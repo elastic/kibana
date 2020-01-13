@@ -39,7 +39,7 @@ export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
 export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
 export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
-export const TOGGLE_LAYER_VISIBLE = 'TOGGLE_LAYER_VISIBLE';
+export const SET_LAYER_VISIBILITY = 'SET_LAYER_VISIBILITY';
 export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
 export const MAP_READY = 'MAP_READY';
 export const MAP_DESTROYED = 'MAP_DESTROYED';
@@ -72,6 +72,7 @@ export const DISABLE_TOOLTIP_CONTROL = 'DISABLE_TOOLTIP_CONTROL';
 export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
 export const HIDE_LAYER_CONTROL = 'HIDE_LAYER_CONTROL';
 export const HIDE_VIEW_CONTROL = 'HIDE_VIEW_CONTROL';
+export const SET_WAITING_FOR_READY_HIDDEN_LAYERS = 'SET_WAITING_FOR_READY_HIDDEN_LAYERS';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -252,27 +253,41 @@ export function cleanTooltipStateForLayer(layerId, layerFeatures = []) {
   };
 }
 
-export function toggleLayerVisible(layerId) {
+export function setLayerVisibility(layerId, makeVisible) {
   return async (dispatch, getState) => {
     //if the current-state is invisible, we also want to sync data
     //e.g. if a layer was invisible at start-up, it won't have any data loaded
     const layer = getLayerById(layerId, getState());
-    if (!layer) {
+
+    // If the layer visibility is already what we want it to be, do nothing
+    if (!layer || layer.isVisible() === makeVisible) {
       return;
     }
-    const makeVisible = !layer.isVisible();
 
     if (!makeVisible) {
       dispatch(cleanTooltipStateForLayer(layerId));
     }
 
     await dispatch({
-      type: TOGGLE_LAYER_VISIBLE,
+      type: SET_LAYER_VISIBILITY,
       layerId,
+      visibility: makeVisible,
     });
     if (makeVisible) {
       dispatch(syncDataForLayer(layerId));
     }
+  };
+}
+
+export function toggleLayerVisible(layerId) {
+  return async (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+    const makeVisible = !layer.isVisible();
+
+    dispatch(setLayerVisibility(layerId, makeVisible));
   };
 }
 
@@ -839,4 +854,18 @@ export function hideLayerControl() {
 }
 export function hideViewControl() {
   return { type: HIDE_VIEW_CONTROL, hideViewControl: true };
+}
+
+export function setHiddenLayers(hiddenLayerIds) {
+  return (dispatch, getState) => {
+    const isMapReady = getMapReady(getState());
+
+    if (!isMapReady) {
+      dispatch({ type: SET_WAITING_FOR_READY_HIDDEN_LAYERS, hiddenLayerIds });
+    } else {
+      getLayerListRaw(getState()).forEach(layer =>
+        dispatch(setLayerVisibility(layer.id, !hiddenLayerIds.includes(layer.id)))
+      );
+    }
+  };
 }

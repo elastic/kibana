@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { chain, difference, each, find, first, get, has, isEqual, without } from 'lodash';
+import { debounce, difference, each, find, first, get, has, isEqual, without } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -362,6 +362,12 @@ export class TimeSeriesExplorer extends React.Component {
     });
   };
 
+  entityFieldSearchChanged = debounce((entity, queryTerm) => {
+    this.loadEntityValues({
+      [entity.fieldType]: queryTerm,
+    });
+  }, 500);
+
   loadAnomaliesTableData = (earliestMs, latestMs) => {
     const { dateFormatTz } = this.props;
     const { selectedJob } = this.state;
@@ -419,58 +425,56 @@ export class TimeSeriesExplorer extends React.Component {
       );
   };
 
-  loadEntityValues = (callback = () => {}) => {
+  /**
+   * Loads available entity values.
+   * @param {Object} searchTerm - Search term for partition, e.g. { partition_field: 'partition' }
+   * @param callback - Callback to execute after component state update.
+   */
+  loadEntityValues = async (searchTerm = {}, callback = () => {}) => {
     const { timefilter } = this.props;
     const { detectorId, entities, selectedJob } = this.state;
 
-    // Populate the entity input datalists with the values from the top records by score
-    // for the selected detector across the full time range. No need to pass through finish().
+    // Populate the entity input datalists with aggregated values. No need to pass through finish().
     const bounds = timefilter.getActiveBounds();
     const detectorIndex = +detectorId;
 
-    mlResultsService
-      .getRecordsForCriteria(
-        [selectedJob.job_id],
-        [{ fieldName: 'detector_index', fieldValue: detectorIndex }],
-        0,
+    const {
+      partition_field: partitionField,
+      over_field: overField,
+      by_field: byField,
+    } = await mlResultsService
+      .fetchPartitionFieldsValues(
+        selectedJob.job_id,
+        searchTerm,
+        [
+          {
+            fieldName: 'detector_index',
+            fieldValue: detectorIndex,
+          },
+        ],
         bounds.min.valueOf(),
-        bounds.max.valueOf(),
-        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+        bounds.max.valueOf()
       )
-      .toPromise()
-      .then(resp => {
-        if (resp.records && resp.records.length > 0) {
-          const firstRec = resp.records[0];
+      .toPromise();
 
-          this.setState(
-            {
-              entities: entities.map(entity => {
-                const newEntity = { ...entity };
-                if (firstRec.partition_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('partition_field_value')
-                    .uniq()
-                    .value();
-                }
-                if (firstRec.over_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('over_field_value')
-                    .uniq()
-                    .value();
-                }
-                if (firstRec.by_field_name === newEntity.fieldName) {
-                  newEntity.fieldValues = chain(resp.records)
-                    .pluck('by_field_value')
-                    .uniq()
-                    .value();
-                }
-                return newEntity;
-              }),
-            },
-            callback
-          );
-        }
-      });
+    this.setState(
+      {
+        entities: entities.map(entity => {
+          const newEntity = { ...entity };
+          if (partitionField?.name === entity.fieldName) {
+            newEntity.fieldValues = partitionField.values;
+          }
+          if (overField?.name === entity.fieldName) {
+            newEntity.fieldValues = overField.values;
+          }
+          if (byField?.name === entity.fieldName) {
+            newEntity.fieldValues = byField.values;
+          }
+          return newEntity;
+        }),
+      },
+      callback
+    );
   };
 
   loadForForecastId = forecastId => {
@@ -796,11 +800,19 @@ export class TimeSeriesExplorer extends React.Component {
     const byFieldName = get(detector, 'by_field_name');
     if (partitionFieldName !== undefined) {
       const partitionFieldValue = get(entitiesState, partitionFieldName, '');
-      entities.push({ fieldName: partitionFieldName, fieldValue: partitionFieldValue });
+      entities.push({
+        fieldType: 'partition_field',
+        fieldName: partitionFieldName,
+        fieldValue: partitionFieldValue,
+      });
     }
     if (overFieldName !== undefined) {
       const overFieldValue = get(entitiesState, overFieldName, '');
-      entities.push({ fieldName: overFieldName, fieldValue: overFieldValue });
+      entities.push({
+        fieldType: 'over_field',
+        fieldName: overFieldName,
+        fieldValue: overFieldValue,
+      });
     }
 
     // For jobs with by and over fields, don't add the 'by' field as this
@@ -810,7 +822,7 @@ export class TimeSeriesExplorer extends React.Component {
     // from filter for the anomaly records.
     if (byFieldName !== undefined && overFieldName === undefined) {
       const byFieldValue = get(entitiesState, byFieldName, '');
-      entities.push({ fieldName: byFieldName, fieldValue: byFieldValue });
+      entities.push({ fieldType: 'by_field', fieldName: byFieldName, fieldValue: byFieldValue });
     }
 
     this.updateCriteriaFields(detectorIndex, entities);
@@ -1338,6 +1350,7 @@ export class TimeSeriesExplorer extends React.Component {
                 <EntityControl
                   entity={entity}
                   entityFieldValueChanged={this.entityFieldValueChanged}
+                  onSearchChange={this.entityFieldSearchChanged}
                   forceSelection={forceSelection}
                   key={entityKey}
                 />
@@ -1381,156 +1394,158 @@ export class TimeSeriesExplorer extends React.Component {
           jobs.length > 0 &&
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
-            <EuiText className="results-container">
-              {/* Make sure ChartTooltip is inside this plain wrapping element so positioning can be infered correctly. */}
+            <div>
+              {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be infered correctly. */}
               <ChartTooltip />
-              <span className="panel-title">
-                {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
-                  defaultMessage: 'Single time series analysis of {functionLabel}',
-                  values: { functionLabel: chartDetails.functionLabel },
-                })}
-              </span>
-              &nbsp;
-              {chartDetails.entityData.count === 1 && (
-                <span className="entity-count-text">
-                  {chartDetails.entityData.entities.length > 0 && '('}
-                  {chartDetails.entityData.entities
-                    .map(entity => {
-                      return `${entity.fieldName}: ${entity.fieldValue}`;
-                    })
-                    .join(', ')}
-                  {chartDetails.entityData.entities.length > 0 && ')'}
-                </span>
-              )}
-              {chartDetails.entityData.count !== 1 && (
-                <span className="entity-count-text">
-                  {chartDetails.entityData.entities.map((countData, i) => {
-                    return (
-                      <Fragment key={countData.fieldName}>
-                        {i18n.translate(
-                          'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                          {
-                            defaultMessage:
-                              '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                            values: {
-                              openBrace: i === 0 ? '(' : '',
-                              closeBrace:
-                                i === chartDetails.entityData.entities.length - 1 ? ')' : '',
-                              cardinalityValue:
-                                countData.cardinality === 0
-                                  ? allValuesLabel
-                                  : countData.cardinality,
-                              cardinality: countData.cardinality,
-                              fieldName: countData.fieldName,
-                            },
-                          }
-                        )}
-                        {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                      </Fragment>
-                    );
+              <EuiText className="results-container">
+                <span className="panel-title">
+                  {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
+                    defaultMessage: 'Single time series analysis of {functionLabel}',
+                    values: { functionLabel: chartDetails.functionLabel },
                   })}
                 </span>
-              )}
-              <EuiFlexGroup style={{ float: 'right' }}>
-                {showModelBoundsCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="toggleModelBoundsCheckbox"
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                        defaultMessage: 'show model bounds',
-                      })}
-                      checked={showModelBounds}
-                      onChange={this.toggleShowModelBoundsHandler}
-                    />
-                  </EuiFlexItem>
+                &nbsp;
+                {chartDetails.entityData.count === 1 && (
+                  <span className="entity-count-text">
+                    {chartDetails.entityData.entities.length > 0 && '('}
+                    {chartDetails.entityData.entities
+                      .map(entity => {
+                        return `${entity.fieldName}: ${entity.fieldValue}`;
+                      })
+                      .join(', ')}
+                    {chartDetails.entityData.entities.length > 0 && ')'}
+                  </span>
                 )}
-
-                {showAnnotationsCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="toggleAnnotationsCheckbox"
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                        defaultMessage: 'annotations',
-                      })}
-                      checked={showAnnotations}
-                      onChange={this.toggleShowAnnotationsHandler}
-                    />
-                  </EuiFlexItem>
-                )}
-
-                {showForecastCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="toggleShowForecastCheckbox"
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                        defaultMessage: 'show forecast',
-                      })}
-                      checked={showForecast}
-                      onChange={this.toggleShowForecastHandler}
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-              <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
-                <TimeseriesChart
-                  {...chartProps}
-                  detectorIndex={detectorId}
-                  renderFocusChartOnly={renderFocusChartOnly}
-                  selectedJob={selectedJob}
-                  showAnnotations={showAnnotations}
-                  showForecast={showForecast}
-                  showModelBounds={showModelBounds}
-                  timefilter={timefilter}
-                />
-              </div>
-              {showAnnotations && focusAnnotationData.length > 0 && (
-                <div>
-                  <span className="panel-title">
-                    {i18n.translate('xpack.ml.timeSeriesExplorer.annotationsTitle', {
-                      defaultMessage: 'Annotations',
+                {chartDetails.entityData.count !== 1 && (
+                  <span className="entity-count-text">
+                    {chartDetails.entityData.entities.map((countData, i) => {
+                      return (
+                        <Fragment key={countData.fieldName}>
+                          {i18n.translate(
+                            'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
+                            {
+                              defaultMessage:
+                                '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
+                              values: {
+                                openBrace: i === 0 ? '(' : '',
+                                closeBrace:
+                                  i === chartDetails.entityData.entities.length - 1 ? ')' : '',
+                                cardinalityValue:
+                                  countData.cardinality === 0
+                                    ? allValuesLabel
+                                    : countData.cardinality,
+                                cardinality: countData.cardinality,
+                                fieldName: countData.fieldName,
+                              },
+                            }
+                          )}
+                          {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
+                        </Fragment>
+                      );
                     })}
                   </span>
-                  <AnnotationsTable
-                    annotations={focusAnnotationData}
-                    isSingleMetricViewerLinkVisible={false}
-                    isNumberBadgeVisible={true}
+                )}
+                <EuiFlexGroup style={{ float: 'right' }}>
+                  {showModelBoundsCheckbox && (
+                    <EuiFlexItem grow={false}>
+                      <EuiCheckbox
+                        id="toggleModelBoundsCheckbox"
+                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
+                          defaultMessage: 'show model bounds',
+                        })}
+                        checked={showModelBounds}
+                        onChange={this.toggleShowModelBoundsHandler}
+                      />
+                    </EuiFlexItem>
+                  )}
+
+                  {showAnnotationsCheckbox && (
+                    <EuiFlexItem grow={false}>
+                      <EuiCheckbox
+                        id="toggleAnnotationsCheckbox"
+                        label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
+                          defaultMessage: 'annotations',
+                        })}
+                        checked={showAnnotations}
+                        onChange={this.toggleShowAnnotationsHandler}
+                      />
+                    </EuiFlexItem>
+                  )}
+
+                  {showForecastCheckbox && (
+                    <EuiFlexItem grow={false}>
+                      <EuiCheckbox
+                        id="toggleShowForecastCheckbox"
+                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                          defaultMessage: 'show forecast',
+                        })}
+                        checked={showForecast}
+                        onChange={this.toggleShowForecastHandler}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+                <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
+                  <TimeseriesChart
+                    {...chartProps}
+                    detectorIndex={detectorId}
+                    renderFocusChartOnly={renderFocusChartOnly}
+                    selectedJob={selectedJob}
+                    showAnnotations={showAnnotations}
+                    showForecast={showForecast}
+                    showModelBounds={showModelBounds}
+                    timefilter={timefilter}
                   />
-                  <EuiSpacer size="l" />
                 </div>
-              )}
-              <AnnotationFlyout />
-              <span className="panel-title">
-                {i18n.translate('xpack.ml.timeSeriesExplorer.anomaliesTitle', {
-                  defaultMessage: 'Anomalies',
-                })}
-              </span>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="l"
-                responsive={true}
-                className="ml-anomalies-controls"
-              >
-                <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                  <EuiFormRow
-                    label={i18n.translate('xpack.ml.timeSeriesExplorer.severityThresholdLabel', {
-                      defaultMessage: 'Severity threshold',
-                    })}
-                  >
-                    <SelectSeverity />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                  <EuiFormRow
-                    label={i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
-                      defaultMessage: 'Interval',
-                    })}
-                  >
-                    <SelectInterval />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </EuiText>
+                {showAnnotations && focusAnnotationData.length > 0 && (
+                  <div>
+                    <span className="panel-title">
+                      {i18n.translate('xpack.ml.timeSeriesExplorer.annotationsTitle', {
+                        defaultMessage: 'Annotations',
+                      })}
+                    </span>
+                    <AnnotationsTable
+                      annotations={focusAnnotationData}
+                      isSingleMetricViewerLinkVisible={false}
+                      isNumberBadgeVisible={true}
+                    />
+                    <EuiSpacer size="l" />
+                  </div>
+                )}
+                <AnnotationFlyout />
+                <span className="panel-title">
+                  {i18n.translate('xpack.ml.timeSeriesExplorer.anomaliesTitle', {
+                    defaultMessage: 'Anomalies',
+                  })}
+                </span>
+                <EuiFlexGroup
+                  direction="row"
+                  gutterSize="l"
+                  responsive={true}
+                  className="ml-anomalies-controls"
+                >
+                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                    <EuiFormRow
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.severityThresholdLabel', {
+                        defaultMessage: 'Severity threshold',
+                      })}
+                    >
+                      <SelectSeverity />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                    <EuiFormRow
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
+                        defaultMessage: 'Interval',
+                      })}
+                    >
+                      <SelectInterval />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+              </EuiText>
+            </div>
           )}
         {arePartitioningFieldsProvided && jobs.length > 0 && (
           <AnomaliesTable tableData={tableData} filter={this.tableFilter} timefilter={timefilter} />

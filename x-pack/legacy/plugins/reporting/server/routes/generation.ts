@@ -17,7 +17,6 @@ import {
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
-import { registerLegacy } from './legacy';
 import { createQueueFactory, enqueueJobFactory } from '../lib';
 
 export function registerJobGenerationRoutes(
@@ -73,7 +72,6 @@ export function registerJobGenerationRoutes(
   }
 
   registerGenerateFromJobParams(server, handler, handleError);
-  registerLegacy(server, handler, handleError);
 
   // Register beta panel-action download-related API's
   if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {

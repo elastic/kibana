@@ -129,7 +129,7 @@ export interface KibanaCore {
     plugins: PluginsSetup;
   };
   startDeps: {
-    core: CoreSetup;
+    core: CoreStart;
     plugins: Record<string, object>;
   };
   logger: LoggerFactory;
