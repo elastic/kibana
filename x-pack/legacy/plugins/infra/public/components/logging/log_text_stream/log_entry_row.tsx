@@ -9,7 +9,6 @@ import React, { useState, useCallback, useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import {
-  LogEntry,
   LogEntryHighlight,
   LogEntryHighlightColumn,
   isTimestampColumn,
@@ -27,6 +26,7 @@ import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle } from './text_styles';
+import { LogEntry } from '../../../../common/http_api';
 
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
@@ -63,9 +63,9 @@ export const LogEntryRow = ({
     setIsHovered(false);
   }, []);
 
-  const openFlyout = useCallback(() => openFlyoutWithItem(logEntry.gid), [
+  const openFlyout = useCallback(() => openFlyoutWithItem(logEntry.id), [
     openFlyoutWithItem,
-    logEntry.gid,
+    logEntry.id,
   ]);
 
   const logEntryColumnsById = useMemo(

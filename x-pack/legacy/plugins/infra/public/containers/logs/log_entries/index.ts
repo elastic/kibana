@@ -10,7 +10,6 @@ import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import { LogEntriesResponse, LogEntry, LogEntriesRequest } from '../../../../common/http_api';
 import { fetchLogEntries } from './api/fetch_log_entries';
 import { datemathToEpochMillis } from '../../../utils/datemath';
-import { InfraLogEntry, InfraLogEntryColumn } from './types';
 
 const DESIRED_BUFFER_PAGES = 2;
 
@@ -81,9 +80,9 @@ export const logEntriesInitialState: LogEntriesStateParams = {
   lastLoadedTime: null,
 };
 
-const cleanDuplicateItems = (entriesA: InfraLogEntry[], entriesB: InfraLogEntry[]) => {
-  const gids = new Set(entriesB.map(item => item.gid));
-  return entriesA.filter(item => !gids.has(item.gid));
+const cleanDuplicateItems = (entriesA: LogEntry[], entriesB: LogEntry[]) => {
+  const ids = new Set(entriesB.map(item => item.id));
+  return entriesA.filter(item => !ids.has(item.id));
 };
 
 const shouldFetchNewEntries = ({
@@ -281,12 +280,12 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       return {
         ...prevState,
         ...action.payload,
-        entries: newEntriesToOldEntries(action.payload.entries),
+        entries: action.payload.entries,
         lastLoadedTime: new Date(),
         isReloading: false,
       };
     case Action.ReceiveEntriesBefore: {
-      const newEntries = newEntriesToOldEntries(action.payload.entries);
+      const newEntries = action.payload.entries;
       const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
 
       const update = {
@@ -299,7 +298,7 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       return { ...prevState, ...update };
     }
     case Action.ReceiveEntriesAfter: {
-      const newEntries = newEntriesToOldEntries(action.payload.entries);
+      const newEntries = action.payload.entries;
       const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
 
       const update = {
@@ -325,15 +324,3 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
 };
 
 export const LogEntriesState = createContainer(useLogEntriesState);
-
-// FIXME temporal helper function to make it work while we adjust the types
-function newEntriesToOldEntries(entries: LogEntry[]): InfraLogEntry[] {
-  return entries.map(entry => {
-    return {
-      gid: entry.id,
-      key: entry.cursor,
-      columns: entry.columns as InfraLogEntryColumn[],
-      source: 'default',
-    };
-  });
-}

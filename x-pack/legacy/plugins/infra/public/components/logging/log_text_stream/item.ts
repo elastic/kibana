@@ -7,7 +7,8 @@
 import { bisector } from 'd3-array';
 
 import { compareToTimeKey, TimeKey } from '../../../../common/time';
-import { LogEntry, LogEntryHighlight } from '../../../utils/log_entry';
+import { LogEntryHighlight } from '../../../utils/log_entry';
+import { LogEntry } from '../../../../common/http_api';
 
 export type StreamItem = LogEntryStreamItem;
 
@@ -20,14 +21,14 @@ export interface LogEntryStreamItem {
 export function getStreamItemTimeKey(item: StreamItem) {
   switch (item.kind) {
     case 'logEntry':
-      return item.logEntry.key;
+      return item.logEntry.cursor;
   }
 }
 
 export function getStreamItemId(item: StreamItem) {
   switch (item.kind) {
     case 'logEntry':
-      return `${item.logEntry.key.time}:${item.logEntry.key.tiebreaker}:${item.logEntry.gid}`;
+      return `${item.logEntry.cursor.time}:${item.logEntry.cursor.tiebreaker}:${item.logEntry.id}`;
   }
 }
 

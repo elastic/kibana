@@ -196,11 +196,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                               lastStreamingUpdate={null}
                             />
                             {items.map((item, idx) => {
-                              const currentTimestamp = item.logEntry.key.time;
+                              const currentTimestamp = item.logEntry.cursor.time;
                               let showDate = false;
 
                               if (idx > 0) {
-                                const prevTimestamp = items[idx - 1].logEntry.key.time;
+                                const prevTimestamp = items[idx - 1].logEntry.cursor.time;
                                 showDate = !moment(currentTimestamp).isSame(prevTimestamp, 'day');
                               }
 
@@ -221,13 +221,13 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                         highlights={item.highlights}
                                         isActiveHighlight={
                                           !!currentHighlightKey &&
-                                          currentHighlightKey.gid === item.logEntry.gid
+                                          currentHighlightKey.gid === item.logEntry.id
                                         }
                                         scale={scale}
                                         wrap={wrap}
                                         isHighlighted={
                                           highlightedItem
-                                            ? item.logEntry.gid === highlightedItem
+                                            ? item.logEntry.id === highlightedItem
                                             : false
                                         }
                                       />
