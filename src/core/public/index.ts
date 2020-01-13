@@ -78,6 +78,7 @@ import {
 
 export { CoreContext, CoreSystem } from './core_system';
 export { RecursiveReadonly } from '../utils';
+export { AppCategory } from '../types';
 
 export {
   ApplicationSetup,

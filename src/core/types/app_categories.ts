@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @public */
 export enum AppCategory {
   analyze,
   observability,

@@ -175,7 +175,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'management',
     title: i18n.translate('kbn.management.managementLabel', {
-      defaultMessage: 'Management',
+      defaultMessage: 'Stack Management',
     }),
     description: i18n.translate('kbn.management.managementDescription', {
       defaultMessage: 'Your center console for managing the Elastic Stack.',

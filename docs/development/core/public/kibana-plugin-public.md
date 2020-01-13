@@ -22,6 +22,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Enumeration | Description |
 |  --- | --- |
+|  [AppCategory](./kibana-plugin-public.appcategory.md) |  |
 |  [AppLeaveActionType](./kibana-plugin-public.appleaveactiontype.md) | Possible type of actions on application leave. |
 |  [AppNavLinkStatus](./kibana-plugin-public.appnavlinkstatus.md) | Status of the application's navLink. |
 |  [AppStatus](./kibana-plugin-public.appstatus.md) | Accessibility status of an application. |

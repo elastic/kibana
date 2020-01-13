@@ -32,6 +32,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
+  const kibanaServer = getService('kibanaServer');
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
     await browser.executeAsync(async (status: Partial<AppUpdatableFields>, cb: Function) => {
@@ -66,6 +67,10 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   };
 
   describe('application status management', () => {
+    before(async function() {
+      await kibanaServer.uiSettings.replace({ pageNavigation: 'individual' });
+    });
+
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('settings');
     });

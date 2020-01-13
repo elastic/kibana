@@ -26,7 +26,7 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { deepFreeze } from '../../utils/';
-import { AppCategory } from '../../types';
+import { AppCategory } from '../';
 
 /** @public */
 export interface LegacyNavLink {
@@ -112,10 +112,6 @@ export class InjectedMetadataService {
         return this.state.basePath;
       },
 
-      getCategory: () => {
-        return this.state.category;
-      },
-
       getKibanaVersion: () => {
         return this.state.version;
       },
@@ -162,7 +158,6 @@ export class InjectedMetadataService {
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
-  getCategory: () => AppCategory | undefined;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;

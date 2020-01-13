@@ -18,7 +18,7 @@
  */
 
 import { pick } from '../../../utils';
-import { AppCategory } from '../../../types';
+import { AppCategory } from '../../';
 
 /**
  * @public

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO@myasonik Lens needs a category probably
-
 import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
