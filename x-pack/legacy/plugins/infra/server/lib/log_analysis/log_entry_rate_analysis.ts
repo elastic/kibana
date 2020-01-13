@@ -10,7 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { NoLogRateResultsIndexError } from './errors';
+import { NoLogAnalysisResultsIndexError } from './errors';
 import {
   logRateModelPlotResponseRT,
   createLogEntryRateQuery,
@@ -21,7 +21,7 @@ import { RequestHandlerContext, KibanaRequest } from '../../../../../../../src/c
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
-export class InfraLogAnalysis {
+export class LogEntryRateAnalysis {
   constructor(
     private readonly libs: {
       framework: KibanaFramework;
@@ -36,11 +36,11 @@ export class InfraLogAnalysis {
 
   public async getLogEntryRateBuckets(
     requestContext: RequestHandlerContext,
+    request: KibanaRequest,
     sourceId: string,
     startTime: number,
     endTime: number,
-    bucketDuration: number,
-    request: KibanaRequest
+    bucketDuration: number
   ) {
     const logRateJobId = this.getJobIds(request, sourceId).logEntryRate;
     let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
@@ -61,7 +61,7 @@ export class InfraLogAnalysis {
       );
 
       if (mlModelPlotResponse._shards.total === 0) {
-        throw new NoLogRateResultsIndexError(
+        throw new NoLogAnalysisResultsIndexError(
           `Failed to find ml result index for job ${logRateJobId}.`
         );
       }
