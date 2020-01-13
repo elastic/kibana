@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve, normalize } from 'path';
+import { resolve } from 'path';
 import buildState from './build_state';
 import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
@@ -13,7 +13,6 @@ const reportName = 'Stack Functional Integration Tests';
 const testsFolder = '../test/functional/apps';
 const stateFilePath = '../../../../../integration-test/qa/envvars.sh';
 const prepend = testFile => require.resolve(`${testsFolder}/${testFile}`);
-const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
@@ -43,22 +42,22 @@ export default async ({ readConfigFile }) => {
     uiSettings: {},
   };
 };
-const splitRight = re => x => re.exec(x)[1];
-function truncate(x) {
-  const dropKibanaPath = splitRight(/^.+kibana\/(.*$)/gm);
-  return dropKibanaPath(x);
+const splitRight = re => testPath => re.exec(testPath)[1];
+
+function truncate(testPath) {
+  const dropKibanaPath = splitRight(/^.+kibana[\\/](.*$)/gm);
+  return dropKibanaPath(testPath);
 }
-function highLight(x) {
-  const dropTestsPath = splitRight(/^.+test\/functional\/apps\/(.*)\//gm);
-  const cleaned = dropTestsPath(x);
+function highLight(testPath) {
+  const dropTestsPath = splitRight(/^.+test[\\/]functional[\\/]apps[\\/](.*)[\\/]/gm);
+  const cleaned = dropTestsPath(testPath);
   const colored = chalk.greenBright.bold(cleaned);
-  return x.replace(cleaned, colored);
+  return testPath.replace(cleaned, colored);
 }
 
-function logTest(x) {
-  const normalizeTruncHighlight = pipe(normalize, truncate, highLight);
-  log.info(`### Testing: '${normalizeTruncHighlight(x)}'`);
-  return x;
+function logTest(testPath) {
+  log.info(`Testing: '${highLight(truncate(testPath))}'`);
+  return testPath;
 }
 function mutateProtocols(servers, provisionedConfigs) {
   servers.kibana.protocol = provisionedConfigs.ESPROTO;
