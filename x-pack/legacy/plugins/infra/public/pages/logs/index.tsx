@@ -51,12 +51,7 @@ export const LogsPage = ({ match }: RouteComponentProps) => {
   };
 
   const logCategoriesTab = {
-    title: (
-      <>
-        {logCategoriesTabTitle}
-        <TabBetaBadge title={logCategoriesTabTitle} />
-      </>
-    ),
+    title: logCategoriesTabTitle,
     path: `${match.path}/log-categories`,
   };
 
