@@ -10,7 +10,6 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_TITLE,
 } from '../../lib/fields_browser/selectors';
-import { logout } from '../../lib/logout';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 import {
@@ -44,10 +43,6 @@ describe('Events Viewer', () => {
     loginAndWaitForPage(HOSTS_PAGE);
 
     clickEventsTab();
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('renders the fields browser with the expected title when the Events Viewer Fields Browser button is clicked', () => {
