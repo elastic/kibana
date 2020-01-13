@@ -171,11 +171,13 @@ export const FieldsPanel: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGrid gutterSize="m">
-        {fieldVisConfigs.map((visConfig, i) => (
-          <EuiFlexItem key={`card_${i}`} style={{ minWidth: '360px' }}>
-            <FieldDataCard config={visConfig} />
-          </EuiFlexItem>
-        ))}
+        {fieldVisConfigs
+          .filter(({ stats }) => stats !== undefined)
+          .map((visConfig, i) => (
+            <EuiFlexItem key={visConfig.fieldName} style={{ minWidth: '360px' }}>
+              <FieldDataCard config={visConfig} />
+            </EuiFlexItem>
+          ))}
       </EuiFlexGrid>
     </div>
   );
