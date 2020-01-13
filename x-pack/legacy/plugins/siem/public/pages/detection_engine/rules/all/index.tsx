@@ -214,10 +214,10 @@ export const AllRules = React.memo<{
                 });
               }}
               pagination={{
-                pageIndex: pagination.page - 1,
+                pageIndex: pagination.page - 4,
                 pageSize: pagination.perPage,
                 totalItemCount: pagination.total,
-                pageSizeOptions: [5, 10, 20],
+                pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
               }}
               sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
               selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
