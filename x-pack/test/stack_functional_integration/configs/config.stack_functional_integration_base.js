@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
+import { resolve, normalize } from 'path';
 import buildState from './build_state';
 import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
@@ -13,6 +13,7 @@ const reportName = 'Stack Functional Integration Tests';
 const testsFolder = '../test/functional/apps';
 const stateFilePath = '../../../../../integration-test/qa/envvars.sh';
 const prepend = testFile => require.resolve(`${testsFolder}/${testFile}`);
+const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
@@ -53,8 +54,10 @@ function highLight(x) {
   const colored = chalk.greenBright.bold(cleaned);
   return x.replace(cleaned, colored);
 }
+
 function logTest(x) {
-  log.info(`Testing: '${highLight(truncate(x))}'`);
+  const normalizeTruncHighlight = pipe(normalize, truncate, highLight);
+  log.info(`### Testing: '${normalizeTruncHighlight(x)}'`);
   return x;
 }
 function mutateProtocols(servers, provisionedConfigs) {
