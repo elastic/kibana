@@ -17,4 +17,25 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+import { replaceUrlHashQuery } from './format';
+
+describe('format', () => {
+  describe('replaceUrlHashQuery', () => {
+    it('should add hash query to url without hash', () => {
+      const url = 'http://localhost:5601/oxf/app/kibana';
+      expect(replaceUrlHashQuery(url, () => ({ test: 'test' }))).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana#?test=test"`
+      );
+    });
+
+    it('should replace hash query', () => {
+      const url = 'http://localhost:5601/oxf/app/kibana#?test=test';
+      expect(
+        replaceUrlHashQuery(url, query => ({
+          ...query,
+          test1: 'test1',
+        }))
+      ).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/kibana#?test=test&test1=test1"`);
+    });
+  });
+});

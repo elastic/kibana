@@ -17,4 +17,26 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+import { MonoTypeOperatorFunction, queueScheduler, scheduled, from } from 'rxjs';
+import { concatAll, distinctUntilChanged, skip } from 'rxjs/operators';
+
+export function distinctUntilChangedWithInitialValue<T>(
+  initialValue: T | Promise<T>,
+  compare?: (x: T, y: T) => boolean
+): MonoTypeOperatorFunction<T> {
+  return input$ =>
+    scheduled(
+      [isPromise(initialValue) ? from(initialValue) : [initialValue], input$],
+      queueScheduler
+    ).pipe(concatAll(), distinctUntilChanged(compare), skip(1));
+}
+
+function isPromise<T>(value: T | Promise<T>): value is Promise<T> {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    'then' in value &&
+    typeof value.then === 'function' &&
+    !('subscribe' in value)
+  );
+}

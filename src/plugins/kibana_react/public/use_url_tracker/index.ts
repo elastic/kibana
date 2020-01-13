@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+export { useUrlTracker } from './use_url_tracker';

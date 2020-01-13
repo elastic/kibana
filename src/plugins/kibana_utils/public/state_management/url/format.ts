@@ -17,4 +17,25 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+import { format as formatUrl } from 'url';
+import { ParsedUrlQuery } from 'querystring';
+import { parseUrl, parseUrlHash } from './parse';
+import { stringifyQueryString } from './stringify_query_string';
+
+export function replaceUrlHashQuery(
+  rawUrl: string,
+  queryReplacer: (query: ParsedUrlQuery) => ParsedUrlQuery
+) {
+  const url = parseUrl(rawUrl);
+  const hash = parseUrlHash(rawUrl);
+  const newQuery = queryReplacer(hash?.query || {});
+  const searchQueryString = stringifyQueryString(newQuery);
+  if ((!hash || !hash.search) && !searchQueryString) return rawUrl; // nothing to change. return original url
+  return formatUrl({
+    ...url,
+    hash: formatUrl({
+      pathname: hash?.pathname || '',
+      search: searchQueryString,
+    }),
+  });
+}

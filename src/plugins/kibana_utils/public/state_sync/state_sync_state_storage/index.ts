@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { isStateHash, createStateHash, persistState, retrieveState } from './state_hash';
+export { IStateStorage } from './types';
+export { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
+export {
+  createSessionStorageStateStorage,
+  ISessionStorageStateStorage,
+} from './create_session_storage_state_storage';
