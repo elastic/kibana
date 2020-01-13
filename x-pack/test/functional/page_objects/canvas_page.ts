@@ -23,6 +23,10 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
       await browser.pressKeys(browser.keys.ESCAPE);
     },
 
+    async openExpressionEditor() {
+      await testSubjects.click('canvasExpressionEditorButton');
+    },
+
     async waitForWorkpadElements() {
       await testSubjects.findAll('canvasWorkpadPage > canvasWorkpadPageElementContent');
     },
