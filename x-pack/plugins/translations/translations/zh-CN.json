@@ -11049,7 +11049,6 @@
     "xpack.snapshotRestore.repositoryDetails.typeS3.serverSideEncryptionLabel": "服务器端加密",
     "xpack.snapshotRestore.repositoryDetails.typeS3.storageClassLabel": "存储类",
     "xpack.snapshotRestore.repositoryDetails.typeTitle": "存储库类型",
-    "xpack.snapshotRestore.repositoryDetails.verificationDetails": "验证详情存储库“{name}”",
     "xpack.snapshotRestore.repositoryDetails.verificationDetailsTitle": "详情",
     "xpack.snapshotRestore.repositoryDetails.verificationTitle": "验证状态",
     "xpack.snapshotRestore.repositoryDetails.verifyButtonLabel": "验证存储库",

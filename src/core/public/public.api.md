@@ -26,13 +26,18 @@ export interface App extends AppBase {
 // @public (undocumented)
 export interface AppBase {
     capabilities?: Partial<Capabilities>;
+    chromeless?: boolean;
     euiIconType?: string;
     icon?: string;
-    // (undocumented)
     id: string;
+    // @internal
+    legacy?: boolean;
+    navLinkStatus?: AppNavLinkStatus;
     order?: number;
+    status?: AppStatus;
     title: string;
-    tooltip$?: Observable<string>;
+    tooltip?: string;
+    updater$?: Observable<AppUpdater>;
 }
 
 // @public
@@ -74,6 +79,7 @@ export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
+    registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
@@ -124,7 +130,27 @@ export interface AppMountParameters {
 }
 
 // @public
+export enum AppNavLinkStatus {
+    default = 0,
+    disabled = 2,
+    hidden = 3,
+    visible = 1
+}
+
+// @public
+export enum AppStatus {
+    accessible = 0,
+    inaccessible = 1
+}
+
+// @public
 export type AppUnmount = () => void;
+
+// @public
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+
+// @public
+export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
 
 // @public
 export interface Capabilities {
