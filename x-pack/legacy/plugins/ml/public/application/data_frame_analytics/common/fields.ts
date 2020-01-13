@@ -257,7 +257,7 @@ export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFi
   return flatDocFields.filter(f => f !== ML__ID_COPY);
 }
 
-export const getDefaultClassificationFieldsFromJobCaps = (
+export const getDefaultFieldsFromJobCaps = (
   fields: Field[],
   jobConfig: DataFrameAnalyticsConfig
 ): { selectedFields: Field[]; docFields: Field[] } => {

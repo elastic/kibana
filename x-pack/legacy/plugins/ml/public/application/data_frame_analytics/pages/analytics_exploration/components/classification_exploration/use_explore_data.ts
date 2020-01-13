@@ -22,7 +22,7 @@ import { Field } from '../../../../../../../common/types/fields';
 import { LoadExploreDataArg } from '../../../../common/analytics';
 
 import {
-  getDefaultClassificationFieldsFromJobCaps,
+  getDefaultFieldsFromJobCaps,
   getFlattenedFields,
   DataFrameAnalyticsConfig,
   EsFieldName,
@@ -58,10 +58,10 @@ export const useExploreData = (
     const { fields } = newJobCapsService;
 
     if (selectedFields.length === 0 && jobConfig !== undefined) {
-      const {
-        selectedFields: defaultSelected,
-        docFields,
-      } = getDefaultClassificationFieldsFromJobCaps(fields, jobConfig);
+      const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
+        fields,
+        jobConfig
+      );
 
       setSelectedFields(defaultSelected);
       setDocFields(docFields);

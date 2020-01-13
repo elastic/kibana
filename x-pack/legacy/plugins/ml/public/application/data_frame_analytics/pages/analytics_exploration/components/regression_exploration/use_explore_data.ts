@@ -15,7 +15,7 @@ import { getNestedProperty } from '../../../../../util/object_utils';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
-  getDefaultClassificationFieldsFromJobCaps,
+  getDefaultFieldsFromJobCaps,
   getFlattenedFields,
   DataFrameAnalyticsConfig,
   EsFieldName,
@@ -49,15 +49,14 @@ export const useExploreData = (
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
-  // TODO: update getDefaultClassificationFieldsFromJobCaps to be more generic (use in both regression/classification)
   const getDefaultSelectedFields = () => {
     const { fields } = newJobCapsService;
 
     if (selectedFields.length === 0 && jobConfig !== undefined) {
-      const {
-        selectedFields: defaultSelected,
-        docFields,
-      } = getDefaultClassificationFieldsFromJobCaps(fields, jobConfig);
+      const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
+        fields,
+        jobConfig
+      );
 
       setSelectedFields(defaultSelected);
       setDocFields(docFields);
