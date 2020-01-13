@@ -48,10 +48,11 @@ export class ColorMapSelect extends Component {
       return;
     }
 
-    const newProps = {};
-    newProps.useCustomColorMap = true;
-    newProps.customColorMap = colorStops;
-    newProps.type = this.props.colorMapType;
+    const newProps = {
+      useCustomColorMap: true,
+      customColorMap: colorStops,
+      type: this.props.colorMapType,
+    };
     this.props.onChange(newProps);
   };
 
