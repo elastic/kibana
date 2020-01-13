@@ -9,11 +9,9 @@ import { AlertsTelemetry, AlertsTelemetrySavedObject } from './types';
 export const ALERTS_TELEMETRY_DOC_ID = 'alerts-telemetry';
 
 export function createAlertsTelemetry(
-  executionsTotal: number = 0,
   executionsByAlertType: Record<string, number> = {}
 ): AlertsTelemetry {
   return {
-    executions_total: executionsTotal,
     excutions_count_by_type: executionsByAlertType,
   };
 }
@@ -43,7 +41,6 @@ export async function incrementAlertsExecutionsCount(
     return;
   }
 
-  let executionsTotal = 1;
   let executionsByAlertTypes = {};
 
   try {
@@ -51,7 +48,6 @@ export async function incrementAlertsExecutionsCount(
       'alerts-telemetry',
       ALERTS_TELEMETRY_DOC_ID
     )) as AlertsTelemetrySavedObject;
-    executionsTotal = attributes.executions_total + 1;
     const executionsByAlertType = attributes.excutions_count_by_type[alertType]
       ? attributes.excutions_count_by_type[alertType]
       : 0;
@@ -63,6 +59,6 @@ export async function incrementAlertsExecutionsCount(
     /* silently fail, this will happen if the saved object doesn't exist yet. */
   }
 
-  const alertsTelemetry = createAlertsTelemetry(executionsTotal, executionsByAlertTypes);
+  const alertsTelemetry = createAlertsTelemetry(executionsByAlertTypes);
   storeAlertsTelemetry(savedObjectsClient, alertsTelemetry);
 }

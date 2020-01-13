@@ -15,12 +15,12 @@ import { AlertsTelemetry } from './types';
 describe('alerts_telemetry', () => {
   describe('createAlertsTelemetry', () => {
     it('should create a AlertsTelemetry object', () => {
-      const alertsTelemetry = createAlertsTelemetry(1);
-      expect(alertsTelemetry.executions_total).toBe(1);
+      const alertsTelemetry = createAlertsTelemetry({ foo: 1 });
+      expect(alertsTelemetry.excutions_count_by_type.foo).toBe(1);
     });
     it('should ignore undefined or unknown values', () => {
-      const alertsTelemetry = createAlertsTelemetry(undefined);
-      expect(alertsTelemetry.executions_total).toBe(0);
+      const alertsTelemetry = createAlertsTelemetry();
+      expect(Object.entries(alertsTelemetry.excutions_count_by_type).length).toBe(0);
     });
   });
 
@@ -31,7 +31,6 @@ describe('alerts_telemetry', () => {
     beforeEach(() => {
       savedObjectsClientInstance = { create: jest.fn() };
       alertsTelemetry = {
-        executions_total: 1,
         excutions_count_by_type: {},
       };
     });
@@ -80,7 +79,6 @@ describe('alerts_telemetry', () => {
               }
               return {
                 attributes: {
-                  executions_total: executionsTotal,
                   excutions_count_by_type: { test: executionsTotal },
                 },
               };
@@ -110,13 +108,12 @@ describe('alerts_telemetry', () => {
       expect(savedObjectsClientInstance.create.mock.calls).toHaveLength(0);
     });
 
-    it('should initialize executions_total with 1 and excutions_count_by_type with proper key value pair', async () => {
+    it('should initialize excutions_count_by_type with proper key value pair', async () => {
       mockInit(true, 0);
       await incrementAlertsExecutionsCount(savedObjectsClientInstance, 'test');
 
       expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('alerts-telemetry');
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toEqual({
-        executions_total: 1,
         excutions_count_by_type: { test: 1 },
       });
     });
@@ -128,7 +125,6 @@ describe('alerts_telemetry', () => {
 
       expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('alerts-telemetry');
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toEqual({
-        executions_total: 2,
         excutions_count_by_type: { some: 1, test: 1 },
       });
     });

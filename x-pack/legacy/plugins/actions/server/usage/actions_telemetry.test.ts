@@ -15,12 +15,12 @@ import { ActionsTelemetry } from './types';
 describe('actions_telemetry', () => {
   describe('createActionsTelemetry', () => {
     it('should create a ActionsTelemetry object', () => {
-      const actionsTelemetry = createActionsTelemetry(1);
-      expect(actionsTelemetry.executions_total).toBe(1);
+      const actionsTelemetry = createActionsTelemetry({ foo: 1 });
+      expect(actionsTelemetry.excutions_count_by_type.foo).toBe(1);
     });
     it('should ignore undefined or unknown values', () => {
-      const actionsTelemetry = createActionsTelemetry(undefined);
-      expect(actionsTelemetry.executions_total).toBe(0);
+      const actionsTelemetry = createActionsTelemetry();
+      expect(Object.entries(actionsTelemetry.excutions_count_by_type).length).toBe(0);
     });
   });
 
@@ -31,7 +31,6 @@ describe('actions_telemetry', () => {
     beforeEach(() => {
       savedObjectsClientInstance = { create: jest.fn() };
       actionsTelemetry = {
-        executions_total: 1,
         excutions_count_by_type: {},
       };
     });
@@ -80,7 +79,6 @@ describe('actions_telemetry', () => {
               }
               return {
                 attributes: {
-                  executions_total: executionsTotal,
                   excutions_count_by_type: { test: executionsTotal },
                 },
               };
@@ -110,25 +108,23 @@ describe('actions_telemetry', () => {
       expect(savedObjectsClientInstance.create.mock.calls).toHaveLength(0);
     });
 
-    it('should initialize executions_total with 1 and excutions_count_by_type with proper key value pair', async () => {
+    it('should initialize excutions_count_by_type with proper key value pair', async () => {
       mockInit(true, 0);
       await incrementActionExecutionsCount(savedObjectsClientInstance, 'test');
 
       expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('actions-telemetry');
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toEqual({
-        executions_total: 1,
         excutions_count_by_type: { test: 1 },
       });
     });
 
-    it('should increment index_creation_count to 2', async () => {
+    it('should increment proper excutions_count_by_type action types executions', async () => {
       mockInit(true, 1);
       await incrementActionExecutionsCount(savedObjectsClientInstance, 'some');
       await incrementActionExecutionsCount(savedObjectsClientInstance, 'test');
 
       expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe('actions-telemetry');
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toEqual({
-        executions_total: 2,
         excutions_count_by_type: { some: 1, test: 1 },
       });
     });

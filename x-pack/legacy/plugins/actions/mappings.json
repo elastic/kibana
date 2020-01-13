@@ -32,9 +32,6 @@
   },
   "actions-telemetry": {
     "properties": {
-      "executions_total": {
-        "type": "integer"
-      },
       "excutions_count_by_type": {
           "enabled": false,
           "type": "object"

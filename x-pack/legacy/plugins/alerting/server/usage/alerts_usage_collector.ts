@@ -96,19 +96,22 @@ async function getTotalInUseCountByAlertType(savedObjectsClient: any, alertTypeI
 
 async function getExecutions(savedObjectsClient: any) {
   try {
-    const mlTelemetrySavedObject = (await savedObjectsClient.get(
-      'actions-telemetry',
+    const alertsTelemetrySavedObject = (await savedObjectsClient.get(
+      'alerts-telemetry',
       ALERTS_TELEMETRY_DOC_ID
     )) as AlertsTelemetrySavedObject;
-    return mlTelemetrySavedObject.attributes;
+    return alertsTelemetrySavedObject.attributes;
   } catch (err) {
     return createAlertsTelemetry();
   }
 }
 
 async function getExecutionsCount(savedObjectsClient: any) {
-  const actionExecutions = await getExecutions(savedObjectsClient);
-  return actionExecutions.executions_total;
+  const alertExecutions = await getExecutions(savedObjectsClient);
+  return Object.entries(alertExecutions.excutions_count_by_type).reduce(
+    (sum, [key, value]) => sum + value,
+    0
+  );
 }
 
 async function getExecutionsCountByAlertTypes(

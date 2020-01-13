@@ -9,11 +9,9 @@ import { ActionsTelemetry, ActionsTelemetrySavedObject } from './types';
 export const ACTIONS_TELEMETRY_DOC_ID = 'actions-telemetry';
 
 export function createActionsTelemetry(
-  executionsTotal: number = 0,
   executionsByActionType: Record<string, number> = {}
 ): ActionsTelemetry {
   return {
-    executions_total: executionsTotal,
     excutions_count_by_type: executionsByActionType,
   };
 }
@@ -43,7 +41,6 @@ export async function incrementActionExecutionsCount(
     return;
   }
 
-  let executionsTotal = 1;
   let executionsByActionTypes = {};
 
   try {
@@ -51,7 +48,6 @@ export async function incrementActionExecutionsCount(
       'actions-telemetry',
       ACTIONS_TELEMETRY_DOC_ID
     )) as ActionsTelemetrySavedObject;
-    executionsTotal = attributes.executions_total + 1;
     const executionsByActionType = attributes.excutions_count_by_type[actionTypeId]
       ? attributes.excutions_count_by_type[actionTypeId]
       : 0;
@@ -63,6 +59,6 @@ export async function incrementActionExecutionsCount(
     /* silently fail, this will happen if the saved object doesn't exist yet. */
   }
 
-  const actionsTelemetry = createActionsTelemetry(executionsTotal, executionsByActionTypes);
+  const actionsTelemetry = createActionsTelemetry(executionsByActionTypes);
   storeActionsTelemetry(savedObjectsClient, actionsTelemetry);
 }

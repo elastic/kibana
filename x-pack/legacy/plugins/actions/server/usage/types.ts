@@ -15,7 +15,6 @@ export interface ActionsUsage {
 }
 
 export interface ActionsTelemetry {
-  executions_total: number;
   excutions_count_by_type: Record<string, number>;
 }
 

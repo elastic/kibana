@@ -15,7 +15,6 @@ export interface AlertsUsage {
 }
 
 export interface AlertsTelemetry {
-  executions_total: number;
   excutions_count_by_type: Record<string, number>;
 }
 

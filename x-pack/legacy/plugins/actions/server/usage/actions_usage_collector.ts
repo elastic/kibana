@@ -71,11 +71,11 @@ async function getTotalCountByActionTypes(
 
 async function getExecutions(savedObjectsClient: any) {
   try {
-    const mlTelemetrySavedObject = (await savedObjectsClient.get(
+    const actionsTelemetrySavedObject = (await savedObjectsClient.get(
       'actions-telemetry',
       ACTIONS_TELEMETRY_DOC_ID
     )) as ActionsTelemetrySavedObject;
-    return mlTelemetrySavedObject.attributes;
+    return actionsTelemetrySavedObject.attributes;
   } catch (err) {
     return createActionsTelemetry();
   }
@@ -83,7 +83,10 @@ async function getExecutions(savedObjectsClient: any) {
 
 async function getExecutionsCount(savedObjectsClient: any) {
   const actionExecutions = await getExecutions(savedObjectsClient);
-  return actionExecutions.executions_total;
+  return Object.entries(actionExecutions.excutions_count_by_type).reduce(
+    (sum, [key, value]) => sum + value,
+    0
+  );
 }
 
 async function getTotalCountByActionType(savedObjectsClient: any, actionTypeId: string) {
