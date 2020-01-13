@@ -49,8 +49,8 @@ const MyLabelButton = styled(EuiButtonEmpty)`
   font-size: 12px;
 
   .euiIcon {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
   }
 `;
 
