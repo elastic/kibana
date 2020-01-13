@@ -432,7 +432,7 @@ describe('Task Runner', () => {
     `);
   });
 
-  test('recovers gracefully when the Alert Task Runner throws an exception when fetching Space Level Permissions', async () => {
+  test('recovers gracefully when the Alert Task Runner throws an exception when getting internal Services', async () => {
     taskRunnerFactoryInitializerParams.getServices.mockImplementation(() => {
       throw new Error('OMG');
     });
