@@ -15,16 +15,13 @@ import {
   getDefaultSwimlaneData,
   AnomaliesTableData,
   ExplorerJob,
+  AppStateSelectedCells,
   SwimlaneData,
   TimeRangeBounds,
 } from '../../explorer_utils';
 
-import { getExplorerDefaultAppState, ExplorerAppState } from '../app_state_reducer';
-
 export interface ExplorerState {
   annotationsData: any[];
-  anomalyChartRecords: any[];
-  appState: ExplorerAppState;
   bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
@@ -40,15 +37,13 @@ export interface ExplorerState {
   noInfluencersConfigured: boolean;
   overallSwimlaneData: SwimlaneData;
   queryString: string;
-  selectedCells: any;
+  selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
   swimlaneBucketInterval: any;
   swimlaneContainerWidth: number;
   swimlaneLimit: number;
   tableData: AnomaliesTableData;
-  tableInterval: string;
   tableQueryString: string;
-  tableSeverity: number;
   viewByLoadedForTimeFormatted: string | null;
   viewBySwimlaneData: SwimlaneData;
   viewBySwimlaneDataLoading: boolean;
@@ -63,8 +58,6 @@ function getDefaultIndexPattern() {
 export function getExplorerDefaultState(): ExplorerState {
   return {
     annotationsData: [],
-    anomalyChartRecords: [],
-    appState: getExplorerDefaultAppState(),
     bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
@@ -80,7 +73,7 @@ export function getExplorerDefaultState(): ExplorerState {
     noInfluencersConfigured: true,
     overallSwimlaneData: getDefaultSwimlaneData(),
     queryString: '',
-    selectedCells: null,
+    selectedCells: undefined,
     selectedJobs: null,
     swimlaneBucketInterval: undefined,
     swimlaneContainerWidth: 0,
@@ -92,9 +85,7 @@ export function getExplorerDefaultState(): ExplorerState {
       jobIds: [],
       showViewSeriesLink: false,
     },
-    tableInterval: 'auto',
     tableQueryString: '',
-    tableSeverity: 0,
     viewByLoadedForTimeFormatted: null,
     viewBySwimlaneData: getDefaultSwimlaneData(),
     viewBySwimlaneDataLoading: false,

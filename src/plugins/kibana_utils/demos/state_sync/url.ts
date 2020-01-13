@@ -18,7 +18,7 @@
  */
 
 import { defaultState, pureTransitions, TodoActions, TodoState } from '../state_containers/todomvc';
-import { BaseStateContainer, createStateContainer } from '../../public/state_containers';
+import { BaseState, BaseStateContainer, createStateContainer } from '../../public/state_containers';
 import {
   createKbnUrlStateStorage,
   syncState,
@@ -55,7 +55,7 @@ export const result = Promise.resolve()
     return window.location.href;
   });
 
-function withDefaultState<State>(
+function withDefaultState<State extends BaseState>(
   // eslint-disable-next-line no-shadow
   stateContainer: BaseStateContainer<State>,
   // eslint-disable-next-line no-shadow

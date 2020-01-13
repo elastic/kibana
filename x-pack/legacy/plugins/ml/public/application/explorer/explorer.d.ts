@@ -6,13 +6,17 @@
 
 import { FC } from 'react';
 
-import { State } from 'ui/state_management/state';
+import { UrlState } from '../util/url_state';
 
-import { JobSelectService$ } from '../components/job_selector/job_select_service_utils';
+import { JobSelection } from '../components/job_selector/use_job_selection';
+
+import { ExplorerState } from '../explorer/reducers';
+import { AppStateSelectedCells } from '../explorer/explorer_utils';
 
 declare interface ExplorerProps {
-  globalState: State;
-  jobSelectService$: JobSelectService$;
+  explorerState: ExplorerState;
+  showCharts: boolean;
+  setSelectedCells: (swimlaneSelectedCells: AppStateSelectedCells) => void;
 }
 
 export const Explorer: FC<ExplorerProps>;
