@@ -38,7 +38,7 @@ describe('MonitorStatusBar component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders expiring data if date is less than 30 days', () => {
+  it('renders expiration date with a warning state if ssl expiry date is less than 30 days', () => {
     const dateIn15Days = moment()
       .add(15, 'day')
       .toString();
