@@ -79,8 +79,7 @@ export interface UserProvidedValues<T = any> {
  * */
 export interface DeprecationSettings {
   message: string;
-  docLinksKey?: string;
-  url?: string;
+  docLinksKey: string;
 }
 
 /**

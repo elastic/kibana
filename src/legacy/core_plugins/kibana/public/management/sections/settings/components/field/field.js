@@ -572,10 +572,8 @@ export class Field extends PureComponent {
 
     if (setting.deprecation) {
       const { links } = npStart.core.docLinks;
-      let badgeUrl = setting.deprecation.url;
-      if (setting.deprecation.docLinksKey) {
-        badgeUrl = links.management[setting.deprecation.docLinksKey];
-      }
+      const badgeUrl = links.management[setting.deprecation.docLinksKey];
+
       deprecation = (
         <>
           <EuiToolTip content={setting.deprecation.message}>
