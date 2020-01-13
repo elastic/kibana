@@ -134,16 +134,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               references,
               version,
             });
-            const date = new Date().toISOString();
-            const ruleStatus = await savedObjectsClient.create(ruleStatusSavedObjectType, {
-              alertId: createdRule.id ?? ruleId, // defaults to alert id if no ruleId is provided.
-              statusDate: date,
-              lastFailureAt: 'test-failure',
-              lastSuccessAt: 'test-success',
-              lastFailureMessage: 'test-failure',
-              lastSuccessMessage: 'test-failure',
-            });
-            return transformOrBulkError(ruleIdOrUuid, createdRule, ruleStatus);
+            return transformOrBulkError(ruleIdOrUuid, createdRule);
           } catch (err) {
             return transformBulkError(ruleIdOrUuid, err);
           }
