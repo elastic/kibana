@@ -324,7 +324,7 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       return { ...prevState, ...update };
     }
     case Action.FetchingNewEntries:
-      return { ...prevState, isReloading: true };
+      return { ...prevState, isReloading: true, entries: [], topCursor: null, bottomCursor: null };
     case Action.FetchingMoreEntries:
       return { ...prevState, isLoadingMore: true };
     case Action.ErrorOnNewEntries:
