@@ -113,10 +113,10 @@ elasticsearch.hosts: ["http://localhost:9200"]
 
 [float]
 [[load-balancing-kibana]]
-=== Load balancing across multiple Kibana instance
+=== Load balancing across multiple Kibana instances
 To serve multiple Kibana installations behind a load balancer, you must change the configuration. See {kibana-ref}/settings.html[Configuring Kibana] for details on each setting.
 
-Settings unique across each Kibana instances:
+Settings unique across each Kibana instance:
 --------
 server.uuid
 server.name
