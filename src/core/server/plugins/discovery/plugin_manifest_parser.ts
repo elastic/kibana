@@ -21,6 +21,7 @@ import { readFile, stat } from 'fs';
 import { resolve } from 'path';
 import { coerce } from 'semver';
 import { promisify } from 'util';
+import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '../../config';
 import { Logger } from '../../logging';
 import { PluginManifest } from '../types';
@@ -167,7 +168,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     id: manifest.id,
     version: manifest.version,
     kibanaVersion: expectedKibanaVersion,
-    configPath: manifest.configPath || manifest.id,
+    configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
     ui: includesUiPlugin,

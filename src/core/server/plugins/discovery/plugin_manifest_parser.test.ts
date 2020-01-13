@@ -118,11 +118,11 @@ test('logs warning if pluginId is not in camelCase format', async () => {
 
 test('return error when plugin version is missing', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some-id' })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'someId' })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin manifest for "some-id" must contain a "version" property. (invalid-manifest, ${pluginManifestPath})`,
+    message: `Plugin manifest for "someId" must contain a "version" property. (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
