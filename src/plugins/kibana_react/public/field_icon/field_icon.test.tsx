@@ -18,24 +18,44 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FieldIcon } from './field_icon';
+import { FieldIcon, typeToEuiIconMap } from './field_icon';
 
-test('FieldIcon renders a blackwhite icon for a string', () => {
-  const component = shallow(<FieldIcon type="string" />);
-  expect(component).toMatchSnapshot();
-});
+const availableTypes = Object.keys(typeToEuiIconMap);
 
-test('FieldIcon renders a colored icon for a number', () => {
-  const component = shallow(<FieldIcon type="number" label="test" useColor />);
-  expect(component).toMatchSnapshot();
+describe('FieldIcon renders known field types', () => {
+  availableTypes.forEach(type => {
+    test(`${type} is rendered`, () => {
+      const component = shallow(<FieldIcon type={type} />);
+      expect(component).toMatchSnapshot();
+    });
+  });
 });
 
 test('FieldIcon renders an icon for an unknown type', () => {
-  const component = shallow(<FieldIcon type="sdfsdf" label="test" useColor />);
+  const component = shallow(<FieldIcon type="sdfsdf" label="test" />);
+  expect(component).toMatchSnapshot();
+});
+
+test('FieldIcon supports same props as EuiToken', () => {
+  const component = shallow(
+    <FieldIcon
+      type="number"
+      label="test"
+      color="euiColorVis0"
+      size="l"
+      shape="circle"
+      fill="none"
+    />
+  );
+  expect(component).toMatchSnapshot();
+});
+
+test('FieldIcon changes fill when scripted is true', () => {
+  const component = shallow(<FieldIcon type="number" label="test" scripted={true} />);
   expect(component).toMatchSnapshot();
 });
 
 test('FieldIcon renders with className if provided', () => {
-  const component = shallow(<FieldIcon type="sdfsdf" label="test" className="myClass" useColor />);
+  const component = shallow(<FieldIcon type="sdfsdf" label="test" className="myClass" />);
   expect(component).toMatchSnapshot();
 });
