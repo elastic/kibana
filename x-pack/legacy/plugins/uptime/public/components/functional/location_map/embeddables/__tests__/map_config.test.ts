@@ -5,7 +5,7 @@
  */
 
 import { getLayerList } from '../map_config';
-import { mockLayerList } from '../__mocks__/mock';
+import { mockLayerList } from './__mocks__/mock';
 import { LocationPoint } from '../embedded_map';
 import { UptimeAppColors } from '../../../../../uptime_app';
 
