@@ -108,7 +108,7 @@ export const SearchPanel: FC<Props> = ({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ width: 270 }}>
             <EuiSuperSelect
               options={searchSizeOptions}
               valueOfSelected={String(samplerShardSize)}
