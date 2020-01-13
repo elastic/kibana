@@ -64,10 +64,12 @@ export class DynamicColorForm extends React.Component {
     let colorSelect;
     if (styleOptions.field && styleOptions.field.name) {
       const onColorChange = colorOptions => {
-        onDynamicStyleChange(styleProperty.getStyleName(), {
+        const newOptions = {
           ...styleOptions,
           ...colorOptions,
-        });
+        };
+
+        onDynamicStyleChange(styleProperty.getStyleName(), newOptions);
       };
       if (this.state.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
         colorSelect = (

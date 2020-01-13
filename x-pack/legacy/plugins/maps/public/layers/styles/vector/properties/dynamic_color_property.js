@@ -21,6 +21,7 @@ import {
 import { VectorIcon } from '../components/legend/vector_icon';
 import { VECTOR_STYLES } from '../vector_style_defaults';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
+import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -136,6 +137,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   _getColorPaletteStops() {
     if (this._options.useCustomColorPalette && this._options.customColorPalette) {
+      if (isCategoricalStopsInvalid(this._options.customColorPalette)) {
+        return [];
+      }
+
       return this._options.customColorPalette.map((config, index) => {
         return {
           stop: config.stop,

@@ -48,6 +48,7 @@ export class ColorRampSelect extends Component {
     this.props.onChange({
       customColorRamp: colorStops,
       type: COLOR_MAP_TYPE.ORDINAL,
+      useCustomColorRamp: true,
     });
   };
 

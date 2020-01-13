@@ -69,6 +69,7 @@ export class ColorPaletteSelect extends Component {
     this.props.onChange({
       type: COLOR_MAP_TYPE.CATEGORICAL,
       customColorPalette: colorStops,
+      useCustomColorPalette: true,
     });
   };
 
