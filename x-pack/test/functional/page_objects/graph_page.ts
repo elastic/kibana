@@ -25,6 +25,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
   const retry = getService('retry');
+  const getCircleText = (circle: any) => circle.getVisibleText();
 
   class GraphPage {
     async selectIndexPattern(pattern: string) {
@@ -36,6 +37,11 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         'aria-disabled',
         'false'
       );
+    }
+
+    async getGraphCircleText() {
+      const chartTypes = await find.allByCssSelector('text.nodeSvgText');
+      return Promise.all(chartTypes.map(getCircleText));
     }
 
     async clickAddField() {
