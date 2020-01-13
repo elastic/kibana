@@ -237,7 +237,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
                             {aboutRuleData != null && (
                               <StepAboutRule
-                                descriptionDirection="column"
+                                descriptionDirection="row"
                                 isReadOnlyView={true}
                                 isLoading={false}
                                 defaultValues={aboutRuleData}
