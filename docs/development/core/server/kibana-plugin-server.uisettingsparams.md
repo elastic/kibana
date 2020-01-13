@@ -24,6 +24,6 @@ export interface UiSettingsParams
 |  [readonly](./kibana-plugin-server.uisettingsparams.readonly.md) | <code>boolean</code> | a flag indicating that value cannot be changed |
 |  [requiresPageReload](./kibana-plugin-server.uisettingsparams.requirespagereload.md) | <code>boolean</code> | a flag indicating whether new value applying requires page reloading |
 |  [type](./kibana-plugin-server.uisettingsparams.type.md) | <code>UiSettingsType</code> | defines a type of UI element [UiSettingsType](./kibana-plugin-server.uisettingstype.md) |
-|  [validation](./kibana-plugin-server.uisettingsparams.validation.md) | <code>StringValidation &#124; ImageValidation</code> |  |
+|  [validation](./kibana-plugin-server.uisettingsparams.validation.md) | <code>ImageValidation &#124; StringValidation</code> |  |
 |  [value](./kibana-plugin-server.uisettingsparams.value.md) | <code>SavedObjectAttribute</code> | default value to fall back to if a user doesn't provide any |
 
