@@ -15,10 +15,14 @@ import {
   NewRule,
   Rule,
   FetchRuleProps,
+  BasicFetchProps,
   RuleError,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_PREPACKAGED_URL,
+} from '../../../../common/constants';
 
 /**
  * Add provided Rule
@@ -199,4 +203,23 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
   return Promise.all(
     responses.map<Promise<Rule>>(response => response.json())
   );
+};
+
+/**
+ * Create Prepackaged Rules
+ *
+ * @param signal AbortSignal for cancelling request
+ */
+export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_PREPACKAGED_URL}`, {
+    method: 'PUT',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-xsrf': 'true',
+    },
+    signal,
+  });
+  await throwIfNotOk(response);
+  return true;
 };

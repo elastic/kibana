@@ -20,34 +20,52 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import deepFreeze from 'deep-freeze-strict';
 import {
   PureTransitionsToTransitions,
   PureTransition,
   ReduxLikeStateContainer,
   PureSelectorsToSelectors,
+  BaseState,
 } from './types';
 
 const $$observable = (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable';
+const $$setActionType = '@@SET';
 
 const freeze: <T>(value: T) => RecursiveReadonly<T> =
   process.env.NODE_ENV !== 'production'
     ? <T>(value: T): RecursiveReadonly<T> => {
-        if (!value) return value as RecursiveReadonly<T>;
-        if (value instanceof Array) return value as RecursiveReadonly<T>;
-        if (typeof value === 'object') return Object.freeze({ ...value }) as RecursiveReadonly<T>;
-        else return value as RecursiveReadonly<T>;
+        const isFreezable = value !== null && typeof value === 'object';
+        if (isFreezable) return deepFreeze(value) as RecursiveReadonly<T>;
+        return value as RecursiveReadonly<T>;
       }
     : <T>(value: T) => value as RecursiveReadonly<T>;
 
-export const createStateContainer = <
-  State,
-  PureTransitions extends object = {},
-  PureSelectors extends object = {}
+export function createStateContainer<State extends BaseState>(
+  defaultState: State
+): ReduxLikeStateContainer<State>;
+export function createStateContainer<State extends BaseState, PureTransitions extends object>(
+  defaultState: State,
+  pureTransitions: PureTransitions
+): ReduxLikeStateContainer<State, PureTransitions>;
+export function createStateContainer<
+  State extends BaseState,
+  PureTransitions extends object,
+  PureSelectors extends object
+>(
+  defaultState: State,
+  pureTransitions: PureTransitions,
+  pureSelectors: PureSelectors
+): ReduxLikeStateContainer<State, PureTransitions, PureSelectors>;
+export function createStateContainer<
+  State extends BaseState,
+  PureTransitions extends object,
+  PureSelectors extends object
 >(
   defaultState: State,
   pureTransitions: PureTransitions = {} as PureTransitions,
   pureSelectors: PureSelectors = {} as PureSelectors
-): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> => {
+): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> {
   const data$ = new BehaviorSubject<RecursiveReadonly<State>>(freeze(defaultState));
   const state$ = data$.pipe(skip(1));
   const get = () => data$.getValue();
@@ -56,9 +74,13 @@ export const createStateContainer = <
     state$,
     getState: () => data$.getValue(),
     set: (state: State) => {
-      data$.next(freeze(state));
+      container.dispatch({ type: $$setActionType, args: [state] });
     },
     reducer: (state, action) => {
+      if (action.type === $$setActionType) {
+        return freeze(action.args[0] as State);
+      }
+
       const pureTransition = (pureTransitions as Record<string, PureTransition<State, any[]>>)[
         action.type
       ];
@@ -86,4 +108,4 @@ export const createStateContainer = <
     [$$observable]: state$,
   };
   return container;
-};
+}

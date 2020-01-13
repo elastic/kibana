@@ -144,3 +144,7 @@ export interface DeleteRulesProps {
 export interface DuplicateRulesProps {
   rules: Rules;
 }
+
+export interface BasicFetchProps {
+  signal: AbortSignal;
+}

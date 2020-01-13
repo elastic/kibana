@@ -33,6 +33,7 @@ export interface RuleSwitchProps {
   dispatch?: React.Dispatch<Action>;
   id: string;
   enabled: boolean;
+  isDisabled?: boolean;
   isLoading?: boolean;
   optionLabel?: string;
 }
@@ -43,6 +44,7 @@ export interface RuleSwitchProps {
 export const RuleSwitchComponent = ({
   dispatch,
   id,
+  isDisabled,
   isLoading,
   enabled,
   optionLabel,
@@ -94,7 +96,7 @@ export const RuleSwitchComponent = ({
             data-test-subj="rule-switch"
             label={optionLabel ?? ''}
             showLabel={!isEmpty(optionLabel)}
-            disabled={false}
+            disabled={isDisabled}
             checked={myEnabled}
             onChange={onRuleStateChange}
           />
