@@ -64,6 +64,7 @@ export const StepDetailsForm: FC<Props> = React.memo(({ overrides = {}, onChange
     defaults.transformDescription
   );
   const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(defaults.destinationIndex);
+  const [destinationIndexDefaultSet, setDestinationIndexDefaultSet] = useState<boolean>(false);
   const [transformIds, setTransformIds] = useState<TransformId[]>([]);
   const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
   const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
@@ -206,7 +207,14 @@ export const StepDetailsForm: FC<Props> = React.memo(({ overrides = {}, onChange
           <EuiFieldText
             placeholder="transform ID"
             value={transformId}
-            onChange={e => setTransformId(e.target.value)}
+            onChange={e => {
+              if (destinationIndexDefaultSet === false) {
+                setTransformId(e.target.value);
+                setDestinationIndex(e.target.value);
+              } else {
+                setTransformId(e.target.value);
+              }
+            }}
             aria-label={i18n.translate(
               'xpack.transform.stepDetailsForm.transformIdInputAriaLabel',
               {
@@ -276,7 +284,10 @@ export const StepDetailsForm: FC<Props> = React.memo(({ overrides = {}, onChange
           <EuiFieldText
             placeholder="destination index"
             value={destinationIndex}
-            onChange={e => setDestinationIndex(e.target.value)}
+            onChange={e => {
+              setDestinationIndex(e.target.value);
+              setDestinationIndexDefaultSet(true);
+            }}
             aria-label={i18n.translate(
               'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
               {
