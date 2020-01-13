@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 export const ADD_REFERENCE = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.addReferenceDescription',
   {
-    defaultMessage: 'Add reference',
+    defaultMessage: 'Add reference URL',
   }
 );
 
 export const ADD_FALSE_POSITIVE = i18n.translate(
   'xpack.siem.detectionEngine.createRule.stepAboutRuleForm.addFalsePositiveDescription',
   {
-    defaultMessage: 'Add false positive',
+    defaultMessage: 'Add false positive example',
   }
 );
 
