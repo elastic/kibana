@@ -297,7 +297,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
                       order: 'desc',
                     },
                   },
-                  _source: ['monitor', 'summary', 'observer'],
+                  _source: ['monitor', 'summary', 'observer', '@timestamp'],
                 },
               },
             },
@@ -328,6 +328,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
         const location: MonitorLocation = {
           summary: mostRecentLocation?.summary,
           geo: getGeo(mostRecentLocation?.observer?.geo),
+          timestamp: mostRecentLocation['@timestamp'],
         };
         monLocs.push(location);
       }
