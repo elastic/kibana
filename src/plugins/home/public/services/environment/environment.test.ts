@@ -23,8 +23,10 @@ describe('EnvironmentService', () => {
   describe('setup', () => {
     test('allows multiple update calls', () => {
       const setup = new EnvironmentService().setup();
-      setup.update({ ml: true });
-      setup.update({ apmUi: true });
+      expect(() => {
+        setup.update({ ml: true });
+        setup.update({ apmUi: true });
+      }).not.toThrow();
     });
   });
 
