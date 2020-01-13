@@ -25,7 +25,7 @@ import {
   DataSetupDependencies,
   DataStartDependencies,
 } from './types';
-import { AutocompleteProviderRegister } from './autocomplete_provider';
+import { AutocompleteProviderRegister } from './autocomplete';
 import { getSuggestionsProvider } from './suggestions_provider';
 import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats_provider';

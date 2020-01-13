@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import * as autocomplete from './autocomplete_provider';
+import * as autocomplete from './autocomplete';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
