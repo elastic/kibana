@@ -55,12 +55,8 @@ const makeProperty = (options, getFieldMeta) => {
 };
 
 const defaultLegendParams = {
-  loadIsPointsOnly: () => {
-    return true;
-  },
-  loadIsLinesOnly: () => {
-    return false;
-  },
+  isPointsOnly: true,
+  isLinesOnly: false,
 };
 
 test('Should render ordinal legend', async () => {
@@ -75,11 +71,6 @@ test('Should render ordinal legend', async () => {
   const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
   const component = shallow(legendRow);
-
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
 
   expect(component).toMatchSnapshot();
 });
@@ -163,11 +154,6 @@ test('Should render categorical legend with breaks from custom', async () => {
   const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
   const component = shallow(legendRow);
-
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
 
   expect(component).toMatchSnapshot();
 });
