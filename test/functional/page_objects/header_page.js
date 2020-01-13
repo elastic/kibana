@@ -30,7 +30,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
-
     async clickTimepicker() {
       await retry.try(async () => {
         await find.clickByCssSelector('superDatePickerToggleQuickMenuButton');
@@ -68,7 +67,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await PageObjects.common.sleep(1000);
         log.debug('### --Select time span : ' + timespan);
         await this.clickTimespan(timespan);
-        await this.getSpinnerDone();
+        await this.awaitGlobalLoadingIndicatorHidden();
       }
     }
 
@@ -84,7 +83,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(52);
       await testSubjects.click('superDatePickerRelativeDateInputUnitSelector').click();
       await PageObjects.common.sleep(53);
-      await find.clickByCssSelector(`select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`);
+      await find.clickByCssSelector(
+        `select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`
+      );
       await testSubjects.click('superDatePickerstartDatePopoverButton').click();
     }
 
@@ -119,7 +120,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.setToTime(toTime);
       await this.clickGoButton();
       await this.getSpinnerDone();
-
     }
 
     async setToRelativeTime(count, unit) {
@@ -135,7 +135,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(56);
       await testSubjects.click('superDatePickerRelativeDateInputUnitSelector');
       await PageObjects.common.sleep(57);
-      await find.clickByCssSelector(`select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`);
+      await find.clickByCssSelector(
+        `select[data-test-subj="superDatePickerRelativeDateInputUnitSelector"] option[value="${unit}"]`
+      );
       await testSubjects.click('superDatePickerendDatePopoverButton');
     }
 
@@ -218,7 +220,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('awaitKibanaChrome');
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
     }
-
   }
 
   return new HeaderPage();

@@ -6,7 +6,7 @@
 import { IHttpResponse } from 'angular';
 import chrome from 'ui/chrome';
 
-const apiBase = chrome.addBasePath(`/api/security/v1/fields`);
+const apiBase = chrome.addBasePath(`/internal/security/fields`);
 
 export async function getFields($http: any, query: string): Promise<string[]> {
   return await $http

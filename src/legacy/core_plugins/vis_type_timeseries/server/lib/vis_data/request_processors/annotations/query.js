@@ -49,7 +49,9 @@ export function query(req, panel, annotation, esQueryConfig, indexPattern, capab
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
-      doc.query.bool.must.push(esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
+      doc.query.bool.must.push(
+        esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig)
+      );
     }
 
     if (annotation.fields) {

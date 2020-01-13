@@ -9,15 +9,15 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover } from '@elastic/eui';
 import { changeColumn } from '../state_helpers';
-import { IndexPatternDimensionPanel, IndexPatternDimensionPanelProps } from './dimension_panel';
+import {
+  IndexPatternDimensionPanel,
+  IndexPatternDimensionPanelComponent,
+  IndexPatternDimensionPanelProps,
+} from './dimension_panel';
 import { DropHandler, DragContextState } from '../../drag_drop';
 import { createMockedDragDropContext } from '../mocks';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
@@ -136,9 +136,9 @@ describe('IndexPatternDimensionPanel', () => {
       uniqueLabel: 'stuff',
       filterOperations: () => true,
       storage: {} as IStorageWrapper,
-      uiSettings: {} as UiSettingsClientContract,
+      uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
-      http: {} as HttpServiceBase,
+      http: {} as HttpSetup,
     };
 
     jest.clearAllMocks();
@@ -164,7 +164,7 @@ describe('IndexPatternDimensionPanel', () => {
     const filterOperations = jest.fn().mockReturnValue(true);
 
     wrapper = shallow(
-      <IndexPatternDimensionPanel {...defaultProps} filterOperations={filterOperations} />
+      <IndexPatternDimensionPanelComponent {...defaultProps} filterOperations={filterOperations} />
     );
 
     expect(filterOperations).toBeCalled();
@@ -610,7 +610,7 @@ describe('IndexPatternDimensionPanel', () => {
       });
     });
 
-    it('should indicate document compatibility with selected field operation', () => {
+    it('should select the Records field when count is selected', () => {
       const initialState: IndexPatternPrivateState = {
         ...state,
         layers: {
@@ -639,12 +639,9 @@ describe('IndexPatternDimensionPanel', () => {
         .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-count"]')
         .simulate('click');
 
-      const options = wrapper.find(EuiComboBox).prop('options');
-
-      expect(options![0]['data-test-subj']).not.toContain('Incompatible');
-      options![1].options!.map(option =>
-        expect(option['data-test-subj']).toContain('Incompatible')
-      );
+      const newColumnState = setState.mock.calls[0][0].layers.first.columns.col2;
+      expect(newColumnState.operationType).toEqual('count');
+      expect(newColumnState.sourceField).toEqual('Records');
     });
 
     it('should indicate document and field compatibility with selected document operation', () => {
@@ -1076,7 +1073,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is not droppable if the dragged item has no field', () => {
       wrapper = shallow(
-        <IndexPatternDimensionPanel
+        <IndexPatternDimensionPanelComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1097,7 +1094,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is not droppable if field is not supported by filterOperations', () => {
       wrapper = shallow(
-        <IndexPatternDimensionPanel
+        <IndexPatternDimensionPanelComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1122,7 +1119,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is droppable if the field is supported by filterOperations', () => {
       wrapper = shallow(
-        <IndexPatternDimensionPanel
+        <IndexPatternDimensionPanelComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1147,7 +1144,7 @@ describe('IndexPatternDimensionPanel', () => {
 
     it('is notdroppable if the field belongs to another index pattern', () => {
       wrapper = shallow(
-        <IndexPatternDimensionPanel
+        <IndexPatternDimensionPanelComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1177,7 +1174,7 @@ describe('IndexPatternDimensionPanel', () => {
       };
       const testState = dragDropState();
       wrapper = shallow(
-        <IndexPatternDimensionPanel
+        <IndexPatternDimensionPanelComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1225,7 +1222,7 @@ describe('IndexPatternDimensionPanel', () => {
       };
       const testState = dragDropState();
       wrapper = shallow(
-        <IndexPatternDimensionPanel
+        <IndexPatternDimensionPanelComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,
@@ -1273,7 +1270,7 @@ describe('IndexPatternDimensionPanel', () => {
       };
       const testState = dragDropState();
       wrapper = shallow(
-        <IndexPatternDimensionPanel
+        <IndexPatternDimensionPanelComponent
           {...defaultProps}
           dragDropContext={{
             ...dragDropContext,

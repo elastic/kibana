@@ -8,7 +8,7 @@ require('../src/setup_node_env');
 
 const { buildTask } = require('./tasks/build');
 const { devTask } = require('./tasks/dev');
-const { testTask, testBrowserTask, testBrowserDevTask, testServerTask } = require('./tasks/test');
+const { testTask, testBrowserTask, testBrowserDevTask } = require('./tasks/test');
 const { prepareTask } = require('./tasks/prepare');
 
 // export the tasks that are runnable from the CLI
@@ -17,7 +17,6 @@ module.exports = {
   dev: devTask,
   prepare: prepareTask,
   test: testTask,
-  testserver: testServerTask,
   testbrowser: testBrowserTask,
   'testbrowser-dev': testBrowserDevTask,
 };

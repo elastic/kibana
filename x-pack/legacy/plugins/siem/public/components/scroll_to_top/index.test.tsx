@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { globalNode, HookWrapper } from '../../mock';
 import { useScrollToTop } from '.';
@@ -23,10 +23,7 @@ describe('Scroll to top', () => {
     Object.defineProperty(globalNode.window, 'scroll', { value: spyScroll });
     mount(<HookWrapper hook={() => useScrollToTop()} />);
 
-    expect(spyScroll).toHaveBeenCalledWith({
-      top: 0,
-      left: 0,
-    });
+    expect(spyScroll).toHaveBeenCalledWith(0, 0);
   });
 
   test('scrollTo have been called', () => {

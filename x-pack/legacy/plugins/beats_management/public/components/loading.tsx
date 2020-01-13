@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import * as React from 'react';
 
-export const Loading: React.SFC<{}> = () => (
+export const Loading: React.FC<{}> = () => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />

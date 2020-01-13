@@ -26,5 +26,5 @@ export const seriesTypes = {
   histogram: ColumnChart,
   line: LineChart,
   area: AreaChart,
-  heatmap: HeatmapChart
+  heatmap: HeatmapChart,
 };

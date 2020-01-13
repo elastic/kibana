@@ -6,8 +6,7 @@
 
 import ApolloClient from 'apollo-client';
 import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -70,7 +69,7 @@ export type KeyUrlState = keyof UrlState;
 
 export interface UrlStateProps {
   navTabs: Record<string, NavTab>;
-  indexPattern?: StaticIndexPattern;
+  indexPattern?: IIndexPattern;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
@@ -109,7 +108,7 @@ export interface UrlStateToRedux {
 export interface SetInitialStateFromUrl<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
-  indexPattern: StaticIndexPattern | undefined;
+  indexPattern: IIndexPattern | undefined;
   pageName: string;
   updateTimeline: DispatchUpdateTimeline;
   updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;

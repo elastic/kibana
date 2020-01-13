@@ -12,7 +12,7 @@ interface Props {
   message: ReactNode;
 }
 
-export const DisabledLoginForm: React.SFC<Props> = props => (
+export const DisabledLoginForm: React.FC<Props> = props => (
   <EuiPanel>
     <EuiText color="danger" style={{ textAlign: 'center' }}>
       <p>{props.title}</p>

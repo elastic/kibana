@@ -14,17 +14,20 @@ import { AddEmbeddableFlyout, Props } from './flyout';
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
+import { WithKibanaProps } from '../../index';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
-    return `filters | savedMap id="${id}" | render`;
+    return `savedMap id="${id}" | render`;
   },
-  [EmbeddableTypes.visualization]: (id: string) => {
+  // FIX: Only currently allow Map embeddables
+  /* [EmbeddableTypes.visualization]: (id: string) => {
     return `filters | savedVisualization id="${id}" | render`;
   },
   [EmbeddableTypes.search]: (id: string) => {
     return `filters | savedSearch id="${id}" | render`;
-  },
+  },*/
 };
 
 interface StateProps {
@@ -68,10 +71,10 @@ const mergeProps = (
   };
 };
 
-export class EmbeddableFlyoutPortal extends React.Component<Props> {
+export class EmbeddableFlyoutPortal extends React.Component<Props & WithKibanaProps> {
   el?: HTMLElement;
 
-  constructor(props: Props) {
+  constructor(props: Props & WithKibanaProps) {
     super(props);
 
     this.el = document.createElement('div');
@@ -97,6 +100,8 @@ export class EmbeddableFlyoutPortal extends React.Component<Props> {
         <AddEmbeddableFlyout
           {...this.props}
           availableEmbeddables={Object.keys(allowedEmbeddables)}
+          savedObjects={this.props.kibana.services.savedObjects}
+          uiSettings={this.props.kibana.services.uiSettings}
         />,
         this.el
       );
@@ -104,6 +109,7 @@ export class EmbeddableFlyoutPortal extends React.Component<Props> {
   }
 }
 
-export const AddEmbeddablePanel = compose<Props, { onClose: () => void }>(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps)
+export const AddEmbeddablePanel = compose<Props & WithKibanaProps, { onClose: () => void }>(
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
+  withKibana
 )(EmbeddableFlyoutPortal);

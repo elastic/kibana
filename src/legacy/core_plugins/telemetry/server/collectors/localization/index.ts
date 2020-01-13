@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { createLocalizationUsageCollector } from './telemetry_localization_collector';
+export { registerLocalizationUsageCollector } from './telemetry_localization_collector';

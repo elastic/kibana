@@ -50,6 +50,11 @@ export const networkDnsQuery = gql`
           dsl
           response
         }
+        histogram {
+          x
+          y
+          g
+        }
       }
     }
   }

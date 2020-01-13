@@ -12,7 +12,8 @@ import { createLocation } from 'history';
 import { stringify } from 'querystring';
 import { APPS, BASE_PATH, BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
-const isModifiedEvent = event => !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+const isModifiedEvent = event =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 const isLeftClickEvent = event => event.button === 0;
 
@@ -21,15 +22,22 @@ const queryParamsFromObject = (params, encodeParams = false) => {
     return;
   }
 
-  const paramsStr = stringify(params, '&', '=', encodeParams ? {} : {
-    encodeURIComponent: (val) => val, // Don't encode special chars
-  });
+  const paramsStr = stringify(
+    params,
+    '&',
+    '=',
+    encodeParams
+      ? {}
+      : {
+          encodeURIComponent: val => val, // Don't encode special chars
+        }
+  );
   return `?${paramsStr}`;
 };
 
 const appToBasePathMap = {
   [APPS.CCR_APP]: BASE_PATH,
-  [APPS.REMOTE_CLUSTER_APP]: BASE_PATH_REMOTE_CLUSTERS
+  [APPS.REMOTE_CLUSTER_APP]: BASE_PATH_REMOTE_CLUSTERS,
 };
 
 class Routing {
@@ -44,9 +52,10 @@ class Routing {
    */
   getRouterLinkProps(to, base = BASE_PATH, params = {}, encodeParams = false) {
     const search = queryParamsFromObject(params, encodeParams) || '';
-    const location = typeof to === 'string'
-      ? createLocation(base + to + search, null, null, this._reactRouter.history.location)
-      : to;
+    const location =
+      typeof to === 'string'
+        ? createLocation(base + to + search, null, null, this._reactRouter.history.location)
+        : to;
     const href = this._reactRouter.history.createHref(location);
 
     const onClick = event => {

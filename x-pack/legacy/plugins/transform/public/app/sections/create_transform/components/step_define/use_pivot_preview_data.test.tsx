@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 
 import { SimpleQuery } from '../../../../common';
@@ -14,7 +14,7 @@ import {
   UsePivotPreviewDataReturnType,
 } from './use_pivot_preview_data';
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 jest.mock('../../../../hooks/use_api');
 
@@ -23,7 +23,7 @@ interface TestHookProps {
   callback: Callback;
 }
 
-const TestHook: SFC<TestHookProps> = ({ callback }) => {
+const TestHook: FC<TestHookProps> = ({ callback }) => {
   callback();
   return null;
 };

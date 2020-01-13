@@ -1,0 +1,17 @@
+{
+  "rule_id": "f068e655-1f52-4d81-839a-9c08c6543ceb",
+  "risk_score": 50,
+  "description": "Suricata Category - Successful Administrator Privilege Gain",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Successful Administrator Privilege Gain",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Successful Administrator Privilege Gain\" or rule.category: \"Successful Administrator Privilege Gain\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

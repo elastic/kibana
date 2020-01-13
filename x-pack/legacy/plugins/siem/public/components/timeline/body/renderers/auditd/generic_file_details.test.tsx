@@ -5,37 +5,36 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { AuditdGenericFileDetails, AuditdGenericFileLine } from './generic_file_details';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('GenericFileDetails', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default GenericFileDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
       const browserFields: BrowserFields = {};
       const wrapper = shallow(
-        <TestProviders>
-          <AuditdGenericFileDetails
-            contextId="contextid-123"
-            text="generic-text-123"
-            browserFields={browserFields}
-            data={mockTimelineData[27].ecs}
-            fileIcon="document"
-            timelineId="test"
-          />
-        </TestProviders>
+        <AuditdGenericFileDetails
+          contextId="contextid-123"
+          text="generic-text-123"
+          browserFields={browserFields}
+          data={mockTimelineData[27].ecs}
+          fileIcon="document"
+          timelineId="test"
+        />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns auditd if the data does contain auditd data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileDetails
             contextId="contextid-123"
@@ -53,17 +52,15 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns null for text if the data contains no auditd data', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuditdGenericFileDetails
-            contextId="contextid-123"
-            text="generic-text-123"
-            browserFields={mockBrowserFields}
-            data={mockTimelineData[0].ecs}
-            fileIcon="document"
-            timelineId="test"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuditdGenericFileDetails
+          contextId="contextid-123"
+          text="generic-text-123"
+          browserFields={mockBrowserFields}
+          data={mockTimelineData[0].ecs}
+          fileIcon="document"
+          timelineId="test"
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
@@ -71,7 +68,7 @@ describe('GenericFileDetails', () => {
 
   describe('#AuditdGenericFileLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -100,7 +97,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns a session with username if username, primary, and secondary all equal each other ', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -129,7 +126,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns a session with username if primary and secondary equal unset', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -158,7 +155,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns a session with username if primary and secondary equal unset with different casing', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -187,7 +184,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns a session with username if primary and secondary are undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -216,7 +213,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns a session with "as" wording if username, primary, and secondary are all different', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -245,7 +242,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns a session with "as" wording if username and primary are the same but secondary is different', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -274,7 +271,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns a session with primary if username and secondary are unset with different casing', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -303,7 +300,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns a session with primary if username and secondary are undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -332,7 +329,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns just session if only session id is given', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -359,7 +356,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns only session and hostName if only hostname and an id is given', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -386,7 +383,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns only a session and user name if only a user name and id is given', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -413,7 +410,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns only a process name if only given a process name and id', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -440,7 +437,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns session user name and title if process title with id is given', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -467,7 +464,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns only a working directory if that is all that is given with a id', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
@@ -494,7 +491,7 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns only the session and args with id if that is all that is given (very unlikely situation)', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"

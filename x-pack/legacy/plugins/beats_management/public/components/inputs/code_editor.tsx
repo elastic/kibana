@@ -41,7 +41,7 @@ class CodeEditor extends Component<
     setValue(defaultValue || '');
   }
 
-  public componentWillReceiveProps(nextProps: ComponentProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: ComponentProps) {
     if (nextProps.isFormSubmitted()) {
       this.showError();
     }

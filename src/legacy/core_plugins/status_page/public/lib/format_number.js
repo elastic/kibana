@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import numeral from 'numeral';
 
 export default function formatNumber(num, which) {

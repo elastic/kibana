@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { share } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { Adapters, InspectorSession } from '../../inspector/public';
 import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
@@ -36,10 +36,9 @@ export class ExpressionLoader {
   private dataHandler: ExpressionDataHandler | undefined;
   private renderHandler: ExpressionRenderHandler;
   private dataSubject: Subject<Data>;
-  private loadingSubject: Subject<void>;
+  private loadingSubject: Subject<boolean>;
   private data: Data;
   private params: IExpressionLoaderParams = {};
-  private ignoreNextResponse = false;
 
   constructor(
     element: HTMLElement,
@@ -47,12 +46,20 @@ export class ExpressionLoader {
     params?: IExpressionLoaderParams
   ) {
     this.dataSubject = new Subject();
-    this.data$ = this.dataSubject.asObservable().pipe(share());
+    this.data$ = this.dataSubject.asObservable();
 
-    this.loadingSubject = new Subject();
-    this.loading$ = this.loadingSubject.asObservable().pipe(share());
+    this.loadingSubject = new BehaviorSubject<boolean>(false);
+    // loading is a "hot" observable,
+    // as loading$ could emit straight away in the constructor
+    // and we want to notify subscribers about it, but all subscriptions will happen later
+    this.loading$ = this.loadingSubject.asObservable().pipe(
+      filter(_ => _ === true),
+      map(() => void 0)
+    );
 
-    this.renderHandler = new ExpressionRenderHandler(element);
+    this.renderHandler = new ExpressionRenderHandler(element, {
+      onRenderError: params && params.onRenderError,
+    });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;
     this.events$ = this.renderHandler.events$;
@@ -65,9 +72,14 @@ export class ExpressionLoader {
       this.render(data);
     });
 
+    this.render$.subscribe(() => {
+      this.loadingSubject.next(false);
+    });
+
     this.setParams(params);
 
     if (expression) {
+      this.loadingSubject.next(true);
       this.loadData(expression, this.params);
     }
   }
@@ -121,7 +133,7 @@ export class ExpressionLoader {
   update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): void {
     this.setParams(params);
 
-    this.loadingSubject.next();
+    this.loadingSubject.next(true);
     if (expression) {
       this.loadData(expression, this.params);
     } else if (this.data) {
@@ -134,15 +146,14 @@ export class ExpressionLoader {
     params: IExpressionLoaderParams
   ): Promise<void> => {
     if (this.dataHandler && this.dataHandler.isPending) {
-      this.ignoreNextResponse = true;
       this.dataHandler.cancel();
     }
     this.setParams(params);
     this.dataHandler = new ExpressionDataHandler(expression, params);
     if (!params.inspectorAdapters) params.inspectorAdapters = this.dataHandler.inspect();
-    const data = await this.dataHandler.getData();
-    if (this.ignoreNextResponse) {
-      this.ignoreNextResponse = false;
+    const prevDataHandler = this.dataHandler;
+    const data = await prevDataHandler.getData();
+    if (this.dataHandler !== prevDataHandler) {
       return;
     }
     this.dataSubject.next(data);

@@ -34,7 +34,7 @@ const defaultProps = {
   isDirty: false,
   onClose: () => {},
   basePath: '',
-  post: () => Promise.resolve(),
+  post: () => Promise.resolve({} as any),
   objectType: 'dashboard',
 };
 

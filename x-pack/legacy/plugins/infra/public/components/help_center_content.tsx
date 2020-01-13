@@ -4,37 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import chrome from 'ui/chrome';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface HelpCenterContentProps {
   feedbackLink: string;
-  feedbackLinkText: string;
+  appName: string;
 }
 
-const Content: React.FC<HelpCenterContentProps> = ({ feedbackLink, feedbackLinkText }) => (
-  <EuiLink href={feedbackLink} target="_blank" rel="noopener">
-    {feedbackLinkText}
-  </EuiLink>
-);
+export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLink, appName }) => {
+  const chrome = useKibana().services.chrome;
 
-export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({
-  feedbackLink,
-  feedbackLinkText,
-}) => {
   useEffect(() => {
-    chrome.helpExtension.set(domElement => {
-      ReactDOM.render(
-        <Content feedbackLink={feedbackLink} feedbackLinkText={feedbackLinkText} />,
-        domElement
-      );
-      return () => {
-        ReactDOM.unmountComponentAtNode(domElement);
-      };
+    return chrome?.setHelpExtension({
+      appName,
+      links: [
+        {
+          linkType: 'discuss',
+          href: feedbackLink,
+        },
+      ],
     });
-  }, [feedbackLink, feedbackLinkText]);
+  }, [feedbackLink, appName, chrome]);
 
   return null;
 };

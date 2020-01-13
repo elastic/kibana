@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Filter Lists renders a list of filters 1`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-list-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-list-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <FilterListsHeader
+        refreshFilterLists={[Function]}
+        totalCount={1}
+      />
+      <FilterListsTable
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        filterLists={
+          Array [
+            Object {
+              "description": "List of known safe domains",
+              "filter_id": "safe_domains",
+              "item_count": 500,
+              "used_by": Object {
+                "jobs": Array [
+                  "dns_exfiltration",
+                ],
+              },
+            },
+          ]
+        }
+        refreshFilterLists={[Function]}
+        selectedFilterLists={Array []}
+        setSelectedFilterLists={[Function]}
+      />
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;

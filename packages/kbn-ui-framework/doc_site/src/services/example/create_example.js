@@ -18,9 +18,7 @@
  */
 
 /* eslint import/named: 0 */
-import {
-  GuideExample,
-} from '../../components';
+import { GuideExample } from '../../components';
 
 export default function creatExample(examples) {
   class Example extends GuideExample {
@@ -30,7 +28,7 @@ export default function creatExample(examples) {
   }
 
   Example.propTypes = {
-    ...GuideExample.propTypes
+    ...GuideExample.propTypes,
   };
 
   return Example;

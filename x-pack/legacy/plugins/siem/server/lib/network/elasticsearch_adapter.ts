@@ -18,6 +18,7 @@ import {
   NetworkHttpData,
   NetworkHttpEdges,
   NetworkTopNFlowEdges,
+  MatrixOverOrdinalHistogramData,
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
@@ -140,6 +141,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     );
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const edges = networkDnsEdges.splice(cursorStart, querySize - cursorStart);
+    const histogram = getHistogramData(edges);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
@@ -154,6 +156,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
         showMorePagesIndicator,
       },
       totalCount,
+      histogram,
     };
   }
 
@@ -193,6 +196,32 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     };
   }
 }
+
+const getHistogramData = (
+  data: NetworkDnsEdges[]
+): MatrixOverOrdinalHistogramData[] | undefined => {
+  if (!Array.isArray(data)) return undefined;
+  return data.reduce(
+    (acc: MatrixOverOrdinalHistogramData[], { node: { dnsBytesOut, dnsBytesIn, _id } }) => {
+      if (_id != null && dnsBytesOut != null && dnsBytesIn != null)
+        return [
+          ...acc,
+          {
+            x: _id,
+            y: dnsBytesOut,
+            g: 'DNS Bytes Out',
+          },
+          {
+            x: _id,
+            y: dnsBytesIn,
+            g: 'DNS Bytes In',
+          },
+        ];
+      return acc;
+    },
+    []
+  );
+};
 
 const getTopNFlowEdges = (
   response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,

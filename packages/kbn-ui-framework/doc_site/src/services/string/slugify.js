@@ -17,8 +17,6 @@
  * under the License.
  */
 
-
-
 /**
  * Lowercases input and replaces spaces with hyphens:
  * e.g. 'GridView Example' -> 'gridview-example'
@@ -28,7 +26,8 @@ function one(str) {
     .toLowerCase()
     .replace(/[-]+/g, ' ')
     .replace(/[^\w^\s]+/g, '')
-    .replace(/ +/g, ' ').split(' ');
+    .replace(/ +/g, ' ')
+    .split(' ');
   return parts.join('-');
 }
 

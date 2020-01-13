@@ -28,7 +28,7 @@ function mapDispatchToProps(dispatch) {
     },
     clearTooltipState() {
       dispatch(setTooltipState(null));
-    }
+    },
   };
 }
 

@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
-export function getChartTheme(): Theme {
-  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+export function getChartTheme(isDarkMode: boolean): Theme {
   return isDarkMode ? DARK_THEME : LIGHT_THEME;
 }

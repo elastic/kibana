@@ -16,9 +16,11 @@ const initialState = {
 
 const success = action => `${action}_SUCCESS`;
 
-const parseAutoFollowPattern = (autoFollowPattern) => {
+const parseAutoFollowPattern = autoFollowPattern => {
   // Extract prefix and suffix from follow index pattern
-  const { followIndexPatternPrefix, followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(autoFollowPattern.followIndexPattern);
+  const { followIndexPatternPrefix, followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(
+    autoFollowPattern.followIndexPattern
+  );
 
   return { ...autoFollowPattern, followIndexPatternPrefix, followIndexPatternSuffix };
 };
@@ -26,10 +28,16 @@ const parseAutoFollowPattern = (autoFollowPattern) => {
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.AUTO_FOLLOW_PATTERN_LOAD): {
-      return { ...state, byId: arrayToObject(action.payload.patterns.map(parseAutoFollowPattern), 'name') };
+      return {
+        ...state,
+        byId: arrayToObject(action.payload.patterns.map(parseAutoFollowPattern), 'name'),
+      };
     }
     case success(t.AUTO_FOLLOW_PATTERN_GET): {
-      return { ...state, byId: { ...state.byId, [action.payload.name]: parseAutoFollowPattern(action.payload) } };
+      return {
+        ...state,
+        byId: { ...state.byId, [action.payload.name]: parseAutoFollowPattern(action.payload) },
+      };
     }
     case t.AUTO_FOLLOW_PATTERN_SELECT_DETAIL: {
       return { ...state, selectedDetailId: action.payload };

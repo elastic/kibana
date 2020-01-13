@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
 import { privilegesProvider } from '../lib/check_privileges';
@@ -21,30 +19,29 @@ import { isSecurityDisabled } from '../lib/security_utils';
 export function systemRoutes({
   commonRouteConfig,
   elasticsearchPlugin,
-  config,
   route,
   xpackMainPlugin,
-  spacesPlugin
+  spacesPlugin,
+  cloud,
 }) {
   const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
 
   function getNodeCount() {
     const filterPath = 'nodes.*.attributes';
-    return callWithInternalUser('nodes.info', { filterPath })
-      .then((resp) => {
-        let count = 0;
-        if (typeof resp.nodes === 'object') {
-          Object.keys(resp.nodes).forEach((k) => {
-            if (resp.nodes[k].attributes !== undefined) {
-              const maxOpenJobs = resp.nodes[k].attributes['ml.max_open_jobs'];
-              if (maxOpenJobs !== null && maxOpenJobs > 0) {
-                count++;
-              }
+    return callWithInternalUser('nodes.info', { filterPath }).then(resp => {
+      let count = 0;
+      if (typeof resp.nodes === 'object') {
+        Object.keys(resp.nodes).forEach(k => {
+          if (resp.nodes[k].attributes !== undefined) {
+            const maxOpenJobs = resp.nodes[k].attributes['ml.max_open_jobs'];
+            if (maxOpenJobs !== null && maxOpenJobs > 0) {
+              count++;
             }
-          });
-        }
-        return { count };
-      });
+          }
+        });
+      }
+      return { count };
+    });
   }
 
   route({
@@ -58,13 +55,15 @@ export function systemRoutes({
           const info = await callWithRequest('ml.info');
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
-          upgradeInProgress = (info.upgrade_mode === true);
+          upgradeInProgress = info.upgrade_mode === true;
         } catch (error) {
           // if the ml.info check fails, it could be due to the user having insufficient privileges
           // most likely they do not have the ml_user role and therefore will be blocked from using
           // ML at all. However, we need to catch this error so the privilege check doesn't fail.
           if (error.status === 403) {
-            mlLog.info('Unable to determine whether upgrade is being performed due to insufficient user privileges');
+            mlLog.info(
+              'Unable to determine whether upgrade is being performed due to insufficient user privileges'
+            );
           } else {
             mlLog.warn('Unable to determine whether upgrade is being performed');
           }
@@ -75,7 +74,7 @@ export function systemRoutes({
           // return that security is disabled and don't call the privilegeCheck endpoint
           return {
             securityDisabled: true,
-            upgradeInProgress
+            upgradeInProgress,
           };
         } else {
           const body = request.payload;
@@ -88,8 +87,8 @@ export function systemRoutes({
       }
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -100,19 +99,25 @@ export function systemRoutes({
       try {
         const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         // if spaces is disabled force isMlEnabledInSpace to be true
-        const { isMlEnabledInSpace } = spacesPlugin !== undefined ?
-          spacesUtilsProvider(spacesPlugin, request) :
-          { isMlEnabledInSpace: async () => true };
+        const { isMlEnabledInSpace } =
+          spacesPlugin !== undefined
+            ? spacesUtilsProvider(spacesPlugin, request)
+            : { isMlEnabledInSpace: async () => true };
 
-        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace, ignoreSpaces);
+        const { getPrivileges } = privilegesProvider(
+          callWithRequest,
+          xpackMainPlugin,
+          isMlEnabledInSpace,
+          ignoreSpaces
+        );
         return await getPrivileges();
       } catch (error) {
         return wrapError(error);
       }
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -138,15 +143,17 @@ export function systemRoutes({
               'cluster:monitor/xpack/ml/job/get',
               'cluster:monitor/xpack/ml/job/stats/get',
               'cluster:monitor/xpack/ml/datafeeds/get',
-              'cluster:monitor/xpack/ml/datafeeds/stats/get'
-            ]
+              'cluster:monitor/xpack/ml/datafeeds/stats/get',
+            ],
           };
           callWithRequest('ml.privilegeCheck', { body })
-            .then((resp) => {
-              if (resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
+            .then(resp => {
+              if (
+                resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
                 resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&
                 resp.cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
-                resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']) {
+                resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']
+              ) {
                 getNodeCount()
                   .then(resolve)
                   .catch(reject);
@@ -158,12 +165,11 @@ export function systemRoutes({
             })
             .catch(reject);
         }
-      })
-        .catch(error => wrapError(error));
+      }).catch(error => wrapError(error));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -174,16 +180,15 @@ export function systemRoutes({
 
       try {
         const info = await callWithRequest('ml.info');
-        const cloudIdKey = 'xpack.cloud.id';
-        const cloudId = config.has(cloudIdKey) && config.get(cloudIdKey);
+        const cloudId = cloud && cloud.cloudId;
         return { ...info, cloudId };
       } catch (error) {
         return wrapError(error);
       }
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -191,11 +196,10 @@ export function systemRoutes({
     path: '/api/ml/es_search',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('search', request.payload)
-        .catch(resp => wrapError(resp));
+      return callWithRequest('search', request.payload).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 }

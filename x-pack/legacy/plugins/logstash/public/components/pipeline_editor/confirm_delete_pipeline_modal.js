@@ -15,22 +15,28 @@ export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDelet
     <EuiOverlayMask>
       <EuiConfirmModal
         buttonColor="danger"
-        cancelButtonText={(<FormattedMessage
-          id="xpack.logstash.confirmDeletePipelineModal.cancelButtonText"
-          defaultMessage="Cancel"
-        />)}
-        confirmButtonText={(<FormattedMessage
-          id="xpack.logstash.confirmDeletePipelineModal.confirmButtonText"
-          defaultMessage="Delete pipeline"
-        />)}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.logstash.confirmDeletePipelineModal.cancelButtonText"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.logstash.confirmDeletePipelineModal.confirmButtonText"
+            defaultMessage="Delete pipeline"
+          />
+        }
         defaultFocusedButton={EUI_MODAL_CANCEL_BUTTON}
         onCancel={cancelDeleteModal}
         onConfirm={confirmDeletePipeline}
-        title={(<FormattedMessage
-          id="xpack.logstash.confirmDeletePipelineModal.deletePipelineTitle"
-          defaultMessage="Delete pipeline {id}"
-          values={{ id }}
-        />)}
+        title={
+          <FormattedMessage
+            id="xpack.logstash.confirmDeletePipelineModal.deletePipelineTitle"
+            defaultMessage="Delete pipeline {id}"
+            values={{ id }}
+          />
+        }
       >
         <p>{PIPELINE_EDITOR.DELETE_PIPELINE_MODAL_MESSAGE}</p>
       </EuiConfirmModal>

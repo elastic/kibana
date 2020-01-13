@@ -5,14 +5,8 @@
  */
 import React, { Fragment } from 'react';
 import { LearnMoreLink, OptionalLabel } from '../../components';
-import {
-  EuiFieldNumber,
-  EuiTextColor,
-  EuiDescribedFormGroup
-} from '@elastic/eui';
-import {
-  PHASE_INDEX_PRIORITY,
-} from '../../../constants';
+import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eui';
+import { PHASE_INDEX_PRIORITY } from '../../../constants';
 import { ErrableFormRow } from '../form_errors';
 import { FormattedMessage } from '@kbn/i18n/react';
 export const SetPriorityInput = props => {

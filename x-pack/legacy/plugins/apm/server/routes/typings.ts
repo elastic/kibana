@@ -5,11 +5,17 @@
  */
 
 import t from 'io-ts';
-import { Request, ResponseToolkit } from 'hapi';
-import { CoreSetup } from 'src/core/server';
+import {
+  CoreSetup,
+  KibanaRequest,
+  RequestHandlerContext,
+  Logger
+} from 'src/core/server';
 import { PickByValue, Optional } from 'utility-types';
+import { Observable } from 'rxjs';
+import { Server } from 'hapi';
 import { FetchOptions } from '../../public/services/rest/callApi';
-import { LegacySetup } from '../new-platform/plugin';
+import { APMConfig } from '../../../../../plugins/apm/server';
 
 export interface Params {
   query?: t.HasProps;
@@ -37,22 +43,35 @@ export interface Route<
   options?: {
     tags: Array<'access:apm' | 'access:apm_write'>;
   };
-  handler: (
-    req: Request,
-    params: DecodeParams<TParams>,
-    h: ResponseToolkit
-  ) => Promise<TReturn>;
+  handler: (kibanaContext: {
+    context: APMRequestHandlerContext<DecodeParams<TParams>>;
+    request: KibanaRequest;
+  }) => Promise<TReturn>;
 }
+
+export type APMLegacyServer = Pick<Server, 'savedObjects' | 'log'> & {
+  plugins: {
+    elasticsearch: Server['plugins']['elasticsearch'];
+  };
+};
+
+export type APMRequestHandlerContext<
+  TDecodedParams extends { [key in keyof Params]: any } = {}
+> = RequestHandlerContext & {
+  params: { query: { _debug: boolean } } & TDecodedParams;
+  config: APMConfig;
+  logger: Logger;
+  __LEGACY: {
+    server: APMLegacyServer;
+  };
+};
 
 export type RouteFactoryFn<
   TPath extends string,
   TMethod extends HttpMethod | undefined,
   TParams extends Params,
   TReturn
-> = (
-  core: CoreSetup,
-  __LEGACY: LegacySetup
-) => Route<TPath, TMethod, TParams, TReturn>;
+> = (core: CoreSetup) => Route<TPath, TMethod, TParams, TReturn>;
 
 export interface RouteState {
   [key: string]: {
@@ -83,7 +102,14 @@ export interface ServerAPI<TRouteState extends RouteState> {
         };
       }
   >;
-  init: (core: CoreSetup, __LEGACY: LegacySetup) => void;
+  init: (
+    core: CoreSetup,
+    context: {
+      config$: Observable<APMConfig>;
+      logger: Logger;
+      __LEGACY: { server: Server };
+    }
+  ) => void;
 }
 
 // without this, TS does not recognize possible existence of `params` in `options` below

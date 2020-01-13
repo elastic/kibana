@@ -9,7 +9,6 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/url';
 import { LogstashLicenseService } from './logstash_license_service';
 
-uiModules.get('xpack/logstash')
-  .factory('logstashLicenseService', ($timeout, kbnUrl) => {
-    return new LogstashLicenseService(xpackInfo, kbnUrl, $timeout);
-  });
+uiModules.get('xpack/logstash').factory('logstashLicenseService', ($timeout, kbnUrl) => {
+  return new LogstashLicenseService(xpackInfo, kbnUrl, $timeout);
+});

@@ -18,32 +18,29 @@
  */
 
 import { Server } from 'hapi';
-import { createCSPRuleString, DEFAULT_CSP_RULES } from '../../../../../server/csp';
+import { CspConfig } from '../../../../../../core/server';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
 export function createCspCollector(server: Server) {
   return {
     type: 'csp',
     isReady: () => true,
     async fetch() {
-      const config = server.config();
-
-      // It's important that we do not send the value of csp.rules here as it
-      // can be customized with values that can be identifiable to given
-      // installs, such as URLs
-      const defaultRulesString = createCSPRuleString([...DEFAULT_CSP_RULES]);
-      const actualRulesString = createCSPRuleString(config.get('csp.rules'));
+      const { strict, warnLegacyBrowsers, header } = server.newPlatform.setup.core.http.csp;
 
       return {
-        strict: config.get('csp.strict'),
-        warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
-        rulesChangedFromDefault: defaultRulesString !== actualRulesString,
+        strict,
+        warnLegacyBrowsers,
+        // It's important that we do not send the value of csp.header here as it
+        // can be customized with values that can be identifiable to given
+        // installs, such as URLs
+        rulesChangedFromDefault: header !== CspConfig.DEFAULT.header,
       };
     },
   };
 }
 
-export function registerCspCollector(server: Server): void {
-  const { collectorSet } = server.usage;
-  const collector = collectorSet.makeUsageCollector(createCspCollector(server));
-  collectorSet.register(collector);
+export function registerCspCollector(usageCollection: UsageCollectionSetup, server: Server): void {
+  const collector = usageCollection.makeUsageCollector(createCspCollector(server));
+  usageCollection.registerCollector(collector);
 }

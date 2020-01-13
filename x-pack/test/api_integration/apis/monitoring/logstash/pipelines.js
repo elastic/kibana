@@ -7,23 +7,23 @@
 import expect from '@kbn/expect';
 import pipelinesFixture from './fixtures/pipelines';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('pipelines', () => {
+  describe.skip('pipelines', () => {
     const archive = 'monitoring/logstash/changing_pipelines';
     const timeRange = {
       min: '2019-11-04T15:40:44.855Z',
-      max: '2019-11-04T15:50:38.667Z'
+      max: '2019-11-04T15:50:38.667Z',
     };
     const pagination = {
       size: 10,
-      index: 0
+      index: 0,
     };
     const sort = {
       field: 'id',
-      direction: 'asc'
+      direction: 'asc',
     };
 
     before('load archive', () => {
@@ -55,11 +55,7 @@ export default function ({ getService }) {
         return body.pipelines.map(pipeline => pipeline.id);
       }
 
-      const ids = [
-        ...await getIds(0),
-        ...await getIds(1),
-        ...await getIds(2),
-      ];
+      const ids = [...(await getIds(0)), ...(await getIds(1)), ...(await getIds(2))];
       expect(ids.length).to.be(26);
     });
   });

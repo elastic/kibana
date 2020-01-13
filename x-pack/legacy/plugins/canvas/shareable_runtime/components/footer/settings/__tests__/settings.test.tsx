@@ -7,7 +7,8 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../../../test/context_jest';
-import { takeMountedSnapshot, tick } from '../../../../test';
+import { takeMountedSnapshot } from '../../../../test';
+import { openSettings, selectMenuItem } from '../../../../test/interactions';
 import {
   getSettingsTrigger as trigger,
   getPopover as popover,
@@ -60,36 +61,26 @@ describe('<Settings />', () => {
     expect(popover(wrapper).prop('isOpen')).toEqual(false);
   });
 
-  test.skip('can navigate Autoplay Settings', async () => {
-    trigger(wrapper).simulate('click');
+  test('can navigate Autoplay Settings', async () => {
+    await openSettings(wrapper);
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
-    await tick(20);
-    menuItems(wrapper)
-      .at(0)
-      .simulate('click');
-    await tick(20);
+
+    await selectMenuItem(wrapper, 0);
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
   });
 
-  test.skip('can navigate Toolbar Settings, closes when activated', async () => {
-    trigger(wrapper).simulate('click');
+  test('can navigate Toolbar Settings, closes when activated', async () => {
+    await openSettings(wrapper);
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
-    menuItems(wrapper)
-      .at(1)
-      .simulate('click');
 
-    // Wait for the animation and DOM update
-    await tick(40);
-    portal(wrapper).update();
-    expect(portal(wrapper).html()).toMatchSnapshot();
+    await selectMenuItem(wrapper, 1);
+    expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
 
     // Click the Hide Toolbar switch
     portal(wrapper)
       .find('button[data-test-subj="hideToolbarSwitch"]')
       .simulate('click');
 
-    // Wait for the animation and DOM update
-    await tick(20);
     portal(wrapper).update();
 
     // The Portal should not be open.

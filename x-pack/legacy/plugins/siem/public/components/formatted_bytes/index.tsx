@@ -4,17 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 import numeral from '@elastic/numeral';
 
 import { DEFAULT_BYTES_FORMAT } from '../../../common/constants';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../lib/kibana';
 
-export const PreferenceFormattedBytes = React.memo<{ value: string | number }>(({ value }) => {
-  const [bytesFormat] = useKibanaUiSetting(DEFAULT_BYTES_FORMAT);
-  return (
-    <>{bytesFormat ? numeral(value).format(bytesFormat) : numeral(value).format('0,0.[0]b')}</>
-  );
-});
+type Bytes = string | number;
+
+export const formatBytes = (value: Bytes, format: string) => {
+  return numeral(value).format(format);
+};
+
+export const useFormatBytes = () => {
+  const [bytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
+
+  return (value: Bytes) => formatBytes(value, bytesFormat);
+};
+
+export const PreferenceFormattedBytesComponent = ({ value }: { value: Bytes }) => (
+  <>{useFormatBytes()(value)}</>
+);
+
+PreferenceFormattedBytesComponent.displayName = 'PreferenceFormattedBytesComponent';
+
+export const PreferenceFormattedBytes = React.memo(PreferenceFormattedBytesComponent);
 
 PreferenceFormattedBytes.displayName = 'PreferenceFormattedBytes';

@@ -26,12 +26,12 @@ export default function validateArgFn(functionDef) {
     const type = argType(value);
     const required = argDef.types;
     const multi = argDef.multi;
-    const isCorrectType = (function () {
+    const isCorrectType = (function() {
       // If argument is not allow to be specified multiple times, we're dealing with a plain value for type
       if (!multi) return _.contains(required, type);
       // If it is, we'll get an array for type
       return _.difference(type, required).length === 0;
-    }());
+    })();
 
     if (isCorrectType) return true;
     else return false;
@@ -39,7 +39,8 @@ export default function validateArgFn(functionDef) {
     if (!isCorrectType) {
       throw new Error(
         i18n.translate('timelion.serverSideErrors.wrongFunctionArgumentTypeErrorMessage', {
-          defaultMessage: '{functionName}({argumentName}) must be one of {requiredTypes}. Got: {actualType}',
+          defaultMessage:
+            '{functionName}({argumentName}) must be one of {requiredTypes}. Got: {actualType}',
           values: {
             functionName: functionDef.name,
             argumentName: name,

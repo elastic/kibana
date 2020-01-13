@@ -148,8 +148,8 @@ export class Form extends PureComponent {
       <Fragment>
         {currentCategories.length
           ? currentCategories.map(category => {
-            return this.renderCategory(category, settings[category], categoryCounts[category]); // fix this
-          })
+              return this.renderCategory(category, settings[category], categoryCounts[category]); // fix this
+            })
           : this.maybeRenderNoSettings(clearQuery)}
       </Fragment>
     );

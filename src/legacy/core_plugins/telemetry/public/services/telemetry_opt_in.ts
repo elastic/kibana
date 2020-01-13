@@ -18,7 +18,6 @@
  */
 
 import moment from 'moment';
-import { setCanTrackUiMetrics } from 'ui/ui_metric';
 // @ts-ignore
 import { banners, toastNotifications } from 'ui/notify';
 import { npStart } from 'ui/new_platform';
@@ -69,8 +68,6 @@ export function TelemetryOptInProvider($injector: any, chrome: any, sendOptInSta
     'telemetryNotifyUserAboutOptInDefault'
   ) as boolean;
 
-  setCanTrackUiMetrics(currentOptInStatus);
-
   const provider = {
     getBannerId: () => bannerId,
     getOptInBannerNoticeId: () => optInBannerNoticeId,
@@ -116,7 +113,6 @@ export function TelemetryOptInProvider($injector: any, chrome: any, sendOptInSta
       if (!allowChangingOptInStatus) {
         return;
       }
-      setCanTrackUiMetrics(enabled);
       const $http = $injector.get('$http');
 
       try {

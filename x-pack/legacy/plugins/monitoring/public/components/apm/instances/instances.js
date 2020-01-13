@@ -8,7 +8,14 @@ import React, { Fragment } from 'react';
 import moment from 'moment';
 import { uniq, get } from 'lodash';
 import { EuiMonitoringTable } from '../../table';
-import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
@@ -16,12 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { APM_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function getColumns(setupMode) {
   return [
     {
       name: i18n.translate('xpack.monitoring.apm.instances.nameTitle', {
-        defaultMessage: 'Name'
+        defaultMessage: 'Name',
       }),
       field: 'name',
       render: (name, apm) => {
@@ -31,7 +39,7 @@ function getColumns(setupMode) {
           const status = list[apm.uuid] || {};
           const instance = {
             uuid: apm.uuid,
-            name: apm.name
+            name: apm.name,
           };
 
           setupModeStatus = (
@@ -48,79 +56,72 @@ function getColumns(setupMode) {
 
         return (
           <Fragment>
-            <EuiLink
-              href={`#/apm/instances/${apm.uuid}`}
-              data-test-subj={`apmLink-${name}`}
-            >
+            <EuiLink href={`#/apm/instances/${apm.uuid}`} data-test-subj={`apmLink-${name}`}>
               {name}
             </EuiLink>
             {setupModeStatus}
           </Fragment>
         );
-      }
+      },
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.outputEnabledTitle', {
-        defaultMessage: 'Output Enabled'
+        defaultMessage: 'Output Enabled',
       }),
-      field: 'output'
+      field: 'output',
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.totalEventsRateTitle', {
-        defaultMessage: 'Total Events Rate'
+        defaultMessage: 'Total Events Rate',
       }),
       field: 'total_events_rate',
-      render: value => formatMetric(value, '', '/s')
+      render: value => formatMetric(value, '', '/s'),
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.bytesSentRateTitle', {
-        defaultMessage: 'Bytes Sent Rate'
+        defaultMessage: 'Bytes Sent Rate',
       }),
       field: 'bytes_sent_rate',
-      render: value => formatMetric(value, 'byte', '/s')
+      render: value => formatMetric(value, 'byte', '/s'),
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.outputErrorsTitle', {
-        defaultMessage: 'Output Errors'
+        defaultMessage: 'Output Errors',
       }),
       field: 'errors',
-      render: value => formatMetric(value, '0')
+      render: value => formatMetric(value, '0'),
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.lastEventTitle', {
-        defaultMessage: 'Last Event'
+        defaultMessage: 'Last Event',
       }),
       field: 'time_of_last_event',
-      render: value => i18n.translate('xpack.monitoring.apm.instances.lastEventValue', {
-        defaultMessage: '{timeOfLastEvent} ago',
-        values: {
-          timeOfLastEvent: formatTimestampToDuration(+moment(value), 'since')
-        }
-      })
+      render: value =>
+        i18n.translate('xpack.monitoring.apm.instances.lastEventValue', {
+          defaultMessage: '{timeOfLastEvent} ago',
+          values: {
+            timeOfLastEvent: formatTimestampToDuration(+moment(value), 'since'),
+          },
+        }),
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
-        defaultMessage: 'Allocated Memory'
+        defaultMessage: 'Allocated Memory',
       }),
       field: 'memory',
-      render: value => formatMetric(value, 'byte')
+      render: value => formatMetric(value, 'byte'),
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.versionTitle', {
-        defaultMessage: 'Version'
+        defaultMessage: 'Version',
       }),
-      field: 'version'
+      field: 'version',
     },
   ];
 }
 
 export function ApmServerInstances({ apms, setupMode }) {
-  const {
-    pagination,
-    sorting,
-    onTableChange,
-    data,
-  } = apms;
+  const { pagination, sorting, onTableChange, data } = apms;
 
   let setupModeCallout = null;
   if (setupMode.enabled && setupMode.data) {
@@ -140,9 +141,17 @@ export function ApmServerInstances({ apms, setupMode }) {
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.apm.instances.heading"
+              defaultMessage="APM Instances"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageContent>
           <Status stats={data.stats} />
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable
             className="apmInstancesTable"
@@ -155,25 +164,28 @@ export function ApmServerInstances({ apms, setupMode }) {
             search={{
               box: {
                 incremental: true,
-                placeholder: i18n.translate('xpack.monitoring.apm.instances.filterInstancesPlaceholder', {
-                  defaultMessage: 'Filter Instances…'
-                })
+                placeholder: i18n.translate(
+                  'xpack.monitoring.apm.instances.filterInstancesPlaceholder',
+                  {
+                    defaultMessage: 'Filter Instances…',
+                  }
+                ),
               },
               filters: [
                 {
                   type: 'field_value_selection',
                   field: 'version',
                   name: i18n.translate('xpack.monitoring.apm.instances.versionFilter', {
-                    defaultMessage: 'Version'
+                    defaultMessage: 'Version',
                   }),
                   options: versions,
                   multiSelect: 'or',
-                }
-              ]
+                },
+              ],
             }}
             onTableChange={onTableChange}
             executeQueryOptions={{
-              defaultFields: ['name']
+              defaultFields: ['name'],
             }}
           />
         </EuiPageContent>

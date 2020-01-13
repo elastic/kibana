@@ -31,15 +31,26 @@ Wrapper.displayName = 'Wrapper';
 
 interface SubtitleItemProps {
   children: string | React.ReactNode;
+  dataTestSubj?: string;
 }
 
-const SubtitleItem = React.memo<SubtitleItemProps>(({ children }) => {
-  if (typeof children === 'string') {
-    return <p className="siemSubtitle__item siemSubtitle__item--text">{children}</p>;
-  } else {
-    return <div className="siemSubtitle__item siemSubtitle__item--node">{children}</div>;
+const SubtitleItem = React.memo<SubtitleItemProps>(
+  ({ children, dataTestSubj = 'header-panel-subtitle' }) => {
+    if (typeof children === 'string') {
+      return (
+        <p className="siemSubtitle__item siemSubtitle__item--text" data-test-subj={dataTestSubj}>
+          {children}
+        </p>
+      );
+    } else {
+      return (
+        <div className="siemSubtitle__item siemSubtitle__item--node" data-test-subj={dataTestSubj}>
+          {children}
+        </div>
+      );
+    }
   }
-});
+);
 SubtitleItem.displayName = 'SubtitleItem';
 
 export interface SubtitleProps {

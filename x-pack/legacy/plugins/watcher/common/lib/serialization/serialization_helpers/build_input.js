@@ -14,9 +14,7 @@ function buildIndices(index) {
     return index;
   }
 
-  return [
-    index
-  ];
+  return [index];
 }
 
 /*
@@ -27,8 +25,8 @@ function buildRange(timeWindowSize, timeWindowUnit, timeField) {
     [timeField]: {
       gte: `{{ctx.trigger.scheduled_time}}||-${timeWindowSize}${timeWindowUnit}`,
       lte: `{{ctx.trigger.scheduled_time}}`,
-      format: 'strict_date_optional_time||epoch_millis'
-    }
+      format: 'strict_date_optional_time||epoch_millis',
+    },
   };
 }
 
@@ -40,9 +38,9 @@ function buildQuery(timeWindowSize, timeWindowUnit, timeField) {
   return {
     bool: {
       filter: {
-        range: buildRange(timeWindowSize, timeWindowUnit, timeField)
-      }
-    }
+        range: buildRange(timeWindowSize, timeWindowUnit, timeField),
+      },
+    },
   };
 }
 
@@ -61,20 +59,20 @@ function buildAggs(aggType, aggField, termField, termSize, termOrder) {
           field: termField,
           size: termSize,
           order: {
-            _count: termOrder
-          }
-        }
-      }
+            _count: termOrder,
+          },
+        },
+      },
     };
   }
 
   if (aggType !== 'count' && !termField) {
     const result = {
-      metricAgg: {}
+      metricAgg: {},
     };
 
     set(result, `metricAgg.${aggType}`, {
-      field: aggField
+      field: aggField,
     });
 
     return result;
@@ -87,17 +85,17 @@ function buildAggs(aggType, aggField, termField, termSize, termOrder) {
           field: termField,
           size: termSize,
           order: {
-            metricAgg: termOrder
-          }
+            metricAgg: termOrder,
+          },
         },
         aggs: {
-          metricAgg: {}
-        }
-      }
+          metricAgg: {},
+        },
+      },
     };
 
     set(result, `bucketAgg.aggs.metricAgg.${aggType}`, {
-      field: aggField
+      field: aggField,
     });
 
     return result;
@@ -107,10 +105,19 @@ function buildAggs(aggType, aggField, termField, termSize, termOrder) {
 /*
 watch.input.search.request.body
  */
-function buildBody(timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder) {
+function buildBody(
+  timeWindowSize,
+  timeWindowUnit,
+  timeField,
+  aggType,
+  aggField,
+  termField,
+  termSize,
+  termOrder
+) {
   const result = {
     size: 0,
-    query: buildQuery(timeWindowSize, timeWindowUnit, timeField)
+    query: buildQuery(timeWindowSize, timeWindowUnit, timeField),
   };
 
   const aggs = buildAggs(aggType, aggField, termField, termSize, termOrder);
@@ -124,13 +131,32 @@ function buildBody(timeWindowSize, timeWindowUnit, timeField, aggType, aggField,
 /*
 watch.input
  */
-export function buildInput({ index, timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder }) {
+export function buildInput({
+  index,
+  timeWindowSize,
+  timeWindowUnit,
+  timeField,
+  aggType,
+  aggField,
+  termField,
+  termSize,
+  termOrder,
+}) {
   return {
     search: {
       request: {
-        body: buildBody(timeWindowSize, timeWindowUnit, timeField, aggType, aggField, termField, termSize, termOrder),
-        indices: buildIndices(index)
-      }
-    }
+        body: buildBody(
+          timeWindowSize,
+          timeWindowUnit,
+          timeField,
+          aggType,
+          aggField,
+          termField,
+          termSize,
+          termOrder
+        ),
+        indices: buildIndices(index),
+      },
+    },
   };
 }

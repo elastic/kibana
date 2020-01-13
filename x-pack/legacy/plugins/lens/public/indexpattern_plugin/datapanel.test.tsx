@@ -17,7 +17,6 @@ import { EuiProgress } from '@elastic/eui';
 import { documentField } from './document_field';
 
 jest.mock('ui/new_platform');
-jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
@@ -279,7 +278,7 @@ describe('IndexPattern Data Panel', () => {
 
     function testProps() {
       const setState = jest.fn();
-      core.http.get = jest.fn(async (url: string) => {
+      core.http.get.mockImplementation(async (url: string) => {
         const parts = url.split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
@@ -485,7 +484,7 @@ describe('IndexPattern Data Panel', () => {
       let overlapCount = 0;
       const props = testProps();
 
-      core.http.get = jest.fn((url: string) => {
+      core.http.get.mockImplementation((url: string) => {
         if (queryCount) {
           ++overlapCount;
         }
@@ -534,11 +533,9 @@ describe('IndexPattern Data Panel', () => {
     it('shows all fields if empty state button is clicked', async () => {
       const props = testProps();
 
-      core.http.get = jest.fn((url: string) => {
-        return Promise.resolve({
-          indexPatternTitle: props.currentIndexPatternId,
-          existingFieldNames: [],
-        });
+      core.http.get.mockResolvedValue({
+        indexPatternTitle: props.currentIndexPatternId,
+        existingFieldNames: [],
       });
 
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);

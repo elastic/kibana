@@ -38,7 +38,7 @@ const isNumericFieldSelected = (agg: IMetricAggConfig) => {
   return field && field.type && field.type === KBN_FIELD_TYPES.NUMBER;
 };
 
-aggTypeFieldFilters.addFilter((field, aggConfig: IMetricAggConfig) => {
+aggTypeFieldFilters.addFilter((field, aggConfig) => {
   if (
     aggConfig.type.name !== METRIC_TYPES.TOP_HITS ||
     _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
@@ -82,7 +82,7 @@ export const topHitMetricAgg = new MetricAggType({
       editorComponent: TopFieldParamEditor,
       onlyAggregatable: false,
       filterFieldTypes: '*',
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         const field = agg.getParam('field');
         output.params = {};
 
@@ -196,7 +196,7 @@ export const topHitMetricAgg = new MetricAggType({
           value: 'asc',
         },
       ],
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         const sortField = agg.params.sortField;
         const sortOrder = agg.params.sortOrder;
 

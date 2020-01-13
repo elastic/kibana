@@ -24,7 +24,7 @@ import {
   elasticsearchServiceMock,
   loggingServiceMock,
 } from '../../../../../src/core/server/mocks';
-import { licenseMock } from '../licensing/index.mock';
+import { licenseMock } from '../../common/licensing/index.mock';
 
 test(`returns exposed services`, () => {
   const kibanaIndexName = '.a-kibana-index';
@@ -53,7 +53,6 @@ test(`returns exposed services`, () => {
     .fn()
     .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() });
   const mockFeaturesService = { getFeatures: () => [] };
-  const mockGetLegacyAPI = () => ({ kibanaIndexName });
   const mockLicense = licenseMock.create();
 
   const authz = setupAuthorization({
@@ -61,20 +60,20 @@ test(`returns exposed services`, () => {
     clusterClient: mockClusterClient,
     license: mockLicense,
     loggers: loggingServiceMock.create(),
-    getLegacyAPI: mockGetLegacyAPI,
+    kibanaIndexName,
     packageVersion: 'some-version',
     featuresService: mockFeaturesService,
     getSpacesService: mockGetSpacesService,
   });
 
   expect(authz.actions.version).toBe('version:some-version');
-  expect(authz.getApplicationName()).toBe(application);
+  expect(authz.applicationName).toBe(application);
 
   expect(authz.checkPrivilegesWithRequest).toBe(mockCheckPrivilegesWithRequest);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(
     authz.actions,
     mockClusterClient,
-    authz.getApplicationName
+    authz.applicationName
   );
 
   expect(authz.checkPrivilegesDynamicallyWithRequest).toBe(

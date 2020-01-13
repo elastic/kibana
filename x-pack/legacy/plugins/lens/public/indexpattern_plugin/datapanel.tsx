@@ -298,6 +298,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 'data-test-subj': 'indexPattern-switch-link',
                 className: 'lnsInnerIndexPatternDataPanel__triggerButton',
               }}
+              indexPatternId={currentIndexPatternId}
               indexPatternRefs={indexPatternRefs}
               onChangeIndexPattern={(newId: string) => {
                 onChangeIndexPattern(newId);

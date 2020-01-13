@@ -16,8 +16,8 @@ uiRoutes.when('/elasticsearch', {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
-    }
+    },
   },
   controllerAs: 'elasticsearchOverview',
-  controller: ElasticsearchOverviewController
+  controller: ElasticsearchOverviewController,
 });

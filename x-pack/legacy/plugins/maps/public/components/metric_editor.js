@@ -36,11 +36,12 @@ export function MetricEditor({ fields, metricsFilter, metric, onChange, removeBu
 
   let fieldSelect;
   if (metric.type && metric.type !== METRIC_TYPE.COUNT) {
-    const filterField = metric.type !== METRIC_TYPE.UNIQUE_COUNT
-      ? field => {
-        return field.type === 'number';
-      }
-      : undefined;
+    const filterField =
+      metric.type !== METRIC_TYPE.UNIQUE_COUNT
+        ? field => {
+            return field.type === 'number';
+          }
+        : undefined;
     fieldSelect = (
       <EuiFormRow
         label={i18n.translate('xpack.maps.metricsEditor.selectFieldLabel', {

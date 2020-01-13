@@ -4,24 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect, useState } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../autocomplete_field';
 import { isDisplayable } from '../../utils/is_displayable';
+import { esKuery, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 interface Props {
-  derivedIndexPattern: StaticIndexPattern;
+  derivedIndexPattern: IIndexPattern;
   onSubmit: (query: string) => void;
   value?: string | null;
 }
 
 function validateQuery(query: string) {
   try {
-    fromKueryExpression(query);
+    esKuery.fromKueryExpression(query);
   } catch (err) {
     return false;
   }

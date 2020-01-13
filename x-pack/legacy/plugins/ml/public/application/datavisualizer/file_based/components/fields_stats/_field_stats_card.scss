@@ -1,0 +1,146 @@
+.card-container {
+  display: inline-grid;
+  display: -ms-inline-grid;
+  padding: 0px 10px 10px 0px;
+}
+
+.ml-field-data-card {
+  // These styles should all be removed once the file data visualizer is using
+  // the same field_data_card component as the index based data visualizer.
+  height: 408px;
+
+  .boolean {
+    background-color: #e6c220;
+  }
+
+  .date {
+    background-color: #f98510;
+  }
+
+  .document_count {
+    background-color: #db1374;
+  }
+
+  .geo_point {
+    background-color: #461a0a;
+  }
+
+  .ip {
+    background-color: #490092;
+  }
+
+  .keyword {
+    background-color: #00b3a4;
+  }
+
+  .number {
+    background-color: #3185fc;
+  }
+
+  .text {
+    background-color: #920000;
+  }
+
+  .type-other,
+  .unknown {
+    background-color: #bfa180;
+  }
+
+  // Use euiPanel styling
+  @include euiPanel($selector: '.card-contents');
+
+  .card-contents {
+    height: 378px;
+    line-height: 21px;
+    border-radius: 0px 0px $euiBorderRadius $euiBorderRadius;
+    overflow: hidden;
+  }
+
+  .stats {
+    padding: 10px 10px 0px 10px;
+    text-align: center;
+  }
+
+  .stat {
+    padding-bottom: 6px;
+  }
+
+  .stat.heading {
+    padding-bottom: 0px;
+  }
+
+  .stat.min,
+  .stat.max,
+  .stat.median {
+    width: 30%;
+    display: inline-block;
+  }
+
+  .stat.min.value,
+  .stat.max.value,
+  .stat.median.value {
+    font-size: $euiFontSizeS;
+    @include euiTextTruncate;
+  }
+
+  .valueWrapper {
+    display: inline;
+  }
+
+  .not-exist-message {
+    padding: 50px 30px 0px 30px;
+    text-align: center;
+  }
+
+  .sampled-message {
+    font-size: 11px;
+    color: #555555;
+    text-align: center;
+    padding-top: 3px;
+  }
+
+  .text-code {
+    font-family: $euiCodeFontFamily;
+  }
+
+  .details-select {
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .details-container {
+    padding-top: 5px;
+  }
+
+  .top-value {
+    height: 21px;
+    font-size: 13px;
+
+    .field-label {
+      @include euiTextTruncate;
+
+      display: inline-block;
+      width: 100px;
+      text-align: right;
+    }
+
+    .count-label {
+      display: inline-block;
+      width: 70px;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-value-bar-holder {
+      display: inline-block;
+      width: 160px;
+    }
+
+    .top-value-bar {
+      height: 15px;
+      min-width: 3px;
+    }
+  }
+}

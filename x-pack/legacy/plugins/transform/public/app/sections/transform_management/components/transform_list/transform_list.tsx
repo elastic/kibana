@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiTitle,
+  Direction,
 } from '@elastic/eui';
 
 import { OnTableChangeArg, SortDirection, SORT_DIRECTION } from '../../../../../shared_imports';
@@ -42,7 +43,7 @@ import { StopAction } from './action_stop';
 import { ItemIdToExpandedRowMap, Query, Clause } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import { ProgressBar, TransformTable } from './transform_table';
+import { ProgressBar, transformTableFactory } from './transform_table';
 
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
@@ -73,6 +74,8 @@ interface Props {
   transformsLoading: boolean;
 }
 
+const TransformTable = transformTableFactory<TransformListRow>();
+
 export const TransformList: FC<Props> = ({
   errorMessage,
   isInitialized,
@@ -97,7 +100,7 @@ export const TransformList: FC<Props> = ({
   const [pageSize, setPageSize] = useState(10);
 
   const [sortField, setSortField] = useState<string>(TRANSFORM_LIST_COLUMN.ID);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
+  const [sortDirection, setSortDirection] = useState<SortDirection | Direction>(SORT_DIRECTION.ASC);
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -329,10 +332,10 @@ export const TransformList: FC<Props> = ({
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'state.state',
         name: i18n.translate('xpack.transform.statusFilter', { defaultMessage: 'Status' }),
-        multiSelect: 'or',
+        multiSelect: 'or' as const,
         options: Object.values(TRANSFORM_STATE).map(val => ({
           value: val,
           name: val,
@@ -340,7 +343,7 @@ export const TransformList: FC<Props> = ({
         })),
       },
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'mode',
         name: i18n.translate('xpack.transform.modeFilter', { defaultMessage: 'Mode' }),
         multiSelect: false,

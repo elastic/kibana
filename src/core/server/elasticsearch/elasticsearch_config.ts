@@ -19,55 +19,57 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Duration } from 'moment';
-import { Logger } from '../logging';
+import { readFileSync } from 'fs';
+import { ConfigDeprecationProvider } from 'src/core/server';
+import { readPkcs12Keystore, readPkcs12Truststore } from '../../utils';
+import { ServiceConfigDescriptor } from '../internal_types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 export const DEFAULT_API_VERSION = 'master';
 
-export type ElasticsearchConfigType = TypeOf<typeof config.schema>;
+export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 type SslConfigSchema = ElasticsearchConfigType['ssl'];
 
-export const config = {
-  path: 'elasticsearch',
-  schema: schema.object({
-    sniffOnStart: schema.boolean({ defaultValue: false }),
-    sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], {
-      defaultValue: false,
-    }),
-    sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
-    hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
-      defaultValue: 'http://localhost:9200',
-    }),
-    preserveHost: schema.boolean({ defaultValue: true }),
-    username: schema.maybe(
-      schema.conditional(
-        schema.contextRef('dist'),
-        false,
-        schema.string({
-          validate: rawConfig => {
-            if (rawConfig === 'elastic') {
-              return (
-                'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-                'privilege-related issues. You should use the "kibana" user instead.'
-              );
-            }
-          },
-        }),
-        schema.string()
-      )
-    ),
-    password: schema.maybe(schema.string()),
-    requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-      defaultValue: ['authorization'],
-    }),
-    customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
-    shardTimeout: schema.duration({ defaultValue: '30s' }),
-    requestTimeout: schema.duration({ defaultValue: '30s' }),
-    pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
-    startupTimeout: schema.duration({ defaultValue: '5s' }),
-    logQueries: schema.boolean({ defaultValue: false }),
-    ssl: schema.object({
+const configSchema = schema.object({
+  sniffOnStart: schema.boolean({ defaultValue: false }),
+  sniffInterval: schema.oneOf([schema.duration(), schema.literal(false)], {
+    defaultValue: false,
+  }),
+  sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
+  hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
+    defaultValue: 'http://localhost:9200',
+  }),
+  preserveHost: schema.boolean({ defaultValue: true }),
+  username: schema.maybe(
+    schema.conditional(
+      schema.contextRef('dist'),
+      false,
+      schema.string({
+        validate: rawConfig => {
+          if (rawConfig === 'elastic') {
+            return (
+              'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+              'privilege-related issues. You should use the "kibana" user instead.'
+            );
+          }
+        },
+      }),
+      schema.string()
+    )
+  ),
+  password: schema.maybe(schema.string()),
+  requestHeadersWhitelist: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+    defaultValue: ['authorization'],
+  }),
+  customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+  shardTimeout: schema.duration({ defaultValue: '30s' }),
+  requestTimeout: schema.duration({ defaultValue: '30s' }),
+  pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
+  startupTimeout: schema.duration({ defaultValue: '5s' }),
+  logQueries: schema.boolean({ defaultValue: false }),
+  ssl: schema.object(
+    {
       verificationMode: schema.oneOf(
         [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
         { defaultValue: 'full' }
@@ -78,12 +80,60 @@ export const config = {
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
       keyPassphrase: schema.maybe(schema.string()),
-      alwaysPresentCertificate: schema.boolean({ defaultValue: true }),
-    }),
-    apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
-    healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
-    ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
-  }),
+      keystore: schema.object({
+        path: schema.maybe(schema.string()),
+        password: schema.maybe(schema.string()),
+      }),
+      truststore: schema.object({
+        path: schema.maybe(schema.string()),
+        password: schema.maybe(schema.string()),
+      }),
+      alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
+    },
+    {
+      validate: rawConfig => {
+        if (rawConfig.key && rawConfig.keystore.path) {
+          return 'cannot use [key] when [keystore.path] is specified';
+        }
+        if (rawConfig.certificate && rawConfig.keystore.path) {
+          return 'cannot use [certificate] when [keystore.path] is specified';
+        }
+      },
+    }
+  ),
+  apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
+  healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
+  ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
+});
+
+const deprecations: ConfigDeprecationProvider = () => [
+  (settings, fromPath, log) => {
+    const es = settings[fromPath];
+    if (!es) {
+      return settings;
+    }
+    if (es.username === 'elastic') {
+      log(
+        `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+      );
+    }
+    if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
+      log(
+        `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+      );
+    } else if (es.ssl?.certificate !== undefined && es.ssl?.key === undefined) {
+      log(
+        `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+      );
+    }
+    return settings;
+  },
+];
+
+export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
+  path: 'elasticsearch',
+  schema: configSchema,
+  deprecations,
 };
 
 export class ElasticsearchConfig {
@@ -173,7 +223,7 @@ export class ElasticsearchConfig {
    */
   public readonly ssl: Pick<
     SslConfigSchema,
-    Exclude<keyof SslConfigSchema, 'certificateAuthorities'>
+    Exclude<keyof SslConfigSchema, 'certificateAuthorities' | 'keystore' | 'truststore'>
   > & { certificateAuthorities?: string[] };
 
   /**
@@ -183,7 +233,7 @@ export class ElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
-  constructor(rawConfig: ElasticsearchConfigType, log?: Logger) {
+  constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
     this.logQueries = rawConfig.logQueries;
@@ -202,24 +252,83 @@ export class ElasticsearchConfig {
     this.password = rawConfig.password;
     this.customHeaders = rawConfig.customHeaders;
 
-    const certificateAuthorities = Array.isArray(rawConfig.ssl.certificateAuthorities)
-      ? rawConfig.ssl.certificateAuthorities
-      : typeof rawConfig.ssl.certificateAuthorities === 'string'
-      ? [rawConfig.ssl.certificateAuthorities]
-      : undefined;
+    const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
+    const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
 
     this.ssl = {
-      ...rawConfig.ssl,
+      alwaysPresentCertificate,
+      key,
+      keyPassphrase,
+      certificate,
       certificateAuthorities,
+      verificationMode,
     };
-
-    if (this.username === 'elastic' && log !== undefined) {
-      // logger is optional / not used during tests
-      // TODO: logger can be removed when issue #40255 is resolved to support deprecations in NP config service
-      log.warn(
-        `Setting the elasticsearch username to "elastic" is deprecated. You should use the "kibana" user instead.`,
-        { tags: ['deprecation'] }
-      );
-    }
   }
 }
+
+const readKeyAndCerts = (rawConfig: ElasticsearchConfigType) => {
+  let key: string | undefined;
+  let keyPassphrase: string | undefined;
+  let certificate: string | undefined;
+  let certificateAuthorities: string[] | undefined;
+
+  const addCAs = (ca: string[] | undefined) => {
+    if (ca && ca.length) {
+      certificateAuthorities = [...(certificateAuthorities || []), ...ca];
+    }
+  };
+
+  if (rawConfig.ssl.keystore?.path) {
+    const keystore = readPkcs12Keystore(
+      rawConfig.ssl.keystore.path,
+      rawConfig.ssl.keystore.password
+    );
+    if (!keystore.key) {
+      throw new Error(`Did not find key in Elasticsearch keystore.`);
+    } else if (!keystore.cert) {
+      throw new Error(`Did not find certificate in Elasticsearch keystore.`);
+    }
+    key = keystore.key;
+    certificate = keystore.cert;
+    addCAs(keystore.ca);
+  } else {
+    if (rawConfig.ssl.key) {
+      key = readFile(rawConfig.ssl.key);
+      keyPassphrase = rawConfig.ssl.keyPassphrase;
+    }
+    if (rawConfig.ssl.certificate) {
+      certificate = readFile(rawConfig.ssl.certificate);
+    }
+  }
+
+  if (rawConfig.ssl.truststore?.path) {
+    const ca = readPkcs12Truststore(
+      rawConfig.ssl.truststore.path,
+      rawConfig.ssl.truststore.password
+    );
+    addCAs(ca);
+  }
+
+  const ca = rawConfig.ssl.certificateAuthorities;
+  if (ca) {
+    const parsed: string[] = [];
+    const paths = Array.isArray(ca) ? ca : [ca];
+    if (paths.length > 0) {
+      for (const path of paths) {
+        parsed.push(readFile(path));
+      }
+      addCAs(parsed);
+    }
+  }
+
+  return {
+    key,
+    keyPassphrase,
+    certificate,
+    certificateAuthorities,
+  };
+};
+
+const readFile = (file: string) => {
+  return readFileSync(file, 'utf8');
+};

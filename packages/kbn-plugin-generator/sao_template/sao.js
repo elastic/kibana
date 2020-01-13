@@ -97,21 +97,30 @@ module.exports = function({ name }) {
     enforceNewFolder: true,
     installDependencies: false,
     gitInit: true,
-    post({ log }) {
-      return execa('yarn', ['kbn', 'bootstrap'], {
+    async post({ log }) {
+      await execa('yarn', ['kbn', 'bootstrap'], {
         cwd: KBN_DIR,
         stdio: 'inherit',
-      }).then(() => {
-        const dir = relative(process.cwd(), resolve(KBN_DIR, 'plugins', snakeCase(name)));
-
-        log.success(chalk`🎉
-
-  Your plugin has been created in {bold ${dir}}. Move into that directory to run it:
-
-    {bold cd "${dir}"}
-    {bold yarn start}
-`);
       });
+
+      const dir = relative(process.cwd(), resolve(KBN_DIR, 'plugins', snakeCase(name)));
+
+      try {
+        await execa('yarn', ['lint', '--fix'], {
+          cwd: dir,
+          all: true,
+        });
+      } catch (error) {
+        throw new Error(`Failure when running prettier on the generated output: ${error.all}`);
+      }
+
+      log.success(chalk`🎉
+
+Your plugin has been created in {bold ${dir}}. Move into that directory to run it:
+
+  {bold cd "${dir}"}
+  {bold yarn start}
+`);
     },
   };
 };

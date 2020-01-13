@@ -8,9 +8,8 @@ import { getOr, isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
 import {
@@ -22,14 +21,14 @@ import {
   inputsSelectors,
 } from '../../../store';
 import { timelineActions } from '../../../store/actions';
-import { KqlMode, TimelineModel } from '../../../store/timeline/model';
+import { KqlMode, timelineDefaults, TimelineModel } from '../../../store/timeline/model';
 import { DispatchUpdateReduxTime, dispatchUpdateReduxTime } from '../../super_date_picker';
 import { DataProvider } from '../data_providers/data_provider';
 import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {
   browserFields: BrowserFields;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   timelineId: string;
 }
 
@@ -196,7 +195,7 @@ const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const getInputsPolicy = inputsSelectors.getTimelinePolicySelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, timelineId);
+    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const policy: inputsModel.Policy = getInputsPolicy(state);
     return {

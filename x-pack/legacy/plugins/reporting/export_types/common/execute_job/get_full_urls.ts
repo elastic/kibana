@@ -16,32 +16,39 @@ import { ServerFacade } from '../../../types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
-interface KeyedRelativeUrl {
-  relativeUrl: string;
+function isPngJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPNG {
+  return (job as JobDocPayloadPNG).relativeUrl !== undefined;
+}
+function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPDF {
+  return (job as JobDocPayloadPDF).relativeUrls !== undefined;
 }
 
-export async function getFullUrls({
-  job,
+export function getFullUrls<JobDocPayloadType>({
   server,
-  ...mergeValues // pass-throughs
+  job,
 }: {
-  job: JobDocPayloadPNG | JobDocPayloadPDF;
   server: ServerFacade;
+  job: JobDocPayloadPDF | JobDocPayloadPNG;
 }) {
-  const getAbsoluteUrl = getAbsoluteUrlFactory(server);
+  const config = server.config();
+
+  const getAbsoluteUrl = getAbsoluteUrlFactory({
+    defaultBasePath: config.get('server.basePath'),
+    protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+    hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
+    port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
+  });
 
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
 
-  if (job.relativeUrl) {
-    // single page (png)
+  if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
-  } else if (job.objects) {
-    // multi page (pdf)
-    relativeUrls = job.objects.map((obj: KeyedRelativeUrl) => obj.relativeUrl);
+  } else if (isPdfJob(job)) {
+    relativeUrls = job.relativeUrls;
   } else {
     throw new Error(
-      `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
+      `No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\``
     );
   }
 
@@ -86,5 +93,5 @@ export async function getFullUrls({
     });
   });
 
-  return { job, urls, server, ...mergeValues };
+  return urls;
 }

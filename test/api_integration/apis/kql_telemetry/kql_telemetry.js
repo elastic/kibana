@@ -21,10 +21,10 @@ import expect from '@kbn/expect';
 import Bluebird from 'bluebird';
 import { get } from 'lodash';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('telemetry API', () => {
     before(() => esArchiver.load('saved_objects/basic'));
@@ -37,13 +37,15 @@ export default function ({ getService }) {
         .send({ opt_in: true })
         .expect(200);
 
-      return es.search({
-        index: '.kibana',
-        q: 'type:kql-telemetry',
-      }).then(response => {
-        const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-        expect(kqlTelemetryDoc.optInCount).to.be(1);
-      });
+      return es
+        .search({
+          index: '.kibana',
+          q: 'type:kql-telemetry',
+        })
+        .then(response => {
+          const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
+          expect(kqlTelemetryDoc.optInCount).to.be(1);
+        });
     });
 
     it('should increment the opt *out* counter in the .kibana/kql-telemetry document', async () => {
@@ -53,16 +55,16 @@ export default function ({ getService }) {
         .send({ opt_in: false })
         .expect(200);
 
-      return es.search({
-        index: '.kibana',
-        q: 'type:kql-telemetry',
-      }).then(response => {
-        const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-        expect(kqlTelemetryDoc.optOutCount).to.be(1);
-      });
-
+      return es
+        .search({
+          index: '.kibana',
+          q: 'type:kql-telemetry',
+        })
+        .then(response => {
+          const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
+          expect(kqlTelemetryDoc.optOutCount).to.be(1);
+        });
     });
-
 
     it('should report success when opt *in* is incremented successfully', () => {
       return supertest
@@ -88,7 +90,7 @@ export default function ({ getService }) {
         });
     });
 
-    it('should only accept literal boolean values for the opt_in POST body param', function () {
+    it('should only accept literal boolean values for the opt_in POST body param', function() {
       return Bluebird.all([
         supertest
           .post('/api/kibana/kql_opt_in_telemetry')
@@ -117,8 +119,5 @@ export default function ({ getService }) {
           .expect(400),
       ]);
     });
-
   });
-
 }
-

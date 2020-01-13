@@ -28,7 +28,6 @@ import toPath from 'lodash/internal/toPath';
 import { PersistedStateError } from './errors';
 import { SimpleEmitter } from '../utils/simple_emitter';
 
-
 function prepSetParams(key, value, path) {
   // key must be the value, set the entire state using it
   if (_.isUndefined(value) && (_.isPlainObject(key) || path.length > 0)) {
@@ -40,12 +39,11 @@ function prepSetParams(key, value, path) {
   // ensure the value being passed in is never mutated
   return {
     value: _.cloneDeep(value),
-    key: key
+    key: key,
   };
 }
 
 export class PersistedState {
-
   /**
    *
    * @param value
@@ -62,7 +60,7 @@ export class PersistedState {
     this._path = this._setPath(path);
 
     _.forOwn(EmitterClass.prototype, (method, methodName) => {
-      this[methodName] = function () {
+      this[methodName] = function() {
         return EmitterClass.prototype[methodName].apply(this, arguments);
       };
     });
@@ -171,7 +169,7 @@ export class PersistedState {
     const isArray = Array.isArray(path);
 
     if (!isString && !isArray) return [];
-    return (isString) ? [this._getIndex(path)] : path;
+    return isString ? [this._getIndex(path)] : path;
   }
 
   _hasPath() {
@@ -232,7 +230,7 @@ export class PersistedState {
     const sourceObj = _.merge({}, this._changedState);
 
     // handler arguments are (targetValue, sourceValue, key, target, source)
-    const mergeMethod = function (targetValue, sourceValue, mergeKey) {
+    const mergeMethod = function(targetValue, sourceValue, mergeKey) {
       // if not initial state, skip default merge method (ie. return value, see note below)
       if (!initialState && _.isEqual(keyPath, self._getIndex(mergeKey))) {
         // use the sourceValue or fall back to targetValue

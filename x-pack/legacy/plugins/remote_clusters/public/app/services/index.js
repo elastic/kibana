@@ -4,31 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  loadClusters,
-  addCluster,
-  editCluster,
-  removeClusterRequest,
-} from './api';
+export { loadClusters, addCluster, editCluster, removeClusterRequest } from './api';
 
-export {
-  showApiError,
-  showApiWarning,
-} from './api_errors';
+export { showApiError, showApiWarning } from './api_errors';
 
-export {
-  setRedirect,
-  redirect,
-} from './redirect';
+export { setRedirect, redirect } from './redirect';
 
-export {
-  isSeedNodeValid,
-  isSeedNodePortValid,
-} from './validate_seed_node';
+export { isSeedNodeValid, isSeedNodePortValid } from './validate_seed_node';
 
-export {
-  extractQueryParams,
-} from './query_params';
+export { extractQueryParams } from './query_params';
 
 export {
   setUserHasLeftApp,
@@ -38,7 +22,4 @@ export {
   getRouterLinkProps,
 } from './routing';
 
-export {
-  trackUiMetric,
-  METRIC_TYPE,
-} from './ui_metric';
+export { trackUiMetric, METRIC_TYPE } from './ui_metric';

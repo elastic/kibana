@@ -37,7 +37,7 @@ describe('shortUrlLookupProvider', () => {
       get: sandbox.stub(),
       create: sandbox.stub().returns(Promise.resolve({ id: ID })),
       update: sandbox.stub(),
-      errors: SavedObjectsClient.errors
+      errors: SavedObjectsClient.errors,
     };
 
     req = { getSavedObjectsClient: () => savedObjectsClient };
@@ -46,43 +46,6 @@ describe('shortUrlLookupProvider', () => {
 
   afterEach(() => {
     sandbox.restore();
-  });
-
-  describe('generateUrlId', () => {
-    it('returns the document id', async () => {
-      const id = await shortUrl.generateUrlId(URL, req);
-      expect(id).toEqual(ID);
-    });
-
-    it('provides correct arguments to savedObjectsClient', async () => {
-      await shortUrl.generateUrlId(URL, req);
-
-      sinon.assert.calledOnce(savedObjectsClient.create);
-      const [type, attributes, options] = savedObjectsClient.create.getCall(0).args;
-
-      expect(type).toEqual(TYPE);
-      expect(Object.keys(attributes).sort()).toEqual(['accessCount', 'accessDate', 'createDate', 'url']);
-      expect(attributes.url).toEqual(URL);
-      expect(options.id).toEqual(ID);
-    });
-
-    it('passes persists attributes', async () => {
-      await shortUrl.generateUrlId(URL, req);
-
-      sinon.assert.calledOnce(savedObjectsClient.create);
-      const [type, attributes] = savedObjectsClient.create.getCall(0).args;
-
-      expect(type).toEqual(TYPE);
-      expect(Object.keys(attributes).sort()).toEqual(['accessCount', 'accessDate', 'createDate', 'url']);
-      expect(attributes.url).toEqual(URL);
-    });
-
-    it('gracefully handles version conflict', async () => {
-      const error = savedObjectsClient.errors.decorateConflictError(new Error());
-      savedObjectsClient.create.throws(error);
-      const id = await shortUrl.generateUrlId(URL, req);
-      expect(id).toEqual(ID);
-    });
   });
 
   describe('getUrl', () => {

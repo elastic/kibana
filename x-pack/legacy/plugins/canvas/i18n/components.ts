@@ -531,7 +531,7 @@ export const ComponentStrings = {
       }),
     getKeyboardShortcutsLinkLabel: () =>
       i18n.translate('xpack.canvas.helpMenu.keyboardShortcutsLinkLabel', {
-        defaultMessage: 'Keyboard Shortcuts',
+        defaultMessage: 'Keyboard shortcuts',
       }),
   },
   KeyboardShortcutsDoc: {
@@ -547,7 +547,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
-        defaultMessage: 'Keyboard Shortcuts',
+        defaultMessage: 'Keyboard shortcuts',
       }),
   },
   Link: {

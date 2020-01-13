@@ -10,7 +10,7 @@ import { TelemetrySavedObjectAttributes } from '../../../../../src/legacy/core_p
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
-  const client: Client = getService('es');
+  const client: Client = getService('legacyEs');
   const supertest = getService('supertest');
 
   describe('/api/telemetry/v2/optIn API Telemetry User has seen OptIn Notice', () => {

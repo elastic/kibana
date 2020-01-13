@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { ServerFacade, ESCallCluster } from '../../types';
+import { ServerFacade, ExportTypesRegistry, ESCallCluster } from '../../types';
 import {
   AggregationBuckets,
   AggregationResults,
@@ -16,7 +16,6 @@ import {
   RangeStats,
 } from './types';
 import { decorateRangeStats } from './decorate_range_stats';
-// @ts-ignore untyped module
 import { getExportTypesHandler } from './get_export_type_handler';
 
 const JOB_TYPES_KEY = 'jobTypes';
@@ -101,7 +100,11 @@ async function handleResponse(
   };
 }
 
-export async function getReportingUsage(server: ServerFacade, callCluster: ESCallCluster) {
+export async function getReportingUsage(
+  server: ServerFacade,
+  callCluster: ESCallCluster,
+  exportTypesRegistry: ExportTypesRegistry
+) {
   const config = server.config();
   const reportingIndex = config.get('xpack.reporting.index');
 
@@ -138,13 +141,13 @@ export async function getReportingUsage(server: ServerFacade, callCluster: ESCal
 
   return callCluster('search', params)
     .then((response: AggregationResults) => handleResponse(server, response))
-    .then(async (usage: RangeStatSets) => {
+    .then((usage: RangeStatSets) => {
       // Allow this to explicitly throw an exception if/when this config is deprecated,
       // because we shouldn't collect browserType in that case!
       const browserType = config.get('xpack.reporting.capture.browser.type');
 
       const xpackInfo = server.plugins.xpack_main.info;
-      const exportTypesHandler = await getExportTypesHandler(server);
+      const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
       const availability = exportTypesHandler.getAvailability(xpackInfo) as FeatureAvailabilityMap;
 
       const { lastDay, last7Days, ...all } = usage;

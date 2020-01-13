@@ -22,9 +22,7 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
 
 jest.mock('ui/new_platform');
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<IndexManagementHome />', () => {
+describe('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: IdxMgmtHomeTestBed;
 
@@ -38,7 +36,6 @@ describe.skip('<IndexManagementHome />', () => {
 
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         const { component } = testBed;
 
@@ -81,7 +78,6 @@ describe.skip('<IndexManagementHome />', () => {
 
         actions.selectHomeTab('templatesTab');
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           component.update();
@@ -101,7 +97,6 @@ describe.skip('<IndexManagementHome />', () => {
 
           actions.selectHomeTab('templatesTab');
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -147,7 +142,6 @@ describe.skip('<IndexManagementHome />', () => {
 
           actions.selectHomeTab('templatesTab');
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -186,7 +180,6 @@ describe.skip('<IndexManagementHome />', () => {
 
           expect(exists('reloadButton')).toBe(true);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickReloadButton();
             await nextTick();
@@ -214,7 +207,6 @@ describe.skip('<IndexManagementHome />', () => {
 
           expect(exists('systemTemplatesSwitch')).toBe(true);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             form.toggleEuiSwitch('systemTemplatesSwitch');
             await nextTick();
@@ -290,7 +282,6 @@ describe.skip('<IndexManagementHome />', () => {
           test('should show a warning message when attempting to delete a system template', async () => {
             const { component, form, actions } = testBed;
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               form.toggleEuiSwitch('systemTemplatesSwitch');
               await nextTick();
@@ -328,7 +319,6 @@ describe.skip('<IndexManagementHome />', () => {
               },
             });
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               confirmButton!.click();
               await nextTick();
@@ -384,7 +374,6 @@ describe.skip('<IndexManagementHome />', () => {
 
               actions.clickCloseDetailsButton();
 
-              // @ts-ignore (remove when react 16.9.0 is released)
               await act(async () => {
                 await nextTick();
                 component.update();
@@ -474,7 +463,6 @@ describe.skip('<IndexManagementHome />', () => {
 
               await actions.clickTemplateAt(0);
 
-              // @ts-ignore (remove when react 16.9.0 is released)
               await act(async () => {
                 await nextTick();
                 component.update();

@@ -1,7 +1,5 @@
-@mixin monitoringNoUserSelect(){
+@mixin monitoringNoUserSelect {
   user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .monRhythmChart__wrapper .monRhythmChart__zoom {
@@ -12,7 +10,7 @@
 .monRhythmChart__wrapper:hover .monRhythmChart__zoom {
   visibility: visible;
 }
-  
+
 .monRhythmChart {
   position: relative;
   display: flex;
@@ -50,7 +48,7 @@
 
   // SASSTODO: generic selector
   div {
-    @include monitoringNoUserSelect();
+    @include monitoringNoUserSelect;
   }
 }
 
@@ -58,6 +56,9 @@
   font-size: $euiFontSizeXS;
   cursor: pointer;
   color: $euiTextColor;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 
   &-isDisabled {
     opacity: 0.5;
@@ -71,7 +72,11 @@
 .monRhythmChart__legendLabel {
   overflow: hidden;
   white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
+
 .monRhythmChart__legendValue {
   overflow: hidden;
   white-space: nowrap;

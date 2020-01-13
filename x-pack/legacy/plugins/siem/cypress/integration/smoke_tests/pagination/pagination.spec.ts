@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import { HOSTS_PAGE_TAB_URLS } from '../../lib/urls';
 import {
   AUTHENTICATIONS_TABLE,
@@ -19,23 +18,26 @@ import {
 import { DEFAULT_TIMEOUT, loginAndWaitForPage, waitForTableLoad } from '../../lib/util/helpers';
 
 describe('Pagination', () => {
-  afterEach(() => {
-    return logout();
-  });
-
-  it.skip('pagination updates results and page number', () => {
+  before(() => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
+  });
+
+  afterEach(() => {
+    cy.get(getPageButtonSelector(0)).click({ force: true });
+  });
+
+  it('pagination updates results and page number', () => {
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
 
-    cy.get(getDraggableField('user.name'))
+    cy.get(getDraggableField('process.name'))
       .first()
       .invoke('text')
       .then(text1 => {
         cy.get(getPageButtonSelector(2)).click({ force: true });
         // wait for table to be done loading
         waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
-        cy.get(getDraggableField('user.name'))
+        cy.get(getDraggableField('process.name'))
           .first()
           .invoke('text')
           .should(text2 => {
@@ -47,15 +49,13 @@ describe('Pagination', () => {
   });
 
   it('pagination keeps track of page results when tabs change', () => {
-    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
-    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
     let thirdPageResult: string;
     cy.get(getPageButtonSelector(2)).click({ force: true });
     // wait for table to be done loading
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
 
-    cy.get(getDraggableField('user.name'))
+    cy.get(getDraggableField('process.name'))
       .first()
       .invoke('text')
       .then(text2 => {
@@ -70,7 +70,7 @@ describe('Pagination', () => {
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     // check uncommon processes table picks up at 3
     cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');
-    cy.get(getDraggableField('user.name'))
+    cy.get(getDraggableField('process.name'))
       .first()
       .invoke('text')
       .should(text1 => {
@@ -82,8 +82,7 @@ describe('Pagination', () => {
    * We only want to comment this code/test for now because it can be nondeterministic
    * when we figure out a way to really mock the data, we should come back to it
    */
-  it.skip('pagination resets results and page number to first page when refresh is clicked', () => {
-    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+  it('pagination resets results and page number to first page when refresh is clicked', () => {
     cy.get(NUMBERED_PAGINATION, { timeout: DEFAULT_TIMEOUT });
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
     // let firstResult: string;
@@ -100,7 +99,7 @@ describe('Pagination', () => {
       .last()
       .click({ force: true });
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
-    cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
+    cy.get(getPageButtonSelector(2)).should('have.class', 'euiPaginationButton-isActive');
     // cy.get(getDraggableField('user.name'))
     //   .first()
     //   .invoke('text')

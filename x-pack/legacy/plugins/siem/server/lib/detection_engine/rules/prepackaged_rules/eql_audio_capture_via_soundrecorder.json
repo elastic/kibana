@@ -1,0 +1,17 @@
+{
+  "rule_id": "f8e06892-ed10-4452-892e-2c5a38d552f1",
+  "risk_score": 50,
+  "description": "EQL - Audio Capture via SoundRecorder",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - Audio Capture via SoundRecorder",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"SoundRecorder.exe\" and process.args:\"/FILE\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

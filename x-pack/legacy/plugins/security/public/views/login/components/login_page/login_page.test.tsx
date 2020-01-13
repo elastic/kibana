@@ -46,6 +46,7 @@ describe('LoginPage', () => {
         loginState: createLoginState(),
         isSecureConnection: false,
         requiresSecureConnection: true,
+        loginAssistanceMessage: '',
       };
 
       expect(shallow(<LoginPage {...props} />)).toMatchSnapshot();
@@ -61,6 +62,7 @@ describe('LoginPage', () => {
         }),
         isSecureConnection: false,
         requiresSecureConnection: false,
+        loginAssistanceMessage: '',
       };
 
       expect(shallow(<LoginPage {...props} />)).toMatchSnapshot();
@@ -76,6 +78,7 @@ describe('LoginPage', () => {
         }),
         isSecureConnection: false,
         requiresSecureConnection: false,
+        loginAssistanceMessage: '',
       };
 
       expect(shallow(<LoginPage {...props} />)).toMatchSnapshot();
@@ -91,6 +94,21 @@ describe('LoginPage', () => {
         }),
         isSecureConnection: false,
         requiresSecureConnection: false,
+        loginAssistanceMessage: '',
+      };
+
+      expect(shallow(<LoginPage {...props} />)).toMatchSnapshot();
+    });
+
+    it('renders as expected when loginAssistanceMessage is set', () => {
+      const props = {
+        http: createMockHttp(),
+        window: {},
+        next: '',
+        loginState: createLoginState(),
+        isSecureConnection: false,
+        requiresSecureConnection: false,
+        loginAssistanceMessage: 'This is an *important* message',
       };
 
       expect(shallow(<LoginPage {...props} />)).toMatchSnapshot();
@@ -106,6 +124,7 @@ describe('LoginPage', () => {
         loginState: createLoginState(),
         isSecureConnection: false,
         requiresSecureConnection: false,
+        loginAssistanceMessage: '',
       };
 
       expect(shallow(<LoginPage {...props} />)).toMatchSnapshot();

@@ -29,7 +29,7 @@ set(ActionTypes, ACTION_TYPES.UNKNOWN, UnknownAction);
 export class Action {
   static getActionTypes = () => {
     return ActionTypes;
-  }
+  };
 
   // From Elasticsearch
   static fromUpstreamJson(json) {

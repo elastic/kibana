@@ -7,18 +7,18 @@
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 async function createPolicy(callWithRequest, policy) {
   const body = {
     policy: {
       phases: policy.phases,
-    }
+    },
   };
   const params = {
     method: 'PUT',
     path: `/_ilm/policy/${encodeURIComponent(policy.name)}`,
-    ignore: [ 404 ],
+    ignore: [404],
     body,
   };
 
@@ -32,7 +32,7 @@ export function registerCreateRoute(server) {
   server.route({
     path: '/api/index_lifecycle_management/policies',
     method: 'POST',
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -47,7 +47,7 @@ export function registerCreateRoute(server) {
       }
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

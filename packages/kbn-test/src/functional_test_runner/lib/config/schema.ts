@@ -143,7 +143,7 @@ export const schema = Joi.object()
 
     junit: Joi.object()
       .keys({
-        enabled: Joi.boolean().default(!!process.env.CI),
+        enabled: Joi.boolean().default(!!process.env.CI && !process.env.DISABLE_JUNIT_REPORTER),
         reportName: Joi.string(),
       })
       .default(),
@@ -257,7 +257,7 @@ export const schema = Joi.object()
     // settings for the stack functional integration tests
     stackFunctionalIntegrationTests: Joi.object()
       .keys({
-        envObj: Joi.object().unknown(true)
+        envObj: Joi.object().unknown(true),
       })
       .default(),
   })

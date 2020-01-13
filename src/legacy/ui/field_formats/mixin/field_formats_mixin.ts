@@ -20,10 +20,10 @@
 import { has } from 'lodash';
 import { Legacy } from 'kibana';
 import { FieldFormatsService } from './field_formats_service';
-import { FieldFormat } from '../../../../plugins/data/public';
+import { IFieldFormatType } from '../../../../plugins/data/public';
 
 export function fieldFormatsMixin(kbnServer: any, server: Legacy.Server) {
-  const fieldFormatClasses: Array<FieldFormat['constructor']> = [];
+  const fieldFormatClasses: IFieldFormatType[] = [];
 
   // for use outside of the request context, for special cases
   server.decorate('server', 'fieldFormatServiceFactory', async function(uiSettings) {

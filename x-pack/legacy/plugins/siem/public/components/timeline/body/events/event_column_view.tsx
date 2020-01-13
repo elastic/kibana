@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useMemo } from 'react';
 import uuid from 'uuid';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
-import { OnColumnResized, OnPinEvent, OnUnPinEvent } from '../../events';
-import { EventsTrData } from '../../styles';
+import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
+import { EventsTdContent, EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { ColumnHeader } from '../column_headers/column_header';
 import { DataDrivenColumns } from '../data_driven_columns';
 import { eventHasNotes, getPinOnClick } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
+import { useTimelineTypeContext } from '../../timeline_context';
 
 interface Props {
   id: string;
@@ -31,10 +32,14 @@ interface Props {
   isEventPinned: boolean;
   isEventViewer?: boolean;
   loading: boolean;
+  loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
+  onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
   showNotes: boolean;
   timelineId: string;
   toggleShowNotes: () => void;
@@ -59,52 +64,73 @@ export const EventColumnView = React.memo<Props>(
     isEventPinned = false,
     isEventViewer = false,
     loading,
+    loadingEventIds,
     onColumnResized,
     onEventToggled,
     onPinEvent,
+    onRowSelected,
     onUnPinEvent,
+    selectedEventIds,
+    showCheckboxes,
     showNotes,
     timelineId,
     toggleShowNotes,
     updateNote,
-  }) => (
-    <EventsTrData data-test-subj="event-column-view">
-      <Actions
-        actionsColumnWidth={actionsColumnWidth}
-        associateNote={associateNote}
-        checked={false}
-        expanded={expanded}
-        data-test-subj="actions"
-        eventId={id}
-        eventIsPinned={isEventPinned}
-        getNotesByIds={getNotesByIds}
-        isEventViewer={isEventViewer}
-        loading={loading}
-        noteIds={eventIdToNoteIds[id] || emptyNotes}
-        onEventToggled={onEventToggled}
-        onPinClicked={getPinOnClick({
-          allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
-          eventId: id,
-          onPinEvent,
-          onUnPinEvent,
-          isEventPinned,
-        })}
-        showCheckboxes={false}
-        showNotes={showNotes}
-        toggleShowNotes={toggleShowNotes}
-        updateNote={updateNote}
-      />
+  }) => {
+    const timelineTypeContext = useTimelineTypeContext();
 
-      <DataDrivenColumns
-        _id={id}
-        columnHeaders={columnHeaders}
-        columnRenderers={columnRenderers}
-        data={data}
-        onColumnResized={onColumnResized}
-        timelineId={timelineId}
-      />
-    </EventsTrData>
-  ),
+    const additionalActions = useMemo<JSX.Element[]>(() => {
+      return (
+        timelineTypeContext.timelineActions?.map(action => (
+          <EventsTdContent key={action.id} textAlign="center">
+            {action.getAction({ eventId: id, data })}
+          </EventsTdContent>
+        )) ?? []
+      );
+    }, [data, timelineTypeContext.timelineActions]);
+
+    return (
+      <EventsTrData data-test-subj="event-column-view">
+        <Actions
+          actionsColumnWidth={actionsColumnWidth}
+          additionalActions={additionalActions}
+          associateNote={associateNote}
+          checked={Object.keys(selectedEventIds).includes(id)}
+          onRowSelected={onRowSelected}
+          expanded={expanded}
+          data-test-subj="actions"
+          eventId={id}
+          eventIsPinned={isEventPinned}
+          getNotesByIds={getNotesByIds}
+          isEventViewer={isEventViewer}
+          loading={loading}
+          loadingEventIds={loadingEventIds}
+          noteIds={eventIdToNoteIds[id] || emptyNotes}
+          onEventToggled={onEventToggled}
+          onPinClicked={getPinOnClick({
+            allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
+            eventId: id,
+            onPinEvent,
+            onUnPinEvent,
+            isEventPinned,
+          })}
+          showCheckboxes={showCheckboxes}
+          showNotes={showNotes}
+          toggleShowNotes={toggleShowNotes}
+          updateNote={updateNote}
+        />
+
+        <DataDrivenColumns
+          _id={id}
+          columnHeaders={columnHeaders}
+          columnRenderers={columnRenderers}
+          data={data}
+          onColumnResized={onColumnResized}
+          timelineId={timelineId}
+        />
+      </EventsTrData>
+    );
+  },
   (prevProps, nextProps) => {
     return (
       prevProps.id === nextProps.id &&
@@ -115,7 +141,11 @@ export const EventColumnView = React.memo<Props>(
       prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
       prevProps.expanded === nextProps.expanded &&
       prevProps.loading === nextProps.loading &&
+      prevProps.loadingEventIds === nextProps.loadingEventIds &&
       prevProps.isEventPinned === nextProps.isEventPinned &&
+      prevProps.onRowSelected === nextProps.onRowSelected &&
+      prevProps.selectedEventIds === nextProps.selectedEventIds &&
+      prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.showNotes === nextProps.showNotes &&
       prevProps.timelineId === nextProps.timelineId
     );

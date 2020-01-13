@@ -7,7 +7,7 @@
 import { memo, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { inputsModel, KueryFilterQuery, timelineSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -31,7 +31,7 @@ interface TimelineKqlFetchDispatch {
 
 export interface TimelineKqlFetchProps {
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   inputId: InputsModelId;
 }
 

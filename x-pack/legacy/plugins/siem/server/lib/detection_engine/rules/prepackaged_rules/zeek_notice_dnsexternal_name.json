@@ -1,0 +1,17 @@
+{
+  "rule_id": "39c40c5a-110c-45b1-876f-969212e8814b",
+  "risk_score": 50,
+  "description": "Raised when a non-local name is found to be pointing at a local host.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice DNS::External_Name",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"DNS::External_Name\" or rule.name: \"DNS::External_Name\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

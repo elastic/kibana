@@ -37,15 +37,14 @@ export function BeatsPanel(props) {
   const goToInstances = () => props.changeUrl('beats/beats');
 
   const setupModeData = get(setupMode.data, 'beats');
-  const setupModeTooltip = setupMode && setupMode.enabled
-    ? (
+  const setupModeTooltip =
+    setupMode && setupMode.enabled ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={BEATS_SYSTEM_ID}
         badgeClickAction={goToInstances}
       />
-    )
-    : null;
+    ) : null;
 
   const beatTypes = props.beats.types.map((beat, index) => {
     return [
@@ -56,11 +55,9 @@ export function BeatsPanel(props) {
       >
         {beat.type}
       </EuiDescriptionListTitle>,
-      <EuiDescriptionListDescription
-        key={`beat-types-count-${index}`}
-      >
+      <EuiDescriptionListDescription key={`beat-types-count-${index}`}>
         {beat.count}
-      </EuiDescriptionListDescription>
+      </EuiDescriptionListDescription>,
     ];
   });
 
@@ -69,7 +66,7 @@ export function BeatsPanel(props) {
       {...props}
       url="beats"
       title={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.beatsTitle', {
-        defaultMessage: 'Beats'
+        defaultMessage: 'Beats',
       })}
     >
       <EuiFlexGrid columns={4}>
@@ -81,9 +78,12 @@ export function BeatsPanel(props) {
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
                   onClick={goToBeats}
-                  aria-label={i18n.translate('xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel', {
-                    defaultMessage: 'Beats Overview'
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.beatsPanel.overviewLinkAriaLabel',
+                    {
+                      defaultMessage: 'Beats Overview',
+                    }
+                  )}
                   data-test-subj="beatsOverview"
                 >
                   <FormattedMessage
@@ -128,7 +128,7 @@ export function BeatsPanel(props) {
                         'xpack.monitoring.cluster.overview.beatsPanel.instancesTotalLinkAriaLabel',
                         {
                           defaultMessage: 'Beats Instances: {beatsTotal}',
-                          values: { beatsTotal }
+                          values: { beatsTotal },
                         }
                       )}
                       data-test-subj="beatsListing"
@@ -136,7 +136,9 @@ export function BeatsPanel(props) {
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.beatsPanel.beatsTotalLinkLabel"
                         defaultMessage="Beats: {beatsTotal}"
-                        values={{ beatsTotal: (<span data-test-subj="beatsTotal">{beatsTotal}</span>) }}
+                        values={{
+                          beatsTotal: <span data-test-subj="beatsTotal">{beatsTotal}</span>,
+                        }}
                       />
                     </EuiLink>
                   </h3>
@@ -145,9 +147,7 @@ export function BeatsPanel(props) {
               {setupModeTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
-            <EuiDescriptionList type="column">
-              {beatTypes}
-            </EuiDescriptionList>
+            <EuiDescriptionList type="column">{beatTypes}</EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGrid>

@@ -6,8 +6,14 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommon } from './common';
+import { MlCustomUrls } from './custom_urls';
 
-export function MachineLearningJobWizardCommonProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardCommonProvider(
+  { getService }: FtrProviderContext,
+  mlCommon: MlCommon,
+  customUrls: MlCustomUrls
+) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -108,7 +114,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setBucketSpan(bucketSpan: string) {
-      await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputBucketSpan', bucketSpan, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -125,7 +131,9 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setJobId(jobId: string) {
-      await testSubjects.setValue('mlJobWizardInputJobId', jobId, { clearWithKeyboard: true });
+      await mlCommon.setValueWithChecks('mlJobWizardInputJobId', jobId, {
+        clearWithKeyboard: true,
+      });
       await this.assertJobIdValue(jobId);
     },
 
@@ -141,7 +149,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     },
 
     async setJobDescription(jobDescription: string) {
-      await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputJobDescription', jobDescription, {
         clearWithKeyboard: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
@@ -164,6 +172,23 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async addJobGroup(jobGroup: string) {
       await comboBox.setCustom('mlJobWizardComboBoxJobGroups > comboBoxInput', jobGroup);
       expect(await this.getSelectedJobGroups()).to.contain(jobGroup);
+    },
+
+    async getSelectedCalendars(): Promise<string[]> {
+      await this.ensureAdditionalSettingsSectionOpen();
+      return await comboBox.getComboBoxSelectedOptions(
+        'mlJobWizardComboBoxCalendars > comboBoxInput'
+      );
+    },
+
+    async assertCalendarsSelection(calendars: string[]) {
+      expect(await this.getSelectedCalendars()).to.eql(calendars);
+    },
+
+    async addCalendar(calendarId: string) {
+      await this.ensureAdditionalSettingsSectionOpen();
+      await comboBox.setCustom('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
+      expect(await this.getSelectedCalendars()).to.contain(calendarId);
     },
 
     async assertModelPlotSwitchExists(
@@ -285,7 +310,7 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      await testSubjects.setValue(subj, modelMemoryLimit, { clearWithKeyboard: true });
+      await mlCommon.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
       await this.assertModelMemoryLimitValue(modelMemoryLimit, {
         withAdvancedSection: sectionOptions.withAdvancedSection,
       });
@@ -356,6 +381,40 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
       await testSubjects.clickWhenNotDisabled('mlButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
+    },
+
+    async ensureAdditionalSettingsSectionOpen() {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists('mlJobWizardAdditionalSettingsSection')) === false) {
+          await testSubjects.click('mlJobWizardToggleAdditionalSettingsSection');
+          await testSubjects.existOrFail('mlJobWizardAdditionalSettingsSection', { timeout: 1000 });
+        }
+      });
+    },
+
+    async ensureNewCustomUrlFormModalOpen() {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists('mlJobNewCustomUrlFormModal')) === false) {
+          await testSubjects.click('mlJobOpenCustomUrlFormButton');
+          await testSubjects.existOrFail('mlJobNewCustomUrlFormModal', { timeout: 1000 });
+        }
+      });
+    },
+
+    async addCustomUrl(customUrl: { label: string }) {
+      await this.ensureAdditionalSettingsSectionOpen();
+
+      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlsList > *');
+
+      await this.ensureNewCustomUrlFormModalOpen();
+      // Fill-in the form
+      await customUrls.setCustomUrlLabel(customUrl.label);
+      // Save custom URL
+      await customUrls.saveCustomUrl('mlJobNewCustomUrlFormModal');
+
+      const expectedIndex = existingCustomUrls.length;
+
+      await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
     },
 
     async ensureAdvancedSectionOpen() {

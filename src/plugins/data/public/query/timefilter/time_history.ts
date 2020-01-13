@@ -37,7 +37,7 @@ export class TimeHistory {
   }
 
   add(time: TimeRange) {
-    if (!time) {
+    if (!time || !time.from || !time.to) {
       return;
     }
 

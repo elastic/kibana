@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('Logstash', () => {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./nodes'));
@@ -13,4 +13,3 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./pipelines'));
   });
 }
-

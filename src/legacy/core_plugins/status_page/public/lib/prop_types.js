@@ -21,16 +21,13 @@ import PropTypes from 'prop-types';
 
 export const State = PropTypes.shape({
   id: PropTypes.string.isRequired,
-  message: PropTypes.string,  // optional
-  title: PropTypes.string,   // optional
+  message: PropTypes.string, // optional
+  title: PropTypes.string, // optional
   uiColor: PropTypes.string.isRequired,
 });
 
 export const Metric = PropTypes.shape({
   name: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.number),
-    PropTypes.number
-  ]).isRequired,
-  type: PropTypes.string  // optional
+  value: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.number), PropTypes.number]).isRequired,
+  type: PropTypes.string, // optional
 });

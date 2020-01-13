@@ -22,35 +22,41 @@ interface PointToolTipContentProps {
   closeTooltip?(): void;
 }
 
-export const PointToolTipContent = React.memo<PointToolTipContentProps>(
-  ({ contextId, featureProps, closeTooltip }) => {
-    const featureDescriptionListItems = featureProps.map(
-      ({ _propertyKey: key, _rawValue: value }) => ({
-        title: sourceDestinationFieldMappings[key],
-        description: (
-          <AddFilterToGlobalSearchBar
-            filter={createFilter(key, Array.isArray(value) ? value[0] : value)}
-            onFilterAdded={closeTooltip}
-            data-test-subj={`add-to-kql-${key}`}
-          >
-            {value != null ? (
-              <DefaultFieldRenderer
-                rowItems={Array.isArray(value) ? value : [value]}
-                attrName={key}
-                idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
-                render={item => getRenderedFieldValue(key, item)}
-              />
-            ) : (
-              getEmptyTagValue()
-            )}
-          </AddFilterToGlobalSearchBar>
-        ),
-      })
-    );
+export const PointToolTipContentComponent = ({
+  contextId,
+  featureProps,
+  closeTooltip,
+}: PointToolTipContentProps) => {
+  const featureDescriptionListItems = featureProps.map(
+    ({ _propertyKey: key, _rawValue: value }) => ({
+      title: sourceDestinationFieldMappings[key],
+      description: (
+        <AddFilterToGlobalSearchBar
+          filter={createFilter(key, Array.isArray(value) ? value[0] : value)}
+          onFilterAdded={closeTooltip}
+          data-test-subj={`add-to-kql-${key}`}
+        >
+          {value != null ? (
+            <DefaultFieldRenderer
+              rowItems={Array.isArray(value) ? value : [value]}
+              attrName={key}
+              idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
+              render={item => getRenderedFieldValue(key, item)}
+            />
+          ) : (
+            getEmptyTagValue()
+          )}
+        </AddFilterToGlobalSearchBar>
+      ),
+    })
+  );
 
-    return <DescriptionListStyled listItems={featureDescriptionListItems} />;
-  }
-);
+  return <DescriptionListStyled listItems={featureDescriptionListItems} />;
+};
+
+PointToolTipContentComponent.displayName = 'PointToolTipContentComponent';
+
+export const PointToolTipContent = React.memo(PointToolTipContentComponent);
 
 PointToolTipContent.displayName = 'PointToolTipContent';
 

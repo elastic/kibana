@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { KeyValueTable } from '..';
-import { cleanup, render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 
 function getKeys(output: ReturnType<typeof render>) {
   const keys = output.getAllByTestId('dot-key');
@@ -19,8 +19,6 @@ function getValues(output: ReturnType<typeof render>) {
 }
 
 describe('KeyValueTable', () => {
-  afterEach(cleanup);
-
   it('displays key and value table', () => {
     const data = [
       { key: 'name.first', value: 'First Name' },

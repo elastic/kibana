@@ -40,9 +40,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<TemplateEdit />', () => {
+describe('<TemplateEdit />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -61,7 +59,6 @@ describe.skip('<TemplateEdit />', () => {
 
     testBed = await setup();
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       await nextTick();
       testBed.component.update();
@@ -87,7 +84,6 @@ describe.skip('<TemplateEdit />', () => {
     beforeEach(async () => {
       const { actions } = testBed;
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         // Complete step 1 (logistics)
         await actions.completeStepOne({
@@ -108,7 +104,6 @@ describe.skip('<TemplateEdit />', () => {
     it('should send the correct payload with changed values', async () => {
       const { actions } = testBed;
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         actions.clickSubmitButton();
         await nextTick();

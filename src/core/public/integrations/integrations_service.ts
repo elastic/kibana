@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from '../ui_settings';
+import { IUiSettingsClient } from '../ui_settings';
 import { CoreService } from '../../types';
 
 import { MomentService } from './moment';
 import { StylesService } from './styles';
 
 interface Deps {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */

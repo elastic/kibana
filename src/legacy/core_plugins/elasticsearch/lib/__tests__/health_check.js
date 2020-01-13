@@ -29,7 +29,7 @@ import kibanaVersion from '../kibana_version';
 const esPort = 9220;
 
 describe('plugins/elasticsearch', () => {
-  describe('lib/health_check', function () {
+  describe('lib/health_check', function() {
     let health;
     let plugin;
     let cluster;
@@ -54,23 +54,31 @@ describe('plugins/elasticsearch', () => {
           red: sinon.stub(),
           green: sinon.stub(),
           yellow: sinon.stub(),
-        }
+        },
       };
 
       cluster = { callWithInternalUser: sinon.stub(), errors: { NoConnections } };
       cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Bluebird.resolve());
-      cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Bluebird.resolve({ ok: true }));
-      cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Bluebird.resolve({ found: false }));
-      cluster.callWithInternalUser.withArgs('search', sinon.match.any).returns(Bluebird.resolve({ hits: { hits: [] } }));
-      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Bluebird.resolve({
-        nodes: {
-          'node-01': {
-            version: COMPATIBLE_VERSION_NUMBER,
-            http_address: `inet[/127.0.0.1:${esPort}]`,
-            ip: '127.0.0.1'
-          }
-        }
-      }));
+      cluster.callWithInternalUser
+        .withArgs('mget', sinon.match.any)
+        .returns(Bluebird.resolve({ ok: true }));
+      cluster.callWithInternalUser
+        .withArgs('get', sinon.match.any)
+        .returns(Bluebird.resolve({ found: false }));
+      cluster.callWithInternalUser
+        .withArgs('search', sinon.match.any)
+        .returns(Bluebird.resolve({ hits: { hits: [] } }));
+      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(
+        Bluebird.resolve({
+          nodes: {
+            'node-01': {
+              version: COMPATIBLE_VERSION_NUMBER,
+              http_address: `inet[/127.0.0.1:${esPort}]`,
+              ip: '127.0.0.1',
+            },
+          },
+        })
+      );
 
       // Setup the server mock
       server = {
@@ -79,10 +87,10 @@ describe('plugins/elasticsearch', () => {
         config: () => ({ get: sinon.stub() }),
         plugins: {
           elasticsearch: {
-            getCluster: sinon.stub().returns(cluster)
-          }
+            getCluster: sinon.stub().returns(cluster),
+          },
         },
-        ext: sinon.stub()
+        ext: sinon.stub(),
       };
 
       health = healthCheck(plugin, server, 0);
@@ -101,30 +109,31 @@ describe('plugins/elasticsearch', () => {
       sinon.assert.calledWithExactly(server.ext, sinon.match.string, sinon.match.func);
 
       const [, handler] = server.ext.firstCall.args;
-      handler();  // this should be health.stop
+      handler(); // this should be health.stop
 
       // ensure that the handler unregistered the timer
       expect(getTimerCount()).to.be(0);
     });
 
-    it('should set the cluster green if everything is ready', function () {
+    it('should set the cluster green if everything is ready', function() {
       cluster.callWithInternalUser.withArgs('ping').returns(Bluebird.resolve());
 
-      return health.run()
-        .then(function () {
-          sinon.assert.calledOnce(plugin.status.yellow);
-          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
+      return health.run().then(function() {
+        sinon.assert.calledOnce(plugin.status.yellow);
+        sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
 
-          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
-          sinon.assert.notCalled(plugin.status.red);
-          sinon.assert.calledOnce(plugin.status.green);
-          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
-        });
+        sinon.assert.calledOnce(
+          cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any)
+        );
+        sinon.assert.notCalled(plugin.status.red);
+        sinon.assert.calledOnce(plugin.status.green);
+        sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
+      });
     });
 
-    describe('#waitUntilReady', function () {
-      it('waits for green status', function () {
-        plugin.status.once = sinon.spy(function (event, handler) {
+    describe('#waitUntilReady', function() {
+      it('waits for green status', function() {
+        plugin.status.once = sinon.spy(function(event, handler) {
           expect(event).to.be('green');
           setImmediate(handler);
         });
@@ -133,7 +142,7 @@ describe('plugins/elasticsearch', () => {
 
         sandbox.clock.runAll();
 
-        return waitUntilReadyPromise.then(function () {
+        return waitUntilReadyPromise.then(function() {
           sinon.assert.calledOnce(plugin.status.once);
         });
       });

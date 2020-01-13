@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocationLink component renders a help link when location not present 1`] = `
+<EuiLink
+  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-observer-options.html"
+  target="_blank"
+>
+  Add location
+   
+  <EuiIcon
+    size="s"
+    type="popout"
+  />
+</EuiLink>
+`;
+
+exports[`LocationLink component renders the location when present 1`] = `
+<EuiText
+  grow={false}
+  size="s"
+>
+  us-east-1
+</EuiText>
+`;

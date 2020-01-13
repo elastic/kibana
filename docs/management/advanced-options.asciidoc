@@ -46,6 +46,7 @@ adapt to the interval between measurements. Keys are http://en.wikipedia.org/wik
 `dateFormat:tz`:: The timezone that Kibana uses. The default value of `Browser` uses the timezone detected by the browser.
 `dateNanosFormat`:: The format to use for displaying https://momentjs.com/docs/#/displaying/format/[pretty formatted dates] of {ref}/date_nanos.html[Elasticsearch date_nanos type].
 `defaultIndex`:: The index to access if no index is set. The default is `null`.
+`defaultRoute`:: The default route when opening Kibana. Use this setting to route users to a specific dashboard, application, or saved object as they enter each space.
 `fields:popularLimit`:: The top N most popular fields to show.
 `filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
 `filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state (be pinned) by default.
@@ -186,7 +187,8 @@ Refresh the page to apply the changes.
 === Search settings
 
 [horizontal]
-`courier:batchSearches`:: When disabled, dashboard panels will load individually, and search requests will terminate when
+`courier:batchSearches`:: **Deprecated in 7.6. Starting in 8.0, this setting will be optimized internally.**
+When disabled, dashboard panels will load individually, and search requests will terminate when
 users navigate away or update the query. When enabled, dashboard panels will load together when all of the data is loaded,
 and searches will not terminate.
 `courier:customRequestPreference`:: {ref}/search-request-body.html#request-body-search-preference[Request preference]

@@ -57,6 +57,9 @@ export function useTrackMetric(
     const trackUiMetric = getTrackerForApp(app);
     const id = setTimeout(() => trackUiMetric(metricType, decoratedMetric), Math.max(delay, 0));
     return () => clearTimeout(id);
+
+    // the dependencies are managed externally
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, effectDependencies);
 }
 

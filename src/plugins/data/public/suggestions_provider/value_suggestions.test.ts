@@ -17,12 +17,9 @@
  * under the License.
  */
 
-// TODO: remove when index patterns are moved here.
-jest.mock('ui/new_platform');
-
 import { stubIndexPattern, stubFields } from '../stubs';
 import { getSuggestionsProvider } from './value_suggestions';
-import { UiSettingsClientContract } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 
 describe('getSuggestions', () => {
   let getSuggestions: any;
@@ -30,7 +27,7 @@ describe('getSuggestions', () => {
 
   describe('with value suggestions disabled', () => {
     beforeEach(() => {
-      const config = { get: (key: string) => false } as UiSettingsClientContract;
+      const config = { get: (key: string) => false } as IUiSettingsClient;
       http = { fetch: jest.fn() };
       getSuggestions = getSuggestionsProvider(config, http);
     });
@@ -47,7 +44,7 @@ describe('getSuggestions', () => {
 
   describe('with value suggestions enabled', () => {
     beforeEach(() => {
-      const config = { get: (key: string) => true } as UiSettingsClientContract;
+      const config = { get: (key: string) => true } as IUiSettingsClient;
       http = { fetch: jest.fn() };
       getSuggestions = getSuggestionsProvider(config, http);
     });

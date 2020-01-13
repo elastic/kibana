@@ -5,264 +5,273 @@
  */
 
 import Boom from 'boom';
+
 import {
-  transformAlertToSignal,
-  getIdError,
-  transformFindAlertsOrError,
-  transformOrError,
+  transformError,
+  transformBulkError,
+  BulkError,
+  createSuccessObject,
+  ImportSuccessError,
+  createImportErrorObject,
+  transformImportError,
 } from './utils';
-import { getResult } from './__mocks__/request_responses';
 
 describe('utils', () => {
-  describe('transformAlertToSignal', () => {
-    test('should work with a full data set', () => {
-      const fullSignal = getResult();
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
-        created_by: 'elastic',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        size: 1,
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
-      });
+  describe('transformError', () => {
+    test('returns boom if it is a boom object', () => {
+      const boom = new Boom('');
+      const transformed = transformError(boom);
+      expect(transformed).toBe(boom);
     });
 
-    test('should work with a partial data set missing data', () => {
-      const fullSignal = getResult();
-      const { from, language, ...omitData } = transformAlertToSignal(fullSignal);
-      expect(omitData).toEqual({
-        created_by: 'elastic',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        size: 1,
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
-      });
+    test('returns a boom if it is some non boom object that has a statusCode', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(true);
     });
 
-    test('should omit query if query is null', () => {
-      const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = null;
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
-        created_by: 'elastic',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        size: 1,
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
-      });
+    test('returns a boom with the message set', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(transformed.message).toBe('some message');
     });
 
-    test('should omit query if query is undefined', () => {
-      const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = undefined;
-      const signal = transformAlertToSignal(fullSignal);
-      expect(signal).toEqual({
-        created_by: 'elastic',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        size: 1,
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
-      });
+    test('does not return a boom if it is some non boom object but it does not have a status Code.', () => {
+      const error: Error = {
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(false);
     });
 
-    test('should omit a mix of undefined, null, and missing fields', () => {
-      const fullSignal = getResult();
-      fullSignal.alertTypeParams.query = undefined;
-      fullSignal.alertTypeParams.language = null;
-      const { from, enabled, ...omitData } = transformAlertToSignal(fullSignal);
-      expect(omitData).toEqual({
-        created_by: 'elastic',
-        description: 'Detecting root and admin users',
-        false_positives: [],
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        size: 1,
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
-      });
+    test('it detects a TypeError and returns a Boom', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformError(error);
+      expect(Boom.isBoom(transformed)).toBe(true);
+    });
+
+    test('it detects a TypeError and returns a Boom status of 400', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformError(error) as Boom;
+      expect(transformed.output.statusCode).toBe(400);
     });
   });
 
-  describe('getIdError', () => {
-    test('outputs message about id not being found if only id is defined and ruleId is undefined', () => {
-      const boom = getIdError({ id: '123', ruleId: undefined });
-      expect(boom.message).toEqual('id of 123 not found');
+  describe('transformBulkError', () => {
+    test('returns transformed object if it is a boom object', () => {
+      const boom = new Boom('some boom message', { statusCode: 400 });
+      const transformed = transformBulkError('rule-1', boom);
+      const expected: BulkError = {
+        rule_id: 'rule-1',
+        error: { message: 'some boom message', status_code: 400 },
+      };
+      expect(transformed).toEqual(expected);
     });
 
-    test('outputs message about id not being found if only id is defined and ruleId is null', () => {
-      const boom = getIdError({ id: '123', ruleId: null });
-      expect(boom.message).toEqual('id of 123 not found');
+    test('returns a normal error if it is some non boom object that has a statusCode', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformBulkError('rule-1', error);
+      const expected: BulkError = {
+        rule_id: 'rule-1',
+        error: { message: 'some message', status_code: 403 },
+      };
+      expect(transformed).toEqual(expected);
     });
 
-    test('outputs message about ruleId not being found if only ruleId is defined and id is undefined', () => {
-      const boom = getIdError({ id: undefined, ruleId: 'rule-id-123' });
-      expect(boom.message).toEqual('rule_id of rule-id-123 not found');
+    test('returns a 500 if the status code is not set', () => {
+      const error: Error & { statusCode?: number } = {
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformBulkError('rule-1', error);
+      const expected: BulkError = {
+        rule_id: 'rule-1',
+        error: { message: 'some message', status_code: 500 },
+      };
+      expect(transformed).toEqual(expected);
     });
 
-    test('outputs message about ruleId not being found if only ruleId is defined and id is null', () => {
-      const boom = getIdError({ id: null, ruleId: 'rule-id-123' });
-      expect(boom.message).toEqual('rule_id of rule-id-123 not found');
-    });
-
-    test('outputs message about both being not defined when both are undefined', () => {
-      const boom = getIdError({ id: undefined, ruleId: undefined });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
-    });
-
-    test('outputs message about both being not defined when both are null', () => {
-      const boom = getIdError({ id: null, ruleId: null });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
-    });
-
-    test('outputs message about both being not defined when id is null and ruleId is undefined', () => {
-      const boom = getIdError({ id: null, ruleId: undefined });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
-    });
-
-    test('outputs message about both being not defined when id is undefined and ruleId is null', () => {
-      const boom = getIdError({ id: undefined, ruleId: null });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+    test('it detects a TypeError and returns a Boom status of 400', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformBulkError('rule-1', error);
+      const expected: BulkError = {
+        rule_id: 'rule-1',
+        error: { message: 'I have a type error', status_code: 400 },
+      };
+      expect(transformed).toEqual(expected);
     });
   });
 
-  describe('transformFindAlertsOrError', () => {
-    test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlertsOrError({ data: [] });
-      expect(output).toEqual({ data: [] });
+  describe('createSuccessObject', () => {
+    test('it should increment the existing success object by 1', () => {
+      const success = createSuccessObject({
+        success_count: 0,
+        success: true,
+        errors: [],
+      });
+      const expected: ImportSuccessError = {
+        success_count: 1,
+        success: true,
+        errors: [],
+      };
+      expect(success).toEqual(expected);
     });
 
-    test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformFindAlertsOrError({
-        data: [getResult()],
-      });
-      expect(output).toEqual({
-        data: [
-          {
-            created_by: 'elastic',
-            description: 'Detecting root and admin users',
-            enabled: true,
-            false_positives: [],
-            from: 'now-6m',
-            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-            index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-            interval: '5m',
-            rule_id: 'rule-1',
-            language: 'kuery',
-            max_signals: 100,
-            name: 'Detect Root/Admin Users',
-            query: 'user.name: root or user.name: admin',
-            references: ['http://www.example.com', 'https://ww.example.com'],
-            severity: 'high',
-            size: 1,
-            updated_by: 'elastic',
-            tags: [],
-            to: 'now',
-            type: 'query',
-          },
+    test('it should increment the existing success object by 1 and not touch the boolean or errors', () => {
+      const success = createSuccessObject({
+        success_count: 0,
+        success: false,
+        errors: [
+          { rule_id: 'rule-1', error: { status_code: 500, message: 'some sad sad sad error' } },
         ],
       });
-    });
-
-    test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformFindAlertsOrError({ data: [{ random: 1 }] });
-      expect((output as Boom).message).toEqual('Internal error transforming');
+      const expected: ImportSuccessError = {
+        success_count: 1,
+        success: false,
+        errors: [
+          { rule_id: 'rule-1', error: { status_code: 500, message: 'some sad sad sad error' } },
+        ],
+      };
+      expect(success).toEqual(expected);
     });
   });
 
-  describe('transformOrError', () => {
-    test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrError(getResult());
-      expect(output).toEqual({
-        created_by: 'elastic',
-        description: 'Detecting root and admin users',
-        enabled: true,
-        false_positives: [],
-        from: 'now-6m',
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-        interval: '5m',
-        rule_id: 'rule-1',
-        language: 'kuery',
-        max_signals: 100,
-        name: 'Detect Root/Admin Users',
-        query: 'user.name: root or user.name: admin',
-        references: ['http://www.example.com', 'https://ww.example.com'],
-        severity: 'high',
-        size: 1,
-        updated_by: 'elastic',
-        tags: [],
-        to: 'now',
-        type: 'query',
+  describe('createImportErrorObject', () => {
+    test('it creates an error message and does not increment the success count', () => {
+      const error = createImportErrorObject({
+        ruleId: 'some-rule-id',
+        statusCode: 400,
+        message: 'some-message',
+        existingImportSuccessError: {
+          success_count: 1,
+          success: true,
+          errors: [],
+        },
       });
+      const expected: ImportSuccessError = {
+        success_count: 1,
+        success: false,
+        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
+      };
+      expect(error).toEqual(expected);
     });
 
-    test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformOrError({ data: [{ random: 1 }] });
-      expect((output as Boom).message).toEqual('Internal error transforming');
+    test('appends a second error message and does not increment the success count', () => {
+      const error = createImportErrorObject({
+        ruleId: 'some-rule-id',
+        statusCode: 400,
+        message: 'some-message',
+        existingImportSuccessError: {
+          success_count: 1,
+          success: false,
+          errors: [
+            { rule_id: 'rule-1', error: { status_code: 500, message: 'some sad sad sad error' } },
+          ],
+        },
+      });
+      const expected: ImportSuccessError = {
+        success_count: 1,
+        success: false,
+        errors: [
+          { rule_id: 'rule-1', error: { status_code: 500, message: 'some sad sad sad error' } },
+          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
+        ],
+      };
+      expect(error).toEqual(expected);
+    });
+  });
+
+  describe('transformImportError', () => {
+    test('returns transformed object if it is a boom object', () => {
+      const boom = new Boom('some boom message', { statusCode: 400 });
+      const transformed = transformImportError('rule-1', boom, {
+        success_count: 1,
+        success: false,
+        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
+      });
+      const expected: ImportSuccessError = {
+        success_count: 1,
+        success: false,
+        errors: [
+          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
+          { rule_id: 'rule-1', error: { status_code: 400, message: 'some boom message' } },
+        ],
+      };
+      expect(transformed).toEqual(expected);
+    });
+
+    test('returns a normal error if it is some non boom object that has a statusCode', () => {
+      const error: Error & { statusCode?: number } = {
+        statusCode: 403,
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformImportError('rule-1', error, {
+        success_count: 1,
+        success: false,
+        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
+      });
+      const expected: ImportSuccessError = {
+        success_count: 1,
+        success: false,
+        errors: [
+          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
+          { rule_id: 'rule-1', error: { status_code: 403, message: 'some message' } },
+        ],
+      };
+      expect(transformed).toEqual(expected);
+    });
+
+    test('returns a 500 if the status code is not set', () => {
+      const error: Error & { statusCode?: number } = {
+        name: 'some name',
+        message: 'some message',
+      };
+      const transformed = transformImportError('rule-1', error, {
+        success_count: 1,
+        success: false,
+        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
+      });
+      const expected: ImportSuccessError = {
+        success_count: 1,
+        success: false,
+        errors: [
+          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
+          { rule_id: 'rule-1', error: { status_code: 500, message: 'some message' } },
+        ],
+      };
+      expect(transformed).toEqual(expected);
+    });
+
+    test('it detects a TypeError and returns a Boom status of 400', () => {
+      const error: TypeError = new TypeError('I have a type error');
+      const transformed = transformImportError('rule-1', error, {
+        success_count: 1,
+        success: false,
+        errors: [{ rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } }],
+      });
+      const expected: ImportSuccessError = {
+        success_count: 1,
+        success: false,
+        errors: [
+          { rule_id: 'some-rule-id', error: { status_code: 400, message: 'some-message' } },
+          { rule_id: 'rule-1', error: { status_code: 400, message: 'I have a type error' } },
+        ],
+      };
+      expect(transformed).toEqual(expected);
     });
   });
 });

@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 import overviewFixture from './fixtures/overview';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('overview', function () {
+  describe('overview', function() {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 
@@ -19,7 +19,7 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster-green-gold';
       const timeRange = {
         min: '2017-08-23T21:29:35Z',
-        max: '2017-08-23T21:47:25Z'
+        max: '2017-08-23T21:47:25Z',
       };
       const codePaths = ['all'];
 

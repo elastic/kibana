@@ -4,22 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApmIndicesConfig, ScopedSavedObjectsClient } from './get_apm_indices';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID
 } from '../../../../common/apm_saved_object_constants';
+import { ApmIndicesConfig } from './get_apm_indices';
+import { APMRequestHandlerContext } from '../../../routes/typings';
 
 export async function saveApmIndices(
-  savedObjectsClient: ScopedSavedObjectsClient,
-  apmIndicesSavedObject: Partial<ApmIndicesConfig>
+  context: APMRequestHandlerContext,
+  apmIndices: Partial<ApmIndicesConfig>
 ) {
-  return await savedObjectsClient.create(
+  return await context.core.savedObjects.client.create(
     APM_INDICES_SAVED_OBJECT_TYPE,
-    apmIndicesSavedObject,
+    removeEmpty(apmIndices),
     {
       id: APM_INDICES_SAVED_OBJECT_ID,
       overwrite: true
     }
+  );
+}
+
+// remove empty/undefined values
+function removeEmpty(apmIndices: Partial<ApmIndicesConfig>) {
+  return Object.fromEntries(
+    Object.entries(apmIndices)
+      .map(([key, value]) => [key, value?.trim()])
+      .filter(([key, value]) => !!value)
   );
 }

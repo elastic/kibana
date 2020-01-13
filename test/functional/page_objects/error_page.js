@@ -28,7 +28,7 @@ export function ErrorPageProvider({ getPageObjects }) {
         JSON.stringify({
           statusCode: 403,
           error: 'Forbidden',
-          message: 'Forbidden'
+          message: 'Forbidden',
         })
       );
     }

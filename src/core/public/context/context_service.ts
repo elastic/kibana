@@ -47,7 +47,7 @@ export class ContextService {
  * export interface VizRenderContext {
  *   core: {
  *     i18n: I18nStart;
- *     uiSettings: UISettingsClientContract;
+ *     uiSettings: IUiSettingsClient;
  *   }
  *   [contextName: string]: unknown;
  * }

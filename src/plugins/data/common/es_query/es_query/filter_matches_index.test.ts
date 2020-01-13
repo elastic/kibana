@@ -31,9 +31,8 @@ describe('filterMatchesIndex', () => {
 
   it('should return true if no index pattern is passed', () => {
     const filter = { meta: { index: 'foo', key: 'bar' } } as Filter;
-    const indexPattern = null;
 
-    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
+    expect(filterMatchesIndex(filter, undefined)).toBe(true);
   });
 
   it('should return true if the filter key matches a field name', () => {
@@ -48,5 +47,12 @@ describe('filterMatchesIndex', () => {
     const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
 
     expect(filterMatchesIndex(filter, indexPattern)).toBe(false);
+  });
+
+  it('should return true if the filter has meta without a key', () => {
+    const filter = { meta: { index: 'foo' } } as Filter;
+    const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
   });
 });

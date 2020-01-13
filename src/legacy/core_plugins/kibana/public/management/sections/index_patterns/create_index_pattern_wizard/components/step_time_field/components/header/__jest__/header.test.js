@@ -23,11 +23,7 @@ import { shallow } from 'enzyme';
 
 describe('Header', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <Header
-        indexPattern="ki*"
-      />
-    );
+    const component = shallow(<Header indexPattern="ki*" />);
 
     expect(component).toMatchSnapshot();
   });

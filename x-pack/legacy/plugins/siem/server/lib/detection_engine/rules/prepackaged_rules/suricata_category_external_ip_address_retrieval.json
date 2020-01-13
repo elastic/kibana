@@ -1,0 +1,17 @@
+{
+  "rule_id": "c7df9ecf-d6be-4ef8-9871-cb317dfff0b4",
+  "risk_score": 50,
+  "description": "Suricata Category - External IP Address Retrieval",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - External IP Address Retrieval",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Device Retrieving External IP Address Detected\" or rule.category: \"Device Retrieving External IP Address Detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

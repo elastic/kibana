@@ -19,81 +19,47 @@
 
 import { Server } from 'hapi';
 import KbnServer from '../kbn_server';
-import { mockRegisterCapabilitiesRoute } from './capabilities_mixin.test.mocks';
 
 import { capabilitiesMixin } from './capabilities_mixin';
 
 describe('capabilitiesMixin', () => {
+  let registerMock: jest.Mock;
+
   const getKbnServer = (pluginSpecs: any[] = []) => {
-    return {
+    return ({
       afterPluginsInit: (callback: () => void) => callback(),
       pluginSpecs,
-    } as KbnServer;
+      newPlatform: {
+        setup: {
+          core: {
+            capabilities: {
+              registerProvider: registerMock,
+            },
+          },
+        },
+      },
+    } as unknown) as KbnServer;
   };
 
   let server: Server;
   beforeEach(() => {
     server = new Server();
+    server.getUiNavLinks = () => [];
+    registerMock = jest.fn();
   });
 
-  afterEach(() => {
-    mockRegisterCapabilitiesRoute.mockClear();
-  });
+  it('calls capabilities#registerCapabilitiesProvider for each legacy plugin specs', async () => {
+    const getPluginSpec = (provider: () => any) => ({
+      getUiCapabilitiesProvider: () => provider,
+    });
 
-  it('calls registerCapabilitiesRoute with merged uiCapabilitiesProviers', async () => {
-    const kbnServer = getKbnServer([
-      {
-        getUiCapabilitiesProvider: () => () => ({
-          app1: { read: true },
-          management: { section1: { feature1: true } },
-        }),
-      },
-      {
-        getUiCapabilitiesProvider: () => () => ({
-          app2: { write: true },
-          catalogue: { feature3: true },
-          management: { section2: { feature2: true } },
-        }),
-      },
-    ]);
-
+    const capaA = { catalogue: { A: true } };
+    const capaB = { catalogue: { B: true } };
+    const kbnServer = getKbnServer([getPluginSpec(() => capaA), getPluginSpec(() => capaB)]);
     await capabilitiesMixin(kbnServer, server);
 
-    expect(mockRegisterCapabilitiesRoute).toHaveBeenCalledWith(
-      server,
-      {
-        app1: { read: true },
-        app2: { write: true },
-        catalogue: { feature3: true },
-        management: {
-          section1: { feature1: true },
-          section2: { feature2: true },
-        },
-        navLinks: {},
-      },
-      []
-    );
-  });
-
-  it('exposes server#registerCapabilitiesModifier for providing modifiers to the route', async () => {
-    const kbnServer = getKbnServer();
-    await capabilitiesMixin(kbnServer, server);
-    const mockModifier1 = jest.fn();
-    const mockModifier2 = jest.fn();
-    server.registerCapabilitiesModifier(mockModifier1);
-    server.registerCapabilitiesModifier(mockModifier2);
-
-    expect(mockRegisterCapabilitiesRoute.mock.calls[0][2]).toEqual([mockModifier1, mockModifier2]);
-  });
-
-  it('exposes request#getCapabilities for retrieving legacy capabilities', async () => {
-    const kbnServer = getKbnServer();
-    jest.spyOn(server, 'decorate');
-    await capabilitiesMixin(kbnServer, server);
-    expect(server.decorate).toHaveBeenCalledWith(
-      'request',
-      'getCapabilities',
-      expect.any(Function)
-    );
+    expect(registerMock).toHaveBeenCalledTimes(2);
+    expect(registerMock.mock.calls[0][0]()).toEqual(capaA);
+    expect(registerMock.mock.calls[1][0]()).toEqual(capaB);
   });
 });

@@ -17,8 +17,10 @@
  * under the License.
  */
 
-export { HomePluginSetup, HomePluginStart } from './plugin';
+export { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
 export { TutorialProvider } from './services';
-import { HomePlugin } from './plugin';
+export { SampleDatasetProvider, SampleDataRegistrySetup } from './services';
+import { PluginInitializerContext } from 'src/core/server';
+import { HomeServerPlugin } from './plugin';
 
-export const plugin = () => new HomePlugin();
+export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);

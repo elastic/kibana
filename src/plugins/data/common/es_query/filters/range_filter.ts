@@ -63,18 +63,22 @@ export type RangeFilterMeta = FilterMeta & {
   formattedValue?: string;
 };
 
-export type RangeFilter = Filter & {
-  meta: RangeFilterMeta;
-  script?: {
-    script: {
-      params: any;
-      lang: string;
-      source: any;
-    };
-  };
-  match_all?: any;
+export interface EsRangeFilter {
   range: { [key: string]: RangeFilterParams };
-};
+}
+
+export type RangeFilter = Filter &
+  EsRangeFilter & {
+    meta: RangeFilterMeta;
+    script?: {
+      script: {
+        params: any;
+        lang: string;
+        source: any;
+      };
+    };
+    match_all?: any;
+  };
 
 export const isRangeFilter = (filter: any): filter is RangeFilter => filter && filter.range;
 
@@ -82,6 +86,10 @@ export const isScriptedRangeFilter = (filter: any): filter is RangeFilter => {
   const params: RangeFilterParams = get(filter, 'script.script.params', {});
 
   return hasRangeKeys(params);
+};
+
+export const getRangeFilterField = (filter: RangeFilter) => {
+  return filter.range && Object.keys(filter.range)[0];
 };
 
 const formatValue = (field: IFieldType, params: any[]) =>

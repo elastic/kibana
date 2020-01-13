@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AppStateClass } from 'ui/state_management/app_state';
+import { AppStateClass } from '../legacy_imports';
 
 /**
  * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.

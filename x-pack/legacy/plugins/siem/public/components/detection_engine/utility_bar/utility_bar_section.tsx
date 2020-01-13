@@ -15,4 +15,5 @@ export interface UtilityBarSectionProps {
 export const UtilityBarSection = React.memo<UtilityBarSectionProps>(({ children }) => (
   <BarSection>{children}</BarSection>
 ));
+
 UtilityBarSection.displayName = 'UtilityBarSection';

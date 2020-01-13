@@ -30,7 +30,7 @@ function mapDispatchToProps(dispatch) {
     },
     openSetView: () => {
       dispatch(openSetView());
-    }
+    },
   };
 }
 

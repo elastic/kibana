@@ -6,44 +6,25 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
-import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
+
 import { LensUsage, LensTelemetryState } from './types';
 
 export function registerLensUsageCollector(
-  core: CoreSetup,
-  plugins: {
-    savedObjects: SavedObjectsLegacyService;
-    usage: {
-      collectorSet: {
-        makeUsageCollector: (options: unknown) => unknown;
-        register: (options: unknown) => unknown;
-      };
-    };
-    config: KibanaConfig;
-    server: Server;
-  }
+  usageCollection: UsageCollectionSetup,
+  taskManager: Promise<TaskManagerStartContract>
 ) {
   let isCollectorReady = false;
-  async function determineIfTaskManagerIsReady() {
-    let isReady = false;
-    try {
-      isReady = await isTaskManagerReady(plugins.server);
-    } catch (err) {} // eslint-disable-line
-
-    if (isReady) {
-      isCollectorReady = true;
-    } else {
-      setTimeout(determineIfTaskManagerIsReady, 500);
-    }
-  }
-  determineIfTaskManagerIsReady();
-
-  const lensUsageCollector = plugins.usage.collectorSet.makeUsageCollector({
+  taskManager.then(() => {
+    // mark lensUsageCollector as ready to collect when the TaskManager is ready
+    isCollectorReady = true;
+  });
+  const lensUsageCollector = usageCollection.makeUsageCollector({
     type: 'lens',
     fetch: async (): Promise<LensUsage> => {
       try {
-        const docs = await getLatestTaskState(plugins.server);
+        const docs = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
         const state: LensTelemetryState = get(docs, '[0].state');
 
@@ -75,7 +56,8 @@ export function registerLensUsageCollector(
     },
     isReady: () => isCollectorReady,
   });
-  plugins.usage.collectorSet.register(lensUsageCollector);
+
+  usageCollection.registerCollector(lensUsageCollector);
 }
 
 function addEvents(prevEvents: Record<string, number>, newEvents: Record<string, number>) {
@@ -84,17 +66,7 @@ function addEvents(prevEvents: Record<string, number>, newEvents: Record<string,
   });
 }
 
-async function isTaskManagerReady(server: Server) {
-  return (await getLatestTaskState(server)) !== null;
-}
-
-async function getLatestTaskState(server: Server) {
-  const taskManager = server.plugins.task_manager;
-
-  if (!taskManager) {
-    return null;
-  }
-
+async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   try {
     const result = await taskManager.fetch({
       query: { bool: { filter: { term: { _id: `task:Lens-lens_telemetry` } } } },

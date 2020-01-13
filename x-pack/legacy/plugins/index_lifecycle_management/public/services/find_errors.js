@@ -6,7 +6,7 @@
 
 export const findFirstError = (object, topLevel = true) => {
   let firstError;
-  const keys = topLevel ? [ 'policyName', 'hot', 'warm', 'cold', 'delete'] : Object.keys(object);
+  const keys = topLevel ? ['policyName', 'hot', 'warm', 'cold', 'delete'] : Object.keys(object);
   for (const key of keys) {
     const value = object[key];
     if (Array.isArray(value) && value.length > 0) {

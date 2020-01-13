@@ -36,28 +36,16 @@ import { EditSettingsJson } from './edit_settings_json';
 
 const tabToHumanizedMap = {
   [TAB_SUMMARY]: (
-    <FormattedMessage
-      id="xpack.idxMgmt.detailPanel.tabSummaryLabel"
-      defaultMessage="Summary"
-    />
+    <FormattedMessage id="xpack.idxMgmt.detailPanel.tabSummaryLabel" defaultMessage="Summary" />
   ),
   [TAB_SETTINGS]: (
-    <FormattedMessage
-      id="xpack.idxMgmt.detailPanel.tabSettingsLabel"
-      defaultMessage="Settings"
-    />
+    <FormattedMessage id="xpack.idxMgmt.detailPanel.tabSettingsLabel" defaultMessage="Settings" />
   ),
   [TAB_MAPPING]: (
-    <FormattedMessage
-      id="xpack.idxMgmt.detailPanel.tabMappingLabel"
-      defaultMessage="Mapping"
-    />
+    <FormattedMessage id="xpack.idxMgmt.detailPanel.tabMappingLabel" defaultMessage="Mapping" />
   ),
   [TAB_STATS]: (
-    <FormattedMessage
-      id="xpack.idxMgmt.detailPanel.tabStatsLabel"
-      defaultMessage="Stats"
-    />
+    <FormattedMessage id="xpack.idxMgmt.detailPanel.tabStatsLabel" defaultMessage="Stats" />
   ),
   [TAB_EDIT_SETTINGS]: (
     <FormattedMessage
@@ -67,13 +55,7 @@ const tabToHumanizedMap = {
   ),
 };
 
-const tabs = [
-  TAB_SUMMARY,
-  TAB_SETTINGS,
-  TAB_MAPPING,
-  TAB_STATS,
-  TAB_EDIT_SETTINGS,
-];
+const tabs = [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_STATS, TAB_EDIT_SETTINGS];
 
 export class DetailPanel extends Component {
   renderTabs() {
@@ -168,9 +150,12 @@ export class DetailPanel extends Component {
       >
         <EuiFlyoutHeader>
           <EuiTitle id="indexDetailsFlyoutTitle">
-            <h2>{indexName}{renderBadges(index)}</h2>
+            <h2>
+              {indexName}
+              {renderBadges(index)}
+            </h2>
           </EuiTitle>
-          {index ? <EuiTabs>{this.renderTabs()}</EuiTabs> : null }
+          {index ? <EuiTabs>{this.renderTabs()}</EuiTabs> : null}
         </EuiFlyoutHeader>
         {content}
       </EuiFlyout>

@@ -4,33 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useAvgDurationByCountry } from '../../../../../hooks/useAvgDurationByCountry';
+
 import { ChoroplethMap } from '../ChoroplethMap';
 
-export const DurationByCountryMap: React.SFC = () => {
+export const DurationByCountryMap: React.FC = () => {
   const { data } = useAvgDurationByCountry();
 
   return (
-    <EuiFlexGrid columns={1} gutterSize="s">
-      <EuiFlexItem>
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <span>
-              {i18n.translate(
-                'xpack.apm.metrics.durationByCountryMap.avgPageLoadByCountryLabel',
-                {
-                  defaultMessage:
-                    'Avg. page load duration distribution by country'
-                }
-              )}
-            </span>
-          </EuiTitle>
-          <ChoroplethMap items={data} />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGrid>
+    <>
+      {' '}
+      <EuiTitle size="xs">
+        <span>
+          {i18n.translate(
+            'xpack.apm.metrics.durationByCountryMap.avgPageLoadByCountryLabel',
+            {
+              defaultMessage: 'Avg. page load duration distribution by country'
+            }
+          )}
+        </span>
+      </EuiTitle>
+      <ChoroplethMap items={data} />
+    </>
   );
 };

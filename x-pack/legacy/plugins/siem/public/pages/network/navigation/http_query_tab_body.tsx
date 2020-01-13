@@ -17,18 +17,18 @@ import { HttpQueryTabBodyProps } from './types';
 const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 
 export const HttpQueryTabBody = ({
-  to,
+  endDate,
   filterQuery,
-  isInitializing,
-  from,
+  skip,
+  startDate,
   setQuery,
 }: HttpQueryTabBodyProps) => (
   <NetworkHttpQuery
-    endDate={to}
+    endDate={endDate}
     filterQuery={filterQuery}
-    skip={isInitializing}
+    skip={skip}
     sourceId="default"
-    startDate={from}
+    startDate={startDate}
     type={networkModel.NetworkType.page}
   >
     {({

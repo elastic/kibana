@@ -5,69 +5,163 @@
  */
 
 import Boom from 'boom';
-import { pickBy, identity } from 'lodash/fp';
-import { SignalAlertType, isAlertType, OutputSignalAlertRest, isAlertTypes } from '../alerts/types';
+import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
+import { ServerFacade, RequestFacade } from '../../../types';
 
-export const getIdError = ({
-  id,
+export const transformError = (err: Error & { statusCode?: number }) => {
+  if (Boom.isBoom(err)) {
+    return err;
+  } else {
+    if (err.statusCode != null) {
+      return new Boom(err.message, { statusCode: err.statusCode });
+    } else if (err instanceof TypeError) {
+      // allows us to throw type errors instead of booms in some conditions
+      // where we don't want to mingle Boom with the rest of the code
+      return new Boom(err.message, { statusCode: 400 });
+    } else {
+      // natively return the err and allow the regular framework
+      // to deal with the error when it is a non Boom
+      return err;
+    }
+  }
+};
+
+export interface BulkError {
+  rule_id: string;
+  error: {
+    status_code: number;
+    message: string;
+  };
+}
+
+export const createBulkErrorObject = ({
   ruleId,
+  statusCode,
+  message,
 }: {
-  id: string | undefined | null;
-  ruleId: string | undefined | null;
-}) => {
-  if (id != null) {
-    return new Boom(`id of ${id} not found`, { statusCode: 404 });
-  } else if (ruleId != null) {
-    return new Boom(`rule_id of ${ruleId} not found`, { statusCode: 404 });
+  ruleId: string;
+  statusCode: number;
+  message: string;
+}): BulkError => {
+  return {
+    rule_id: ruleId,
+    error: {
+      status_code: statusCode,
+      message,
+    },
+  };
+};
+
+export interface ImportSuccessError {
+  success: boolean;
+  success_count: number;
+  errors: BulkError[];
+}
+
+export const createSuccessObject = (
+  existingImportSuccessError: ImportSuccessError
+): ImportSuccessError => {
+  return {
+    success_count: existingImportSuccessError.success_count + 1,
+    success: existingImportSuccessError.success,
+    errors: existingImportSuccessError.errors,
+  };
+};
+
+export const createImportErrorObject = ({
+  ruleId,
+  statusCode,
+  message,
+  existingImportSuccessError,
+}: {
+  ruleId: string;
+  statusCode: number;
+  message: string;
+  existingImportSuccessError: ImportSuccessError;
+}): ImportSuccessError => {
+  return {
+    success: false,
+    errors: [
+      ...existingImportSuccessError.errors,
+      createBulkErrorObject({
+        ruleId,
+        statusCode,
+        message,
+      }),
+    ],
+    success_count: existingImportSuccessError.success_count,
+  };
+};
+
+export const transformImportError = (
+  ruleId: string,
+  err: Error & { statusCode?: number },
+  existingImportSuccessError: ImportSuccessError
+): ImportSuccessError => {
+  if (Boom.isBoom(err)) {
+    return createImportErrorObject({
+      ruleId,
+      statusCode: err.output.statusCode,
+      message: err.message,
+      existingImportSuccessError,
+    });
+  } else if (err instanceof TypeError) {
+    return createImportErrorObject({
+      ruleId,
+      statusCode: 400,
+      message: err.message,
+      existingImportSuccessError,
+    });
   } else {
-    return new Boom(`id or rule_id should have been defined`, { statusCode: 404 });
+    return createImportErrorObject({
+      ruleId,
+      statusCode: err.statusCode ?? 500,
+      message: err.message,
+      existingImportSuccessError,
+    });
   }
 };
 
-// Transforms the data but will remove any null or undefined it encounters and not include
-// those on the export
-export const transformAlertToSignal = (signal: SignalAlertType): Partial<OutputSignalAlertRest> => {
-  return pickBy<OutputSignalAlertRest>(identity, {
-    created_by: signal.createdBy,
-    description: signal.alertTypeParams.description,
-    enabled: signal.enabled,
-    false_positives: signal.alertTypeParams.falsePositives,
-    filter: signal.alertTypeParams.filter,
-    filters: signal.alertTypeParams.filters,
-    from: signal.alertTypeParams.from,
-    id: signal.id,
-    immutable: signal.alertTypeParams.immutable,
-    index: signal.alertTypeParams.index,
-    interval: signal.interval,
-    rule_id: signal.alertTypeParams.ruleId,
-    language: signal.alertTypeParams.language,
-    max_signals: signal.alertTypeParams.maxSignals,
-    name: signal.name,
-    query: signal.alertTypeParams.query,
-    references: signal.alertTypeParams.references,
-    saved_id: signal.alertTypeParams.savedId,
-    severity: signal.alertTypeParams.severity,
-    size: signal.alertTypeParams.size,
-    updated_by: signal.updatedBy,
-    tags: signal.alertTypeParams.tags,
-    to: signal.alertTypeParams.to,
-    type: signal.alertTypeParams.type,
-  });
-};
-
-export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
-  if (isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(signal => transformAlertToSignal(signal));
-    return findResults;
+export const transformBulkError = (
+  ruleId: string,
+  err: Error & { statusCode?: number }
+): BulkError => {
+  if (Boom.isBoom(err)) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: err.output.statusCode,
+      message: err.message,
+    });
+  } else if (err instanceof TypeError) {
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: 400,
+      message: err.message,
+    });
   } else {
-    return new Boom('Internal error transforming', { statusCode: 500 });
+    return createBulkErrorObject({
+      ruleId,
+      statusCode: err.statusCode ?? 500,
+      message: err.message,
+    });
   }
 };
 
-export const transformOrError = (signal: unknown): Partial<OutputSignalAlertRest> | Boom => {
-  if (isAlertType(signal)) {
-    return transformAlertToSignal(signal);
-  } else {
-    return new Boom('Internal error transforming', { statusCode: 500 });
-  }
+export const getIndex = (
+  request: RequestFacade | Omit<RequestFacade, 'query'>,
+  server: ServerFacade
+): string => {
+  const spaceId = server.plugins.spaces.getSpaceId(request);
+  const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+  return `${signalsIndex}-${spaceId}`;
+};
+
+export const callWithRequestFactory = (
+  request: RequestFacade | Omit<RequestFacade, 'query'>,
+  server: ServerFacade
+) => {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  return <T, U>(endpoint: string, params: T, options?: U) => {
+    return callWithRequest(request, endpoint, params, options);
+  };
 };

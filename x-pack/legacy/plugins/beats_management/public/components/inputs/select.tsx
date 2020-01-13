@@ -14,7 +14,7 @@ import { CommonProps } from '@elastic/eui/src/components/common';
 import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';
 
-const FixedSelect = EuiSelect as React.SFC<any>;
+const FixedSelect = EuiSelect as React.FC<any>;
 
 interface ComponentProps extends FormsyInputProps, CommonProps {
   instantValidation: boolean;
@@ -49,7 +49,7 @@ class FieldSelect extends Component<
     }
   }
 
-  public componentWillReceiveProps(nextProps: ComponentProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: ComponentProps) {
     if (nextProps.isFormSubmitted()) {
       this.showError();
     }

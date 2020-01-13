@@ -76,7 +76,7 @@ export class Field extends PureComponent {
     this.changeImageForm = null;
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const { unsavedValue } = this.state;
     const { type, value, defVal } = nextProps.setting;
     const editableValue = this.getEditableValue(type, value, defVal);
@@ -224,7 +224,7 @@ export class Field extends PureComponent {
     }
 
     const file = files[0];
-    const { maxSize } = this.props.setting.options;
+    const { maxSize } = this.props.setting.validation;
     try {
       const base64Image = await this.getImageAsBase64(file);
       const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
@@ -232,11 +232,11 @@ export class Field extends PureComponent {
         isInvalid,
         error: isInvalid
           ? i18n.translate('kbn.management.settings.field.imageTooLargeErrorMessage', {
-            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-            values: {
-              maxSizeDescription: maxSize.description,
-            },
-          })
+              defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
+              values: {
+                maxSizeDescription: maxSize.description,
+              },
+            })
           : null,
         changeImage: true,
         unsavedValue: base64Image,

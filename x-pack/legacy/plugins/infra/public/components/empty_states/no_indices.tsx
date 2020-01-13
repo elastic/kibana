@@ -16,7 +16,7 @@ interface NoIndicesProps {
   'data-test-subj'?: string;
 }
 
-export const NoIndices: React.SFC<NoIndicesProps> = ({ actions, message, title, ...rest }) => (
+export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => (
   <CenteredEmptyPrompt
     title={<h2>{title}</h2>}
     body={<p>{message}</p>}

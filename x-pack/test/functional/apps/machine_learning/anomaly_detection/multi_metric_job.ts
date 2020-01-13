@@ -75,6 +75,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
+      await ml.api.createCalendar('wizard-test-calendar');
     });
 
     after(async () => {
@@ -92,7 +93,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation loads the job type selection page', async () => {
-      await ml.jobSourceSelection.selectSource('farequote');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('farequote');
     });
 
     it('job creation loads the multi metric job wizard page', async () => {
@@ -168,6 +169,18 @@ export default function({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.addJobGroup(jobGroup);
       }
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroups);
+    });
+
+    it('job creation opens the additional settings section', async () => {
+      await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+    });
+
+    it('job creation adds a new custom url', async () => {
+      await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
+    });
+
+    it('job creation assigns calendars', async () => {
+      await ml.jobWizardCommon.addCalendar('wizard-test-calendar');
     });
 
     it('job creation opens the advanced section', async () => {
@@ -304,6 +317,18 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertJobGroupInputExists();
       await ml.jobWizardCommon.addJobGroup('clone');
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroupsClone);
+    });
+
+    it('job cloning opens the additional settings section', async () => {
+      await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+    });
+
+    it('job cloning persists custom urls', async () => {
+      await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
+    });
+
+    it('job cloning persists assigned calendars', async () => {
+      await ml.jobWizardCommon.assertCalendarsSelection(['wizard-test-calendar']);
     });
 
     it('job cloning opens the advanced section', async () => {

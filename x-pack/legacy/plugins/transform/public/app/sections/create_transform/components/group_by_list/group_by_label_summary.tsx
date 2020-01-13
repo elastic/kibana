@@ -15,7 +15,7 @@ interface Props {
   optionsDataId: string;
 }
 
-export const GroupByLabelSummary: React.SFC<Props> = ({ item, optionsDataId }) => {
+export const GroupByLabelSummary: React.FC<Props> = ({ item, optionsDataId }) => {
   let interval: string | undefined;
 
   if (isGroupByDateHistogram(item)) {

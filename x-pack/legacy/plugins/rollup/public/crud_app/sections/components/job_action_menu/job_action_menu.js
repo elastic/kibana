@@ -54,11 +54,7 @@ class JobActionMenuUi extends Component {
   }
 
   panels() {
-    const {
-      startJobs,
-      stopJobs,
-      cloneJob
-    } = this.props;
+    const { startJobs, stopJobs, cloneJob } = this.props;
 
     const isSingleSelection = this.isSingleSelection() ? 1 : 0;
 
@@ -135,13 +131,13 @@ class JobActionMenuUi extends Component {
 
   onButtonClick = () => {
     this.setState(prevState => ({
-      isPopoverOpen: !prevState.isPopoverOpen
+      isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
 
   closePopover = () => {
     this.setState({
-      isPopoverOpen: false
+      isPopoverOpen: false,
     });
   };
 
@@ -181,10 +177,7 @@ class JobActionMenuUi extends Component {
       return null;
     }
 
-    const {
-      deleteJobs,
-      jobs,
-    } = this.props;
+    const { deleteJobs, jobs } = this.props;
 
     const onConfirmDelete = () => {
       this.closePopover();

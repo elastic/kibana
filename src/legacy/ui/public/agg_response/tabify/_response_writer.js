@@ -29,11 +29,10 @@ import { tabifyGetColumns } from './_get_columns';
  * @param {boolean} partialRows - setting to true will not remove rows with missing values
  * @param {Object} timeRange - time range object, if provided
  */
-function TabbedAggResponseWriter(aggs, {
-  metricsAtAllLevels = false,
-  partialRows = false,
-  timeRange
-} = {}) {
+function TabbedAggResponseWriter(
+  aggs,
+  { metricsAtAllLevels = false, partialRows = false, timeRange } = {}
+) {
   // Private
   this._removePartialRows = !partialRows;
 
@@ -56,14 +55,14 @@ function TabbedAggResponseWriter(aggs, {
   }
 }
 
-TabbedAggResponseWriter.prototype.isPartialRow = function (row) {
-  return !this.columns.map(column => row.hasOwnProperty(column.id)).every(c => (c === true));
+TabbedAggResponseWriter.prototype.isPartialRow = function(row) {
+  return !this.columns.map(column => row.hasOwnProperty(column.id)).every(c => c === true);
 };
 
 /**
  * Create a new row by reading the row buffer and bucketBuffer
  */
-TabbedAggResponseWriter.prototype.row = function () {
+TabbedAggResponseWriter.prototype.row = function() {
   this.bucketBuffer.forEach(bucket => {
     this.rowBuffer[bucket.id] = bucket.value;
   });
@@ -72,7 +71,10 @@ TabbedAggResponseWriter.prototype.row = function () {
     this.rowBuffer[metric.id] = metric.value;
   });
 
-  if (!toArray(this.rowBuffer).length || (this._removePartialRows && this.isPartialRow(this.rowBuffer))) {
+  if (
+    !toArray(this.rowBuffer).length ||
+    (this._removePartialRows && this.isPartialRow(this.rowBuffer))
+  ) {
     return;
   }
 
@@ -85,10 +87,10 @@ TabbedAggResponseWriter.prototype.row = function () {
  *
  * @return {object} - the final table
  */
-TabbedAggResponseWriter.prototype.response = function () {
+TabbedAggResponseWriter.prototype.response = function() {
   return {
     columns: this.columns,
-    rows: this.rows
+    rows: this.rows,
   };
 };
 
