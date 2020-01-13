@@ -76,28 +76,32 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiIcon type="document" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardNumber.documentsCountDescription"
-          defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-          values={{
-            count,
-            docsPercent,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="document" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardNumber.documentsCountDescription"
+            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
+            values={{
+              count,
+              docsPercent,
+            }}
+          />
+        </EuiText>
       </div>
       <EuiSpacer size="xs" />
       <div>
-        <EuiIcon type="database" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardNumber.distinctCountDescription"
-          defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
-          values={{
-            cardinality,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="database" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardNumber.distinctCountDescription"
+            defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
+            values={{
+              cardinality,
+            }}
+          />
+        </EuiText>
       </div>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xs" justifyContent="center">
@@ -152,7 +156,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         isFullWidth={true}
         buttonSize="compressed"
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       {detailsMode === DETAILS_MODE.DISTRIBUTION && (
         <Fragment>
           <EuiFlexGroup justifyContent="spaceAround" gutterSize="xs">

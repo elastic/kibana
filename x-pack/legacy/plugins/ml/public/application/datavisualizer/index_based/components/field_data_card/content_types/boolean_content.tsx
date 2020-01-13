@@ -36,26 +36,32 @@ export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiIcon type="document" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardBoolean.documentsCountDescription"
-          defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-          values={{
-            count,
-            docsPercent,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="document" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardBoolean.documentsCountDescription"
+            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
+            values={{
+              count,
+              docsPercent,
+            }}
+          />
+        </EuiText>
       </div>
 
       <EuiSpacer size="m" />
 
       <div>
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
-          defaultMessage="values"
-        />
-        <EuiSpacer size="xs" />
+        <EuiText size="s">
+          <h6>
+            <FormattedMessage
+              id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
+              defaultMessage="Values"
+            />
+          </h6>
+        </EuiText>
+        <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false} style={{ width: 100 }} className="eui-textTruncate">
             <EuiText size="s" textAlign="right">
