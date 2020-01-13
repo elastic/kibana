@@ -140,6 +140,8 @@ function generateDLL(config) {
         filename: dllStyleFilename,
       }),
     ],
+    // Single runtime for the dll bundles which assures that common transient dependencies won't be evaluated twice.
+    // The module cache will be shared, even when module code may be duplicated across chunks.
     optimization: {
       runtimeChunk: {
         name: 'vendors_runtime',
@@ -188,7 +190,6 @@ function extendRawConfig(rawConfig) {
     ];
     return dllEntryObj;
   }, dllEntry);
-  // dllEntry[dllEntryName] = [`${dllOutputPath}/${dllEntryName}${dllEntryExt}`];
 
   // Export dll config map
   return {
