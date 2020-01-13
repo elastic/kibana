@@ -225,7 +225,7 @@ describe('utils', () => {
     test('it returns null if the interval is an invalid string such as "invalid"', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone(),
-        interval: 'invalid',
+        interval: 'invalid', // if not set to "x" where x is an interval such as 6m
         from: 'now-5m',
         to: 'now',
         now: nowDate.clone(),
@@ -237,7 +237,7 @@ describe('utils', () => {
       const gap = getGapBetweenRuns({
         previousStartedAt: nowDate.clone(),
         interval: '5m',
-        from: 'invalid',
+        from: 'invalid', // if not set to "now-x" where x is an interval such as 6m
         to: 'now',
         now: nowDate.clone(),
       });
@@ -249,7 +249,7 @@ describe('utils', () => {
         previousStartedAt: nowDate.clone(),
         interval: '5m',
         from: 'now-5m',
-        to: 'invalid',
+        to: 'invalid', // if not set to "now" this function returns null
         now: nowDate.clone(),
       });
       expect(gap).toBeNull();

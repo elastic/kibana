@@ -90,7 +90,7 @@ export const signalRulesAlertType = ({
       });
       if (gap != null && gap.asMilliseconds() > 0) {
         logger.warn(
-          `Signal signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`
+          `Signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`
         );
       }
       // set searchAfter page size to be the lesser of default page size or maxSignals.
