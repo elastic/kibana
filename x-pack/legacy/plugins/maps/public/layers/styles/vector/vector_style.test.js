@@ -102,6 +102,17 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
         },
         type: 'STATIC',
       },
+      labelBorderColor: {
+        options: {
+          color: '#FFFFFF',
+        },
+        type: 'STATIC',
+      },
+      labelBorderSize: {
+        options: {
+          size: 'SMALL',
+        },
+      },
       labelColor: {
         options: {
           color: '#000000',
