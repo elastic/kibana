@@ -15,6 +15,7 @@ import {
 import React from 'react';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
 export function removeRow(colorStops, index) {
   if (colorStops.length === 1) {
@@ -117,6 +118,13 @@ export function isColorInvalid(color) {
 
 export function isOrdinalStopInvalid(stop) {
   return stop === '' || isNaN(stop);
+}
+
+export function isCategoricalStopsInvalid(colorStops) {
+  const nonDefaults = colorStops.slice(1); //
+  const values = nonDefaults.map(stop => stop.stop);
+  const uniques = _.uniq(values);
+  return values.length !== uniques.length;
 }
 
 export function isOrdinalStopsInvalid(colorStops) {

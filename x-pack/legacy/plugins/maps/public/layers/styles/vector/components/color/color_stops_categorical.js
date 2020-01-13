@@ -8,7 +8,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiFieldText } from '@elastic/eui';
-import { addCategoricalRow, DEFAULT_CUSTOM_COLOR, DEFAULT_NEXT_COLOR } from './color_stops_utils';
+import {
+  addCategoricalRow,
+  isCategoricalStopsInvalid,
+  DEFAULT_CUSTOM_COLOR,
+  DEFAULT_NEXT_COLOR,
+} from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
 
@@ -23,8 +28,19 @@ export const ColorStopsCategorical = ({
     return value;
   };
 
-  const getStopError = () => {
-    return null;
+  const getStopError = (stop, index) => {
+    let count = 0;
+    for (let i = 1; i < colorStops.length; i++) {
+      if (colorStops[i].stop === stop && i !== index) {
+        count++;
+      }
+    }
+
+    return count
+      ? i18n.translate('xpack.maps.styles.colorStops.categoricalStop.noDupesWarningLabel', {
+          defaultMessage: 'Stops should have unique values',
+        })
+      : null;
   };
 
   const renderStopInput = (stop, onStopChange, index) => {
@@ -76,7 +92,7 @@ export const ColorStopsCategorical = ({
     <ColorStops
       onChange={onChange}
       colorStops={colorStops}
-      isStopsInvalid={() => false}
+      isStopsInvalid={isCategoricalStopsInvalid}
       sanitizeStopInput={sanitizeStopInput}
       getStopError={getStopError}
       renderStopInput={renderStopInput}
