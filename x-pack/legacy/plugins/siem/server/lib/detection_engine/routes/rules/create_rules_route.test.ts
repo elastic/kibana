@@ -28,7 +28,9 @@ describe('create_rules', () => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
     elasticsearch.getCluster = jest.fn().mockImplementation(() => ({
-      callWithRequest: jest.fn().mockImplementation(() => true),
+      callWithRequest: jest
+        .fn()
+        .mockImplementation((endpoint, params) => ({ _shards: { total: 1 } })),
     }));
 
     createRulesRoute(server);
