@@ -66,12 +66,14 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           });
         }
 
+        const hasEntries = entries.length > 0;
+
         return response.ok({
           body: logEntriesResponseRT.encode({
             data: {
               entries,
-              topCursor: entries[0].cursor,
-              bottomCursor: entries[entries.length - 1].cursor,
+              topCursor: hasEntries ? entries[0].cursor : null,
+              bottomCursor: hasEntries ? entries[entries.length - 1].cursor : null,
             },
           }),
         });

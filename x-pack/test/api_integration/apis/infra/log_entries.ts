@@ -182,7 +182,7 @@ export default function({ getService }: FtrProviderContext) {
                 sourceId: 'default',
                 startDate: EARLIEST_KEY_WITH_DATA.time,
                 endDate: KEY_WITHIN_DATA_RANGE.time,
-                after: firstPage.data.bottomCursor,
+                after: firstPage.data.bottomCursor!,
                 size: 10,
               })
             );
@@ -242,7 +242,7 @@ export default function({ getService }: FtrProviderContext) {
                 sourceId: 'default',
                 startDate: KEY_WITHIN_DATA_RANGE.time,
                 endDate: LATEST_KEY_WITH_DATA.time,
-                before: lastPage.data.topCursor,
+                before: lastPage.data.topCursor!,
                 size: 10,
               })
             );
@@ -302,6 +302,32 @@ export default function({ getService }: FtrProviderContext) {
           expect(entries).to.have.length(200);
           expect(firstEntry.cursor.time >= EARLIEST_KEY_WITH_DATA.time).to.be(true);
           expect(lastEntry.cursor.time <= LATEST_KEY_WITH_DATA.time).to.be(true);
+        });
+
+        it('Handles empty responses', async () => {
+          const startDate = Date.now() + 1000;
+          const endDate = Date.now() + 5000;
+
+          const { body } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startDate,
+                endDate,
+              })
+            )
+            .expect(200);
+
+          const logEntriesResponse = pipe(
+            logEntriesResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          expect(logEntriesResponse.data.entries).to.have.length(0);
+          expect(logEntriesResponse.data.topCursor).to.be(null);
+          expect(logEntriesResponse.data.bottomCursor).to.be(null);
         });
       });
     });

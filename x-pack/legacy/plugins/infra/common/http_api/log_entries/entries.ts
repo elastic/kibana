@@ -93,8 +93,8 @@ export type LogEntry = rt.TypeOf<typeof logEntryRT>;
 export const logEntriesResponseRT = rt.type({
   data: rt.type({
     entries: rt.array(logEntryRT),
-    topCursor: logEntriesCursorRT,
-    bottomCursor: logEntriesCursorRT,
+    topCursor: rt.union([logEntriesCursorRT, rt.null]),
+    bottomCursor: rt.union([logEntriesCursorRT, rt.null]),
   }),
 });
 
