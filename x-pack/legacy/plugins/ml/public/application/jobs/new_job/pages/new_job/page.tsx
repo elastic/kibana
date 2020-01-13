@@ -133,6 +133,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // auto set the time range if creating a new advanced job
     autoSetTimeRange = isAdvancedJobCreator(jobCreator);
     initCategorizationSettings();
+    if (isCategorizationJobCreator(jobCreator)) {
+      const { catFields } = newJobCapsService;
+      if (catFields.length === 1) {
+        jobCreator.categorizationFieldName = catFields[0].name;
+      }
+    }
   }
 
   if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
