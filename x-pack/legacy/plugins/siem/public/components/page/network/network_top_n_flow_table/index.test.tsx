@@ -52,7 +52,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
     });
 
     test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
@@ -77,7 +77,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('Connect(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
+      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
     });
   });
 

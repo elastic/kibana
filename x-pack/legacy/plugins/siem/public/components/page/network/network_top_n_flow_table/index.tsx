@@ -8,7 +8,6 @@ import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern } from 'src/plugins/data/public';
 
 import { networkActions } from '../../../../store/actions';
 import {
