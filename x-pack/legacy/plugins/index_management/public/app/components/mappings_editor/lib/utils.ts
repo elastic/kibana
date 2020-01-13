@@ -396,6 +396,29 @@ export const getAllDescendantAliases = (
   return aliasesIds;
 };
 
+/**
+ * Helper to retrieve a map of all the ancestors of a field
+ *
+ * @param fieldId The field id
+ * @param byId A map of all the fields by Id
+ */
+export const getFieldAncestors = (
+  fieldId: string,
+  byId: NormalizedFields['byId']
+): { [key: string]: boolean } => {
+  const ancestors: { [key: string]: boolean } = {};
+  const currentField = byId[fieldId];
+  let parent: NormalizedField | undefined =
+    currentField.parentId === undefined ? undefined : byId[currentField.parentId];
+
+  while (parent) {
+    ancestors[parent.id] = true;
+    parent = parent.parentId === undefined ? undefined : byId[parent.parentId];
+  }
+
+  return ancestors;
+};
+
 export const filterTypesForMultiField = <T extends string = string>(
   options: ComboBoxOption[]
 ): ComboBoxOption[] =>

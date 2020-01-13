@@ -25,10 +25,17 @@
   }
 }
 
-.mappingsEditor__fieldsListItem__field--selected {
+.mappingsEditor__fieldsListItem__field--highlighted {
   background-color: $euiColorLightestShade;
   &:hover {
     background-color: $euiColorLightestShade;
+  }
+}
+
+.mappingsEditor__fieldsListItem__field--selected {
+  background-color: $euiColorLightShade;
+  &:hover {
+    background-color: $euiColorLightShade;
   }
 }
 

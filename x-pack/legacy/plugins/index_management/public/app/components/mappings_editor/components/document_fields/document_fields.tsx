@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo, useCallback } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { useMappingsState, useDispatch } from '../../mappings_state';
 import { deNormalize } from '../../lib';
@@ -50,9 +50,28 @@ export const DocumentFields = React.memo(() => {
       <DocumentFieldsHeader searchValue={search.term} onSearchChange={onSearchChange} />
       <EuiSpacer size="m" />
       {search.term.trim() !== '' ? (
-        <SearchResult result={search.result} documentFieldsState={documentFields} />
+        <SearchResult
+          style={{ display: search.selected === null ? 'block' : 'none' }}
+          result={search.result}
+          documentFieldsState={documentFields}
+        />
       ) : (
         editor
+      )}
+      {search.selected !== null && (
+        <>
+          <EuiButton
+            onClick={() => {
+              dispatch({
+                type: 'search:setSelectedField',
+                value: null,
+              });
+            }}
+          >
+            Back to search
+          </EuiButton>
+          {editor}
+        </>
       )}
       {renderEditField()}
     </>

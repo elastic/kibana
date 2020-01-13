@@ -36,6 +36,13 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
     });
   };
 
+  const revealInEditor = () => {
+    dispatch({
+      type: 'search:setSelectedField',
+      value: field.id,
+    });
+  };
+
   const renderActionButtons = () => {
     if (!areActionButtonsVisible) {
       return null;
@@ -43,6 +50,13 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
 
     return (
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={revealInEditor} data-test-subj="revealInEditorButton">
+            {i18n.translate('xpack.idxMgmt.mappingsEditor.searchResult.revealInEditorButtonLabel', {
+              defaultMessage: 'Reveal in editor',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.searchResult.editFieldButtonLabel', {

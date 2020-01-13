@@ -16,12 +16,13 @@ import { SearchResultItem } from './search_result_item';
 interface Props {
   result: SearchResultType[];
   documentFieldsState: State['documentFields'];
+  style?: React.CSSProperties;
 }
 
 const ITEM_HEIGHT = 64;
 
 export const SearchResult = React.memo(
-  ({ result, documentFieldsState: { status, fieldToEdit } }: Props) => {
+  ({ result, documentFieldsState: { status, fieldToEdit }, style: virtualListStyle }: Props) => {
     const dispatch = useDispatch();
     const listHeight = Math.min(result.length * ITEM_HEIGHT, 600);
 
@@ -59,7 +60,7 @@ export const SearchResult = React.memo(
       />
     ) : (
       <VirtualList
-        style={{ overflowX: 'hidden' }}
+        style={{ overflowX: 'hidden', ...virtualListStyle }}
         width="100%"
         height={listHeight}
         itemCount={result.length}

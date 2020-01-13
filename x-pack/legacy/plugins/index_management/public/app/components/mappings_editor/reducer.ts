@@ -15,6 +15,7 @@ import {
   normalize,
   updateFieldsPathAfterFieldNameChange,
   searchFields,
+  getFieldAncestors,
 } from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
 
@@ -62,6 +63,7 @@ export interface State {
   };
   search: {
     term: string;
+    selected: string | null;
     result: SearchResult[];
   };
 }
@@ -80,7 +82,8 @@ export type Action =
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
   | { type: 'documentField.changeEditor'; value: FieldsEditor }
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
-  | { type: 'search:update'; value: string };
+  | { type: 'search:update'; value: string }
+  | { type: 'search:setSelectedField'; value: string | null };
 
 export type Dispatch = (action: Action) => void;
 
@@ -531,8 +534,34 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         search: {
+          selected: null,
           term: action.value,
           result: searchFields(action.value, state.fields.byId),
+        },
+      };
+    }
+    case 'search:setSelectedField': {
+      let updatedById = state.fields.byId;
+
+      if (action.value !== null) {
+        // Get all the ancestors of the field
+        updatedById = { ...state.fields.byId };
+        const ancestors = getFieldAncestors(action.value, updatedById);
+
+        // We update the expanded state of all the fields, leaving only the ancestors expanded.
+        Object.entries(updatedById).forEach(([id, field]) => {
+          field.isExpanded = Boolean(ancestors[id]);
+        });
+      }
+      return {
+        ...state,
+        fields: {
+          ...state.fields,
+          byId: updatedById,
+        },
+        search: {
+          ...state.search,
+          selected: action.value,
         },
       };
     }
