@@ -55,6 +55,7 @@ Array [
             },
             "terms": Object {
               "field": "service.name",
+              "size": 10000,
             },
           },
         },

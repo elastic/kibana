@@ -70,7 +70,8 @@ export function transactionGroupsFetcher(
   const servicesAggregation = {
     services: {
       terms: {
-        field: SERVICE_NAME
+        field: SERVICE_NAME,
+        size: 10000
       },
       aggs: transactionsAggregation
     }
