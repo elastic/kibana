@@ -146,8 +146,8 @@ exports[`EmptyState component does not render empty state with appropriate base 
                   body={
                     <p>
                       <FormattedMessage
-                        defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
-                        id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                        defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                        id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {
                             "configureHeartbeatLink": <ForwardRef
@@ -242,8 +242,8 @@ exports[`EmptyState component does not render empty state with appropriate base 
                           >
                             <p>
                               <FormattedMessage
-                                defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
-                                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                                id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
                                     "configureHeartbeatLink": <ForwardRef
@@ -278,7 +278,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                     </FormattedMessage>
                                   </a>
                                 </EuiLink>
-                                 to start collecting uptime data.
+                                 to start logging uptime data.
                               </FormattedMessage>
                             </p>
                           </div>
@@ -611,8 +611,8 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                   body={
                     <p>
                       <FormattedMessage
-                        defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
-                        id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                        defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                        id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
                         values={
                           Object {
                             "configureHeartbeatLink": <ForwardRef
@@ -707,8 +707,8 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                           >
                             <p>
                               <FormattedMessage
-                                defaultMessage="{configureHeartbeatLink} to start collecting uptime data."
-                                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+                                id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
                                 values={
                                   Object {
                                     "configureHeartbeatLink": <ForwardRef
@@ -743,7 +743,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                     </FormattedMessage>
                                   </a>
                                 </EuiLink>
-                                 to start collecting uptime data.
+                                 to start logging uptime data.
                               </FormattedMessage>
                             </p>
                           </div>
