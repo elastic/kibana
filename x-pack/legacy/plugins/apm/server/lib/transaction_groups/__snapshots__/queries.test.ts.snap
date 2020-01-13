@@ -44,9 +44,6 @@ Object {
             },
             "terms": Object {
               "field": "transaction.name",
-              "order": Object {
-                "sum": "desc",
-              },
               "size": "myIndex",
             },
           },
@@ -144,9 +141,6 @@ Object {
         },
         "terms": Object {
           "field": "transaction.name",
-          "order": Object {
-            "sum": "desc",
-          },
           "size": "myIndex",
         },
       },

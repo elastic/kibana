@@ -76,6 +76,6 @@ describe('transactionGroupsTransformer', () => {
       transactionGroupsTransformer({ response, start: 100, end: 20000 }).map(
         bucket => bucket.impact
       )
-    ).toEqual([0, 25, 100]);
+    ).toEqual([100, 25, 0]);
   });
 });

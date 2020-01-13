@@ -55,7 +55,6 @@ export function transactionGroupsFetcher(
     transactions: {
       terms: {
         ...projection.body.aggs.transactions.terms,
-        order: { sum: 'desc' as const },
         size: config['xpack.apm.ui.transactionGroupBucketSize']
       },
       aggs: {
