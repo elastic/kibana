@@ -5,6 +5,7 @@
  */
 
 import { pick } from 'lodash/fp';
+import { useLocation } from 'react-router-dom';
 
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
@@ -64,3 +65,5 @@ export const getStepsData = ({
 
   return { aboutRuleData, defineRuleData, scheduleRuleData };
 };
+
+export const useQuery = () => new URLSearchParams(useLocation().search);
