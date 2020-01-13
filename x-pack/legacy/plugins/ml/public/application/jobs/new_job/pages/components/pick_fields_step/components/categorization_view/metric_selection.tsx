@@ -6,6 +6,7 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -70,15 +71,20 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   async function loadFieldExamples() {
     if (categorizationFieldName !== null) {
       setLoadingData(true);
-      const {
-        valid,
-        examples,
-        sampleSize: tempSampleSize,
-      } = await jobCreator.loadCategorizationFieldExamples();
-      setFieldExamples(examples);
-      setExamplesValid(valid);
-      setLoadingData(false);
-      setSampleSize(tempSampleSize);
+      try {
+        const {
+          valid,
+          examples,
+          sampleSize: tempSampleSize,
+        } = await jobCreator.loadCategorizationFieldExamples();
+        setFieldExamples(examples);
+        setExamplesValid(valid);
+        setLoadingData(false);
+        setSampleSize(tempSampleSize);
+      } catch (error) {
+        setLoadingData(false);
+        mlMessageBarService.notify.error(error);
+      }
     } else {
       setFieldExamples(null);
       setExamplesValid(0);

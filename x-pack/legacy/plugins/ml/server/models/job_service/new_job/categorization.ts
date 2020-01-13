@@ -58,29 +58,31 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     });
     const examples: string[] = results.hits?.hits
       ?.map((doc: any) => doc._source[categorizationFieldName])
-      .filter((example: string | undefined) => example !== undefined);
+      .filter((example: string | null | undefined) => example !== undefined && example !== null);
 
-    const exampleChunks = chunk(examples, CHUNK_SIZE);
-    const tokensPerChunks = await Promise.all(exampleChunks.map(c => getTokens(c, analyzer)));
-    const tokensPerExample = tokensPerChunks.flat();
-    return examples.map((e, i) => ({ text: e, tokens: tokensPerExample[i] }));
+    async function loadTokens(chunkSize: number) {
+      const exampleChunks = chunk(examples, chunkSize);
+      const tokensPerChunks = await Promise.all(exampleChunks.map(c => getTokens(c, analyzer)));
+      const tokensPerExample = tokensPerChunks.flat();
+      return examples.map((e, i) => ({ text: e, tokens: tokensPerExample[i] }));
+    }
+    try {
+      return loadTokens(CHUNK_SIZE);
+    } catch (error) {
+      // if an error is thrown when loading the tokens, lower the chunk size by half and try again
+      // the error may have been caused by too many tokens being found.
+      // the _analyze endpoint has a maximum of 10000 tokens.
+      return loadTokens(CHUNK_SIZE / 2);
+    }
   }
 
   async function getTokens(examples: string[], analyzer?: any) {
-    let tokens: Token[] = [];
-    try {
-      const { tokens: tempTokens } = await callWithRequest('indices.analyze', {
-        body: {
-          ...getAnalyzer(analyzer),
-          text: examples,
-        },
-      });
-      tokens = tempTokens;
-    } catch (error) {
-      // fail silently, the tokens could not be loaded
-      // an empty list of tokens will be returned for each example
-      // console.error(error);
-    }
+    const { tokens }: { tokens: Token[] } = await callWithRequest('indices.analyze', {
+      body: {
+        ...getAnalyzer(analyzer),
+        text: examples,
+      },
+    });
 
     const lengths = examples.map(e => e.length);
     const sumLengths = lengths.map((s => (a: number) => (s += a))(0));
@@ -138,7 +140,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     const validExamples = sortedExamples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT);
     const sampleSize = sortedExamples.length;
 
-    const multiple = Math.floor(sampleSize / size); // TODO - change this to sortedExamples.length
+    const multiple = Math.floor(sampleSize / size) || sampleSize; // TODO - change this to sortedExamples.length
     const filteredExamples = [];
     let i = 0;
     while (filteredExamples.length < size && i < sortedExamples.length) {
