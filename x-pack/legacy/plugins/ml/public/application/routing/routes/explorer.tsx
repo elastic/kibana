@@ -173,12 +173,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     loadExplorerData(loadExplorerDataConfig);
   }, [JSON.stringify(loadExplorerDataConfig)]);
 
-  if (
-    explorerState === undefined ||
-    jobIds.length === 0 ||
-    refresh === undefined ||
-    showCharts === undefined
-  ) {
+  if (explorerState === undefined || refresh === undefined || showCharts === undefined) {
     return null;
   }
 

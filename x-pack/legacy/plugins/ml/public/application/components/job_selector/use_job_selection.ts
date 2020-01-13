@@ -65,24 +65,22 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[], dateFormatTz: string
 
   useEffect(() => {
     // if there are no valid ids, warn and then select the first job
-    if (validIds.length === 0) {
+    if (validIds.length === 0 && jobs.length > 0) {
       toastNotifications.addWarning(
         i18n.translate('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {
           defaultMessage: 'No jobs selected, auto selecting first job',
         })
       );
 
-      if (jobs.length > 0) {
-        const mlGlobalState = globalState?.ml || {};
-        mlGlobalState.jobIds = [jobs[0].job_id];
+      const mlGlobalState = globalState?.ml || {};
+      mlGlobalState.jobIds = [jobs[0].job_id];
 
-        const time = getTimeRangeFromSelection(jobs, mlGlobalState.jobIds);
+      const time = getTimeRangeFromSelection(jobs, mlGlobalState.jobIds);
 
-        setGlobalState({
-          ...{ ml: mlGlobalState },
-          ...(time !== undefined ? { time } : {}),
-        });
-      }
+      setGlobalState({
+        ...{ ml: mlGlobalState },
+        ...(time !== undefined ? { time } : {}),
+      });
     }
   }, [jobs, validIds]);
 

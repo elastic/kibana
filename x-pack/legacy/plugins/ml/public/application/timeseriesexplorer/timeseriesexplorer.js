@@ -1215,6 +1215,16 @@ export class TimeSeriesExplorer extends React.Component {
       timeseriesOnly: true,
     };
 
+    const jobs = createTimeSeriesJobData(mlJobService.jobs);
+
+    if (jobs.length === 0) {
+      return (
+        <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
+          <TimeseriesexplorerNoJobsFound />
+        </TimeSeriesExplorerPage>
+      );
+    }
+
     if (
       selectedJobIds === undefined ||
       selectedJobIds.length > 1 ||
@@ -1228,15 +1238,6 @@ export class TimeSeriesExplorer extends React.Component {
 
     const selectedJob = mlJobService.getJob(selectedJobIds[0]);
     const entityControls = this.getControlsForDetector();
-    const jobs = createTimeSeriesJobData(mlJobService.jobs);
-
-    if (jobs.length === 0) {
-      return (
-        <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
-          <TimeseriesexplorerNoJobsFound />
-        </TimeSeriesExplorerPage>
-      );
-    }
 
     const fieldNamesWithEmptyValues = entityControls
       .filter(({ fieldValue }) => !fieldValue)
