@@ -32,6 +32,7 @@ import { image } from './image';
 import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
+import { mapCenter } from './map_center';
 import { mapColumn } from './mapColumn';
 import { math } from './math';
 import { metric } from './metric';
@@ -58,6 +59,7 @@ import { staticColumn } from './staticColumn';
 import { string } from './string';
 import { table } from './table';
 import { tail } from './tail';
+import { timerange } from './time_range';
 import { timefilter } from './timefilter';
 import { timefilterControl } from './timefilterControl';
 import { switchFn } from './switch';
@@ -92,6 +94,7 @@ export const functions = [
   lt,
   lte,
   joinRows,
+  mapCenter,
   mapColumn,
   math,
   metric,
@@ -120,6 +123,7 @@ export const functions = [
   tail,
   timefilter,
   timefilterControl,
+  timerange,
   switchFn,
   caseFn,
 ];
