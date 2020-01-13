@@ -11,7 +11,7 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import uuid from 'uuid';
@@ -60,7 +60,11 @@ const initialState: State = {
  *   * Delete
  *   * Import/Export
  */
-export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importCompleteToggle => {
+export const AllRules = React.memo<{
+  hasNoPermissions: boolean;
+  importCompleteToggle: boolean;
+  loading: boolean;
+}>(({ hasNoPermissions, importCompleteToggle, loading }) => {
   const [
     {
       exportPayload,
@@ -110,6 +114,15 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
       },
     });
   }, [rulesData]);
+
+  const euiBasicTableSelectionProps = useMemo(
+    () => ({
+      selectable: (item: TableData) => !item.isLoading,
+      onSelectionChange: (selected: TableData[]) =>
+        dispatch({ type: 'setSelected', selectedItems: selected }),
+    }),
+    []
+  );
 
   return (
     <>
@@ -161,13 +174,15 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
 
                 <UtilityBarGroup>
                   <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
-                  <UtilityBarAction
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverContent={getBatchItemsPopoverContent}
-                  >
-                    {i18n.BATCH_ACTIONS}
-                  </UtilityBarAction>
+                  {!hasNoPermissions && (
+                    <UtilityBarAction
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverContent={getBatchItemsPopoverContent}
+                    >
+                      {i18n.BATCH_ACTIONS}
+                    </UtilityBarAction>
+                  )}
                   <UtilityBarAction
                     iconSide="right"
                     iconType="refresh"
@@ -180,8 +195,8 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
             </UtilityBar>
 
             <EuiBasicTable
-              columns={getColumns(dispatch, history)}
-              isSelectable
+              columns={getColumns(dispatch, history, hasNoPermissions)}
+              isSelectable={!hasNoPermissions ?? false}
               itemId="rule_id"
               items={tableData}
               onChange={({ page, sort }: EuiBasicTableOnChange) => {
@@ -204,14 +219,12 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
                 totalItemCount: pagination.total,
                 pageSizeOptions: [5, 10, 20],
               }}
-              selection={{
-                selectable: (item: TableData) => !item.isLoading,
-                onSelectionChange: (selected: TableData[]) =>
-                  dispatch({ type: 'setSelected', selectedItems: selected }),
-              }}
               sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
+              selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
             />
-            {isLoading && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
+            {(isLoading || loading) && (
+              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+            )}
           </>
         )}
       </Panel>
