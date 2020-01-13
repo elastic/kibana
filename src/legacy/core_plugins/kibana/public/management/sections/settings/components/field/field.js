@@ -572,7 +572,6 @@ export class Field extends PureComponent {
 
     if (setting.deprecation) {
       const { links } = npStart.core.docLinks;
-      const badgeUrl = links.management[setting.deprecation.docLinksKey];
 
       deprecation = (
         <>
@@ -580,7 +579,7 @@ export class Field extends PureComponent {
             <EuiBadge
               color="warning"
               onClick={() => {
-                badgeUrl && window.open(badgeUrl, '_blank');
+                window.open(links.management[setting.deprecation.docLinksKey], '_blank');
               }}
               onClickAriaLabel={i18n.translate(
                 'kbn.management.settings.field.deprecationClickAreaLabel',
