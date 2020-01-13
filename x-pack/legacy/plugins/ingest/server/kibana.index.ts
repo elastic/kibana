@@ -10,13 +10,17 @@ import { initRestApi } from './rest_api/init_api';
 export const initServerWithKibana = (hapiServer: any) => {
   const libs = compose(hapiServer);
   libs.framework.log(['debug'], 'Ingest is composed -- debug message');
-
   libs.framework.expose('policy', libs.policy);
   libs.framework.expose('outputs', libs.outputs);
-
   initRestApi(hapiServer, libs);
 };
 
-export function postInit(server: any) {
-  server.plugins.ingest.policy.ensureDefaultPolicy();
+export async function postInit(server: any) {
+  await Promise.all([
+    server.plugins.ingest.policy.ensureDefaultPolicy(),
+    server.plugins.ingest.outputs.ensureDefaultOutput(),
+  ]).catch(err => {
+    // Log error but do not stop kbn from booting
+    server.log(['error'], err);
+  });
 }

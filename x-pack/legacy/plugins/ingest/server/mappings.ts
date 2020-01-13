@@ -33,6 +33,15 @@ export const mappings = {
       },
     },
   },
+  outputs: {
+    properties: {
+      name: { type: 'keyword' },
+      type: { type: 'keyword' },
+      hosts: { type: 'keyword' },
+      ingest_pipeline: { type: 'keyword' },
+      api_key: { type: 'keyword' },
+    },
+  },
   datasources: {
     properties: {
       id: {
