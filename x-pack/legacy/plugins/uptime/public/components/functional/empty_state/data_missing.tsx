@@ -38,7 +38,7 @@ export const DataMissing = ({ headingMessage }: DataMissingProps) => {
             body={
               <p>
                 <FormattedMessage
-                  id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                  id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
                   defaultMessage="{configureHeartbeatLink} to start logging uptime data."
                   values={{
                     configureHeartbeatLink: (
