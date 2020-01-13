@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchMappingOf } from '../../server/utils/typed_elasticsearch_mappings';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleViewState } from '../../public/containers/waffle/with_waffle_view_state';
 
 export const inventoryViewSavedObjectType = 'inventory-view';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedViewSavedObject } from '../../public/hooks/use_saved_view';
 
 export const inventoryViewSavedObjectMappings: {

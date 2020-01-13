@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../../../../src/setup_node_env');
+require('../../../../src/setup_node_env');
 
 const { join, resolve } = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies, import/no-unresolved

@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchMappingOf } from '../../server/utils/typed_elasticsearch_mappings';
 import {
   MetricsExplorerOptions,
   MetricsExplorerChartOptions,
   MetricsExplorerTimeOptions,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../public/containers/metrics_explorer/use_metrics_explorer_options';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedViewSavedObject } from '../../public/hooks/use_saved_view';
 
 interface MetricsExplorerSavedView {
