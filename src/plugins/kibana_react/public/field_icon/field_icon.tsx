@@ -20,7 +20,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiToken, EuiTokenProps } from '@elastic/eui';
 
-interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
+export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
   type:
     | 'boolean'
     | 'conflict'
