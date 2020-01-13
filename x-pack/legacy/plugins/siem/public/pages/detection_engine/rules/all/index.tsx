@@ -214,7 +214,7 @@ export const AllRules = React.memo<{
                 });
               }}
               pagination={{
-                pageIndex: pagination.page - 4,
+                pageIndex: pagination.page - 1,
                 pageSize: pagination.perPage,
                 totalItemCount: pagination.total,
                 pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
