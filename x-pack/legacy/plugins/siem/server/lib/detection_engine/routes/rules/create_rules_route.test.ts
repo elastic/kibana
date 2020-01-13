@@ -20,15 +20,28 @@ import {
   createActionResult,
   getCreateRequest,
   typicalPayload,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('create_rules', () => {
-  let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
+  let {
+    server,
+    alertsClient,
+    actionsClient,
+    elasticsearch,
+    savedObjectsClient,
+  } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
+    ({
+      server,
+      alertsClient,
+      actionsClient,
+      elasticsearch,
+      savedObjectsClient,
+    } = createMockServer());
     elasticsearch.getCluster = jest.fn().mockImplementation(() => ({
       callWithRequest: jest
         .fn()
@@ -44,6 +57,7 @@ describe('create_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { statusCode } = await server.inject(getCreateRequest());
       expect(statusCode).toBe(200);
     });
@@ -78,6 +92,7 @@ describe('create_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       // missing rule_id should return 200 as it will be auto generated if not given
       const { rule_id, ...noRuleId } = typicalPayload();
       const request: ServerInjectOptions = {
@@ -94,6 +109,7 @@ describe('create_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
@@ -112,6 +128,7 @@ describe('create_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',

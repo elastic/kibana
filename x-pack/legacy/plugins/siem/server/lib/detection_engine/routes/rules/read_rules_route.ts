@@ -13,7 +13,7 @@ import { transformError } from '../utils';
 import { readRules } from '../../rules/read_rules';
 import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { QueryRequest } from '../../rules/types';
+import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createReadRulesRoute: Hapi.ServerRoute = {
@@ -44,12 +44,16 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
         id,
         ruleId,
       });
-      const ruleStatuses = await savedObjectsClient.find({
-        type: ruleStatusSavedObjectType,
-        perPage: 10,
-        search: `"${id}"`,
-        searchFields: ['alertId'],
-      });
+      const ruleStatuses = await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>(
+        {
+          type: ruleStatusSavedObjectType,
+          perPage: 10,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: `"${id}"`,
+          searchFields: ['alertId'],
+        }
+      );
       ruleStatuses.saved_objects.sort((a, b) => {
         const dateA = new Date(a.attributes.statusDate);
         const dateB = new Date(b.attributes.statusDate);

@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
+import { SavedObject, SavedObjectAttributes, SavedObjectsFindResponse } from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
@@ -50,10 +51,14 @@ export interface IRuleStatusAttributes {
   status: RuleStatusString;
 }
 
+export interface IRuleSavedAttributesSavedObjectAttributes
+  extends IRuleStatusAttributes,
+    SavedObjectAttributes {}
+
 export interface IRuleStatusSavedObject {
   type: string;
   id: string;
-  attributes: IRuleStatusAttributes;
+  attributes: Array<SavedObject<IRuleStatusAttributes & SavedObjectAttributes>>;
   references: unknown[];
   updated_at: string;
   version: string;
@@ -164,14 +169,20 @@ export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttribut
   return get('lastSuccessMessage', obj) != null;
 };
 
-export const isRuleStatusSavedObjectType = (obj: unknown): obj is IRuleStatusSavedObject => {
+export const isRuleStatusSavedObjectType = (
+  obj: unknown
+): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
   return get('attributes', obj) != null;
 };
 
-export const isRuleStatusFindType = (obj: unknown): obj is IRuleStatusFindType => {
+export const isRuleStatusFindType = (
+  obj: unknown
+): obj is SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => {
   return get('saved_objects', obj) != null;
 };
 
-export const isRuleStatusFindTypes = (obj: unknown[] | undefined): obj is IRuleStatusFindType[] => {
+export const isRuleStatusFindTypes = (
+  obj: unknown[] | undefined
+): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
   return obj ? obj.every(ruleStatus => isRuleStatusFindType(ruleStatus)) : false;
 };

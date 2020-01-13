@@ -13,7 +13,7 @@ import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
-import { QueryRequest } from '../../rules/types';
+import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createDeleteRulesRoute: Hapi.ServerRoute = {
@@ -46,12 +46,14 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
         id,
         ruleId,
       });
-      const ruleStatuses = await savedObjectsClient.find({
-        type: ruleStatusSavedObjectType,
-        perPage: 10,
-        search: `"${id}"`,
-        searchFields: ['alertId'],
-      });
+      const ruleStatuses = await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>(
+        {
+          type: ruleStatusSavedObjectType,
+          perPage: 10,
+          search: `"${id}"`,
+          searchFields: ['alertId'],
+        }
+      );
       ruleStatuses.saved_objects.forEach(async obj =>
         savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
       );

@@ -20,6 +20,7 @@ import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
+import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
 
 export const signalRulesAlertType = ({
   logger,
@@ -76,7 +77,10 @@ export const signalRulesAlertType = ({
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get('alert', alertId);
-      const ruleStatusSavedObjects = await services.savedObjectsClient.find({
+      let ruleStatusSavedObjects;
+      ruleStatusSavedObjects = await services.savedObjectsClient.find<
+        IRuleSavedAttributesSavedObjectAttributes
+      >({
         type: ruleStatusSavedObjectType,
         perPage: 10, // should limit to 5 but since we only allow 5... idk.
         search: `"${alertId}"`,
@@ -104,6 +108,29 @@ export const signalRulesAlertType = ({
             ...ruleStatusSavedObjects.saved_objects[0].attributes,
           }
         );
+      } else {
+        // create the saved object here
+        const date = new Date().toISOString();
+        await services.savedObjectsClient.create<IRuleSavedAttributesSavedObjectAttributes>(
+          ruleStatusSavedObjectType,
+          {
+            alertId: `"${alertId}"`, // do a search for this id.
+            statusDate: date,
+            status: 'executing',
+            lastFailureAt: '1970-01-01T00:00:00Z', // default to unix epoch time
+            lastSuccessAt: '1970-01-01T00:00:00Z',
+            lastFailureMessage: '',
+            lastSuccessMessage: '',
+          }
+        );
+        ruleStatusSavedObjects = await services.savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
+          type: ruleStatusSavedObjectType,
+          perPage: 10, // should limit to 5 but since we only allow 5... idk.
+          search: `"${alertId}"`,
+          searchFields: ['alertId'],
+        });
       }
       // then in the end of the executor delete all statuses
       // based on relevant alertIds

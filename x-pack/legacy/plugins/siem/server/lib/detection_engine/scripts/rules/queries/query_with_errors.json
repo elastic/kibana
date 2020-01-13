@@ -1,7 +1,7 @@
 {
   "name": "Query with a rule id",
   "description": "Query with a rule_id that acts like an external id",
-  "rule_id": "query-rule-id",
+  "rule_id": "query-rule-id-errors-2",
   "risk_score": 1,
   "interval": "30s",
   "severity": "high",

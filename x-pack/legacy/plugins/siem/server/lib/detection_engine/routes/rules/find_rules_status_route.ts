@@ -10,7 +10,10 @@ import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ServerFacade } from '../../../../types';
 import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
-import { FindRulesStatusesRequest } from '../../rules/types';
+import {
+  FindRulesStatusesRequest,
+  IRuleSavedAttributesSavedObjectAttributes,
+} from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createFindRulesStatusRoute: Hapi.ServerRoute = {
@@ -44,7 +47,9 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
         }
     */
     const statuses = await query.ids.reduce(async (acc, id) => {
-      const lastFiveErrorsForId = await savedObjectsClient.find({
+      const lastFiveErrorsForId = await savedObjectsClient.find<
+        IRuleSavedAttributesSavedObjectAttributes
+      >({
         type: ruleStatusSavedObjectType,
         perPage: 10,
         search: `"${id}"`,

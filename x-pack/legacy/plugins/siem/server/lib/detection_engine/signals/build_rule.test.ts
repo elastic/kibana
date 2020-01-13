@@ -61,6 +61,12 @@ describe('buildRule', () => {
       updated_by: 'elastic',
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      status: 'succeeded',
+      status_date: '',
+      last_failure_at: '',
+      last_failure_message: '',
+      last_success_at: '',
+      last_success_message: '',
       filters: [
         {
           query: 'host.name: Rebecca',
@@ -116,6 +122,12 @@ describe('buildRule', () => {
       version: 1,
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      status: 'succeeded',
+      status_date: '',
+      last_failure_at: '',
+      last_failure_message: '',
+      last_success_at: '',
+      last_success_message: '',
     };
     expect(rule).toEqual(expected);
   });
@@ -159,6 +171,12 @@ describe('buildRule', () => {
       version: 1,
       updated_at: rule.updated_at,
       created_at: rule.created_at,
+      status: 'succeeded',
+      status_date: '',
+      last_failure_at: '',
+      last_failure_message: '',
+      last_success_at: '',
+      last_success_message: '',
     };
     expect(rule).toEqual(expected);
   });

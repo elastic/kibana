@@ -20,14 +20,15 @@ import {
   getResult,
   getReadRequest,
   getFindResultWithSingleHit,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('read_signals', () => {
-  let { server, alertsClient } = createMockServer();
+  let { server, alertsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient } = createMockServer());
+    ({ server, alertsClient, savedObjectsClient } = createMockServer());
     readRulesRoute((server as unknown) as ServerFacade);
   });
 
@@ -39,6 +40,7 @@ describe('read_signals', () => {
     test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { statusCode } = await server.inject(getReadRequest());
       expect(statusCode).toBe(200);
     });
@@ -72,6 +74,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const request: ServerInjectOptions = {
         method: 'GET',
         url: DETECTION_ENGINE_RULES_URL,

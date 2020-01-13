@@ -10,7 +10,7 @@ import Boom from 'boom';
 import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
-import { RulesRequest } from '../../rules/types';
+import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { createRulesSchema } from '../schemas/create_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
@@ -123,17 +123,17 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           references,
           version: 1,
         });
-        const date = new Date().toISOString();
-        const ruleStatus = await savedObjectsClient.create(ruleStatusSavedObjectType, {
-          alertId: createdRule.id, // do a search for this id.
-          statusDate: date,
-          status: 'executing',
-          lastFailureAt: 'test-failure',
-          lastSuccessAt: 'test-success',
-          lastFailureMessage: 'test-failure',
-          lastSuccessMessage: 'test-failure',
+        const ruleStatuses = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
+          type: ruleStatusSavedObjectType,
+          perPage: 10,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: `"${createdRule.id}"`,
+          searchFields: ['alertId'],
         });
-        return transformOrError(createdRule, ruleStatus);
+        return transformOrError(createdRule, ruleStatuses.saved_objects[0]);
       } catch (err) {
         return transformError(err);
       }

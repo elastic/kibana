@@ -6,12 +6,13 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
+import { SavedObject } from 'kibana/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
   isAlertType,
   isAlertTypes,
-  IRuleStatusSavedObject,
+  IRuleSavedAttributesSavedObjectAttributes,
   isRuleStatusFindType,
   isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
@@ -77,7 +78,7 @@ export const transformTags = (tags: string[]): string[] => {
 // those on the export
 export const transformAlertToRule = (
   alert: RuleAlertType,
-  ruleStatus?: IRuleStatusSavedObject
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     created_at: alert.params.createdAt,
@@ -176,8 +177,12 @@ export const transformOrBulkError = (
   alert: unknown,
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | BulkError => {
-  if (isAlertType(alert) && isRuleStatusFindType(ruleStatus)) {
-    return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
+  if (isAlertType(alert)) {
+    if (isRuleStatusFindType(ruleStatus)) {
+      return transformAlertToRule(alert, ruleStatus?.saved_objects[0] ?? ruleStatus);
+    } else {
+      return transformAlertToRule(alert);
+    }
   } else {
     return createBulkErrorObject({
       ruleId,
