@@ -39,7 +39,6 @@ export interface DefaultEditorCommonProps {
     value: AggParams[T]
   ) => void;
   onAggTypeChange: (aggId: AggId, aggType: AggType) => void;
-  setTouched: (isTouched: boolean) => void;
 }
 
 export interface DefaultEditorAggCommonProps extends DefaultEditorCommonProps {

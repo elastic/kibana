@@ -39,10 +39,10 @@ export interface AggParamCommonProps<T, P = AggParam> {
   state: VisState;
   value?: T;
   metricAggs: AggConfig[];
-  setValidity(isValid: boolean): void;
-  setTouched(): void;
 }
 
 export interface AggParamEditorProps<T, P = AggParam> extends AggParamCommonProps<T, P> {
   setValue(value?: T): void;
+  setValidity(isValid: boolean): void;
+  setTouched(): void;
 }

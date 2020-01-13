@@ -100,6 +100,9 @@ describe('DefaultEditorAggParams component', () => {
           params: [{ name: 'interval', deserialize: intervalDeserialize }],
         },
         params: {},
+        schema: {
+          title: '',
+        },
       } as any) as AggConfig,
       groupName: AggGroupNames.Metrics,
       formIsTouched: false,

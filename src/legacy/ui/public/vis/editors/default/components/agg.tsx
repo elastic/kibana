@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiAccordion,
   EuiToolTip,
@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { AggConfig } from '../../..';
 import { DefaultEditorAggParams } from './agg_params';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
+import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: AggConfig;
@@ -41,7 +42,7 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   isDraggable: boolean;
   isLastBucket: boolean;
   isRemovable: boolean;
-  setValidity: (isValid: boolean) => void;
+  setAggsState: React.Dispatch<AggsAction>;
 }
 
 function DefaultEditorAgg({
@@ -63,8 +64,7 @@ function DefaultEditorAgg({
   onAggTypeChange,
   onToggleEnableAgg,
   removeAgg,
-  setTouched,
-  setValidity,
+  setAggsState,
 }: DefaultEditorAggProps) {
   const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
@@ -115,17 +115,38 @@ function DefaultEditorAgg({
     }
   }, [lastParentPipelineAggTitle, isLastBucket, agg.type]);
 
-  const onToggle = (isOpen: boolean) => {
-    setIsEditorOpen(isOpen);
-    if (!isOpen) {
-      setTouched(true);
-    }
-  };
+  const setTouched = useCallback(
+    (touched: boolean) => {
+      setAggsState({
+        type: AGGS_ACTION_KEYS.TOUCHED,
+        payload: touched,
+        aggId: agg.id,
+      });
+    },
+    [setAggsState]
+  );
 
-  const onSetValidity = (isValid: boolean) => {
-    setValidity(isValid);
-    setValidState(isValid);
-  };
+  const setValidity = useCallback(
+    (isValid: boolean) => {
+      setAggsState({
+        type: AGGS_ACTION_KEYS.VALID,
+        payload: isValid,
+        aggId: agg.id,
+      });
+      setValidState(isValid);
+    },
+    [setAggsState]
+  );
+
+  const onToggle = useCallback(
+    (isOpen: boolean) => {
+      setIsEditorOpen(isOpen);
+      if (!isOpen) {
+        setTouched(true);
+      }
+    },
+    [setTouched]
+  );
 
   const renderAggButtons = () => {
     const actionIcons = [];
@@ -270,7 +291,7 @@ function DefaultEditorAgg({
           setAggParamValue={setAggParamValue}
           onAggTypeChange={onAggTypeChange}
           setTouched={setTouched}
-          setValidity={onSetValidity}
+          setValidity={setValidity}
         />
       </>
     </EuiAccordion>

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useReducer, useMemo } from 'react';
+import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
@@ -49,6 +49,7 @@ export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps 
   addSchema: AddSchema;
   reorderAggs: ReorderAggs;
   setValidity(modelName: string, value: boolean): void;
+  setTouched(isTouched: boolean): void;
 }
 
 function DefaultEditorAggGroup({
@@ -70,8 +71,10 @@ function DefaultEditorAggGroup({
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = aggGroupNamesMap()[groupName];
   // e.g. buckets can have no aggs
-  const group: AggConfig[] =
-    state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [];
+  const group: AggConfig[] = useMemo(
+    () => state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [],
+    [state.aggs.aggs]
+  );
 
   const stats = {
     max: 0,
@@ -123,27 +126,14 @@ function DefaultEditorAggGroup({
     setValidity(`aggGroup__${groupName}`, isGroupValid);
   }, [groupName, isGroupValid, setValidity]);
 
-  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
-      reorderAggs(group[source.index], group[destination.index]);
-    }
-  };
-
-  const setTouchedHandler = (aggId: string, touched: boolean) => {
-    setAggsState({
-      type: AGGS_ACTION_KEYS.TOUCHED,
-      payload: touched,
-      aggId,
-    });
-  };
-
-  const setValidityHandler = (aggId: string, valid: boolean) => {
-    setAggsState({
-      type: AGGS_ACTION_KEYS.VALID,
-      payload: valid,
-      aggId,
-    });
-  };
+  const onDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        reorderAggs(group[source.index], group[destination.index]);
+      }
+    },
+    [reorderAggs, group]
+  );
 
   return (
     <EuiDragDropContext onDragEnd={onDragEnd}>
@@ -187,8 +177,7 @@ function DefaultEditorAggGroup({
                     onAggTypeChange={onAggTypeChange}
                     onToggleEnableAgg={onToggleEnableAgg}
                     removeAgg={removeAgg}
-                    setTouched={isTouched => setTouchedHandler(agg.id, isTouched)}
-                    setValidity={isValid => setValidityHandler(agg.id, isValid)}
+                    setAggsState={setAggsState}
                   />
                 )}
               </EuiDraggable>

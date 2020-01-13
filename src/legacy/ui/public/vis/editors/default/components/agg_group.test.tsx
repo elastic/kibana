@@ -128,46 +128,6 @@ describe('DefaultEditorAgg component', () => {
     expect(setTouched).toBeCalledWith(false);
   });
 
-  it('should mark group as touched when all invalid aggs are touched', () => {
-    defaultProps.groupName = AggGroupNames.Buckets;
-    const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
-    act(() => {
-      const aggProps = comp.find(DefaultEditorAgg).props();
-      aggProps.setValidity(false);
-      aggProps.setTouched(true);
-    });
-
-    expect(setTouched).toBeCalledWith(true);
-  });
-
-  it('should mark group as touched when the form applied', () => {
-    const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
-    act(() => {
-      comp
-        .find(DefaultEditorAgg)
-        .first()
-        .props()
-        .setValidity(false);
-    });
-    expect(setTouched).toBeCalledWith(false);
-    comp.setProps({ formIsTouched: true });
-
-    expect(setTouched).toBeCalledWith(true);
-  });
-
-  it('should mark group as invalid when at least one agg is invalid', () => {
-    const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
-    act(() => {
-      comp
-        .find(DefaultEditorAgg)
-        .first()
-        .props()
-        .setValidity(false);
-    });
-
-    expect(setValidity).toHaveBeenLastCalledWith('aggGroup__metrics', false);
-  });
-
   it('should last bucket has truthy isLastBucket prop', () => {
     defaultProps.groupName = AggGroupNames.Buckets;
     const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);

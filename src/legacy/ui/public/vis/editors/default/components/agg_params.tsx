@@ -29,18 +29,14 @@ import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
 import {
   getAggParamsToRender,
-  getError,
   getAggTypeOptions,
-  ParamInstance,
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import {
   aggTypeReducer,
-  AGG_TYPE_ACTION_KEYS,
   aggParamsReducer,
   AGG_PARAMS_ACTION_KEYS,
   initAggParamsState,
-  AggParamsItem,
 } from './agg_params_state';
 import { editorConfigProviders } from '../../config/editor_config_providers';
 import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/types';
@@ -62,6 +58,7 @@ export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
   disabledParams?: string[];
   indexPattern: IndexPattern;
   setValidity: (isValid: boolean) => void;
+  setTouched: (isTouched: boolean) => void;
 }
 
 function DefaultEditorAggParams({
@@ -81,14 +78,28 @@ function DefaultEditorAggParams({
   setTouched,
   setValidity,
 }: DefaultEditorAggParamsProps) {
-  const groupedAggTypeOptions = getAggTypeOptions(agg, indexPattern, groupName);
-  const errors = getError(agg, aggIsTooLow);
+  const groupedAggTypeOptions = useMemo(() => getAggTypeOptions(agg, indexPattern, groupName), [
+    agg,
+    indexPattern,
+    groupName,
+  ]);
+  const error = aggIsTooLow
+    ? i18n.translate('common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage', {
+        defaultMessage: '"{schema}" aggs must run before all other buckets!',
+        values: { schema: agg.schema.title },
+      })
+    : '';
 
   const editorConfig = useMemo(() => editorConfigProviders.getConfigForAgg(indexPattern, agg), [
     indexPattern,
     agg,
   ]);
-  const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
+  const params = useMemo(() => getAggParamsToRender({ agg, editorConfig, metricAggs, state }), [
+    agg,
+    editorConfig,
+    metricAggs,
+    state,
+  ]);
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(
     aggParamsReducer,
@@ -98,12 +109,12 @@ function DefaultEditorAggParams({
   const [aggType, onChangeAggType] = useReducer(aggTypeReducer, { touched: false, valid: true });
 
   const isFormValid =
-    !errors.length &&
+    !error &&
     aggType.valid &&
     Object.entries(paramsState).every(([, paramState]) => paramState.valid);
 
   const isAllInvalidParamsTouched =
-    !!errors.length || isInvalidParamsTouched(agg.type, aggType, paramsState);
+    !!error || isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   const onAggSelect = useCallback(
     value => {
@@ -164,39 +175,11 @@ function DefaultEditorAggParams({
     setTouched(isAllInvalidParamsTouched);
   }, [isAllInvalidParamsTouched]);
 
-  const renderParam = (paramInstance: ParamInstance, model: AggParamsItem) => {
-    return (
-      <DefaultEditorAggParam
-        key={`${paramInstance.aggParam.name}${agg.type ? agg.type.name : ''}`}
-        disabled={disabledParams && disabledParams.includes(paramInstance.aggParam.name)}
-        formIsTouched={formIsTouched}
-        showValidation={formIsTouched || model.touched}
-        setAggParamValue={setAggParamValue}
-        setValidity={valid => {
-          onChangeParamsState({
-            type: AGG_PARAMS_ACTION_KEYS.VALID,
-            paramName: paramInstance.aggParam.name,
-            payload: valid,
-          });
-        }}
-        // setTouched can be called from sub-agg which passes a parameter
-        setTouched={(isTouched: boolean = true) => {
-          onChangeParamsState({
-            type: AGG_PARAMS_ACTION_KEYS.TOUCHED,
-            paramName: paramInstance.aggParam.name,
-            payload: isTouched,
-          });
-        }}
-        {...paramInstance}
-      />
-    );
-  };
-
   return (
     <EuiForm
       className={className}
-      isInvalid={!!errors.length}
-      error={errors}
+      isInvalid={!!error}
+      error={error}
       data-test-subj="visAggEditorParams"
     >
       <DefaultEditorAggSelect
@@ -208,8 +191,7 @@ function DefaultEditorAggParams({
         isSubAggregation={aggIndex >= 1 && groupName === AggGroupNames.Buckets}
         showValidation={formIsTouched || aggType.touched}
         setValue={onAggSelect}
-        setTouched={() => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, payload: true })}
-        setValidity={valid => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALID, payload: valid })}
+        onChangeAggType={onChangeAggType}
       />
 
       {params.basic.map(param => {
@@ -218,7 +200,17 @@ function DefaultEditorAggParams({
           valid: true,
         };
 
-        return renderParam(param, model);
+        return (
+          <DefaultEditorAggParam
+            key={`${param.aggParam.name}${agg.type ? agg.type.name : ''}`}
+            disabled={disabledParams && disabledParams.includes(param.aggParam.name)}
+            formIsTouched={formIsTouched}
+            showValidation={formIsTouched || model.touched}
+            setAggParamValue={setAggParamValue}
+            onChangeParamsState={onChangeParamsState}
+            {...param}
+          />
+        );
       })}
 
       {params.advanced.length ? (
@@ -239,7 +231,18 @@ function DefaultEditorAggParams({
                 touched: false,
                 valid: true,
               };
-              return renderParam(param, model);
+
+              return (
+                <DefaultEditorAggParam
+                  key={`${param.aggParam.name}${agg.type ? agg.type.name : ''}`}
+                  disabled={disabledParams && disabledParams.includes(param.aggParam.name)}
+                  formIsTouched={formIsTouched}
+                  showValidation={formIsTouched || model.touched}
+                  setAggParamValue={setAggParamValue}
+                  onChangeParamsState={onChangeParamsState}
+                  {...param}
+                />
+              );
             })}
           </EuiAccordion>
         </EuiFormRow>

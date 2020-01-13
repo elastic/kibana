@@ -26,6 +26,7 @@ import { act } from 'react-dom/test-utils';
 import { DefaultEditorAggParams } from './agg_params';
 import { AggType } from 'ui/agg_types';
 import { IndexPattern } from '../../../../../../../plugins/data/public';
+import { AGGS_ACTION_KEYS } from './agg_group_state';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -35,18 +36,16 @@ describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggProps;
   let setAggParamValue: jest.Mock;
   let setStateParamValue: jest.Mock;
-  let setTouched: jest.Mock;
   let onToggleEnableAgg: jest.Mock;
   let removeAgg: jest.Mock;
-  let setValidity: jest.Mock;
+  let setAggsState: jest.Mock;
 
   beforeEach(() => {
     setAggParamValue = jest.fn();
     setStateParamValue = jest.fn();
-    setTouched = jest.fn();
     onToggleEnableAgg = jest.fn();
     removeAgg = jest.fn();
-    setValidity = jest.fn();
+    setAggsState = jest.fn();
 
     defaultProps = {
       agg: {
@@ -71,8 +70,7 @@ describe('DefaultEditorAgg component', () => {
       setAggParamValue,
       setStateParamValue,
       onAggTypeChange: () => {},
-      setValidity,
-      setTouched,
+      setAggsState,
       onToggleEnableAgg,
       removeAgg,
     };
@@ -101,7 +99,11 @@ describe('DefaultEditorAgg component', () => {
         .setValidity(false);
     });
     comp.update();
-    expect(setValidity).toBeCalledWith(false);
+    expect(setAggsState).toBeCalledWith({
+      type: AGGS_ACTION_KEYS.VALID,
+      payload: false,
+      aggId: defaultProps.agg.id,
+    });
 
     expect(
       comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').exists()
@@ -122,7 +124,11 @@ describe('DefaultEditorAgg component', () => {
         .setValidity(true);
     });
     comp.update();
-    expect(setValidity).toBeCalledWith(true);
+    expect(setAggsState).toBeCalledWith({
+      type: AGGS_ACTION_KEYS.VALID,
+      payload: true,
+      aggId: defaultProps.agg.id,
+    });
 
     expect(comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').text()).toBe(
       'Agg description'
@@ -131,16 +137,20 @@ describe('DefaultEditorAgg component', () => {
 
   it('should call setTouched when accordion is collapsed', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
-    expect(defaultProps.setTouched).toBeCalledTimes(0);
+    expect(defaultProps.setAggsState).toBeCalledTimes(0);
 
     comp.find('.euiAccordion__button').simulate('click');
     // make sure that the accordion is collapsed
     expect(comp.find('.euiAccordion-isOpen').exists()).toBeFalsy();
 
-    expect(defaultProps.setTouched).toBeCalledWith(true);
+    expect(defaultProps.setAggsState).toBeCalledWith({
+      type: AGGS_ACTION_KEYS.TOUCHED,
+      payload: true,
+      aggId: defaultProps.agg.id,
+    });
   });
 
-  it('should call setValidity inside onSetValidity', () => {
+  it('should call setAggsState inside setValidity', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
@@ -150,7 +160,11 @@ describe('DefaultEditorAgg component', () => {
         .setValidity(false);
     });
 
-    expect(setValidity).toBeCalledWith(false);
+    expect(setAggsState).toBeCalledWith({
+      type: AGGS_ACTION_KEYS.VALID,
+      payload: false,
+      aggId: defaultProps.agg.id,
+    });
 
     expect(
       comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').exists()
