@@ -23,9 +23,7 @@ const taskManagerQuery = {
   },
 };
 
-export function initRoutes(server, taskTestingEvents) {
-  const taskManager = server.plugins.task_manager;
-
+export function initRoutes(server, taskManager, legacyTaskManager, taskTestingEvents) {
   server.route({
     path: '/api/sample_tasks/schedule',
     method: 'POST',
@@ -54,6 +52,45 @@ export function initRoutes(server, taskTestingEvents) {
         };
 
         const taskResult = await taskManager.schedule(task, { request });
+
+        return taskResult;
+      } catch (err) {
+        return err;
+      }
+    },
+  });
+
+  /*
+    Schedule using legacy Api
+   */
+  server.route({
+    path: '/api/sample_tasks/schedule_legacy',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            taskType: Joi.string().required(),
+            schedule: Joi.object({
+              interval: Joi.string(),
+            }).optional(),
+            interval: Joi.string().optional(),
+            params: Joi.object().required(),
+            state: Joi.object().optional(),
+            id: Joi.string().optional(),
+          }),
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        const { task: taskFields } = request.payload;
+        const task = {
+          ...taskFields,
+          scope: [scope],
+        };
+
+        const taskResult = await legacyTaskManager.schedule(task, { request });
 
         return taskResult;
       } catch (err) {
