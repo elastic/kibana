@@ -41,5 +41,4 @@ export interface LicenseExpirationAlertExecutorOptions extends AlertExecutorOpti
 export interface AlertParams {
   dateFormat: string;
   timezone: string;
-  ccs: string | null;
 }

@@ -15,6 +15,7 @@ export async function fetchLicenses(
     index,
     filterPath: [
       'hits.hits._source.license.*',
+      'hits.hits._source.cluster_settings.cluster.metadata.display_name',
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.cluster_name',
     ],

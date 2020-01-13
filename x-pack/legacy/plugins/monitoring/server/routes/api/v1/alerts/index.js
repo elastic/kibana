@@ -6,4 +6,3 @@
 
 export * from './legacy_alerts';
 export * from './alerts';
-export * from './migration_status';

@@ -27,11 +27,10 @@ import { AlertsConfiguration } from './configuration';
 export interface AlertsStatusProps {
   clusterUuid: string;
   emailAddress: string;
-  ccs: string;
 }
 
 export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusProps) => {
-  const { emailAddress, ccs } = props;
+  const { emailAddress } = props;
 
   const [setupModeEnabled, setSetupModeEnabled] = React.useState(getSetupModeState().enabled);
   const [kibanaAlerts, setKibanaAlerts] = React.useState<Alert[]>([]);
@@ -136,7 +135,6 @@ export const AlertsStatus: React.FC<AlertsStatusProps> = (props: AlertsStatusPro
           <EuiFlyoutBody>
             <AlertsConfiguration
               emailAddress={emailAddress}
-              ccs={ccs}
               onDone={() => setShowMigrationFlyout(false)}
             />
           </EuiFlyoutBody>

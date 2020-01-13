@@ -17,10 +17,10 @@ import {
 import { formatTimestampToDuration } from '../../common';
 import { AlertType } from '../../../alerting';
 // @ts-ignore
-import { prefixIndexPatternWithCCS } from '../lib/ccs_utils';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import {
   AlertLicense,
   AlertState,
@@ -59,11 +59,25 @@ export const getLicenseExpiration = (
       logger.debug(
         `Firing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
       );
-      const { dateFormat, timezone, ccs } = params as AlertParams;
-      const esIndexPattern = ccsEnabled
-        ? prefixIndexPatternWithCCS(INDEX_PATTERN_ELASTICSEARCH, ccs)
-        : INDEX_PATTERN_ELASTICSEARCH;
+      const { dateFormat, timezone } = params as AlertParams;
+
       const callCluster = await getCallCluster(services);
+
+      // Support CCS use cases by querying to find available remote clusters
+      // and then adding those to the index pattern we are searching against
+      let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
+      if (ccsEnabled) {
+        const availableCcs = await fetchAvailableCcs(callCluster);
+        if (availableCcs.length > 0) {
+          esIndexPattern = `${esIndexPattern},${esIndexPattern
+            .split(',')
+            .map(pattern => {
+              return availableCcs.map(remoteName => `${remoteName}:${pattern}`).join(',');
+            })
+            .join(',')}`;
+        }
+      }
+
       const clusters = await fetchClusters(callCluster, esIndexPattern);
 
       // Fetch licensing information from cluster_stats documents

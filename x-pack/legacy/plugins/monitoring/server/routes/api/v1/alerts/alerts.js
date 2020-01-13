@@ -14,11 +14,11 @@ import {
 import { getDateFormat } from '../../../../lib/get_date_format';
 import { getTimezone } from '../../../../lib/get_timezone';
 
-async function createAlerts(req, alertsClient, { selectedEmailActionId, ccs }) {
+async function createAlerts(req, alertsClient, { selectedEmailActionId }) {
   const createdAlerts = [];
   const dateFormat = await getDateFormat(req);
   const timezone = await getTimezone(req);
-  const alertParams = { dateFormat, timezone, ccs };
+  const alertParams = { dateFormat, timezone };
 
   // Create alerts
   const ALERT_TYPES = {
@@ -86,14 +86,13 @@ export function createKibanaAlertsRoute(server) {
     config: {
       validate: {
         payload: Joi.object({
-          ccs: Joi.string().optional(),
           selectedEmailActionId: Joi.string().required(),
           emailAddress: Joi.string().required(),
         }),
       },
     },
     async handler(req, headers) {
-      const { emailAddress, selectedEmailActionId, ccs } = req.payload;
+      const { emailAddress, selectedEmailActionId } = req.payload;
       const alertsClient = isFunction(req.getAlertsClient) ? req.getAlertsClient() : null;
       const savedObjectsClient = isFunction(req.getSavedObjectsClient)
         ? req.getSavedObjectsClient()
@@ -103,7 +102,7 @@ export function createKibanaAlertsRoute(server) {
       }
 
       const [alerts, emailResponse] = await Promise.all([
-        createAlerts(req, alertsClient, { ...req.params, selectedEmailActionId, ccs }),
+        createAlerts(req, alertsClient, { ...req.params, selectedEmailActionId }),
         saveEmailAddress(emailAddress, savedObjectsClient),
       ]);
 
