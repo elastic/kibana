@@ -75,3 +75,9 @@ export const UI_METRIC_USAGE_TYPE = 'ui_metric';
  * Link to Advanced Settings.
  */
 export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';
+
+/**
+ * The type name used within the Monitoring index to publish management stats.
+ * @type {string}
+ */
+export const KIBANA_MANAGEMENT_STATS_TYPE = 'management';
