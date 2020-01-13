@@ -61,23 +61,21 @@ export const fetchRules = async ({
   id,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const queryParams = [
-    `page=${pagination.page}`,
-    `per_page=${pagination.perPage}`,
-    `sort_field=${filterOptions.sortField}`,
-    `sort_order=${filterOptions.sortOrder}`,
-    ...(filterOptions.filter.length !== 0
-      ? [`filter=alert.attributes.name:%20${encodeURIComponent(filterOptions.filter)}`]
-      : []),
-  ];
+  const searchQuery = {
+    page: pagination.page,
+    per_page: pagination.perPage,
+    sort_field: filterOptions.sortField,
+    sort_order: filterOptions.sortOrder,
+    ...(filterOptions.filter ? { filter: `alert.attributes.name: ${filterOptions.filter}` } : {}),
+  };
 
-  const endpoint =
-    id != null
-      ? `${DETECTION_ENGINE_RULES_URL}?id="${id}"`
-      : `${DETECTION_ENGINE_RULES_URL}/_find?${queryParams.join('&')}`;
+  const endpoint = id != null ? DETECTION_ENGINE_RULES_URL : `${DETECTION_ENGINE_RULES_URL}/_find`;
+  const query = id != null ? { id } : searchQuery;
 
   const response = await npStart.core.http.fetch<FetchRulesResponse | Rule[]>(endpoint, {
     method: 'GET',
+    query,
+    credentials: 'same-origin',
     signal,
     asResponse: true,
   });
@@ -100,8 +98,9 @@ export const fetchRules = async ({
  * @param id Rule ID's (not rule_id)
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
-  const response = await npStart.core.http.fetch<Rule>(`${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+  const response = await npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
+    query: { id },
     credentials: 'same-origin',
     asResponse: true,
     signal,
@@ -142,8 +141,9 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Rule[]> =>
   // TODO: Don't delete if immutable!
   const responses = await Promise.all(
     ids.map(id =>
-      npStart.core.http.fetch<Rule>(`${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+      npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
         method: 'DELETE',
+        query: { id },
         credentials: 'same-origin',
         asResponse: true,
       })
