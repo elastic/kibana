@@ -47,24 +47,30 @@ describe('MonitorStatusBar component', () => {
     };
     const component = mountWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
 
-    expect(component).toMatchSnapshot();
-
     const badgeComponent = component.find(EuiBadge);
     expect(badgeComponent.props().color).toBe('warning');
+
+    const badgeComponentText = component.find('.euiBadge__text');
+    expect(badgeComponentText.text()).toBe(moment(dateIn15Days).fromNow());
+
+    expect(badgeComponent.find('span.euiBadge--warning')).toBeTruthy();
   });
 
   it('renders expiring state if validity is greater than 30 days', () => {
-    const dateIn15Days = moment()
+    const dateIn40Days = moment()
       .add(40, 'day')
       .toString();
     monitorTls = {
-      certificate_not_valid_after: dateIn15Days,
+      certificate_not_valid_after: dateIn40Days,
     };
     const component = mountWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
 
-    expect(component).toMatchSnapshot();
-
     const badgeComponent = component.find(EuiBadge);
     expect(badgeComponent.props().color).toBe('default');
+
+    const badgeComponentText = component.find('.euiBadge__text');
+    expect(badgeComponentText.text()).toBe(moment(dateIn40Days).fromNow());
+
+    expect(badgeComponent.find('span.euiBadge--warning')).toHaveLength(0);
   });
 });
