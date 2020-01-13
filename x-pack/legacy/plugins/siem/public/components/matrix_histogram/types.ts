@@ -26,6 +26,8 @@ export interface MatrixHistogramOption {
   text: string;
   value: string;
 }
+
+export type GetSubTitle = (count: number) => string;
 export interface MatrixHistogramBasicProps {
   defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
@@ -37,7 +39,7 @@ export interface MatrixHistogramBasicProps {
   sourceId: string;
   startDate: number;
   stackByOptions: MatrixHistogramOption[];
-  subtitle?: string;
+  subtitle?: string | GetSubTitle;
   title?: string;
   updateDateRange: UpdateDateRange;
 }

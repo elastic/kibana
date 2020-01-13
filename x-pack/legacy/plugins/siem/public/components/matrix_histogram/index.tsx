@@ -86,7 +86,7 @@ export const MatrixHistogram = React.memo(
     const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
       defaultStackByOption
     );
-    const [subtitleWithCounts, setSubtitle] = useState(subtitle);
+    const [subtitleWithCounts, setSubtitle] = useState<string>('');
     const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
     const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
     const setSelectedChatOptionCallback = useCallback(
@@ -126,8 +126,8 @@ export const MatrixHistogram = React.memo(
     });
 
     useEffect(() => {
-      const formattedSubTitle = subtitle?.replace('{{totalCount}}', totalCount.toString());
-      setSubtitle(formattedSubTitle);
+      if (subtitle != null)
+        setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
 
       if (totalCount <= 0) {
         if (hideHistogramIfEmpty) setHideHistogram(true);

@@ -17,6 +17,7 @@ import { MatrixHistogram } from '../../components/matrix_histogram';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
+  GetSubTitle,
 } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
@@ -36,7 +37,7 @@ export interface OwnProps extends QueryTemplateProps {
   setQuery: SetQuery;
   sourceId: string;
   stackByOptions: MatrixHistogramOption[];
-  subtitle?: string;
+  subtitle?: string | GetSubTitle;
   type: hostsModel.HostsType | networkModel.NetworkType;
   title: string;
   updateDateRange: UpdateDateRange;

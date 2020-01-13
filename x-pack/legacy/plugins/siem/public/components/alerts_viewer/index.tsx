@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { noop } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AlertsComponentsQueryProps } from './types';
@@ -39,6 +39,11 @@ export const AlertsView = ({
       }
     };
   }, []);
+
+  const getSubtitle = useCallback(
+    (totalCount: number) => `${i18n.SHOWING}: ${totalCount} ${i18n.UNIT(totalCount)}`,
+    []
+  );
   return (
     <>
       <MatrixHistogramContainer
@@ -55,7 +60,7 @@ export const AlertsView = ({
         sourceId="default"
         stackByOptions={alertsStackByOptions}
         startDate={startDate}
-        subtitle={`${i18n.SHOWING}: {{totalCount}} ${i18n.UNIT(-1)}`}
+        subtitle={getSubtitle}
         title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
         type={type}
         updateDateRange={updateDateRange}
