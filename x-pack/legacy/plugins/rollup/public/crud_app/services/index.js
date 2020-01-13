@@ -19,13 +19,14 @@ export { showApiError, showApiWarning } from './api_errors';
 export { listBreadcrumb, createBreadcrumb } from './breadcrumbs';
 
 export {
-  logisticalDetailsUrl,
-  dateHistogramDetailsUrl,
-  dateHistogramAggregationUrl,
-  termsDetailsUrl,
-  histogramDetailsUrl,
-  metricsDetailsUrl,
-  cronUrl,
+  setEsBaseAndXPackBase,
+  getLogisticalDetailsUrl,
+  getDateHistogramDetailsUrl,
+  getDateHistogramAggregationUrl,
+  getTermsDetailsUrl,
+  getHistogramDetailsUrl,
+  getMetricsDetailsUrl,
+  getCronUrl,
 } from './documentation_links';
 
 export { filterItems } from './filter_items';
