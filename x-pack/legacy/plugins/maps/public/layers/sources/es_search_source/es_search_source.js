@@ -19,6 +19,7 @@ import {
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
+  CATEGORICAL_DATA_TYPES,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -125,11 +126,17 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
-  async getStringFields() {
+  async getCategoricalFields() {
     try {
       const indexPattern = await this.getIndexPattern();
-      const aggFields = indexPattern.fields.getByType('string').filter(field => {
-        return field.aggregatable;
+
+      const aggFields = [];
+      CATEGORICAL_DATA_TYPES.forEach(dataType => {
+        indexPattern.fields.getByType(dataType).forEach(field => {
+          if (field.aggregatable) {
+            aggFields.push(field);
+          }
+        });
       });
       return aggFields.map(field => {
         return this.createField({ fieldName: field.name });

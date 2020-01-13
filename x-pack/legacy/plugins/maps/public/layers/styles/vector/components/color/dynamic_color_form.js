@@ -10,7 +10,7 @@ import { FieldSelect } from '../field_select';
 import { ColorRampSelect } from './color_ramp_select';
 import { ColorPaletteSelect } from './color_palette_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
+import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { OrdinalFieldMetaOptionsPopover } from '../ordinal_field_meta_options_popover';
 
 export class DynamicColorForm extends React.Component {
@@ -42,8 +42,9 @@ export class DynamicColorForm extends React.Component {
       return;
     }
     const dataType = await field.getDataType();
-    const colorMapType =
-      dataType === 'string' ? COLOR_MAP_TYPE.CATEGORICAL : COLOR_MAP_TYPE.ORDINAL;
+    const colorMapType = CATEGORICAL_DATA_TYPES.includes(dataType)
+      ? COLOR_MAP_TYPE.CATEGORICAL
+      : COLOR_MAP_TYPE.ORDINAL;
     if (this._isMounted && this.state.colorMapType !== colorMapType) {
       this.setState({ colorMapType });
     }
