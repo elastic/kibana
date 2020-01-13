@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { isEmpty, kebabCase, camelCase } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
@@ -41,6 +41,7 @@ interface AddItemProps {
 }
 
 export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
+  const [showValidation, setShowValidation] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const removeItem = useCallback(
@@ -137,15 +138,16 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow>
           <EuiComboBox
-            placeholder={i18n.TECHNIQUES_PLACEHOLDER}
+            placeholder={item.tactic.name === 'none' ? '' : i18n.TECHNIQUES_PLACEHOLDER}
             options={techniquesOptions.filter(t => t.tactics.includes(kebabCase(item.tactic.name)))}
             selectedOptions={item.techniques}
             onChange={updateTechniques.bind(null, index)}
-            isDisabled={disabled}
+            isDisabled={disabled || item.tactic.name === 'none'}
             fullWidth={true}
-            isInvalid={invalid}
+            isInvalid={showValidation && invalid}
+            onBlur={() => setShowValidation(true)}
           />
-          {invalid && (
+          {showValidation && invalid && (
             <EuiText color="danger" size="xs">
               <p>{errorMessage}</p>
             </EuiText>
@@ -155,7 +157,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
           <EuiButtonIcon
             color="danger"
             iconType="trash"
-            isDisabled={disabled}
+            isDisabled={disabled || item.tactic.name === 'none'}
             onClick={() => removeItem(index)}
             aria-label={Rulei18n.DELETE}
           />
@@ -186,7 +188,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
               {index === 0 ? (
                 <EuiFormRow
                   label={`${field.label} ${i18n.TECHNIQUE}`}
-                  isInvalid={isInvalid}
+                  isInvalid={showValidation && isInvalid}
                   fullWidth
                   describedByIds={idAria ? [`${idAria} ${i18n.TECHNIQUE}`] : undefined}
                 >

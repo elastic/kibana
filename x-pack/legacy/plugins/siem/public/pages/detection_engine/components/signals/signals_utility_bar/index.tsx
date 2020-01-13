@@ -22,6 +22,8 @@ import { TimelineNonEcsData } from '../../../../../graphql/types';
 import { SendSignalsToTimeline, UpdateSignalsStatus } from '../types';
 
 interface SignalsUtilityBarProps {
+  canUserCRUD: boolean;
+  hasIndexWrite: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
   isFilteredToOpen: boolean;
@@ -34,6 +36,8 @@ interface SignalsUtilityBarProps {
 }
 
 const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
+  canUserCRUD,
+  hasIndexWrite,
   areEventsLoading,
   clearSelection,
   totalCount,
@@ -49,15 +53,15 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
       <EuiContextMenuPanel
-        items={getBatchItems(
+        items={getBatchItems({
           areEventsLoading,
-          showClearSelection,
+          allEventsSelected: showClearSelection,
           selectedEventIds,
           updateSignalsStatus,
           sendSignalsToTimeline,
           closePopover,
-          isFilteredToOpen
-        )}
+          isFilteredToOpen,
+        })}
       />
     ),
     [
@@ -66,6 +70,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
       updateSignalsStatus,
       sendSignalsToTimeline,
       isFilteredToOpen,
+      hasIndexWrite,
     ]
   );
 
@@ -83,7 +88,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
           </UtilityBarGroup>
 
           <UtilityBarGroup>
-            {totalCount > 0 && (
+            {canUserCRUD && hasIndexWrite && (
               <>
                 <UtilityBarText>
                   {i18n.SELECTED_SIGNALS(

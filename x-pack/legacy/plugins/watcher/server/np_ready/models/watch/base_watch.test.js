@@ -188,50 +188,6 @@ describe('BaseWatch', () => {
     });
   });
 
-  describe('upstreamJson getter method', () => {
-    let props;
-    beforeEach(() => {
-      props = {
-        id: 'foo',
-        name: 'bar',
-        type: 'json',
-        watchStatus: {
-          downstreamJson: {
-            prop1: 'prop1',
-            prop2: 'prop2',
-          },
-        },
-        actions: [
-          {
-            downstreamJson: {
-              prop1: 'prop3',
-              prop2: 'prop4',
-            },
-          },
-        ],
-      };
-    });
-
-    it('should return a valid object', () => {
-      const watch = new BaseWatch(props);
-
-      const actual = watch.upstreamJson;
-      const expected = {
-        id: props.id,
-        watch: {
-          metadata: {
-            name: props.name,
-            xpack: {
-              type: props.type,
-            },
-          },
-        },
-      };
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
   describe('getPropsFromDownstreamJson method', () => {
     let downstreamJson;
     beforeEach(() => {
