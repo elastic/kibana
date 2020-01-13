@@ -6,11 +6,7 @@
 
 import React from 'react';
 import { get } from 'lodash';
-import {
-  formatBytesUsage,
-  formatPercentageUsage,
-  formatNumber,
-} from 'plugins/monitoring/lib/format_number';
+import { formatBytesUsage, formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import {
   EuiSpacer,
   EuiFlexItem,
