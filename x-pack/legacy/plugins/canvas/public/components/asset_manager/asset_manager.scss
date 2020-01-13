@@ -50,6 +50,12 @@
   }
 
   .canvasAsset__img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+
     img {
       width: auto;
       max-width: 100%;
