@@ -80,4 +80,18 @@ specified explicitly.
 
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
+[float]
+[[breaking_80_user_role_changes]]
+=== User role changes
+
+[float]
+==== `kibana_user` role renamed to `kibana_admin`
+
+*Details:* The `kibana_user` role has been renamed to `kibana_admin` to better reflect its intended use. This role
+continues to grant all access to every Kibana feature. If you wish to restrict access to specific features,
+then you should create custom roles with <<kibana-privileges>>.
+
+*Impact:* Any users currently assigned the `kibana_user` role will need to instead be assigned the `kibana_admin`
+role in order to maintain their current access level.
+
 // end::notable-breaking-changes[]
