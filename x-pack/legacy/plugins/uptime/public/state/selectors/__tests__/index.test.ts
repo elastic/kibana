@@ -24,7 +24,11 @@ describe('state selectors', () => {
       errors: [],
       loading: false,
     },
-    ui: { basePath: 'yyz', integrationsPopoverOpen: null, lastRefresh: 125 },
+    ui: {
+      basePath: 'yyz',
+      integrationsPopoverOpen: null,
+      lastRefresh: 125,
+    },
   };
 
   it('selects base path from state', () => {
