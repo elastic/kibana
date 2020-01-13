@@ -96,13 +96,12 @@ const shouldFetchNewEntries = ({
   prevParams,
   timeKey,
   filterQuery,
-  entriesStart,
-  entriesEnd,
+  topCursor,
+  bottomCursor,
 }: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams }) => {
-  if (!timeKey) return false;
   const shouldLoadWithNewFilter = filterQuery !== prevParams.filterQuery;
   const shouldLoadAroundNewPosition =
-    !entriesStart || !entriesEnd || !timeKeyIsBetween(entriesStart, entriesEnd, timeKey);
+    timeKey && (!topCursor || !bottomCursor || !timeKeyIsBetween(topCursor, bottomCursor, timeKey));
   return shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
 };
 
