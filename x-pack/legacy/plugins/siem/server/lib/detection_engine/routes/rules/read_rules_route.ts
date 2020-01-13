@@ -44,17 +44,17 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
         id,
         ruleId,
       });
-      const ruleStatuses = await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>(
-        {
+      if (rule != null) {
+        const ruleStatuses = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
           type: ruleStatusSavedObjectType,
           perPage: 5,
           sortField: 'statusDate',
           sortOrder: 'desc',
           search: `"${rule?.id}"`,
           searchFields: ['alertId'],
-        }
-      );
-      if (rule != null) {
+        });
         return transformOrError(rule, ruleStatuses); // update this to run with an array of rule statuses
       } else {
         return getIdError({ id, ruleId });
