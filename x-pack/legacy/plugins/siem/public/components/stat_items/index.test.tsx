@@ -58,7 +58,7 @@ describe('Stat Items Component', () => {
           <ReduxStoreProvider store={store}>
             <StatItemsComponent
               description="HOSTS"
-              fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+              fields={[{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }]}
               from={from}
               id="statItems"
               index={0}
@@ -78,7 +78,7 @@ describe('Stat Items Component', () => {
               areaChart={[]}
               barChart={[]}
               description="HOSTS"
-              fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+              fields={[{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }]}
               from={from}
               id="statItems"
               index={0}
