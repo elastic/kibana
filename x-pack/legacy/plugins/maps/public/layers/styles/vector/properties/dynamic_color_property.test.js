@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line no-unused-vars
+jest.mock('../components/vector_style_editor', () => ({
+  VectorStyleEditor: () => {
+    return <div>mockVectorStyleEditor</div>;
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
