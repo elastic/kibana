@@ -19,6 +19,9 @@ export function renderApp(
   { element }: AppMountParameters,
   embeddable: Promise<IEmbeddable | undefined>
 ) {
+  /**
+   * The application DOM node should take all available space.
+   */
   element.style.display = 'flex';
   element.style.flexGrow = '1';
 

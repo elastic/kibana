@@ -11,30 +11,45 @@ import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, ProcessEvent } from '../types';
 import * as selectors from '../store/selectors';
 
+/**
+ * A placeholder view for a process node.
+ */
 export const ProcessEventDot = styled(
   React.memo(
     ({
       className,
-      worldPosition,
-      processEvent,
+      position,
+      event,
     }: {
+      /**
+       * A `className` string provided by `styled`
+       */
       className?: string;
-      worldPosition: Vector2;
-      processEvent: ProcessEvent;
+      /**
+       * The positon of the process node, in 'world' coordinates.
+       */
+      position: Vector2;
+      /**
+       * An event which contains details about the process node.
+       */
+      event: ProcessEvent;
     }) => {
+      /**
+       * Convert the position, which is in 'world' coordinates, to screen coordinates.
+       */
       const projectionMatrix = useSelector(selectors.projectionMatrix);
-      const [left, top] = applyMatrix3(worldPosition, projectionMatrix);
+      const [left, top] = applyMatrix3(position, projectionMatrix);
       const style = {
         left: (left - 20).toString() + 'px',
         top: (top - 20).toString() + 'px',
       };
       return (
         <span className={className} style={style}>
-          name: {processEvent.data_buffer.process_name}
+          name: {event.data_buffer.process_name}
           <br />
-          x: {worldPosition[0]}
+          x: {position[0]}
           <br />
-          y: {worldPosition[1]}
+          y: {position[1]}
         </span>
       );
     }
@@ -45,6 +60,9 @@ export const ProcessEventDot = styled(
   height: 40px;
   text-align: left;
   font-size: 10px;
+  /**
+   * Give the element a button-like appearance.
+   */
   user-select: none;
   border: 1px solid black;
   box-sizing: border-box;

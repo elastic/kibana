@@ -144,7 +144,7 @@ const Resolver = styled(
         onMouseDown={handleMouseDown}
       >
         {Array.from(processNodePositions).map(([processEvent, position], index) => (
-          <ProcessEventDot key={index} worldPosition={position} processEvent={processEvent} />
+          <ProcessEventDot key={index} position={position} event={processEvent} />
         ))}
         {edgeLineSegments.map(([startPosition, endPosition], index) => (
           <EdgeLine key={index} startPosition={startPosition} endPosition={endPosition} />
@@ -153,6 +153,9 @@ const Resolver = styled(
     );
   })
 )`
+  /**
+   * Take up all availble space
+   */
   display: flex;
   flex-grow: 1;
   position: relative;
