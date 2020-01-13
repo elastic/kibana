@@ -9,6 +9,7 @@ import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
 import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
+import { FlowTarget } from '../../graphql/types';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
@@ -78,7 +79,11 @@ const NetworkContainerComponent: React.FC<Props> = () => {
               match: {
                 params: { detailName },
               },
-            }) => <Redirect to={`/${SiemPageName.network}/ip/${detailName}/source${search}`} />}
+            }) => (
+              <Redirect
+                to={`/${SiemPageName.network}/ip/${detailName}/${FlowTarget.source}${search}`}
+              />
+            )}
           />
           <Route
             path={`/${SiemPageName.network}/`}
