@@ -36,7 +36,7 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
     {
       method: 'POST',
       credentials: 'same-origin',
-      body: query,
+      body: JSON.stringify(query),
       asResponse: true,
       signal,
     }

@@ -16,9 +16,13 @@ import {
   NewRule,
   Rule,
   FetchRuleProps,
+  BasicFetchProps,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_PREPACKAGED_URL,
+} from '../../../../common/constants';
 
 /**
  * Add provided Rule
@@ -174,4 +178,21 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
 
   await Promise.all(responses.map(response => throwIfNotOk(response.response)));
   return responses.map(response => response.body!);
+};
+
+/**
+ * Create Prepackaged Rules
+ *
+ * @param signal AbortSignal for cancelling request
+ */
+export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
+  const response = await npStart.core.http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
+    method: 'PUT',
+    credentials: 'same-origin',
+    signal,
+    asResponse: true,
+  });
+
+  await throwIfNotOk(response.response);
+  return true;
 };

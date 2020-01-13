@@ -10,7 +10,6 @@ import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { ColumnarPage, PageContent } from '../../components/page';
 import { WithMetricsTime, WithMetricsTimeUrlState } from './containers/with_metrics_time';
-import { InfraNodeType } from '../../graphql/types';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../containers/metadata/use_metadata';
 import { Source } from '../../containers/source';
@@ -19,6 +18,7 @@ import { findInventoryModel } from '../../../common/inventory_models';
 import { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -39,7 +39,7 @@ export const MetricDetail = withMetricPageProviders(
   withTheme(({ match, theme }: Props) => {
     const uiCapabilities = useKibana().services.application?.capabilities;
     const nodeId = match.params.node;
-    const nodeType = match.params.type as InfraNodeType;
+    const nodeType = match.params.type as InventoryItemType;
     const inventoryModel = findInventoryModel(nodeType);
     const { sourceId } = useContext(Source.Context);
     const {
