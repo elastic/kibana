@@ -428,7 +428,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:05:00.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
@@ -462,7 +461,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:05:00.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
@@ -495,7 +493,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:05:00.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
