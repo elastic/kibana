@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { Fingerprints } from './fingerprints';
 import { NetflowColumns } from './netflow_columns';

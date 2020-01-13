@@ -19,6 +19,7 @@
 
 import { writeFile } from 'fs';
 import os from 'os';
+
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -26,10 +27,9 @@ import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
+
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
-
-import { defaults } from 'lodash';
-
 import { IS_KIBANA_DISTRIBUTABLE } from '../legacy/utils';
 import { fromRoot } from '../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
@@ -400,6 +400,10 @@ export default class BaseOptimizer {
         // and not for the webpack compilations performance itself
         hints: false,
       },
+
+      externals: {
+        ...UiSharedDeps.externals,
+      },
     };
 
     // when running from the distributable define an environment variable we can use
@@ -412,17 +416,6 @@ export default class BaseOptimizer {
           },
         }),
       ],
-    };
-
-    // We need to add react-addons (and a few other bits) for enzyme to work.
-    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
-    const supportEnzymeConfig = {
-      externals: {
-        mocha: 'mocha',
-        'react/lib/ExecutionEnvironment': true,
-        'react/addons': true,
-        'react/lib/ReactContext': true,
-      },
     };
 
     const watchingConfig = {
@@ -462,9 +455,7 @@ export default class BaseOptimizer {
       webpackMerge(
         commonConfig,
         IS_KIBANA_DISTRIBUTABLE ? isDistributableConfig : {},
-        this.uiBundles.isDevMode()
-          ? webpackMerge(watchingConfig, supportEnzymeConfig)
-          : productionConfig
+        this.uiBundles.isDevMode() ? watchingConfig : productionConfig
       )
     );
   }
@@ -495,21 +486,18 @@ export default class BaseOptimizer {
   }
 
   failedStatsToError(stats) {
-    const details = stats.toString(
-      defaults(
-        { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
-        Stats.presetToOptions('minimal')
-      )
-    );
+    const details = stats.toString({
+      ...Stats.presetToOptions('minimal'),
+      colors: true,
+      warningsFilter: STATS_WARNINGS_FILTER,
+    });
 
     return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(
-        defaults({
-          warningsFilter: STATS_WARNINGS_FILTER,
-          ...Stats.presetToOptions('detailed'),
-        })
-      )
+      stats.toJson({
+        warningsFilter: STATS_WARNINGS_FILTER,
+        ...Stats.presetToOptions('detailed'),
+      })
     );
   }
 

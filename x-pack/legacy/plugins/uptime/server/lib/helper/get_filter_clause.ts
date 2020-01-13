@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const getRange = (dateRangeStart: string, dateRangeEnd: string) => ({
-  range: {
-    '@timestamp': {
-      gte: dateRangeStart,
-      lte: dateRangeEnd,
-    },
-  },
-});
+import { makeDateRangeFilter } from './make_date_rate_filter';
 
 export const getFilterClause = (
   dateRangeStart: string,
@@ -19,5 +12,5 @@ export const getFilterClause = (
   additionalKeys?: Array<{ [key: string]: any }>
 ) =>
   additionalKeys && additionalKeys.length > 0
-    ? [getRange(dateRangeStart, dateRangeEnd), ...additionalKeys]
-    : [getRange(dateRangeStart, dateRangeEnd)];
+    ? [makeDateRangeFilter(dateRangeStart, dateRangeEnd), ...additionalKeys]
+    : [makeDateRangeFilter(dateRangeStart, dateRangeEnd)];

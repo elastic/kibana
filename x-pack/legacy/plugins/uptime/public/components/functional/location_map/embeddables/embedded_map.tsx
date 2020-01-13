@@ -81,6 +81,8 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
       setEmbeddable(embeddableObject);
     }
     setupEmbeddable();
+    // we want this effect to execute exactly once after the component mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -93,9 +95,8 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     if (embeddableRoot.current && embeddable) {
       embeddable.render(embeddableRoot.current);
     }
-  }, [embeddable]);
+  }, [embeddable, embeddableRoot]);
 
-  
   return (
     <EmbeddedPanel>
       <div className="embPanel__content" ref={embeddableRoot} />

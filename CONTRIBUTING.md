@@ -174,23 +174,121 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
-Start elasticsearch from a nightly snapshot.
+#### Increase node.js heap size
+
+Kibana is a big project and for some commands it can happen that the process hits the default heap limit and crashes with an out-of-memory error. If you run into this problem, you can increase maximum heap size by setting the `--max_old_space_size` option on the command line. To set the limit for all commands, simply add the following line to your shell config: `export NODE_OPTIONS="--max_old_space_size=2048"`.
+
+### Running Elasticsearch Locally
+
+There are a few options when it comes to running Elasticsearch locally:
+
+#### Nightly snapshot (recommended)
+
+These snapshots are built on a nightly basis which expire after a couple weeks. If running from an old, untracted branch this snapshot might not exist. In which case you might need to run from source or an archive.
 
 ```bash
 yarn es snapshot
 ```
 
-This will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.
+##### Keeping data between snapshots
 
-> You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
-
-If you're just getting started with `elasticsearch`, you could use the following command to populate your instance with a few fake logs to hit the ground running.
+If you want to keep the data inside your Elasticsearch between usages of this command,
+you should use the following command, to keep your data folder outside the downloaded snapshot 
+folder:
 
 ```bash
-node scripts/makelogs
+yarn es snapshot -E path.data=../data
 ```
 
+The same parameter can be used with the source and archive command shown in the following
+paragraphs.
+
+#### Source
+
+By default, it will reference an [elasticsearch](https://github.com/elastic/elasticsearch) checkout which is a sibling to the Kibana directory named `elasticsearch`. If you wish to use a checkout in another location you can provide that by supplying `--source-path`
+
+```bash
+yarn es source
+```
+
+#### Archive
+
+Use this if you already have a distributable. For released versions, one can be obtained on the [Elasticsearch downloads](https://www.elastic.co/downloads/elasticsearch) page.
+
+```bash
+yarn es archive <full_path_to_archive>
+```
+
+**Each of these will run Elasticsearch with a `basic` license. Additional options are available, pass `--help` for more information.**
+
+##### Sample Data
+
+If you're just getting started with Elasticsearch, you could use the following command to populate your instance with a few fake logs to hit the ground running.
+
+```bash
+node scripts/makelogs --auth <username>:<password>
+```
+> The default username and password combination are `elastic:changeme`
+
 > Make sure to execute `node scripts/makelogs` *after* elasticsearch is up and running!
+
+### Running Elasticsearch Remotely
+
+You can save some system resources, and the effort of generating sample data, if you have a remote Elasticsearch cluster to connect to. (**Elasticians: you do! Check with your team about where to find credentials**)
+
+You'll need to [create a `kibana.dev.yml`](#customizing-configkibanadevyml) and add the following to it:
+
+```
+elasticsearch.hosts:
+  - {{ url }}
+elasticsearch.username: {{ username }}
+elasticsearch.password: {{ password }}
+elasticsearch.ssl.verificationMode: none
+```
+
+If many other users will be interacting with your remote cluster, you'll want to add the following to avoid causing conflicts:
+
+```
+kibana.index: '.{YourGitHubHandle}-kibana'
+xpack.task_manager.index: '.{YourGitHubHandle}-task-manager-kibana'
+```
+
+### Running remote clusters
+Setup remote clusters for cross cluster search (CCS) and cross cluster replication (CCR).
+
+Start your primary cluster by running:
+```bash
+yarn es snapshot -E path.data=../data_prod1
+```
+
+Start your remote cluster by running:
+```bash
+yarn es snapshot -E transport.port=9500 -E http.port=9201 -E path.data=../data_prod2
+```
+
+Once both clusters are running, start kibana. Kibana will connect to the primary cluster.
+
+Setup the remote cluster in Kibana from either `Management` -> `Elasticsearch` -> `Remote Clusters` UI or by running the following script in `Console`.
+```
+PUT _cluster/settings
+{
+  "persistent": {
+    "cluster": {
+      "remote": {
+        "cluster_one": {
+          "seeds": [
+            "localhost:9500"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+Follow the [cross-cluster search](https://www.elastic.co/guide/en/kibana/current/management-cross-cluster-search.html) instructions for setting up index patterns to search across clusters.
+
+### Running Kibana
 
 Start the development server.
 
@@ -198,9 +296,11 @@ Start the development server.
 yarn start
 ```
 
-> On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
+> On Windows, you'll need to use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
 Now you can point your web browser to http://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+
+By default, you can log in with username `elastic` and password `changeme`. See the `--help` options on `yarn es <command>` if you'd like to configure a different password.
 
 #### Running Kibana in Open-Source mode
 
@@ -261,12 +361,12 @@ Another tool we use for enforcing consistent coding style is EditorConfig, which
 Note that for VSCode, to enable "live" linting of TypeScript (and other) file types, you will need to modify your local settings, as shown below.  The default for the ESLint extension is to only lint JavaScript file types.
 
 ```json
-   "eslint.validate": [
-        "javascript",
-        "javascriptreact",
-        "typescript",
-        "typescriptreact",
-    ]
+"eslint.validate": [
+  "javascript",
+  "javascriptreact",
+  { "language": "typescript", "autoFix": true },
+  { "language": "typescriptreact", "autoFix": true }
+]
 ```
 
 `eslint` can automatically fix trivial lint errors when you save a file by adding this line in your setting.
@@ -293,7 +393,7 @@ ReactDOM.render(
 );
 ```
 
-There is a number of tools was created to support internationalization in Kibana that would allow one to validate internationalized labels, 
+There are a number of tools created to support internationalization in Kibana that would allow one to validate internationalized labels,
 extract them to a `JSON` file or integrate translations back to Kibana. To know more, please read corresponding [readme](src/dev/i18n/README.md) file.
 
 ### Testing and Building
@@ -359,10 +459,11 @@ The following table outlines possible test file locations and how to invoke them
 
 | Test runner        | Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
 | -----------------  | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                                  |
+| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                               |
 | Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
-| Mocha              | `src/**/__tests__/**/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`                                          |
-| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`                                                                                     | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
+| Mocha              | `src/**/__tests__/**/*.js`<br>`!src/**/public/__tests__/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`       |
+| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`<br>`test/accessibility/config.js`                                                                                    | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
+| Karma              | `src/**/public/__tests__/*.js`                                                                                                                          | `npm run test:dev`                                                                      |
 
 For X-Pack tests located in `x-pack/` see [X-Pack Testing](x-pack/README.md#testing)
 
@@ -432,7 +533,7 @@ In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. Y
 
 ### Unit Testing Plugins
 
-This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/generator-kibana-plugin). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
+This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
 
 To run the tests for just your particular plugin run the following command from your plugin:
 
@@ -454,6 +555,7 @@ yarn test:browser --dev # remove the --dev flag to run them once and close
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
 * Run Kibana with `yarn start --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
+* Alternatively you can use browserstack
 
 #### Running Browser Automation Tests
 
@@ -498,7 +600,8 @@ node scripts/docs.js --open
 
 Part of this process only applies to maintainers, since it requires access to GitHub labels.
 
-Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html). To include your change in the Release Notes:
+Kibana publishes major, minor and patch releases periodically through the year. During this process we run a script against this repo to collect the applicable PRs against that release and generate [Release Notes](https://www.elastic.co/guide/en/kibana/current/release-notes.html).
+To include your change in the Release Notes:
 
 1. In the title, summarize what the PR accomplishes in language that is meaningful to the user.  In general, use present tense (for example, Adds, Fixes) in sentence case.
 2. Label the PR with the targeted version (ex: `v7.3.0`).

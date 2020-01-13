@@ -7,7 +7,7 @@
 import { combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
-  IClusterClient,
+  ICustomClusterClient,
   CoreSetup,
   KibanaRequest,
   Logger,
@@ -86,7 +86,7 @@ export interface PluginSetupDependencies {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private clusterClient?: IClusterClient;
+  private clusterClient?: ICustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
 
