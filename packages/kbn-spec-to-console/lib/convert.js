@@ -52,7 +52,6 @@ module.exports = spec => {
 
     if (source.url.paths) {
       const paths = source.url.paths.filter(path => !path.deprecated);
-      paths.forEach(p => console.log(p.deprecated));
       patterns = convertPaths(paths);
       paths.forEach(pathsObject => {
         pathsObject.methods.forEach(method => methodSet.add(method));
