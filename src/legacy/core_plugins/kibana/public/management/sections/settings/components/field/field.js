@@ -19,6 +19,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { npStart } from 'ui/new_platform';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
@@ -570,15 +571,28 @@ export class Field extends PureComponent {
     let deprecation;
 
     if (setting.deprecation) {
+      const { links } = npStart.core.docLinks;
+      let badgeUrl = setting.deprecation.url;
+      if (setting.deprecation.docLinksKey) {
+        badgeUrl = links.management[setting.deprecation.docLinksKey];
+      }
       deprecation = (
         <>
           <EuiToolTip content={setting.deprecation.message}>
             <EuiBadge
               color="warning"
               onClick={() => {
-                window.open(setting.deprecation.url, '_blank');
+                badgeUrl && window.open(badgeUrl, '_blank');
               }}
-              onClickAriaLabel="Click to view deprecation documentation for this setting."
+              onClickAriaLabel={i18n.translate(
+                'kbn.management.settings.field.deprecationClickAreaLabel',
+                {
+                  defaultMessage: 'Click to view deprecation documentation for {settingName}.',
+                  values: {
+                    settingName: setting.name,
+                  },
+                }
+              )}
             >
               Deprecated
             </EuiBadge>
