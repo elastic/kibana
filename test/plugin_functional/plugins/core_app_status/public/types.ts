@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreAppStatusPluginStart } from './public/plugin';
+import { CoreAppStatusPluginStart } from './plugin';
 
 declare global {
   interface Window {

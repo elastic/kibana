@@ -24,7 +24,7 @@ import {
   AppUpdatableFields,
 } from '../../../../src/core/public/application/types';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../plugins/core_app_status/types';
+import '../../plugins/core_app_status/public/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
