@@ -9,24 +9,13 @@ import _ from 'lodash';
 const EMPTY_VALUE = '';
 
 export class CategoricalLegend extends React.Component {
-  constructor() {
-    super();
-    this._isMounted = false;
-    this.state = {
-      label: EMPTY_VALUE,
-      isPointsOnly: null,
-      isLinesOnly: null,
-    };
-  }
+  state = {
+    label: EMPTY_VALUE,
+  };
 
-  async _loadParams() {
-    const label = await this.props.style.getField().getLabel();
-    const isLinesOnly = await this.props.loadIsLinesOnly();
-    const isPointsOnly = await this.props.loadIsPointsOnly();
-    const newState = { label, isLinesOnly, isPointsOnly };
-    if (this._isMounted && !_.isEqual(this.state, newState)) {
-      this.setState(newState);
-    }
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadParams();
   }
 
   componentDidUpdate() {
@@ -37,9 +26,12 @@ export class CategoricalLegend extends React.Component {
     this._isMounted = false;
   }
 
-  componentDidMount() {
-    this._isMounted = true;
-    this._loadParams();
+  async _loadParams() {
+    const label = await this.props.style.getField().getLabel();
+    const newState = { label };
+    if (this._isMounted && !_.isEqual(this.state, newState)) {
+      this.setState(newState);
+    }
   }
 
   render() {
@@ -48,8 +40,8 @@ export class CategoricalLegend extends React.Component {
     }
     return this.props.style.renderBreakedLegend({
       fieldLabel: this.state.label,
-      isLinesOnly: this.state.isLinesOnly,
-      isPointsOnly: this.state.isPointsOnly,
+      isLinesOnly: this.props.isLinesOnly,
+      isPointsOnly: this.props.isPointsOnly,
       symbolId: this.props.symbolId,
     });
   }

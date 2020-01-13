@@ -63,7 +63,7 @@ export interface ChromeNavLink {
   /** LEGACY FIELDS */
 
   /**
-   * A url base that legacy apps can set to match deep URLs to an applcation.
+   * A url base that legacy apps can set to match deep URLs to an application.
    *
    * @internalRemarks
    * This should be removed once legacy apps are gone.
