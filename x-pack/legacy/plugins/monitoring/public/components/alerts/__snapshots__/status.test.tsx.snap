@@ -28,7 +28,6 @@ exports[`Status should render a flyout when clicking the link 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <AlertsConfiguration
-      ccs=""
       emailAddress="test@elastic.co"
       onDone={[Function]}
     />
