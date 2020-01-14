@@ -3,7 +3,7 @@
 exports[`when response has data Initially should have 3 legends  1`] = `
 Array [
   Object {
-    "color": "#3185fc",
+    "color": "#6092c0",
     "disabled": undefined,
     "onClick": [Function],
     "text": <ForwardRef(styled.span)>
@@ -14,7 +14,7 @@ Array [
     </ForwardRef(styled.span)>,
   },
   Object {
-    "color": "#e6c220",
+    "color": "#fae181",
     "disabled": undefined,
     "onClick": [Function],
     "text": <ForwardRef(styled.span)>
@@ -22,7 +22,7 @@ Array [
     </ForwardRef(styled.span)>,
   },
   Object {
-    "color": "#f98510",
+    "color": "#f19f58",
     "disabled": undefined,
     "onClick": [Function],
     "text": <ForwardRef(styled.span)>
@@ -442,7 +442,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#f98510",
+                  "stroke": "#f19f58",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -463,9 +463,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -480,9 +480,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -497,9 +497,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -514,9 +514,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -531,9 +531,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -548,9 +548,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -565,9 +565,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -582,9 +582,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -599,9 +599,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -616,9 +616,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -633,9 +633,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -650,9 +650,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -667,9 +667,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -684,9 +684,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -701,9 +701,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -718,9 +718,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -735,9 +735,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -752,9 +752,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -769,9 +769,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -786,9 +786,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -803,9 +803,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -820,9 +820,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -837,9 +837,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -854,9 +854,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -871,9 +871,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -888,9 +888,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -905,9 +905,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -922,9 +922,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -939,9 +939,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -956,9 +956,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -973,9 +973,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -995,7 +995,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#e6c220",
+                  "stroke": "#fae181",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -1016,9 +1016,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1033,9 +1033,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1050,9 +1050,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1067,9 +1067,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1084,9 +1084,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1101,9 +1101,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1118,9 +1118,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1135,9 +1135,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1152,9 +1152,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1169,9 +1169,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1186,9 +1186,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1203,9 +1203,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1220,9 +1220,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1237,9 +1237,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1254,9 +1254,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1271,9 +1271,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1288,9 +1288,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1305,9 +1305,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1322,9 +1322,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1339,9 +1339,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1356,9 +1356,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1373,9 +1373,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1390,9 +1390,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1407,9 +1407,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1424,9 +1424,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1441,9 +1441,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1458,9 +1458,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1475,9 +1475,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1492,9 +1492,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1509,9 +1509,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1526,9 +1526,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -1548,7 +1548,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#3185fc",
+                  "stroke": "#6092c0",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -1569,9 +1569,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1586,9 +1586,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1603,9 +1603,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1620,9 +1620,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1637,9 +1637,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1654,9 +1654,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1671,9 +1671,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1688,9 +1688,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1705,9 +1705,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1722,9 +1722,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1739,9 +1739,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1756,9 +1756,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1773,9 +1773,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1790,9 +1790,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1807,9 +1807,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1824,9 +1824,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1841,9 +1841,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1858,9 +1858,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1875,9 +1875,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1892,9 +1892,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1909,9 +1909,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1926,9 +1926,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1943,9 +1943,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1960,9 +1960,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1977,9 +1977,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -1994,9 +1994,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -2011,9 +2011,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -2028,9 +2028,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -2045,9 +2045,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -2062,9 +2062,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -2079,9 +2079,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -2651,7 +2651,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #3185fc;
+  background: #6092c0;
   border-radius: 100%;
 }
 
@@ -2659,7 +2659,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #e6c220;
+  background: #fae181;
   border-radius: 100%;
 }
 
@@ -2667,7 +2667,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #f98510;
+  background: #f19f58;
   border-radius: 100%;
 }
 
@@ -2723,14 +2723,14 @@ Array [
           onClick={[Function]}
         >
           <styled.span
-            color="#3185fc"
+            color="#6092c0"
             radius={11}
             shape="circle"
             withMargin={true}
           >
             <span
               className="c2"
-              color="#3185fc"
+              color="#6092c0"
               radius={11}
               shape="circle"
             />
@@ -2764,14 +2764,14 @@ Array [
           onClick={[Function]}
         >
           <styled.span
-            color="#e6c220"
+            color="#fae181"
             radius={11}
             shape="circle"
             withMargin={true}
           >
             <span
               className="c5"
-              color="#e6c220"
+              color="#fae181"
               radius={11}
               shape="circle"
             />
@@ -2798,14 +2798,14 @@ Array [
           onClick={[Function]}
         >
           <styled.span
-            color="#f98510"
+            color="#f19f58"
             radius={11}
             shape="circle"
             withMargin={true}
           >
             <span
               className="c6"
-              color="#f98510"
+              color="#f19f58"
               radius={11}
               shape="circle"
             />
@@ -2849,17 +2849,17 @@ exports[`when response has data when dragging without releasing should display S
 exports[`when response has data when setting hoverX should display tooltip 1`] = `
 Array [
   Object {
-    "color": "#3185fc",
+    "color": "#6092c0",
     "text": "Avg.",
     "value": 438704.4,
   },
   Object {
-    "color": "#e6c220",
+    "color": "#fae181",
     "text": "95th",
     "value": 1557383.999999999,
   },
   Object {
-    "color": "#f98510",
+    "color": "#f19f58",
     "text": "99th",
     "value": 1820377.1200000006,
   },
@@ -2891,7 +2891,7 @@ Array [
   width: 8px;
   height: 8px;
   margin-right: 4px;
-  background: #3185fc;
+  background: #6092c0;
   border-radius: 100%;
 }
 
@@ -2899,7 +2899,7 @@ Array [
   width: 8px;
   height: 8px;
   margin-right: 4px;
-  background: #e6c220;
+  background: #fae181;
   border-radius: 100%;
 }
 
@@ -2907,7 +2907,7 @@ Array [
   width: 8px;
   height: 8px;
   margin-right: 4px;
-  background: #f98510;
+  background: #f19f58;
   border-radius: 100%;
 }
 
@@ -3378,7 +3378,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#f98510",
+                  "stroke": "#f19f58",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -3399,9 +3399,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3416,9 +3416,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3433,9 +3433,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3450,9 +3450,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3467,9 +3467,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3484,9 +3484,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3501,9 +3501,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3518,9 +3518,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3535,9 +3535,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3552,9 +3552,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3569,9 +3569,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3586,9 +3586,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3603,9 +3603,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3620,9 +3620,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3637,9 +3637,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3654,9 +3654,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3671,9 +3671,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3688,9 +3688,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3705,9 +3705,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3722,9 +3722,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3739,9 +3739,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3756,9 +3756,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3773,9 +3773,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3790,9 +3790,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3807,9 +3807,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3824,9 +3824,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3841,9 +3841,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3858,9 +3858,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3875,9 +3875,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3892,9 +3892,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3909,9 +3909,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#f98510",
+                    "fill": "#f19f58",
                     "opacity": 1,
-                    "stroke": "#f98510",
+                    "stroke": "#f19f58",
                     "strokeWidth": 1,
                   }
                 }
@@ -3931,7 +3931,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#e6c220",
+                  "stroke": "#fae181",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -3952,9 +3952,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -3969,9 +3969,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -3986,9 +3986,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4003,9 +4003,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4020,9 +4020,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4037,9 +4037,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4054,9 +4054,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4071,9 +4071,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4088,9 +4088,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4105,9 +4105,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4122,9 +4122,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4139,9 +4139,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4156,9 +4156,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4173,9 +4173,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4190,9 +4190,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4207,9 +4207,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4224,9 +4224,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4241,9 +4241,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4258,9 +4258,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4275,9 +4275,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4292,9 +4292,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4309,9 +4309,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4326,9 +4326,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4343,9 +4343,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4360,9 +4360,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4377,9 +4377,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4394,9 +4394,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4411,9 +4411,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4428,9 +4428,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4445,9 +4445,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4462,9 +4462,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#e6c220",
+                    "fill": "#fae181",
                     "opacity": 1,
-                    "stroke": "#e6c220",
+                    "stroke": "#fae181",
                     "strokeWidth": 1,
                   }
                 }
@@ -4484,7 +4484,7 @@ Array [
               style={
                 Object {
                   "opacity": 1,
-                  "stroke": "#3185fc",
+                  "stroke": "#6092c0",
                   "strokeDasharray": undefined,
                   "strokeWidth": undefined,
                 }
@@ -4505,9 +4505,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4522,9 +4522,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4539,9 +4539,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4556,9 +4556,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4573,9 +4573,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4590,9 +4590,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4607,9 +4607,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4624,9 +4624,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4641,9 +4641,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4658,9 +4658,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4675,9 +4675,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4692,9 +4692,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4709,9 +4709,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4726,9 +4726,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4743,9 +4743,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4760,9 +4760,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4777,9 +4777,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4794,9 +4794,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4811,9 +4811,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4828,9 +4828,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4845,9 +4845,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4862,9 +4862,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4879,9 +4879,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4896,9 +4896,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4913,9 +4913,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4930,9 +4930,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4947,9 +4947,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4964,9 +4964,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4981,9 +4981,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -4998,9 +4998,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -5015,9 +5015,9 @@ Array [
                 r={0.5}
                 style={
                   Object {
-                    "fill": "#3185fc",
+                    "fill": "#6092c0",
                     "opacity": 1,
-                    "stroke": "#3185fc",
+                    "stroke": "#6092c0",
                     "strokeWidth": 1,
                   }
                 }
@@ -5072,9 +5072,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#f98510",
+                  "fill": "#f19f58",
                   "opacity": 1,
-                  "stroke": "#f98510",
+                  "stroke": "#f19f58",
                   "strokeWidth": 1,
                 }
               }
@@ -5089,9 +5089,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#e6c220",
+                  "fill": "#fae181",
                   "opacity": 1,
-                  "stroke": "#e6c220",
+                  "stroke": "#fae181",
                   "strokeWidth": 1,
                 }
               }
@@ -5106,9 +5106,9 @@ Array [
               r={5}
               style={
                 Object {
-                  "fill": "#3185fc",
+                  "fill": "#6092c0",
                   "opacity": 1,
-                  "stroke": "#3185fc",
+                  "stroke": "#6092c0",
                   "strokeWidth": 1,
                 }
               }
@@ -5158,7 +5158,7 @@ Array [
                       className="c3"
                     >
                       <Styled(Legend)
-                        color="#3185fc"
+                        color="#6092c0"
                         radius={8}
                         text="Avg."
                       >
@@ -5174,14 +5174,14 @@ Array [
                             fontSize="12px"
                           >
                             <styled.span
-                              color="#3185fc"
+                              color="#6092c0"
                               radius={8}
                               shape="circle"
                               withMargin={true}
                             >
                               <span
                                 className="c6"
-                                color="#3185fc"
+                                color="#6092c0"
                                 radius={8}
                                 shape="circle"
                               />
@@ -5204,7 +5204,7 @@ Array [
                       className="c3"
                     >
                       <Styled(Legend)
-                        color="#e6c220"
+                        color="#fae181"
                         radius={8}
                         text="95th"
                       >
@@ -5220,14 +5220,14 @@ Array [
                             fontSize="12px"
                           >
                             <styled.span
-                              color="#e6c220"
+                              color="#fae181"
                               radius={8}
                               shape="circle"
                               withMargin={true}
                             >
                               <span
                                 className="c8"
-                                color="#e6c220"
+                                color="#fae181"
                                 radius={8}
                                 shape="circle"
                               />
@@ -5250,7 +5250,7 @@ Array [
                       className="c3"
                     >
                       <Styled(Legend)
-                        color="#f98510"
+                        color="#f19f58"
                         radius={8}
                         text="99th"
                       >
@@ -5266,14 +5266,14 @@ Array [
                             fontSize="12px"
                           >
                             <styled.span
-                              color="#f98510"
+                              color="#f19f58"
                               radius={8}
                               shape="circle"
                               withMargin={true}
                             >
                               <span
                                 className="c9"
-                                color="#f98510"
+                                color="#f19f58"
                                 radius={8}
                                 shape="circle"
                               />
@@ -5830,7 +5830,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #3185fc;
+  background: #6092c0;
   border-radius: 100%;
 }
 
@@ -5838,7 +5838,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #e6c220;
+  background: #fae181;
   border-radius: 100%;
 }
 
@@ -5846,7 +5846,7 @@ Array [
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
-  background: #f98510;
+  background: #f19f58;
   border-radius: 100%;
 }
 
@@ -5902,14 +5902,14 @@ Array [
           onClick={[Function]}
         >
           <styled.span
-            color="#3185fc"
+            color="#6092c0"
             radius={11}
             shape="circle"
             withMargin={true}
           >
             <span
               className="c2"
-              color="#3185fc"
+              color="#6092c0"
               radius={11}
               shape="circle"
             />
@@ -5943,14 +5943,14 @@ Array [
           onClick={[Function]}
         >
           <styled.span
-            color="#e6c220"
+            color="#fae181"
             radius={11}
             shape="circle"
             withMargin={true}
           >
             <span
               className="c5"
-              color="#e6c220"
+              color="#fae181"
               radius={11}
               shape="circle"
             />
@@ -5977,14 +5977,14 @@ Array [
           onClick={[Function]}
         >
           <styled.span
-            color="#f98510"
+            color="#f19f58"
             radius={11}
             shape="circle"
             withMargin={true}
           >
             <span
               className="c6"
-              color="#f98510"
+              color="#f19f58"
               radius={11}
               shape="circle"
             />
