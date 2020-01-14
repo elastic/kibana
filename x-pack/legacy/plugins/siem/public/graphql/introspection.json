@@ -703,6 +703,12 @@
                   "ofType": { "kind": "INPUT_OBJECT", "name": "TimerangeInput", "ofType": null }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -714,7 +720,7 @@
             "deprecationReason": null
           },
           {
-            "name": "AnomaliesOverTime",
+            "name": "AnomaliesHistogram",
             "description": "",
             "args": [
               {
@@ -749,6 +755,12 @@
                     }
                   }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -822,7 +834,7 @@
             "deprecationReason": null
           },
           {
-            "name": "AuthenticationsOverTime",
+            "name": "AuthenticationsHistogram",
             "description": "",
             "args": [
               {
@@ -857,6 +869,12 @@
                     }
                   }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -1058,7 +1076,7 @@
             "deprecationReason": null
           },
           {
-            "name": "EventsOverTime",
+            "name": "EventsHistogram",
             "description": "",
             "args": [
               {
@@ -1093,6 +1111,12 @@
                     }
                   }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -1832,6 +1856,12 @@
                     "ofType": null
                   }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "stackByField",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               },
               {
@@ -2599,7 +2629,7 @@
             "deprecationReason": null
           },
           {
-            "name": "alertsOverTimeByModule",
+            "name": "matrixHistogramData",
             "description": "",
             "args": [],
             "type": {
@@ -2752,7 +2782,7 @@
             "deprecationReason": null
           },
           {
-            "name": "anomaliesOverTime",
+            "name": "matrixHistogramData",
             "description": "",
             "args": [],
             "type": {
@@ -3516,7 +3546,7 @@
             "deprecationReason": null
           },
           {
-            "name": "authenticationsOverTime",
+            "name": "matrixHistogramData",
             "description": "",
             "args": [],
             "type": {
@@ -6235,7 +6265,7 @@
             "deprecationReason": null
           },
           {
-            "name": "eventsOverTime",
+            "name": "matrixHistogramData",
             "description": "",
             "args": [],
             "type": {
