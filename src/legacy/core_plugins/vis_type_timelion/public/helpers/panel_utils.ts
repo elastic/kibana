@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, defaults, merge } from 'lodash';
+import { cloneDeep, defaults, merge, compact } from 'lodash';
 import moment, { Moment } from 'moment-timezone';
 
 import { TimefilterContract } from 'src/plugins/data/public';
@@ -67,7 +67,7 @@ const colors = [
 const SERIES_ID_ATTR = 'data-series-id';
 
 function buildSeriesData(chart: Series[], options: jquery.flot.plotOptions) {
-  return chart.map((series: Series, seriesIndex: number) => {
+  const seriesData = chart.map((series: Series, seriesIndex: number) => {
     const newSeries: Series = cloneDeep(
       defaults(series, {
         shadowSize: 0,
@@ -106,6 +106,8 @@ function buildSeriesData(chart: Series[], options: jquery.flot.plotOptions) {
 
     return newSeries;
   });
+
+  return compact(seriesData);
 }
 
 function buildOptions(
@@ -139,6 +141,15 @@ function buildOptions(
       // Use moment to format ticks so we get timezone correction
       tickFormatter: (val: number) => moment(val).format(format),
     },
+    selection: {
+      mode: 'x',
+      color: '#ccc',
+    },
+    crosshair: {
+      mode: 'x',
+      color: '#C66',
+      lineWidth: 2,
+    },
     colors,
     grid: {
       show: showGrid,
@@ -169,7 +180,7 @@ function buildOptions(
         return wrapperSpan.outerHTML;
       },
     },
-  };
+  } as jquery.flot.plotOptions;
 
   return options;
 }

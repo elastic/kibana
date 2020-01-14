@@ -73,9 +73,9 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   const [canvasElem, setCanvasElem] = useState();
   const [chartElem, setChartElem] = useState();
 
-  const [originalColorMap, setOriginalColorMap] = useState(() => new Map());
+  const [originalColorMap, setOriginalColorMap] = useState(() => new Map<Series, string>());
 
-  const [highlightedSeries, setHighlightedSeries] = useState();
+  const [highlightedSeries, setHighlightedSeries] = useState<number | null>(null);
   const [focusedSeries, setFocusedSeries] = useState();
   const [plot, setPlot] = useState();
 
@@ -105,41 +105,6 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     [chartElem]
   );
 
-  useEffect(() => {
-    setChart(
-      seriesList.list.map((series: Series, seriesIndex: number) => {
-        const newSeries = { ...series };
-        if (!newSeries.color) {
-          const colorIndex = seriesIndex % colors.length;
-          newSeries.color = colors[colorIndex];
-        }
-        // setting originalColorMap
-        setOriginalColorMap(stateMap => new Map(stateMap.set(newSeries, newSeries.color)));
-        return newSeries;
-      })
-    );
-  }, [seriesList.list]);
-
-  useEffect(() => {
-    if (plot && get(plot.getData(), '[0]._global.legend.showTime', true)) {
-      const caption = $('<caption class="timChart__legendCaption"></caption>');
-      caption.html(emptyCaption);
-      setLegendCaption(caption);
-
-      const canvasNode = $(canvasElem);
-      canvasNode.find('div.legend table').append(caption);
-      setLegendValueNumbers(canvasNode.find('.ngLegendValueNumber'));
-
-      // legend has been re-created. Apply focus on legend element when previously set
-      if (focusedSeries || focusedSeries === 0) {
-        canvasNode
-          .find('div.legend table .legendLabel>span')
-          .get(focusedSeries)
-          .focus();
-      }
-    }
-  }, [plot, focusedSeries, canvasElem]);
-
   const highlightSeries = useCallback(
     debounce(({ currentTarget }: JQuery.TriggeredEvent) => {
       const id = Number(currentTarget.getAttribute(SERIES_ID_ATTR));
@@ -150,16 +115,16 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
       setHighlightedSeries(id);
       setChart(chartState =>
         chartState.map((series: Series, seriesIndex: number) => {
-          const color =
+          series.color =
             seriesIndex === id
               ? originalColorMap.get(series) // color it like it was
               : 'rgba(128,128,128,0.1)'; // mark as grey
 
-          return { ...series, color };
+          return series;
         })
       );
     }, DEBOUNCE_DELAY),
-    [highlightedSeries, originalColorMap]
+    [originalColorMap, highlightedSeries]
   );
 
   const focusSeries = useCallback(
@@ -173,53 +138,86 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   const toggleSeries = useCallback(({ currentTarget }: JQuery.TriggeredEvent) => {
     const id = Number(currentTarget.getAttribute(SERIES_ID_ATTR));
+
     setChart(chartState =>
       chartState.map((series: Series, seriesIndex: number) => {
-        return seriesIndex === id ? { ...series, _hide: !series._hide } : { ...series };
+        if (seriesIndex === id) {
+          series._hide = !series._hide;
+        }
+        return series;
       })
     );
   }, []);
 
-  const options = useMemo(
-    () =>
-      buildOptions(
-        interval,
-        kibana.services.timefilter,
-        kibana.services.uiSettings,
-        chartElem && chartElem.clientWidth,
-        seriesList.render.grid
-      ),
-    [seriesList.render.grid, interval, chartElem, kibana.services]
+  const updateCaption = useCallback(
+    (plotData: any) => {
+      if (get(plotData, '[0]._global.legend.showTime', true)) {
+        const caption = $('<caption class="timChart__legendCaption"></caption>');
+        caption.html(emptyCaption);
+        setLegendCaption(caption);
+
+        const canvasNode = $(canvasElem);
+        canvasNode.find('div.legend table').append(caption);
+        setLegendValueNumbers(canvasNode.find('.ngLegendValueNumber'));
+
+        const legend = $(canvasElem).find('.ngLegendValue');
+        if (legend) {
+          legend.click(toggleSeries);
+          legend.focus(focusSeries);
+          legend.mouseover(highlightSeries);
+        }
+
+        // legend has been re-created. Apply focus on legend element when previously set
+        if (focusedSeries || focusedSeries === 0) {
+          canvasNode
+            .find('div.legend table .legendLabel>span')
+            .get(focusedSeries)
+            .focus();
+        }
+      }
+    },
+    [focusedSeries, canvasElem, toggleSeries, focusSeries, highlightSeries]
   );
 
-  const updatedSeries = useMemo(() => buildSeriesData(chart, options), [chart, options]);
+  const updatePlot = useCallback(
+    (chartValue: Series[], grid?: boolean) => {
+      if (canvasElem && canvasElem.clientWidth > 0 && canvasElem.clientHeight > 0) {
+        const options = buildOptions(
+          interval,
+          kibana.services.timefilter,
+          kibana.services.uiSettings,
+          chartElem && chartElem.clientWidth,
+          grid
+        );
+        const updatedSeries = buildSeriesData(chartValue, options);
+        const newPlot = $.plot(canvasElem, updatedSeries, options);
+        setPlot(newPlot);
+        renderComplete();
 
-  useEffect(() => {
-    if (canvasElem && canvasElem.clientWidth > 0 && canvasElem.clientHeight > 0) {
-      // @ts-ignore
-      setPlot($.plot(canvasElem, compact(updatedSeries), options));
-      renderComplete();
-
-      const legend = $(canvasElem).find('.ngLegendValue');
-      if (legend) {
-        legend.click(toggleSeries);
-        legend.focus(focusSeries);
-        legend.mouseover(highlightSeries);
+        updateCaption(newPlot.getData());
       }
-    }
-  }, [
-    canvasElem,
-    options,
-    updatedSeries,
-    toggleSeries,
-    focusSeries,
-    highlightSeries,
-    renderComplete,
-  ]);
+    },
+    [canvasElem, chartElem, renderComplete, kibana.services, interval, updateCaption]
+  );
 
   useEffect(() => {
-    moment.tz.setDefault(kibana.services.uiSettings.get('dateFormat:tz'));
-  }, [kibana.services.uiSettings]);
+    updatePlot(chart, seriesList.render.grid);
+  }, [chart, updatePlot, seriesList.render.grid]);
+
+  useEffect(() => {
+    const colorsSet: Array<[Series, string]> = [];
+    const newChart = seriesList.list.map((series: Series, seriesIndex: number) => {
+      const newSeries = { ...series };
+      if (!newSeries.color) {
+        const colorIndex = seriesIndex % colors.length;
+        newSeries.color = colors[colorIndex];
+      }
+      colorsSet.push([newSeries, newSeries.color]);
+      return newSeries;
+    });
+    setChart(newChart);
+    setOriginalColorMap(new Map(colorsSet));
+  }, [seriesList.list, seriesList.render.grid]);
 
   const unhighlightSeries = useCallback(() => {
     if (highlightedSeries === null) {
@@ -228,9 +226,11 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
     setHighlightedSeries(null);
     setFocusedSeries(null);
+
     setChart(chartState =>
       chartState.map((series: Series) => {
-        return { ...series, color: originalColorMap.get(series) }; // reset the colors
+        series.color = originalColorMap.get(series); // reset the colors
+        return series;
       })
     );
   }, [originalColorMap, highlightedSeries]);
@@ -284,7 +284,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
         }
       }
     },
-    [unhighlightSeries, legendCaption, legendValueNumbers, plot]
+    [plot, legendValueNumbers, unhighlightSeries, legendCaption]
   );
 
   const debouncedSetLegendNumbers = useCallback(
@@ -335,20 +335,31 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
 
   useEffect(() => {
     if (chartElem) {
-      const $chart = $(chartElem);
-      $chart
+      $(chartElem)
         .off('plotselected')
-        .off('plothover')
-        .off('mouseleave');
+        .on('plotselected', plotSelectedHandler);
+    }
+  }, [chartElem, plotSelectedHandler]);
 
-      $chart
-        .on('plotselected', plotSelectedHandler)
-        .on('plothover', plotHoverHandler)
+  useEffect(() => {
+    if (chartElem) {
+      $(chartElem)
+        .off('mouseleave')
         .on('mouseleave', mouseLeaveHandler);
     }
-  }, [chartElem, plotSelectedHandler, plotHoverHandler, mouseLeaveHandler]);
+  }, [chartElem, mouseLeaveHandler]);
 
-  const title: string = useMemo(() => last(compact(map(chart, '_title'))) || '', [chart]);
+  useEffect(() => {
+    if (chartElem) {
+      $(chartElem)
+        .off('plothover')
+        .on('plothover', plotHoverHandler);
+    }
+  }, [chartElem, plotHoverHandler]);
+
+  const title: string = useMemo(() => last(compact(map(seriesList.list, '_title'))) || '', [
+    seriesList.list,
+  ]);
 
   return (
     <div ref={elementRef} className="timChart">
