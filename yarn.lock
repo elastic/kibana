@@ -1398,7 +1398,7 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@elastic/ems-client@^7.6.0":
+"@elastic/ems-client@7.6.0":
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.6.0.tgz#ca548aba1a1f5170a1892de129b537b5248c74be"
   integrity sha512-oBtLH24qIgTaMhlSske49FTd35Y0nv+PlZCZaHkBhOH+ScsTDL3LO2lbIcSmcYQod43Ly34v/xwJvFCTxojVEQ==
