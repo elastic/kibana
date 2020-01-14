@@ -14,7 +14,9 @@ import { ColorStopsCategorical } from './color_stops_categorical';
 const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 
 export class ColorMapSelect extends Component {
-  state = {};
+  state = {
+    selected: null,
+  };
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.customColorMap === prevState.prevPropsCustomColorMap) {
@@ -56,20 +58,41 @@ export class ColorMapSelect extends Component {
     this.props.onChange(newProps);
   };
 
-  componentDidUpdate(prevProps) {
-    if (!prevProps.useCustomColorMap) {
-      if (!prevProps.colorMapOptions.find(option => option.value === prevProps.color)) {
-        const nw = this.props.colorMapOptions[0].value;
-        this._onColorMapSelect(nw);
+  componentDidMount() {
+    this._updateSelected();
+  }
+
+  componentDidUpdate() {
+    this._updateSelected();
+  }
+
+  _updateSelected() {
+    const { color, useCustomColorMap, colorMapOptions } = this.props;
+    let valueOfSelected;
+    let shouldUpdate = false;
+    if (useCustomColorMap) {
+      valueOfSelected = CUSTOM_COLOR_MAP;
+    } else {
+      if (colorMapOptions.find(option => option.value === color)) {
+        valueOfSelected = color;
+      } else {
+        valueOfSelected = colorMapOptions[0].value;
+        shouldUpdate = true;
       }
+    }
+
+    if (this.state.selected !== valueOfSelected) {
+      this.setState({ selected: valueOfSelected }, () => {
+        if (shouldUpdate) {
+          this._onColorMapSelect(valueOfSelected);
+        }
+      });
     }
   }
 
   render() {
-    const { color, useCustomColorMap } = this.props;
-
     let colorStopsInput;
-    if (useCustomColorMap) {
+    if (this.props.useCustomColorMap) {
       if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
         colorStopsInput = (
           <Fragment>
@@ -93,7 +116,6 @@ export class ColorMapSelect extends Component {
       }
     }
 
-    let valueOfSelected;
     const colorMapOptionsWithCustom = [
       {
         value: CUSTOM_COLOR_MAP,
@@ -102,22 +124,12 @@ export class ColorMapSelect extends Component {
       ...this.props.colorMapOptions,
     ];
 
-    if (useCustomColorMap) {
-      valueOfSelected = CUSTOM_COLOR_MAP;
-    } else {
-      if (colorMapOptionsWithCustom.find(option => option.value === color)) {
-        valueOfSelected = color;
-      } else {
-        return null;
-      }
-    }
-
     return (
       <Fragment>
         <EuiSuperSelect
           options={colorMapOptionsWithCustom}
           onChange={this._onColorMapSelect}
-          valueOfSelected={valueOfSelected}
+          valueOfSelected={this.state.selected}
           hasDividers={true}
         />
         {colorStopsInput}
