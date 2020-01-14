@@ -13,6 +13,7 @@ import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
 import { SavedSearchQuery } from '../../contexts/kibana';
+import { SortDirection } from '../../components/ml_in_memory_table';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -37,6 +38,13 @@ interface ClassificationAnalysis {
     num_top_classes?: string;
     prediction_field_name?: string;
   };
+}
+
+export interface LoadExploreDataArg {
+  field: string;
+  direction: SortDirection;
+  searchQuery: SavedSearchQuery;
+  requiresKeyword?: boolean;
 }
 
 export const SEARCH_SIZE = 1000;
@@ -182,7 +190,7 @@ export const getPredictedFieldName = (
   const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
-  }${isClassificationAnalysis(analysis) && !forSort ? '.keyword' : ''}`;
+  }`;
   return predictedField;
 };
 

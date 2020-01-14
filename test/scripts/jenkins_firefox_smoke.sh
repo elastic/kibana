@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-if [[ -n "$IS_PIPELINE_JOB" ]] ; then
-  source src/dev/ci_setup/setup_env.sh
-fi
+source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   node scripts/build --debug --oss;

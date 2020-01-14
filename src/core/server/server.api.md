@@ -450,11 +450,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest) => string;
+    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest, requestSpecificBasePath: string) => void;
+    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -1928,6 +1928,8 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 // @public
 export interface UiSettingsParams {
     category?: string[];
+    // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
+    deprecation?: DeprecationSettings;
     description?: string;
     name?: string;
     optionLabels?: Record<string, string>;
@@ -1935,6 +1937,11 @@ export interface UiSettingsParams {
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
+    // Warning: (ae-forgotten-export) The symbol "ImageValidation" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "StringValidation" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    validation?: ImageValidation | StringValidation;
     value?: SavedObjectAttribute;
 }
 

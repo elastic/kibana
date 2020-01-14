@@ -23,8 +23,11 @@ export const WorkpadTemplates = compose(
     // Clone workpad given an id
     cloneWorkpad: props => workpad => {
       workpad.id = getId('workpad');
-      workpad.name = `Untitled Workpad - ${workpad.name}`;
+      workpad.name = `My Canvas Workpad - ${workpad.name}`;
+      // Remove unneeded fields
       workpad.tags = undefined;
+      workpad.displayName = undefined;
+      workpad.help = undefined;
       return workpadService
         .create(workpad)
         .then(() => props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 }))

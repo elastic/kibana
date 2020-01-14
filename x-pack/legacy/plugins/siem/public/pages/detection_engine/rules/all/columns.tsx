@@ -10,14 +10,12 @@ import {
   EuiTableActionsColumnType,
   EuiBasicTableColumn,
   EuiBadge,
-  EuiHealth,
   EuiIconTip,
   EuiLink,
   EuiTextColor,
 } from '@elastic/eui';
 import * as H from 'history';
-import React from 'react';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import React, { Dispatch } from 'react';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import {
   deleteRulesAction,
@@ -32,8 +30,14 @@ import { TableData } from '../types';
 import * as i18n from '../translations';
 import { PreferenceFormattedDate } from '../../../../components/formatted_date';
 import { RuleSwitch } from '../components/rule_switch';
+import { SeverityBadge } from '../components/severity_badge';
+import { ActionToaster } from '../../../../components/toasters';
 
-const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
+const getActions = (
+  dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>,
+  history: H.History
+) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
     type: 'icon',
@@ -55,7 +59,8 @@ const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
     type: 'icon',
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
-    onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch),
+    onClick: (rowItem: TableData) =>
+      duplicateRuleAction(rowItem.sourceRule, dispatch, dispatchToaster),
   },
   {
     description: i18n.EXPORT_RULE,
@@ -63,13 +68,15 @@ const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
     onClick: (rowItem: TableData) => exportRulesAction([rowItem.sourceRule], dispatch),
+    enabled: (rowItem: TableData) => !rowItem.immutable,
   },
   {
     description: i18n.DELETE_RULE,
     type: 'icon',
     icon: 'trash',
     name: i18n.DELETE_RULE,
-    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch),
+    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, dispatchToaster),
+    enabled: (rowItem: TableData) => !rowItem.immutable,
   },
 ];
 
@@ -78,6 +85,7 @@ type RulesColumns = EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<T
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
 export const getColumns = (
   dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
   hasNoPermissions: boolean
 ): RulesColumns[] => {
@@ -97,21 +105,7 @@ export const getColumns = (
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
-      render: (value: TableData['severity']) => (
-        <EuiHealth
-          color={
-            value === 'low'
-              ? euiLightVars.euiColorVis0
-              : value === 'medium'
-              ? euiLightVars.euiColorVis5
-              : value === 'high'
-              ? euiLightVars.euiColorVis7
-              : euiLightVars.euiColorVis9
-          }
-        >
-          {value}
-        </EuiHealth>
-      ),
+      render: (value: TableData['severity']) => <SeverityBadge value={value} />,
       truncateText: true,
     },
     {
@@ -184,7 +178,7 @@ export const getColumns = (
   ];
   const actions: RulesColumns[] = [
     {
-      actions: getActions(dispatch, history),
+      actions: getActions(dispatch, dispatchToaster, history),
       width: '40px',
     } as EuiTableActionsColumnType<TableData>,
   ];
