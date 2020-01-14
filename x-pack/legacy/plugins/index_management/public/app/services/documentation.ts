@@ -57,6 +57,10 @@ class DocumentationService {
     return `${this.esDocsBase}/mapping-meta-field.html`;
   }
 
+  public getDynamicTemplatesLink() {
+    return `${this.esDocsBase}/dynamic-templates.html`;
+  }
+
   public getMappingSourceFieldLink() {
     return `${this.esDocsBase}/mapping-source-field.html`;
   }
@@ -129,6 +133,14 @@ class DocumentationService {
     return `${this.esDocsBase}/fielddata.html`;
   }
 
+  public getFielddataFrequencyLink() {
+    return `${this.esDocsBase}/fielddata.html#field-data-filtering`;
+  }
+
+  public getEnablingFielddataLink() {
+    return `${this.esDocsBase}/fielddata.html#before-enabling-fielddata`;
+  }
+
   public getIndexPhrasesLink() {
     return `${this.esDocsBase}/index-phrases.html`;
   }
@@ -143,10 +155,6 @@ class DocumentationService {
 
   public getAnalyzerLink() {
     return `${this.esDocsBase}/analyzer.html`;
-  }
-
-  public getEnablingFielddataLink() {
-    return `${this.esDocsBase}/fielddata.html#before-enabling-fielddata`;
   }
 
   public getDateFormatLink() {

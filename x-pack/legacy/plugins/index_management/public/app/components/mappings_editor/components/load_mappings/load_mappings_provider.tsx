@@ -19,7 +19,7 @@ import {
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
 import { validateMappings, MappingsValidationError } from '../../lib';
 
-const MAX_ERRORS_TO_DISPLAY = 10;
+const MAX_ERRORS_TO_DISPLAY = 1;
 
 type OpenJsonModalFunc = () => void;
 
@@ -40,17 +40,17 @@ interface State {
 type ModalView = 'json' | 'validationResult';
 
 const getTexts = (view: ModalView, totalErrors = 0) => ({
-  modalTitle: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.title', {
-    defaultMessage: 'Load mappings from JSON',
+  modalTitle: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModalTitle', {
+    defaultMessage: 'Load JSON',
   }),
   buttons: {
     confirm:
       view === 'json'
         ? i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.loadButtonLabel', {
-            defaultMessage: 'Load',
+            defaultMessage: 'Load and overwrite',
           })
         : i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.acceptWarningLabel', {
-            defaultMessage: 'OK',
+            defaultMessage: 'Continue loading',
           }),
     cancel:
       view === 'json'
@@ -65,24 +65,23 @@ const getTexts = (view: ModalView, totalErrors = 0) => ({
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorLabel', {
       defaultMessage: 'Mappings object',
     }),
-    helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText', {
-      defaultMessage:
-        'Provide the complete mappings object with both the configuration and the properties.',
-    }),
   },
   validationErrors: {
-    title: i18n.translate('xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorTitle', {
-      defaultMessage:
-        '{totalErrors} {totalErrors, plural, one {error} other {errors}} detected in the mappings object',
-      values: {
-        totalErrors,
-      },
-    }),
+    title: (
+      <FormattedMessage
+        id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorTitle"
+        defaultMessage="{totalErrors} {totalErrors, plural, one {invalid option} other {invalid options}} detected in {mappings} object"
+        values={{
+          totalErrors,
+          // NOTE: This doesn't need internationalization because it's part of the ES API.
+          mappings: <code>mappings</code>,
+        }}
+      />
+    ),
     description: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.loadJsonModal.validationErrorDescription',
       {
-        defaultMessage:
-          'The mappings provided contains some errors. You can safely ignore them: the configuration, field or parameter containing an error will be discarded before loading the JSON object in the editor.',
+        defaultMessage: 'If you continue loading the object, only valid options will be accepted.',
       }
     ),
   },
@@ -93,7 +92,7 @@ const getErrorMessage = (error: MappingsValidationError) => {
     case 'ERR_CONFIG': {
       return (
         <FormattedMessage
-          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.configuration"
+          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.configurationMessage"
           defaultMessage="The {configName} configuration is invalid."
           values={{
             configName: <code>{error.configName}</code>,
@@ -104,7 +103,7 @@ const getErrorMessage = (error: MappingsValidationError) => {
     case 'ERR_FIELD': {
       return (
         <FormattedMessage
-          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.field"
+          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.fieldMessage"
           defaultMessage="The {fieldPath} field is invalid."
           values={{
             fieldPath: <code>{error.fieldPath}</code>,
@@ -115,7 +114,7 @@ const getErrorMessage = (error: MappingsValidationError) => {
     case 'ERR_PARAMETER': {
       return (
         <FormattedMessage
-          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.parameter"
+          id="xpack.idxMgmt.mappingsEditor.loadJsonModal.validationError.parameterMessage"
           defaultMessage="The {paramName} parameter on field {fieldPath} is invalid."
           values={{
             paramName: <code>{error.paramName}</code>,
@@ -202,11 +201,8 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
         iconType={showingAllErrors ? 'arrowUp' : 'arrowDown'}
       >
         {showingAllErrors
-          ? i18n.translate('xpack.idxMgmt.mappingsEditor.showFirstErrorsButtonLabel', {
-              defaultMessage: 'Show first {numErrors} errors',
-              values: {
-                numErrors: MAX_ERRORS_TO_DISPLAY,
-              },
+          ? i18n.translate('xpack.idxMgmt.mappingsEditor.hideErrorsButtonLabel', {
+              defaultMessage: 'Hide errors',
             })
           : i18n.translate('xpack.idxMgmt.mappingsEditor.showAllErrorsButtonLabel', {
               defaultMessage: 'Show {numErrors} more errors',
@@ -235,9 +231,20 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
             {view === 'json' ? (
               // The CSS override for the EuiCodeEditor requires a parent .application css class
               <div className="application">
+                <EuiText color="subdued">
+                  <FormattedMessage
+                    id="xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText"
+                    defaultMessage="Provide a mappings object, for example, the object assigned to an index {mappings} property. This will overwrite existing mappings, dynamic templates, and options"
+                    values={{
+                      mappings: <code>mappings</code>,
+                    }}
+                  />
+                </EuiText>
+
+                <EuiSpacer size="m" />
+
                 <JsonEditor
                   label={i18nTexts.editor.label}
-                  helpText={i18nTexts.editor.helpText}
                   onUpdate={onJsonUpdate}
                   defaultValue={state.json?.unparsed}
                   euiCodeEditorProps={{

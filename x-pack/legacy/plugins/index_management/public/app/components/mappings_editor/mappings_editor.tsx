@@ -8,7 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
-import { ConfigurationForm, DocumentFields } from './components';
+import { ConfigurationForm, DocumentFields, TemplatesForm } from './components';
 import { IndexSettings } from './types';
 import { State } from './reducer';
 import { MappingsState, Props as MappingsStateProps } from './mappings_state';
@@ -20,7 +20,7 @@ interface Props {
   indexSettings?: IndexSettings;
 }
 
-type TabName = 'fields' | 'advanced';
+type TabName = 'fields' | 'advanced' | 'templates';
 
 export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSettings }: Props) => {
   const [selectedTab, selectTab] = useState<TabName>('fields');
@@ -34,6 +34,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
       date_detection,
       dynamic_date_formats,
       properties = {},
+      dynamic_templates,
     } = defaultValue ?? {};
 
     return {
@@ -46,22 +47,28 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
         dynamic_date_formats,
       },
       fields: properties,
+      templates: {
+        dynamic_templates,
+      },
     };
   }, [defaultValue]);
 
-  const changeTab = async (
-    tab: TabName,
-    submitConfigurationForm?: State['configuration']['submitForm']
-  ) => {
+  const changeTab = async (tab: TabName, state: State) => {
     if (selectedTab === 'advanced') {
       // When we navigate away we need to submit the form to validate if there are any errors.
-      const { isValid: isConfigurationFormValid } = await submitConfigurationForm!();
+      const { isValid: isConfigurationFormValid } = await state.configuration.submitForm!();
 
       if (!isConfigurationFormValid) {
         /**
          * Don't navigate away from the tab if there are errors in the form.
          * For now there is no need to display a CallOut as the form can never be invalid.
          */
+        return;
+      }
+    } else if (selectedTab === 'templates') {
+      const { isValid: isTemplatesFormValid } = await state.templates.form!.submit();
+
+      if (!isTemplatesFormValid) {
         return;
       }
     }
@@ -73,11 +80,17 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     <IndexSettingsProvider indexSettings={indexSettings}>
       <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue}>
         {({ state }) => {
+          const tabToContentMap = {
+            fields: <DocumentFields />,
+            templates: <TemplatesForm defaultValue={state.templates.defaultValue} />,
+            advanced: <ConfigurationForm defaultValue={state.configuration.defaultValue} />,
+          };
+
           return (
             <div className="mappingsEditor">
               <EuiTabs>
                 <EuiTab
-                  onClick={() => changeTab('fields', state.configuration.submitForm)}
+                  onClick={() => changeTab('fields', state)}
                   isSelected={selectedTab === 'fields'}
                 >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
@@ -85,7 +98,15 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                   })}
                 </EuiTab>
                 <EuiTab
-                  onClick={() => changeTab('advanced')}
+                  onClick={() => changeTab('templates', state)}
+                  isSelected={selectedTab === 'templates'}
+                >
+                  {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
+                    defaultMessage: 'Dynamic templates',
+                  })}
+                </EuiTab>
+                <EuiTab
+                  onClick={() => changeTab('advanced', state)}
                   isSelected={selectedTab === 'advanced'}
                 >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
@@ -96,11 +117,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
 
               <EuiSpacer size="l" />
 
-              {selectedTab === 'fields' ? (
-                <DocumentFields />
-              ) : (
-                <ConfigurationForm defaultValue={state.configuration.defaultValue} />
-              )}
+              {tabToContentMap[selectedTab]}
             </div>
           );
         }}

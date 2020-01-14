@@ -19,12 +19,6 @@ export interface DataTypeDefinition {
   description?: () => ReactNode;
 }
 
-export type ConfigType =
-  | 'dynamic'
-  | 'date_detection'
-  | 'numeric_detection'
-  | 'dynamic_date_formats';
-
 export type MainType =
   | 'text'
   | 'keyword'

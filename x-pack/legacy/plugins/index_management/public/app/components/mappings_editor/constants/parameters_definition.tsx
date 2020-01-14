@@ -143,12 +143,6 @@ export const PARAMETERS_DEFINITION = {
             )
           ),
         },
-        {
-          validator: containsCharsField({
-            chars: ' ',
-            message: commonErrorMessages.spacesNotAllowed,
-          }),
-        },
       ],
     },
   },

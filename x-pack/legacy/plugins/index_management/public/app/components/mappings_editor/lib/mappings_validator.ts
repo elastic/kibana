@@ -243,7 +243,7 @@ export const validateMappings = (mappings: any = {}): MappingsValidatorResponse 
     return { value: {} };
   }
 
-  const { properties, ...mappingsConfiguration } = mappings;
+  const { properties, dynamic_templates, ...mappingsConfiguration } = mappings;
 
   const { value: parsedConfiguration, errors: configurationErrors } = validateMappingsConfiguration(
     mappingsConfiguration
@@ -256,6 +256,7 @@ export const validateMappings = (mappings: any = {}): MappingsValidatorResponse 
     value: {
       ...parsedConfiguration,
       properties: parsedProperties,
+      dynamic_templates,
     },
     errors: errors.length ? errors : undefined,
   };

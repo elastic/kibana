@@ -11,20 +11,23 @@ import {
   addFieldToState,
   MappingsConfiguration,
   MappingsFields,
+  MappingsTemplates,
   State,
   Dispatch,
 } from './reducer';
 import { Field } from './types';
 import { normalize, deNormalize } from './lib';
 
-type Mappings = MappingsConfiguration & {
-  properties: MappingsFields;
-};
+type Mappings = MappingsTemplates &
+  MappingsConfiguration & {
+    properties: MappingsFields;
+  };
 
 export interface Types {
   Mappings: Mappings;
   MappingsConfiguration: MappingsConfiguration;
   MappingsFields: MappingsFields;
+  MappingsTemplates: MappingsTemplates;
 }
 
 export interface OnUpdateHandlerArg {
@@ -40,7 +43,11 @@ const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 export interface Props {
   children: (params: { state: State }) => React.ReactNode;
-  defaultValue: { configuration: MappingsConfiguration; fields: { [key: string]: Field } };
+  defaultValue: {
+    templates: MappingsTemplates;
+    configuration: MappingsConfiguration;
+    fields: { [key: string]: Field };
+  };
   onUpdate: OnUpdateHandler;
 }
 
@@ -58,6 +65,14 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       data: {
         raw: defaultValue.configuration,
         format: () => defaultValue.configuration,
+      },
+      validate: () => Promise.resolve(true),
+    },
+    templates: {
+      defaultValue: defaultValue.templates,
+      data: {
+        raw: defaultValue.templates,
+        format: () => defaultValue.templates,
       },
       validate: () => Promise.resolve(true),
     },
@@ -116,9 +131,11 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
             : deNormalize(nextState.fields);
 
         const configurationData = nextState.configuration.data.format();
+        const templatesData = nextState.templates.data.format();
 
         return {
           ...configurationData,
+          ...templatesData,
           properties: fields,
         };
       },
@@ -131,7 +148,12 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
               })
             : Promise.resolve(true);
 
-        const promisesToValidate = [configurationFormValidator];
+        const templatesFormValidator =
+          state.templates.form !== undefined
+            ? (await state.templates.form!.submit()).isValid
+            : Promise.resolve(true);
+
+        const promisesToValidate = [configurationFormValidator, templatesFormValidator];
 
         if (state.fieldForm !== undefined && !bypassFieldFormValidation) {
           promisesToValidate.push(state.fieldForm.validate());
@@ -148,13 +170,14 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   useEffect(() => {
     /**
      * If the defaultValue has changed that probably means that we have loaded
-     * new data from JSON. We need to update our state witht the new mappings.
+     * new data from JSON. We need to update our state with the new mappings.
      */
     if (didMountRef.current) {
       dispatch({
         type: 'editor.replaceMappings',
         value: {
           configuration: defaultValue.configuration,
+          templates: defaultValue.templates,
           fields: parsedFieldsDefaultValue,
         },
       });
