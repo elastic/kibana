@@ -51,7 +51,7 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
           IRuleSavedAttributesSavedObjectAttributes
         >({
           type: ruleStatusSavedObjectType,
-          perPage: 5,
+          perPage: 6,
           search: rule.id,
           searchFields: ['alertId'],
         });

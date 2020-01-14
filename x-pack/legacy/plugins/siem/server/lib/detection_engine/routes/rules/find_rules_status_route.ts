@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { isFunction, snakeCase } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ServerFacade } from '../../../../types';
@@ -18,11 +18,8 @@ import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 const convertToSnakeCase = (obj: IRuleSavedAttributesSavedObjectAttributes) => {
   return Object.keys(obj).reduce((acc, item) => {
-    const newKey = item
-      .split(/(?=[A-Z])/)
-      .join('_')
-      .toLowerCase();
-    return { [newKey]: obj[item], ...acc };
+    const newKey = snakeCase(item);
+    return { ...acc, [newKey]: obj[item] };
   }, {});
 };
 

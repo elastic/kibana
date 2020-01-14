@@ -51,7 +51,7 @@ export const createFindRulesRoute: Hapi.ServerRoute = {
         rules.data.map(async rule => {
           const results = await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
             type: ruleStatusSavedObjectType,
-            perPage: 5,
+            perPage: 1,
             sortField: 'statusDate',
             sortOrder: 'desc',
             search: rule.id,

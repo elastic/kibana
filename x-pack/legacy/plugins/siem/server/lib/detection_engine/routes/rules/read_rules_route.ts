@@ -49,7 +49,7 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
           IRuleSavedAttributesSavedObjectAttributes
         >({
           type: ruleStatusSavedObjectType,
-          perPage: 5,
+          perPage: 1,
           sortField: 'statusDate',
           sortOrder: 'desc',
           search: rule.id,
