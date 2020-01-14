@@ -18,9 +18,10 @@ import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/li
 
 interface Props {
   sections: Section[];
+  otherLinks?: EuiListGroupItemProps[];
+
   button: NonNullable<ReactNode>;
   anchorPosition?: PopoverAnchorPosition;
-  otherLinks?: EuiListGroupItemProps[];
   id?: string;
   isOpen?: boolean;
   closePopover(): void;
