@@ -23,8 +23,7 @@ import moment, { Moment } from 'moment-timezone';
 import { TimefilterContract } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'kibana/public';
 
-// @ts-ignore
-import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../timelion/common/lib';
+import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from './xaxis_formatter';
 import { Series } from './timelion_request_handler';
 

@@ -24,8 +24,7 @@ import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
 import { useKibana } from '../../../../../plugins/kibana_react/public';
 import '../flot';
-// @ts-ignore
-import { DEFAULT_TIME_FORMAT } from '../../../timelion/common/lib';
+import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 import { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors } from '../helpers/panel_utils';
 import { Series, Sheet } from '../helpers/timelion_request_handler';

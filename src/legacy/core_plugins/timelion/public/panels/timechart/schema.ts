@@ -24,8 +24,7 @@ import moment from 'moment-timezone';
 import { timefilter } from 'ui/timefilter';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
-// @ts-ignore
-import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
+import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../../vis_type_timelion/common/lib';
 import { TimelionVisualizationDependencies } from '../../plugin';
 import { tickFormatters } from '../../../../vis_type_timelion/public/helpers/tick_formatters';
 import { xaxisFormatterProvider } from '../../../../vis_type_timelion/public/helpers/xaxis_formatter';
