@@ -113,17 +113,19 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       * Commit: ${getCommitHash()}
     """
   } else if(status == 'UNSTABLE') {
-    messages << """
+    def message = """
       ## :yellow_heart: Build succeeded, but was flaky
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
-    """
+    """.stripIndent()
 
     def failures = retryable.getFlakyFailures()
     if (failures && failures.size() > 0) {
       def list = failures.collect { "  * ${it.label}" }.join("\n")
-      messages << "* Flaky failures:\n${list}"
+      message += "* Flaky failures:\n${list}"
     }
+
+    messages << message
   } else {
     messages << """
       ## :broken_heart: Build Failed
