@@ -56,6 +56,7 @@ export interface ESFilter {
       | string
       | string[]
       | number
+      | boolean
       | Record<string, unknown>
       | ESFilter[];
   };
