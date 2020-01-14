@@ -108,6 +108,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         },
       }
     }
+    tableLayout="fixed"
   />
 </Fragment>
 `;

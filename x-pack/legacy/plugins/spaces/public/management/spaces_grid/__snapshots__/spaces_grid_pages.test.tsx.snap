@@ -119,6 +119,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
         }
       }
       sorting={true}
+      tableLayout="fixed"
     />
   </EuiPageContent>
   <SecureSpaceMessage />
@@ -140,7 +141,7 @@ Array [
     }
   >
     <EuiAvatar
-      color="#461A0A"
+      color="#B46F5F"
       data-test-subj="space-avatar-default"
       imageUrl=""
       initials="D"
@@ -155,9 +156,9 @@ Array [
         data-test-subj="space-avatar-default"
         style={
           Object {
-            "backgroundColor": "#461A0A",
+            "backgroundColor": "#B46F5F",
             "backgroundImage": "none",
-            "color": "#FFFFFF",
+            "color": "#000000",
           }
         }
         title="Default"
@@ -182,7 +183,7 @@ Array [
     }
   >
     <EuiAvatar
-      color="#BFA180"
+      color="#F19F58"
       data-test-subj="space-avatar-custom-1"
       imageUrl=""
       initials="C1"
@@ -197,7 +198,7 @@ Array [
         data-test-subj="space-avatar-custom-1"
         style={
           Object {
-            "backgroundColor": "#BFA180",
+            "backgroundColor": "#F19F58",
             "backgroundImage": "none",
             "color": "#000000",
           }
