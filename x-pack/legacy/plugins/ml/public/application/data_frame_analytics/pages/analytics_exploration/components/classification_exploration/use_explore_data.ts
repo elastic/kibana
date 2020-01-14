@@ -17,27 +17,22 @@ import { SortDirection, SORT_DIRECTION } from '../../../../../components/ml_in_m
 
 import { ml } from '../../../../../services/ml_api_service';
 import { getNestedProperty } from '../../../../../util/object_utils';
-import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { Field } from '../../../../../../../common/types/fields';
+import { LoadExploreDataArg } from '../../../../common/analytics';
 
 import {
-  getDefaultClassificationFields,
+  getDefaultFieldsFromJobCaps,
   getFlattenedFields,
   DataFrameAnalyticsConfig,
   EsFieldName,
-  getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
-  defaultSearchQuery,
   SearchQuery,
 } from '../../../../common';
 
 export type TableItem = Record<string, any>;
 
-interface LoadExploreDataArg {
-  field: string;
-  direction: SortDirection;
-  searchQuery: SavedSearchQuery;
-}
 export interface UseExploreDataReturnType {
   errorMessage: string;
   loadExploreData: (arg: LoadExploreDataArg) => void;
@@ -49,8 +44,9 @@ export interface UseExploreDataReturnType {
 
 export const useExploreData = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  selectedFields: EsFieldName[],
-  setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
+  selectedFields: Field[],
+  setSelectedFields: React.Dispatch<React.SetStateAction<Field[]>>,
+  setDocFields: React.Dispatch<React.SetStateAction<Field[]>>
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
@@ -58,7 +54,26 @@ export const useExploreData = (
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
-  const loadExploreData = async ({ field, direction, searchQuery }: LoadExploreDataArg) => {
+  const getDefaultSelectedFields = () => {
+    const { fields } = newJobCapsService;
+
+    if (selectedFields.length === 0 && jobConfig !== undefined) {
+      const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
+        fields,
+        jobConfig
+      );
+
+      setSelectedFields(defaultSelected);
+      setDocFields(docFields);
+    }
+  };
+
+  const loadExploreData = async ({
+    field,
+    direction,
+    searchQuery,
+    requiresKeyword,
+  }: LoadExploreDataArg) => {
     if (jobConfig !== undefined) {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
@@ -72,7 +87,7 @@ export const useExploreData = (
         if (field !== undefined) {
           body.sort = [
             {
-              [field]: {
+              [`${field}${requiresKeyword ? '.keyword' : ''}`]: {
                 order: direction,
               },
             },
@@ -94,11 +109,6 @@ export const useExploreData = (
           setTableItems([]);
           setStatus(INDEX_STATUS.LOADED);
           return;
-        }
-
-        if (selectedFields.length === 0) {
-          const newSelectedFields = getDefaultClassificationFields(docs, jobConfig);
-          setSelectedFields(newSelectedFields);
         }
 
         // Create a version of the doc's source with flattened field names.
@@ -144,11 +154,7 @@ export const useExploreData = (
 
   useEffect(() => {
     if (jobConfig !== undefined) {
-      loadExploreData({
-        field: getPredictedFieldName(jobConfig.dest.results_field, jobConfig.analysis),
-        direction: SORT_DIRECTION.DESC,
-        searchQuery: defaultSearchQuery,
-      });
+      getDefaultSelectedFields();
     }
   }, [jobConfig && jobConfig.id]);
 
