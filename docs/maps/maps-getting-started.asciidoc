@@ -68,14 +68,16 @@ and lighter shades symbolize countries with less traffic.
 . Click the *EMS Boundaries* data source.
 . From the *Layer* dropdown menu, select *World Countries*.
 . Click the *Add layer* button.
-. Set *Layer name* to `Total Requests by Country`.
-. Set *Layer transparency* to 0.5.
+. Set *Name* to `Total Requests by Country`.
+. Set *Opacity* to 50%.
+. Click *Add* under *Tooltip fields*.
+. In the popover, select *ISO 3166-1 alpha-2 code* and *name* and click *Add*.
 
 ===== Join the vector layer with the sample web log index
 
 You now have a vector layer containing the world countries.
 To symbolize countries by web traffic, you'll need to augment the world country features with the count of Elasticsearch weblog documents originating from each country.
-To do this, you'll create a <<terms-join, terms join>> to link the vector source *World Countries* to
+To do this, you'll create a <<terms-join, term join>> to link the vector source *World Countries* to
 the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 
 . Click plus image:maps/images/gs_plus_icon.png[] to the right of *Term Joins* label.
@@ -83,15 +85,18 @@ the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
 . Set *Left field* to *ISO 3166-1 alpha-2 code*.
 . Set *Right source* to *kibana_sample_data_logs*.
 . Set *Right field* to *geo.src*.
+. Click *and use metric count*.
+. Set *Custom label* to *web logs count*.
 
 ===== Set the layer style
 
 All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
 To shade the world countries based on which country is sending the most requests, you'll need to use <<maps-vector-style-data-driven, data driven styling>>.
 
-. Click image:maps/images/gs_link_icon.png[] to the right of *Fill color*.
+. Under *Fill color*, change the selected value from *Solid* to *By value*.
+. In the field select input, select *web logs count*.
 . Select the grey color ramp.
-. In the field select input, select *count of kibana_sample_data_logs:geo.src*.
+. Under *Border color*, change the selected color to *white*.
 . Click *Save & close*.
 +
 Your map now looks like this:
