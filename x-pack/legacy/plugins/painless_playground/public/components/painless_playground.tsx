@@ -25,6 +25,7 @@ interface State {
   code: string;
   request?: string;
   response?: string;
+  responseObj: Record<string, any>;
 }
 export function PainlessPlayground(props: Props) {
   const [state, setState] = useState<State>({
@@ -43,14 +44,16 @@ export function PainlessPlayground(props: Props) {
       const response = await props.service.simulate(request);
       setState({
         code: state.code,
-        response: JSON.stringify(response, null, 2),
         request: JSON.stringify(request, null, 2),
+        response: JSON.stringify(response, null, 2),
+        responseObj: response,
       });
     } catch (e) {
       setState({
         code: state.code,
         response: JSON.stringify(e, null, 2),
         request: JSON.stringify(request, null, 2),
+        responseObj: e,
       });
     }
   };
@@ -106,6 +109,34 @@ export function PainlessPlayground(props: Props) {
               </EuiButton>
               <EuiSpacer />
 
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.painlessPlayground.outputLabel"
+                    defaultMessage="Response"
+                  />
+                }
+                fullWidth
+                data-test-subj="response"
+              >
+                <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+                  {state.responseObject?.body?.error ? (
+                    <div>{state.responseObject?.body?.error}</div>
+                  ) : (
+                    <CodeEditor
+                      languageId="json"
+                      height={100}
+                      value={state.response || ''}
+                      options={{
+                        fontSize: 12,
+                        minimap: {
+                          enabled: false,
+                        },
+                      }}
+                    />
+                  )}
+                </div>
+              </EuiFormRow>
               {state.request && (
                 <EuiFormRow
                   label={
@@ -120,7 +151,7 @@ export function PainlessPlayground(props: Props) {
                   <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
                     <CodeEditor
                       languageId="json"
-                      height={250}
+                      height={100}
                       value={'POST /_scripts/painless/_execute\n' + state.request}
                       options={{
                         fontSize: 12,
@@ -132,31 +163,6 @@ export function PainlessPlayground(props: Props) {
                   </div>
                 </EuiFormRow>
               )}
-
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.painlessPlayground.outputLabel"
-                    defaultMessage="Response"
-                  />
-                }
-                fullWidth
-                data-test-subj="response"
-              >
-                <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
-                  <CodeEditor
-                    languageId="json"
-                    height={250}
-                    value={state.response || ''}
-                    options={{
-                      fontSize: 12,
-                      minimap: {
-                        enabled: false,
-                      },
-                    }}
-                  />
-                </div>
-              </EuiFormRow>
             </EuiForm>
           </EuiPageContentBody>
         </EuiPageContent>

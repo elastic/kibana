@@ -11,9 +11,13 @@ export class PainlessPlaygroundService {
     this.http = http;
   }
 
-  simulate(payload: unknown) {
-    return this.http.post(`${ROUTES.API_ROOT}/simulate`, {
-      body: JSON.stringify(payload),
-    });
+  async simulate(payload: unknown) {
+    try {
+      return await this.http.post(`${ROUTES.API_ROOT}/simulate`, {
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      return e;
+    }
   }
 }

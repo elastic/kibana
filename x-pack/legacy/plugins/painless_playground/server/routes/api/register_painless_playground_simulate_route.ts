@@ -20,7 +20,9 @@ export function registerPainlessPlaygroundSimulateRoute(server: ServerFacade) {
         .callWithRequest(request, 'scriptsPainlessExecute', {
           body: request.payload,
         })
-        .catch((e: any) => wrapEsError(e));
+        .catch((e: any) => {
+          return e.body;
+        });
     },
     config: {
       pre: [licensePreRouting],
