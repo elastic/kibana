@@ -31,7 +31,6 @@ interface Props {
   isCreateFieldFormVisible: boolean;
   areActionButtonsVisible: boolean;
   isHighlighted: boolean;
-  isSelected: boolean;
   isDimmed: boolean;
   isLastItem: boolean;
   childFieldsArray: NormalizedField[];
@@ -47,7 +46,6 @@ function FieldListItemComponent(
     field,
     allFields,
     isHighlighted,
-    isSelected,
     isDimmed,
     isCreateFieldFormVisible,
     areActionButtonsVisible,
@@ -161,7 +159,6 @@ function FieldListItemComponent(
         className={classNames('mappingsEditor__fieldsListItem__field', {
           'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
           'mappingsEditor__fieldsListItem__field--highlighted': isHighlighted,
-          'mappingsEditor__fieldsListItem__field--selected': isSelected,
           'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
       >
