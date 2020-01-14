@@ -137,7 +137,11 @@ export class LegacyService implements CoreService<LegacyServiceSetup> {
       pluginExtendedConfig,
       disabledPluginSpecs,
       uiExports,
-    } = await findLegacyPluginSpecs(this.settings, this.coreContext.logger);
+    } = await findLegacyPluginSpecs(
+      this.settings,
+      this.coreContext.logger,
+      this.coreContext.env.packageInfo
+    );
 
     this.legacyPlugins = {
       pluginSpecs,
