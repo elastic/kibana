@@ -17,52 +17,69 @@
  * under the License.
  */
 
-import { load } from 'cheerio';
-
 import expect from '@kbn/expect';
 
+import '../../plugins/core_provider_plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const supertest = getService('supertest');
+  const PageObjects = getPageObjects(['common']);
+  const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
+
+  function navigate(path: string) {
+    return browser.get(`${PageObjects.common.getHostPort()}${path}`);
+  }
+
+  function getLegacyMode() {
+    return browser.execute(() => {
+      return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
+        .legacyMode;
+    });
+  }
+
+  function getUserSettings() {
+    return browser.execute(() => {
+      return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
+        .legacyMetadata.uiSettings.user;
+    });
+  }
+
+  async function loadingScreenNotShown() {
+    expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+  }
 
   describe('rendering service', () => {
     it('renders "core" application', async () => {
-      const response = await supertest.get('/render/core').expect(200);
-      const dom = load(response.text);
-      const metadata = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+      await navigate('/render/core');
 
-      expect(metadata.legacyMode).to.be(false);
-      expect(dom('script[src="/bundles/app/core/bootstrap.js"]').length).to.be(1);
-      expect(metadata.legacyMetadata.uiSettings.user).not.to.be.empty();
+      await loadingScreenNotShown();
+      expect(await getLegacyMode()).to.be(false);
+      expect(await getUserSettings()).to.not.be.empty();
     });
 
     it('renders "core" application without user settings', async () => {
-      const response = await supertest.get('/render/core?includeUserSettings=false').expect(200);
-      const dom = load(response.text);
-      const metadata = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+      await navigate('/render/core?includeUserSettings=false');
 
-      expect(metadata.legacyMode).to.be(false);
-      expect(metadata.legacyMetadata.uiSettings.user).to.be.empty();
+      await loadingScreenNotShown();
+      expect(await getUserSettings()).to.be.empty();
     });
 
     it('renders "legacy" application', async () => {
-      const response = await supertest.get('/render/legacy').expect(200);
-      const dom = load(response.text);
-      const metadata = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+      await navigate('/render/core_plugin_legacy');
 
-      expect(metadata.legacyMode).to.be(true);
-      expect(dom('script[src="/bundles/app/legacy/bootstrap.js"]').length).to.be(1);
+      await loadingScreenNotShown();
+      expect(await getLegacyMode()).to.be(true);
+      expect(await getUserSettings()).to.not.be.empty();
     });
 
-    it('renders "legacy" application wihtout user settings', async () => {
-      const response = await supertest.get('/render/legacy?includeUserSettings=false').expect(200);
-      const dom = load(response.text);
-      const metadata = JSON.parse(dom('kbn-injected-metadata').attr('data'));
+    it('renders "legacy" application without user settings', async () => {
+      await navigate('/render/core_plugin_legacy?includeUserSettings=false');
 
-      expect(metadata.legacyMode).to.be(true);
-      expect(metadata.legacyMetadata.uiSettings.user).to.be.empty();
+      await loadingScreenNotShown();
+      expect(await getLegacyMode()).to.be(true);
+      expect(await getUserSettings()).to.be.empty();
     });
   });
 }

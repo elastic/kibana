@@ -29,9 +29,12 @@ export class RenderingPlugin implements Plugin {
       {
         path: '/render/{id}',
         validate: {
-          query: schema.object({
-            includeUserSettings: schema.boolean({ defaultValue: true }),
-          }),
+          query: schema.object(
+            {
+              includeUserSettings: schema.boolean({ defaultValue: true }),
+            },
+            { allowUnknowns: true }
+          ),
           params: schema.object({
             id: schema.maybe(schema.string()),
           }),
