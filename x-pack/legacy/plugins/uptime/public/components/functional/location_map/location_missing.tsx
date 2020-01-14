@@ -5,7 +5,15 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSpacer,
+  EuiText,
+  EuiCode,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LocationLink } from '../monitor_list/monitor_list_drawer';
 
@@ -24,23 +32,30 @@ export const LocationMissingWarning = () => {
 
   return (
     <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+      <EuiFlexItem grow={false} style={{ marginLeft: 'auto', marginRight: 20 }}>
         <EuiPopover
           id="popover"
           button={button}
           isOpen={isPopoverOpen}
           closePopover={togglePopover}
         >
-          <EuiText style={{ width: '300px' }}>
+          <EuiText style={{ width: '350px' }}>
             <FormattedMessage
               id="xpack.uptime.locationMap.locations.missing.message"
-              defaultMessage="Important geo location configuration is missing. You can use the observer.geo.?? field
-            to create distinctive geographic regions for your uptime checks. Get more information in
-            our documentation. {locationLink}"
-              values={{
-                locationLink: <LocationLink />,
-              }}
+              defaultMessage="Important geo location configuration is missing.
+              You can use the {codeBlock} field to create distinctive geographic regions for
+               your uptime checks."
+              values={{ codeBlock: <EuiCode>observer.geo.??</EuiCode> }}
             />
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText style={{ width: '350px' }}>
+            <FormattedMessage
+              id="xpack.uptime.locationMap.locations.missing.message1"
+              defaultMessage="Get more information in our documentation."
+            />
+            <EuiSpacer size="xs" />
+            <LocationLink />
           </EuiText>
         </EuiPopover>
       </EuiFlexItem>
