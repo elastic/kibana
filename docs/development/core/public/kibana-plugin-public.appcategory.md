@@ -2,21 +2,21 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [AppCategory](./kibana-plugin-public.appcategory.md)
 
-## AppCategory enum
+## AppCategory interface
 
 
 <b>Signature:</b>
 
 ```typescript
-export declare enum AppCategory 
+export interface AppCategory 
 ```
 
-## Enumeration Members
+## Properties
 
-|  Member | Value | Description |
+|  Property | Type | Description |
 |  --- | --- | --- |
-|  analyze | <code>0</code> |  |
-|  management | <code>3</code> |  |
-|  observability | <code>1</code> |  |
-|  security | <code>2</code> |  |
+|  [ariaLabel](./kibana-plugin-public.appcategory.arialabel.md) | <code>string</code> |  |
+|  [euiIconType](./kibana-plugin-public.appcategory.euiicontype.md) | <code>string</code> |  |
+|  [label](./kibana-plugin-public.appcategory.label.md) | <code>string</code> |  |
+|  [order](./kibana-plugin-public.appcategory.order.md) | <code>number</code> |  |
 

@@ -42,15 +42,15 @@ export interface AppBase {
 }
 
 // @public (undocumented)
-export enum AppCategory {
+export interface AppCategory {
     // (undocumented)
-    analyze = 0,
+    ariaLabel?: string;
     // (undocumented)
-    management = 3,
+    euiIconType?: string;
     // (undocumented)
-    observability = 1,
+    label: string;
     // (undocumented)
-    security = 2
+    order?: number;
 }
 
 // @public
@@ -420,6 +420,26 @@ export class CoreSystem {
     // (undocumented)
     stop(): void;
     }
+
+// @internal (undocumented)
+export const DEFAULT_APP_CATEGORIES: Readonly<{
+    analyze: {
+        label: string;
+        order: number;
+    };
+    observability: {
+        label: string;
+        order: number;
+    };
+    security: {
+        label: string;
+        order: number;
+    };
+    administration: {
+        label: string;
+        euiIconType: string;
+    };
+}>;
 
 // @public (undocumented)
 export interface DocLinksStart {

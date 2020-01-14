@@ -22,7 +22,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Enumeration | Description |
 |  --- | --- |
-|  [AppCategory](./kibana-plugin-public.appcategory.md) |  |
 |  [AppLeaveActionType](./kibana-plugin-public.appleaveactiontype.md) | Possible type of actions on application leave. |
 |  [AppNavLinkStatus](./kibana-plugin-public.appnavlinkstatus.md) | Status of the application's navLink. |
 |  [AppStatus](./kibana-plugin-public.appstatus.md) | Accessibility status of an application. |
@@ -33,6 +32,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [App](./kibana-plugin-public.app.md) | Extension of [common app properties](./kibana-plugin-public.appbase.md) with the mount function. |
 |  [AppBase](./kibana-plugin-public.appbase.md) |  |
+|  [AppCategory](./kibana-plugin-public.appcategory.md) |  |
 |  [AppLeaveConfirmAction](./kibana-plugin-public.appleaveconfirmaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) to show a confirmation message when trying to leave an application.<!-- -->See  |
 |  [AppLeaveDefaultAction](./kibana-plugin-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
 |  [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |  |

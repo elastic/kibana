@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+/** @internal */
 export const DEFAULT_APP_CATEGORIES = Object.freeze({
   analyze: {
     label: i18n.translate('core.ui.analyzeNavList.label', {

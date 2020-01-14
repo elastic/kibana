@@ -4,7 +4,7 @@
 
 ## AppBase.category property
 
-The category the app lives in
+The category the app lives in Default categories defined in 
 
 <b>Signature:</b>
 
