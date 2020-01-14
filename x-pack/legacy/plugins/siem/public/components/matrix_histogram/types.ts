@@ -46,12 +46,9 @@ export interface MatrixHistogramBasicProps {
 
 export interface MatrixHistogramQueryProps {
   activePage?: number;
-  alertsType?: boolean;
-  anomaliesType?: boolean;
-  authenticationsType?: boolean;
   dataKey: string;
-  eventsType?: boolean;
   endDate: number;
+  errorMessage: string;
   filterQuery?: ESQuery | string | undefined;
   limit?: number;
   query: DocumentNode;
@@ -60,9 +57,14 @@ export interface MatrixHistogramQueryProps {
   skip: boolean;
   startDate: number;
   title: string;
+  isAlertsHistogram?: boolean;
+  isAnomaliesHistogram?: boolean;
+  isAuthenticationsHistogram?: boolean;
+  isDNSHistogram?: boolean;
+  isEventsType?: boolean;
   isInspected: boolean;
-  isPtrIncluded: boolean;
-  isHistogram?: boolean;
+  isPtrIncluded?: boolean;
+  isDNSHistogram?: boolean;
   pagination?: PaginationInputPaginated;
 }
 

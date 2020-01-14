@@ -32,16 +32,19 @@ import { ChartSeriesData } from '../charts/common';
 export const MatrixHistogram = React.memo(
   ({
     activePage,
-    alertsType,
-    anomaliesType,
-    authenticationsType,
+
     dataKey,
     defaultStackByOption,
     endDate,
-    eventsType,
+    errorMessage,
     filterQuery,
     hideHistogramIfEmpty = false,
     id,
+    isAlertsHistogram,
+    isAnomaliesHistogram,
+    isAuthenticationsHistogram,
+    isDNSHistogram,
+    isEventsType,
     isPtrIncluded,
     isInspected,
     legendPosition,
@@ -76,12 +79,12 @@ export const MatrixHistogram = React.memo(
       if (!showInspect) {
         setShowInspect(true);
       }
-    }, [showInspect]);
+    }, [showInspect, setShowInspect]);
     const handleOnMouseLeave = useCallback(() => {
       if (showInspect) {
         setShowInspect(false);
       }
-    }, [showInspect]);
+    }, [showInspect, setShowInspect]);
 
     const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
       defaultStackByOption
@@ -89,7 +92,7 @@ export const MatrixHistogram = React.memo(
     const [subtitleWithCounts, setSubtitle] = useState<string>('');
     const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
     const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
-    const setSelectedChatOptionCallback = useCallback(
+    const setSelectedChartOptionCallback = useCallback(
       (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedStackByOption(
           stackByOptions?.find(co => co.value === event.target.value) ?? defaultStackByOption
@@ -106,21 +109,22 @@ export const MatrixHistogram = React.memo(
       {},
       HistogramAggregation
     >({
-      alertsType,
-      anomaliesType,
-      authenticationsType,
       dataKey,
       endDate,
-      eventsType,
+      errorMessage,
       filterQuery,
       query,
       skip,
       startDate,
       sort,
       title,
+      isAlertsHistogram,
+      isAnomaliesHistogram,
+      isAuthenticationsHistogram,
+      isDNSHistogram,
+      isEventsType,
       isInspected,
       isPtrIncluded,
-      isHistogram: true,
       pagination: useMemo(() => getPagination(), [activePage, limit]),
       stackByField: selectedStackByOption.value,
     });
@@ -130,8 +134,11 @@ export const MatrixHistogram = React.memo(
         setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
 
       if (totalCount <= 0) {
-        if (hideHistogramIfEmpty) setHideHistogram(true);
-        else setHideHistogram(false);
+        if (hideHistogramIfEmpty) {
+          setHideHistogram(true);
+        } else {
+          setHideHistogram(false);
+        }
       } else {
         setHideHistogram(false);
       }
@@ -139,7 +146,18 @@ export const MatrixHistogram = React.memo(
       setBarChartData(getCustomChartData(data, mapping));
 
       setQuery({ id, inspect, loading, refetch });
-    }, [totalCount, isInspected, loading, data]);
+    }, [
+      subtitle,
+      setSubtitle,
+      setHideHistogram,
+      setBarChartData,
+      setQuery,
+      hideHistogramIfEmpty,
+      totalCount,
+      isInspected,
+      loading,
+      data,
+    ]);
 
     return !hideHistogram ? (
       <Panel
@@ -150,15 +168,13 @@ export const MatrixHistogram = React.memo(
       >
         <HeaderSection
           id={id}
-          title={
-            title && selectedStackByOption ? `${title} by ${selectedStackByOption.text}` : null
-          }
+          title={title}
           showInspect={showInspect}
           subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
         >
           {stackByOptions && (
             <EuiSelect
-              onChange={setSelectedChatOptionCallback}
+              onChange={setSelectedChartOptionCallback}
               options={stackByOptions}
               prepend={i18n.STACK_BY}
               value={selectedStackByOption?.value}

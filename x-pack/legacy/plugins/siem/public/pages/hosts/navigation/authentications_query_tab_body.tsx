@@ -64,15 +64,16 @@ export const AuthenticationsQueryTabBody = ({
         deleteQuery({ id: ID });
       }
     };
-  }, []);
+  }, [deleteQuery]);
   return (
     <>
       <MatrixHistogramContainer
-        authenticationsType={true}
+        isAuthenticationsHistogram={true}
         dataKey="AuthenticationsHistogram"
         defaultStackByOption={authStackByOptions[0]}
         deleteQuery={deleteQuery}
         endDate={endDate}
+        errorMessage={i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA}
         filterQuery={filterQuery}
         id={ID}
         mapping={authMatrixDataMappingFields}

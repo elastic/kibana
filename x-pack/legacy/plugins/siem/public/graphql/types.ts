@@ -3227,11 +3227,11 @@ export namespace GetKpiNetworkQuery {
 
 export namespace GetMatrixHistogramQuery {
   export type Variables = {
-    alertsType: boolean;
-    anomaliesType: boolean;
-    authenticationsType: boolean;
+    isAlertsHistogram: boolean;
+    isAnomaliesHistogram: boolean;
+    isAuthenticationsHistogram: boolean;
     defaultIndex: string[];
-    eventsType: boolean;
+    isEventsType: boolean;
     filterQuery?: Maybe<string>;
     inspect: boolean;
     sourceId: string;
@@ -3377,7 +3377,7 @@ export namespace GetNetworkDnsQuery {
     defaultIndex: string[];
     filterQuery?: Maybe<string>;
     inspect: boolean;
-    isHistogram: boolean;
+    isDNSHistogram: boolean;
     isPtrIncluded: boolean;
     pagination: PaginationInputPaginated;
     sort: NetworkDnsSortField;

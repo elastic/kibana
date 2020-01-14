@@ -102,7 +102,7 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
     const variables: GetNetworkDnsQuery.Variables = {
       defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
-      isHistogram: false,
+      isDNSHistogram: false,
       inspect: isInspected,
       isPtrIncluded,
       pagination: generateTablePaginationOptions(activePage, limit),

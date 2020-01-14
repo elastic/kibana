@@ -40,7 +40,7 @@ export const EventsQueryTabBody = ({
         deleteQuery({ id: EVENTS_HISTOGRAM_ID });
       }
     };
-  }, []);
+  }, [deleteQuery]);
   return (
     <>
       <MatrixHistogramContainer
@@ -48,7 +48,8 @@ export const EventsQueryTabBody = ({
         defaultStackByOption={eventsStackByOptions[0]}
         deleteQuery={deleteQuery}
         endDate={endDate}
-        eventsType={true}
+        isEventsType={true}
+        errorMessage={i18n.ERROR_FETCHING_EVENTS_DATA}
         filterQuery={filterQuery}
         query={MatrixHistogramGqlQuery}
         setQuery={setQuery}

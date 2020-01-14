@@ -10,7 +10,6 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { State, inputsSelectors, hostsModel, networkModel } from '../../store';
 import { QueryTemplateProps } from '../query_template';
-import { withKibana } from '../../lib/kibana';
 
 import { Maybe } from '../../graphql/types';
 import { MatrixHistogram } from '../../components/matrix_histogram';
@@ -23,13 +22,14 @@ import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
 export interface OwnProps extends QueryTemplateProps {
-  alertsType?: boolean;
-  anomaliesType?: boolean;
-  authenticationsType?: boolean;
+  isAlertsHistogram?: boolean;
+  isAnomaliesHistogram?: boolean;
+  isAuthenticationsHistogram?: boolean;
   dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
   deleteQuery?: ({ id }: { id: string }) => void;
-  eventsType?: boolean;
+  isEventsType?: boolean;
+  errorMessage: string;
   hideHistogramIfEmpty?: boolean;
   id: string;
   mapping?: MatrixHistogramMappingTypes;
@@ -55,6 +55,5 @@ const makeMapStateToProps = () => {
 };
 
 export const MatrixHistogramContainer = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
+  connect(makeMapStateToProps)
 )(MatrixHistogram);

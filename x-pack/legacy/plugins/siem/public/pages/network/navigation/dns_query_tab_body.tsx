@@ -49,7 +49,7 @@ export const DnsQueryTabBody = ({
         deleteQuery({ id: HISTOGRAM_ID });
       }
     };
-  }, []);
+  }, [deleteQuery]);
   const formatBytes = useFormatBytes();
 
   return (
@@ -77,7 +77,9 @@ export const DnsQueryTabBody = ({
             dataKey={['NetworkDns', 'histogram']}
             defaultStackByOption={dnsStackByOptions[0]}
             endDate={endDate}
+            errorMessage={i18n.ERROR_FETCHING_DNS_DATA}
             filterQuery={filterQuery}
+            isDNSHistogram={true}
             limit={totalCount}
             query={networkDnsQuery}
             scaleType={ScaleType.Ordinal}

@@ -11,7 +11,7 @@ export const networkDnsQuery = gql`
     $defaultIndex: [String!]!
     $filterQuery: String
     $inspect: Boolean!
-    $isHistogram: Boolean!
+    $isDNSHistogram: Boolean!
     $isPtrIncluded: Boolean!
     $pagination: PaginationInputPaginated!
     $sort: NetworkDnsSortField!
@@ -31,7 +31,7 @@ export const networkDnsQuery = gql`
         stackByField: $stackByField
       ) {
         totalCount
-        edges @skip(if: $isHistogram) {
+        edges @skip(if: $isDNSHistogram) {
           node {
             _id
             dnsBytesIn
@@ -44,7 +44,7 @@ export const networkDnsQuery = gql`
             value
           }
         }
-        pageInfo @skip(if: $isHistogram) {
+        pageInfo @skip(if: $isDNSHistogram) {
           activePage
           fakeTotalCount
           showMorePagesIndicator
@@ -53,7 +53,7 @@ export const networkDnsQuery = gql`
           dsl
           response
         }
-        histogram @include(if: $isHistogram) {
+        histogram @include(if: $isDNSHistogram) {
           x
           y
           g

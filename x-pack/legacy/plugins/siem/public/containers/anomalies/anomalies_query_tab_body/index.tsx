@@ -62,11 +62,12 @@ export const AnomaliesQueryTabBody = ({
   return (
     <>
       <MatrixHistogramContainer
-        anomaliesType={true}
+        isAnomaliesHistogram={true}
         dataKey="AnomaliesHistogram"
         defaultStackByOption={anomaliesStackByOptions[0]}
         deleteQuery={deleteQuery}
         endDate={endDate}
+        errorMessage={i18n.ERROR_FETCHING_ANOMALIES_DATA}
         filterQuery={mergedFilterQuery}
         hideHistogramIfEmpty={true}
         id={ID}

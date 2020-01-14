@@ -8,11 +8,11 @@ import gql from 'graphql-tag';
 
 export const MatrixHistogramGqlQuery = gql`
   query GetMatrixHistogramQuery(
-    $alertsType: Boolean!
-    $anomaliesType: Boolean!
-    $authenticationsType: Boolean!
+    $isAlertsHistogram: Boolean!
+    $isAnomaliesHistogram: Boolean!
+    $isAuthenticationsHistogram: Boolean!
     $defaultIndex: [String!]!
-    $eventsType: Boolean!
+    $isEventsType: Boolean!
     $filterQuery: String
     $inspect: Boolean!
     $sourceId: ID!
@@ -26,7 +26,7 @@ export const MatrixHistogramGqlQuery = gql`
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
         stackByField: $stackByField
-      ) @include(if: $alertsType) {
+      ) @include(if: $isAlertsHistogram) {
         matrixHistogramData {
           x
           y
@@ -43,7 +43,7 @@ export const MatrixHistogramGqlQuery = gql`
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
         stackByField: $stackByField
-      ) @include(if: $anomaliesType) {
+      ) @include(if: $isAnomaliesHistogram) {
         matrixHistogramData {
           x
           y
@@ -60,7 +60,7 @@ export const MatrixHistogramGqlQuery = gql`
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
         stackByField: $stackByField
-      ) @include(if: $authenticationsType) {
+      ) @include(if: $isAuthenticationsHistogram) {
         matrixHistogramData {
           x
           y
@@ -77,7 +77,7 @@ export const MatrixHistogramGqlQuery = gql`
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
         stackByField: $stackByField
-      ) @include(if: $eventsType) {
+      ) @include(if: $isEventsType) {
         matrixHistogramData {
           x
           y

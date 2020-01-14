@@ -17,23 +17,23 @@ import { createFilter } from '../helpers';
 import { useApolloClient } from '../../utils/apollo_context';
 import { inputsModel } from '../../store';
 import { GetMatrixHistogramQuery, GetNetworkDnsQuery } from '../../graphql/types';
-import * as i18n from './translations';
 
 export const useQuery = <Hit, Aggs, TCache = object>({
-  alertsType = false,
-  anomaliesType = false,
-  authenticationsType = false,
   dataKey,
-  eventsType = false,
   endDate,
+  errorMessage,
   filterQuery,
+  isAlertsHistogram = false,
+  isAnomaliesHistogram = false,
+  isAuthenticationsHistogram = false,
+  isEventsType = false,
+  isDNSHistogram,
+  isPtrIncluded,
+  isInspected,
   query,
   stackByField,
   startDate,
   sort,
-  isPtrIncluded,
-  isInspected,
-  isHistogram,
   pagination,
 }: MatrixHistogramQueryProps) => {
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
@@ -43,29 +43,22 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
   const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
   const [totalCount, setTotalCount] = useState(-1);
-
-  const getErrorMessage = () => {
-    if (alertsType) return i18n.ERROR_FETCHING_ALERTS_DATA;
-    if (anomaliesType) return i18n.ERROR_FETCHING_ANOMALIES_DATA;
-    if (authenticationsType) return i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA;
-    if (eventsType) return i18n.ERROR_FETCHING_EVENTS_DATA;
-    return i18n.ERROR_FETCHING_DNS_DATA;
-  };
+  const apolloClient = useApolloClient();
 
   const isDNSQuery = (
     variable: Pick<
       MatrixHistogramQueryProps,
-      'isHistogram' | 'isPtrIncluded' | 'sort' | 'pagination'
+      'isDNSHistogram' | 'isPtrIncluded' | 'sort' | 'pagination'
     >
   ): variable is GetNetworkDnsQuery.Variables => {
     return (
-      variable.isHistogram !== undefined &&
+      !!isDNSHistogram &&
+      variable.isDNSHistogram !== undefined &&
       variable.isPtrIncluded !== undefined &&
       variable.sort !== undefined &&
       variable.pagination !== undefined
     );
   };
-
   const basicVariables = {
     filterQuery: createFilter(filterQuery),
     sourceId: 'default',
@@ -80,20 +73,18 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   };
   const dnsVariables = {
     ...basicVariables,
-    isHistogram,
+    isDNSHistogram,
     isPtrIncluded,
     sort,
     pagination,
   };
   const matrixHistogramVariables: GetMatrixHistogramQuery.Variables = {
     ...basicVariables,
-    alertsType,
-    anomaliesType,
-    authenticationsType,
-    eventsType,
+    isAlertsHistogram,
+    isAnomaliesHistogram,
+    isAuthenticationsHistogram,
+    isEventsType,
   };
-
-  const apolloClient = useApolloClient();
 
   useEffect(() => {
     let isSubscribed = true;
@@ -135,7 +126,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
               setData(null);
               setTotalCount(-1);
               setInspect(null);
-              errorToToaster({ title: getErrorMessage(), error, dispatchToaster });
+              errorToToaster({ title: errorMessage, error, dispatchToaster });
               setLoading(false);
             }
           }
@@ -154,7 +145,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
     query,
     filterQuery,
     isInspected,
-    isHistogram,
+    isDNSHistogram,
     stackByField,
     sort,
     isPtrIncluded,

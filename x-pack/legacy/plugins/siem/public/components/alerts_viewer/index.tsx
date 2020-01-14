@@ -49,13 +49,14 @@ export const AlertsView = ({
   return (
     <>
       <MatrixHistogramContainer
-        alertsType={true}
         dataKey={dataKey}
         deleteQuery={deleteQuery}
         defaultStackByOption={alertsStackByOptions[0]}
         endDate={endDate}
+        errorMessage={i18n.ERROR_FETCHING_ALERTS_DATA}
         filterQuery={filterQuery}
         id={ID}
+        isAlertsHistogram={true}
         query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
         skip={skip}
@@ -63,7 +64,7 @@ export const AlertsView = ({
         stackByOptions={alertsStackByOptions}
         startDate={startDate}
         subtitle={getSubtitle}
-        title={`${i18n.ALERTS_DOCUMENT_TYPE}`}
+        title={i18n.ALERTS_DOCUMENT_TYPE}
         type={type}
         updateDateRange={updateDateRange}
       />

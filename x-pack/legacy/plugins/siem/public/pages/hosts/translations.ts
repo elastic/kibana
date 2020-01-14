@@ -76,3 +76,17 @@ export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.hosts.emptyAction
 export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.hosts.emptyActionSecondary', {
   defaultMessage: 'Go to documentation',
 });
+
+export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
+  'xpack.siem.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
+  {
+    defaultMessage: 'Failed to query authentications data',
+  }
+);
+
+export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
+  'xpack.siem.hosts.navigaton.matrixHistogram.errorFetchingEventsData',
+  {
+    defaultMessage: 'Failed to query events data',
+  }
+);
