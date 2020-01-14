@@ -100,7 +100,7 @@ export const FieldsPanel: FC<Props> = ({
                   />
                 }
               >
-                <EuiBadge>
+                <EuiBadge title="">
                   <b>{fieldVisConfigs.length}</b>
                 </EuiBadge>
               </EuiToolTip>
