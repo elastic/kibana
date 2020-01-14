@@ -22,7 +22,6 @@ import {
   duplicateRuleAction,
   editRuleAction,
   exportRulesAction,
-  runRuleAction,
 } from './actions';
 
 import { Action } from './reducer';
@@ -44,13 +43,6 @@ const getActions = (
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: TableData) => editRuleAction(rowItem.sourceRule, history),
     enabled: (rowItem: TableData) => !rowItem.sourceRule.immutable,
-  },
-  {
-    description: i18n.RUN_RULE_MANUALLY,
-    icon: 'play',
-    name: i18n.RUN_RULE_MANUALLY,
-    onClick: runRuleAction,
-    enabled: () => false,
   },
   {
     description: i18n.DUPLICATE_RULE,

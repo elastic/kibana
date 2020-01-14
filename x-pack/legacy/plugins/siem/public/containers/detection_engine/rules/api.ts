@@ -189,7 +189,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
       },
       body: JSON.stringify({
         ...rule,
-        name: `${rule.name} [Duplicate]`,
+        name: `${rule.name} [${i18n.DUPLICATE}]`,
         created_at: undefined,
         created_by: undefined,
         id: undefined,
@@ -198,6 +198,10 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
         updated_by: undefined,
         enabled: rule.enabled,
         immutable: false,
+        last_success_at: undefined,
+        last_success_message: undefined,
+        status: undefined,
+        status_date: undefined,
       }),
     })
   );

@@ -52,6 +52,7 @@ import { inputsSelectors } from '../../../../store/inputs';
 import { State } from '../../../../store';
 import { InputsRange } from '../../../../store/inputs/model';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../../store/inputs/actions';
+import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -211,6 +212,12 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                                 >
                                   {ruleI18n.EDIT_RULE_SETTINGS}
                                 </EuiButton>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <RuleActionsOverflow
+                                  rule={rule}
+                                  userHasNoPermissions={userHasNoPermissions}
+                                />
                               </EuiFlexItem>
                             </EuiFlexGroup>
                           </EuiFlexItem>

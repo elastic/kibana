@@ -6,22 +6,26 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { Dispatch } from 'react';
+import * as H from 'history';
 import * as i18n from '../translations';
 import { TableData } from '../types';
 import { Action } from './reducer';
 import { deleteRulesAction, enableRulesAction, exportRulesAction } from './actions';
 import { ActionToaster } from '../../../../components/toasters';
+import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 
 export const getBatchItems = (
   selectedState: TableData[],
   dispatch: Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
+  history: H.History,
   closePopover: () => void
 ) => {
   const containsEnabled = selectedState.some(v => v.activate);
   const containsDisabled = selectedState.some(v => !v.activate);
   const containsLoading = selectedState.some(v => v.isLoading);
   const containsImmutable = selectedState.some(v => v.immutable);
+  const containsMultipleRules = Array.from(new Set(selectedState.map(v => v.rule_id))).length > 1;
 
   return [
     <EuiContextMenuItem
@@ -65,9 +69,12 @@ export const getBatchItems = (
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_EDIT_INDEX_PATTERNS}
       icon="indexEdit"
-      disabled={true}
+      disabled={
+        containsImmutable || containsLoading || containsMultipleRules || selectedState.length === 0
+      }
       onClick={async () => {
         closePopover();
+        history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${selectedState[0].id}/edit`);
       }}
     >
       {i18n.BATCH_ACTION_EDIT_INDEX_PATTERNS}
