@@ -59,7 +59,6 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await testSubjects.click(popoverId);
     },
     async getSnapshotCount() {
-      await testSubjects.existOrFail('xpack.uptime.snapshot.donutChart.up', { timeout: 5000 });
       return {
         up: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.up'),
         down: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.down'),
