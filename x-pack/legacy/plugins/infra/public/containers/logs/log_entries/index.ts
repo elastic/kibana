@@ -169,10 +169,16 @@ const useFetchEntriesEffect = (
     if (!props.startTimestamp || !props.endTimestamp) {
       return;
     }
+    const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
+
+    // Control cursors are correct
+    if (getEntriesBefore && !state.topCursor) {
+      return;
+    } else if (!state.bottomCursor) {
+      return;
+    }
 
     dispatch({ type: Action.FetchingMoreEntries });
-
-    const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
 
     try {
       const fetchArgs: LogEntriesRequest = {
@@ -183,7 +189,7 @@ const useFetchEntriesEffect = (
       };
 
       if (getEntriesBefore) {
-        (fetchArgs as LogEntriesBeforeRequest).before = state.topCursor;
+        (fetchArgs as LogEntriesBeforeRequest).before = state.topCursor!; // We check for nullity above already
       } else {
         (fetchArgs as LogEntriesAfterRequest).after = state.bottomCursor;
       }
