@@ -6,13 +6,28 @@
 
 import { APICaller, CoreSetup } from 'kibana/server';
 
-import { TaskInstance } from '../../task_manager/server';
-import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../task_manager/server/plugin';
+import {
+  ConcreteTaskInstance,
+  TaskStatus,
+  TaskManagerStartContract,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/task_manager/server';
 
-export const getMockTaskInstance = (): TaskInstance => ({
+export const getMockTaskInstance = (
+  overrides: Partial<ConcreteTaskInstance> = {}
+): ConcreteTaskInstance => ({
   state: { runs: 0, stats: {} },
   taskType: 'test',
   params: {},
+  id: '',
+  scheduledAt: new Date(),
+  attempts: 1,
+  status: TaskStatus.Idle,
+  runAt: new Date(),
+  startedAt: null,
+  retryAt: null,
+  ownerId: null,
+  ...overrides,
 });
 
 const defaultMockSavedObjects = [
@@ -38,8 +53,24 @@ export const getMockCallWithInternal = (hits: unknown[] = defaultMockSavedObject
   }) as unknown) as APICaller;
 };
 
-export const getMockTaskFetch = (docs: TaskInstance[] = defaultMockTaskDocs) => {
-  return () => Promise.resolve({ docs });
+export const getMockTaskFetch = (
+  docs: ConcreteTaskInstance[] = defaultMockTaskDocs
+): Partial<jest.Mocked<TaskManagerStartContract>> => {
+  return {
+    fetch: jest.fn(fetchOpts => {
+      return Promise.resolve({ docs, searchAfter: [] });
+    }),
+  } as Partial<jest.Mocked<TaskManagerStartContract>>;
+};
+
+export const getMockThrowingTaskFetch = (
+  throws: Error
+): Partial<jest.Mocked<TaskManagerStartContract>> => {
+  return {
+    fetch: jest.fn(fetchOpts => {
+      throw throws;
+    }),
+  } as Partial<jest.Mocked<TaskManagerStartContract>>;
 };
 
 export const getMockConfig = () => {
@@ -47,13 +78,6 @@ export const getMockConfig = () => {
     get: () => '',
   };
 };
-
-export const getMockTaskManager = (fetch: any = getMockTaskFetch()) =>
-  (({
-    registerTaskDefinitions: () => undefined,
-    ensureScheduled: () => Promise.resolve(),
-    fetch,
-  } as unknown) as TaskManagerPluginSetupContract);
 
 export const getCluster = () => ({
   callWithInternalUser: getMockCallWithInternal(),

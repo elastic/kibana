@@ -37,6 +37,25 @@ const MyEuiFormRow = styled(EuiFormRow)`
   }
 `;
 
+export const MyAddItemButton = styled(EuiButtonEmpty)`
+  margin-top: 4px;
+
+  &.euiButtonEmpty--xSmall {
+    font-size: 12px;
+  }
+
+  .euiIcon {
+    width: 12px;
+    height: 12px;
+  }
+`;
+
+MyAddItemButton.defaultProps = {
+  flush: 'left',
+  iconType: 'plusInCircle',
+  size: 'xs',
+};
+
 export const AddItem = ({
   addText,
   dataTestSubj,
@@ -160,9 +179,9 @@ export const AddItem = ({
           );
         })}
 
-        <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled} iconType="plusInCircle">
+        <MyAddItemButton onClick={addItem} isDisabled={isDisabled}>
           {addText}
-        </EuiButtonEmpty>
+        </MyAddItemButton>
       </>
     </MyEuiFormRow>
   );

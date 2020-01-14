@@ -322,6 +322,10 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         async () => (await globalNav.getLastBreadcrumb()) === vizName
       );
     }
+
+    public async clickLensWidget() {
+      await this.clickVisType('lens');
+    }
   }
 
   return new VisualizePage();
