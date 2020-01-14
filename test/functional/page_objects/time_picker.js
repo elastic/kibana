@@ -113,6 +113,11 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
+    async isOff() {
+      const element = await find.byClassName('euiDatePickerRange--readOnly');
+      return !!element;
+    }
+
     async isQuickSelectMenuOpen() {
       return await testSubjects.exists('superDatePickerQuickMenu');
     }

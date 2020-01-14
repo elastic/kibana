@@ -431,13 +431,17 @@ export class DashboardAppController {
           $scope.indexPatterns,
           (p: IndexPattern) => p.id === indexPatternId
         );
-        if (indexPattern && indexPattern.timeFieldName) {
-          const { timeRangeFilter, restOfFilters } = extractTimeFilter(
-            indexPattern.timeFieldName,
-            filters
-          );
-          queryFilter.addFilters(restOfFilters);
-          if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+        if (indexPattern) {
+          if (indexPattern.timeFieldName) {
+            const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+              indexPattern.timeFieldName,
+              filters
+            );
+            queryFilter.addFilters(restOfFilters);
+            if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
+          } else {
+            queryFilter.addFilters(filters);
+          }
         }
       }
 

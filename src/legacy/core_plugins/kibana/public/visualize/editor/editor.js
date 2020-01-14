@@ -436,7 +436,11 @@ function VisEditor(
     };
 
     $scope.showQueryBarTimePicker = () => {
-      return vis.type.options.showTimePicker;
+      // tsvb loads without an indexPattern initially (TODO investigate).
+      // hide timefilter only if timeFieldName is explicitly undefined.
+      let hasTimeField = true;
+      if ($scope.indexPattern) hasTimeField = !!$scope.indexPattern.timeFieldName;
+      return vis.type.options.showTimePicker && hasTimeField;
     };
 
     $scope.timeRange = timefilter.getTime();
