@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 import { MonitorLocations } from '../../../../common/runtime_types';
@@ -53,7 +53,10 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
         <EuiFlexItem grow={true}>
           {isGeoInfoMissing && <LocationMissingWarning />}
           <MapPanel>
-            <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
+            <EmbeddedMap
+              upPoints={upPoints.length > 0 ? upPoints : null}
+              downPoints={downPoints.length > 0 ? downPoints : null}
+            />
           </MapPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

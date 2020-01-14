@@ -18,8 +18,8 @@ import { getLayerList } from './map_config';
 import { UptimeThemeContext } from '../../../../contexts';
 
 export interface EmbeddedMapProps {
-  upPoints: LocationPoint[];
-  downPoints: LocationPoint[];
+  upPoints: LocationPoint[] | null;
+  downPoints: LocationPoint[] | null;
 }
 
 export interface LocationPoint {
@@ -45,7 +45,7 @@ const EmbeddedPanel = styled.div`
   }
 `;
 
-export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
+export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
   const { colors } = useContext(UptimeThemeContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -55,10 +55,6 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     id: uuid.v4(),
     filters: [],
     hidePanelTitles: true,
-    query: {
-      query: '',
-      language: 'kuery',
-    },
     refreshConfig: {
       value: 0,
       pause: false,
@@ -83,7 +79,7 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
   useEffect(() => {
     async function setupEmbeddable() {
       const mapState = {
-        layerList: getLayerList(upPoints, downPoints, colors),
+        layerList: getLayerList(upPoints ?? [], downPoints ?? [], colors),
         title: i18n.MAP_TITLE,
       };
       // @ts-ignore
@@ -91,6 +87,7 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
 
       setEmbeddable(embeddableObject);
     }
+
     setupEmbeddable();
 
     // we want this effect to execute exactly once after the component mounts
@@ -99,10 +96,10 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
 
   // update map layers based on points
   useEffect(() => {
-    if (embeddable) {
+    if (embeddable && (upPoints || downPoints)) {
       embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
     }
-  }, [upPoints, downPoints, embeddable, colors]);
+  }, [embeddable, upPoints, downPoints, colors]);
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
@@ -116,6 +113,6 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
       <div className="embPanel__content" ref={embeddableRoot} />
     </EmbeddedPanel>
   );
-};
+});
 
 EmbeddedMap.displayName = 'EmbeddedMap';
