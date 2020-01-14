@@ -66,7 +66,6 @@ export interface StoreOpts {
 }
 
 export interface SearchOpts {
-  searchAfter?: any[];
   sort?: string | object | object[];
   query?: object;
   size?: number;
@@ -93,7 +92,6 @@ export interface OwnershipClaimingOpts {
 }
 
 export interface FetchResult {
-  searchAfter: any[];
   docs: ConcreteTaskInstance[];
 }
 
@@ -186,10 +184,8 @@ export class TaskStore {
    * @param opts - The query options used to filter tasks
    */
   public async fetch(opts: FetchOpts = {}): Promise<FetchResult> {
-    const sort = paginatableSort(opts.sort);
     return this.search({
-      sort,
-      search_after: opts.searchAfter,
+      sort: opts.sort || [{ 'task.runAt': 'asc' }],
       query: opts.query,
     });
   }
@@ -387,7 +383,6 @@ export class TaskStore {
         .map(doc => this.serializer.rawToSavedObject(doc))
         .map(doc => omit(doc, 'namespace') as SavedObject)
         .map(savedObjectToConcreteTaskInstance),
-      searchAfter: (rawDocs.length && rawDocs[rawDocs.length - 1].sort) || [],
     };
   }
 
@@ -415,20 +410,6 @@ export class TaskStore {
       version_conflicts,
     };
   }
-}
-
-function paginatableSort(sort: any[] = []) {
-  const sortById = { _id: 'desc' };
-
-  if (!sort.length) {
-    return [{ 'task.runAt': 'asc' }, sortById];
-  }
-
-  if (sort.find(({ _id }) => !!_id)) {
-    return sort;
-  }
-
-  return [...sort, sortById];
 }
 
 function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
