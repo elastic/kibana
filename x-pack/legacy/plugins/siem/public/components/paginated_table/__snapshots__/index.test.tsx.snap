@@ -520,7 +520,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
     }
   }
 >
-  <PaginatedTable
+  <PaginatedTableComponent
     activePage={0}
     columns={
       Array [
