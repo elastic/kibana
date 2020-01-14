@@ -13,7 +13,7 @@ import {
   orthographicProjection,
   translationTransformation,
 } from '../../lib/transformation';
-import { maximum, minimum } from './scaling_constants';
+import { maximum, minimum, zoomCurveRate } from './scaling_constants';
 
 interface ClippingPlanes {
   renderWidth: number;
@@ -178,7 +178,7 @@ export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state =>
  */
 export const scale = (state: CameraState): Vector2 => {
   const delta = maximum - minimum;
-  const value = state.scalingFactor * delta + minimum;
+  const value = Math.pow(state.scalingFactor, zoomCurveRate) * delta + minimum;
   return [value, value];
 };
 

@@ -8,7 +8,7 @@ import { Store, createStore } from 'redux';
 import { CameraAction } from './action';
 import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
-import { projectionMatrix, scale } from './selectors';
+import { projectionMatrix } from './selectors';
 import { applyMatrix3 } from '../../lib/vector2';
 import { scaleToZoom } from './scale_to_zoom';
 
