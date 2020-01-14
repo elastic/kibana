@@ -105,7 +105,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                               showInspect={false}
                             >
                               <div
-                                className="sc-AykKF cUIXEb"
+                                className="sc-AykKF kJqrPG"
                                 data-test-subj="transparent-inspect-container"
                               >
                                 <EuiButtonIcon
@@ -347,7 +347,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               showInspect={false}
                             >
                               <div
-                                className="sc-AykKF cUIXEb"
+                                className="sc-AykKF kJqrPG"
                                 data-test-subj="transparent-inspect-container"
                               >
                                 <EuiButtonIcon
@@ -659,7 +659,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             showInspect={false}
                           >
                             <div
-                              className="sc-AykKF gGhbbL"
+                              className="sc-AykKF gblzeK"
                               data-test-subj="transparent-inspect-container"
                             >
                               <EuiButtonIcon

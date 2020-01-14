@@ -164,7 +164,7 @@ function EditorUI() {
 
     mappings.retrieveAutoCompleteInfo();
 
-    const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor.getCoreEditor());
+    const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {

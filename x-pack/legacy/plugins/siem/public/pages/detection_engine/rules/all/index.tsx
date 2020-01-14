@@ -11,7 +11,7 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import uuid from 'uuid';
@@ -60,7 +60,11 @@ const initialState: State = {
  *   * Delete
  *   * Import/Export
  */
-export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importCompleteToggle => {
+export const AllRules = React.memo<{
+  hasNoPermissions: boolean;
+  importCompleteToggle: boolean;
+  loading: boolean;
+}>(({ hasNoPermissions, importCompleteToggle, loading }) => {
   const [
     {
       exportPayload,
@@ -80,10 +84,34 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
-      <EuiContextMenuPanel items={getBatchItems(selectedItems, dispatch, closePopover)} />
+      <EuiContextMenuPanel
+        items={getBatchItems(selectedItems, dispatch, dispatchToaster, closePopover)}
+      />
     ),
-    [selectedItems, dispatch]
+    [selectedItems, dispatch, dispatchToaster]
   );
+
+  const tableOnChangeCallback = useCallback(
+    ({ page, sort }: EuiBasicTableOnChange) => {
+      dispatch({
+        type: 'updatePagination',
+        pagination: { ...pagination, page: page.index + 1, perPage: page.size },
+      });
+      dispatch({
+        type: 'updateFilterOptions',
+        filterOptions: {
+          ...filterOptions,
+          sortField: 'enabled', // Only enabled is supported for sorting currently
+          sortOrder: sort?.direction ?? 'desc',
+        },
+      });
+    },
+    [dispatch, filterOptions, pagination]
+  );
+
+  const columns = useMemo(() => {
+    return getColumns(dispatch, dispatchToaster, history, hasNoPermissions);
+  }, [dispatch, dispatchToaster, history]);
 
   useEffect(() => {
     dispatch({ type: 'loading', isLoading: isLoadingRules });
@@ -110,6 +138,15 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
       },
     });
   }, [rulesData]);
+
+  const euiBasicTableSelectionProps = useMemo(
+    () => ({
+      selectable: (item: TableData) => !item.isLoading,
+      onSelectionChange: (selected: TableData[]) =>
+        dispatch({ type: 'setSelected', selectedItems: selected }),
+    }),
+    []
+  );
 
   return (
     <>
@@ -161,13 +198,15 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
 
                 <UtilityBarGroup>
                   <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
-                  <UtilityBarAction
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverContent={getBatchItemsPopoverContent}
-                  >
-                    {i18n.BATCH_ACTIONS}
-                  </UtilityBarAction>
+                  {!hasNoPermissions && (
+                    <UtilityBarAction
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverContent={getBatchItemsPopoverContent}
+                    >
+                      {i18n.BATCH_ACTIONS}
+                    </UtilityBarAction>
+                  )}
                   <UtilityBarAction
                     iconSide="right"
                     iconType="refresh"
@@ -180,38 +219,23 @@ export const AllRules = React.memo<{ importCompleteToggle: boolean }>(importComp
             </UtilityBar>
 
             <EuiBasicTable
-              columns={getColumns(dispatch, history)}
-              isSelectable
+              columns={columns}
+              isSelectable={!hasNoPermissions ?? false}
               itemId="rule_id"
               items={tableData}
-              onChange={({ page, sort }: EuiBasicTableOnChange) => {
-                dispatch({
-                  type: 'updatePagination',
-                  pagination: { ...pagination, page: page.index + 1, perPage: page.size },
-                });
-                dispatch({
-                  type: 'updateFilterOptions',
-                  filterOptions: {
-                    ...filterOptions,
-                    sortField: 'enabled', // Only enabled is supported for sorting currently
-                    sortOrder: sort!.direction,
-                  },
-                });
-              }}
+              onChange={tableOnChangeCallback}
               pagination={{
                 pageIndex: pagination.page - 1,
                 pageSize: pagination.perPage,
                 totalItemCount: pagination.total,
-                pageSizeOptions: [5, 10, 20],
-              }}
-              selection={{
-                selectable: (item: TableData) => !item.isLoading,
-                onSelectionChange: (selected: TableData[]) =>
-                  dispatch({ type: 'setSelected', selectedItems: selected }),
+                pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
               }}
               sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
+              selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
             />
-            {isLoading && <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />}
+            {(isLoading || loading) && (
+              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+            )}
           </>
         )}
       </Panel>

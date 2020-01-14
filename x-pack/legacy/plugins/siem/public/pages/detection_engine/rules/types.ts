@@ -25,6 +25,7 @@ export interface EuiBasicTableOnChange {
 
 export interface TableData {
   id: string;
+  immutable: boolean;
   rule_id: string;
   rule: {
     href: string;
@@ -57,6 +58,7 @@ export interface RuleStepData {
 }
 
 export interface RuleStepProps {
+  addPadding?: boolean;
   descriptionDirection?: 'row' | 'column';
   setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
   isReadOnlyView: boolean;
@@ -109,8 +111,8 @@ export interface AboutStepRuleJson {
   references: string[];
   false_positives: string[];
   tags: string[];
-  timeline_id: string | null;
-  timeline_title: string | null;
+  timeline_id?: string;
+  timeline_title?: string;
   threats: IMitreEnterpriseAttack[];
 }
 
