@@ -15,7 +15,7 @@ const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 
 export class ColorMapSelect extends Component {
   state = {
-    selected: null,
+    selected: '',
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
