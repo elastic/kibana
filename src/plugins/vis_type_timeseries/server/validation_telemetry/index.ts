@@ -17,28 +17,4 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { getVisData } from '../lib/get_vis_data';
-
-const escapeHatch = schema.object({}, { allowUnknowns: true });
-
-export const visDataRoutes = (router, framework) => {
-  router.post(
-    {
-      path: '/api/metrics/vis/data',
-      validate: {
-        body: escapeHatch,
-      },
-    },
-    async (requestContext, request, response) => {
-      try {
-        const results = await getVisData(requestContext, request.body, framework);
-        return response.ok({ body: results });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
-    }
-  );
-};
+export * from './validation_telemetry_service';

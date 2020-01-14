@@ -17,9 +17,21 @@
  * under the License.
  */
 
-/** This module is intended for consumption by public to avoid import issues with server-side code */
-export { PluginOpaqueId } from './plugins/types';
-export * from './saved_objects/types';
-export * from './ui_settings/types';
-export * from './legacy/types';
-export { EnvironmentMode, PackageInfo } from './config/types';
+import React from 'react';
+import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import classNames from 'classnames';
+
+export const AppWrapper: React.FunctionComponent<{
+  chromeVisible$: Observable<boolean>;
+}> = ({ chromeVisible$, children }) => {
+  const visible = useObservable(chromeVisible$);
+  return <div className={classNames('app-wrapper', { 'hidden-chrome': !visible })}>{children}</div>;
+};
+
+export const AppContainer: React.FunctionComponent<{
+  classes$: Observable<string[]>;
+}> = ({ classes$, children }) => {
+  const classes = useObservable(classes$);
+  return <div className={classNames('application', classes)}>{children}</div>;
+};

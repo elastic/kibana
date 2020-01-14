@@ -59,7 +59,8 @@ import {
 } from '../..';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
+import { InternalApplicationStart } from '../../../application/types';
+import { CoreStart } from '../../../';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -110,11 +111,10 @@ function euiRecentItem(
 
 function euiNavLink(
   navLink: ChromeNavLink,
-  urlForApp: ApplicationStart['getUrlForApp'],
   legacyMode: boolean,
-  navigateToApp: ApplicationStart['navigateToApp'],
   currentAppId: string | undefined,
-  basePath: HttpStart['basePath']
+  basePath: HttpStart['basePath'],
+  navigateToApp: CoreStart['application']['navigateToApp']
 ) {
   const {
     legacy,
@@ -130,7 +130,7 @@ function euiNavLink(
     order,
     tooltip,
   } = navLink;
-  let href = urlForApp(id);
+  let href = navLink.baseUrl;
 
   if (legacy) {
     href = url && !active ? url : baseUrl;
@@ -150,7 +150,7 @@ function euiNavLink(
         !isModifiedEvent(event) // ignore clicks with modifier keys
       ) {
         event.preventDefault();
-        navigateToApp(id);
+        navigateToApp(navLink.id);
       }
     },
     // Legacy apps use `active` property, NP apps should match the current app
@@ -302,11 +302,10 @@ class HeaderUI extends Component<Props, State> {
             .map(navLink =>
               euiNavLink(
                 navLink,
-                this.props.application.getUrlForApp,
                 this.props.legacyMode,
-                this.props.application.navigateToApp,
                 currentAppId,
-                this.props.basePath
+                this.props.basePath,
+                this.props.application.navigateToApp
               )
             ),
           recentlyAccessed: recentlyAccessed.map(ra =>
