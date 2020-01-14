@@ -47,6 +47,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent = () => {
         endTime,
         isValidating,
         validatedIndices,
+        setupStatus,
         setValidatedIndices,
         validationErrors,
       }),

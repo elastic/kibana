@@ -47,6 +47,7 @@ export const LogEntryCategoriesSetupContent: React.FunctionComponent = () => {
         endTime,
         isValidating,
         validatedIndices,
+        setupStatus,
         setValidatedIndices,
         validationErrors,
       }),
