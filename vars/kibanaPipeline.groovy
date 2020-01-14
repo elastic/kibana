@@ -188,6 +188,24 @@ def uploadCoverageArtifacts(prefix, pattern) {
   uploadGcsArtifact(uploadPrefix, pattern)
 }
 
+def uploadCoverageStaticSite(timestamp) {
+  def uploadPrefix = "kibana-ci-artifacts/jobs/coverage/${timestamp}"
+  def ARTIFACT_PATTERNS = [
+    'target/kibana-coverage/**/*.png',
+    'target/kibana-coverage/**/*.css',
+    'target/kibana-coverage/**/*.html',
+    'target/kibana-coverage/**/*.js',
+  ]
+
+  withEnv([
+    "GCS_UPLOAD_PREFIX=${uploadPrefix}"
+  ], {
+    ARTIFACT_PATTERNS.each { pattern ->
+      uploadGcsArtifact(uploadPrefix, pattern)
+    }
+  })
+}
+
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
