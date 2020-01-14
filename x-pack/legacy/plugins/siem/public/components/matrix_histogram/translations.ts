@@ -6,6 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NETWORK_DNS_HISTOGRAM = i18n.translate('xpack.siem.DNS.histogramTitle', {
-  defaultMessage: 'Top DNS domains bytes count',
-});
+export const STACK_BY = i18n.translate(
+  'xpack.siem.components.histogram.stackByOptions.stackByLabel',
+  {
+    defaultMessage: 'Stack by',
+  }
+);
