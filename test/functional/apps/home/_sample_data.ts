@@ -19,8 +19,9 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
@@ -76,9 +77,8 @@ export default function({ getService, getPageObjects }) {
       expect(isInstalled).to.be(true);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/40670
-    describe.skip('dashboard', () => {
-      afterEach(async () => {
+    describe('dashboard', () => {
+      beforeEach(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -99,7 +99,6 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.home.launchSampleDataSet('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
-
         log.debug('Checking pie charts rendered');
         await pieChart.expectPieSliceCount(4);
         log.debug('Checking area, bar and heatmap charts rendered');
@@ -142,6 +141,11 @@ export default function({ getService, getPageObjects }) {
 
     // needs to be in describe block so it is run after 'dashboard describe block'
     describe('uninstall', () => {
+      beforeEach(async () => {
+        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+
       it('should uninstall flights sample data set', async () => {
         await PageObjects.home.removeSampleDataSet('flights');
         const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
