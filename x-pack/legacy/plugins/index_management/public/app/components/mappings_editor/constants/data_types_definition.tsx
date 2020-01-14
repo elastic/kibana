@@ -50,6 +50,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/keyword.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.keywordLongDescription"
+          defaultMessage="Keyword fields support search by their exact value. This data type is useful for filtering, sorting, and aggregations. To index full-text content, such as an email body, use the {textType}."
+          values={{
+            textType: (
+              <EuiLink href={documentationService.getTypeDocLink('text')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.keywordLongDescription.textTypeLink',
+                  {
+                    defaultMessage: 'text data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   numeric: {
     value: 'numeric',
@@ -393,6 +413,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/dense-vector.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.denseVectorLongDescription"
+          defaultMessage="Dense vector fields store dense vectors of float values. This data type is useful for document scoring."
+        />
+      </p>
+    ),
   },
   date_range: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateRangeDescription', {
@@ -536,6 +564,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/search-suggesters.html#completion-suggester',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.completionSuggesterLongDescription"
+          defaultMessage="Completion suggester fields support autocomplete functionality. This data type uses data structures to enable fast lookups, but are costly to build and stored in-memory."
+        />
+      </p>
+    ),
   },
   token_count: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.tokenCountDescription', {
@@ -545,6 +581,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/token-count.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.tokenCountLongDescription"
+          defaultMessage="Token count fields accept string values. These values are analyzed, then the number of tokens in the string are indexed."
+        />
+      </p>
+    ),
   },
   percolator: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.percolatorDescription', {
@@ -572,6 +616,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/alias.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.aliasLongDescription"
+          defaultMessage="Alias fields accept an alternative name for a field in the index. Aliases can be used in place of the target field in search requests."
+        />
+      </p>
+    ),
   },
   search_as_you_type: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.searchAsYouTypeDescription', {
@@ -581,6 +633,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/search-as-you-type.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.searchAsYouTypeLongDescription"
+          defaultMessage="Search-as-you-type fields supports as-you-type search by breaking strings into a series of subfields. Both prefix completion and infix completion are supported."
+        />
+      </p>
+    ),
   },
   flattened: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.flattenedDescription', {
@@ -590,6 +650,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/flattened.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.flattenedLongDescription"
+          defaultMessage="Flattened fields map an entire field as a single object. This data type is useful for indexing objects with a large or unknown number of unique keys. Flattened fields only support basic queries."
+        />
+      </p>
+    ),
   },
   shape: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.shapeDescription', {
