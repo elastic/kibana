@@ -123,7 +123,7 @@ export const SUCCESSFULLY_EXPORTED_RULES = (totalRules: number) =>
   i18n.translate('xpack.siem.detectionEngine.rules.allRules.successfullyExportedRulesTitle', {
     values: { totalRules },
     defaultMessage:
-      'Successfully exported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+      'Successfully exported {totalRules, plural, =0 {all rules} =1 {{totalRules} rule} other {{totalRules} rules}}',
   });
 
 export const ALL_RULES = i18n.translate('xpack.siem.detectionEngine.rules.allRules.tableTitle', {
