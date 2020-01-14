@@ -519,3 +519,52 @@ export class MyPlugin implements Plugin {
     });
   }
 ```
+
+## Render HTML Content
+
+You can return a blank HTML page bootstrapped with the core application bundle from an HTTP route handler
+via the `rendering` context.
+
+```ts
+router.get(
+  { path: '/', validate: false },
+  (context, request, response) => {
+    const { http, rendering } = context.core;
+
+    return response.ok({
+      body: await rendering.render(),
+      headers: {
+        'content-security-policy': http.csp.header,
+      },
+    });
+  }
+);
+```
+
+You can also specify to exclude user data from the bundle metadata:
+
+```ts
+router.get(
+  { path: '/', validate: false },
+  (context, request, response) => {
+    const { http, rendering } = context.core;
+
+    return response.ok({
+      body: await rendering.render({ includeUserSettings: false }),
+      headers: {
+        'content-security-policy': http.csp.header,
+      },
+    });
+  }
+);
+router.get(
+  { path: '/', validate: false },
+  (context, request, response) =>
+    response.ok({
+      body: await context.core.rendering.render({ includeUserSettings: false }),
+      headers: {
+        'content-security-policy': context.core.http.csp.header,
+      },
+    })
+);
+```
