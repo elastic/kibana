@@ -18,9 +18,9 @@
  */
 
 /** @public */
-export enum AppCategory {
-  analyze,
-  observability,
-  security,
-  management,
+export interface AppCategory {
+  label: string;
+  ariaLabel?: string;
+  order?: number;
+  euiIconType?: string;
 }

@@ -99,6 +99,7 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  DEFAULT_APP_CATEGORIES,
 } from './application';
 
 export {

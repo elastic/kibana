@@ -169,10 +169,6 @@ export class ChromeService {
     const navSetting =
       settings?.user?.pageNavigation?.userValue || settings.defaults.pageNavigation.value;
 
-    const license = (injectedMetadata.getInjectedVars()?.xpackInitialInfo as {
-      license: { type: string };
-    })?.license?.type;
-
     return {
       navControls,
       navLinks,
@@ -201,7 +197,6 @@ export class ChromeService {
             navControlsLeft$={navControls.getLeft$()}
             navControlsRight$={navControls.getRight$()}
             navSetting={navSetting}
-            license={license}
           />
         </React.Fragment>
       ),

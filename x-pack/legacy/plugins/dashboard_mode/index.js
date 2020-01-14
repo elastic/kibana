@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import { AppCategory } from '../../../../src/core/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from './common';
 import { createDashboardModeRequestInterceptor } from './server';
 
@@ -62,7 +62,7 @@ export function dashboardMode(kibana) {
               }
             ),
             icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
-            category: AppCategory.analyze,
+            category: DEFAULT_APP_CATEGORIES.analyze,
           },
         ],
       },

@@ -18,7 +18,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/fea
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../src/plugins/vis_type_timeseries/server';
 import { APMPluginContract } from '../../../plugins/apm/server';
-import { AppCategory } from '../../../../src/core/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export const APP_ID = 'infra';
 
@@ -56,7 +56,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Metrics',
           }),
           url: `/app/${APP_ID}#/infrastructure`,
-          category: AppCategory.observability,
+          category: DEFAULT_APP_CATEGORIES.observability,
         },
         {
           description: i18n.translate('xpack.infra.linkLogsDescription', {
@@ -70,7 +70,7 @@ export function infra(kibana: any) {
             defaultMessage: 'Logs',
           }),
           url: `/app/${APP_ID}#/logs`,
-          category: AppCategory.observability,
+          category: DEFAULT_APP_CATEGORIES.observability,
         },
       ],
       mappings: savedObjectMappings,

@@ -12,7 +12,13 @@ const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects([
+    'common',
+    'infraHome',
+    'security',
+    'spaceSelector',
+    'settings',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const retry = getService('retry');
@@ -37,6 +43,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           name: 'custom_space',
           disabledFeatures: [],
         });
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+          basePath: `/s/custom_space`,
+          ensureCurrentUrl: false,
+        });
+        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
       });
 
       after(async () => {

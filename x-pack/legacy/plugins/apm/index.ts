@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 import { resolve } from 'path';
 import { APMPluginContract } from '../../../plugins/apm/server';
 import { LegacyPluginInitializer } from '../../../../src/legacy/types';
-import { AppCategory } from '../../../../src/core/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import mappings from './mappings.json';
 import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
@@ -29,7 +29,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         icon: 'plugins/apm/icon.svg',
         euiIconType: 'apmApp',
         order: 8100,
-        category: AppCategory.observability
+        category: DEFAULT_APP_CATEGORIES.observability
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/legacy_register_feature'],

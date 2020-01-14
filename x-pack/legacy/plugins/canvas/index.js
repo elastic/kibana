@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import { AppCategory } from '../../../../src/core/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { init } from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
@@ -24,7 +24,7 @@ export function canvas(kibana) {
         icon: 'plugins/canvas/icon.svg',
         euiIconType: 'canvasApp',
         main: 'plugins/canvas/legacy_start',
-        category: AppCategory.analyze,
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
       interpreter: [
         'plugins/canvas/browser_functions',

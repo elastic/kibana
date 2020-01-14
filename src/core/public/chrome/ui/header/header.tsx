@@ -48,6 +48,7 @@ import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
+import { AppCategory } from '../../../../types';
 
 import {
   ChromeBadge,
@@ -59,7 +60,6 @@ import {
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
-import { AppCategory } from '../../../';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -185,36 +185,6 @@ function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   }
 }
 
-function getGroupIcon(groupName: AppCategory) {
-  switch (groupName) {
-    case AppCategory.management:
-      return 'managementApp';
-  }
-}
-
-function getGroupLabel(groupName: AppCategory) {
-  switch (groupName) {
-    case AppCategory.analyze:
-      return i18n.translate('core.ui.analyzeNavList.label', {
-        defaultMessage: 'Analyze',
-      });
-    case AppCategory.observability:
-      return i18n.translate('core.ui.observabilityNavList.label', {
-        defaultMessage: 'Observability',
-      });
-    case AppCategory.security:
-      return i18n.translate('core.ui.securityNavList.label', {
-        defaultMessage: 'Security',
-      });
-    case AppCategory.management:
-      return i18n.translate('core.ui.managementNavList.label', {
-        defaultMessage: 'Admin',
-      });
-    default:
-      return groupName;
-  }
-}
-
 function truncateRecentItemLabel(label: string): string {
   if (label.length > TRUNCATE_LIMIT) {
     label = `${label.substring(0, TRUNCATE_AT)}…`;
@@ -246,20 +216,40 @@ interface Props {
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
   navSetting: 'individual' | 'grouped';
-  license: string;
   onIsLockedUpdate?: (isLocked: boolean) => void;
 }
 
 type ExtendedRecentlyAccessedHistoryItem = ReturnType<typeof euiRecentItem>;
+type NavLink = ReturnType<typeof euiNavLink>;
 
 interface State {
   appTitle: string;
   isVisible: boolean;
-  navLinks: ReadonlyArray<ReturnType<typeof euiNavLink>>;
+  navLinks: NavLink[];
   recentlyAccessed: ExtendedRecentlyAccessedHistoryItem[];
   forceNavigation: boolean;
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
+}
+
+function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
+  const allCategories = {} as Record<string, AppCategory | undefined>;
+
+  for (const [key, value] of Object.entries(allCategorizedLinks)) {
+    allCategories[key] = value[0].category;
+  }
+
+  return allCategories;
+}
+
+function getOrderedCategories(
+  mainCategories: Record<string, NavLink[]>,
+  categoryDictionary: ReturnType<typeof getAllCategories>
+) {
+  return sortBy(
+    Object.keys(mainCategories),
+    categoryName => categoryDictionary[categoryName]?.order
+  );
 }
 
 class HeaderUI extends Component<Props, State> {
@@ -394,9 +384,16 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public renderNavLinks() {
-    const isOSS = this.props.license === 'oss';
     const disableGroupedNavSetting = this.props.navSetting === 'individual';
-    const showUngroupedNav = isOSS || disableGroupedNavSetting || this.state.navLinks.length < 7;
+    const groupedNavLinks = groupBy(this.state.navLinks, link => link?.category?.label);
+    const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
+    const { Administration: admin, ...mainCategories } = allCategorizedLinks;
+    const categoryDictionary = getAllCategories(allCategorizedLinks);
+    const orderedCategories = getOrderedCategories(mainCategories, categoryDictionary);
+    const showUngroupedNav =
+      disableGroupedNavSetting ||
+      this.state.navLinks.length < 7 ||
+      Object.keys(mainCategories).length === 1;
 
     if (showUngroupedNav) {
       return (
@@ -422,11 +419,6 @@ class HeaderUI extends Component<Props, State> {
       );
     }
 
-    const { undefined: unknowns, [AppCategory.management]: management, ...mainNav } = groupBy(
-      this.state.navLinks,
-      'category'
-    );
-
     return (
       <EuiNavDrawer
         ref={this.navDrawerRef}
@@ -445,23 +437,28 @@ class HeaderUI extends Component<Props, State> {
             defaultMessage: 'Primary navigation links',
           })}
           listItems={[
-            ...Object.keys(mainNav).map(categoryName => {
-              const category = parseInt(categoryName, 10);
-              const childLinks = mainNav[categoryName];
-              if (childLinks.length === 1) {
+            ...orderedCategories.map(categoryName => {
+              const category = categoryDictionary[categoryName]!;
+              const links = mainCategories[categoryName];
+
+              if (links.length === 1) {
                 return {
-                  ...childLinks[0],
-                  label: getGroupLabel(category),
-                  iconType: getGroupIcon(category),
+                  ...links[0],
+                  label: category.label,
+                  iconType: category.euiIconType || links[0].iconType,
                 };
               }
 
               return {
-                label: getGroupLabel(category),
-                iconType: getGroupIcon(category),
+                'data-test-subj': 'navDrawerCategory',
+                iconType: category.euiIconType,
+                label: category.label,
                 flyoutMenu: {
-                  title: getGroupLabel(category),
-                  listItems: sortBy(childLinks, 'order'),
+                  title: category.label,
+                  listItems: sortBy(links, 'order').map(link => {
+                    link['data-test-subj'] = 'navDrawerFlyoutLink';
+                    return link;
+                  }),
                 },
               };
             }),
@@ -472,15 +469,19 @@ class HeaderUI extends Component<Props, State> {
         <EuiNavDrawerGroup
           data-test-subj="navDrawerManagementMenu"
           aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
-            defaultMessage: 'Management navigation links',
+            defaultMessage: 'Administration navigation links',
           })}
           listItems={[
             {
-              label: getGroupLabel(AppCategory.management),
-              iconType: getGroupIcon(AppCategory.management),
+              label: categoryDictionary.Administration!.label,
+              iconType: categoryDictionary.Administration!.euiIconType,
+              'data-test-subj': 'navDrawerCategory',
               flyoutMenu: {
-                title: getGroupLabel(AppCategory.management),
-                listItems: sortBy(management, 'order'),
+                title: categoryDictionary.Administration!.label,
+                listItems: sortBy(admin, 'order').map(link => {
+                  link['data-test-subj'] = 'navDrawerFlyoutLink';
+                  return link;
+                }),
               },
             },
           ]}

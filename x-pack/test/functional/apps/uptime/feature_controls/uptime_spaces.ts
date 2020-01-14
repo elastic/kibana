@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security', 'settings']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -20,6 +20,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           name: 'custom_space',
           disabledFeatures: [],
         });
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+          basePath: `/s/custom_space`,
+          ensureCurrentUrl: false,
+        });
+        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
       });
 
       after(async () => {

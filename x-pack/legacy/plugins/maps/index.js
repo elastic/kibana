@@ -13,7 +13,7 @@ import { initTelemetryCollection } from './server/maps_telemetry';
 import { getAppTitle } from './common/i18n_getters';
 import { MapPlugin } from './server/plugin';
 import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
-import { AppCategory } from '../../../../src/core/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export function maps(kibana) {
   return new kibana.Plugin({
@@ -31,7 +31,7 @@ export function maps(kibana) {
         main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
-        category: AppCategory.analyze,
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();

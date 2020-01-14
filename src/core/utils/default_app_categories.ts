@@ -17,15 +17,31 @@
  * under the License.
  */
 
-export * from './assert_never';
-export * from './context';
-export * from './crypto';
-export * from './deep_freeze';
-export * from './get';
-export * from './map_to_object';
-export * from './merge';
-export * from './pick';
-export * from './promise';
-export * from './url';
-export * from './unset';
-export * from './default_app_categories';
+import { i18n } from '@kbn/i18n';
+
+export const DEFAULT_APP_CATEGORIES = Object.freeze({
+  analyze: {
+    label: i18n.translate('core.ui.analyzeNavList.label', {
+      defaultMessage: 'Analyze',
+    }),
+    order: 1000,
+  },
+  observability: {
+    label: i18n.translate('core.ui.observabilityNavList.label', {
+      defaultMessage: 'Observability',
+    }),
+    order: 2000,
+  },
+  security: {
+    label: i18n.translate('core.ui.securityNavList.label', {
+      defaultMessage: 'Security',
+    }),
+    order: 3000,
+  },
+  administration: {
+    label: i18n.translate('core.ui.managementNavList.label', {
+      defaultMessage: 'Administration',
+    }),
+    euiIconType: 'managementApp',
+  },
+});

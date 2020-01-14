@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { AppCategory } from '../../../../src/core/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 /**
  * Configuration of dependency objects for the UI, which are needed for the
@@ -27,7 +27,7 @@ export const getUiExports = () => ({
     euiIconType: 'monitoringApp',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/monitoring',
-    category: AppCategory.management,
+    category: DEFAULT_APP_CATEGORIES.administration,
   },
   injectDefaultVars(server) {
     const config = server.config();

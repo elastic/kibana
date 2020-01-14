@@ -30,7 +30,7 @@ import {
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { initServerWithKibana } from './server/kibana.index';
-import { AppCategory } from '../../../../src/core/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -61,7 +61,7 @@ export const siem = (kibana: any) => {
           order: 9000,
           title: APP_NAME,
           url: `/app/${APP_ID}`,
-          category: AppCategory.security,
+          category: DEFAULT_APP_CATEGORIES.security,
         },
       ],
       uiSettingDefaults: {

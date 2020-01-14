@@ -29,10 +29,9 @@ import '../../plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'settings']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
-  const kibanaServer = getService('kibanaServer');
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
     await browser.executeAsync(async (status: Partial<AppUpdatableFields>, cb: Function) => {
@@ -67,8 +66,10 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   };
 
   describe('application status management', () => {
-    before(async function() {
-      await kibanaServer.uiSettings.replace({ pageNavigation: 'individual' });
+    before(async () => {
+      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
+      await browser.refresh();
     });
 
     beforeEach(async () => {

@@ -37,6 +37,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+          basePath: `/s/custom_space`,
+          ensureCurrentUrl: false,
+        });
+        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });

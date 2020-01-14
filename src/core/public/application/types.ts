@@ -31,7 +31,7 @@ import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
 import { SavedObjectsStart } from '../saved_objects';
-import { AppCategory } from '../';
+import { AppCategory } from '../../types';
 
 /** @public */
 export interface AppBase {
@@ -47,6 +47,7 @@ export interface AppBase {
 
   /**
    * The category the app lives in
+   * Default categories defined in {@link DEFAULT_APP_CATEGORIES}
    */
   category?: AppCategory;
 
