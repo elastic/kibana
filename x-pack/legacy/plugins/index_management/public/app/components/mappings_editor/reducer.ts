@@ -271,6 +271,10 @@ export const reducer = (state: State, action: Action): State => {
           fieldToAddFieldTo: undefined,
           fieldToEdit: undefined,
         },
+        search: {
+          term: '',
+          result: [],
+        },
       };
     }
     case 'configuration.update': {
