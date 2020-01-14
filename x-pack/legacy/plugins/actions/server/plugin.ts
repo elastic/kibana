@@ -93,7 +93,7 @@ export class Plugin {
     const actionsConfigUtils = getActionsConfigurationUtilities(config as ActionsConfigType);
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       actionsConfigUtils,
     });
     this.taskRunnerFactory = taskRunnerFactory;
@@ -164,7 +164,7 @@ export class Plugin {
     });
 
     const executeFn = createExecuteFunction({
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       getScopedSavedObjectsClient: core.savedObjects.getScopedSavedObjectsClient,
       getBasePath,
     });

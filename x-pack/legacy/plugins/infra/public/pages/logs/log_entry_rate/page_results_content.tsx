@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPanel,
+  EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
@@ -26,7 +27,6 @@ import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapp
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
-import { FirstUseCallout } from './first_use';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
@@ -35,6 +35,7 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
+import { FirstUseCallout } from '../../../components/logging/log_analysis_results';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -196,7 +197,12 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="l">
-            {isFirstUse && !hasResults ? <FirstUseCallout /> : null}
+            {isFirstUse && !hasResults ? (
+              <>
+                <FirstUseCallout />
+                <EuiSpacer />
+              </>
+            ) : null}
             <LogRateResults
               isLoading={isLoading}
               results={logEntryRate}
@@ -259,6 +265,8 @@ const getBucketDuration = (startTime: number, endTime: number) => {
 // This is needed due to the flex-basis: 100% !important; rule that
 // kicks in on small screens via media queries breaking when using direction="column"
 export const ResultsContentPage = euiStyled(EuiPage)`
+  flex: 1 0 0%;
+
   .euiFlexGroup--responsive > .euiFlexItem {
     flex-basis: auto !important;
   }

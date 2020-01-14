@@ -12,7 +12,8 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { isEmpty, isEqual, get } from 'lodash/fp';
-import React, { memo, useCallback, useState, useEffect } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import styled from 'styled-components';
 
 import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
@@ -22,6 +23,7 @@ import * as RuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
+import { StepContentWrapper } from '../step_content_wrapper';
 import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
@@ -42,6 +44,20 @@ const stepDefineDefaultValue = {
   },
 };
 
+const MyLabelButton = styled(EuiButtonEmpty)`
+  height: 18px;
+  font-size: 12px;
+
+  .euiIcon {
+    width: 14px;
+    height: 14px;
+  }
+`;
+
+MyLabelButton.defaultProps = {
+  flush: 'right',
+};
+
 const getStepDefaultValue = (
   indicesConfig: string[],
   defaultValues: DefineStepRule | null
@@ -59,106 +75,104 @@ const getStepDefaultValue = (
   }
 };
 
-export const StepDefineRule = memo<StepDefineRuleProps>(
-  ({
-    defaultValues,
-    descriptionDirection = 'row',
-    isReadOnlyView,
-    isLoading,
-    isUpdateView = false,
-    resizeParentContainer,
-    setForm,
-    setStepData,
-  }) => {
-    const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
-    const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState(false);
-    const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-    const [mylocalIndicesConfig, setMyLocalIndicesConfig] = useState(
-      defaultValues != null ? defaultValues.index : indicesConfig ?? []
-    );
-    const [
-      {
-        browserFields,
-        indexPatterns: indexPatternQueryBar,
-        isLoading: indexPatternLoadingQueryBar,
-      },
-    ] = useFetchIndexPatterns(mylocalIndicesConfig);
-    const [myStepData, setMyStepData] = useState<DefineStepRule>(
-      getStepDefaultValue(indicesConfig, null)
-    );
+const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
+  addPadding = false,
+  defaultValues,
+  descriptionDirection = 'row',
+  isReadOnlyView,
+  isLoading,
+  isUpdateView = false,
+  setForm,
+  setStepData,
+}) => {
+  const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
+  const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState(false);
+  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [mylocalIndicesConfig, setMyLocalIndicesConfig] = useState(
+    defaultValues != null ? defaultValues.index : indicesConfig ?? []
+  );
+  const [
+    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
+  ] = useFetchIndexPatterns(mylocalIndicesConfig);
+  const [myStepData, setMyStepData] = useState<DefineStepRule>(
+    getStepDefaultValue(indicesConfig, null)
+  );
 
-    const { form } = useForm({
-      defaultValue: myStepData,
-      options: { stripEmptyFields: false },
-      schema,
-    });
+  const { form } = useForm({
+    defaultValue: myStepData,
+    options: { stripEmptyFields: false },
+    schema,
+  });
 
-    const onSubmit = useCallback(async () => {
-      if (setStepData) {
-        setStepData(RuleStep.defineRule, null, false);
-        const { isValid, data } = await form.submit();
-        if (isValid && setStepData) {
-          setStepData(RuleStep.defineRule, data, isValid);
-          setMyStepData({ ...data, isNew: false } as DefineStepRule);
+  const onSubmit = useCallback(async () => {
+    if (setStepData) {
+      setStepData(RuleStep.defineRule, null, false);
+      const { isValid, data } = await form.submit();
+      if (isValid && setStepData) {
+        setStepData(RuleStep.defineRule, data, isValid);
+        setMyStepData({ ...data, isNew: false } as DefineStepRule);
+      }
+    }
+  }, [form]);
+
+  useEffect(() => {
+    if (indicesConfig != null && defaultValues != null) {
+      const myDefaultValues = getStepDefaultValue(indicesConfig, defaultValues);
+      if (!isEqual(myDefaultValues, myStepData)) {
+        setMyStepData(myDefaultValues);
+        setLocalUseIndicesConfig(isEqual(myDefaultValues.index, indicesConfig));
+        if (!isReadOnlyView) {
+          Object.keys(schema).forEach(key => {
+            const val = get(key, myDefaultValues);
+            if (val != null) {
+              form.setFieldValue(key, val);
+            }
+          });
         }
       }
-    }, [form]);
+    }
+  }, [defaultValues, indicesConfig]);
 
-    useEffect(() => {
-      if (indicesConfig != null && defaultValues != null) {
-        const myDefaultValues = getStepDefaultValue(indicesConfig, defaultValues);
-        if (!isEqual(myDefaultValues, myStepData)) {
-          setMyStepData(myDefaultValues);
-          setLocalUseIndicesConfig(isEqual(myDefaultValues.index, indicesConfig));
-          if (!isReadOnlyView) {
-            Object.keys(schema).forEach(key => {
-              const val = get(key, myDefaultValues);
-              if (val != null) {
-                form.setFieldValue(key, val);
-              }
-            });
-          }
-        }
-      }
-    }, [defaultValues, indicesConfig]);
+  useEffect(() => {
+    if (setForm != null) {
+      setForm(RuleStep.defineRule, form);
+    }
+  }, [form]);
 
-    useEffect(() => {
-      if (setForm != null) {
-        setForm(RuleStep.defineRule, form);
-      }
-    }, [form]);
+  const handleResetIndices = useCallback(() => {
+    const indexField = form.getFields().index;
+    indexField.setValue(indicesConfig);
+  }, [form, indicesConfig]);
 
-    const handleResetIndices = useCallback(() => {
-      const indexField = form.getFields().index;
-      indexField.setValue(indicesConfig);
-    }, [form, indicesConfig]);
+  const handleOpenTimelineSearch = useCallback(() => {
+    setOpenTimelineSearch(true);
+  }, []);
 
-    const handleOpenTimelineSearch = useCallback(() => {
-      setOpenTimelineSearch(true);
-    }, []);
+  const handleCloseTimelineSearch = useCallback(() => {
+    setOpenTimelineSearch(false);
+  }, []);
 
-    const handleCloseTimelineSearch = useCallback(() => {
-      setOpenTimelineSearch(false);
-    }, []);
-
-    return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView && myStepData != null ? (
+    <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription
         direction={descriptionDirection}
         indexPatterns={indexPatternQueryBar as IIndexPattern}
         schema={schema}
         data={myStepData}
       />
-    ) : (
-      <>
+    </StepContentWrapper>
+  ) : (
+    <>
+      <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
           <CommonUseField
             path="index"
             config={{
               ...schema.index,
               labelAppend: !localUseIndicesConfig ? (
-                <EuiButtonEmpty size="xs" onClick={handleResetIndices}>
-                  <small>{i18n.RESET_DEFAULT_INDEX}</small>
-                </EuiButtonEmpty>
+                <MyLabelButton onClick={handleResetIndices} iconType="refresh">
+                  {i18n.RESET_DEFAULT_INDEX}
+                </MyLabelButton>
               ) : null,
             }}
             componentProps={{
@@ -176,9 +190,9 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
             config={{
               ...schema.queryBar,
               labelAppend: (
-                <EuiButtonEmpty size="xs" onClick={handleOpenTimelineSearch}>
-                  <small>{i18n.IMPORT_TIMELINE_QUERY}</small>
-                </EuiButtonEmpty>
+                <MyLabelButton onClick={handleOpenTimelineSearch}>
+                  {i18n.IMPORT_TIMELINE_QUERY}
+                </MyLabelButton>
               ),
             }}
             component={QueryBarDefineRule}
@@ -192,7 +206,6 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
               dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
               openTimelineSearch,
               onCloseTimelineSearch: handleCloseTimelineSearch,
-              resizeParentContainer,
             }}
           />
           <FormDataProvider pathsToWatch="index">
@@ -212,24 +225,26 @@ export const StepDefineRule = memo<StepDefineRuleProps>(
             }}
           </FormDataProvider>
         </Form>
-        {!isUpdateView && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="xs"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-                  {RuleI18n.CONTINUE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-      </>
-    );
-  }
-);
+      </StepContentWrapper>
+      {!isUpdateView && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+                {RuleI18n.CONTINUE}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
+  );
+};
+
+export const StepDefineRule = memo(StepDefineRuleComponent);

@@ -59,7 +59,7 @@ export const reporting = (kibana: any) => {
             defaultMessage: `Custom image to use in the PDF's footer`,
           }),
           type: 'image',
-          options: {
+          validation: {
             maxSize: {
               length: kbToBase64Length(200),
               description: '200 kB',

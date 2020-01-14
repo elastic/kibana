@@ -43,12 +43,14 @@ export function toEditableConfig({ def, name, value, isCustom, isOverridden }) {
     defVal: def.value,
     type: getValType(def, value),
     description: def.description,
-    validation: def.validation
-      ? {
-          regex: new RegExp(def.validation.regexString),
-          message: def.validation.message,
-        }
-      : undefined,
+    deprecation: def.deprecation,
+    validation:
+      def.validation && def.validation.regexString
+        ? {
+            regex: new RegExp(def.validation.regexString),
+            message: def.validation.message,
+          }
+        : def.validation,
     options: def.options,
     optionLabels: def.optionLabels,
     requiresPageReload: !!def.requiresPageReload,
