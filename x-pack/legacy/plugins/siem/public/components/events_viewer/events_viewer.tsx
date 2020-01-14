@@ -59,7 +59,6 @@ interface Props {
   kqlMode: KqlMode;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
-  showInspect: boolean;
   start: number;
   sort: Sort;
   timelineTypeContext: TimelineTypeContextProps;
@@ -67,171 +66,171 @@ interface Props {
   utilityBar?: (totalCount: number) => React.ReactNode;
 }
 
-export const EventsViewer = React.memo<Props>(
-  ({
-    browserFields,
-    columns,
+const EventsViewerComponent: React.FC<Props> = ({
+  browserFields,
+  columns,
+  dataProviders,
+  deletedEventIds,
+  end,
+  filters,
+  headerFilterGroup,
+  height = DEFAULT_EVENTS_VIEWER_HEIGHT,
+  id,
+  indexPattern,
+  isLive,
+  itemsPerPage,
+  itemsPerPageOptions,
+  kqlMode,
+  onChangeItemsPerPage,
+  query,
+  start,
+  sort,
+  timelineTypeContext,
+  toggleColumn,
+  utilityBar,
+}) => {
+  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+  const kibana = useKibana();
+  const combinedQueries = combineQueries({
+    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
-    deletedEventIds,
-    end,
-    filters,
-    headerFilterGroup,
-    height = DEFAULT_EVENTS_VIEWER_HEIGHT,
-    id,
     indexPattern,
-    isLive,
-    itemsPerPage,
-    itemsPerPageOptions,
+    browserFields,
+    filters,
+    kqlQuery: query,
     kqlMode,
-    onChangeItemsPerPage,
-    query,
-    showInspect,
     start,
-    sort,
-    timelineTypeContext,
-    toggleColumn,
-    utilityBar,
-  }) => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    const kibana = useKibana();
-    const combinedQueries = combineQueries({
-      config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-      dataProviders,
-      indexPattern,
-      browserFields,
-      filters,
-      kqlQuery: query,
-      kqlMode,
-      start,
-      end,
-      isEventViewer: true,
-    });
-    const queryFields = useMemo(
-      () =>
-        union(
-          columnsHeader.map(c => c.id),
-          timelineTypeContext.queryFields ?? []
-        ),
-      [columnsHeader, timelineTypeContext.queryFields]
-    );
+    end,
+    isEventViewer: true,
+  });
+  const queryFields = useMemo(
+    () =>
+      union(
+        columnsHeader.map(c => c.id),
+        timelineTypeContext.queryFields ?? []
+      ),
+    [columnsHeader, timelineTypeContext.queryFields]
+  );
 
-    return (
-      <EuiPanel data-test-subj="events-viewer-panel" grow={false}>
-        <AutoSizer detectAnyWindowResize={true} content>
-          {({ measureRef, content: { width = 0 } }) => (
-            <>
-              <WrappedByAutoSizer ref={measureRef}>
-                <div
-                  data-test-subj="events-viewer-measured"
-                  style={{ height: '0px', width: '100%' }}
-                />
-              </WrappedByAutoSizer>
+  return (
+    <EuiPanel data-test-subj="events-viewer-panel">
+      <AutoSizer detectAnyWindowResize={true} content>
+        {({ measureRef, content: { width = 0 } }) => (
+          <>
+            <WrappedByAutoSizer ref={measureRef}>
+              <div
+                data-test-subj="events-viewer-measured"
+                style={{ height: '0px', width: '100%' }}
+              />
+            </WrappedByAutoSizer>
 
-              {combinedQueries != null ? (
-                <TimelineQuery
-                  fields={queryFields}
-                  filterQuery={combinedQueries.filterQuery}
-                  id={id}
-                  indexPattern={indexPattern}
-                  limit={itemsPerPage}
-                  sortField={{
-                    sortFieldId: sort.columnId,
-                    direction: sort.sortDirection as Direction,
-                  }}
-                  sourceId="default"
-                >
-                  {({
-                    events,
-                    getUpdatedAt,
-                    inspect,
-                    loading,
-                    loadMore,
-                    pageInfo,
-                    refetch,
-                    totalCount = 0,
-                  }) => {
-                    const totalCountMinusDeleted =
-                      totalCount > 0 ? totalCount - deletedEventIds.length : 0;
+            {combinedQueries != null ? (
+              <TimelineQuery
+                fields={queryFields}
+                filterQuery={combinedQueries.filterQuery}
+                id={id}
+                indexPattern={indexPattern}
+                limit={itemsPerPage}
+                sortField={{
+                  sortFieldId: sort.columnId,
+                  direction: sort.sortDirection as Direction,
+                }}
+                sourceId="default"
+              >
+                {({
+                  events,
+                  getUpdatedAt,
+                  inspect,
+                  loading,
+                  loadMore,
+                  pageInfo,
+                  refetch,
+                  totalCount = 0,
+                }) => {
+                  const totalCountMinusDeleted =
+                    totalCount > 0 ? totalCount - deletedEventIds.length : 0;
 
-                    // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
-                    return (
-                      <>
-                        <HeaderSection
-                          id={id}
-                          showInspect={showInspect}
-                          subtitle={
-                            utilityBar
-                              ? undefined
-                              : `${
-                                  i18n.SHOWING
-                                }: ${totalCountMinusDeleted.toLocaleString()} ${i18n.UNIT(
-                                  totalCountMinusDeleted
-                                )}`
-                          }
-                          title={timelineTypeContext?.title ?? i18n.EVENTS}
+                  // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
+                  return (
+                    <>
+                      <HeaderSection
+                        id={id}
+                        subtitle={
+                          utilityBar
+                            ? undefined
+                            : `${
+                                i18n.SHOWING
+                              }: ${totalCountMinusDeleted.toLocaleString()} ${i18n.UNIT(
+                                totalCountMinusDeleted
+                              )}`
+                        }
+                        title={timelineTypeContext?.title ?? i18n.EVENTS}
+                      >
+                        {headerFilterGroup}
+                      </HeaderSection>
+
+                      {utilityBar?.(totalCountMinusDeleted)}
+
+                      <div
+                        data-test-subj={`events-container-loading-${loading}`}
+                        style={{ width: `${width}px` }}
+                      >
+                        <ManageTimelineContext
+                          loading={loading}
+                          width={width}
+                          type={timelineTypeContext}
                         >
-                          {headerFilterGroup}
-                        </HeaderSection>
-
-                        {utilityBar?.(totalCountMinusDeleted)}
-
-                        <div
-                          data-test-subj={`events-container-loading-${loading}`}
-                          style={{ width: `${width}px` }}
-                        >
-                          <ManageTimelineContext
+                          <TimelineRefetch
+                            id={id}
+                            inputId="global"
+                            inspect={inspect}
                             loading={loading}
-                            width={width}
-                            type={timelineTypeContext}
-                          >
-                            <TimelineRefetch
-                              id={id}
-                              inputId="global"
-                              inspect={inspect}
-                              loading={loading}
-                              refetch={refetch}
-                            />
+                            refetch={refetch}
+                          />
 
-                            <StatefulBody
-                              browserFields={browserFields}
-                              data={events.filter(e => !deletedEventIds.includes(e._id))}
-                              id={id}
-                              isEventViewer={true}
-                              height={height}
-                              sort={sort}
-                              toggleColumn={toggleColumn}
-                            />
+                          <StatefulBody
+                            browserFields={browserFields}
+                            data={events.filter(e => !deletedEventIds.includes(e._id))}
+                            id={id}
+                            isEventViewer={true}
+                            height={height}
+                            sort={sort}
+                            toggleColumn={toggleColumn}
+                          />
 
-                            <Footer
-                              compact={isCompactFooter(width)}
-                              getUpdatedAt={getUpdatedAt}
-                              hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                              height={footerHeight}
-                              isEventViewer={true}
-                              isLive={isLive}
-                              isLoading={loading}
-                              itemsCount={events.length}
-                              itemsPerPage={itemsPerPage}
-                              itemsPerPageOptions={itemsPerPageOptions}
-                              onChangeItemsPerPage={onChangeItemsPerPage}
-                              onLoadMore={loadMore}
-                              nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                              serverSideEventCount={totalCountMinusDeleted}
-                              tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                            />
-                          </ManageTimelineContext>
-                        </div>
-                      </>
-                    );
-                  }}
-                </TimelineQuery>
-              ) : null}
-            </>
-          )}
-        </AutoSizer>
-      </EuiPanel>
-    );
-  },
+                          <Footer
+                            compact={isCompactFooter(width)}
+                            getUpdatedAt={getUpdatedAt}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            height={footerHeight}
+                            isEventViewer={true}
+                            isLive={isLive}
+                            isLoading={loading}
+                            itemsCount={events.length}
+                            itemsPerPage={itemsPerPage}
+                            itemsPerPageOptions={itemsPerPageOptions}
+                            onChangeItemsPerPage={onChangeItemsPerPage}
+                            onLoadMore={loadMore}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            serverSideEventCount={totalCountMinusDeleted}
+                            tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                          />
+                        </ManageTimelineContext>
+                      </div>
+                    </>
+                  );
+                }}
+              </TimelineQuery>
+            ) : null}
+          </>
+        )}
+      </AutoSizer>
+    </EuiPanel>
+  );
+};
+
+export const EventsViewer = React.memo(
+  EventsViewerComponent,
   (prevProps, nextProps) =>
     prevProps.browserFields === nextProps.browserFields &&
     prevProps.columns === nextProps.columns &&
@@ -247,10 +246,8 @@ export const EventsViewer = React.memo<Props>(
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
     prevProps.kqlMode === nextProps.kqlMode &&
     isEqual(prevProps.query, nextProps.query) &&
-    prevProps.showInspect === nextProps.showInspect &&
     prevProps.start === nextProps.start &&
     prevProps.sort === nextProps.sort &&
     isEqual(prevProps.timelineTypeContext, nextProps.timelineTypeContext) &&
     prevProps.utilityBar === nextProps.utilityBar
 );
-EventsViewer.displayName = 'EventsViewer';

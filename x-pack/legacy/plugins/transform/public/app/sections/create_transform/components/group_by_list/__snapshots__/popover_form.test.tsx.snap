@@ -21,11 +21,8 @@ exports[`Transform: Group By <PopoverForm /> Minimal initialization 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       defaultValue="the-agg-name"
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -41,10 +38,6 @@ exports[`Transform: Group By <PopoverForm /> Minimal initialization 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [

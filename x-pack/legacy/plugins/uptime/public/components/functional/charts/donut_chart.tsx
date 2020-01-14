@@ -9,7 +9,7 @@ import React, { useContext, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import { DonutChartLegend } from './donut_chart_legend';
-import { UptimeThemeContext } from '../../../contexts/uptime_theme_context';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface DonutChartProps {
   down: number;

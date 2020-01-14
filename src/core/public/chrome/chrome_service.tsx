@@ -127,7 +127,7 @@ export class ChromeService {
         )
       )
     );
-    this.isVisible$ = combineLatest(this.appHidden$, this.toggleHidden$).pipe(
+    this.isVisible$ = combineLatest([this.appHidden$, this.toggleHidden$]).pipe(
       map(([appHidden, toggleHidden]) => !(appHidden || toggleHidden)),
       takeUntil(this.stop$)
     );
