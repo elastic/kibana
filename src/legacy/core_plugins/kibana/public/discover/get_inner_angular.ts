@@ -82,6 +82,7 @@ import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
 import { createFieldSearchDirective } from './np_ready/components/field_chooser/discover_field_search_directive';
 import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
 import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
+import { createDiscoverGridDirective } from './np_ready/components/discover_grid/create_discover_grid_directive';
 // @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
 
@@ -329,5 +330,6 @@ function createDocTableModule() {
     .directive('kbnTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
-    .directive('docViewer', createDocViewerDirective);
+    .directive('docViewer', createDocViewerDirective)
+    .directive('discoverGrid', createDiscoverGridDirective);
 }

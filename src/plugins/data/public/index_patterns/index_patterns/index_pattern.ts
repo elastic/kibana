@@ -331,8 +331,8 @@ export class IndexPattern implements IIndexPattern {
     return this.fields.getByName(this.timeFieldName);
   }
 
-  getFieldByName(name: string): Field | void {
-    if (!this.fields || !this.fields.getByName) return;
+  getFieldByName(name: string): Field | undefined {
+    if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
   }
 

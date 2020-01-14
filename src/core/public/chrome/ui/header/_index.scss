@@ -8,6 +8,10 @@
   z-index: 10;
 }
 
+.euiDataGrid__restrictBody .chrHeaderWrapper {
+  z-index: 0;
+}
+
 .chrHeaderWrapper ~ .app-wrapper:not(.hidden-chrome) {
   top: $euiHeaderChildSize;
   left: $euiHeaderChildSize;

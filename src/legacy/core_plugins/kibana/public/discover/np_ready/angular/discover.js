@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import rison from 'rison-node';
 import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
@@ -73,7 +74,7 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { generateFilters } from '../../../../../../../plugins/data/public';
+import { esFilters, generateFilters } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { FilterStateManager } from '../../../../../data/public';
 
@@ -186,8 +187,8 @@ function discoverController(
   $scope,
   $timeout,
   $window,
+  $httpParamSerializer,
   AppState,
-  Private,
   Promise,
   config,
   kbnUrl,
@@ -220,6 +221,7 @@ function discoverController(
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.refreshInterval = timefilter.getRefreshInterval();
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
+  $scope.useShortDots = config.get('shortDots:enable');
 
   $scope.$watch(
     () => uiCapabilities.discover.saveQuery,
@@ -553,9 +555,32 @@ function discoverController(
     });
   };
 
-  $scope.$watchCollection('state.columns', function() {
+  $scope.$watchCollection('state.columns', function(columns) {
+    const tableColumns = [...columns];
+    const { timeFieldName } = $scope.indexPattern;
+
+    if (!config.get('doc_table:hideTimeColumn') && timeFieldName) {
+      tableColumns.unshift(timeFieldName);
+    }
+
+    $scope.tableColumns = tableColumns;
     $state.save();
   });
+
+  $scope.getContextAppHref = anchorId => {
+    const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorId }}', {
+      anchorId,
+      indexPattern: $scope.indexPattern.id,
+    });
+
+    const hash = $httpParamSerializer({
+      _a: rison.encode({
+        columns: $state.columns,
+        filters: ($scope.filters || []).map(esFilters.disableFilter),
+      }),
+    });
+    return `${path}?${hash}`;
+  };
 
   $scope.opts = {
     // number of records to fetch, then paginate through

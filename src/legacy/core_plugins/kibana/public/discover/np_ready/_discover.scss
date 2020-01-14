@@ -28,11 +28,9 @@ discover-app {
   padding-right: $euiSizeS;
 }
 
-// SASSTODO: replace the z-index value with a variable
 .dscWrapper {
   padding-right: $euiSizeS;
   padding-left: 21px;
-  z-index: 1;
 }
 
 @include euiPanel('.dscWrapper__content');
@@ -94,19 +92,6 @@ discover-app {
 
 .dscTable {
   overflow: auto;
-
-  // SASSTODO: add a monospace modifier to the doc-table component
-  .kbnDocTable__row {
-    font-family: $euiCodeFontFamily;
-    font-size: $euiFontSizeXS;
-  }
-}
-
-// SASSTODO: replace the padding value with a variable
-.dscTable__footer {
-  background-color: $euiColorLightShade;
-  padding: 5px 10px;
-  text-align: center;
 }
 
 /**

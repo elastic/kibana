@@ -17,7 +17,6 @@
  * under the License.
  */
 import { getAngularModule, wrapInI18nContext, getServices } from '../../kibana_services';
-// @ts-ignore
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import html from './doc.html';
 import { Doc } from '../components/doc/doc';

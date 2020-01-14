@@ -28,13 +28,14 @@ import {
   IFieldSubType,
   FieldFormat,
   shortenDottedString,
+  KBN_FIELD_TYPES,
 } from '../../../common';
 
 export type FieldSpec = Record<string, any>;
 
 export class Field implements IFieldType {
   name: string;
-  type: string;
+  type: KBN_FIELD_TYPES;
   script?: string;
   lang?: string;
   count?: number;

@@ -161,7 +161,6 @@
                     </span>
                   </span>
                 </div>
-
               </header>
 
               <discover-histogram
@@ -174,55 +173,30 @@
               ></discover-histogram>
             </section>
 
-            <section
-              class="dscTable"
-              fixed-scroll
-              aria-labelledby="documentsAriaLabel"
-            >
-              <h2 class="euiScreenReaderOnly"
+            <section class="dscTable" fixed-scroll aria-labelledby="documentsAriaLabel">
+              <h2
+                class="euiScreenReaderOnly"
                 id="documentsAriaLabel"
                 i18n-id="kbn.discover.documentsAriaLabel"
                 i18n-default-message="Documents"
               ></h2>
-              <doc-table
-                hits="rows"
+              <discover-grid
+                ng-if="rows"
+                aria-labelled-by="'documentsAriaLabel'"
+                columns="tableColumns"
                 index-pattern="indexPattern"
-                sorting="state.sort"
-                columns="state.columns"
-                infinite-scroll="true"
-                filter="filterQuery"
-                filters="state.filters"
-                data-shared-item
-                data-title="{{opts.savedSearch.lastSavedTitle}}"
-                data-description="{{opts.savedSearch.description}}"
-                minimum-visible-rows="minimumVisibleRows"
-                render-complete
+                rows="rows"
+                sort="state.sort"
+                sample-size="opts.sampleSize"
+                search-description="opts.savedSearch.description"
+                search-title="opts.savedSearch.lastSavedTitle"
+                use-short-dots="useShortDots"
+                get-context-app-href="getContextAppHref"
                 on-add-column="addColumn"
-                on-change-sort-order="setSortOrder"
-                on-move-column="moveColumn"
+                on-filter="filterQuery"
                 on-remove-column="removeColumn"
-              ></doc-table>
-
-              <a tabindex="0" id="discoverBottomMarker"></a>
-
-              <div
-                ng-if="rows.length == opts.sampleSize"
-                class="dscTable__footer"
-              >
-                <span
-                  i18n-id="kbn.discover.howToSeeOtherMatchingDocumentsDescription"
-                  i18n-default-message="These are the first {sampleSize} documents matching
-                  your search, refine your search to see others. "
-                  i18n-values="{
-                    sampleSize: opts.sampleSize,
-                  }"
-                ></span>
-                <a
-                  kbn-accessible-click
-                  ng-click="scrollToTop()"
-                  i18n-id="kbn.discover.backToTopLinkText"
-                  i18n-default-message="Back to top."
-                ></a>
+                on-sort="setSortOrder"
+              ></discover-grid>
               </div>
             </section>
           </div>
