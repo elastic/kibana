@@ -223,6 +223,7 @@ export const networkSchema = gql`
       isPtrIncluded: Boolean!
       pagination: PaginationInputPaginated!
       sort: NetworkDnsSortField!
+      stackByField: String
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkDnsData!

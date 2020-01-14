@@ -12,6 +12,7 @@ import {
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { TotalValue } from '../types';
+import { NetworkDnsRequestOptions } from '.';
 
 export interface NetworkAdapter {
   getNetworkTopCountries(
@@ -22,7 +23,7 @@ export interface NetworkAdapter {
     req: FrameworkRequest,
     options: RequestOptionsPaginated
   ): Promise<NetworkTopNFlowData>;
-  getNetworkDns(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<NetworkDnsData>;
+  getNetworkDns(req: FrameworkRequest, options: NetworkDnsRequestOptions): Promise<NetworkDnsData>;
   getNetworkHttp(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<NetworkHttpData>;
 }
 
