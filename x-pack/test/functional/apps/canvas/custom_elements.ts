@@ -8,7 +8,10 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function canvasSmokeTest({ getService, getPageObjects }: FtrProviderContext) {
+export default function canvasCustomElementTest({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -16,7 +19,9 @@ export default function canvasSmokeTest({ getService, getPageObjects }: FtrProvi
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
 
-  describe('custom elements', () => {
+  describe('custom elements', function() {
+    this.tags('skipFirefox');
+
     before(async () => {
       // init data
       await esArchiver.loadIfNeeded('logstash_functional');
