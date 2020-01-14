@@ -379,6 +379,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.expression = await buildPipeline(this.vis, {
       searchSource: this.savedVisualization.searchSource,
       timeRange: this.timeRange,
+      savedObjectId: this.savedVisualization.id,
     });
 
     this.vis.filters = { timeRange: this.timeRange };
