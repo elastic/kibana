@@ -147,7 +147,7 @@ export const getColumns = (
       render: (value: TableData['tags']) => (
         <>
           {value.map((tag, i) => (
-            <EuiBadge color="hollow" key={i}>
+            <EuiBadge color="hollow" key={`${tag}-${i}`}>
               {tag}
             </EuiBadge>
           ))}

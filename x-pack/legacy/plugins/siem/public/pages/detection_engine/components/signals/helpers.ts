@@ -68,7 +68,7 @@ export const findValueToChangeInQuery = (
 };
 
 export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs) => {
-  if (query !== '') {
+  if (query.trim() !== '') {
     const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
     return valueToChange.reduce((newQuery, vtc) => {
       const newValue = get(vtc.field, ecsData);
@@ -81,25 +81,21 @@ export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs) => {
   return '';
 };
 
-export const replaceTemplateFieldFromMatchFilters = (filters: esFilters.Filter[], ecsData: Ecs) => {
-  if (!isEmpty(filters)) {
-    return filters.map(filter => {
-      if (
-        filter.meta.type === 'phrase' &&
-        filter.meta.key != null &&
-        templateFields.includes(filter.meta.key)
-      ) {
-        const newValue = get(filter.meta.key, ecsData);
-        if (newValue != null) {
-          filter.meta.params = { query: newValue };
-          filter.query = { match_phrase: { [filter.meta.key]: newValue } };
-        }
+export const replaceTemplateFieldFromMatchFilters = (filters: esFilters.Filter[], ecsData: Ecs) =>
+  filters.map(filter => {
+    if (
+      filter.meta.type === 'phrase' &&
+      filter.meta.key != null &&
+      templateFields.includes(filter.meta.key)
+    ) {
+      const newValue = get(filter.meta.key, ecsData);
+      if (newValue != null) {
+        filter.meta.params = { query: newValue };
+        filter.query = { match_phrase: { [filter.meta.key]: newValue } };
       }
-      return filter;
-    });
-  }
-  return [];
-};
+    }
+    return filter;
+  });
 
 export const reformatDataProviderWithNewValue = <T extends DataProvider | DataProvidersAnd>(
   dataProvider: T,
@@ -121,17 +117,13 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
 export const replaceTemplateFieldFromDataProviders = (
   dataProviders: DataProvider[],
   ecsData: Ecs
-) => {
-  if (!isEmpty(dataProviders)) {
-    return dataProviders.map((dataProvider: DataProvider) => {
-      const newDataProvider = reformatDataProviderWithNewValue(dataProvider, ecsData);
-      if (newDataProvider.and != null && !isEmpty(newDataProvider.and)) {
-        newDataProvider.and = newDataProvider.and.map(andDataProvider =>
-          reformatDataProviderWithNewValue(andDataProvider, ecsData)
-        );
-      }
-      return newDataProvider;
-    });
-  }
-  return [];
-};
+) =>
+  dataProviders.map((dataProvider: DataProvider) => {
+    const newDataProvider = reformatDataProviderWithNewValue(dataProvider, ecsData);
+    if (newDataProvider.and != null && !isEmpty(newDataProvider.and)) {
+      newDataProvider.and = newDataProvider.and.map(andDataProvider =>
+        reformatDataProviderWithNewValue(andDataProvider, ecsData)
+      );
+    }
+    return newDataProvider;
+  });

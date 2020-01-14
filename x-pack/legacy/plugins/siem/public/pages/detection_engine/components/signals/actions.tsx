@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import dateMath from '@elastic/datemath';
 import { getOr } from 'lodash/fp';
 import moment from 'moment';
 
-import { esFilters } from '../../../../../../../../../src/plugins/data/public';
 import { updateSignalStatus } from '../../../../containers/detection_engine/signals/api';
 import { SendSignalToTimelineActionProps, UpdateSignalStatusActionProps } from './types';
 import { TimelineNonEcsData, GetOneTimeline, TimelineResult } from '../../../../graphql/types';
@@ -16,9 +16,7 @@ import {
   omitTypenameInTimeline,
   formatTimelineResultToModel,
 } from '../../../../components/open_timeline/helpers';
-import { DataProvider } from '../../../../components/timeline/data_providers/data_provider';
 import { convertKueryToElasticSearchQuery } from '../../../../lib/keury';
-import { KueryFilterQueryKind } from '../../../../store';
 import { timelineDefaults } from '../../../../store/timeline/model';
 import {
   replaceTemplateFieldFromQuery,
@@ -83,15 +81,14 @@ export const sendSignalToTimelineAction = async ({
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
 
-  const ellapsedTimeRule = (ecsData.signal?.rule?.from != null
-    ? ecsData.signal?.rule?.from[0]
-    : 'now-0s'
-  )
-    .replace('now-', '')
-    .replace('s', '');
+  const ellapsedTimeRule = moment.duration(
+    moment().diff(
+      dateMath.parse(ecsData.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
+    )
+  );
 
   const from = moment(ecsData.timestamp ?? new Date())
-    .subtract(ellapsedTimeRule, 's')
+    .subtract(ellapsedTimeRule)
     .valueOf();
   const to = moment(ecsData.timestamp ?? new Date()).valueOf();
 
@@ -117,12 +114,9 @@ export const sendSignalToTimelineAction = async ({
         timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
         ecsData
       );
-      const filters = replaceTemplateFieldFromMatchFilters(
-        (timeline.filters ?? []) as esFilters.Filter[],
-        ecsData
-      );
+      const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
       const dataProviders = replaceTemplateFieldFromDataProviders(
-        (timeline.dataProviders ?? []) as DataProvider[],
+        timeline.dataProviders ?? [],
         ecsData
       );
       createTimeline({
@@ -139,15 +133,13 @@ export const sendSignalToTimelineAction = async ({
           kqlQuery: {
             filterQuery: {
               kuery: {
-                kind: (timeline.kqlQuery?.filterQuery?.kuery?.kind ??
-                  'kuery') as KueryFilterQueryKind,
+                kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
                 expression: query,
               },
               serializedQuery: convertKueryToElasticSearchQuery(query),
             },
             filterQueryDraft: {
-              kind: (timeline.kqlQuery?.filterQuery?.kuery?.kind ??
-                'kuery') as KueryFilterQueryKind,
+              kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
               expression: query,
             },
           },

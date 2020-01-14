@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isObject } from 'lodash/fp';
 import { GraphQLScalarType, Kind } from 'graphql';
 
 /*
@@ -20,10 +21,17 @@ export const toAnyScalar = new GraphQLScalarType({
   serialize(value): unknown {
     if (value == null) {
       return null;
-    } else if (typeof value === 'string' && value.charAt(0) === '{') {
-      return JSON.parse(value);
     }
-    return value;
+    try {
+      const maybeObj = JSON.parse(value);
+      if (isObject(maybeObj)) {
+        return maybeObj;
+      } else {
+        return value;
+      }
+    } catch (e) {
+      return value;
+    }
   },
   parseValue(value) {
     return value;

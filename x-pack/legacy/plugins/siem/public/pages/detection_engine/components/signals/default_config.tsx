@@ -194,7 +194,7 @@ export const getSignalsActions = ({
         content={i18n.ACTION_VIEW_IN_TIMELINE}
       >
         <EuiButtonIcon
-          data-test-subj={'send-signal-to-timeline-tool-tip'}
+          data-test-subj={'send-signal-to-timeline-button'}
           onClick={() =>
             sendSignalToTimelineAction({
               apolloClient,

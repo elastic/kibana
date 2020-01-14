@@ -36,8 +36,8 @@ export const formatRules = (rules: Rule[], selectedIds?: string[]): TableData[] 
     },
     tags: rule.tags ?? [],
     activate: rule.enabled,
-    status: rule.status == null ? null : rule.status,
-    statusDate: rule.status_date == null ? null : rule.status_date,
+    status: rule.status ?? null,
+    statusDate: rule.status_date ?? null,
     sourceRule: rule,
     isLoading: selectedIds?.includes(rule.id) ?? false,
   }));

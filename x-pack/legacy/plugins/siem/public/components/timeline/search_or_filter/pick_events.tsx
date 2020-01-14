@@ -22,7 +22,6 @@ const AllEuiHealth = styled(EuiHealth)`
     stroke: #fff;
     stroke-width: 1px;
     stroke-linejoin: round;
-    z-index: 2;
     width: 19px;
     height: 19px;
     margin-top: 1px;
@@ -58,11 +57,11 @@ export const eventTypeOptions: EventTypeOptionItem[] = [
   },
   {
     value: 'raw',
-    inputDisplay: <EuiHealth color="subdued">{i18n.RAW_EVENT} </EuiHealth>,
+    inputDisplay: <EuiHealth color="subdued">{i18n.RAW_EVENT}</EuiHealth>,
   },
   {
     value: 'signal',
-    inputDisplay: <EuiHealth color="warning">{i18n.SIGNAL_EVENT} </EuiHealth>,
+    inputDisplay: <EuiHealth color="warning">{i18n.SIGNAL_EVENT}</EuiHealth>,
   },
 ];
 

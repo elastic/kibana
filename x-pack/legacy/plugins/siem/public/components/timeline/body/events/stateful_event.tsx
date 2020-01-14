@@ -142,8 +142,6 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const divElement = useRef<HTMLDivElement | null>(null);
 
-  const eventType = useMemo(() => getEventType(event.ecs), [event]);
-
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
     setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
@@ -218,7 +216,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                 <EventsTrGroup
                   className={STATEFUL_EVENT_CSS_CLASS_NAME}
                   data-test-subj="event"
-                  eventType={eventType}
+                  eventType={getEventType(event.ecs)}
                   showLeftBorder={!isEventViewer}
                   ref={c => {
                     if (c != null) {

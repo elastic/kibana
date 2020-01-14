@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import numeral from '@elastic/numeral';
 import {
@@ -78,7 +79,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
                 </UtilityBarText>
 
                 <UtilityBarAction
-                  disabled={areEventsLoading || Object.keys(selectedEventIds).length === 0}
+                  disabled={areEventsLoading || isEmpty(selectedEventIds)}
                   iconType={isFilteredToOpen ? 'indexClose' : 'indexOpen'}
                   onClick={handleUpdateStatus}
                 >
