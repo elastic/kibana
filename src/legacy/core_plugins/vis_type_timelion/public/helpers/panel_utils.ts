@@ -130,7 +130,7 @@ function buildOptions(
   const tickLetterWidth = 7;
   const tickPadding = 45;
 
-  const options: jquery.flot.plotOptions = {
+  const options = {
     xaxis: {
       mode: 'time',
       tickLength: 5,
