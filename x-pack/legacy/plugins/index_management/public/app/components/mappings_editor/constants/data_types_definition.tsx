@@ -187,7 +187,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.scaledFloatLongDescription"
-          defaultMessage="Scaled-float fields accept a floating point number that is backed by a {longType} and scaled by a fixed {doubleType} scaling factor. Use this data type to store floating-point data into an integer using a scaling factor. This is helpful to save disk space, but will affect accuracy."
+          defaultMessage="Scaled-float fields accept a floating point number that is backed by a {longType} and scaled by a fixed {doubleType} scaling factor. Use this data type to store floating point data into an integer using a scaling factor. This saves disk space, but affects accuracy."
           values={{
             longType: <EuiCode>long</EuiCode>,
             doubleType: <EuiCode>double</EuiCode>,
