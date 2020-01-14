@@ -22,16 +22,56 @@
 // be stored as an individual document in the errors channel index
 // by the service
 
+import { PulseCollector, CollectorSetupContext } from '../types';
+
 export interface Payload {
   errorId: string;
 }
 
-const payloads: Payload[] = [];
+export class Collector extends PulseCollector<Payload> {
+  private payloads: Payload[] = [];
+  private readonly indexName = '.pulse-errors';
 
-export async function putRecord(payload: Payload) {
-  payloads.push(payload);
-}
+  public async setup(deps: CollectorSetupContext) {
+    await super.setup(deps);
+    const exists = await this.elasticsearch!.callAsInternalUser('indices.exists', {
+      index: this.indexName,
+    });
+    if (!exists) {
+      await this.elasticsearch!.callAsInternalUser('indices.create', {
+        index: this.indexName,
+        body: {
+          settings: {
+            number_of_shards: 1,
+          },
+          mappings: {
+            properties: {
+              errorId: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      });
+    }
+  }
+  public async putRecord(payload: Payload) {
+    this.payloads.push(payload);
+    if (this.elasticsearch) {
+      await this.elasticsearch.callAsInternalUser('create', {
+        index: this.indexName,
+        body: payload,
+      });
+    }
+  }
 
-export async function getRecords() {
-  return payloads;
+  public async getRecords() {
+    if (this.elasticsearch) {
+      const results = await this.elasticsearch.callAsInternalUser('search', {
+        index: this.indexName,
+      });
+      // TODO: Set results as sent and return them
+    }
+    return this.payloads.splice(0, this.payloads.length);
+  }
 }

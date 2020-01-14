@@ -125,8 +125,18 @@ export class Server {
       http: httpSetup,
     });
 
+    const uiSettingsSetup = await this.uiSettings.setup({
+      http: httpSetup,
+    });
+
+    const savedObjectsSetup = await this.savedObjects.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      legacyPlugins,
+    });
+
     const pulseSetup = await this.pulse.setup({
       elasticsearch: elasticsearchServiceSetup,
+      savedObjects: savedObjectsSetup,
     });
 
     // example of retrieving instructions for a specific channel
@@ -180,15 +190,6 @@ export class Server {
 
     fixedVersionInstruction$.subscribe(() => {
       this.log.info(`Received instructions for fixed versions for error`);
-    });
-
-    const uiSettingsSetup = await this.uiSettings.setup({
-      http: httpSetup,
-    });
-
-    const savedObjectsSetup = await this.savedObjects.setup({
-      elasticsearch: elasticsearchServiceSetup,
-      legacyPlugins,
     });
 
     const coreSetup: InternalCoreSetup = {

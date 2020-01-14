@@ -45,7 +45,8 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     });
 
     instructions$.subscribe(instruction => {
-      // console.log('instruction::', instruction);
+      // eslint-disable-next-line no-console
+      console.log('instruction::', instruction);
     });
   }
 

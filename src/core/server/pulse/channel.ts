@@ -18,7 +18,10 @@
  */
 
 import { Subject } from 'rxjs';
-// import { IClusterClient } from '../elasticsearch';
+import { PulseCollectorConstructor } from './types';
+import { IClusterClient } from '../elasticsearch';
+import { SavedObjectsServiceSetup } from '../saved_objects';
+import { Logger } from '../logging';
 
 export interface PulseInstruction {
   owner: string;
@@ -26,19 +29,32 @@ export interface PulseInstruction {
   value: unknown;
 }
 
-interface ChannelConfig {
+export interface ChannelConfig {
   id: string;
   instructions$: Subject<PulseInstruction>;
+  logger: Logger;
+}
+export interface ChannelSetupContext {
+  elasticsearch: IClusterClient;
+  savedObjects: SavedObjectsServiceSetup;
 }
 
-export class PulseChannel {
-  public readonly getRecords: () => Promise<Record<string, any>>;
+export class PulseChannel<Payload = any, Rec = Payload> {
   private readonly collector: any;
+
   constructor(private readonly config: ChannelConfig) {
-    this.collector = require(`${__dirname}/collectors/${this.id}`);
-    this.getRecords = this.collector.getRecords;
+    const Collector: PulseCollectorContructor = require(`${__dirname}/collectors/${this.id}`)
+      .Collector;
+    this.collector = new Collector(this.config.logger);
   }
 
+  public async setup(setupContext: ChannelSetupContexxt) {
+    return this.collector.setup(setupContext);
+  }
+
+  public async getRecords() {
+    return this.collector.getRecords();
+  }
   public get id() {
     return this.config.id;
   }

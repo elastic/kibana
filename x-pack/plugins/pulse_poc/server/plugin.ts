@@ -8,6 +8,7 @@ import { readdirSync } from 'fs';
 import { resolve } from 'path';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { take } from 'rxjs/operators';
 
 export class PulsePocPlugin {
   private channels = readdirSync(resolve(__dirname, 'channels'))
@@ -35,6 +36,22 @@ export class PulsePocPlugin {
     logger.info(
       `Starting up POC pulse service, which wouldn't actually be part of Kibana in reality`
     );
+    const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
+    await esClient.callAsInternalUser('indices.putTemplate', {
+      name: 'pulse-poc-raw-template',
+      body: {
+        index_patterns: ['pulse-poc-raw*'],
+        settings: {
+          number_of_shards: 1,
+        },
+        mappings: {
+          properties: {
+            channel_id: { type: 'keyword' },
+            deployment_id: { type: 'keyword' },
+          },
+        },
+      },
+    });
 
     const router = core.http.createRouter();
 

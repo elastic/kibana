@@ -17,6 +17,11 @@
  * under the License.
  */
 
-export async function getRecords() {
-  return [];
+import { PulseCollector } from '../types';
+
+export class Collector extends PulseCollector {
+  public async putRecord() {}
+  public async getRecords() {
+    return [];
+  }
 }
