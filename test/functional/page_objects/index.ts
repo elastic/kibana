@@ -22,7 +22,6 @@ import { CommonPageProvider } from './common_page';
 import { ConsolePageProvider } from './console_page';
 // @ts-ignore not TS yet
 import { ContextPageProvider } from './context_page';
-// @ts-ignore not TS yet
 import { DashboardPageProvider } from './dashboard_page';
 // @ts-ignore not TS yet
 import { DiscoverPageProvider } from './discover_page';
