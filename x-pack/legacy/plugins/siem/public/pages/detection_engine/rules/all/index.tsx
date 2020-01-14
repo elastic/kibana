@@ -31,7 +31,7 @@ import { getBatchItems } from './batch_actions';
 import { EuiBasicTableOnChange, TableData } from '../types';
 import { allRulesReducer, State } from './reducer';
 import * as i18n from '../translations';
-import { JSONDownloader } from '../components/json_downloader';
+import { RuleDownloader } from '../components/rule_downloader';
 import { useStateToaster } from '../../../../components/toasters';
 
 const initialState: State = {
@@ -84,10 +84,34 @@ export const AllRules = React.memo<{
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
-      <EuiContextMenuPanel items={getBatchItems(selectedItems, dispatch, closePopover)} />
+      <EuiContextMenuPanel
+        items={getBatchItems(selectedItems, dispatch, dispatchToaster, closePopover)}
+      />
     ),
-    [selectedItems, dispatch]
+    [selectedItems, dispatch, dispatchToaster]
   );
+
+  const tableOnChangeCallback = useCallback(
+    ({ page, sort }: EuiBasicTableOnChange) => {
+      dispatch({
+        type: 'updatePagination',
+        pagination: { ...pagination, page: page.index + 1, perPage: page.size },
+      });
+      dispatch({
+        type: 'updateFilterOptions',
+        filterOptions: {
+          ...filterOptions,
+          sortField: 'enabled', // Only enabled is supported for sorting currently
+          sortOrder: sort?.direction ?? 'desc',
+        },
+      });
+    },
+    [dispatch, filterOptions, pagination]
+  );
+
+  const columns = useMemo(() => {
+    return getColumns(dispatch, dispatchToaster, history, hasNoPermissions);
+  }, [dispatch, dispatchToaster, history]);
 
   useEffect(() => {
     dispatch({ type: 'loading', isLoading: isLoadingRules });
@@ -126,9 +150,9 @@ export const AllRules = React.memo<{
 
   return (
     <>
-      <JSONDownloader
+      <RuleDownloader
         filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-        payload={exportPayload}
+        rules={exportPayload}
         onExportComplete={exportCount => {
           dispatchToaster({
             type: 'addToaster',
@@ -161,6 +185,10 @@ export const AllRules = React.memo<{
                       ...filterOptions,
                       filter: filterString,
                     },
+                  });
+                  dispatch({
+                    type: 'updatePagination',
+                    pagination: { ...pagination, page: 1 },
                   });
                 }}
               />
@@ -195,29 +223,16 @@ export const AllRules = React.memo<{
             </UtilityBar>
 
             <EuiBasicTable
-              columns={getColumns(dispatch, history, hasNoPermissions)}
+              columns={columns}
               isSelectable={!hasNoPermissions ?? false}
-              itemId="rule_id"
+              itemId="id"
               items={tableData}
-              onChange={({ page, sort }: EuiBasicTableOnChange) => {
-                dispatch({
-                  type: 'updatePagination',
-                  pagination: { ...pagination, page: page.index + 1, perPage: page.size },
-                });
-                dispatch({
-                  type: 'updateFilterOptions',
-                  filterOptions: {
-                    ...filterOptions,
-                    sortField: 'enabled', // Only enabled is supported for sorting currently
-                    sortOrder: sort!.direction,
-                  },
-                });
-              }}
+              onChange={tableOnChangeCallback}
               pagination={{
                 pageIndex: pagination.page - 1,
                 pageSize: pagination.perPage,
                 totalItemCount: pagination.total,
-                pageSizeOptions: [5, 10, 20],
+                pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
               }}
               sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
               selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}

@@ -97,7 +97,7 @@ export const Toolbar = (props: Props) => {
 
   const trays = {
     pageManager: <PageManager previousPage={previousPage} />,
-    expression: !elementIsSelected ? null : <Expression key={selectedElement.id} done={done} />,
+    expression: !elementIsSelected ? null : <Expression done={done} />,
   };
 
   return (
@@ -141,6 +141,7 @@ export const Toolbar = (props: Props) => {
                 color="text"
                 iconType="editorCodeBlock"
                 onClick={() => showHideTray(TrayType.expression)}
+                data-test-subj="canvasExpressionEditorButton"
               >
                 {strings.getEditorButtonLabel()}
               </EuiButtonEmpty>
