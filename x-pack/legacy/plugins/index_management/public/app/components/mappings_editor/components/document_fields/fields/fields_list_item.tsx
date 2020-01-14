@@ -5,7 +5,14 @@
  */
 import React, { forwardRef } from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, NormalizedFields } from '../../../types';
@@ -229,6 +236,12 @@ function FieldListItemComponent(
                         })
                   }
                 />
+              </EuiFlexItem>
+            )}
+
+            {isMultiField && (
+              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__icon">
+                <EuiIcon color="subdued" type="documents" />
               </EuiFlexItem>
             )}
 
