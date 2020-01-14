@@ -33,6 +33,7 @@ class Interactive extends React.Component<
           value={this.state.value}
           anchorPosition="downCenter"
           hasButtons={this.state.hasButtons}
+          ariaLabel="Color Picker"
         />
         <p style={{ marginTop: 20 }}>
           <label>
@@ -72,6 +73,7 @@ storiesOf('components/Color/ColorPickerPopover', module)
       anchorPosition="downCenter"
       onChange={action('onChange')}
       colors={THREE_COLORS}
+      ariaLabel="Color Picker"
     />
   ))
   .add('six colors', () => (
@@ -80,6 +82,7 @@ storiesOf('components/Color/ColorPickerPopover', module)
       anchorPosition="downCenter"
       onChange={action('onChange')}
       colors={SIX_COLORS}
+      ariaLabel="Color Picker"
     />
   ))
   .add('six colors, value missing', () => (
@@ -88,6 +91,7 @@ storiesOf('components/Color/ColorPickerPopover', module)
       anchorPosition="downCenter"
       onChange={action('onChange')}
       colors={SIX_COLORS}
+      ariaLabel="Color Picker"
     />
   ))
   .add('interactive', () => <Interactive />, {
