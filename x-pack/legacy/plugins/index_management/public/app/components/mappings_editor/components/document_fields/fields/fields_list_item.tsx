@@ -125,7 +125,7 @@ function FieldListItemComponent(
     );
 
     return (
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
         {canHaveMultiFields && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={addMultiFieldButtonLabel}>
