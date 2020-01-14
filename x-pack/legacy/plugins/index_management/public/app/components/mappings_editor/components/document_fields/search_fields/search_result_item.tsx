@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SearchResult } from '../../../types';
@@ -41,26 +41,42 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
       return null;
     }
 
+    const editButtonLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
+      defaultMessage: 'Edit',
+    });
+
+    const deleteButtonLabel = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.removeFieldButtonLabel',
+      {
+        defaultMessage: 'Remove',
+      }
+    );
+
     return (
-      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+      <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.searchResult.editFieldButtonLabel', {
-              defaultMessage: 'Edit',
-            })}
-          </EuiButtonEmpty>
+          <EuiToolTip content={editButtonLabel}>
+            <EuiButtonIcon
+              iconType="pencil"
+              onClick={editField}
+              data-test-subj="editFieldButton"
+              aria-label={editButtonLabel}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
             {deleteField => (
-              <EuiButtonEmpty onClick={() => deleteField(field)} data-test-subj="removeFieldButton">
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.searchResult.removeFieldButtonLabel',
-                  {
-                    defaultMessage: 'Remove',
-                  }
-                )}
-              </EuiButtonEmpty>
+              <EuiToolTip content={deleteButtonLabel}>
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => deleteField(field)}
+                  data-test-subj="removeFieldButton"
+                  aria-label={deleteButtonLabel}
+                />
+              </EuiToolTip>
             )}
           </DeleteFieldProvider>
         </EuiFlexItem>
@@ -89,6 +105,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
             <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__name">
               {display}
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">
                 {isMultiField
@@ -101,9 +118,8 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
                   : TYPE_DEFINITION[source.type].label}
               </EuiBadge>
             </EuiFlexItem>
-            <EuiFlexItem className="mappingsEditor__fieldsListItem__actions">
-              {renderActionButtons()}
-            </EuiFlexItem>
+
+            <EuiFlexItem>{renderActionButtons()}</EuiFlexItem>
           </EuiFlexGroup>
         </div>
       </div>

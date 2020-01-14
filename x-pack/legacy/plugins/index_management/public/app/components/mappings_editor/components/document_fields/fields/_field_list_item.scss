@@ -18,10 +18,6 @@
 .mappingsEditor__fieldsListItem__field--enabled {
   &:hover {
     background-color: $euiColorLightestShade;
-    .mappingsEditor__fieldsListItem__actions,
-    .mappingsEditor__fieldsListItem__multiFieldButton {
-      opacity: 1;
-    }
   }
 }
 
@@ -53,7 +49,7 @@
   position: relative;
 }
 
-.mappingsEditor__fieldsListItem__content --indent {
+.mappingsEditor__fieldsListItem__content--indent {
   padding-left: $euiSizeXL;
 }
 
@@ -62,9 +58,6 @@
   width: $euiSizeL;
 }
 
-.mappingsEditor__fieldsListItem__actions,
-.mappingsEditor__fieldsListItem__multiFieldButton {
-  opacity: 0;
-  padding-right: $euiSizeS;
-  transition: opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
+.mappingsEditor__fieldsListItem__actions {
+  padding-left: $euiSizeS;
 }
