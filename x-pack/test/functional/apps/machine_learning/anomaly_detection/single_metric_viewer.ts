@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -49,9 +50,38 @@ export default function({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    it('job creation loads the job management page', async () => {
+    it('loads from job list row link', async () => {
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
+
+      await ml.jobTable.waitForJobsToLoad();
+      await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id);
+      const rows = await ml.jobTable.parseJobTable();
+      expect(rows.filter(row => row.id === JOB_CONFIG.job_id)).to.have.length(1);
+
+      await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
+      await ml.common.waitForMlLoadingIndicatorToDisappear();
+    });
+
+    it('pre-fills the job selection', async () => {
+      await ml.jobSelection.assertSelectedJobBadges([JOB_CONFIG.job_id]);
+    });
+
+    it('pre-fills the detector input', async () => {
+      await ml.singleMetricViewer.assertDetectorInputExsist();
+      await ml.singleMetricViewer.assertDetectorInputValue('0');
+    });
+
+    it('displays the chart', async () => {
+      await ml.singleMetricViewer.assertChartExsist();
+    });
+
+    it('displays the anomalies table', async () => {
+      await ml.anomaliesTable.assertTableExists();
+    });
+
+    it('anomalies table is not empty', async () => {
+      await ml.anomaliesTable.assertTableNotEmpty();
     });
   });
 }
