@@ -5,19 +5,36 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 import { StatusByLocations } from '../';
 
-describe.skip('StatusByLocation component', () => {
+describe('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];
+
+  // Note: for shallow test we need absolute timestamp
+  it('renders properly against props', () => {
+    monitorLocations = [
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: '2020-01-09T12:22:32.567Z',
+      },
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: '2020-01-05T12:22:32.567Z',
+      },
+    ];
+    const component = shallowWithIntl(<StatusByLocations locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
+  });
 
   it('renders when up in all locations', () => {
     monitorLocations = [
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
       },
       {
         summary: { up: 4, down: 0 },
@@ -33,7 +50,6 @@ describe.skip('StatusByLocation component', () => {
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
@@ -45,7 +61,6 @@ describe.skip('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
@@ -57,12 +72,10 @@ describe.skip('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
       },
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);
@@ -74,12 +87,10 @@ describe.skip('StatusByLocation component', () => {
       {
         summary: { up: 0, down: 4 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: '2020-01-09T12:22:32.567Z',
       },
     ];
     const component = renderWithIntl(<StatusByLocations locations={monitorLocations} />);

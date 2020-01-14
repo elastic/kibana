@@ -10,7 +10,7 @@ import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../';
 
-describe('StatusByLocation component', () => {
+describe('LocationStatusTags component', () => {
   let monitorLocations: MonitorLocation[];
 
   it('renders when there are many location', () => {
