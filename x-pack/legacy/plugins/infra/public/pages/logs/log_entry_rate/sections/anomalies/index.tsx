@@ -12,7 +12,6 @@ import {
   EuiStat,
   EuiTitle,
   EuiLoadingSpinner,
-  EuiButton,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -21,16 +20,18 @@ import React, { useMemo } from 'react';
 import euiStyled from '../../../../../../../../common/eui_styled_components';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { JobStatus, SetupStatus } from '../../../../../../common/log_analysis';
+import { formatAnomalyScore, JobStatus, SetupStatus } from '../../../../../../common/log_analysis';
 import {
-  formatAnomalyScore,
   getAnnotationsForAll,
   getLogEntryRateCombinedSeries,
   getTopAnomalyScoreAcrossAllPartitions,
 } from '../helpers/data_formatters';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
-import { LogAnalysisJobProblemIndicator } from '../../../../../components/logging/log_analysis_job_status';
+import {
+  LogAnalysisJobProblemIndicator,
+  RecreateJobButton,
+} from '../../../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
@@ -99,9 +100,7 @@ export const AnomaliesResults: React.FunctionComponent<{
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={viewSetupForUpdate} size="s">
-            Recreate jobs
-          </EuiButton>
+          <RecreateJobButton onClick={viewSetupForUpdate} size="s" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} />

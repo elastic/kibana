@@ -4,6 +4,8 @@ exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
+exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
+
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -112,6 +114,8 @@ exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
+exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
+
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -219,6 +223,8 @@ exports[`Span USER_ID 1`] = `undefined`;
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
+
+exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
