@@ -26,6 +26,13 @@ interface FieldData {
   type: string;
 }
 
+/**
+ * Copied from https://stackoverflow.com/a/9310752
+ */
+const escapeRegExp = (text: string) => {
+  return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+};
+
 const sortResult = (a: FieldWithMeta, b: FieldWithMeta) => {
   if (a.metadata.score > b.metadata.score) {
     return -1;
@@ -224,7 +231,7 @@ const parseSearchTerm = (term: string): SearchData => {
   let type: string | undefined;
   let parsedTerm = term.replace(/\s+/g, ' ').trim(); // Remove multiple spaces with 1 single space
 
-  const words = parsedTerm.split(' ');
+  const words = parsedTerm.split(' ').map(escapeRegExp);
 
   // We don't take into account if the last word is a ">" char
   if (words[words.length - 1] === '>') {
