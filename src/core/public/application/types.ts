@@ -34,6 +34,9 @@ import { SavedObjectsStart } from '../saved_objects';
 
 /** @public */
 export interface AppBase {
+  /**
+   * The unique identifier of the application
+   */
   id: string;
 
   /**
@@ -42,14 +45,61 @@ export interface AppBase {
   title: string;
 
   /**
+   * The initial status of the application.
+   * Defaulting to `accessible`
+   */
+  status?: AppStatus;
+
+  /**
+   * The initial status of the application's navLink.
+   * Defaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible`
+   * See {@link AppNavLinkStatus}
+   */
+  navLinkStatus?: AppNavLinkStatus;
+
+  /**
+   * An {@link AppUpdater} observable that can be used to update the application {@link AppUpdatableFields} at runtime.
+   *
+   * @example
+   *
+   * How to update an application navLink at runtime
+   *
+   * ```ts
+   * // inside your plugin's setup function
+   * export class MyPlugin implements Plugin {
+   *   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+   *
+   *   setup({ application }) {
+   *     application.register({
+   *       id: 'my-app',
+   *       title: 'My App',
+   *       updater$: this.appUpdater,
+   *       async mount(params) {
+   *         const { renderApp } = await import('./application');
+   *         return renderApp(params);
+   *       },
+   *     });
+   *   }
+   *
+   *   start() {
+   *      // later, when the navlink needs to be updated
+   *      appUpdater.next(() => {
+   *        navLinkStatus: AppNavLinkStatus.disabled,
+   *      })
+   *   }
+   * ```
+   */
+  updater$?: Observable<AppUpdater>;
+
+  /**
    * An ordinal used to sort nav links relative to one another for display.
    */
   order?: number;
 
   /**
-   * An observable for a tooltip shown when hovering over app link.
+   * A tooltip shown when hovering over app link.
    */
-  tooltip$?: Observable<string>;
+  tooltip?: string;
 
   /**
    * A EUI iconType that will be used for the app's icon. This icon
@@ -67,7 +117,75 @@ export interface AppBase {
    * Custom capabilities defined by the app.
    */
   capabilities?: Partial<Capabilities>;
+
+  /**
+   * Flag to keep track of legacy applications.
+   * For internal use only. any value will be overridden when registering an App.
+   *
+   * @internal
+   */
+  legacy?: boolean;
+
+  /**
+   * Hide the UI chrome when the application is mounted. Defaults to `false`.
+   * Takes precedence over chrome service visibility settings.
+   */
+  chromeless?: boolean;
 }
+
+/**
+ * Accessibility status of an application.
+ *
+ * @public
+ */
+export enum AppStatus {
+  /**
+   * Application is accessible.
+   */
+  accessible = 0,
+  /**
+   * Application is not accessible.
+   */
+  inaccessible = 1,
+}
+
+/**
+ * Status of the application's navLink.
+ *
+ * @public
+ */
+export enum AppNavLinkStatus {
+  /**
+   * The application navLink will be `visible` if the application's {@link AppStatus} is set to `accessible`
+   * and `hidden` if the application status is set to `inaccessible`.
+   */
+  default = 0,
+  /**
+   * The application navLink is visible and clickable in the navigation bar.
+   */
+  visible = 1,
+  /**
+   * The application navLink is visible but inactive and not clickable in the navigation bar.
+   */
+  disabled = 2,
+  /**
+   * The application navLink does not appear in the navigation bar.
+   */
+  hidden = 3,
+}
+
+/**
+ * Defines the list of fields that can be updated via an {@link AppUpdater}.
+ * @public
+ */
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+
+/**
+ * Updater for applications.
+ * see {@link ApplicationSetup}
+ * @public
+ */
+export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
 
 /**
  * Extension of {@link AppBase | common app properties} with the mount function.
@@ -375,6 +493,35 @@ export interface ApplicationSetup {
   register(app: App): void;
 
   /**
+   * Register an application updater that can be used to change the {@link AppUpdatableFields} fields
+   * of all applications at runtime.
+   *
+   * This is meant to be used by plugins that needs to updates the whole list of applications.
+   * To only updates a specific application, use the `updater$` property of the registered application instead.
+   *
+   * @example
+   *
+   * How to register an application updater that disables some applications:
+   *
+   * ```ts
+   * // inside your plugin's setup function
+   * export class MyPlugin implements Plugin {
+   *   setup({ application }) {
+   *     application.registerAppUpdater(
+   *       new BehaviorSubject<AppUpdater>(app => {
+   *          if (myPluginApi.shouldDisable(app))
+   *            return {
+   *              status: AppStatus.inaccessible,
+   *            };
+   *        })
+   *      );
+   *     }
+   * }
+   * ```
+   */
+  registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
+
+  /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
    * plugin that registered this context. Deprecated, use {@link CoreSetup.getStartServices}.
    *
@@ -389,7 +536,7 @@ export interface ApplicationSetup {
 }
 
 /** @internal */
-export interface InternalApplicationSetup {
+export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'registerAppUpdater'> {
   /**
    * Register an mountable application to the system.
    * @param plugin - opaque ID of the plugin that registers this application
@@ -462,16 +609,11 @@ export interface ApplicationStart {
 export interface InternalApplicationStart
   extends Pick<ApplicationStart, 'capabilities' | 'navigateToApp' | 'getUrlForApp'> {
   /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
+   * Apps available based on the current capabilities.
+   * Should be used to show navigation links and make routing decisions.
+   * Applications manually disabled from the client-side using {@link AppUpdater}
    */
-  availableApps: ReadonlyMap<string, App>;
-  /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
-   * @internal
-   */
-  availableLegacyApps: ReadonlyMap<string, LegacyApp>;
+  applications$: Observable<ReadonlyMap<string, App | LegacyApp>>;
 
   /**
    * Register a context provider for application mounting. Will only be available to applications that depend on the
