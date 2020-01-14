@@ -60,6 +60,12 @@ export const ManageGlobalToaster = ({ children }: ManageGlobalToasterProps) => {
   );
 };
 
+const GlobalToasterListContainer = styled.div`
+  position: absolute;
+  right: 0;
+  bottom: 0;
+`;
+
 interface GlobalToasterProps {
   toastLifeTimeMs?: number;
 }
@@ -82,13 +88,15 @@ export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) =>
   return (
     <>
       {toasts.length > 0 && !isShowing && (
-        <EuiGlobalToastList
-          toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
-          dismissToast={({ id }) => {
-            dispatch({ type: 'deleteToaster', id });
-          }}
-          toastLifeTimeMs={toastLifeTimeMs}
-        />
+        <GlobalToasterListContainer>
+          <EuiGlobalToastList
+            toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
+            dismissToast={({ id }) => {
+              dispatch({ type: 'deleteToaster', id });
+            }}
+            toastLifeTimeMs={toastLifeTimeMs}
+          />
+        </GlobalToasterListContainer>
       )}
       {toastInModal != null && (
         <ModalAllErrors isShowing={isShowing} toast={toastInModal} toggle={toggle} />
