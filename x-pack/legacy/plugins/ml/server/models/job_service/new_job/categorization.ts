@@ -140,7 +140,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     const validExamples = sortedExamples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT);
     const sampleSize = sortedExamples.length;
 
-    const multiple = Math.floor(sampleSize / size) || sampleSize; // TODO - change this to sortedExamples.length
+    const multiple = Math.floor(sampleSize / size) || sampleSize;
     const filteredExamples = [];
     let i = 0;
     while (filteredExamples.length < size && i < sortedExamples.length) {

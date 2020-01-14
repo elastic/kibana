@@ -74,7 +74,7 @@ const PercentageText: FC<{ examplesValid: number; sampleSize: number }> = ({
   <div>
     <FormattedMessage
       id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldPercentage"
-      defaultMessage="{number} field values analyzed, {percentage}% contain valid tokens."
+      defaultMessage="{number} field {number, plural, zero {value} one {value} other {values}} analyzed, {percentage}% contain valid tokens."
       values={{
         number: sampleSize,
         percentage: Math.floor(examplesValid * 100),
