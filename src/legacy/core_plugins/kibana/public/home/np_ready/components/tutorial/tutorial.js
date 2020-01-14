@@ -362,6 +362,11 @@ class TutorialUi extends React.Component {
         );
       }
 
+      let icon = this.state.tutorial.euiIconType;
+      if (icon && icon.includes('/')) {
+        icon = this.props.addBasePath(icon);
+      }
+
       const instructions = this.getInstructions();
       content = (
         <div>
@@ -370,7 +375,7 @@ class TutorialUi extends React.Component {
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
             exportedFieldsUrl={exportedFieldsUrl}
-            iconType={this.state.tutorial.euiIconType}
+            iconType={icon}
             isBeta={this.state.tutorial.isBeta}
           />
 

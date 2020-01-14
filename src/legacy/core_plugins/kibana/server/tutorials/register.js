@@ -83,6 +83,7 @@ import { activemqMetricsSpecProvider } from './activemq_metrics';
 import { ibmmqLogsSpecProvider } from './ibmmq_logs';
 import { stanMetricsSpecProvider } from './stan_metrics';
 import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
+import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
 
 export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemLogsSpecProvider);
@@ -154,4 +155,5 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(ibmmqLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(stanMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(envoyproxyMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(cockroachdbMetricsSpecProvider);
 }
