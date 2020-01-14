@@ -15,6 +15,7 @@ const DATE_COLUMN_SLACK_FACTOR = 1.1;
 const FIELD_COLUMN_MIN_WIDTH_CHARACTERS = 10;
 const DETAIL_FLYOUT_ICON_MIN_WIDTH = 32;
 const COLUMN_PADDING = 8;
+const ROW_PADDING = 2;
 
 interface LogEntryColumnProps {
   baseWidth: string;
@@ -36,7 +37,7 @@ export const LogEntryColumn = euiStyled.div.attrs(() => ({
 
 export const LogEntryColumnContent = euiStyled.div`
   flex: 1 0 0%;
-  padding: 2px ${COLUMN_PADDING}px;
+  padding: ${ROW_PADDING}px ${COLUMN_PADDING}px;
 `;
 
 export type LogEntryColumnWidth = Pick<

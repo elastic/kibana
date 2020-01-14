@@ -39,6 +39,7 @@ interface LogEntryRowProps {
   openFlyoutWithItem: (id: string) => void;
   scale: TextScale;
   wrap: boolean;
+  streamItemId: string;
 }
 
 export const LogEntryRow = ({
@@ -52,6 +53,7 @@ export const LogEntryRow = ({
   openFlyoutWithItem,
   scale,
   wrap,
+  streamItemId,
 }: LogEntryRowProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -148,6 +150,7 @@ export const LogEntryRow = ({
                   isActiveHighlight={isActiveHighlight}
                   isHovered={isHovered}
                   isWrapped={wrap}
+                  streamItemId={streamItemId}
                 />
               ) : null}
             </LogEntryColumn>

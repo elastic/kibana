@@ -29,6 +29,7 @@ interface LogEntryMessageColumnProps {
   isHighlighted: boolean;
   isHovered: boolean;
   isWrapped: boolean;
+  streamItemId: string;
 }
 
 const getMaxLineLength = ({
@@ -40,7 +41,15 @@ const getMaxLineLength = ({
 }) => Math.floor(messageColumnWidth / characterDimensions.width);
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, isWrapped }) => {
+  ({
+    columnValue,
+    highlights,
+    isActiveHighlight,
+    isHighlighted,
+    isHovered,
+    isWrapped,
+    streamItemId,
+  }) => {
     const context = useLogEntryMessageColumnWidthContext();
     const message = useMemo(
       () =>
@@ -49,7 +58,8 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
               columnValue.message,
               highlights,
               isActiveHighlight,
-              isWrapped ? getMaxLineLength(context) : 0
+              isWrapped ? getMaxLineLength(context) : 0,
+              streamItemId
             )
           : null,
       [columnValue, highlights, isActiveHighlight]
@@ -171,7 +181,8 @@ const formatMessageSegments = (
   messageSegments: LogEntryMessageSegment[],
   highlights: LogEntryHighlightColumn[],
   isActiveHighlight: boolean,
-  maxLineLength: number
+  maxLineLength: number,
+  streamItemId: string
 ) => {
   const formattedSegments = messageSegments.map((messageSegment, index) =>
     formatMessageSegment(
@@ -189,7 +200,7 @@ const formatMessageSegments = (
     return (
       splitSegments?.reduce((result: Array<React.ReactNode>, segment, idx, arr) => {
         result.push(segment);
-        if (idx < arr.length - 1) result.push(<br />);
+        if (idx < arr.length - 1) result.push(<br key={`${streamItemId}-br-${idx}`} />);
         return result;
       }, []) || formattedSegments
     );

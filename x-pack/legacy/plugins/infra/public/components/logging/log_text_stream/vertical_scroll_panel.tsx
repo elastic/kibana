@@ -6,327 +6,264 @@
 
 import { bisector } from 'd3-array';
 import sortBy from 'lodash/fp/sortBy';
-import throttle from 'lodash/fp/throttle';
+import debounce from 'lodash/fp/debounce';
 import { VariableSizeList } from 'react-window';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
-import * as React from 'react';
+import { LogTextStreamJumpToTail } from './jump_to_tail';
+import React, { useCallback, useRef, useEffect, useMemo, useState } from 'react';
 import { useLogEntryMessageColumnWidthContext } from './log_entry_message_column';
+import { BoundingBoxes1D } from './bounding_boxes_1d';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { Rect } from './measurable_item_view';
 
 const DEFAULT_ITEM_HEIGHT = 25;
 const ITEM_PADDING = 4;
+const STREAM_ITEM_HEIGHT = 40;
 
-interface VerticalScrollPanelProps<Child> {
-  children?: (
-    registerChild: (key: Child, element: MeasurableChild | null) => void
-  ) => React.ReactNode;
+interface VerticalScrollPanelProps {
   onVisibleChildrenChange?: (visibleChildren: {
-    topChild: Child;
-    middleChild: Child;
-    bottomChild: Child;
+    topChild: string;
+    middleChild: string;
+    bottomChild: string;
     pagesAbove: number;
     pagesBelow: number;
     fromScroll: boolean;
   }) => void;
-  target: Child | undefined;
+  onScrollLockChange: (isLocked: boolean) => void;
+  target: string | null;
   height: number;
   width: number;
   hideScrollbar?: boolean;
   'data-test-subj'?: string;
-  isLocked: boolean;
+  isStreaming: boolean;
   entriesCount: number;
-  itemHeights: Map<string, number>;
-  recalculateColumnSize: () => void;
-  messageColumnSizeData: ReturnType<typeof useLogEntryMessageColumnWidthContext>;
 }
 
-interface VerticalScrollPanelSnapshot<Child> {
-  scrollTarget: Child | undefined;
-  scrollOffset: number | undefined;
-}
-
-interface MeasurableChild {
-  getOffsetRect(): Rect | null;
-}
-
-const SCROLL_THROTTLE_INTERVAL = 250;
+const SCROLL_DEBOUNCE_INTERVAL = 32;
 export const ASSUMED_SCROLLBAR_WIDTH = 20;
 
-class VerticalScrollPanelComponent<Child> extends React.PureComponent<
-  VerticalScrollPanelProps<Child>
-> {
-  public static defaultProps: Partial<VerticalScrollPanelProps<any>> = {
-    hideScrollbar: false,
-  };
+export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
+  children,
+  target,
+  height,
+  width,
+  hideScrollbar = false,
+  'data-test-subj': dataTestSubj,
+  onVisibleChildrenChange,
+  onScrollLockChange,
+  isStreaming,
+}) => {
+  const windowRef = useRef<VariableSizeList>(null);
+  const outerRef = useRef(null);
+  const {
+    messageColumnWidth,
+    characterDimensions,
+    getLogEntryHeightFromMessageContent,
+    recalculateColumnSize,
+  } = useLogEntryMessageColumnWidthContext();
+  const scrollbarOffset = hideScrollbar ? ASSUMED_SCROLLBAR_WIDTH : 0;
 
-  public scrollRef = React.createRef<HTMLDivElement & VariableSizeList>();
-  public childRefs = new Map<Child, MeasurableChild>();
-  public childDimensions = new Map<Child, Rect>();
-  private nextScrollEventFromCenterTarget = false;
+  const [scrollTop, setScrollTop] = useState(0);
 
-  public handleScroll: React.UIEventHandler<HTMLDivElement & VariableSizeList> = throttle(
-    SCROLL_THROTTLE_INTERVAL,
-    () => {
-      // If this event was fired by the centerTarget method modifying the scrollTop,
-      // then don't send `fromScroll: true` to reportVisibleChildren. The rest of the
-      // app needs to respond differently depending on whether the user is scrolling through
-      // the pane manually, versus whether the pane is updating itself in response to new data
-      this.reportVisibleChildren(!this.nextScrollEventFromCenterTarget);
-      this.nextScrollEventFromCenterTarget = false;
-    }
+  const [isScrollLocked, setIsScrollLocked] = useState(false);
+  useEffect(() => onScrollLockChange(isScrollLocked), [isScrollLocked]);
+  useEffect(() => setIsScrollLocked(false), [isStreaming]);
+
+  // Prevent FOUC before initial column width is rendered
+  const [hasInitializedColumnWidth, setHasInitializedColumnWidth] = useState(false);
+
+  const childrenArray = useMemo(() => React.Children.toArray(children), [children]);
+
+  const targetChild = useMemo(
+    () =>
+      childrenArray.findIndex(child => {
+        if (child && 'type' in child && child?.type === React.Fragment) {
+          const fragmentChildren = React.Children.toArray(child.props.children);
+          const logEntry = fragmentChildren[fragmentChildren.length - 1];
+          return logEntry.props.streamItemId === target;
+        }
+        return false;
+      }),
+    [childrenArray, target]
   );
 
-  public registerChild = (key: any, element: MeasurableChild | null) => {
-    if (element === null) {
-      this.childRefs.delete(key);
-    } else {
-      this.childRefs.set(key, element);
+  const centerTargetEffect = useCallback(() => {
+    if (!isScrollLocked) {
+      windowRef.current?.scrollToItem(targetChild, 'smart');
     }
-  };
+  }, [isScrollLocked, windowRef.current]);
+  useEffect(() => centerTargetEffect, [targetChild, hasInitializedColumnWidth]);
 
-  public updateChildDimensions = () => {
-    this.childDimensions = new Map<Child, Rect>(
-      sortDimensionsByTop(
-        Array.from(this.childRefs.entries()).reduce((accumulatedDimensions, [key, child]) => {
-          const currentOffsetRect = child.getOffsetRect();
+  const childHeights = useMemo(() => {
+    const boundingBoxes = new BoundingBoxes1D<number>();
+    const pxHeights = childrenArray.map(child => {
+      if (child && 'type' in child) {
+        if (child.type === React.Fragment) {
+          const fragmentChildren = React.Children.toArray(child.props.children);
+          const hasDateRow = fragmentChildren.length === 2;
 
-          if (currentOffsetRect !== null) {
-            accumulatedDimensions.push([key, currentOffsetRect]);
-          }
-
-          return accumulatedDimensions;
-        }, [] as Array<[any, Rect]>)
-      )
-    );
-  };
-
-  public getVisibleChildren = () => {
-    if (this.scrollRef.current === null || this.childDimensions.size <= 0) {
-      return;
-    }
-
-    const {
-      childDimensions,
-      props: { height: scrollViewHeight },
-      scrollRef: {
-        current: { scrollTop },
-      },
-    } = this;
-
-    return getVisibleChildren(Array.from(childDimensions.entries()), scrollViewHeight, scrollTop);
-  };
-
-  public getScrollPosition = () => {
-    if (this.scrollRef.current === null) {
-      return;
-    }
-
-    const {
-      props: { height: scrollViewHeight },
-      scrollRef: {
-        current: { scrollHeight, scrollTop },
-      },
-    } = this;
-
-    return {
-      pagesAbove: scrollTop / scrollViewHeight,
-      pagesBelow: (scrollHeight - scrollTop - scrollViewHeight) / scrollViewHeight,
-    };
-  };
-
-  public reportVisibleChildren = (fromScroll: boolean = false) => {
-    const { onVisibleChildrenChange } = this.props;
-    const visibleChildren = this.getVisibleChildren();
-    const scrollPosition = this.getScrollPosition();
-
-    if (!visibleChildren || !scrollPosition || typeof onVisibleChildrenChange !== 'function') {
-      return;
-    }
-
-    onVisibleChildrenChange({
-      bottomChild: visibleChildren.bottomChild,
-      middleChild: visibleChildren.middleChild,
-      topChild: visibleChildren.topChild,
-      fromScroll,
-      ...scrollPosition,
-    });
-  };
-
-  public centerTarget = (target: Child, offset?: number) => {
-    const {
-      props: { height: scrollViewHeight },
-      childDimensions,
-      scrollRef,
-    } = this;
-
-    if (scrollRef.current === null || !target || childDimensions.size <= 0) {
-      return false;
-    }
-
-    const targetDimensions = childDimensions.get(target);
-
-    if (targetDimensions) {
-      const targetOffset = typeof offset === 'undefined' ? targetDimensions.height / 2 : offset;
-      // Flag the scrollTop change that's about to happen as programmatic, as
-      // opposed to being in direct response to user input
-      this.nextScrollEventFromCenterTarget = true;
-      const currentScrollTop = scrollRef.current.scrollTop;
-      const newScrollTop = targetDimensions.top + targetOffset - scrollViewHeight / 2;
-      scrollRef.current.scrollTop = newScrollTop;
-      return currentScrollTop !== newScrollTop;
-    }
-    return false;
-  };
-
-  public handleUpdatedChildren = (target: Child | undefined, offset: number | undefined) => {
-    this.updateChildDimensions();
-    let centerTargetWillReportChildren = false;
-    if (!!target) {
-      centerTargetWillReportChildren = this.centerTarget(target, offset);
-    }
-    if (!centerTargetWillReportChildren) {
-      this.reportVisibleChildren();
-    }
-  };
-
-  public componentDidMount() {
-    this.handleUpdatedChildren(this.props.target, undefined);
-  }
-
-  public getSnapshotBeforeUpdate(
-    prevProps: VerticalScrollPanelProps<Child>
-  ): VerticalScrollPanelSnapshot<Child> {
-    /** Center the target if:
-     *  1. This component has just finished calculating its height after being first mounted
-     *  2. The target prop changes
-     */
-    if (
-      (prevProps.height === 0 && this.props.height > 0) ||
-      (prevProps.target !== this.props.target && this.props.target)
-    ) {
-      return {
-        scrollOffset: undefined,
-        scrollTarget: this.props.target,
-      };
-    } else if (this.props.height > 0) {
-      const visibleChildren = this.getVisibleChildren();
-
-      if (visibleChildren) {
-        return {
-          scrollOffset: visibleChildren.middleChildOffset,
-          scrollTarget: visibleChildren.middleChild,
-        };
-      }
-    }
-
-    return {
-      scrollOffset: undefined,
-      scrollTarget: undefined,
-    };
-  }
-
-  public componentDidUpdate(
-    prevProps: VerticalScrollPanelProps<Child>,
-    prevState: {},
-    snapshot: VerticalScrollPanelSnapshot<Child>
-  ) {
-    if (
-      prevProps.height !== this.props.height ||
-      prevProps.target !== this.props.target ||
-      prevProps.entriesCount !== this.props.entriesCount
-    ) {
-      this.handleUpdatedChildren(snapshot.scrollTarget, snapshot.scrollOffset);
-    }
-    if (prevProps.isLocked && !this.props.isLocked && this.scrollRef.current) {
-      this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight;
-    }
-    if (
-      prevProps.messageColumnSizeData.messageColumnWidth !==
-        this.props.messageColumnSizeData.messageColumnWidth &&
-      this.scrollRef.current
-    ) {
-      // This recomputes the column size after the first initial render. Even though
-      // recalculateColumnSize also calls requestAnimationFrame within itself, this
-      // doesn't actually work unless we also call requestAnimationFrame here a second time
-      // for some cosmic, unknowable reason
-      requestAnimationFrame(this.props.messageColumnSizeData.recalculateColumnSize);
-      this.scrollRef.current.resetAfterIndex(0, true);
-    }
-  }
-
-  public componentWillUnmount() {
-    this.childRefs.clear();
-  }
-
-  public render() {
-    const {
-      children,
-      height,
-      width,
-      hideScrollbar,
-      'data-test-subj': dataTestSubj,
-      messageColumnSizeData,
-    } = this.props;
-    const scrollbarOffset = hideScrollbar ? ASSUMED_SCROLLBAR_WIDTH : 0;
-
-    const renderedChildren = typeof children === 'function' ? children(this.registerChild) : null;
-    const childrenArray = renderedChildren
-      ? React.Children.toArray(React.Children.only(renderedChildren).props.children)
-      : [];
-
-    const getItemSize = ({
-      messageColumnWidth,
-      characterDimensions,
-      getLogEntryHeightFromMessageContent,
-    }) => (index: number) => {
-      const child = childrenArray[index];
-      if (child?.type === React.Fragment) {
-        const fragmentChildren = React.Children.toArray(child.props.children);
-        const logEntry = fragmentChildren[fragmentChildren.length - 1];
-        const logEntryValue = logEntry.props.logEntry;
-        const logEntryHeight = getLogEntryHeightFromMessageContent(
-          logEntryValue,
-          messageColumnWidth,
-          characterDimensions
-        );
-        return logEntryHeight
-          ? logEntryHeight +
-              ITEM_PADDING +
-              (fragmentChildren.length === 2 ? DEFAULT_ITEM_HEIGHT : 0)
-          : DEFAULT_ITEM_HEIGHT;
-      } else if (child?.type === LogTextStreamLoadingItemView) {
-        return 32;
+          const logEntry = fragmentChildren[fragmentChildren.length - 1];
+          const logEntryValue = logEntry.props.logEntry;
+          const logEntryId = logEntry.props.streamItemId;
+          const logEntryHeight = getLogEntryHeightFromMessageContent(
+            logEntryValue,
+            messageColumnWidth,
+            characterDimensions
+          );
+          const totalHeight = logEntryHeight
+            ? logEntryHeight + ITEM_PADDING + (hasDateRow ? DEFAULT_ITEM_HEIGHT : 0)
+            : DEFAULT_ITEM_HEIGHT;
+          boundingBoxes.add(logEntryId, totalHeight);
+          return totalHeight;
+        } else if (child.type === LogTextStreamLoadingItemView) {
+          return STREAM_ITEM_HEIGHT;
+        }
       }
       return DEFAULT_ITEM_HEIGHT;
-    };
+    });
+    return { pxHeights, boundingBoxes };
+  }, [childrenArray, messageColumnWidth, characterDimensions, getLogEntryHeightFromMessageContent]);
 
-    return (
+  const resizeItemsEffect = useCallback(() => windowRef.current?.resetAfterIndex(0, true), [
+    windowRef.current,
+  ]);
+  useEffect(resizeItemsEffect, [
+    windowRef.current,
+    messageColumnWidth,
+    characterDimensions,
+    recalculateColumnSize,
+    childHeights,
+  ]);
+
+  const visibleChildren = useMemo(
+    () => getVisibleChildren({ height, boundingBoxes: childHeights.boundingBoxes, scrollTop }),
+    [height, childHeights.boundingBoxes, scrollTop]
+  );
+
+  const handleScroll = useCallback(
+    debounce(
+      SCROLL_DEBOUNCE_INTERVAL,
+      ({
+        scrollOffset,
+        scrollUpdateWasRequested,
+      }: {
+        scrollOffset: number;
+        scrollUpdateWasRequested: boolean;
+      }) => {
+        setScrollTop(scrollOffset);
+        const { pagesBelow } = getVisibleChildren({
+          height,
+          boundingBoxes: childHeights.boundingBoxes,
+          scrollTop: scrollOffset,
+        });
+        if (!scrollUpdateWasRequested && isStreaming) {
+          setIsScrollLocked(pagesBelow > 0);
+        }
+      }
+    ),
+    [
+      height,
+      childHeights.boundingBoxes,
+      characterDimensions,
+      isStreaming,
+      visibleChildren.pagesBelow,
+    ]
+  );
+
+  const scrollEffect = useCallback(
+    debounce(SCROLL_DEBOUNCE_INTERVAL, () => {
+      if (
+        hasInitializedColumnWidth &&
+        !isNaN(visibleChildren.pagesAbove) &&
+        visibleChildren.pagesBelow < Infinity
+      ) {
+        onVisibleChildrenChange(visibleChildren);
+      }
+    }),
+    [hasInitializedColumnWidth, visibleChildren, onVisibleChildrenChange]
+  );
+  useEffect(scrollEffect, [visibleChildren]);
+
+  const jumpToTail = useCallback(() => {
+    windowRef.current?.scrollTo(childHeights.boundingBoxes.totalHeight);
+    setIsScrollLocked(false);
+  }, [childrenArray, windowRef.current, childHeights.boundingBoxes.totalHeight]);
+
+  const streamUpdateEffect = useCallback(() => {
+    if (isStreaming && !isScrollLocked) {
+      jumpToTail();
+    }
+  }, [isStreaming, isScrollLocked]);
+  useEffect(() => streamUpdateEffect, [
+    isStreaming,
+    isScrollLocked,
+    childHeights.boundingBoxes.totalHeight,
+  ]);
+
+  const onItemsRendered = useCallback(() => {
+    if (!hasInitializedColumnWidth) {
+      // Recompute the column size after the first initial render. Even though
+      // recalculateColumnSize calls requestAnimationFrame within itself, this
+      // doesn't actually work unless we also call setTimeout here (NOT requestAnimationFrame)
+      // for some cosmic, unknowable reason
+      setTimeout(recalculateColumnSize, 0);
+      setHasInitializedColumnWidth(true);
+    }
+  }, [hasInitializedColumnWidth]);
+
+  return (
+    <>
       <ScrollPanelWrapper
         data-test-subj={dataTestSubj}
         height={height}
         width={width + scrollbarOffset}
         scrollbarOffset={scrollbarOffset}
-        onScroll={this.handleScroll}
-        ref={this.scrollRef}
+        onScroll={handleScroll}
+        ref={windowRef}
+        outerRef={outerRef}
+        isHidden={!hasInitializedColumnWidth}
         itemCount={childrenArray.length}
-        itemSize={getItemSize(messageColumnSizeData)}
-        estimatedItemSize={DEFAULT_ITEM_HEIGHT}
+        itemSize={index => childHeights.pxHeights[index]}
+        onItemsRendered={onItemsRendered}
+        estimatedItemSize={DEFAULT_ITEM_HEIGHT * 4}
+        overscanCount={4}
       >
         {({ index, style }) => <div style={style}>{childrenArray[index]}</div>}
       </ScrollPanelWrapper>
-    );
-  }
-}
+      {isStreaming && isScrollLocked && (
+        <LogTextStreamJumpToTail width={width} onClickJump={() => jumpToTail()} />
+      )}
+    </>
+  );
+};
 
-export const VerticalScrollPanel: React.FC<any> = props => {
-  const context = useLogEntryMessageColumnWidthContext();
-  return <VerticalScrollPanelComponent {...props} messageColumnSizeData={context} />;
+const getVisibleChildren = ({
+  height,
+  scrollTop,
+  boundingBoxes,
+}: {
+  height: number;
+  scrollTop: number;
+  boundingBoxes: BoundingBoxes1D<number>;
+}) => {
+  const scrollCenter = Math.floor(height / 2 + scrollTop);
+  const scrollBottom = Math.floor(height + scrollTop);
+  const topChild = boundingBoxes.find(scrollTop);
+  const middleChild = boundingBoxes.find(scrollCenter);
+  const bottomChild = boundingBoxes.find(scrollBottom);
+  return {
+    topChild,
+    middleChild,
+    bottomChild,
+    pagesAbove: scrollTop / height,
+    pagesBelow: Math.max(0, (boundingBoxes.totalHeight - scrollTop - height) / height),
+  };
 };
 
 interface ScrollPanelWrapperProps {
   scrollbarOffset?: number;
+  isHidden: boolean;
 }
 
 const ScrollPanelWrapper = euiStyled(VariableSizeList)<ScrollPanelWrapperProps>`
@@ -339,38 +276,3 @@ const ScrollPanelWrapper = euiStyled(VariableSizeList)<ScrollPanelWrapperProps>`
     overflow-anchor: none;
   }
 `;
-
-const getVisibleChildren = <Child extends {}>(
-  childDimensions: Array<[Child, Rect]>,
-  scrollViewHeight: number,
-  scrollTop: number
-) => {
-  const middleChildIndex = Math.min(
-    getChildIndexBefore(childDimensions, scrollTop + scrollViewHeight / 2),
-    childDimensions.length - 1
-  );
-
-  const topChildIndex = Math.min(
-    getChildIndexBefore(childDimensions, scrollTop, 0, middleChildIndex),
-    childDimensions.length - 1
-  );
-
-  const bottomChildIndex = Math.min(
-    getChildIndexBefore(childDimensions, scrollTop + scrollViewHeight, middleChildIndex),
-    childDimensions.length - 1
-  );
-
-  return {
-    bottomChild: childDimensions[bottomChildIndex][0],
-    bottomChildOffset: childDimensions[bottomChildIndex][1].top - scrollTop - scrollViewHeight,
-    middleChild: childDimensions[middleChildIndex][0],
-    middleChildOffset: scrollTop + scrollViewHeight / 2 - childDimensions[middleChildIndex][1].top,
-    topChild: childDimensions[topChildIndex][0],
-    topChildOffset: childDimensions[topChildIndex][1].top - scrollTop,
-  };
-};
-
-const sortDimensionsByTop = sortBy<[any, Rect]>('1.top');
-
-const getChildIndexBefore = bisector<[any, Rect], number>(([key, rect]) => rect.top + rect.height)
-  .left;

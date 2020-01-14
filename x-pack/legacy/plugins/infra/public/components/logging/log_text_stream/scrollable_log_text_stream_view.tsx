@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useMemo } from 'react';
 import moment from 'moment';
-
+import { isEqual } from 'lodash';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';
@@ -80,20 +80,22 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     nextProps: ScrollableLogTextStreamViewProps,
     prevState: ScrollableLogTextStreamViewState
   ): Partial<ScrollableLogTextStreamViewState> | null {
-    const hasNewTarget = nextProps.target && nextProps.target !== prevState.target;
+    const hasNewTarget = nextProps.target && !isEqual(nextProps.target, prevState.target);
     const hasItems = nextProps.items.length > 0;
 
     // Prevent new entries from being appended and moving the stream forward when
     // the user has scrolled up during live streaming
-    const nextItems = hasItems && prevState.isScrollLocked ? prevState.items : nextProps.items;
+    const nextItems = nextProps.items;
+    //hasItems && prevState.isScrollLocked ? prevState.items :
+    // if (nextProps.isStreaming && hasItems) {
+    //   return {
+    //     target: nextProps.target,
+    //     targetId: getStreamItemId(nextProps.items[nextProps.items.length - 1]),
+    //     items: nextItems,
+    //   };
+    // } else
 
-    if (nextProps.isStreaming && hasItems) {
-      return {
-        target: nextProps.target,
-        targetId: getStreamItemId(nextProps.items[nextProps.items.length - 1]),
-        items: nextItems,
-      };
-    } else if (hasNewTarget && hasItems) {
+    if (hasNewTarget && hasItems) {
       return {
         target: nextProps.target,
         targetId: getStreamItemId(getStreamItemBeforeTimeKey(nextProps.items, nextProps.target!)),
@@ -190,73 +192,59 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         height={height}
                         width={width}
                         onVisibleChildrenChange={this.handleVisibleChildrenChange}
+                        onScrollLockChange={this.handleScrollLock}
                         target={targetId}
                         hideScrollbar={true}
                         data-test-subj={'logStream'}
-                        isLocked={isScrollLocked}
+                        isStreaming={isStreaming}
                         entriesCount={items.length}
                       >
-                        {registerChild => (
-                          <>
-                            {isLoadingMore && (
-                              <LogTextStreamLoadingItemView
-                                alignment="bottom"
-                                isLoading={isLoadingMore}
-                                hasMore={hasMoreBeforeStart}
-                                isStreaming={false}
-                                lastStreamingUpdate={null}
-                              />
-                            )}
-                            {items.map((item, idx) => {
-                              const currentTimestamp = item.logEntry.key.time;
-                              let showDate = false;
+                        <LogTextStreamLoadingItemView
+                          alignment="bottom"
+                          isLoading={isLoadingMore}
+                          hasMore={hasMoreBeforeStart}
+                          isStreaming={false}
+                          lastStreamingUpdate={null}
+                        />
+                        {items.map((item, idx) => {
+                          const currentTimestamp = item.logEntry.key.time;
+                          let showDate = false;
 
-                              if (idx > 0) {
-                                const prevTimestamp = items[idx - 1].logEntry.key.time;
-                                showDate = !moment(currentTimestamp).isSame(prevTimestamp, 'day');
-                              }
-                              return (
-                                <Fragment key={getStreamItemId(item)}>
-                                  {showDate && <LogDateRow timestamp={currentTimestamp} />}
-                                  <LogEntryRow
-                                    columnConfigurations={columnConfigurations}
-                                    columnWidths={columnWidths}
-                                    openFlyoutWithItem={this.handleOpenFlyout}
-                                    logEntry={item.logEntry}
-                                    highlights={item.highlights}
-                                    isActiveHighlight={
-                                      !!currentHighlightKey &&
-                                      currentHighlightKey.gid === item.logEntry.gid
-                                    }
-                                    scale={scale}
-                                    wrap={wrap}
-                                    isHighlighted={
-                                      highlightedItem
-                                        ? item.logEntry.gid === highlightedItem
-                                        : false
-                                    }
-                                  />
-                                </Fragment>
-                              );
-                            })}
-                            {(isStreaming || isLoadingMore) && (
-                              <LogTextStreamLoadingItemView
-                                alignment="top"
-                                isLoading={isStreaming || isLoadingMore}
-                                hasMore={hasMoreAfterEnd}
-                                isStreaming={isStreaming}
-                                lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
-                                onLoadMore={this.handleLoadNewerItems}
+                          if (idx > 0) {
+                            const prevTimestamp = items[idx - 1].logEntry.key.time;
+                            showDate = !moment(currentTimestamp).isSame(prevTimestamp, 'day');
+                          }
+                          return (
+                            <Fragment key={getStreamItemId(item)}>
+                              {showDate && <LogDateRow timestamp={currentTimestamp} />}
+                              <LogEntryRow
+                                streamItemId={getStreamItemId(item)}
+                                columnConfigurations={columnConfigurations}
+                                columnWidths={columnWidths}
+                                openFlyoutWithItem={this.handleOpenFlyout}
+                                logEntry={item.logEntry}
+                                highlights={item.highlights}
+                                isActiveHighlight={
+                                  !!currentHighlightKey &&
+                                  currentHighlightKey.gid === item.logEntry.gid
+                                }
+                                scale={scale}
+                                wrap={wrap}
+                                isHighlighted={
+                                  highlightedItem ? item.logEntry.gid === highlightedItem : false
+                                }
                               />
-                            )}
-                            {isScrollLocked && (
-                              <LogTextStreamJumpToTail
-                                width={width}
-                                onClickJump={this.handleJumpToTail}
-                              />
-                            )}
-                          </>
-                        )}
+                            </Fragment>
+                          );
+                        })}
+                        <LogTextStreamLoadingItemView
+                          alignment="top"
+                          isLoading={isStreaming || isLoadingMore}
+                          hasMore={hasMoreAfterEnd}
+                          isStreaming={isStreaming}
+                          lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
+                          onLoadMore={this.handleLoadNewerItems}
+                        />
                       </VerticalScrollPanel>
                     </ScrollPanelSizeProbe>
                   )}
@@ -299,39 +287,23 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       bottomChild,
       pagesAbove,
       pagesBelow,
-      fromScroll,
     }: {
       topChild: string;
       middleChild: string;
       bottomChild: string;
       pagesAbove: number;
       pagesBelow: number;
-      fromScroll: boolean;
     }) => {
-      if (fromScroll && this.props.isStreaming) {
-        this.setState({
-          isScrollLocked: pagesBelow !== 0,
-        });
-      }
       this.props.reportVisibleInterval({
         endKey: parseStreamItemId(bottomChild),
         middleKey: parseStreamItemId(middleChild),
         pagesAfterEnd: pagesBelow,
         pagesBeforeStart: pagesAbove,
         startKey: parseStreamItemId(topChild),
-        fromScroll,
       });
     }
   );
-
-  private handleJumpToTail = () => {
-    const { items } = this.props;
-    const lastItemTarget = getStreamItemId(items[items.length - 1]);
-    this.setState({
-      targetId: lastItemTarget,
-      isScrollLocked: false,
-    });
-  };
+  private handleScrollLock = (isScrollLocked: boolean) => this.setState({ isScrollLocked });
 }
 
 /**
