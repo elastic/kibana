@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 
 import { HeaderSection } from '../../../header_section';
 import { manageQuery } from '../../../page/manage_query';
@@ -17,6 +17,7 @@ import {
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewNetworkStats } from '../overview_network_stats';
 import { getNetworkUrl } from '../../../link_to';
+import { InspectButtonContainer } from '../../../inspect';
 
 export interface OwnProps {
   startDate: number;
@@ -36,18 +37,13 @@ export interface OwnProps {
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 
-export const OverviewNetwork = React.memo<OwnProps>(({ endDate, startDate, setQuery }) => {
-  const [isHover, setIsHover] = useState(false);
-  const handleMouseEnter = useCallback(() => setIsHover(true), [setIsHover]);
-  const handleMouseLeave = useCallback(() => setIsHover(false), [setIsHover]);
-
-  return (
-    <EuiFlexItem>
-      <EuiPanel onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+const OverviewNetworkComponent: React.FC<OwnProps> = ({ endDate, startDate, setQuery }) => (
+  <EuiFlexItem>
+    <InspectButtonContainer>
+      <EuiPanel>
         <HeaderSection
           border
           id={OverviewNetworkQueryId}
-          showInspect={isHover}
           subtitle={
             <FormattedMessage
               id="xpack.siem.overview.networkSubtitle"
@@ -82,8 +78,8 @@ export const OverviewNetwork = React.memo<OwnProps>(({ endDate, startDate, setQu
           )}
         </OverviewNetworkQuery>
       </EuiPanel>
-    </EuiFlexItem>
-  );
-});
+    </InspectButtonContainer>
+  </EuiFlexItem>
+);
 
-OverviewNetwork.displayName = 'OverviewNetwork';
+export const OverviewNetwork = React.memo(OverviewNetworkComponent);

@@ -71,6 +71,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
 
   return (
     <EuiComboBox
+      aria-label={placeholderText}
       isDisabled={options.aggregation === 'count'}
       placeholder={placeholderText}
       fullWidth

@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
+import { ConcreteTaskInstance, TaskStatus } from '../../../../../plugins/task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
@@ -428,7 +428,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:05:00.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
@@ -462,7 +461,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:05:00.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
@@ -495,7 +493,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:05:00.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
