@@ -1,29 +1,22 @@
 {
-  "rule_id": "ef862985-3f13-4262-a686-5f357bbb9bc2",
-  "risk_score": 50,
   "description": "Windows whoami command activity",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Windows whoami command activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name:whoami.exe",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "event.action",
-        "value": "Process Create (rule: ProcessCreate)",
+        "negate": false,
         "params": {
           "query": "Process Create (rule: ProcessCreate)"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase",
+        "value": "Process Create (rule: ProcessCreate)"
       },
       "query": {
         "match": {
@@ -32,12 +25,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Windows whoami command activity",
+  "query": "process.name:whoami.exe",
+  "risk_score": 50,
+  "rule_id": "ef862985-3f13-4262-a686-5f357bbb9bc2",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

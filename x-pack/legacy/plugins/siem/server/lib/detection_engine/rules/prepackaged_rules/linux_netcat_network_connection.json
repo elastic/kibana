@@ -1,29 +1,22 @@
 {
-  "rule_id": "adb961e0-cb74-42a0-af9e-29fc41f88f5f",
-  "risk_score": 50,
   "description": "Linux: Netcat Network Connection",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Linux: Netcat Network Connection",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional)",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "event.action",
-        "value": "socket_opened",
+        "negate": false,
         "params": {
           "query": "socket_opened"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase",
+        "value": "socket_opened"
       },
       "query": {
         "match": {
@@ -32,23 +25,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": true,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
         "key": "destination.ip",
-        "value": "127.0.0.1",
+        "negate": true,
         "params": {
           "query": "127.0.0.1"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+        "type": "phrase",
+        "value": "127.0.0.1"
       },
       "query": {
         "match": {
@@ -57,23 +50,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": true,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
         "key": "destination.ip",
-        "value": "::1",
+        "negate": true,
         "params": {
           "query": "::1"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index"
+        "type": "phrase",
+        "value": "::1"
       },
       "query": {
         "match": {
@@ -82,12 +75,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Linux: Netcat Network Connection",
+  "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional)",
+  "risk_score": 50,
+  "rule_id": "adb961e0-cb74-42a0-af9e-29fc41f88f5f",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

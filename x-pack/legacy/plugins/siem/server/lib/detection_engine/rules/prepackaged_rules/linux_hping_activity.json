@@ -1,29 +1,22 @@
 {
-  "rule_id": "90169566-2260-4824-b8e4-8615c3b4ed52",
-  "risk_score": 50,
   "description": "Linux: Hping Activity",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Linux: Hping Activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: hping",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "event.action",
-        "value": "process_started",
+        "negate": false,
         "params": {
           "query": "process_started"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase",
+        "value": "process_started"
       },
       "query": {
         "match": {
@@ -32,23 +25,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
         "key": "event.dataset",
-        "value": "process",
+        "negate": false,
         "params": {
           "query": "process"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+        "type": "phrase",
+        "value": "process"
       },
       "query": {
         "match": {
@@ -57,12 +50,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Linux: Hping Activity",
+  "query": "process.name: hping",
+  "risk_score": 50,
+  "rule_id": "90169566-2260-4824-b8e4-8615c3b4ed52",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

@@ -1,29 +1,22 @@
 {
-  "rule_id": "ebdc4b6f-7fdb-4c21-bbd6-59e1ed11024a",
-  "risk_score": 50,
   "description": "Windows Netcat network activity",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Windows Netcat network activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name:ncat.exe",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "event.action",
-        "value": "connected-to",
+        "negate": false,
         "params": {
           "query": "connected-to"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase",
+        "value": "connected-to"
       },
       "query": {
         "match": {
@@ -32,12 +25,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Windows Netcat network activity",
+  "query": "process.name:ncat.exe",
+  "risk_score": 50,
+  "rule_id": "ebdc4b6f-7fdb-4c21-bbd6-59e1ed11024a",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }
