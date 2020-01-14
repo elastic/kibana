@@ -26,6 +26,20 @@ def getFlakyFailures() {
   return retryable.FLAKY_FAILURES
 }
 
+def printFlakyFailures() {
+  catchError {
+    def failures = getFlakyFailures()
+
+    if (failures && failures.size() > 0) {
+      print "This build had the following flaky failures:"
+      failures.each {
+        print "\n${it.label}"
+        buildUtils.printStacktrace(it.exception)
+      }
+    }
+  }
+}
+
 def call(label, Closure closure) {
   if (!retryable.GLOBAL_RETRIES_ENABLED) {
     closure()
@@ -41,7 +55,7 @@ def call(label, Closure closure) {
     }
 
     retryable.CURRENT_GLOBAL_RETRIES++
-    print ex.toString() // TODO replace with unsandboxed hudson.Functions.printThrowable(ex)
+    buildUtils.printStacktrace(ex)
     unstable "${label} failed but is retryable, trying a second time..."
 
     def JOB = env.JOB ? "${env.JOB}-retry" : ""

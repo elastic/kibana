@@ -65,7 +65,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
           }
         }
 
-        // TODO spit out flaky failures to the console
+        retryable.printFlakyFailures()
         kibanaPipeline.sendMail()
       }
     }

@@ -118,6 +118,12 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
     """
+
+    def failures = retryable.getFlakyFailures()
+    if (failures && failures.size() > 0) {
+      def list = failures.collect { message += "  * ${it.label}" }.join("\n")
+      messages << "* Flaky failures:\n${list}"
+    }
   } else {
     messages << """
       ## :broken_heart: Build Failed
