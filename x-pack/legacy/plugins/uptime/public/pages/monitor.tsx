@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { Fragment, useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
-import { BaseLocationOptions } from '../components/functional/ping_list';
 import { useTrackPageview } from '../../../infra/public';
 import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 import { PageHeader } from './page_header';
@@ -31,16 +30,12 @@ export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
-  const [selectedLocation, setSelectedLocation] = useState<EuiComboBoxOptionProps[]>(
-    BaseLocationOptions
-  );
-
-  const selLocationVal = selectedLocation[0].value === 'All' ? null : selectedLocation[0].value;
+  const [selectedLocation, setSelectedLocation] = useState(undefined);
 
   const sharedVariables = {
     dateRangeStart,
     dateRangeEnd,
-    location: selLocationVal,
+    location: selectedLocation,
     monitorId,
   };
 
