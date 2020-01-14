@@ -70,15 +70,19 @@ export const RuleSchema = t.intersection([
     risk_score: t.number,
     rule_id: t.string,
     severity: t.string,
-    type: t.string,
     tags: t.array(t.string),
+    type: t.string,
     to: t.string,
     threats: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
   }),
   t.partial({
+    output_index: t.string,
     saved_id: t.string,
+    timeline_id: t.string,
+    timeline_title: t.string,
+    version: t.number,
   }),
 ]);
 
@@ -86,6 +90,16 @@ export const RulesSchema = t.array(RuleSchema);
 
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
+
+export interface RuleError {
+  rule_id: string;
+  error: { status_code: number; message: string };
+}
+
+export interface RuleResponseBuckets {
+  rules: Rule[];
+  errors: RuleError[];
+}
 
 export interface PaginationOptions {
   page: number;
@@ -129,4 +143,8 @@ export interface DeleteRulesProps {
 
 export interface DuplicateRulesProps {
   rules: Rules;
+}
+
+export interface BasicFetchProps {
+  signal: AbortSignal;
 }

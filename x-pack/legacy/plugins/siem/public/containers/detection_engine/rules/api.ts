@@ -15,9 +15,14 @@ import {
   NewRule,
   Rule,
   FetchRuleProps,
+  BasicFetchProps,
+  RuleError,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_PREPACKAGED_URL,
+} from '../../../../common/constants';
 
 /**
  * Add provided Rule
@@ -118,50 +123,50 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  *
  * @param ids array of Rule ID's (not rule_id) to enable/disable
  * @param enabled to enable or disable
+ *
+ * @throws An error if response is not OK
  */
 export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
-  const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    {
       method: 'PUT',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
         'kbn-xsrf': 'true',
       },
-      body: JSON.stringify({ id, enabled }),
-    })
+      body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+    }
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await throwIfNotOk(response);
+  return response.json();
 };
 
 /**
  * Deletes provided Rule ID's
  *
  * @param ids array of Rule ID's (not rule_id) to delete
+ *
+ * @throws An error if response is not OK
  */
-export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Rule[]> => {
-  // TODO: Don't delete if immutable!
-  const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule | RuleError>> => {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    {
       method: 'DELETE',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
         'kbn-xsrf': 'true',
       },
-    })
+      body: JSON.stringify(ids.map(id => ({ id }))),
+    }
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await throwIfNotOk(response);
+  return response.json();
 };
 
 /**
@@ -198,4 +203,23 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
   return Promise.all(
     responses.map<Promise<Rule>>(response => response.json())
   );
+};
+
+/**
+ * Create Prepackaged Rules
+ *
+ * @param signal AbortSignal for cancelling request
+ */
+export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_PREPACKAGED_URL}`, {
+    method: 'PUT',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-xsrf': 'true',
+    },
+    signal,
+  });
+  await throwIfNotOk(response);
+  return true;
 };
