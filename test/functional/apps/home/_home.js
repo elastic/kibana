@@ -27,7 +27,7 @@ export default function({ getService, getPageObjects }) {
   describe('Kibana takes you home', function describeIndexTests() {
     this.tags('smoke');
 
-    it('is flaky', () => {
+    it.only('is flaky', () => {
       expect(process.env.JOB).to.match(/retry$/);
     });
 

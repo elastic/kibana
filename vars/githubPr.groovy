@@ -99,6 +99,37 @@ def getHistoryText(builds) {
   return "### History\n${list}"
 }
 
+def getTestFailuresMessage() {
+  def failures = testUtils.getFailures()
+  if (!failures) {
+    return ""
+  }
+
+  def messages = []
+
+  failures.take(5).each { failure ->
+    messages << """
+---
+
+### Test Failures
+<details><summary>${failure.fullDisplayName}</summary>
+
+```
+${failure.stdOut}
+```
+</details>
+
+---
+    """
+  }
+
+  if (failures.size() > 3) {
+    messages << "and ${failures.size() - 3} more failures, only showing the first 3."
+  }
+
+  return messages.join("\n")
+}
+
 def getNextCommentMessage(previousCommentInfo = [:]) {
   info = previousCommentInfo ?: [:]
   info.builds = previousCommentInfo.builds ?: []
@@ -122,7 +153,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
     def failures = retryable.getFlakyFailures()
     if (failures && failures.size() > 0) {
       def list = failures.collect { "  * ${it.label}" }.join("\n")
-      message += "* Flaky failures:\n${list}"
+      message += "* Flaky suites:\n${list}"
     }
 
     messages << message
@@ -133,6 +164,8 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       * Commit: ${getCommitHash()}
     """
   }
+
+  messages << getTestFailuresMessage()
 
   if (info.builds && info.builds.size() > 0) {
     messages << getHistoryText(info.builds)
