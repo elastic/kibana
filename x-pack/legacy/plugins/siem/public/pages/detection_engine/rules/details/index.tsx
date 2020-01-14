@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiHealth,
+  EuiTab,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
@@ -52,6 +60,9 @@ import { inputsSelectors } from '../../../../store/inputs';
 import { State } from '../../../../store';
 import { InputsRange } from '../../../../store/inputs/model';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../../store/inputs/actions';
+import { getEmptyTagValue } from '../../../../components/empty_value';
+import { RuleStatusFailedCallOut } from './status_failed_callout';
+import { FailureHistory } from './failure_history';
 import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 
 interface ReduxProps {
@@ -66,6 +77,19 @@ export interface DispatchProps {
     to: number;
   }>;
 }
+
+const ruleDetailTabs = [
+  {
+    id: 'signal',
+    name: detectionI18n.SIGNAL,
+    disabled: false,
+  },
+  {
+    id: 'failure',
+    name: i18n.FAILURE_HISTORY_TAB,
+    disabled: false,
+  },
+];
 
 type RuleDetailsComponentProps = ReduxProps & DispatchProps;
 
@@ -82,6 +106,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
     } = useUserInfo();
     const { ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
+    const [ruleDetailTab, setRuleDetailTab] = useState('signal');
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
       rule,
       detailsView: true,
@@ -150,6 +175,42 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       filters,
     ]);
 
+    const statusColor =
+      rule?.status == null
+        ? 'subdued'
+        : rule?.status === 'succeeded'
+        ? 'success'
+        : rule?.status === 'failed'
+        ? 'danger'
+        : rule?.status === 'executing'
+        ? 'warning'
+        : 'subdued';
+
+    const tabs = useMemo(
+      () =>
+        ruleDetailTabs.map(tab => (
+          <EuiTab
+            onClick={() => setRuleDetailTab(tab.id)}
+            isSelected={tab.id === ruleDetailTab}
+            disabled={tab.disabled}
+            key={tab.name}
+          >
+            {tab.name}
+          </EuiTab>
+        )),
+      [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
+    );
+    const ruleError = useMemo(
+      () =>
+        rule?.status === 'failed' && ruleDetailTab === 'signal' && rule?.last_failure_at != null ? (
+          <RuleStatusFailedCallOut
+            message={rule?.last_failure_message ?? ''}
+            date={rule?.last_failure_at}
+          />
+        ) : null,
+      [rule, ruleDetailTab]
+    );
+
     const updateDateRangeCallback = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
@@ -181,14 +242,43 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                         border
                         subtitle={subTitle}
                         subtitle2={[
-                          lastSignals != null ? (
-                            <>
-                              {detectionI18n.LAST_SIGNAL}
-                              {': '}
-                              {lastSignals}
-                            </>
-                          ) : null,
-                          'Status: Comming Soon',
+                          ...(lastSignals != null
+                            ? [
+                                <>
+                                  {detectionI18n.LAST_SIGNAL}
+                                  {': '}
+                                  {lastSignals}
+                                </>,
+                              ]
+                            : []),
+                          <EuiFlexGroup
+                            gutterSize="xs"
+                            alignItems="center"
+                            justifyContent="flexStart"
+                          >
+                            <EuiFlexItem grow={false}>
+                              {i18n.STATUS}
+                              {':'}
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiHealth color={statusColor}>
+                                {rule?.status ?? getEmptyTagValue()}
+                              </EuiHealth>
+                            </EuiFlexItem>
+                            {rule?.status_date && (
+                              <>
+                                <EuiFlexItem grow={false}>
+                                  <>{i18n.STATUS_AT}</>
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={true}>
+                                  <FormattedDate
+                                    value={rule?.status_date}
+                                    fieldName={i18n.STATUS_DATE}
+                                  />
+                                </EuiFlexItem>
+                              </>
+                            )}
+                          </EuiFlexGroup>,
                         ]}
                         title={title}
                       >
@@ -223,73 +313,75 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </HeaderPage>
-
+                      {ruleError}
+                      {tabs}
                       <EuiSpacer />
+                      {ruleDetailTab === 'signal' && (
+                        <>
+                          <EuiFlexGroup>
+                            <EuiFlexItem component="section" grow={1}>
+                              <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                                {defineRuleData != null && (
+                                  <StepDefineRule
+                                    descriptionDirection="column"
+                                    isReadOnlyView={true}
+                                    isLoading={false}
+                                    defaultValues={defineRuleData}
+                                  />
+                                )}
+                              </StepPanel>
+                            </EuiFlexItem>
 
-                      <EuiFlexGroup>
-                        <EuiFlexItem component="section" grow={1}>
-                          <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                            {defineRuleData != null && (
-                              <StepDefineRule
-                                descriptionDirection="column"
-                                isReadOnlyView={true}
-                                isLoading={false}
-                                defaultValues={defineRuleData}
-                              />
-                            )}
-                          </StepPanel>
-                        </EuiFlexItem>
+                            <EuiFlexItem component="section" grow={2}>
+                              <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
+                                {aboutRuleData != null && (
+                                  <StepAboutRule
+                                    descriptionDirection="row"
+                                    isReadOnlyView={true}
+                                    isLoading={false}
+                                    defaultValues={aboutRuleData}
+                                  />
+                                )}
+                              </StepPanel>
+                            </EuiFlexItem>
 
-                        <EuiFlexItem component="section" grow={2}>
-                          <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
-                            {aboutRuleData != null && (
-                              <StepAboutRule
-                                descriptionDirection="row"
-                                isReadOnlyView={true}
-                                isLoading={false}
-                                defaultValues={aboutRuleData}
-                              />
-                            )}
-                          </StepPanel>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem component="section" grow={1}>
-                          <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                            {scheduleRuleData != null && (
-                              <StepScheduleRule
-                                descriptionDirection="column"
-                                isReadOnlyView={true}
-                                isLoading={false}
-                                defaultValues={scheduleRuleData}
-                              />
-                            )}
-                          </StepPanel>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-
-                      <EuiSpacer />
-                      <SignalsHistogramPanel
-                        filters={signalMergedFilters}
-                        query={query}
-                        from={from}
-                        stackByOptions={signalsHistogramOptions}
-                        to={to}
-                        updateDateRange={updateDateRangeCallback}
-                      />
-
-                      <EuiSpacer />
-
-                      {ruleId != null && (
-                        <SignalsTable
-                          canUserCRUD={canUserCRUD ?? false}
-                          defaultFilters={signalDefaultFilters}
-                          hasIndexWrite={hasIndexWrite ?? false}
-                          from={from}
-                          loading={loading}
-                          signalsIndex={signalIndexName ?? ''}
-                          to={to}
-                        />
+                            <EuiFlexItem component="section" grow={1}>
+                              <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                                {scheduleRuleData != null && (
+                                  <StepScheduleRule
+                                    descriptionDirection="column"
+                                    isReadOnlyView={true}
+                                    isLoading={false}
+                                    defaultValues={scheduleRuleData}
+                                  />
+                                )}
+                              </StepPanel>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer />
+                          <SignalsHistogramPanel
+                            filters={signalMergedFilters}
+                            query={query}
+                            from={from}
+                            stackByOptions={signalsHistogramOptions}
+                            to={to}
+                            updateDateRange={updateDateRangeCallback}
+                          />
+                          <EuiSpacer />
+                          {ruleId != null && (
+                            <SignalsTable
+                              canUserCRUD={canUserCRUD ?? false}
+                              defaultFilters={signalDefaultFilters}
+                              hasIndexWrite={hasIndexWrite ?? false}
+                              from={from}
+                              loading={loading}
+                              signalsIndex={signalIndexName ?? ''}
+                              to={to}
+                            />
+                          )}
+                        </>
                       )}
+                      {ruleDetailTab === 'failure' && <FailureHistory id={rule?.id} />}
                     </WrapperPage>
                   </StickyContainer>
                 )}
