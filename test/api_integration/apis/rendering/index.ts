@@ -16,19 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PluginFunctionalProviderContext } from '../../services';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./ui_settings'));
-    loadTestFile(require.resolve('./top_nav'));
-    loadTestFile(require.resolve('./application_leave_confirm'));
-    loadTestFile(require.resolve('./application_status'));
-    loadTestFile(require.resolve('./rendering'));
+export default function({ getService }) {
+  const supertest = getService('supertest');
+
+  describe('rendering', () => {
+    it('renders "core" application', async () => {
+      await supertest.get('/render/core').expect(200, /app:core/);
+    });
+
+    it('renders "core" application without user data', async () => {
+      await supertest.get('/render/core?excludeUserSettings').expect(200, /app:core/);
+    });
+
+    it('renders "legacy" application', async () => {
+      await supertest.get('/render/legacy').expect(200, /app:legacy/);
+    });
+
+    it('renders "legacy" application wihtout user data', async () => {
+      await supertest.get('/render/legacy?excludeUserSettings').expect(200, /app:legacy/);
+    });
   });
 }
