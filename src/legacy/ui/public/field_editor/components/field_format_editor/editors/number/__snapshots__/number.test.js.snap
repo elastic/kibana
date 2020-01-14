@@ -76,6 +76,14 @@ exports[`NumberFormatEditor should render normally 1`] = `
           "input": 0.52,
           "output": 1.04,
         },
+        Object {
+          "input": 1.23456789e-15,
+          "output": 2.46913578e-15,
+        },
+        Object {
+          "input": 1.99e+22,
+          "output": 3.98e+22,
+        },
       ]
     }
   />

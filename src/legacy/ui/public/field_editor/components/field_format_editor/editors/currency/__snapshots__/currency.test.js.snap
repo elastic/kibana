@@ -1,0 +1,255 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CurrencyFormatEditor should render normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Select currency"
+        id="common.ui.fieldEditor.currency.currencyCodeLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiComboBox
+      compressed={true}
+      data-test-subj="fieldEditor-currency-currencies"
+      fullWidth={true}
+      isClearable={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "label": "United States dollar (USD) US$",
+            "value": "USD",
+          },
+          Object {
+            "label": "Euro (EUR) €",
+            "value": "EUR",
+          },
+          Object {
+            "label": "Japanese yen (JPY) ¥",
+            "value": "JPY",
+          },
+          Object {
+            "label": "Pound sterling (GBP) £",
+            "value": "GBP",
+          },
+          Object {
+            "label": "Australian dollar (AUD) A$",
+            "value": "AUD",
+          },
+          Object {
+            "label": "Canadian dollar (CAD) C$",
+            "value": "CAD",
+          },
+          Object {
+            "label": "Swiss franc (CHF) CHF",
+            "value": "CHF",
+          },
+          Object {
+            "label": "Renminbi (CNY) 元",
+            "value": "CNY",
+          },
+          Object {
+            "label": "Hong Kong dollar (HKD) HK$",
+            "value": "HKD",
+          },
+          Object {
+            "label": "New Zealand dollar (NZD) NZ$",
+            "value": "NZD",
+          },
+          Object {
+            "label": "Swedish krona (SEK) kr",
+            "value": "SEK",
+          },
+          Object {
+            "label": "South Korean won (KRW) ₩",
+            "value": "KRW",
+          },
+          Object {
+            "label": "Singapore dollar (SGD) S$",
+            "value": "SGD",
+          },
+          Object {
+            "label": "Norwegian krone (NOK) kr",
+            "value": "NOK",
+          },
+          Object {
+            "label": "Mexican peso (MXN) $",
+            "value": "MXN",
+          },
+          Object {
+            "label": "Indian rupee (INR) ₹",
+            "value": "INR",
+          },
+          Object {
+            "label": "Russian ruble (RUB) ₽",
+            "value": "RUB",
+          },
+          Object {
+            "label": "South African rand (ZAR) R",
+            "value": "ZAR",
+          },
+          Object {
+            "label": "Turkish lira (TRY) ₺",
+            "value": "TRY",
+          },
+          Object {
+            "label": "Brazilian real (BRL) R$",
+            "value": "BRL",
+          },
+          Object {
+            "label": "New Taiwan dollar (TWD) NT$",
+            "value": "TWD",
+          },
+          Object {
+            "label": "Danish krone (DKK) kr",
+            "value": "DKK",
+          },
+          Object {
+            "label": "Polish zloty (PLN) zł",
+            "value": "PLN",
+          },
+          Object {
+            "label": "Thai baht (THB) ฿",
+            "value": "THB",
+          },
+          Object {
+            "label": "Indonesian rupiah (IDR) Rp",
+            "value": "IDR",
+          },
+          Object {
+            "label": "Hungarian forint (HUF) Ft",
+            "value": "HUF",
+          },
+          Object {
+            "label": "Czech koruna (CZK) Kč",
+            "value": "CZK",
+          },
+          Object {
+            "label": "Israeli new shekel (ILS) ₪",
+            "value": "ILS",
+          },
+          Object {
+            "label": "Chilean peso (CLP) CLP$",
+            "value": "CLP",
+          },
+          Object {
+            "label": "Philippine peso (PHP) ₱",
+            "value": "PHP",
+          },
+          Object {
+            "label": "UAE dirham (AED) د.إ",
+            "value": "AED",
+          },
+          Object {
+            "label": "Colombian peso (COP) COL$",
+            "value": "COP",
+          },
+          Object {
+            "label": "Saudi riyal (SAR) ﷼",
+            "value": "SAR",
+          },
+          Object {
+            "label": "Malaysian ringgit (MYR) RM",
+            "value": "MYR",
+          },
+          Object {
+            "label": "Romanian leu (RON) L",
+            "value": "RON",
+          },
+          Object {
+            "label": "Other currency",
+            "value": null,
+          },
+        ]
+      }
+      selectedOptions={
+        Array [
+          Object {
+            "label": "Other currency",
+            "value": null,
+          },
+        ]
+      }
+      singleSelection={
+        Object {
+          "asPlainText": true,
+        }
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Minimum decimal places"
+        id="common.ui.fieldEditor.defaultNumber.minDecimalPlacesLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldNumber
+      max={20}
+      min={0}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Maximum decimal places"
+        id="common.ui.fieldEditor.defaultNumber.maxDecimalPlacesLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldNumber
+      max={20}
+      min={0}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": 1234,
+          "output": 2468,
+        },
+        Object {
+          "input": 99.9999,
+          "output": 199.9998,
+        },
+        Object {
+          "input": 5150000.0001,
+          "output": 10300000.0002,
+        },
+        Object {
+          "input": 0.00005,
+          "output": 0.0001,
+        },
+      ]
+    }
+  />
+</Fragment>
+`;

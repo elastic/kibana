@@ -68,11 +68,14 @@ export class CurrencyFormatEditor extends DefaultNumberFormatEditor {
           }
         >
           <EuiComboBox
+            data-test-subj="fieldEditor-currency-currencies"
             fullWidth
             compressed
             isClearable={false}
             selectedOptions={
-              this.state.hasOther ? [otherLabel] : [{ value: currencyCode, label: currencyLabel }]
+              this.state.hasOther || !currencyMatch
+                ? [otherLabel]
+                : [{ value: currencyCode, label: currencyLabel }]
             }
             singleSelection={{ asPlainText: true }}
             options={topCurrencies
@@ -100,6 +103,7 @@ export class CurrencyFormatEditor extends DefaultNumberFormatEditor {
             })}
           >
             <EuiFieldText
+              data-test-subj="fieldEditor-currency-otherInput"
               value={currencyCode}
               onChange={e => {
                 this.onChange({ currencyCode: e.target.value ? e.target.value.toUpperCase() : '' });

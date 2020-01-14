@@ -47,6 +47,14 @@ describe('CurrencyFormat', () => {
     expect(formatter.convert(1234.56789)).toBe('$1,234.57');
   });
 
+  test('override default currency', () => {
+    config['format:currency:defaultCurrency'] = 'USD';
+
+    const formatter = new CurrencyFormat({ currencyCode: 'EUR' }, getConfig);
+
+    expect(formatter.convert(1234.56789)).toBe('€1,234.57');
+  });
+
   test('config for decimal places', () => {
     config['format:currency:defaultCurrency'] = 'USD';
     config['format:currency:maxDecimals'] = 0;

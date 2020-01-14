@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PercentFormatEditor should render normally 1`] = `
+exports[`DefaultNumberFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
@@ -49,24 +49,32 @@ exports[`PercentFormatEditor should render normally 1`] = `
     samples={
       Array [
         Object {
-          "input": 0.1,
-          "output": 0.2,
+          "input": 10000,
+          "output": 20000,
         },
         Object {
-          "input": 0.99999,
-          "output": 1.99998,
+          "input": 12.345678,
+          "output": 24.691356,
         },
         Object {
-          "input": 1,
-          "output": 2,
+          "input": -1,
+          "output": -2,
         },
         Object {
-          "input": 100,
-          "output": 200,
+          "input": -999,
+          "output": -1998,
         },
         Object {
-          "input": 1000,
-          "output": 2000,
+          "input": 0.52,
+          "output": 1.04,
+        },
+        Object {
+          "input": 1.23456789e-15,
+          "output": 2.46913578e-15,
+        },
+        Object {
+          "input": 1.99e+22,
+          "output": 3.98e+22,
         },
       ]
     }

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { DefaultNumberFormatEditor } from './number';
+export { DefaultNumberFormatEditor } from './default_number';
