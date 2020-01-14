@@ -14,7 +14,8 @@ jest.mock('../../np_imports/ui/chrome', () => {
   };
 });
 
-jest.mock('../../np_imports/ui/capabilities',
+jest.mock(
+  '../../np_imports/ui/capabilities',
   () => ({
     capabilities: {
       get: () => ({ logs: { show: true } }),

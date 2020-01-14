@@ -8,13 +8,21 @@
  * Kibana Overview
  */
 import React from 'react';
-import uiRoutes from'plugins/monitoring/np_imports/ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';

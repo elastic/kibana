@@ -71,7 +71,7 @@ function mockFilterManager() {
         return jest.fn();
       },
     }),
-    setFilters: (newFilters) => {
+    setFilters: newFilters => {
       filters = newFilters;
       subscriber();
     },
@@ -102,16 +102,16 @@ function setModulesAndMocks(isOnCloud = false) {
   jest.doMock('ui/new_platform', () => ({
     npSetup: {
       plugins: {
-        cloud: isOnCloud ? { cloudId: 'test', isCloudEnabled: true } : { },
+        cloud: isOnCloud ? { cloudId: 'test', isCloudEnabled: true } : {},
         uiActions: {
           registerAction: jest.fn(),
-          attachAction: jest.fn()
-        }
+          attachAction: jest.fn(),
+        },
       },
       core: {
         ...coreMock.createSetup(),
-        notifications: notificationServiceMock.createStartContract()
-      }
+        notifications: notificationServiceMock.createStartContract(),
+      },
     },
     npStart: {
       plugins: {
@@ -121,8 +121,8 @@ function setModulesAndMocks(isOnCloud = false) {
       core: {
         ...coreMock.createStart(),
         overlays: overlayServiceMock.createStartContract(),
-      }
-    }
+      },
+    },
   }));
 
   const setupMode = require('./setup_mode');
@@ -148,8 +148,8 @@ describe('setup_mode', () => {
       }
       expect(error).toEqual(
         'Unable to interact with setup ' +
-        'mode because the angular injector was not previously set. This needs to be ' +
-        'set by calling `initSetupModeState`.'
+          'mode because the angular injector was not previously set. This needs to be ' +
+          'set by calling `initSetupModeState`.'
       );
     });
 

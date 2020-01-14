@@ -6,14 +6,7 @@
 import React, { PureComponent } from 'react';
 import { capitalize } from 'lodash';
 import chrome from '../../np_imports/ui/chrome';
-import {
-  EuiBasicTable,
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
 import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';

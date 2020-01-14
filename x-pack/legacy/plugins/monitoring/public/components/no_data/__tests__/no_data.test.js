@@ -12,7 +12,7 @@ const enabler = {};
 
 jest.mock('../../../np_imports/ui/chrome', () => {
   return {
-    getBasePath: () => ''
+    getBasePath: () => '',
   };
 });
 

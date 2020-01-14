@@ -194,7 +194,12 @@ export class MonitoringViewBaseController {
       return;
     }
     if (this._isDataInitialized === false) {
-      render(<I18nContext><PageLoading /></I18nContext>, renderElement);
+      render(
+        <I18nContext>
+          <PageLoading />
+        </I18nContext>,
+        renderElement
+      );
     } else {
       render(component, renderElement);
     }

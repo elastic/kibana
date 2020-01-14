@@ -10,7 +10,7 @@ import { CcrShard } from './ccr_shard';
 
 jest.mock('../../../np_imports/ui/chrome', () => {
   return {
-    getBasePath: () => ''
+    getBasePath: () => '',
   };
 });
 

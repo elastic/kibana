@@ -9,7 +9,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import uiRoutes from'plugins/monitoring/np_imports/ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';

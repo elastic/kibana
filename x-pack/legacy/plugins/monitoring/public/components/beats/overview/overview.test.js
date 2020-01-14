@@ -16,7 +16,7 @@ jest.mock('../../', () => ({
 
 jest.mock('../../../np_imports/ui/chrome', () => {
   return {
-    getBasePath: () => ''
+    getBasePath: () => '',
   };
 });
 
