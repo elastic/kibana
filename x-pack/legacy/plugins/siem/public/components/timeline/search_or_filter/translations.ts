@@ -74,10 +74,13 @@ export const ALL_EVENT = i18n.translate('xpack.siem.timeline.searchOrFilter.even
   defaultMessage: 'All events',
 });
 
-export const RAW_EVENT = i18n.translate('xpack.siem.timeline.searchOrFilter.eventTypeAllEvent', {
+export const RAW_EVENT = i18n.translate('xpack.siem.timeline.searchOrFilter.eventTypeRawEvent', {
   defaultMessage: 'Raw events',
 });
 
-export const SIGNAL_EVENT = i18n.translate('xpack.siem.timeline.searchOrFilter.eventTypeAllEvent', {
-  defaultMessage: 'Signal events',
-});
+export const SIGNAL_EVENT = i18n.translate(
+  'xpack.siem.timeline.searchOrFilter.eventTypeSignalEvent',
+  {
+    defaultMessage: 'Signal events',
+  }
+);
