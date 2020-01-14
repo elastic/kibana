@@ -116,7 +116,7 @@ test('Should render categorical legend with breaks from default', async () => {
     {
       type: COLOR_MAP_TYPE.CATEGORICAL,
       useCustomColorPalette: false,
-      color: 'palette_0',
+      colorCategory: 'palette_0',
     },
     getCategoricalFieldMeta
   );
@@ -177,7 +177,7 @@ function makeFeatures(foobarPropValues) {
 test('Should pluck the categorical style-meta', async () => {
   const colorStyle = makeProperty({
     type: COLOR_MAP_TYPE.CATEGORICAL,
-    color: 'palette_0',
+    colorCategory: 'palette_0',
     getCategoricalFieldMeta,
   });
 
@@ -196,7 +196,7 @@ test('Should pluck the categorical style-meta', async () => {
 test('Should pluck the categorical style-meta from fieldmeta', async () => {
   const colorStyle = makeProperty({
     type: COLOR_MAP_TYPE.CATEGORICAL,
-    color: 'palette_0',
+    colorCategory: 'palette_0',
     getCategoricalFieldMeta,
   });
 

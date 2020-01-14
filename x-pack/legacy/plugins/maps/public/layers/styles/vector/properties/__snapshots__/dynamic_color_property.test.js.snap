@@ -30,7 +30,7 @@ exports[`Should render categorical legend with breaks from default 1`] = `
             fillColor="none"
             isLinesOnly={false}
             isPointsOnly={true}
-            strokeColor="#1EA593"
+            strokeColor="#5BBAA0"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -54,7 +54,7 @@ exports[`Should render categorical legend with breaks from default 1`] = `
             fillColor="none"
             isLinesOnly={false}
             isPointsOnly={true}
-            strokeColor="#2B70F7"
+            strokeColor="#6092C0"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -82,7 +82,7 @@ exports[`Should render categorical legend with breaks from default 1`] = `
             fillColor="none"
             isLinesOnly={false}
             isPointsOnly={true}
-            strokeColor="#CE0060"
+            strokeColor="#D36086"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
