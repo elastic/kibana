@@ -272,6 +272,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     });
 
     setValue('seriesParams', updatedSeries);
+    updateAxisTitle();
   }, [metrics, firstValueAxesId]);
 
   const visType = useMemo(() => {
@@ -282,8 +283,6 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   useEffect(() => {
     vis.setVisType(visType);
   }, [vis, visType]);
-
-  useEffect(updateAxisTitle, [stateParams.seriesParams]);
 
   return (
     <>
