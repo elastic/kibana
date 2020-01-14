@@ -128,6 +128,7 @@ function euiNavLink(
     icon,
     category,
     order,
+    tooltip,
   } = navLink;
   let href = urlForApp(id);
 
@@ -138,7 +139,7 @@ function euiNavLink(
   return {
     category,
     key: id,
-    label: title,
+    label: tooltip ?? title,
     href, // Use href and onClick to support "open in new tab" and SPA navigation in the same link
     onClick(event: MouseEvent) {
       if (

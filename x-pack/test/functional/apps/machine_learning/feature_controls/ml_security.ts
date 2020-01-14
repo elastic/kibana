@@ -10,7 +10,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'security']);
+  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'security', 'settings']);
 
   describe('security', () => {
     before(async () => {
@@ -94,6 +95,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await PageObjects.security.login('machine_learning_user', 'machine_learning_user-password');
+        await PageObjects.common.navigateToApp('settings');
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
+        await browser.refresh();
       });
 
       after(async () => {
