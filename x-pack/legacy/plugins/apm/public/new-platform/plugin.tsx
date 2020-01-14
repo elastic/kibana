@@ -17,6 +17,7 @@ import {
   Plugin,
   PluginInitializerContext
 } from '../../../../../../src/core/public';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
@@ -92,6 +93,7 @@ export class ApmPlugin
 
   // Take the DOM element as the constructor, so we can mount the app.
   public setup(_core: CoreSetup, plugins: ApmPluginSetupDeps) {
+    plugins.home.featureCatalogue.register(featureCatalogueEntry);
     this.setupPlugins = plugins;
   }
 
