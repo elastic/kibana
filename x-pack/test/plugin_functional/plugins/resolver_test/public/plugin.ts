@@ -26,6 +26,12 @@ export class ResolverTestPlugin
   private resolveEmbeddable!: (
     value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
   ) => void;
+  /**
+   * We register our application during the `setup` phase, but the embeddable
+   * plugin API is not available until the `start` phase. In order to access
+   * the embeddable API from our application, we pass a Promise to the application
+   * which we resolve during the `start` phase.
+   */
   private embeddablePromise: Promise<IEmbeddable | undefined> = new Promise<
     IEmbeddable | undefined
   >(resolve => {
@@ -39,6 +45,9 @@ export class ResolverTestPlugin
       }),
       mount: async (_context, params) => {
         const { renderApp } = await import('./applications/resolver_test');
+        /**
+         * Pass a promise which resolves to the Resolver embeddable.
+         */
         return renderApp(params, this.embeddablePromise);
       },
     });
@@ -47,6 +56,9 @@ export class ResolverTestPlugin
   public start(...args: [unknown, { embeddable: IEmbeddableStart }]) {
     const [, plugins] = args;
     const factory = plugins.embeddable.getEmbeddableFactory('resolver');
+    /**
+     * Provide the Resolver embeddable to the application
+     */
     this.resolveEmbeddable(factory.create({ id: 'test basic render' }));
   }
   public stop() {}
