@@ -99,7 +99,6 @@
       "x-pack",
       "x-pack/plugins/*",
       "x-pack/legacy/plugins/*",
-      "x-pack/plugins/endpoint",
       "examples/*",
       "test/plugin_functional/plugins/*",
       "test/interpreter_functional/plugins/*"
