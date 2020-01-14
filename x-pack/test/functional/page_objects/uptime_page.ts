@@ -55,8 +55,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
 
     public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
       retry.try(async () => {
-        const f = await uptimeService.urlContains(value);
-        expect(f).to.eql(expected);
+        expect(await uptimeService.urlContains(value)).to.eql(expected);
       });
     }
 
