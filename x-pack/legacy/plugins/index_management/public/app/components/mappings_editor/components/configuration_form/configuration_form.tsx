@@ -93,8 +93,16 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const subscription = form.subscribe(updatedConfiguration => {
-      dispatch({ type: 'configuration.update', value: { ...updatedConfiguration, form } });
+    const subscription = form.subscribe(({ data, isValid, validate }) => {
+      dispatch({
+        type: 'configuration.update',
+        value: {
+          data,
+          isValid,
+          validate,
+          submitForm: form.submit,
+        },
+      });
     });
     return subscription.unsubscribe;
   }, [form]);

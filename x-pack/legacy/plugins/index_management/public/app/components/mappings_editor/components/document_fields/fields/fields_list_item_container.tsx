@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 
 import { useMappingsState, useDispatch } from '../../../mappings_state';
 import { NormalizedField } from '../../../types';
@@ -17,6 +17,7 @@ interface Props {
 
 export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Props) => {
   const dispatch = useDispatch();
+  const listElement = useRef<HTMLLIElement | null>(null);
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
     fields: { byId, maxNestedDepth },
@@ -55,6 +56,7 @@ export const FieldsListItemContainer = ({ fieldId, treeDepth, isLastItem }: Prop
 
   return (
     <FieldsListItem
+      ref={listElement}
       field={field}
       allFields={byId}
       treeDepth={treeDepth}

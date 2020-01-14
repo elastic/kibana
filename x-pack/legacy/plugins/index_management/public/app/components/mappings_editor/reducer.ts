@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { OnFormUpdateArg, FormHook } from './shared_imports';
-import { Field, NormalizedFields, NormalizedField, FieldsEditor } from './types';
+import { Field, NormalizedFields, NormalizedField, FieldsEditor, SearchResult } from './types';
 import {
   getFieldMeta,
   getUniqueId,
@@ -14,6 +14,7 @@ import {
   isStateValid,
   normalize,
   updateFieldsPathAfterFieldNameChange,
+  searchFields,
 } from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
 
@@ -52,18 +53,24 @@ interface DocumentFieldsState {
   fieldToAddFieldTo?: string;
 }
 
+interface ConfigurationFormState extends OnFormUpdateArg<MappingsConfiguration> {
+  defaultValue: MappingsConfiguration;
+  submitForm?: FormHook<MappingsConfiguration>['submit'];
+}
+
 export interface State {
   isValid: boolean | undefined;
-  configuration: {
-    defaultValue: MappingsConfiguration;
-    form?: FormHook<MappingsConfiguration>;
-  } & OnFormUpdateArg<MappingsConfiguration>;
+  configuration: ConfigurationFormState;
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
   fieldForm?: OnFormUpdateArg<any>;
   fieldsJsonEditor: {
     format(): MappingsFields;
     isValid: boolean;
+  };
+  search: {
+    term: string;
+    result: SearchResult[];
   };
   templates: {
     defaultValue: {
@@ -75,7 +82,7 @@ export interface State {
 
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
-  | { type: 'configuration.update'; value: Partial<State['configuration']> }
+  | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
   | { type: 'configuration.save' }
   | { type: 'templates.update'; value: Partial<State['templates']> }
   | { type: 'templates.save' }
@@ -88,7 +95,8 @@ export type Action =
   | { type: 'documentField.editField'; value: string }
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
   | { type: 'documentField.changeEditor'; value: FieldsEditor }
-  | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } };
+  | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
+  | { type: 'search:update'; value: string };
 
 export type Dispatch = (action: Action) => void;
 
@@ -263,6 +271,10 @@ export const reducer = (state: State, action: Action): State => {
           fieldToAddFieldTo: undefined,
           fieldToEdit: undefined,
         },
+        search: {
+          term: '',
+          result: [],
+        },
       };
     }
     case 'configuration.update': {
@@ -420,6 +432,13 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         fields: updatedFields,
+        // If we have a search in progress, we reexecute the search to update our result array
+        search: Boolean(state.search.term)
+          ? {
+              ...state.search,
+              result: searchFields(state.search.term, updatedFields.byId),
+            }
+          : state.search,
       };
     }
     case 'field.edit': {
@@ -518,6 +537,13 @@ export const reducer = (state: State, action: Action): State => {
           fieldToEdit: undefined,
           status: 'idle',
         },
+        // If we have a search in progress, we reexecute the search to update our result array
+        search: Boolean(state.search.term)
+          ? {
+              ...state.search,
+              result: searchFields(state.search.term, updatedFields.byId),
+            }
+          : state.search,
       };
     }
     case 'field.toggleExpand': {
@@ -554,6 +580,15 @@ export const reducer = (state: State, action: Action): State => {
       nextState.isValid = isStateValid(nextState);
 
       return nextState;
+    }
+    case 'search:update': {
+      return {
+        ...state,
+        search: {
+          term: action.value,
+          result: searchFields(action.value, state.fields.byId),
+        },
+      };
     }
     default:
       throw new Error(`Action "${action!.type}" not recognized.`);

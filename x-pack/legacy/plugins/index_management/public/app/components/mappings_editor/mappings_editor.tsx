@@ -8,15 +8,9 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
-import {
-  ConfigurationForm,
-  DocumentFieldsHeader,
-  DocumentFields,
-  DocumentFieldsJsonEditor,
-  TemplatesForm,
-} from './components';
+import { ConfigurationForm, DocumentFields, TemplatesForm } from './components';
 import { IndexSettings } from './types';
-import { State, Dispatch } from './reducer';
+import { State } from './reducer';
 import { MappingsState, Props as MappingsStateProps } from './mappings_state';
 import { IndexSettingsProvider } from './index_settings_context';
 
@@ -59,10 +53,10 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     };
   }, [defaultValue]);
 
-  const changeTab = async (tab: TabName, [state, dispatch]: [State, Dispatch]) => {
+  const changeTab = async (tab: TabName, state: State) => {
     if (selectedTab === 'advanced') {
       // When we navigate away we need to submit the form to validate if there are any errors.
-      const { isValid: isConfigurationFormValid } = await state.configuration.form!.submit();
+      const { isValid: isConfigurationFormValid } = await state.configuration.submitForm!();
 
       if (!isConfigurationFormValid) {
         /**
@@ -85,31 +79,18 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
   return (
     <IndexSettingsProvider indexSettings={indexSettings}>
       <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue}>
-        {({ editor: editorType, state, dispatch, getProperties }) => {
-          const editor =
-            editorType === 'json' ? (
-              <DocumentFieldsJsonEditor defaultValue={getProperties()} />
-            ) : (
-              <DocumentFields />
-            );
-
+        {({ state }) => {
           const tabToContentMap = {
-            fields: (
-              <>
-                <DocumentFieldsHeader />
-                <EuiSpacer size="m" />
-                {editor}
-              </>
-            ),
-            advanced: <ConfigurationForm defaultValue={state.configuration.defaultValue} />,
+            fields: <DocumentFields />,
             templates: <TemplatesForm defaultValue={state.templates.defaultValue} />,
+            advanced: <ConfigurationForm defaultValue={state.configuration.defaultValue} />,
           };
 
           return (
             <div className="mappingsEditor">
               <EuiTabs>
                 <EuiTab
-                  onClick={() => changeTab('fields', [state, dispatch])}
+                  onClick={() => changeTab('fields', state)}
                   isSelected={selectedTab === 'fields'}
                 >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
@@ -117,7 +98,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                   })}
                 </EuiTab>
                 <EuiTab
-                  onClick={() => changeTab('templates', [state, dispatch])}
+                  onClick={() => changeTab('templates', state)}
                   isSelected={selectedTab === 'templates'}
                 >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
@@ -125,7 +106,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
                   })}
                 </EuiTab>
                 <EuiTab
-                  onClick={() => changeTab('advanced', [state, dispatch])}
+                  onClick={() => changeTab('advanced', state)}
                   isSelected={selectedTab === 'advanced'}
                 >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {

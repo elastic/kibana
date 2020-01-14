@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { forwardRef } from 'react';
 import classNames from 'classnames';
 import {
   EuiFlexGroup,
@@ -41,21 +41,24 @@ interface Props {
   treeDepth: number;
 }
 
-export const FieldsListItem = React.memo(function FieldListItemComponent({
-  field,
-  allFields,
-  isHighlighted,
-  isDimmed,
-  isCreateFieldFormVisible,
-  areActionButtonsVisible,
-  isLastItem,
-  childFieldsArray,
-  maxNestedDepth,
-  addField,
-  editField,
-  toggleExpand,
-  treeDepth,
-}: Props) {
+function FieldListItemComponent(
+  {
+    field,
+    allFields,
+    isHighlighted,
+    isDimmed,
+    isCreateFieldFormVisible,
+    areActionButtonsVisible,
+    isLastItem,
+    childFieldsArray,
+    maxNestedDepth,
+    addField,
+    editField,
+    toggleExpand,
+    treeDepth,
+  }: Props,
+  ref: React.Ref<HTMLLIElement>
+) {
   const {
     source,
     isMultiField,
@@ -149,12 +152,13 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
         'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
       })}
       data-test-subj="fieldsListItem"
+      ref={ref}
     >
       <div
         style={{ paddingLeft: `${indent}px` }}
         className={classNames('mappingsEditor__fieldsListItem__field', {
           'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
-          'mappingsEditor__fieldsListItem__field--selected': isHighlighted,
+          'mappingsEditor__fieldsListItem__field--highlighted': isHighlighted,
           'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
       >
@@ -248,4 +252,6 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
       {renderCreateField()}
     </li>
   );
-});
+}
+
+export const FieldsListItem = React.memo(forwardRef<HTMLLIElement, Props>(FieldListItemComponent));

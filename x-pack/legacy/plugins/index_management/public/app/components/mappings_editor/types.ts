@@ -221,3 +221,51 @@ export interface ComboBoxOption {
   label: string;
   value?: unknown;
 }
+
+export interface SearchResult {
+  display: JSX.Element;
+  field: NormalizedField;
+}
+
+export interface SearchMetadata {
+  /**
+   * Whether or not the search term match some part of the field path.
+   */
+  matchPath: boolean;
+  /**
+   * If the search term matches the field type we will give it a higher score.
+   */
+  matchType: boolean;
+  /**
+   * If the last word of the search terms matches the field name
+   */
+  matchFieldName: boolean;
+  /**
+   * If the search term matches the beginning of the path we will give it a higher score
+   */
+  matchStartOfPath: boolean;
+  /**
+   * If the last word of the search terms fully matches the field name
+   */
+  fullyMatchFieldName: boolean;
+  /**
+   * If the search term exactly matches the field type
+   */
+  fullyMatchType: boolean;
+  /**
+   * If the search term matches the full field path
+   */
+  fullyMatchPath: boolean;
+  /**
+   * The score of the result that will allow us to sort the list
+   */
+  score: number;
+  /**
+   * The JSX with <strong> tag wrapping the matched string
+   */
+  display: JSX.Element;
+  /**
+   * The field path substring that matches the search
+   */
+  stringMatch: string | null;
+}

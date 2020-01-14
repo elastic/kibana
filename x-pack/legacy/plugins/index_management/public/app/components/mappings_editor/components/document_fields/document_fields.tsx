@@ -3,81 +3,60 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React, { useEffect, useMemo } from 'react';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useMemo, useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
 import { useMappingsState, useDispatch } from '../../mappings_state';
-import { FieldsList, CreateField, EditFieldContainer } from './fields';
+import { deNormalize } from '../../lib';
+import { EditFieldContainer } from './fields';
+import { DocumentFieldsHeader } from './document_fields_header';
+import { DocumentFieldsJsonEditor } from './fields_json_editor';
+import { DocumentFieldsTreeEditor } from './fields_tree_editor';
+import { SearchResult } from './search_fields';
 
-export const DocumentFields = () => {
+export const DocumentFields = React.memo(() => {
+  const { fields, search, documentFields } = useMappingsState();
   const dispatch = useDispatch();
-  const {
-    fields: { byId, rootLevelFields },
-    documentFields: { status, fieldToAddFieldTo, fieldToEdit },
-  } = useMappingsState();
 
-  const getField = (fieldId: string) => byId[fieldId];
-  const fields = useMemo(() => rootLevelFields.map(getField), [rootLevelFields]);
+  const { status, fieldToEdit, editor: editorType } = documentFields;
 
-  const addField = () => {
-    dispatch({ type: 'documentField.createField' });
-  };
-
-  useEffect(() => {
-    /**
-     * If there aren't any fields yet, we display the create field form
-     */
-    if (status === 'idle' && fields.length === 0) {
-      addField();
+  const jsonEditorDefaultValue = useMemo(() => {
+    if (editorType === 'json') {
+      return deNormalize(fields);
     }
-  }, [fields, status]);
+  }, [editorType]);
 
-  const renderCreateField = () => {
-    // The "fieldToAddFieldTo" is undefined when adding to the top level "properties" object.
-    const isCreateFieldFormVisible = status === 'creatingField' && fieldToAddFieldTo === undefined;
-
-    if (!isCreateFieldFormVisible) {
-      return null;
-    }
-
-    return <CreateField isCancelable={fields.length > 0} allFields={byId} isRootLevelField />;
-  };
-
-  const renderAddFieldButton = () => {
-    const isDisabled = status !== 'idle';
-    return (
-      <>
-        <EuiSpacer />
-        <EuiButtonEmpty
-          disabled={isDisabled}
-          onClick={addField}
-          iconType="plusInCircleFilled"
-          data-test-subj="addFieldButton"
-        >
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.addFieldButtonLabel', {
-            defaultMessage: 'Add field',
-          })}
-        </EuiButtonEmpty>
-      </>
+  const editor =
+    editorType === 'json' ? (
+      <DocumentFieldsJsonEditor defaultValue={jsonEditorDefaultValue!} />
+    ) : (
+      <DocumentFieldsTreeEditor />
     );
-  };
 
   const renderEditField = () => {
     if (status !== 'editingField') {
       return null;
     }
-    const field = byId[fieldToEdit!];
-    return <EditFieldContainer field={field} allFields={byId} />;
+    const field = fields.byId[fieldToEdit!];
+    return <EditFieldContainer field={field} allFields={fields.byId} />;
   };
+
+  const onSearchChange = useCallback((value: string) => {
+    dispatch({ type: 'search:update', value });
+  }, []);
+
+  const searchTerm = search.term.trim();
 
   return (
     <>
-      <FieldsList fields={fields} />
-      {renderCreateField()}
-      {renderAddFieldButton()}
+      <DocumentFieldsHeader searchValue={search.term} onSearchChange={onSearchChange} />
+      <EuiSpacer size="m" />
+      {searchTerm !== '' ? (
+        <SearchResult result={search.result} documentFieldsState={documentFields} />
+      ) : (
+        editor
+      )}
       {renderEditField()}
     </>
   );
-};
+});

@@ -15,7 +15,7 @@ import {
   State,
   Dispatch,
 } from './reducer';
-import { Field, FieldsEditor } from './types';
+import { Field } from './types';
 import { normalize, deNormalize } from './lib';
 
 type Mappings = MappingsTemplates &
@@ -42,12 +42,7 @@ const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 export interface Props {
-  children: (params: {
-    state: State;
-    dispatch: Dispatch;
-    editor: FieldsEditor;
-    getProperties(): Mappings['properties'];
-  }) => React.ReactNode;
+  children: (params: { state: State }) => React.ReactNode;
   defaultValue: {
     templates: MappingsTemplates;
     configuration: MappingsConfiguration;
@@ -89,6 +84,10 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     fieldsJsonEditor: {
       format: () => ({}),
       isValid: true,
+    },
+    search: {
+      term: '',
+      result: [],
     },
   };
 
@@ -142,8 +141,11 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       },
       validate: async () => {
         const configurationFormValidator =
-          state.configuration.form !== undefined
-            ? (await state.configuration.form!.submit()).isValid
+          state.configuration.submitForm !== undefined
+            ? new Promise(async resolve => {
+                const { isValid } = await state.configuration.submitForm!();
+                resolve(isValid);
+              })
             : Promise.resolve(true);
 
         const templatesFormValidator =
@@ -186,14 +188,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
 
   return (
     <StateContext.Provider value={state}>
-      <DispatchContext.Provider value={dispatch}>
-        {children({
-          state,
-          dispatch,
-          editor: state.documentFields.editor,
-          getProperties: () => deNormalize(state.fields),
-        })}
-      </DispatchContext.Provider>
+      <DispatchContext.Provider value={dispatch}>{children({ state })}</DispatchContext.Provider>
     </StateContext.Provider>
   );
 });

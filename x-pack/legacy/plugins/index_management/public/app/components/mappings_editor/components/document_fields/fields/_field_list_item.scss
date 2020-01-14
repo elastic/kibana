@@ -11,6 +11,7 @@
 
 .mappingsEditor__fieldsListItem__field {
   border-bottom: $euiBorderThin;
+  height: $euiSizeXL * 2;
   margin-top: $euiSizeXS; // [1]
 }
 
@@ -24,7 +25,7 @@
   }
 }
 
-.mappingsEditor__fieldsListItem__field--selected {
+.mappingsEditor__fieldsListItem__field--highlighted {
   background-color: $euiColorLightestShade;
   &:hover {
     background-color: $euiColorLightestShade;
