@@ -186,6 +186,10 @@ export const AllRules = React.memo<{
                       filter: filterString,
                     },
                   });
+                  dispatch({
+                    type: 'updatePagination',
+                    pagination: { ...pagination, page: 1 },
+                  });
                 }}
               />
             </HeaderSection>
@@ -221,7 +225,7 @@ export const AllRules = React.memo<{
             <EuiBasicTable
               columns={columns}
               isSelectable={!hasNoPermissions ?? false}
-              itemId="rule_id"
+              itemId="id"
               items={tableData}
               onChange={tableOnChangeCallback}
               pagination={{
