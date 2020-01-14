@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bytes Usage should format correctly with only usedBytes 1`] = `
+<span>
+  <div
+    class="euiText euiText--medium"
+  >
+    50.0 B
+  </div>
+</span>
+`;
+
+exports[`Bytes Usage should format correctly with used and max bytes 1`] = `
+<span>
+  <div
+    class="euiText euiText--medium"
+  >
+    50.0 B / 100.0 B
+  </div>
+</span>
+`;
+
+exports[`BytesPercentageUsage should format correctly with used bytes and max bytes 1`] = `
+<span>
+  <div
+    class="euiText euiText--medium"
+  >
+    50.00%
+  </div>
+  <div
+    class="euiText euiText--small"
+  >
+    <div
+      class="euiTextColor euiTextColor--subdued"
+    >
+      50.0 B / 100.0 B
+    </div>
+  </div>
+</span>
+`;
+
+exports[`BytesPercentageUsage should return zero bytes if both parameters are not present 1`] = `
+<div
+  class="euiText euiText--medium"
+>
+  0
+</div>
+`;
