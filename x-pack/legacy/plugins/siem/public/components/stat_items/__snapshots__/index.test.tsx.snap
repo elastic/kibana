@@ -38,18 +38,18 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
         data-test-subj="stat-item"
       >
         <EuiFlexItem
-          className="sc-AykKG krmHWP"
+          className="sc-AykKG dLVTBE"
           data-test-subj="stat-item"
         >
           <div
-            className="euiFlexItem sc-AykKG krmHWP"
+            className="euiFlexItem sc-AykKG dLVTBE"
             data-test-subj="stat-item"
           >
             <InspectButtonContainer
               show={true}
             >
               <div
-                className="sc-AykKF jsEnvB"
+                className="sc-AykKF iWeiGa"
               >
                 <EuiPanel>
                   <div
@@ -166,10 +166,10 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                           key="stat-items-field-hosts"
                         >
                           <EuiFlexItem
-                            className="sc-AykKG krmHWP"
+                            className="sc-AykKG dLVTBE"
                           >
                             <div
-                              className="euiFlexItem sc-AykKG krmHWP"
+                              className="euiFlexItem sc-AykKG dLVTBE"
                             >
                               <EuiFlexGroup
                                 alignItems="center"
@@ -181,22 +181,22 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                 >
                                   <FlexItem>
                                     <EuiFlexItem
-                                      className="sc-AykKG krmHWP"
+                                      className="sc-AykKG dLVTBE"
                                     >
                                       <div
-                                        className="euiFlexItem sc-AykKG krmHWP"
+                                        className="euiFlexItem sc-AykKG dLVTBE"
                                       >
                                         <StatValue>
                                           <EuiTitle
-                                            className="sc-AykKH eSsePF"
+                                            className="sc-AykKH eFqnYS"
                                           >
                                             <p
-                                              className="euiTitle euiTitle--medium sc-AykKH eSsePF"
+                                              className="euiTitle euiTitle--medium sc-AykKH eFqnYS"
                                               data-test-subj="stat-title"
                                             >
                                               <EmptyWrapper>
                                                 <span
-                                                  className="sc-AykKC bGtoQZ"
+                                                  className="sc-AykKC inVqby"
                                                 >
                                                   —
                                                 </span>
@@ -272,18 +272,18 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
         data-test-subj="stat-item"
       >
         <EuiFlexItem
-          className="sc-AykKG krmHWP"
+          className="sc-AykKG dLVTBE"
           data-test-subj="stat-item"
         >
           <div
-            className="euiFlexItem sc-AykKG krmHWP"
+            className="euiFlexItem sc-AykKG dLVTBE"
             data-test-subj="stat-item"
           >
             <InspectButtonContainer
               show={true}
             >
               <div
-                className="sc-AykKF jsEnvB"
+                className="sc-AykKF iWeiGa"
               >
                 <EuiPanel>
                   <div
@@ -400,10 +400,10 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                           key="stat-items-field-hosts"
                         >
                           <EuiFlexItem
-                            className="sc-AykKG krmHWP"
+                            className="sc-AykKG dLVTBE"
                           >
                             <div
-                              className="euiFlexItem sc-AykKG krmHWP"
+                              className="euiFlexItem sc-AykKG dLVTBE"
                             >
                               <EuiFlexGroup
                                 alignItems="center"
@@ -416,22 +416,22 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                   0
                                   <FlexItem>
                                     <EuiFlexItem
-                                      className="sc-AykKG krmHWP"
+                                      className="sc-AykKG dLVTBE"
                                     >
                                       <div
-                                        className="euiFlexItem sc-AykKG krmHWP"
+                                        className="euiFlexItem sc-AykKG dLVTBE"
                                       >
                                         <StatValue>
                                           <EuiTitle
-                                            className="sc-AykKH eSsePF"
+                                            className="sc-AykKH eFqnYS"
                                           >
                                             <p
-                                              className="euiTitle euiTitle--medium sc-AykKH eSsePF"
+                                              className="euiTitle euiTitle--medium sc-AykKH eFqnYS"
                                               data-test-subj="stat-title"
                                             >
                                               <EmptyWrapper>
                                                 <span
-                                                  className="sc-AykKC bGtoQZ"
+                                                  className="sc-AykKC inVqby"
                                                 >
                                                   —
                                                 </span>
@@ -576,18 +576,18 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
       data-test-subj="stat-item"
     >
       <EuiFlexItem
-        className="sc-AykKG krmHWP"
+        className="sc-AykKG dLVTBE"
         data-test-subj="stat-item"
       >
         <div
-          className="euiFlexItem sc-AykKG krmHWP"
+          className="euiFlexItem sc-AykKG dLVTBE"
           data-test-subj="stat-item"
         >
           <InspectButtonContainer
             show={true}
           >
             <div
-              className="sc-AykKF kHKSBZ"
+              className="sc-AykKF bIbcmW"
             >
               <EuiPanel>
                 <div
@@ -704,10 +704,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                         key="stat-items-field-uniqueSourceIps"
                       >
                         <EuiFlexItem
-                          className="sc-AykKG krmHWP"
+                          className="sc-AykKG dLVTBE"
                         >
                           <div
-                            className="euiFlexItem sc-AykKG krmHWP"
+                            className="euiFlexItem sc-AykKG dLVTBE"
                           >
                             <EuiFlexGroup
                               alignItems="center"
@@ -721,11 +721,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   grow={false}
                                 >
                                   <EuiFlexItem
-                                    className="sc-AykKG krmHWP"
+                                    className="sc-AykKG dLVTBE"
                                     grow={false}
                                   >
                                     <div
-                                      className="euiFlexItem euiFlexItem--flexGrowZero sc-AykKG krmHWP"
+                                      className="euiFlexItem euiFlexItem--flexGrowZero sc-AykKG dLVTBE"
                                     >
                                       <EuiIcon
                                         color="#DB1374"
@@ -768,17 +768,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 </FlexItem>
                                 <FlexItem>
                                   <EuiFlexItem
-                                    className="sc-AykKG krmHWP"
+                                    className="sc-AykKG dLVTBE"
                                   >
                                     <div
-                                      className="euiFlexItem sc-AykKG krmHWP"
+                                      className="euiFlexItem sc-AykKG dLVTBE"
                                     >
                                       <StatValue>
                                         <EuiTitle
-                                          className="sc-AykKH eSsePF"
+                                          className="sc-AykKH eFqnYS"
                                         >
                                           <p
-                                            className="euiTitle euiTitle--medium sc-AykKH eSsePF"
+                                            className="euiTitle euiTitle--medium sc-AykKH eFqnYS"
                                             data-test-subj="stat-title"
                                           >
                                             1,714
@@ -799,10 +799,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                         key="stat-items-field-uniqueDestinationIps"
                       >
                         <EuiFlexItem
-                          className="sc-AykKG krmHWP"
+                          className="sc-AykKG dLVTBE"
                         >
                           <div
-                            className="euiFlexItem sc-AykKG krmHWP"
+                            className="euiFlexItem sc-AykKG dLVTBE"
                           >
                             <EuiFlexGroup
                               alignItems="center"
@@ -816,11 +816,11 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                   grow={false}
                                 >
                                   <EuiFlexItem
-                                    className="sc-AykKG krmHWP"
+                                    className="sc-AykKG dLVTBE"
                                     grow={false}
                                   >
                                     <div
-                                      className="euiFlexItem euiFlexItem--flexGrowZero sc-AykKG krmHWP"
+                                      className="euiFlexItem euiFlexItem--flexGrowZero sc-AykKG dLVTBE"
                                     >
                                       <EuiIcon
                                         color="#490092"
@@ -863,17 +863,17 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 </FlexItem>
                                 <FlexItem>
                                   <EuiFlexItem
-                                    className="sc-AykKG krmHWP"
+                                    className="sc-AykKG dLVTBE"
                                   >
                                     <div
-                                      className="euiFlexItem sc-AykKG krmHWP"
+                                      className="euiFlexItem sc-AykKG dLVTBE"
                                     >
                                       <StatValue>
                                         <EuiTitle
-                                          className="sc-AykKH eSsePF"
+                                          className="sc-AykKH eFqnYS"
                                         >
                                           <p
-                                            className="euiTitle euiTitle--medium sc-AykKH eSsePF"
+                                            className="euiTitle euiTitle--medium sc-AykKH eFqnYS"
                                             data-test-subj="stat-title"
                                           >
                                             2,359
@@ -903,10 +903,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                     >
                       <FlexItem>
                         <EuiFlexItem
-                          className="sc-AykKG krmHWP"
+                          className="sc-AykKG dLVTBE"
                         >
                           <div
-                            className="euiFlexItem sc-AykKG krmHWP"
+                            className="euiFlexItem sc-AykKG dLVTBE"
                           >
                             <BarChart
                               barChart={
@@ -962,10 +962,10 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                       </FlexItem>
                       <FlexItem>
                         <EuiFlexItem
-                          className="sc-AykKG krmHWP"
+                          className="sc-AykKG dLVTBE"
                         >
                           <div
-                            className="euiFlexItem sc-AykKG krmHWP"
+                            className="euiFlexItem sc-AykKG dLVTBE"
                           >
                             <AreaChart
                               areaChart={

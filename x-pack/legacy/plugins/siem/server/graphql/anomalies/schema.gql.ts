@@ -9,15 +9,16 @@ import gql from 'graphql-tag';
 export const anomaliesSchema = gql`
   type AnomaliesOverTimeData {
     inspect: Inspect
-    anomaliesOverTime: [MatrixOverTimeHistogramData!]!
+    matrixHistogramData: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 
   extend type Source {
-    AnomaliesOverTime(
+    AnomaliesHistogram(
       timerange: TimerangeInput!
       filterQuery: String
       defaultIndex: [String!]!
+      stackByField: String
     ): AnomaliesOverTimeData!
   }
 `;

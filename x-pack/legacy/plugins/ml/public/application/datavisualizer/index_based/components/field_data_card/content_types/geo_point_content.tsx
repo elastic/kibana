@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -42,33 +42,37 @@ export const GeoPointContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiIcon type="document" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardGeoPoint.documentsCountDescription"
-          defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-          values={{
-            count,
-            docsPercent,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="document" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardGeoPoint.documentsCountDescription"
+            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
+            values={{
+              count,
+              docsPercent,
+            }}
+          />
+        </EuiText>
       </div>
 
       <EuiSpacer size="xs" />
 
       <div>
-        <EuiIcon type="database" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardGeoPoint.distinctCountDescription"
-          defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
-          values={{
-            cardinality,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="database" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardGeoPoint.distinctCountDescription"
+            defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
+            values={{
+              cardinality,
+            }}
+          />
+        </EuiText>
       </div>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
       <ExamplesList examples={examples} />
     </div>
