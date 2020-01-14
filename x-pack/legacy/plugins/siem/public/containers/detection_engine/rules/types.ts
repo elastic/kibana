@@ -175,11 +175,3 @@ export interface ExportRulesProps {
   excludeExportDetails?: boolean;
   signal: AbortSignal;
 }
-
-export interface ExportRulesPayload {
-  objects: ExportRulesPayloadRule[];
-}
-
-interface ExportRulesPayloadRule {
-  rule_id: string;
-}

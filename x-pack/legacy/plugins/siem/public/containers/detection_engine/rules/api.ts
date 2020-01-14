@@ -18,7 +18,6 @@ import {
   BasicFetchProps,
   ImportRulesProps,
   ExportRulesProps,
-  ExportRulesPayload,
   RuleError,
   ImportRulesResponse,
 } from './types';
