@@ -1,8 +1,18 @@
+$icon-size: 20px;
+
 .field-type-icon-container {
-  display: inline !important;
+  display: inline-block !important;
+  vertical-align: middle;
+  border: 1px solid;
+  border-radius: 4px;
+  width: $icon-size;
+  height: $icon-size;
+  line-height: $icon-size;;
+  text-align: center;
 
   .field-type-icon {
-    padding-right: $euiSizeXS / 2;
+    padding: 0;
     display: inline !important;
+    vertical-align: initial;
   }
 }

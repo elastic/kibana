@@ -11,7 +11,7 @@ exports[`FieldIcon renders a blackwhite icon for a string 1`] = `
 exports[`FieldIcon renders a colored icon for a number 1`] = `
 <EuiIcon
   aria-label="test"
-  color="#1EA593"
+  color="#5BBAA0"
   size="s"
   type="number"
 />
@@ -20,7 +20,7 @@ exports[`FieldIcon renders a colored icon for a number 1`] = `
 exports[`FieldIcon renders an icon for an unknown type 1`] = `
 <EuiIcon
   aria-label="test"
-  color="#1EA593"
+  color="#5BBAA0"
   size="s"
   type="questionInCircle"
 />
@@ -30,7 +30,7 @@ exports[`FieldIcon renders with className if provided 1`] = `
 <EuiIcon
   aria-label="test"
   className="myClass"
-  color="#1EA593"
+  color="#5BBAA0"
   size="s"
   type="questionInCircle"
 />

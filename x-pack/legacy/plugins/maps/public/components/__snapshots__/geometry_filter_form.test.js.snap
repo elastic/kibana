@@ -13,8 +13,6 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
   >
     <EuiFieldText
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="My shape"
     />
@@ -92,8 +90,6 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
   >
     <EuiFieldText
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="My shape"
     />
@@ -151,9 +147,6 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
   >
     <EuiSelect
       compressed={true}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -201,8 +194,6 @@ exports[`should render error message 1`] = `
   >
     <EuiFieldText
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="My shape"
     />
@@ -283,8 +274,6 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
   >
     <EuiFieldText
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="My shape"
     />
@@ -342,9 +331,6 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
   >
     <EuiSelect
       compressed={true}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
