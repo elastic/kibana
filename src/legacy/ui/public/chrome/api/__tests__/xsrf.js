@@ -24,15 +24,15 @@ import { initChromeXsrfApi } from '../xsrf';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { version } from '../../../../../../core/server/utils/package_json';
 
-describe('chrome xsrf apis', function () {
+describe('chrome xsrf apis', function() {
   const sandbox = sinon.createSandbox();
 
-  afterEach(function () {
+  afterEach(function() {
     sandbox.restore();
   });
 
-  describe('#getXsrfToken()', function () {
-    it('exposes the token', function () {
+  describe('#getXsrfToken()', function() {
+    it('exposes the token', function() {
       const chrome = {};
       initChromeXsrfApi(chrome, { version });
       expect(chrome.getXsrfToken()).to.be(version);

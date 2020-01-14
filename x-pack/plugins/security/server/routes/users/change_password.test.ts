@@ -17,7 +17,6 @@ import {
 import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
 import { ConfigType } from '../../config';
-import { LegacyAPI } from '../../plugin';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
 import {
@@ -77,7 +76,7 @@ describe('Change password', () => {
       config: { authc: { providers: ['saml'] } } as ConfigType,
       authc,
       authz: authorizationMock.create(),
-      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
+      csp: httpServiceMock.createSetupContract().csp,
     });
 
     const [changePasswordRouteConfig, changePasswordRouteHandler] = router.post.mock.calls[0];

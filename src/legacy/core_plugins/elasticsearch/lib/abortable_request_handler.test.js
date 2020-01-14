@@ -27,8 +27,8 @@ describe('abortableRequestHandler', () => {
     const eventHandlers = new Map();
     const mockRequest = {
       events: {
-        once: jest.fn((key, fn) => eventHandlers.set(key, fn))
-      }
+        once: jest.fn((key, fn) => eventHandlers.set(key, fn)),
+      },
     };
 
     const handler = jest.fn();

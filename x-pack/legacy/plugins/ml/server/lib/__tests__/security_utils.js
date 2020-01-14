@@ -4,28 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
-import {
-  isSecurityDisabled
-} from '../security_utils';
+import { isSecurityDisabled } from '../security_utils';
 
 describe('ML - security utils', () => {
-
   function mockXpackMainPluginFactory(isAvailable = true, isEnabled = true) {
     return {
       info: {
         isAvailable: () => isAvailable,
         feature: () => ({
-          isEnabled: () => isEnabled
-        })
-      }
+          isEnabled: () => isEnabled,
+        }),
+      },
     };
   }
 
   describe('isSecurityDisabled', () => {
-
     it('returns not disabled for given mock server object #1', () => {
       expect(isSecurityDisabled(mockXpackMainPluginFactory())).to.be(false);
     });
@@ -37,7 +31,5 @@ describe('ML - security utils', () => {
     it('returns disabled for given mock server object #3', () => {
       expect(isSecurityDisabled(mockXpackMainPluginFactory(true, false))).to.be(true);
     });
-
   });
-
 });

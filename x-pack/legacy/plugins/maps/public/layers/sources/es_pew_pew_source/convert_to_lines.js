@@ -17,7 +17,6 @@ function parsePointFromKey(key) {
 }
 
 export function convertToLines(esResponse) {
-
   const lineFeatures = [];
 
   const destBuckets = _.get(esResponse, 'aggregations.destSplit.buckets', []);
@@ -26,11 +25,7 @@ export function convertToLines(esResponse) {
     const dest = parsePointFromKey(destBucket.key);
     const sourceBuckets = _.get(destBucket, 'sourceGrid.buckets', []);
     for (let j = 0; j < sourceBuckets.length; j++) {
-      const {
-        key,
-        sourceCentroid,
-        ...rest
-      } = sourceBuckets[j];
+      const { key, sourceCentroid, ...rest } = sourceBuckets[j];
 
       // flatten metrics
       Object.keys(rest).forEach(key => {
@@ -43,11 +38,11 @@ export function convertToLines(esResponse) {
         type: 'Feature',
         geometry: {
           type: 'LineString',
-          coordinates: [[sourceCentroid.location.lon, sourceCentroid.location.lat], dest]
+          coordinates: [[sourceCentroid.location.lon, sourceCentroid.location.lat], dest],
         },
         id: `${dest.join()},${key}`,
         properties: {
-          ...rest
+          ...rest,
         },
       });
     }
@@ -56,7 +51,7 @@ export function convertToLines(esResponse) {
   return {
     featureCollection: {
       type: 'FeatureCollection',
-      features: lineFeatures
-    }
+      features: lineFeatures,
+    },
   };
 }

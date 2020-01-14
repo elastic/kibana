@@ -59,6 +59,8 @@ describe('buildRule', () => {
       to: 'now',
       type: 'query',
       updated_by: 'elastic',
+      updated_at: rule.updated_at,
+      created_at: rule.created_at,
       filters: [
         {
           query: 'host.name: Rebecca',
@@ -70,6 +72,7 @@ describe('buildRule', () => {
           query: 'host.name: Braden',
         },
       ],
+      version: 1,
     };
     expect(rule).toEqual(expected);
   });
@@ -110,6 +113,9 @@ describe('buildRule', () => {
       to: 'now',
       type: 'query',
       updated_by: 'elastic',
+      version: 1,
+      updated_at: rule.updated_at,
+      created_at: rule.created_at,
     };
     expect(rule).toEqual(expected);
   });
@@ -150,6 +156,9 @@ describe('buildRule', () => {
       to: 'now',
       type: 'query',
       updated_by: 'elastic',
+      version: 1,
+      updated_at: rule.updated_at,
+      created_at: rule.created_at,
     };
     expect(rule).toEqual(expected);
   });

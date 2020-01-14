@@ -44,12 +44,12 @@ This page is deleted. Please see
 [role="exclude",id="ml-jobs"]
 == Creating {anomaly-jobs}
 
-This page has moved. Please see {stack-ov}/create-jobs.html[Creating {anomaly-jobs}].
+This page has moved. Please see {ml-docs}/create-jobs.html[Creating {anomaly-jobs}].
 
 [role="exclude",id="job-tips"]
 == Machine learning job tips
 
-This page has moved. Please see {stack-ov}/create-jobs.html#job-tips[Machine learning job tips].
+This page has moved. Please see {ml-docs}/create-jobs.html#job-tips[Machine learning job tips].
 
 [role="exclude",id="extend"]
 == Extend your use case

@@ -46,12 +46,14 @@ export class ExecuteDetails {
   }
 
   get upstreamJson() {
-    const triggeredTime = this.triggeredTimeValue && this.triggeredTimeValue !== ''
-      ? getDateMathFormat(this.triggeredTimeUnit, this.triggeredTimeValue)
-      : undefined;
-    const scheduledTime = this.scheduledTimeValue && this.scheduledTimeValue !== ''
-      ?  getDateMathFormat(this.scheduledTimeUnit, this.scheduledTimeValue)
-      : undefined;
+    const triggeredTime =
+      this.triggeredTimeValue && this.triggeredTimeValue !== ''
+        ? getDateMathFormat(this.triggeredTimeUnit, this.triggeredTimeValue)
+        : undefined;
+    const scheduledTime =
+      this.scheduledTimeValue && this.scheduledTimeValue !== ''
+        ? getDateMathFormat(this.scheduledTimeUnit, this.scheduledTimeValue)
+        : undefined;
 
     return {
       triggerData: {
@@ -59,7 +61,8 @@ export class ExecuteDetails {
         scheduledTime,
       },
       ignoreCondition: this.ignoreCondition,
-      alternativeInput: this.alternativeInput !== '' ? JSON.parse(this.alternativeInput) : undefined,
+      alternativeInput:
+        this.alternativeInput !== '' ? JSON.parse(this.alternativeInput) : undefined,
       actionModes: this.actionModes,
       recordExecution: this.recordExecution,
     };

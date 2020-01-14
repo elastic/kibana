@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export { EditDescriptionPopover } from './edit_description_popover';

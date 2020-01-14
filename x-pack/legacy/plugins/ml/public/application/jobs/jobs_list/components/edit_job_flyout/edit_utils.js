@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { difference } from 'lodash';
 import chrome from 'ui/chrome';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
@@ -12,9 +11,7 @@ import { mlJobService } from '../../../../services/job_service';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
 
 export function saveJob(job, newJobData, finish) {
-
   return new Promise((resolve, reject) => {
-
     const jobData = {
       ...extractDescription(job, newJobData),
       ...extractGroups(job, newJobData),
@@ -27,7 +24,7 @@ export function saveJob(job, newJobData, finish) {
     };
 
     if (jobData.custom_settings !== undefined) {
-      jobData.custom_settings =  processCustomSettings(jobData, datafeedData);
+      jobData.custom_settings = processCustomSettings(jobData, datafeedData);
     }
 
     const saveDatafeedWrapper = () => {
@@ -35,22 +32,23 @@ export function saveJob(job, newJobData, finish) {
         .then(() => {
           resolve();
         })
-        .catch((error) => {
+        .catch(error => {
           reject(error);
         });
     };
 
     // if anything has changed, post the changes
     if (Object.keys(jobData).length) {
-      mlJobService.updateJob(job.job_id, jobData)
-        .then((resp) => {
+      mlJobService
+        .updateJob(job.job_id, jobData)
+        .then(resp => {
           if (resp.success) {
             saveDatafeedWrapper();
           } else {
             reject(resp);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           reject(error);
         });
     } else {
@@ -63,14 +61,13 @@ function saveDatafeed(datafeedData, job) {
   return new Promise((resolve, reject) => {
     if (Object.keys(datafeedData).length) {
       const datafeedId = job.datafeed_config.datafeed_id;
-      mlJobService.updateDatafeed(datafeedId, datafeedData)
-        .then((resp) => {
-          if (resp.success) {
-            resolve();
-          } else {
-            reject(resp);
-          }
-        });
+      mlJobService.updateDatafeed(datafeedId, datafeedData).then(resp => {
+        if (resp.success) {
+          resolve();
+        } else {
+          reject(resp);
+        }
+      });
     } else {
       resolve();
     }
@@ -80,14 +77,14 @@ function saveDatafeed(datafeedData, job) {
 export function loadSavedDashboards(maxNumber) {
   // Loads the list of saved dashboards, as used in editing custom URLs.
   return new Promise((resolve, reject) => {
-
     const savedObjectsClient = chrome.getSavedObjectsClient();
-    savedObjectsClient.find({
-      type: 'dashboard',
-      fields: ['title'],
-      perPage: maxNumber
-    })
-      .then((resp)=> {
+    savedObjectsClient
+      .find({
+        type: 'dashboard',
+        fields: ['title'],
+        perPage: maxNumber,
+      })
+      .then(resp => {
         const savedObjects = resp.savedObjects;
         if (savedObjects !== undefined) {
           const dashboards = savedObjects.map(savedObj => {
@@ -101,7 +98,7 @@ export function loadSavedDashboards(maxNumber) {
           resolve(dashboards);
         }
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -112,14 +109,14 @@ export function loadIndexPatterns(maxNumber) {
   // TODO - amend loadIndexPatterns in index_utils.js to do the request,
   // without needing an Angular Provider.
   return new Promise((resolve, reject) => {
-
     const savedObjectsClient = chrome.getSavedObjectsClient();
-    savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: maxNumber
-    })
-      .then((resp)=> {
+    savedObjectsClient
+      .find({
+        type: 'index-pattern',
+        fields: ['title'],
+        perPage: maxNumber,
+      })
+      .then(resp => {
         const savedObjects = resp.savedObjects;
         if (savedObjects !== undefined) {
           const indexPatterns = savedObjects.map(savedObj => {
@@ -133,7 +130,7 @@ export function loadIndexPatterns(maxNumber) {
           resolve(indexPatterns);
         }
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -151,7 +148,7 @@ function extractGroups(job, newJobData) {
   const groups = newJobData.groups;
   if (newJobData.groups !== undefined) {
     const diffCount = difference(job.groups, groups).length + difference(groups, job.groups).length;
-    return (diffCount === 0) ? {} : { groups };
+    return diffCount === 0 ? {} : { groups };
   }
   return {};
 }
@@ -171,7 +168,7 @@ function extractMML(job, newJobData) {
     // has the data changed, did analysis_limits never exist for this job
     if (mml !== job.analysis_limits.model_memory_limit) {
       mmlData.analysis_limits = {
-        model_memory_limit: mml
+        model_memory_limit: mml,
       };
     }
   }
@@ -180,16 +177,19 @@ function extractMML(job, newJobData) {
 
 function extractDetectorDescriptions(job, newJobData) {
   const detectors = [];
-  const descriptions = newJobData.detectorDescriptions.map((d, i) => ({ detector_index: i, description: d }));
+  const descriptions = newJobData.detectorDescriptions.map((d, i) => ({
+    detector_index: i,
+    description: d,
+  }));
 
   const originalDetectors = job.analysis_config.detectors;
-  originalDetectors.forEach((d) => {
+  originalDetectors.forEach(d => {
     if (descriptions[d.detector_index].description !== d.detector_description) {
       detectors.push(descriptions[d.detector_index]);
     }
   });
 
-  return (detectors.length) ? { detectors } : {};
+  return detectors.length ? { detectors } : {};
 }
 
 function extractCustomSettings(job, newJobData) {
@@ -216,14 +216,16 @@ function extractDatafeed(job, newDatafeedData) {
       datafeedData.query_delay = newDatafeedData.datafeedQueryDelay;
     }
 
-    if (job.datafeed_config.frequency !== newDatafeedData.datafeedFrequency && newDatafeedData.datafeedFrequency !== '') {
+    if (
+      job.datafeed_config.frequency !== newDatafeedData.datafeedFrequency &&
+      newDatafeedData.datafeedFrequency !== ''
+    ) {
       datafeedData.frequency = newDatafeedData.datafeedFrequency;
     }
 
     if (job.datafeed_config.scroll_size !== newDatafeedData.datafeedScrollSize) {
       datafeedData.scroll_size = newDatafeedData.datafeedScrollSize;
     }
-
   }
 
   return datafeedData;
@@ -236,7 +238,8 @@ function processCustomSettings(jobData, datafeedData) {
   if (jobData.custom_settings !== undefined) {
     customSettings = { ...jobData.custom_settings };
 
-    if (jobData.custom_settings.created_by !== undefined &&
+    if (
+      jobData.custom_settings.created_by !== undefined &&
       (jobData.detectors !== undefined || Object.keys(datafeedData).length)
     ) {
       processCreatedBy(customSettings);

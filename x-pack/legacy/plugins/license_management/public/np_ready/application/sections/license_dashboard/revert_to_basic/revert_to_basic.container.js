@@ -11,7 +11,7 @@ import {
   startBasicLicenseNeedsAcknowledgement,
   getLicenseType,
   shouldShowRevertToBasicLicense,
-  getStartBasicMessages
+  getStartBasicMessages,
 } from '../../../store/reducers/license_management';
 import { startBasicLicense, cancelStartBasicLicense } from '../../../store/actions/start_basic';
 
@@ -20,15 +20,13 @@ const mapStateToProps = state => {
     shouldShowRevertToBasicLicense: shouldShowRevertToBasicLicense(state),
     licenseType: getLicenseType(state),
     needsAcknowledgement: startBasicLicenseNeedsAcknowledgement(state),
-    messages: getStartBasicMessages(state)
+    messages: getStartBasicMessages(state),
   };
 };
 
 const mapDispatchToProps = {
   startBasicLicense,
-  cancelStartBasicLicense
+  cancelStartBasicLicense,
 };
 
-export const RevertToBasic = connect(mapStateToProps, mapDispatchToProps)(
-  PresentationComponent
-);
+export const RevertToBasic = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);

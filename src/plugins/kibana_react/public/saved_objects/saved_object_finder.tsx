@@ -44,7 +44,7 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectAttributes } from '../../../../core/server';
+import { SavedObjectAttributes } from '../../../../core/public';
 import { SimpleSavedObject, CoreStart } from '../../../../core/public';
 import { useKibana } from '../context';
 

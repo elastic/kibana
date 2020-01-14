@@ -31,7 +31,7 @@ export class WatchHistoryItem {
       watchId: this.watchId,
       details: this.includeDetails ? this.details : null,
       startTime: this.startTime.toISOString(),
-      watchStatus: this.watchStatus.downstreamJson
+      watchStatus: this.watchStatus.downstreamJson,
     };
   }
 
@@ -42,29 +42,35 @@ export class WatchHistoryItem {
         i18n.translate('xpack.watcher.models.watchHistoryItem.idPropertyMissingBadRequestMessage', {
           defaultMessage: 'JSON argument must contain an {id} property',
           values: {
-            id: 'id'
-          }
-        }),
+            id: 'id',
+          },
+        })
       );
     }
     if (!json.watchId) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain a {watchId} property',
-          values: {
-            watchId: 'watchId'
+        i18n.translate(
+          'xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain a {watchId} property',
+            values: {
+              watchId: 'watchId',
+            },
           }
-        }),
+        )
       );
     }
     if (!json.watchHistoryItemJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchHistoryItem.watchHistoryItemJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain a {watchHistoryItemJson} property',
-          values: {
-            watchHistoryItemJson: 'watchHistoryItemJson'
+        i18n.translate(
+          'xpack.watcher.models.watchHistoryItem.watchHistoryItemJsonPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain a {watchHistoryItemJson} property',
+            values: {
+              watchHistoryItemJson: 'watchHistoryItemJson',
+            },
           }
-        }),
+        )
       );
     }
 

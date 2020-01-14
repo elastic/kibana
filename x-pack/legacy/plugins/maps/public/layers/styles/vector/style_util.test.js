@@ -24,7 +24,7 @@ describe('isOnlySingleFeatureType', () => {
     const supportedFeatures = [
       VECTOR_SHAPE_TYPES.POINT,
       VECTOR_SHAPE_TYPES.LINE,
-      VECTOR_SHAPE_TYPES.POLYGON
+      VECTOR_SHAPE_TYPES.POLYGON,
     ];
 
     test('Is only single feature type when data only has target feature type', () => {
@@ -33,7 +33,9 @@ describe('isOnlySingleFeatureType', () => {
         [VECTOR_SHAPE_TYPES.LINE]: false,
         [VECTOR_SHAPE_TYPES.POLYGON]: false,
       };
-      expect(isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POINT, supportedFeatures, hasFeatureType)).toBe(true);
+      expect(
+        isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POINT, supportedFeatures, hasFeatureType)
+      ).toBe(true);
     });
 
     test('Is not single feature type when data has multiple feature types', () => {
@@ -42,7 +44,9 @@ describe('isOnlySingleFeatureType', () => {
         [VECTOR_SHAPE_TYPES.LINE]: true,
         [VECTOR_SHAPE_TYPES.POLYGON]: true,
       };
-      expect(isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.LINE, supportedFeatures, hasFeatureType)).toBe(false);
+      expect(
+        isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.LINE, supportedFeatures, hasFeatureType)
+      ).toBe(false);
     });
 
     test('Is not single feature type when data does not have target feature types', () => {
@@ -51,7 +55,9 @@ describe('isOnlySingleFeatureType', () => {
         [VECTOR_SHAPE_TYPES.LINE]: true,
         [VECTOR_SHAPE_TYPES.POLYGON]: false,
       };
-      expect(isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POINT, supportedFeatures, hasFeatureType)).toBe(false);
+      expect(
+        isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POINT, supportedFeatures, hasFeatureType)
+      ).toBe(false);
     });
   });
 });

@@ -20,8 +20,10 @@
 const _ = require('lodash');
 import { UrlPatternMatcher } from '../autocomplete/components';
 import { UrlParams } from '../autocomplete/url_params';
-import  { globalsOnlyAutocompleteComponents, compileBodyDescription } from '../autocomplete/body_completer';
-
+import {
+  globalsOnlyAutocompleteComponents,
+  compileBodyDescription,
+} from '../autocomplete/body_completer';
 
 /**
  *
@@ -39,58 +41,65 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
   this.name = '';
 }
 
-(function (cls) {
-  cls.addGlobalAutocompleteRules = function (parentNode, rules) {
+(function(cls) {
+  cls.addGlobalAutocompleteRules = function(parentNode, rules) {
     this.globalRules[parentNode] = compileBodyDescription(
-      'GLOBAL.' + parentNode, rules, this.globalBodyComponentFactories);
+      'GLOBAL.' + parentNode,
+      rules,
+      this.globalBodyComponentFactories
+    );
   };
 
-  cls.getGlobalAutocompleteComponents = function (term, throwOnMissing) {
+  cls.getGlobalAutocompleteComponents = function(term, throwOnMissing) {
     const result = this.globalRules[term];
     if (_.isUndefined(result) && (throwOnMissing || _.isUndefined(throwOnMissing))) {
-      throw new Error('failed to resolve global components for  [\'' + term + '\']');
+      throw new Error("failed to resolve global components for  ['" + term + "']");
     }
     return result;
   };
 
-  cls.addEndpointDescription = function (endpoint, description) {
-
+  cls.addEndpointDescription = function(endpoint, description) {
     const copiedDescription = {};
     _.extend(copiedDescription, description || {});
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],
-      methods: ['GET']
+      methods: ['GET'],
     });
-    _.each(copiedDescription.patterns, function (p) {
-      this.urlPatternMatcher.addEndpoint(p, copiedDescription);
-    }, this);
+    _.each(
+      copiedDescription.patterns,
+      function(p) {
+        this.urlPatternMatcher.addEndpoint(p, copiedDescription);
+      },
+      this
+    );
 
     copiedDescription.paramsAutocomplete = new UrlParams(copiedDescription.url_params);
     copiedDescription.bodyAutocompleteRootComponents = compileBodyDescription(
-      copiedDescription.id, copiedDescription.data_autocomplete_rules, this.globalBodyComponentFactories);
+      copiedDescription.id,
+      copiedDescription.data_autocomplete_rules,
+      this.globalBodyComponentFactories
+    );
 
     this.endpoints[endpoint] = copiedDescription;
   };
 
-  cls.getEndpointDescriptionByEndpoint = function (endpoint) {
+  cls.getEndpointDescriptionByEndpoint = function(endpoint) {
     return this.endpoints[endpoint];
   };
 
-
-  cls.getTopLevelUrlCompleteComponents = function (method) {
+  cls.getTopLevelUrlCompleteComponents = function(method) {
     return this.urlPatternMatcher.getTopLevelComponents(method);
   };
 
-  cls.getUnmatchedEndpointComponents = function () {
+  cls.getUnmatchedEndpointComponents = function() {
     return globalsOnlyAutocompleteComponents();
   };
 
-  cls.clear = function () {
+  cls.clear = function() {
     this.endpoints = {};
     this.globalRules = {};
   };
-}(Api.prototype));
-
+})(Api.prototype);
 
 export default Api;

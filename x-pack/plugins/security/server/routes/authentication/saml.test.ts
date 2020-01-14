@@ -9,7 +9,6 @@ import { Authentication, AuthenticationResult, SAMLLoginStep } from '../../authe
 import { defineSAMLRoutes } from './saml';
 import { ConfigType } from '../../config';
 import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
-import { LegacyAPI } from '../../plugin';
 
 import {
   elasticsearchServiceMock,
@@ -36,7 +35,7 @@ describe('SAML authentication routes', () => {
       config: { authc: { providers: ['saml'] } } as ConfigType,
       authc,
       authz: authorizationMock.create(),
-      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
+      csp: httpServiceMock.createSetupContract().csp,
     });
   });
 

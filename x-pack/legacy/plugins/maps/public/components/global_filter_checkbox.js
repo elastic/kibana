@@ -13,9 +13,7 @@ export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQu
   };
 
   return (
-    <EuiFormRow
-      display="columnCompressedSwitch"
-    >
+    <EuiFormRow display="columnCompressedSwitch">
       <EuiSwitch
         label={label}
         checked={applyGlobalQuery}

@@ -14,29 +14,30 @@ import { CLOUD_METADATA_SERVICES } from '../../common/constants';
  * {@code GCPCloudService} will check and load the service metadata for an Google Cloud Platform VM if it is available.
  */
 class GCPCloudService extends CloudService {
-
-  constructor(options = { }) {
+  constructor(options = {}) {
     super('gcp', options);
   }
 
   _checkIfService(request) {
     // we need to call GCP individually for each field
-    const fields = [ 'id', 'machine-type', 'zone' ];
+    const fields = ['id', 'machine-type', 'zone'];
 
     const create = this._createRequestForField;
     const allRequests = fields.map(field => promisify(request)(create(field)));
-    return Promise.all(allRequests)
-    /*
+    return (
+      Promise.all(allRequests)
+        /*
       Note: there is no fallback option for GCP;
       responses are arrays containing [fullResponse, body];
       because GCP returns plaintext, we have no way of validating without using the response code
      */
-      .then(responses => {
-        return responses.map(response => {
-          return this._extractBody(response, response.body);
-        });
-      })
-      .then(([id, machineType, zone]) => this._combineResponses(id, machineType, zone));
+        .then(responses => {
+          return responses.map(response => {
+            return this._extractBody(response, response.body);
+          });
+        })
+        .then(([id, machineType, zone]) => this._combineResponses(id, machineType, zone))
+    );
   }
 
   _createRequestForField(field) {
@@ -45,10 +46,10 @@ class GCPCloudService extends CloudService {
       uri: `${CLOUD_METADATA_SERVICES.GCP_URL_PREFIX}/${field}`,
       headers: {
         // GCP requires this header
-        'Metadata-Flavor': 'Google'
+        'Metadata-Flavor': 'Google',
       },
       // GCP does _not_ return JSON
-      json: false
+      json: false,
     };
   }
 
@@ -60,7 +61,12 @@ class GCPCloudService extends CloudService {
    * @return {Object} {@code body} (probably actually a String) if the response came from GCP. Otherwise {@code null}.
    */
   _extractBody(response, body) {
-    if (response && response.statusCode === 200 && response.headers && response.headers['metadata-flavor'] === 'Google') {
+    if (
+      response &&
+      response.statusCode === 200 &&
+      response.headers &&
+      response.headers['metadata-flavor'] === 'Google'
+    ) {
       return body;
     }
 
@@ -119,7 +125,6 @@ class GCPCloudService extends CloudService {
 
     return undefined;
   }
-
 }
 
 /**

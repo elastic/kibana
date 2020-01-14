@@ -20,7 +20,7 @@ export class IndexAction extends BaseAction {
   get downstreamJson() {
     const result = super.downstreamJson;
     Object.assign(result, {
-      index: this.index
+      index: this.index,
     });
 
     return result;
@@ -32,7 +32,7 @@ export class IndexAction extends BaseAction {
     const { errors } = this.validateJson(json);
 
     Object.assign(props, {
-      index: json.index
+      index: json.index,
     });
 
     const action = new IndexAction(props, errors);
@@ -55,7 +55,7 @@ export class IndexAction extends BaseAction {
     const { errors } = this.validateJson(json.actionJson);
 
     Object.assign(props, {
-      index: json.actionJson.index.index
+      index: json.actionJson.index.index,
     });
 
     const action = new IndexAction(props, errors);
@@ -68,28 +68,33 @@ export class IndexAction extends BaseAction {
     if (!json.index) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.indexAction.actionJsonIndexPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonIndex} property',
-          values: {
-            actionJsonIndex: 'actionJson.index'
+        message: i18n.translate(
+          'xpack.watcher.models.indexAction.actionJsonIndexPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonIndex} property',
+            values: {
+              actionJsonIndex: 'actionJson.index',
+            },
           }
-        }),
+        ),
       });
     }
 
     if (json.index && !json.index.index) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonIndexNamePropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonIndexName} property',
-          values: {
-            actionJsonIndexName: 'actionJson.index.index'
+        message: i18n.translate(
+          'xpack.watcher.models.loggingAction.actionJsonIndexNamePropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonIndexName} property',
+            values: {
+              actionJsonIndexName: 'actionJson.index.index',
+            },
           }
-        }),
+        ),
       });
     }
 
     return { errors: errors.length ? errors : null };
   }
-
 }

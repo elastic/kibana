@@ -115,7 +115,7 @@ export class Graph {
 
     // At this point, we know there are input stage vertices. Further, they
     // must be all the start vertices of the graph
-    this.startVertices.forEach(v => v.pipelineStage = 'input');
+    this.startVertices.forEach(v => (v.pipelineStage = 'input'));
   }
 
   /**
@@ -126,7 +126,7 @@ export class Graph {
 
     // If there is only one end vertex in this pipeline graph and it is the queue
     // vertex, then there are no output stage vertices so we are done here
-    if ((this.endVertices.length === 1) && (this.endVertices[0] instanceof QueueVertex)) {
+    if (this.endVertices.length === 1 && this.endVertices[0] instanceof QueueVertex) {
       return;
     }
 
@@ -150,18 +150,24 @@ export class Graph {
       const currentVertex = pending.shift();
       const parents = currentVertex.incomingVertices;
 
-      const isParentFilterPluginVertex = parents.some(p => p instanceof PluginVertex && p.pluginType === 'filter');
+      const isParentFilterPluginVertex = parents.some(
+        p => p instanceof PluginVertex && p.pluginType === 'filter'
+      );
       const isParentQueueVertex = parents.some(p => p instanceof QueueVertex);
       const isParentNothing = parents.length === 0;
 
-      const isParentOutputStageVertex = !(isParentFilterPluginVertex || isParentQueueVertex || isParentNothing);
+      const isParentOutputStageVertex = !(
+        isParentFilterPluginVertex ||
+        isParentQueueVertex ||
+        isParentNothing
+      );
 
       if (isParentOutputStageVertex) {
         pending.push(...parents);
       } else {
         currentVertex.pipelineStage = 'output';
         const descendantVertices = currentVertex.descendants().vertices;
-        descendantVertices.forEach(v => v.pipelineStage = 'output');
+        descendantVertices.forEach(v => (v.pipelineStage = 'output'));
       }
     }
   }

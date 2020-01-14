@@ -125,23 +125,23 @@ export const useLogAnalysisModule = <JobType extends string>({
           dispatchModuleStatus({ type: 'failedSetup' });
         });
     },
-    [cleanUpModule, setUpModule]
+    [cleanUpModule, dispatchModuleStatus, setUpModule]
   );
 
   const viewSetupForReconfiguration = useCallback(() => {
     dispatchModuleStatus({ type: 'requestedJobConfigurationUpdate' });
-  }, []);
+  }, [dispatchModuleStatus]);
 
   const viewSetupForUpdate = useCallback(() => {
     dispatchModuleStatus({ type: 'requestedJobDefinitionUpdate' });
-  }, []);
+  }, [dispatchModuleStatus]);
 
   const viewResults = useCallback(() => {
     dispatchModuleStatus({ type: 'viewedResults' });
-  }, []);
+  }, [dispatchModuleStatus]);
 
   const jobIds = useMemo(() => moduleDescriptor.getJobIds(spaceId, sourceId), [
-    moduleDescriptor.getJobIds,
+    moduleDescriptor,
     spaceId,
     sourceId,
   ]);

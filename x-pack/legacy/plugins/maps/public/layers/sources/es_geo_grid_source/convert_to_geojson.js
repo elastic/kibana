@@ -9,20 +9,25 @@ import { getTileBoundingBox } from './geo_tile_utils';
 import { EMPTY_FEATURE_COLLECTION } from '../../../../common/constants';
 
 export function convertToGeoJson({ table, renderAs }) {
-
   if (!table || !table.rows) {
     return EMPTY_FEATURE_COLLECTION;
   }
 
-  const geoGridColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geotile_grid');
+  const geoGridColumn = table.columns.find(
+    column => column.aggConfig.type.dslName === 'geotile_grid'
+  );
   if (!geoGridColumn) {
     return EMPTY_FEATURE_COLLECTION;
   }
 
   const metricColumns = table.columns.filter(column => {
-    return column.aggConfig.type.type === 'metrics' && column.aggConfig.type.dslName !== 'geo_centroid';
+    return (
+      column.aggConfig.type.type === 'metrics' && column.aggConfig.type.dslName !== 'geo_centroid'
+    );
   });
-  const geocentroidColumn = table.columns.find(column => column.aggConfig.type.dslName === 'geo_centroid');
+  const geocentroidColumn = table.columns.find(
+    column => column.aggConfig.type.dslName === 'geo_centroid'
+  );
   if (!geocentroidColumn) {
     return EMPTY_FEATURE_COLLECTION;
   }
@@ -48,24 +53,19 @@ export function convertToGeoJson({ table, renderAs }) {
         renderAs,
       }),
       id: gridKey,
-      properties
+      properties,
     });
   });
 
   return {
     featureCollection: {
       type: 'FeatureCollection',
-      features: features
-    }
+      features: features,
+    },
   };
 }
 
-function rowToGeometry({
-  row,
-  gridKey,
-  geocentroidColumn,
-  renderAs,
-}) {
+function rowToGeometry({ row, gridKey, geocentroidColumn, renderAs }) {
   const { top, bottom, right, left } = getTileBoundingBox(gridKey);
 
   if (renderAs === RENDER_AS.GRID) {
@@ -78,20 +78,20 @@ function rowToGeometry({
           [left, bottom],
           [right, bottom],
           [right, top],
-        ]
-      ]
+        ],
+      ],
     };
   }
 
   // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
   const pointCoordinates = [
     clampGrid(row[geocentroidColumn.id].lon, left, right),
-    clampGrid(row[geocentroidColumn.id].lat, bottom, top)
+    clampGrid(row[geocentroidColumn.id].lat, bottom, top),
   ];
 
   return {
     type: 'Point',
-    coordinates: pointCoordinates
+    coordinates: pointCoordinates,
   };
 }
 

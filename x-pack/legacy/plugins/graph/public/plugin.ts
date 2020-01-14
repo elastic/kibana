@@ -7,8 +7,9 @@
 // NP type imports
 import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/core/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
-import { LegacyAngularInjectedDependencies } from './render_app';
-import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
 
 export interface GraphPluginStartDependencies {
   npData: ReturnType<DataPlugin['start']>;
@@ -16,62 +17,47 @@ export interface GraphPluginStartDependencies {
 }
 
 export interface GraphPluginSetupDependencies {
-  __LEGACY: {
-    Storage: any;
-    xpackInfo: any;
-  };
-}
-
-export interface GraphPluginStartDependencies {
-  __LEGACY: {
-    angularDependencies: LegacyAngularInjectedDependencies;
-  };
+  licensing: LicensingPluginSetup;
 }
 
 export class GraphPlugin implements Plugin {
   private navigationStart: NavigationStart | null = null;
   private npDataStart: ReturnType<DataPlugin['start']> | null = null;
   private savedObjectsClient: SavedObjectsClientContract | null = null;
-  private angularDependencies: LegacyAngularInjectedDependencies | null = null;
 
-  setup(core: CoreSetup, { __LEGACY: { xpackInfo, Storage } }: GraphPluginSetupDependencies) {
+  setup(core: CoreSetup, { licensing }: GraphPluginSetupDependencies) {
     core.application.register({
       id: 'graph',
       title: 'Graph',
       mount: async ({ core: contextCore }, params) => {
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./application');
         return renderApp({
           ...params,
+          licensing,
           navigation: this.navigationStart!,
           npData: this.npDataStart!,
           savedObjectsClient: this.savedObjectsClient!,
-          xpackInfo,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           canEditDrillDownUrls: core.injectedMetadata.getInjectedVar(
             'canEditDrillDownUrls'
           ) as boolean,
           graphSavePolicy: core.injectedMetadata.getInjectedVar('graphSavePolicy') as string,
-          Storage,
+          storage: new Storage(window.localStorage),
           capabilities: contextCore.application.capabilities.graph,
           coreStart: contextCore,
           chrome: contextCore.chrome,
           config: contextCore.uiSettings,
           toastNotifications: contextCore.notifications.toasts,
           indexPatterns: this.npDataStart!.indexPatterns,
-          ...this.angularDependencies!,
         });
       },
     });
   }
 
-  start(
-    core: CoreStart,
-    { npData, navigation, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
-  ) {
+  start(core: CoreStart, { npData, navigation }: GraphPluginStartDependencies) {
     this.navigationStart = navigation;
     this.npDataStart = npData;
-    this.angularDependencies = angularDependencies;
     this.savedObjectsClient = core.savedObjects.client;
   }
 

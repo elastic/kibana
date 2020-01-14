@@ -30,10 +30,9 @@ export function toElasticsearchQuery(node, indexPattern, config, context) {
 
   return {
     bool: {
-      filter: children.map((child) => {
+      filter: children.map(child => {
         return ast.toElasticsearchQuery(child, indexPattern, config, context);
-      })
-    }
+      }),
+    },
   };
 }
-

@@ -9,7 +9,6 @@ import _ from 'lodash';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 
 export class TileLayer extends AbstractLayer {
-
   static type = LAYER_TYPE.TILE;
 
   static createDescriptor(options) {
@@ -24,15 +23,16 @@ export class TileLayer extends AbstractLayer {
       return;
     }
     const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {//data is immmutable
+    if (sourceDataRequest) {
+      //data is immmutable
       return;
     }
-    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
       const url = await this._source.getUrlTemplate();
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
-    } catch(error) {
+    } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
   }
@@ -54,7 +54,6 @@ export class TileLayer extends AbstractLayer {
   }
 
   syncLayerWithMB(mbMap) {
-
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this._getMbLayerId();
 

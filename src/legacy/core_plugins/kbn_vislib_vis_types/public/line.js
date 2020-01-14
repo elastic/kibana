@@ -40,7 +40,9 @@ export const lineDefinition = {
   name: 'line',
   title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
-  description: i18n.translate('kbnVislibVisTypes.line.lineDescription', { defaultMessage: 'Emphasize trends' }),
+  description: i18n.translate('kbnVislibVisTypes.line.lineDescription', {
+    defaultMessage: 'Emphasize trends',
+  }),
   visualization: vislibVisController,
   visConfig: {
     defaults: {
@@ -61,10 +63,10 @@ export const lineDefinition = {
           labels: {
             show: true,
             filter: true,
-            truncate: 100
+            truncate: 100,
           },
-          title: {}
-        }
+          title: {},
+        },
       ],
       valueAxes: [
         {
@@ -82,12 +84,12 @@ export const lineDefinition = {
             show: true,
             rotate: Rotates.HORIZONTAL,
             filter: false,
-            truncate: 100
+            truncate: 100,
           },
           title: {
             text: countLabel,
-          }
-        }
+          },
+        },
       ],
       seriesParams: [
         {
@@ -96,14 +98,14 @@ export const lineDefinition = {
           mode: ChartModes.NORMAL,
           data: {
             label: countLabel,
-            id: '1'
+            id: '1',
           },
           valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           interpolate: InterpolationModes.LINEAR,
-          showCircles: true
-        }
+          showCircles: true,
+        },
       ],
       addTooltip: true,
       addLegend: true,
@@ -116,8 +118,8 @@ export const lineDefinition = {
         value: 10,
         width: 1,
         style: ThresholdLineStyles.FULL,
-        color: palettes.euiPaletteColorBlind.colors[9]
-      }
+        color: palettes.euiPaletteColorBlind.colors[9],
+      },
     },
   },
   events: {
@@ -133,9 +135,7 @@ export const lineDefinition = {
         title: i18n.translate('kbnVislibVisTypes.line.metricTitle', { defaultMessage: 'Y-axis' }),
         min: 1,
         aggFilter: ['!geo_centroid', '!geo_bounds'],
-        defaults: [
-          { schema: 'metric', type: 'count' }
-        ]
+        defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
         group: AggGroupNames.Metrics,
@@ -143,7 +143,7 @@ export const lineDefinition = {
         title: i18n.translate('kbnVislibVisTypes.line.radiusTitle', { defaultMessage: 'Dot size' }),
         min: 0,
         max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits']
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -151,24 +151,28 @@ export const lineDefinition = {
         title: i18n.translate('kbnVislibVisTypes.line.segmentTitle', { defaultMessage: 'X-axis' }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.line.groupTitle', { defaultMessage: 'Split series' }),
+        title: i18n.translate('kbnVislibVisTypes.line.groupTitle', {
+          defaultMessage: 'Split series',
+        }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.line.splitTitle', { defaultMessage: 'Split chart' }),
+        title: i18n.translate('kbnVislibVisTypes.line.splitTitle', {
+          defaultMessage: 'Split chart',
+        }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-      }
-    ])
-  }
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+      },
+    ]),
+  },
 };

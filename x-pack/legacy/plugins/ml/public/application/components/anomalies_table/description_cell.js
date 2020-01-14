@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import { getMetricChangeDescription } from '../../formatters/metric_change_description';
 
@@ -22,26 +16,17 @@ import { getMetricChangeDescription } from '../../formatters/metric_change_descr
  * concise description of how the actual value of an anomaly compares to the typical value.
  */
 export function DescriptionCell({ actual, typical }) {
-
-  const {
-    iconType,
-    message
-  } = getMetricChangeDescription(actual, typical);
+  const { iconType, message } = getMetricChangeDescription(actual, typical);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      {iconType !== undefined &&
+      {iconType !== undefined && (
         <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={iconType}
-            size="s"
-          />
+          <EuiIcon type={iconType} size="s" />
         </EuiFlexItem>
-      }
+      )}
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          {message}
-        </EuiText>
+        <EuiText size="xs">{message}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -49,5 +34,5 @@ export function DescriptionCell({ actual, typical }) {
 
 DescriptionCell.propTypes = {
   actual: PropTypes.oneOfType([PropTypes.array, PropTypes.number]),
-  typical: PropTypes.oneOfType([PropTypes.array, PropTypes.number])
+  typical: PropTypes.oneOfType([PropTypes.array, PropTypes.number]),
 };

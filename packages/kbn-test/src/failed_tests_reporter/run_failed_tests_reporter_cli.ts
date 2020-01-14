@@ -26,7 +26,7 @@ import { updateFailureIssue, createFailureIssue } from './report_failure';
 import { getIssueMetadata } from './issue_metadata';
 import { readTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
-import { getReportMessages } from './report_metadata';
+import { getReportMessageIter } from './report_metadata';
 
 export function runFailedTestsReporterCli() {
   run(
@@ -75,7 +75,7 @@ export function runFailedTestsReporterCli() {
 
       for (const reportPath of reportPaths) {
         const report = await readTestReport(reportPath);
-        const messages = getReportMessages(report);
+        const messages = Array.from(getReportMessageIter(report));
 
         for (const failure of await getFailures(report)) {
           const pushMessage = (msg: string) => {

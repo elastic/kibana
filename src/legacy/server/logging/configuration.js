@@ -25,29 +25,26 @@ export default function loggingConfiguration(config) {
 
   if (config.get('logging.silent')) {
     _.defaults(events, {});
-  }
-  else if (config.get('logging.quiet')) {
+  } else if (config.get('logging.quiet')) {
     _.defaults(events, {
       log: ['listening', 'error', 'fatal'],
       request: ['error'],
-      error: '*'
+      error: '*',
     });
-  }
-  else if (config.get('logging.verbose')) {
+  } else if (config.get('logging.verbose')) {
     _.defaults(events, {
       log: '*',
       ops: '*',
       request: '*',
       response: '*',
-      error: '*'
+      error: '*',
     });
-  }
-  else {
+  } else {
     _.defaults(events, {
       log: ['info', 'warning', 'error', 'fatal'],
       response: config.get('logging.json') ? '*' : '!',
       request: ['info', 'warning', 'error', 'fatal'],
-      error: '*'
+      error: '*',
     });
   }
 
@@ -63,25 +60,29 @@ export default function loggingConfiguration(config) {
       // --logging.filter.cookie=none to have it show up in the logs.
       filter: _.defaults(config.get('logging.filter'), {
         authorization: 'remove',
-        cookie: 'remove'
-      })
+        cookie: 'remove',
+      }),
     },
-    events: _.transform(events, function (filtered, val, key) {
-      // provide a string compatible way to remove events
-      if (val !== '!') filtered[key] = val;
-    }, {})
+    events: _.transform(
+      events,
+      function(filtered, val, key) {
+        // provide a string compatible way to remove events
+        if (val !== '!') filtered[key] = val;
+      },
+      {}
+    ),
   });
 
   const options = {
     ops: {
-      interval: config.get('ops.interval')
+      interval: config.get('ops.interval'),
     },
     includes: {
-      request: ['headers', 'payload']
+      request: ['headers', 'payload'],
     },
     reporters: {
-      logReporter: [loggerStream]
-    }
+      logReporter: [loggerStream],
+    },
   };
   return options;
 }

@@ -4,10 +4,32 @@ exports[`Home component should render services 1`] = `
 <ContextProvider
   value={
     Object {
-      "apm": Object {
-        "config": Object {},
-        "stackVersion": "0",
+      "config": Object {
+        "indexPatternTitle": "apm-*",
+        "serviceMapEnabled": false,
+        "ui": Object {
+          "enabled": false,
+        },
       },
+      "core": Object {
+        "chrome": Object {
+          "setBreadcrumbs": [Function],
+        },
+        "http": Object {
+          "basePath": Object {
+            "prepend": [Function],
+          },
+        },
+        "notifications": Object {
+          "toasts": Object {
+            "addWarning": [Function],
+          },
+        },
+      },
+      "packageInfo": Object {
+        "version": "0",
+      },
+      "plugins": Object {},
     }
   }
 >
@@ -21,10 +43,32 @@ exports[`Home component should render traces 1`] = `
 <ContextProvider
   value={
     Object {
-      "apm": Object {
-        "config": Object {},
-        "stackVersion": "0",
+      "config": Object {
+        "indexPatternTitle": "apm-*",
+        "serviceMapEnabled": false,
+        "ui": Object {
+          "enabled": false,
+        },
       },
+      "core": Object {
+        "chrome": Object {
+          "setBreadcrumbs": [Function],
+        },
+        "http": Object {
+          "basePath": Object {
+            "prepend": [Function],
+          },
+        },
+        "notifications": Object {
+          "toasts": Object {
+            "addWarning": [Function],
+          },
+        },
+      },
+      "packageInfo": Object {
+        "version": "0",
+      },
+      "plugins": Object {},
     }
   }
 >

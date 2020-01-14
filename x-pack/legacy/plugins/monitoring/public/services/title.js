@@ -13,12 +13,14 @@ const uiModule = uiModules.get('monitoring/title', []);
 uiModule.service('title', () => {
   return function changeTitle(cluster, suffix) {
     let clusterName = _.get(cluster, 'cluster_name');
-    clusterName = (clusterName) ? `- ${clusterName}` : '';
-    suffix = (suffix) ? `- ${suffix}` : '';
+    clusterName = clusterName ? `- ${clusterName}` : '';
+    suffix = suffix ? `- ${suffix}` : '';
     docTitle.change(
       i18n.translate('xpack.monitoring.stackMonitoringDocTitle', {
         defaultMessage: 'Stack Monitoring {clusterName} {suffix}',
-        values: { clusterName, suffix }
-      }), true);
+        values: { clusterName, suffix },
+      }),
+      true
+    );
   };
 });

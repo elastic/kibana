@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('apis', () => {
     loadTestFile(require.resolve('./core'));
     loadTestFile(require.resolve('./elasticsearch'));

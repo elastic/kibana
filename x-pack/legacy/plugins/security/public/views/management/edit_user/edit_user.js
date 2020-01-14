@@ -7,7 +7,6 @@ import routes from 'ui/routes';
 import template from 'plugins/security/views/management/edit_user/edit_user.html';
 import 'angular-resource';
 import 'ui/angular_ui_select';
-import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import { EDIT_USERS_PATH } from '../management_urls';
 import { EditUserPage } from './components';
@@ -15,6 +14,7 @@ import { UserAPIClient } from '../../../lib/api';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
+import { npSetup } from 'ui/new_platform';
 import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from '../breadcrumbs';
 
 const renderReact = (elem, changeUrl, username) => {
@@ -24,6 +24,7 @@ const renderReact = (elem, changeUrl, username) => {
         changeUrl={changeUrl}
         username={username}
         apiClient={new UserAPIClient()}
+        securitySetup={npSetup.plugins.security}
       />
     </I18nContext>,
     elem
@@ -32,11 +33,10 @@ const renderReact = (elem, changeUrl, username) => {
 
 routes.when(`${EDIT_USERS_PATH}/:username?`, {
   template,
-  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
-    $route.current.params.username
-      ? getEditUserBreadcrumbs
-      : getCreateUserBreadcrumbs
-  ),
+  k7Breadcrumbs: ($injector, $route) =>
+    $injector.invoke(
+      $route.current.params.username ? getEditUserBreadcrumbs : getCreateUserBreadcrumbs
+    ),
   controllerAs: 'editUser',
   controller($scope, $route, kbnUrl) {
     $scope.$on('$destroy', () => {
@@ -48,7 +48,7 @@ routes.when(`${EDIT_USERS_PATH}/:username?`, {
     $scope.$$postDigest(() => {
       const elem = document.getElementById('editUserReactRoot');
       const username = $route.current.params.username;
-      const changeUrl = (url) => {
+      const changeUrl = url => {
         kbnUrl.change(url);
         $scope.$apply();
       };

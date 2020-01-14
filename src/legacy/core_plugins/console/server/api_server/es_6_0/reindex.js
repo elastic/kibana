@@ -17,52 +17,49 @@
  * under the License.
  */
 
-export default function (api) {
-
+export default function(api) {
   api.addEndpointDescription('reindex', {
-    methods: [ 'POST' ],
-    patterns: [
-      '_reindex'
-    ],
+    methods: ['POST'],
+    patterns: ['_reindex'],
     data_autocomplete_rules: {
       __template: {
-        'source': {},
-        'dest': {}
+        source: {},
+        dest: {},
       },
-      'source': {
-        'index': '',
-        'type': '',
-        'query': {
-          __scope_link: 'GLOBAL.query'
+      source: {
+        index: '',
+        type: '',
+        query: {
+          __scope_link: 'GLOBAL.query',
         },
-        'sort': {
+        sort: {
           __template: {
-            'FIELD': 'desc'
+            FIELD: 'desc',
           },
-          'FIELD': { __one_of: [ 'asc', 'desc' ] }
+          FIELD: { __one_of: ['asc', 'desc'] },
         },
-        'size': 1000,
-        'remote': {
+        size: 1000,
+        remote: {
           __template: {
-            'host': '',
+            host: '',
           },
-          'host': '',
-          'username': '',
-          'password': '',
-          'socket_timeout': '30s',
-          'connect_timeout': '30s'
-        }
+          host: '',
+          username: '',
+          password: '',
+          socket_timeout: '30s',
+          connect_timeout: '30s',
+        },
       },
-      'dest': {
-        'index': '',
-        'version_type': { __one_of: [ 'internal', 'external' ] },
-        'op_type': 'create',
-        'routing': { __one_of: [ 'keep', 'discard', '=SOME TEXT'] },
-        'pipeline': ''
+      dest: {
+        index: '',
+        version_type: { __one_of: ['internal', 'external'] },
+        op_type: 'create',
+        routing: { __one_of: ['keep', 'discard', '=SOME TEXT'] },
+        pipeline: '',
       },
-      'conflicts': 'proceed',
-      'size': 10,
-      'script': { __scope_link: 'GLOBAL.script' },
-    }
+      conflicts: 'proceed',
+      size: 10,
+      script: { __scope_link: 'GLOBAL.script' },
+    },
   });
 }

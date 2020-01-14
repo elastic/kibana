@@ -17,7 +17,7 @@ function getActionStatusTotals(watchStatus) {
   forEach(ACTION_STATES, state => {
     result[state] = 0;
   });
-  forEach(watchStatus.actionStatuses, (actionStatus) => {
+  forEach(watchStatus.actionStatuses, actionStatus => {
     result[actionStatus.state] = result[actionStatus.state] + 1;
   });
 
@@ -67,8 +67,10 @@ export class WatchStatus {
       return WATCH_STATES.CONFIG_ERROR;
     }
 
-    const firingTotal = totals[ACTION_STATES.FIRING] + totals[ACTION_STATES.ACKNOWLEDGED] +
-                              totals[ACTION_STATES.THROTTLED];
+    const firingTotal =
+      totals[ACTION_STATES.FIRING] +
+      totals[ACTION_STATES.ACKNOWLEDGED] +
+      totals[ACTION_STATES.THROTTLED];
 
     if (firingTotal > 0) {
       return WATCH_STATES.FIRING;
@@ -82,23 +84,25 @@ export class WatchStatus {
     const totalActions = this.actionStatuses.length;
     let result = WATCH_STATE_COMMENTS.OK;
 
-    if ((totals[ACTION_STATES.THROTTLED] > 0) &&
-      (totals[ACTION_STATES.THROTTLED] < totalActions)) {
+    if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] < totalActions) {
       result = WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED;
     }
 
-    if ((totals[ACTION_STATES.THROTTLED] > 0) &&
-      (totals[ACTION_STATES.THROTTLED] === totalActions)) {
+    if (totals[ACTION_STATES.THROTTLED] > 0 && totals[ACTION_STATES.THROTTLED] === totalActions) {
       result = WATCH_STATE_COMMENTS.THROTTLED;
     }
 
-    if ((totals[ACTION_STATES.ACKNOWLEDGED] > 0) &&
-      (totals[ACTION_STATES.ACKNOWLEDGED] < totalActions)) {
+    if (
+      totals[ACTION_STATES.ACKNOWLEDGED] > 0 &&
+      totals[ACTION_STATES.ACKNOWLEDGED] < totalActions
+    ) {
       result = WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED;
     }
 
-    if ((totals[ACTION_STATES.ACKNOWLEDGED] > 0) &&
-      (totals[ACTION_STATES.ACKNOWLEDGED] === totalActions)) {
+    if (
+      totals[ACTION_STATES.ACKNOWLEDGED] > 0 &&
+      totals[ACTION_STATES.ACKNOWLEDGED] === totalActions
+    ) {
       result = WATCH_STATE_COMMENTS.ACKNOWLEDGED;
     }
 
@@ -130,7 +134,7 @@ export class WatchStatus {
       lastChecked: this.lastChecked,
       lastMetCondition: this.lastMetCondition,
       lastFired: this.lastFired,
-      actionStatuses: map(this.actionStatuses, actionStatus => actionStatus.downstreamJson)
+      actionStatuses: map(this.actionStatuses, actionStatus => actionStatus.downstreamJson),
     };
 
     return json;
@@ -143,19 +147,22 @@ export class WatchStatus {
         i18n.translate('xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage', {
           defaultMessage: 'JSON argument must contain an {id} property',
           values: {
-            id: 'id'
-          }
-        }),
+            id: 'id',
+          },
+        })
       );
     }
     if (!json.watchStatusJson) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain a {watchStatusJson} property',
-          values: {
-            watchStatusJson: 'watchStatusJson'
+        i18n.translate(
+          'xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain a {watchStatusJson} property',
+            values: {
+              watchStatusJson: 'watchStatusJson',
+            },
           }
-        }),
+        )
       );
     }
 
@@ -190,5 +197,4 @@ export class WatchStatus {
     "last_met_condition": "2017-03-02T14:25:31.139Z"
   }
   */
-
 }

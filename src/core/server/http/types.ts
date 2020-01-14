@@ -17,6 +17,7 @@
  * under the License.
  */
 import { IContextProvider, IContextContainer } from '../context';
+import { ICspConfig } from '../csp';
 import { RequestHandler, IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
@@ -183,6 +184,11 @@ export interface HttpServiceSetup {
   basePath: IBasePath;
 
   /**
+   * The CSP config used for Kibana.
+   */
+  csp: ICspConfig;
+
+  /**
    * Flag showing whether a server was configured to use TLS connection.
    */
   isTlsEnabled: boolean;
@@ -244,16 +250,6 @@ export interface InternalHttpServiceSetup
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;
-  config: {
-    /**
-     * @internalRemarks
-     * Deprecated part of the server config, provided until
-     * https://github.com/elastic/kibana/issues/40255
-     *
-     * @deprecated
-     * */
-    defaultRoute?: string;
-  };
 }
 
 /** @public */

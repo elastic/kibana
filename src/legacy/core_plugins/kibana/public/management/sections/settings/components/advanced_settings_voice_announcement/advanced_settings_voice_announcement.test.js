@@ -26,45 +26,41 @@ const testProps = {
   nothing: {
     query: '',
     filteredSettings: [
-      [{
-        ariaName: 'General'
-      }]
-    ]
+      [
+        {
+          ariaName: 'General',
+        },
+      ],
+    ],
   },
   searchResult: {
     query: 'dark theme',
     filteredSettings: [
-      [{
-        ariaName: 'General'
-      }]
-    ]
-  }
+      [
+        {
+          ariaName: 'General',
+        },
+      ],
+    ],
+  },
 };
 
 describe('Advanced Settings: Voice Announcement', () => {
   it('should render nothing', async () => {
-
     const { query, filteredSettings } = testProps.nothing;
 
     const component = shallow(
-      <AdvancedSettingsVoiceAnnouncement
-        query={query}
-        settings={filteredSettings}
-      />
+      <AdvancedSettingsVoiceAnnouncement query={query} settings={filteredSettings} />
     );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render announcement', async () => {
-
     const { query, filteredSettings } = testProps.searchResult;
 
     const component = shallow(
-      <AdvancedSettingsVoiceAnnouncement
-        query={query}
-        settings={filteredSettings}
-      />
+      <AdvancedSettingsVoiceAnnouncement query={query} settings={filteredSettings} />
     );
 
     expect(component).toMatchSnapshot();

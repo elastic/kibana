@@ -20,19 +20,21 @@ import { getClustersState } from './get_clusters_state';
  * @return {Promise} A promise containing an array of clusters.
  */
 export function getClustersStats(req, esIndexPattern, clusterUuid) {
-  return fetchClusterStats(req, esIndexPattern, clusterUuid)
-    .then(response => handleClusterStats(response, req.server))
-  // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
-    .then(clusters => getClustersState(req, esIndexPattern, clusters));
+  return (
+    fetchClusterStats(req, esIndexPattern, clusterUuid)
+      .then(response => handleClusterStats(response, req.server))
+      // augment older documents (e.g., from 2.x - 5.4) with their cluster_state
+      .then(clusters => getClustersState(req, esIndexPattern, clusters))
+  );
 }
 
 /**
-* Query cluster_stats for all the cluster data
-*
-* @param {Object} req (required) - server request
-* @param {String} esIndexPattern (required) - index pattern to use in searching for cluster_stats data
-* @param {String} clusterUuid (optional) - if not undefined, getClusters filters for a single clusterUuid
-* @return {Promise} Object representing each cluster.
+ * Query cluster_stats for all the cluster data
+ *
+ * @param {Object} req (required) - server request
+ * @param {String} esIndexPattern (required) - index pattern to use in searching for cluster_stats data
+ * @param {String} clusterUuid (optional) - if not undefined, getClusters filters for a single clusterUuid
+ * @return {Promise} Object representing each cluster.
  */
 function fetchClusterStats(req, esIndexPattern, clusterUuid) {
   checkParam(esIndexPattern, 'esIndexPattern in getClusters');
@@ -58,15 +60,15 @@ function fetchClusterStats(req, esIndexPattern, clusterUuid) {
       'hits.hits._source.license.expiry_date_in_millis',
       'hits.hits._source.cluster_stats',
       'hits.hits._source.cluster_state',
-      'hits.hits._source.cluster_settings.cluster.metadata.display_name'
+      'hits.hits._source.cluster_settings.cluster.metadata.display_name',
     ],
     body: {
       query: createQuery({ type: 'cluster_stats', start, end, metric, clusterUuid }),
       collapse: {
-        field: 'cluster_uuid'
+        field: 'cluster_uuid',
       },
-      sort: { timestamp: { order: 'desc' } }
-    }
+      sort: { timestamp: { order: 'desc' } },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -82,20 +84,21 @@ function fetchClusterStats(req, esIndexPattern, clusterUuid) {
 export function handleClusterStats(response) {
   const hits = get(response, 'hits.hits', []);
 
-  return hits.map(hit => {
-    const cluster = get(hit, '_source');
+  return hits
+    .map(hit => {
+      const cluster = get(hit, '_source');
 
-    if (cluster) {
-      const indexName = get(hit, '_index', '');
-      const ccs = parseCrossClusterPrefix(indexName);
+      if (cluster) {
+        const indexName = get(hit, '_index', '');
+        const ccs = parseCrossClusterPrefix(indexName);
 
-      // use CCS whenever we come across it so that we can avoid talking to other monitoring clusters whenever possible
-      if (ccs) {
-        cluster.ccs = ccs;
+        // use CCS whenever we come across it so that we can avoid talking to other monitoring clusters whenever possible
+        if (ccs) {
+          cluster.ccs = ccs;
+        }
       }
-    }
 
-    return cluster;
-  })
+      return cluster;
+    })
     .filter(Boolean);
 }

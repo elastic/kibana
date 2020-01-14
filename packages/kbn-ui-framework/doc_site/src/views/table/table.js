@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import classNames from 'classnames';
 
@@ -34,9 +32,7 @@ import {
   KuiTableRowCheckBoxCell,
 } from '../../../../components';
 
-import {
-  SortableProperties,
-} from '../../../../src/services';
+import { SortableProperties } from '../../../../src/services';
 
 const statusToIconClassNameMap = {
   success: 'kuiIcon--success fa-check',
@@ -54,39 +50,52 @@ export class Table extends Component {
       rowToOpenActionsPopoverMap: new Map(),
     };
 
-    this.items = [{
-      title: 'Alligator',
-      isLink: true,
-      status: 'success',
-      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-    }, {
-      title: 'Boomerang',
-      isLink: false,
-      status: 'success',
-      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      details: 'All kinds of crazy information about boomerangs could go in here.',
-    }, {
-      title: 'Celebration of some very long content that will affect cell width and should eventually become truncated',
-      isLink: true,
-      status: 'warning',
-      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-    }, {
-      title: 'You can also specify that really long content wraps instead of becoming truncated with an ellipsis (which is the default behavior)', // eslint-disable-line max-len
-      isLink: true,
-      isWrapped: true,
-      status: 'danger',
-      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-    }];
+    this.items = [
+      {
+        title: 'Alligator',
+        isLink: true,
+        status: 'success',
+        dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      },
+      {
+        title: 'Boomerang',
+        isLink: false,
+        status: 'success',
+        dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+        details: 'All kinds of crazy information about boomerangs could go in here.',
+      },
+      {
+        title:
+          'Celebration of some very long content that will affect cell width and should eventually become truncated',
+        isLink: true,
+        status: 'warning',
+        dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      },
+      {
+        title:
+          'You can also specify that really long content wraps instead of becoming truncated with an ellipsis (which is the default behavior)',
+        isLink: true,
+        isWrapped: true,
+        status: 'danger',
+        dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      },
+    ];
 
-    this.sortableProperties = new SortableProperties([{
-      name: 'title',
-      getValue: item => item.title.toLowerCase(),
-      isAscending: true,
-    }, {
-      name: 'status',
-      getValue: item => item.status.toLowerCase(),
-      isAscending: true,
-    }], this.state.sortedColumn);
+    this.sortableProperties = new SortableProperties(
+      [
+        {
+          name: 'title',
+          getValue: item => item.title.toLowerCase(),
+          isAscending: true,
+        },
+        {
+          name: 'status',
+          getValue: item => item.status.toLowerCase(),
+          isAscending: true,
+        },
+      ],
+      this.state.sortedColumn
+    );
   }
 
   onSort = prop => {
@@ -95,7 +104,7 @@ export class Table extends Component {
     this.setState({
       sortedColumn: prop,
     });
-  }
+  };
 
   toggleItem = item => {
     this.setState(previousState => {
@@ -157,17 +166,11 @@ export class Table extends Component {
             onChange={() => this.toggleItem(item)}
           />
 
-          <KuiTableRowCell className={classes}>
-            {title}
-          </KuiTableRowCell>
+          <KuiTableRowCell className={classes}>{title}</KuiTableRowCell>
 
-          <KuiTableRowCell>
-            {this.renderStatusIcon(item.status)}
-          </KuiTableRowCell>
+          <KuiTableRowCell>{this.renderStatusIcon(item.status)}</KuiTableRowCell>
 
-          <KuiTableRowCell>
-            {item.dateCreated}
-          </KuiTableRowCell>
+          <KuiTableRowCell>{item.dateCreated}</KuiTableRowCell>
         </KuiTableRow>
       );
 
@@ -175,12 +178,8 @@ export class Table extends Component {
         rows.push(
           <KuiTableRow key={`${item.title}Details`}>
             <KuiTableRowCell className="kuiTableRowCell--expanded" colSpan="5">
-              <h3 className="kuiSubTitle">
-                {item.title}
-              </h3>
-              <p className="kuiText">
-                {item.details}
-              </p>
+              <h3 className="kuiSubTitle">{item.title}</h3>
+              <p className="kuiText">{item.details}</p>
             </KuiTableRowCell>
           </KuiTableRow>
         );
@@ -215,14 +214,10 @@ export class Table extends Component {
             Status
           </KuiTableHeaderCell>
 
-          <KuiTableHeaderCell>
-            Date created
-          </KuiTableHeaderCell>
+          <KuiTableHeaderCell>Date created</KuiTableHeaderCell>
         </KuiTableHeader>
 
-        <KuiTableBody>
-          {this.renderRows()}
-        </KuiTableBody>
+        <KuiTableBody>{this.renderRows()}</KuiTableBody>
       </KuiTable>
     );
   }

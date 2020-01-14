@@ -9,10 +9,8 @@ import { shallow } from 'enzyme';
 import { ExplorerNoJobsFound } from './explorer_no_jobs_found';
 
 describe('ExplorerNoInfluencersFound', () => {
-
   test('snapshot', () => {
     const wrapper = shallow(<ExplorerNoJobsFound />);
     expect(wrapper).toMatchSnapshot();
   });
-
 });

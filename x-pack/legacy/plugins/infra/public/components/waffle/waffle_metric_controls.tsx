@@ -14,13 +14,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-
-import { InfraSnapshotMetricInput, InfraSnapshotMetricType } from '../../graphql/types';
+import { SnapshotMetricInput } from '../../../common/http_api/snapshot_api';
+import { SnapshotMetricType } from '../../../common/inventory_models/types';
 
 interface Props {
-  options: Array<{ text: string; value: InfraSnapshotMetricType }>;
-  metric: InfraSnapshotMetricInput;
-  onChange: (metric: InfraSnapshotMetricInput) => void;
+  options: Array<{ text: string; value: SnapshotMetricType }>;
+  metric: SnapshotMetricInput;
+  onChange: (metric: SnapshotMetricInput) => void;
 }
 
 const initialState = {
@@ -44,7 +44,7 @@ export const WaffleMetricControls = class extends React.PureComponent<Props, Sta
     }
     const currentLabel = options.find(o => o.value === metric.type);
     if (!currentLabel) {
-      return 'null';
+      return null;
     }
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
@@ -90,7 +90,7 @@ export const WaffleMetricControls = class extends React.PureComponent<Props, Sta
     this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
   };
 
-  private handleClick = (value: InfraSnapshotMetricType) => () => {
+  private handleClick = (value: SnapshotMetricType) => () => {
     this.props.onChange({ type: value });
     this.handleClose();
   };

@@ -9,25 +9,25 @@ import { i18n } from '@kbn/i18n';
 const FRACTIONAL_SECOND_SEPARATORS = ':.,';
 
 const VALID_LETTER_GROUPS = {
-  'yyyy': true,
-  'yy': true,
-  'M': true,
-  'MM': true,
-  'MMM': true,
-  'MMMM': true,
-  'd': true,
-  'dd': true,
-  'EEE': true,
-  'EEEE': true,
-  'H': true,
-  'HH': true,
-  'h': true,
-  'mm': true,
-  'ss': true,
-  'a': true,
-  'XX': true,
-  'XXX': true,
-  'zzz': true,
+  yyyy: true,
+  yy: true,
+  M: true,
+  MM: true,
+  MMM: true,
+  MMMM: true,
+  d: true,
+  dd: true,
+  EEE: true,
+  EEEE: true,
+  H: true,
+  HH: true,
+  h: true,
+  mm: true,
+  ss: true,
+  a: true,
+  XX: true,
+  XXX: true,
+  zzz: true,
 };
 
 function isLetter(str) {
@@ -39,13 +39,17 @@ export function isTimestampFormatValid(timestampFormat) {
 
   if (timestampFormat.indexOf('?') >= 0) {
     result.isValid = false;
-    result.errorMessage = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampQuestionMarkValidationErrorMessage', {
-      defaultMessage: 'Timestamp format {timestampFormat} not supported because it contains a question mark character ({fieldPlaceholder})',
-      values: {
-        timestampFormat,
-        fieldPlaceholder: '?',
+    result.errorMessage = i18n.translate(
+      'xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampQuestionMarkValidationErrorMessage',
+      {
+        defaultMessage:
+          'Timestamp format {timestampFormat} not supported because it contains a question mark character ({fieldPlaceholder})',
+        values: {
+          timestampFormat,
+          fieldPlaceholder: '?',
+        },
       }
-    });
+    );
     return result;
   }
 
@@ -57,7 +61,7 @@ export function isTimestampFormatValid(timestampFormat) {
   while (pos < timestampFormat.length) {
     const curChar = timestampFormat.charAt(pos);
 
-    if (curChar === '\'') {
+    if (curChar === "'") {
       notQuoted = !notQuoted;
     } else if (notQuoted && isLetter(curChar)) {
       const startPos = pos;
@@ -72,18 +76,26 @@ export function isTimestampFormatValid(timestampFormat) {
       if (VALID_LETTER_GROUPS[letterGroup] !== true) {
         const length = letterGroup.length;
         // Special case of fractional seconds
-        if (curChar !== 'S' || FRACTIONAL_SECOND_SEPARATORS.indexOf(prevChar) === -1 ||
-          !('ss' === prevLetterGroup) || endPos - startPos > 9) {
+        if (
+          curChar !== 'S' ||
+          FRACTIONAL_SECOND_SEPARATORS.indexOf(prevChar) === -1 ||
+          !('ss' === prevLetterGroup) ||
+          endPos - startPos > 9
+        ) {
           result.isValid = false;
 
-          result.errorMessage = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampLetterValidationErrorMessage', {
-            defaultMessage: 'Letter { length, plural, one { {lg} } other { group {lg} } } in {format} is not supported',
-            values: {
-              length,
-              lg: letterGroup,
-              format: timestampFormat
-            },
-          });
+          result.errorMessage = i18n.translate(
+            'xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampLetterValidationErrorMessage',
+            {
+              defaultMessage:
+                'Letter { length, plural, one { {lg} } other { group {lg} } } in {format} is not supported',
+              values: {
+                length,
+                lg: letterGroup,
+                format: timestampFormat,
+              },
+            }
+          );
 
           if (curChar === 'S') {
             // disable exceeds maximum line length error so i18n check passes
@@ -95,9 +107,10 @@ export function isTimestampFormatValid(timestampFormat) {
                   length,
                   lg: letterGroup,
                   sep: FRACTIONAL_SECOND_SEPARATORS,
-                  format: timestampFormat
+                  format: timestampFormat,
                 },
-              });
+              }
+            );
           }
 
           return result;
@@ -112,12 +125,15 @@ export function isTimestampFormatValid(timestampFormat) {
 
   if (prevLetterGroup == null) {
     result.isValid = false;
-    result.errorMessage = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampEmptyValidationErrorMessage', {
-      defaultMessage: 'No time format letter groups in timestamp format {timestampFormat}',
-      values: {
-        timestampFormat,
+    result.errorMessage = i18n.translate(
+      'xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampEmptyValidationErrorMessage',
+      {
+        defaultMessage: 'No time format letter groups in timestamp format {timestampFormat}',
+        values: {
+          timestampFormat,
+        },
       }
-    });
+    );
   }
 
   return result;

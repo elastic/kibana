@@ -11,6 +11,8 @@ import { PolicyForm } from '../../public/app/components/policy_form';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { POLICY_EDIT } from './helpers/constant';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.policyEdit;
 const { setup: setupPolicyAdd } = pageHelpers.policyAdd;
 
@@ -22,9 +24,9 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<PolicyEdit />', () => {
+jest.mock('ui/new_platform');
+
+describe('<PolicyEdit />', () => {
   let testBed: PolicyFormTestBed;
   let testBedPolicyAdd: PolicyFormTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();

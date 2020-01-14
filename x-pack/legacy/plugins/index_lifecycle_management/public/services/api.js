@@ -14,7 +14,7 @@ import {
 import { trackUiMetric } from './ui_metric';
 
 let httpClient;
-export const setHttpClient = (client) => {
+export const setHttpClient = client => {
   httpClient = client;
 };
 export const getHttpClient = () => {
@@ -46,7 +46,9 @@ export async function loadIndexTemplate(templateName, httpClient = getHttpClient
 }
 
 export async function loadPolicies(withIndices, httpClient = getHttpClient()) {
-  const response = await httpClient.get(`${apiPrefix}/policies${ withIndices ? '?withIndices=true' : ''}`);
+  const response = await httpClient.get(
+    `${apiPrefix}/policies${withIndices ? '?withIndices=true' : ''}`
+  );
   return response.data;
 }
 
@@ -56,7 +58,9 @@ export async function savePolicy(policy, httpClient = getHttpClient()) {
 }
 
 export async function deletePolicy(policyName, httpClient = getHttpClient()) {
-  const response = await httpClient.delete(`${apiPrefix}/policies/${encodeURIComponent(policyName)}`);
+  const response = await httpClient.delete(
+    `${apiPrefix}/policies/${encodeURIComponent(policyName)}`
+  );
   // Only track successful actions.
   trackUiMetric('count', UIM_POLICY_DELETE);
   return response.data;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 
 export function emsBoundariesSpecProvider(server) {
@@ -36,7 +36,8 @@ export function emsBoundariesSpecProvider(server) {
       defaultMessage: 'Administrative boundaries from Elastic Maps Service.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.ems.longDescription', {
-      defaultMessage: '[Elastic Maps Service (EMS)](https://www.elastic.co/elastic-maps-service) \
+      defaultMessage:
+        '[Elastic Maps Service (EMS)](https://www.elastic.co/elastic-maps-service) \
 hosts tile layers and vector shapes of administrative boundaries. \
 Indexing EMS administrative boundaries in Elasticsearch allows for search on boundary property fields.',
     }),
@@ -55,7 +56,8 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
                     defaultMessage: 'Download Elastic Maps Service boundaries',
                   }),
                   textPre: i18n.translate('kbn.server.tutorials.ems.downloadStepText', {
-                    defaultMessage: '1. Navigate to Elastic Maps Service [landing page]({emsLandingPageUrl}).\n\
+                    defaultMessage:
+                      '1. Navigate to Elastic Maps Service [landing page]({emsLandingPageUrl}).\n\
 2. In the left sidebar, select an administrative boundary.\n\
 3. Click `Download GeoJSON` button.',
                     values: {
@@ -68,19 +70,20 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
                     defaultMessage: 'Index Elastic Maps Service boundaries',
                   }),
                   textPre: i18n.translate('kbn.server.tutorials.ems.uploadStepText', {
-                    defaultMessage: '1. Open [Elastic Maps]({newMapUrl}).\n\
+                    defaultMessage:
+                      '1. Open [Elastic Maps]({newMapUrl}).\n\
 2. Click `Add layer`, then select `Upload GeoJSON`.\n\
 3. Upload the GeoJSON file and click `Import file`.',
                     values: {
-                      newMapUrl: addBasePath('/app/maps#/map')
-                    }
+                      newMapUrl: addBasePath('/app/maps#/map'),
+                    },
                   }),
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
   };
 }

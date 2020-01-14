@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { AbstractStyleProperty } from './style_property';
 import { STYLE_TYPE } from '../../../../../common/constants';
 

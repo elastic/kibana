@@ -481,18 +481,22 @@ describe('config schema', () => {
 });
 
 describe('createConfig$()', () => {
+  const mockAndCreateConfig = async (isTLSEnabled: boolean, value = {}, context?: any) => {
+    const contextMock = coreMock.createPluginInitializerContext(
+      // we must use validate to avoid errors in `createConfig$`
+      ConfigSchema.validate(value, context)
+    );
+    return await createConfig$(contextMock, isTLSEnabled)
+      .pipe(first())
+      .toPromise()
+      .then(config => ({ contextMock, config }));
+  };
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
-    const contextMock = coreMock.createPluginInitializerContext({
-      authc: { providers: ['basic'] },
-    });
-    const config = await createConfig$(contextMock, true)
-      .pipe(first())
-      .toPromise();
+    const { contextMock, config } = await mockAndCreateConfig(true, {}, { dist: true });
     expect(config.encryptionKey).toEqual('ab'.repeat(16));
-    expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
                         Array [
@@ -504,15 +508,7 @@ describe('createConfig$()', () => {
   });
 
   it('should log a warning if SSL is not configured', async () => {
-    const contextMock = coreMock.createPluginInitializerContext({
-      encryptionKey: 'a'.repeat(32),
-      secureCookies: false,
-      authc: { providers: ['basic'] },
-    });
-
-    const config = await createConfig$(contextMock, false)
-      .pipe(first())
-      .toPromise();
+    const { contextMock, config } = await mockAndCreateConfig(false, {});
     expect(config.secureCookies).toEqual(false);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
@@ -525,15 +521,7 @@ describe('createConfig$()', () => {
   });
 
   it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
-    const contextMock = coreMock.createPluginInitializerContext({
-      encryptionKey: 'a'.repeat(32),
-      secureCookies: true,
-      authc: { providers: ['basic'] },
-    });
-
-    const config = await createConfig$(contextMock, false)
-      .pipe(first())
-      .toPromise();
+    const { contextMock, config } = await mockAndCreateConfig(false, { secureCookies: true });
     expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
@@ -546,15 +534,7 @@ describe('createConfig$()', () => {
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {
-    const contextMock = coreMock.createPluginInitializerContext({
-      encryptionKey: 'a'.repeat(32),
-      secureCookies: false,
-      authc: { providers: ['basic'] },
-    });
-
-    const config = await createConfig$(contextMock, true)
-      .pipe(first())
-      .toPromise();
+    const { contextMock, config } = await mockAndCreateConfig(true, {});
     expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);

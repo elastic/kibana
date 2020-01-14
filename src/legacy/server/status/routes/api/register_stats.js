@@ -19,7 +19,7 @@
 
 import Joi from 'joi';
 import boom from 'boom';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { KIBANA_STATS_TYPE } from '../../constants';
 
@@ -41,7 +41,7 @@ export function registerStatsApi(usageCollection, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
 
   const getClusterUuid = async callCluster => {
-    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
+    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
     return uuid;
   };
 
@@ -60,14 +60,15 @@ export function registerStatsApi(usageCollection, server, config) {
             extended: Joi.string().valid('', 'true', 'false'),
             legacy: Joi.string().valid('', 'true', 'false'),
             exclude_usage: Joi.string().valid('', 'true', 'false'),
-          })
+          }),
         },
         tags: ['api'],
       },
       async handler(req) {
         const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
         const isLegacy = req.query.legacy !== undefined && req.query.legacy !== 'false';
-        const shouldGetUsage = req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
+        const shouldGetUsage =
+          req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
 
         let extended;
         if (isExtended) {
@@ -81,7 +82,7 @@ export function registerStatsApi(usageCollection, server, config) {
 
           const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
           try {
-            const [ usage, clusterUuid ] = await Promise.all([
+            const [usage, clusterUuid] = await Promise.all([
               usagePromise,
               getClusterUuid(callCluster),
             ]);
@@ -97,22 +98,20 @@ export function registerStatsApi(usageCollection, server, config) {
                 if (usageKey === 'kibana') {
                   accum = {
                     ...accum,
-                    ...usage[usageKey]
+                    ...usage[usageKey],
                   };
-                }
-                else if (usageKey === 'reporting') {
+                } else if (usageKey === 'reporting') {
                   accum = {
                     ...accum,
                     xpack: {
                       ...accum.xpack,
-                      reporting: usage[usageKey]
+                      reporting: usage[usageKey],
                     },
                   };
-                }
-                else {
+                } else {
                   accum = {
                     ...accum,
-                    [usageKey]: usage[usageKey]
+                    [usageKey]: usage[usageKey],
                   };
                 }
 
@@ -123,11 +122,10 @@ export function registerStatsApi(usageCollection, server, config) {
                 usage: modifiedUsage,
                 clusterUuid,
               };
-            }
-            else {
+            } else {
               extended = usageCollection.toApiFieldNames({
                 usage: modifiedUsage,
-                clusterUuid
+                clusterUuid,
               });
             }
           } catch (e) {
@@ -139,7 +137,7 @@ export function registerStatsApi(usageCollection, server, config) {
          * for health-checking Kibana and fetch does not rely on fetching data
          * from ES */
         const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE);
-        if (!await kibanaStatsCollector.isReady()) {
+        if (!(await kibanaStatsCollector.isReady())) {
           return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
         }
         let kibanaStats = await kibanaStatsCollector.fetch();

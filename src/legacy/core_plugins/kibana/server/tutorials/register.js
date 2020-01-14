@@ -80,6 +80,10 @@ import { traefikMetricsSpecProvider } from './traefik_metrics';
 import { awsLogsSpecProvider } from './aws_logs';
 import { activemqLogsSpecProvider } from './activemq_logs';
 import { activemqMetricsSpecProvider } from './activemq_metrics';
+import { ibmmqLogsSpecProvider } from './ibmmq_logs';
+import { stanMetricsSpecProvider } from './stan_metrics';
+import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
+import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
 
 export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemLogsSpecProvider);
@@ -113,7 +117,9 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(aerospikeMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(couchbaseMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(dropwizardMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(elasticsearchMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(
+    elasticsearchMetricsSpecProvider
+  );
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(etcdMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(haproxyMetricsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(kafkaMetricsSpecProvider);
@@ -146,4 +152,8 @@ export function registerTutorials(server) {
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(awsLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqLogsSpecProvider);
   server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(ibmmqLogsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(stanMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(envoyproxyMetricsSpecProvider);
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(cockroachdbMetricsSpecProvider);
 }

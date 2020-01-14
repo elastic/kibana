@@ -31,7 +31,7 @@ class VisualizationStub {
   }
 
   render() {
-    renderPromise = new Promise((resolve) => {
+    renderPromise = new Promise(resolve => {
       this.el.innerText = this.vis.params.markdown;
       resolve();
     });
@@ -41,53 +41,57 @@ class VisualizationStub {
 }
 
 describe('<Visualization/>', () => {
-
   const visData = {
-    hits: 1
+    hits: 1,
   };
 
   const uiState = {
     on: () => {},
     off: () => {},
-    set: () => {}
+    set: () => {},
   };
 
   let vis;
 
   beforeEach(() => {
     vis = {
-      _setUiState: function (uiState) {
+      _setUiState: function(uiState) {
         this.uiState = uiState;
       },
-      getUiState: function () {
+      getUiState: function() {
         return this.uiState;
       },
-      params: {
-      },
+      params: {},
       type: {
         title: 'new vis',
         requiresSearch: true,
         useCustomNoDataScreen: false,
-        visualization: VisualizationStub
-      }
+        visualization: VisualizationStub,
+      },
     };
   });
 
   it('should display no result message when length of data is 0', () => {
     const data = { rows: [] };
-    const wrapper = render(<Visualization vis={vis} visData={data} listenOnChange={true} uiState={uiState} />);
+    const wrapper = render(
+      <Visualization vis={vis} visData={data} listenOnChange={true} uiState={uiState} />
+    );
     expect(wrapper.text()).toBe('No results found');
   });
 
   it('should display error message when there is a request error that should be shown and no data', () => {
     const errorVis = { ...vis, requestError: { message: 'Request error' }, showRequestError: true };
     const data = null;
-    const wrapper = render(<Visualization vis={errorVis} visData={data} listenOnChange={true} uiState={uiState} />);
+    const wrapper = render(
+      <Visualization vis={errorVis} visData={data} listenOnChange={true} uiState={uiState} />
+    );
     expect(wrapper.text()).toBe('Request error');
   });
 
   it('should render chart when data is present', () => {
-    const wrapper = render(<Visualization vis={vis} visData={visData} uiState={uiState} listenOnChange={true} />);
+    const wrapper = render(
+      <Visualization vis={vis} visData={visData} uiState={uiState} listenOnChange={true} />
+    );
     expect(wrapper.text()).not.toBe('No results found');
   });
 

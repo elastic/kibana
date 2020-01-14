@@ -6,48 +6,33 @@
 
 import { GEO_JSON_TYPE, FEATURE_VISIBLE_PROPERTY_NAME } from '../../../common/constants';
 
-const VISIBILITY_FILTER_CLAUSE = ['all',
-  [
-    '==',
-    ['get', FEATURE_VISIBLE_PROPERTY_NAME],
-    true
-  ]
-];
+const VISIBILITY_FILTER_CLAUSE = ['all', ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]];
 
 const CLOSED_SHAPE_MB_FILTER = [
   'any',
   ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
-  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON]
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
 ];
 
-const VISIBLE_CLOSED_SHAPE_MB_FILTER = [
-  ...VISIBILITY_FILTER_CLAUSE,
-  CLOSED_SHAPE_MB_FILTER,
-];
+const VISIBLE_CLOSED_SHAPE_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, CLOSED_SHAPE_MB_FILTER];
 
 const ALL_SHAPE_MB_FILTER = [
   'any',
   ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
   ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
   ['==', ['geometry-type'], GEO_JSON_TYPE.LINE_STRING],
-  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING]
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING],
 ];
 
-const VISIBLE_ALL_SHAPE_MB_FILTER = [
-  ...VISIBILITY_FILTER_CLAUSE,
-  ALL_SHAPE_MB_FILTER,
-];
+const VISIBLE_ALL_SHAPE_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, ALL_SHAPE_MB_FILTER];
 
 const POINT_MB_FILTER = [
   'any',
   ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
-  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT]
+  ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
 ];
 
-const VISIBLE_POINT_MB_FILTER = [
-  ...VISIBILITY_FILTER_CLAUSE,
-  POINT_MB_FILTER,
-];
+const VISIBLE_POINT_MB_FILTER = [...VISIBILITY_FILTER_CLAUSE, POINT_MB_FILTER];
 
 export function getFillFilterExpression(hasJoins) {
   return hasJoins ? VISIBLE_CLOSED_SHAPE_MB_FILTER : CLOSED_SHAPE_MB_FILTER;

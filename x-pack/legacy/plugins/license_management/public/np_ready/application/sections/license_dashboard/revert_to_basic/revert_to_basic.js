@@ -13,7 +13,7 @@ import {
   EuiLink,
   EuiOverlayMask,
   EuiConfirmModal,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EXTERNAL_LINKS } from '../../../../../../common/constants';
@@ -29,7 +29,7 @@ export class RevertToBasic extends React.PureComponent {
       messages: [firstLine, ...messages] = [],
       startBasicLicense,
       cancelStartBasicLicense,
-      licenseType
+      licenseType,
     } = this.props;
     if (!needsAcknowledgement) {
       return null;
@@ -37,26 +37,34 @@ export class RevertToBasic extends React.PureComponent {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={(<FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModalTitle"
-            defaultMessage="Confirm Revert to Basic License"
-          />)}
+          title={
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModalTitle"
+              defaultMessage="Confirm Revert to Basic License"
+            />
+          }
           onCancel={cancelStartBasicLicense}
           onConfirm={() => startBasicLicense(licenseType, true)}
-          cancelButtonText={(<FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />)}
-          confirmButtonText={(<FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModal.confirmButtonLabel"
-            defaultMessage="Confirm"
-          />)}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModal.confirmButtonLabel"
+              defaultMessage="Confirm"
+            />
+          }
         >
           <div>
             <EuiText>{firstLine}</EuiText>
             <EuiText>
               <ul>
-                {messages.map(message => <li key={message}>{message}</li>)}
+                {messages.map(message => (
+                  <li key={message}>{message}</li>
+                ))}
               </ul>
             </EuiText>
           </div>
@@ -65,11 +73,7 @@ export class RevertToBasic extends React.PureComponent {
     );
   }
   render() {
-    const {
-      licenseType,
-      shouldShowRevertToBasicLicense,
-      startBasicLicense
-    } = this.props;
+    const { licenseType, shouldShowRevertToBasicLicense, startBasicLicense } = this.props;
     if (!shouldShowRevertToBasicLicense) {
       return null;
     }
@@ -81,16 +85,13 @@ export class RevertToBasic extends React.PureComponent {
           machine learning, advanced security, and other {platinumLicenseFeaturesLinkText}."
           values={{
             platinumLicenseFeaturesLinkText: (
-              <EuiLink
-                href={EXTERNAL_LINKS.SUBSCRIPTIONS}
-                target="_blank"
-              >
+              <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
                 <FormattedMessage
                   id="xpack.licenseMgmt.licenseDashboard.revertToBasic.platinumLicenseFeaturesLinkText"
                   defaultMessage="Platinum features"
                 />
               </EuiLink>
-            )
+            ),
           }}
         />
       </span>
@@ -100,13 +101,18 @@ export class RevertToBasic extends React.PureComponent {
       <EuiFlexItem>
         {this.acknowledgeModal()}
         <EuiCard
-          title={(<FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.revertToBasic.acknowledgeModalTitle"
-            defaultMessage="Revert to Basic license"
-          />)}
+          title={
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.revertToBasic.acknowledgeModalTitle"
+              defaultMessage="Revert to Basic license"
+            />
+          }
           description={description}
           footer={
-            <EuiButton data-test-subj="revertToBasicButton" onClick={() => startBasicLicense(licenseType)}>
+            <EuiButton
+              data-test-subj="revertToBasicButton"
+              onClick={() => startBasicLicense(licenseType)}
+            >
               <FormattedMessage
                 id="xpack.licenseMgmt.licenseDashboard.revertToBasic.acknowledgeModal.revertToBasicButtonLabel"
                 defaultMessage="Revert to Basic"

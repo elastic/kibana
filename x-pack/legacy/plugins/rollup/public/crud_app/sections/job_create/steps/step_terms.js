@@ -17,26 +17,20 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  termsDetailsUrl,
-} from '../../../services';
+import { termsDetailsUrl } from '../../../services';
 
-import {
-  FieldList,
-} from '../../components';
+import { FieldList } from '../../components';
 
-import {
-  FieldChooser,
-} from './components';
+import { FieldChooser } from './components';
 
 export class StepTermsUi extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
     termsFields: PropTypes.array.isRequired,
-  }
+  };
 
-  onSelectField = (field) => {
+  onSelectField = field => {
     const {
       fields: { terms },
       onFieldsChange,
@@ -45,7 +39,7 @@ export class StepTermsUi extends Component {
     onFieldsChange({ terms: terms.concat(field) });
   };
 
-  onRemoveField = (field) => {
+  onRemoveField = field => {
     const {
       fields: { terms },
       onFieldsChange,
@@ -55,26 +49,24 @@ export class StepTermsUi extends Component {
   };
 
   render() {
-    const {
-      fields,
-      termsFields,
-    } = this.props;
+    const { fields, termsFields } = this.props;
 
-    const {
-      terms,
-    } = fields;
+    const { terms } = fields;
 
-    const columns = [{
-      field: 'name',
-      name: 'Field',
-      sortable: true,
-    }, {
-      field: 'type',
-      name: 'Type',
-      truncateText: true,
-      sortable: true,
-      width: '180px',
-    }];
+    const columns = [
+      {
+        field: 'name',
+        name: 'Field',
+        sortable: true,
+      },
+      {
+        field: 'type',
+        name: 'Type',
+        truncateText: true,
+        sortable: true,
+        width: '180px',
+      },
+    ];
 
     return (
       <Fragment>
@@ -127,21 +119,21 @@ export class StepTermsUi extends Component {
           fields={terms}
           onRemoveField={this.onRemoveField}
           emptyMessage={<p>No terms fields added</p>}
-          addButton={(
+          addButton={
             <FieldChooser
-              buttonLabel={(
+              buttonLabel={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepTerms.fieldsChooserLabel"
                   defaultMessage="Add terms fields"
                 />
-              )}
+              }
               columns={columns}
               fields={termsFields}
               selectedFields={terms}
               onSelectField={this.onSelectField}
               dataTestSubj="rollupJobTermsFieldChooser"
             />
-          )}
+          }
           dataTestSubj="rollupJobTermsFieldList"
         />
       </Fragment>

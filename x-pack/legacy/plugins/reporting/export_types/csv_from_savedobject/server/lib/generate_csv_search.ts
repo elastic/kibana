@@ -18,11 +18,15 @@ import {
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
 import { JobParamsDiscoverCsv } from '../../../csv/types';
+
 import {
   esQuery,
   esFilters,
   IIndexPattern,
   Query,
+  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
+  // be moved under reporting/server/
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
 
 const getEsQueryConfig = async (config: any) => {
@@ -80,10 +84,11 @@ export async function generateCsvSearch(
 
   let payloadQuery: QueryFilter | undefined;
   let payloadSort: any[] = [];
+  let docValueFields: any[] | undefined;
   if (jobParams.post && jobParams.post.state) {
     ({
       post: {
-        state: { query: payloadQuery, sort: payloadSort = [] },
+        state: { query: payloadQuery, sort: payloadSort = [], docvalue_fields: docValueFields },
       },
     } = jobParams);
   }
@@ -115,7 +120,15 @@ export async function generateCsvSearch(
         },
       };
     }, {});
-  const docValueFields = indexPatternTimeField ? [indexPatternTimeField] : undefined;
+
+  if (indexPatternTimeField) {
+    if (docValueFields) {
+      docValueFields = [indexPatternTimeField].concat(docValueFields);
+    } else {
+      docValueFields = [indexPatternTimeField];
+    }
+  }
+
   const searchRequest: SearchRequest = {
     index: esIndex,
     body: {

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import Boom from 'boom';
 import fs from 'fs';
 import os from 'os';
@@ -25,17 +24,14 @@ export function fileDataVisualizerProvider(callWithRequest) {
         cached = await cacheData(data);
       }
     } catch (error) {
-      const err = (error.message !== undefined) ? error.message : error;
+      const err = error.message !== undefined ? error.message : error;
       throw Boom.badRequest(err);
     }
 
-    const {
-      hasOverrides,
-      reducedOverrides
-    } = formatOverrides(overrides);
+    const { hasOverrides, reducedOverrides } = formatOverrides(overrides);
 
     return {
-      ...hasOverrides && { overrides: reducedOverrides },
+      ...(hasOverrides && { overrides: reducedOverrides }),
       cached,
       results,
     };
@@ -64,13 +60,13 @@ export function fileDataVisualizerProvider(callWithRequest) {
 
   async function deleteOutputFiles(outputPath) {
     const files = await readdir(outputPath);
-    files.forEach((f) => {
+    files.forEach(f => {
       fs.unlinkSync(`${outputPath}/${f}`);
     });
   }
 
   return {
-    analyzeFile
+    analyzeFile,
   };
 }
 
@@ -90,14 +86,14 @@ function formatOverrides(overrides) {
   }
 
   if (reducedOverrides.has_header_row !== undefined) {
-    reducedOverrides.has_header_row = (reducedOverrides.has_header_row === 'true');
+    reducedOverrides.has_header_row = reducedOverrides.has_header_row === 'true';
   }
 
   if (reducedOverrides.should_trim_fields !== undefined) {
-    reducedOverrides.should_trim_fields = (reducedOverrides.should_trim_fields === 'true');
+    reducedOverrides.should_trim_fields = reducedOverrides.should_trim_fields === 'true';
   }
 
-  return  {
+  return {
     reducedOverrides,
     hasOverrides,
   };

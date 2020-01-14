@@ -126,12 +126,7 @@ export function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expression ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(
-        framePublicAPI,
-        dispatch,
-        suggestionForDraggedField,
-        'SWITCH_VISUALIZATION'
-      );
+      switchToSuggestion(dispatch, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
     }
   }
 
@@ -162,7 +157,7 @@ export function InnerWorkspacePanel({
             <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
           </p>
           <EuiButtonEmpty
-            href="https://discuss.elastic.co/c/kibana"
+            href="https://www.elastic.co/products/kibana/feedback"
             iconType="popout"
             iconSide="right"
             size="xs"

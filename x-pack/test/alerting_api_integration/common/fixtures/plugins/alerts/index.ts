@@ -14,6 +14,30 @@ export default function(kibana: any) {
     require: ['actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'alerting',
+        name: 'Alerting',
+        app: ['alerting', 'kibana'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['alert'],
+              read: [],
+            },
+            ui: [],
+            api: ['alerting-read', 'alerting-all'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['alert'],
+            },
+            ui: [],
+            api: ['alerting-read'],
+          },
+        },
+      });
+
       // Action types
       const noopActionType: ActionType = {
         id: 'test.noop',
@@ -178,8 +202,21 @@ export default function(kibana: any) {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
         actionGroups: ['default', 'other'],
-        async executor({ services, params, state }: AlertExecutorOptions) {
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const {
+            services,
+            params,
+            state,
+            alertId,
+            spaceId,
+            namespace,
+            name,
+            tags,
+            createdBy,
+            updatedBy,
+          } = alertExecutorOptions;
           let group = 'default';
+          const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
           if (params.groupsToScheduleActionsInSeries) {
             const index = state.groupInSeriesIndex || 0;
@@ -202,6 +239,7 @@ export default function(kibana: any) {
               params,
               reference: params.reference,
               source: 'alert:test.always-firing',
+              alertInfo,
             },
           });
           return {

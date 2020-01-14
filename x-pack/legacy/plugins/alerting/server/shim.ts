@@ -7,8 +7,12 @@
 import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
-import { TaskManager } from '../../task_manager';
-import { XPackMainPlugin } from '../../xpack_main/xpack_main';
+import {
+  TaskManagerStartContract,
+  TaskManagerSetupContract,
+} from '../../../../plugins/task_manager/server';
+import { getTaskManagerSetup, getTaskManagerStart } from '../../task_manager/server';
+import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import {
   PluginSetupContract as EncryptedSavedObjectsSetupContract,
@@ -25,12 +29,12 @@ import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
 // due to being marked as dependencies
 interface Plugins extends Hapi.PluginProperties {
   actions: ActionsPlugin;
-  task_manager: TaskManager;
 }
 
 export interface Server extends Legacy.Server {
@@ -40,14 +44,9 @@ export interface Server extends Legacy.Server {
 /**
  * Shim what we're thinking setup and start contracts will look like
  */
-export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
 export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
-export type TaskManagerSetupContract = Pick<
-  TaskManager,
-  'addMiddleware' | 'registerTaskDefinitions'
->;
 
 /**
  * New platform interfaces
@@ -69,17 +68,18 @@ export interface AlertingCoreStart {
 }
 export interface AlertingPluginsSetup {
   security?: SecurityPluginSetupContract;
-  task_manager: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetupContract;
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  licensing: LicensingPluginSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStartContract;
   spaces: () => SpacesPluginStartContract | undefined;
   encryptedSavedObjects: EncryptedSavedObjectsStartContract;
-  task_manager: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -116,11 +116,12 @@ export function shim(
 
   const pluginsSetup: AlertingPluginsSetup = {
     security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
-    task_manager: server.plugins.task_manager,
+    taskManager: getTaskManagerSetup(server)!,
     actions: server.plugins.actions.setup,
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
+    licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
   };
 
   const pluginsStart: AlertingPluginsStart = {
@@ -131,7 +132,7 @@ export function shim(
     spaces: () => server.plugins.spaces,
     encryptedSavedObjects: newPlatform.start.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
-    task_manager: server.plugins.task_manager,
+    taskManager: getTaskManagerStart(server)!,
   };
 
   return {

@@ -5,5 +5,11 @@
  */
 import path from 'path';
 
-export const OSS_KIBANA_ARCHIVE_PATH = path.resolve(__dirname, '../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana');
-export const OSS_DATA_ARCHIVE_PATH = path.resolve(__dirname, '../../../../test/functional/fixtures/es_archiver/dashboard/current/data');
+export const OSS_KIBANA_ARCHIVE_PATH = path.resolve(
+  __dirname,
+  '../../../../test/functional/fixtures/es_archiver/dashboard/current/kibana'
+);
+export const OSS_DATA_ARCHIVE_PATH = path.resolve(
+  __dirname,
+  '../../../../test/functional/fixtures/es_archiver/dashboard/current/data'
+);

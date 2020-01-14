@@ -24,6 +24,7 @@ import { NavigationMenu } from '../../../components/navigation_menu';
 
 import { Exploration } from './components/exploration';
 import { RegressionExploration } from './components/regression_exploration';
+import { ClassificationExploration } from './components/classification_exploration';
 
 import { ANALYSIS_CONFIG_TYPE } from '../../common/analytics';
 import { DATA_FRAME_TASK_STATE } from '../analytics_management/components/analytics_list/common';
@@ -71,6 +72,9 @@ export const Page: FC<{
           )}
           {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
             <RegressionExploration jobId={jobId} jobStatus={jobStatus} />
+          )}
+          {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
+            <ClassificationExploration jobId={jobId} jobStatus={jobStatus} />
           )}
         </EuiPageContentBody>
       </EuiPageBody>

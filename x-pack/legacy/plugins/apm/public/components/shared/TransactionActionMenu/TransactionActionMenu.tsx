@@ -23,7 +23,7 @@ import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransact
 import { InfraLink } from '../Links/InfraLink';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { fromQuery } from '../Links/url_helpers';
-import { useKibanaCore } from '../../../../../observability/public';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -65,7 +65,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
 ) => {
   const { transaction } = props;
 
-  const core = useKibanaCore();
+  const { core } = useApmPluginContext();
 
   const [isOpen, setIsOpen] = useState(false);
 

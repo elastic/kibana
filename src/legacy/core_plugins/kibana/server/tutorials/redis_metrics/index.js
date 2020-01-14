@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function redisMetricsSpecProvider(context) {
   const moduleName = 'redis';
@@ -33,7 +37,8 @@ export function redisMetricsSpecProvider(context) {
       defaultMessage: 'Fetch internal metrics from Redis.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.redisMetrics.longDescription', {
-      defaultMessage: 'The `redis` Metricbeat module fetches internal metrics from the Redis server. \
+      defaultMessage:
+        'The `redis` Metricbeat module fetches internal metrics from the Redis server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-redis.html',
@@ -44,20 +49,23 @@ export function redisMetricsSpecProvider(context) {
       dashboards: [
         {
           id: 'AV4YjZ5pux-M-tCAunxK-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.redisMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Redis metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.redisMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Redis metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-redis.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-redis.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/redis_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

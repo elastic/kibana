@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const elasticsearchJsPlugin = (Client, config, components) => { // eslint-disable-line no-unused-vars
+export const elasticsearchJsPlugin = (Client, config, components) => {
+  // eslint-disable-line no-unused-vars
   const ca = components.clientAction.factory;
 
   Client.prototype.rollup = components.clientAction.namespaceFactory();
@@ -16,12 +17,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
         fmt: '/<%=indexPattern%>/_rollup/data',
         req: {
           indexPattern: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   rollup.search = ca({
@@ -30,13 +31,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
         fmt: '/<%=index%>/_rollup_search',
         req: {
           index: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   rollup.fieldCapabilities = ca({
@@ -45,21 +46,21 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
         fmt: '/<%=indexPattern%>/_field_caps?fields=*',
         req: {
           indexPattern: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   rollup.jobs = ca({
     urls: [
       {
         fmt: '/_rollup/job/_all',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   rollup.job = ca({
@@ -68,12 +69,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
         fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   rollup.startJob = ca({
@@ -82,32 +83,32 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
         fmt: '/_rollup/job/<%=id%>/_start',
         req: {
           id: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   rollup.stopJob = ca({
     params: {
       waitForCompletion: {
         type: 'boolean',
-        name: 'wait_for_completion'
-      }
+        name: 'wait_for_completion',
+      },
     },
     urls: [
       {
         fmt: '/_rollup/job/<%=id%>/_stop',
         req: {
           id: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   rollup.deleteJob = ca({
@@ -116,12 +117,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
         fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
     ],
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   rollup.createJob = ca({
@@ -130,13 +131,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
         fmt: '/_rollup/job/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
     ],
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 };
-

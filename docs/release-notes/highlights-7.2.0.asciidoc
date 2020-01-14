@@ -165,7 +165,8 @@ image::release-notes/images/7.2-localization.jpg[Kibana in Japanese]
 [float]
 === {dataframes-cap}
 
-beta[] Machine Learning now enables you to transform your data with {stack-ov}/ml-dataframes.html[{dataframes}]. A 
+beta[] Machine Learning now enables you to transform your data with
+{ref}/transforms.html[{dataframes}]. A 
 new wizard guides you through the process of creating a {dataframe}: selecting 
 the source data, the fields you want to group by, and the aggregations for 
 pivoting the data. There is also a preview of the transform for reviewing the configuration. 

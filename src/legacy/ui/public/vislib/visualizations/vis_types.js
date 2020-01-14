@@ -26,5 +26,5 @@ export const visTypes = {
   point_series: PointSeries,
   gauge: GaugeChart,
   goal: GaugeChart,
-  metric: GaugeChart
+  metric: GaugeChart,
 };

@@ -13,7 +13,12 @@ import { getDefaultAdminEmail, resetDeprecationWarning } from '../get_settings_c
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../../../../common/constants';
 
 describe('getSettingsCollector / getDefaultAdminEmail', () => {
-  function setup({ enabled = true, docExists = true, defaultAdminEmail = 'default-admin@email.com', adminEmail = null }) {
+  function setup({
+    enabled = true,
+    docExists = true,
+    defaultAdminEmail = 'default-admin@email.com',
+    adminEmail = null,
+  }) {
     const config = { get: sinon.stub() };
 
     config.get
@@ -26,13 +31,9 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
         .returns(adminEmail);
     }
 
-    config.get
-      .withArgs('kibana.index')
-      .returns('.kibana');
+    config.get.withArgs('kibana.index').returns('.kibana');
 
-    config.get
-      .withArgs('pkg.version')
-      .returns('1.1.1');
+    config.get.withArgs('pkg.version').returns('1.1.1');
 
     const doc = {};
     if (docExists) {
@@ -45,16 +46,20 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
       doc.found = false;
     }
 
-    const callCluster = sinon.stub()
-      .withArgs('get', sinon.match({
-        index: '.kibana',
-        type: 'doc',
-        id: 'config:1.1.1'
-      }))
+    const callCluster = sinon
+      .stub()
+      .withArgs(
+        'get',
+        sinon.match({
+          index: '.kibana',
+          type: 'doc',
+          id: 'config:1.1.1',
+        })
+      )
       .returns(doc);
 
     const log = {
-      warn: sinon.stub()
+      warn: sinon.stub(),
     };
 
     return {
@@ -70,7 +75,6 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
     });
 
     describe('xpack.monitoring.cluster_alerts.email_notifications.enabled = false', () => {
-
       it('returns null', async () => {
         const { config, callCluster, log } = setup({ enabled: false });
         expect(await getDefaultAdminEmail(config, callCluster, log)).to.be(null);
@@ -150,16 +154,18 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
       it('returns value from xpack:defaultAdminEmail', async () => {
         const { config, callCluster, log } = setup({
           defaultAdminEmail: 'default-admin@email.com',
-          adminEmail: false
+          adminEmail: false,
         });
-        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be('default-admin@email.com');
+        expect(await getDefaultAdminEmail(config, callCluster, log)).to.be(
+          'default-admin@email.com'
+        );
         sinon.assert.calledOnce(callCluster);
       });
 
       it('logs a deprecation warning', async () => {
         const { config, callCluster, log } = setup({
           defaultAdminEmail: 'default-admin@email.com',
-          adminEmail: false
+          adminEmail: false,
         });
         await getDefaultAdminEmail(config, callCluster, log);
         sinon.assert.calledOnce(log.warn);

@@ -18,6 +18,8 @@
         "cbor",
         "smile"
       ]
-    }
+    },
+    "template": "_sql?format=json\n{\n  \"query\": \"\"\"\n  SELECT * FROM \"${1:TABLE}\"\n  \"\"\"\n}\n",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-rest-overview.html"
   }
 }

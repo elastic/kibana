@@ -5,11 +5,12 @@
  */
 
 import React from 'react';
-import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';
+import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
 
 import { RollupPrompt } from './components/rollup_prompt';
 import { setHttpClient, getRollupIndices } from '../services/api';
-import { i18n } from '@kbn/i18n';
+import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';
 
 const rollupIndexPatternTypeName = i18n.translate(
   'xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultTypeName',
@@ -63,7 +64,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
 
   async setRollupIndices() {
     try {
-      this.rollupIndicesCapabilities = await getRollupIndices();
+      // This is a hack intended to prevent the getRollupIndices() request from being sent if
+      // we're on /logout. There is a race condition that can arise on that page, whereby this
+      // request resolves after the logout request resolves, and un-clears the session ID.
+      const isAnonymous = npSetup.core.http.anonymousPaths.isAnonymous(window.location.pathname);
+      if (!isAnonymous) {
+        this.rollupIndicesCapabilities = await getRollupIndices();
+      }
+
       this.rollupIndices = Object.keys(this.rollupIndicesCapabilities);
     } catch (e) {
       // Silently swallow failure responses such as expired trials
@@ -74,14 +82,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     await this.settingUp;
     return this.rollupIndices && this.rollupIndices.length
       ? {
-        text: rollupIndexPatternButtonText,
-        description: rollupIndexPatternButtonDescription,
-        testSubj: `createRollupIndexPatternButton`,
-        isBeta: this.isBeta,
-        onClick: () => {
-          urlHandler('/management/kibana/index_pattern?type=rollup');
-        },
-      }
+          text: rollupIndexPatternButtonText,
+          description: rollupIndexPatternButtonDescription,
+          testSubj: `createRollupIndexPatternButton`,
+          isBeta: this.isBeta,
+          onClick: () => {
+            urlHandler('/management/kibana/index_pattern?type=rollup');
+          },
+        }
       : null;
   }
 
@@ -92,11 +100,11 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   getIndexTags(indexName) {
     return this.isRollupIndex(indexName)
       ? [
-        {
-          key: this.type,
-          name: rollupIndexPatternIndexLabel,
-        },
-      ]
+          {
+            key: this.type,
+            name: rollupIndexPatternIndexLabel,
+          },
+        ]
       : [];
   }
 
@@ -137,14 +145,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   getIndexPatternMappings = () => {
     return this.rollupIndex
       ? {
-        type: this.type,
-        typeMeta: {
-          params: {
-            rollup_index: this.rollupIndex,
+          type: this.type,
+          typeMeta: {
+            params: {
+              rollup_index: this.rollupIndex,
+            },
+            aggs: this.rollupIndicesCapabilities[this.rollupIndex].aggs,
           },
-          aggs: this.rollupIndicesCapabilities[this.rollupIndex].aggs,
-        },
-      }
+        }
       : {};
   };
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const defaultConfig = await readConfigFile(require.resolve('./config'));
 
   return {
@@ -28,7 +28,7 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'Internet Explorer UI Functional Tests'
+      reportName: 'Internet Explorer UI Functional Tests',
     },
 
     uiSettings: {
@@ -41,14 +41,9 @@ export default async function ({ readConfigFile }) {
       },
     },
 
-
     kbnTestServer: {
       ...defaultConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...defaultConfig.get('kbnTestServer.serverArgs'),
-      ],
+      serverArgs: [...defaultConfig.get('kbnTestServer.serverArgs')],
     },
-
-
   };
 }

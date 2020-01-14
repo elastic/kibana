@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Renders the modal dialog which allows the user to run and view time series forecasts.
  */
@@ -21,9 +19,8 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
-
 
 import { MessageCallOut } from '../../../components/message_call_out';
 import { ForecastsList } from './forecasts_list';
@@ -31,15 +28,10 @@ import { RunControls } from './run_controls';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
 export function Modal(props) {
   return (
     <EuiOverlayMask>
-      <EuiModal
-        onClose={props.close}
-        maxWidth={860}
-      >
-
+      <EuiModal onClose={props.close} maxWidth={860}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
@@ -50,26 +42,20 @@ export function Modal(props) {
         </EuiModalHeader>
 
         <EuiModalBody>
-
-          {props.messages.map(
-            (message, i) => (
-              <React.Fragment key={i}>
-                <MessageCallOut {...message} />
-                <EuiSpacer size="m" />
-              </React.Fragment>
-            )
-          )}
-
-          {props.forecasts.length > 0 &&
-            <React.Fragment>
-              <ForecastsList
-                forecasts={props.forecasts}
-                viewForecast={props.viewForecast}
-              />
-              <EuiSpacer/>
+          {props.messages.map((message, i) => (
+            <React.Fragment key={i}>
+              <MessageCallOut {...message} />
+              <EuiSpacer size="m" />
             </React.Fragment>
-          }
-          <RunControls {...props}/>
+          ))}
+
+          {props.forecasts.length > 0 && (
+            <React.Fragment>
+              <ForecastsList forecasts={props.forecasts} viewForecast={props.viewForecast} />
+              <EuiSpacer />
+            </React.Fragment>
+          )}
+          <RunControls {...props} />
         </EuiModalBody>
 
         <EuiModalFooter>

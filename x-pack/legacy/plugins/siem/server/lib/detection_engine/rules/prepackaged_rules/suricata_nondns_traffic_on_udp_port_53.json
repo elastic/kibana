@@ -1,0 +1,17 @@
+{
+  "rule_id": "ba6dea7f-ba98-4a86-b570-d05d85472e79",
+  "risk_score": 50,
+  "description": "Suricata non-DNS Traffic on UDP Port 53",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata non-DNS Traffic on UDP Port 53",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "suricata.eve.alert.signature_id:2610016 and (event.module:suricata and event.kind:alert)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

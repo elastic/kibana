@@ -9,5 +9,5 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 export const logstashSecurity = {
   isSecurityEnabled() {
     return Boolean(xpackInfo.get(`features.security`));
-  }
+  },
 };

@@ -23,23 +23,25 @@ const REPORT_VERSION = 1;
 
 export interface Report {
   reportVersion: typeof REPORT_VERSION;
-  uiStatsMetrics: {
-    [key: string]: {
+  uiStatsMetrics?: Record<
+    string,
+    {
       key: string;
       appName: string;
       eventName: string;
       type: UiStatsMetricType;
       stats: Stats;
-    };
-  };
-  userAgent?: {
-    [key: string]: {
+    }
+  >;
+  userAgent?: Record<
+    string,
+    {
       userAgent: string;
       key: string;
       type: METRIC_TYPE.USER_AGENT;
       appName: string;
-    };
-  };
+    }
+  >;
 }
 
 export class ReportManager {
@@ -49,14 +51,15 @@ export class ReportManager {
     this.report = report || ReportManager.createReport();
   }
   static createReport(): Report {
-    return { reportVersion: REPORT_VERSION, uiStatsMetrics: {} };
+    return { reportVersion: REPORT_VERSION };
   }
   public clearReport() {
     this.report = ReportManager.createReport();
   }
   public isReportEmpty(): boolean {
-    const noUiStats = Object.keys(this.report.uiStatsMetrics).length === 0;
-    const noUserAgent = !this.report.userAgent || Object.keys(this.report.userAgent).length === 0;
+    const { uiStatsMetrics, userAgent } = this.report;
+    const noUiStats = !uiStatsMetrics || Object.keys(uiStatsMetrics).length === 0;
+    const noUserAgent = !userAgent || Object.keys(userAgent).length === 0;
     return noUiStats && noUserAgent;
   }
   private incrementStats(count: number, stats?: Stats): Stats {
@@ -75,6 +78,7 @@ export class ReportManager {
   }
   assignReports(newMetrics: Metric | Metric[]) {
     wrapArray(newMetrics).forEach(newMetric => this.assignReport(this.report, newMetric));
+    return { report: this.report };
   }
   static createMetricKey(metric: Metric): string {
     switch (metric.type) {
@@ -98,7 +102,7 @@ export class ReportManager {
       case METRIC_TYPE.USER_AGENT: {
         const { appName, type, userAgent } = metric;
         if (userAgent) {
-          this.report.userAgent = {
+          report.userAgent = {
             [key]: {
               key,
               appName,
@@ -107,14 +111,16 @@ export class ReportManager {
             },
           };
         }
+
         return;
       }
       case METRIC_TYPE.CLICK:
       case METRIC_TYPE.LOADED:
       case METRIC_TYPE.COUNT: {
         const { appName, type, eventName, count } = metric;
+        report.uiStatsMetrics = report.uiStatsMetrics || {};
         const existingStats = (report.uiStatsMetrics[key] || {}).stats;
-        this.report.uiStatsMetrics[key] = {
+        report.uiStatsMetrics[key] = {
           key,
           appName,
           eventName,

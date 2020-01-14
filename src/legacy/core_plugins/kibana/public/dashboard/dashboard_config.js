@@ -35,11 +35,10 @@ export function dashboardConfigProvider() {
       return {
         getHideWriteControls() {
           return hideWriteControls;
-        }
+        },
       };
-    }
+    },
   };
 }
 
-uiModules.get('kibana')
-  .provider('dashboardConfig', dashboardConfigProvider);
+uiModules.get('kibana').provider('dashboardConfig', dashboardConfigProvider);

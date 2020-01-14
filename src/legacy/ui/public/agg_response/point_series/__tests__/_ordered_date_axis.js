@@ -22,47 +22,51 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import { orderedDateAxis } from '../_ordered_date_axis';
 
-describe('orderedDateAxis', function () {
-
+describe('orderedDateAxis', function() {
   const baseArgs = {
     vis: {
       indexPattern: {
-        timeFieldName: '@timestamp'
-      }
+        timeFieldName: '@timestamp',
+      },
     },
     chart: {
       ordered: {},
       aspects: {
-        x: [{
-          params: {
-            format: 'hh:mm:ss',
-            bounds: { min: moment().subtract(15, 'm').valueOf(), max: moment().valueOf() }
-          }
-        }]
-      }
-    }
+        x: [
+          {
+            params: {
+              format: 'hh:mm:ss',
+              bounds: {
+                min: moment()
+                  .subtract(15, 'm')
+                  .valueOf(),
+                max: moment().valueOf(),
+              },
+            },
+          },
+        ],
+      },
+    },
   };
 
-  describe('ordered object', function () {
-    it('sets date: true', function () {
+  describe('ordered object', function() {
+    it('sets date: true', function() {
       const args = _.cloneDeep(baseArgs);
       orderedDateAxis(args.chart);
 
-      expect(args.chart)
-        .to.have.property('ordered');
+      expect(args.chart).to.have.property('ordered');
 
-      expect(args.chart.ordered)
-        .to.have.property('date', true);
+      expect(args.chart.ordered).to.have.property('date', true);
     });
 
-    it('sets the min/max when the buckets are bounded', function () {
+    it('sets the min/max when the buckets are bounded', function() {
       const args = _.cloneDeep(baseArgs);
       orderedDateAxis(args.chart);
       expect(args.chart.ordered).to.have.property('min');
       expect(args.chart.ordered).to.have.property('max');
     });
 
-    it('does not set the min/max when the buckets are unbounded', function () {
+    it('does not set the min/max when the buckets are unbounded', function() {
       const args = _.cloneDeep(baseArgs);
       args.chart.aspects.x[0].params.bounds = null;
       orderedDateAxis(args.chart);

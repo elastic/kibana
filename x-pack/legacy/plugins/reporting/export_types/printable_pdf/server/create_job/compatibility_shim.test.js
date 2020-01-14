@@ -21,7 +21,7 @@ const createMockLogger = () => ({
 
 const createMockRequest = () => {
   return {
-    getSavedObjectsClient: once(function () {
+    getSavedObjectsClient: once(function() {
       return {
         get: jest.fn(),
       };
@@ -35,7 +35,11 @@ test(`passes title through if provided`, async () => {
   const title = 'test title';
 
   const createJobMock = jest.fn();
-  await compatibilityShim(createJobMock)({ title, relativeUrls: ['/something'] }, null, createMockRequest());
+  await compatibilityShim(createJobMock)(
+    { title, relativeUrls: ['/something'] },
+    null,
+    createMockRequest()
+  );
 
   expect(mockLogger.warning.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
@@ -57,7 +61,11 @@ test(`gets the title from the savedObject`, async () => {
     },
   });
 
-  await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, mockRequest);
+  await compatibilityShim(createJobMock)(
+    { objectType: 'search', savedObjectId: 'abc' },
+    null,
+    mockRequest
+  );
 
   expect(mockLogger.warning.mock.calls.length).toBe(2);
   expect(mockLogger.warning.mock.calls[0][0]).toEqual(
@@ -107,7 +115,11 @@ test(`logs no warnings when title and relativeUrls is passed`, async () => {
   const createJobMock = jest.fn();
   const mockRequest = createMockRequest();
 
-  await compatibilityShim(createJobMock)({ title: 'Phenomenal Dashboard', relativeUrls: ['/abc', '/def'] }, null, mockRequest);
+  await compatibilityShim(createJobMock)(
+    { title: 'Phenomenal Dashboard', relativeUrls: ['/abc', '/def'] },
+    null,
+    mockRequest
+  );
 
   expect(mockLogger.warning.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
@@ -124,7 +136,7 @@ test(`logs warning if title can not be provided`, async () => {
   expect(mockLogger.warning.mock.calls.length).toBe(1);
   expect(mockLogger.warning.mock.calls[0][0]).toEqual(
     `A title parameter should be provided with the job generation request. Please ` +
-    `use Kibana to regenerate your POST URL to have a title included in the PDF.`
+      `use Kibana to regenerate your POST URL to have a title included in the PDF.`
   );
 });
 
@@ -136,11 +148,15 @@ test(`logs deprecations when generating the title/relativeUrl using the savedObj
   const mockRequest = createMockRequest();
   mockRequest.getSavedObjectsClient().get.mockReturnValue({
     attributes: {
-      title: ''
-    }
+      title: '',
+    },
   });
 
-  await compatibilityShim(createJobMock)({ objectType: 'search', savedObjectId: 'abc' }, null, mockRequest);
+  await compatibilityShim(createJobMock)(
+    { objectType: 'search', savedObjectId: 'abc' },
+    null,
+    mockRequest
+  );
 
   expect(mockLogger.warning.mock.calls.length).toBe(2);
   expect(mockLogger.warning.mock.calls[0][0]).toEqual(
@@ -159,7 +175,11 @@ test(`passes objectType through`, async () => {
   const mockRequest = createMockRequest();
 
   const objectType = 'foo';
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls: ['/something'], objectType }, null, mockRequest);
+  await compatibilityShim(createJobMock)(
+    { title: 'test', relativeUrls: ['/something'], objectType },
+    null,
+    mockRequest
+  );
 
   expect(mockLogger.warning.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);
@@ -190,7 +210,11 @@ const testSavedObjectRelativeUrl = (objectType, expectedUrl) => {
     const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
     const createJobMock = jest.fn();
 
-    await compatibilityShim(createJobMock)({ title: 'test', objectType, savedObjectId: 'abc', }, null, null);
+    await compatibilityShim(createJobMock)(
+      { title: 'test', objectType, savedObjectId: 'abc' },
+      null,
+      null
+    );
 
     expect(mockLogger.warning.mock.calls.length).toBe(1);
     expect(mockLogger.warning.mock.calls[0][0]).toEqual(
@@ -212,7 +236,11 @@ test(`appends the queryString to the relativeUrl when generating from the savedO
   const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
   const createJobMock = jest.fn();
 
-  await compatibilityShim(createJobMock)({ title: 'test', objectType: 'search', savedObjectId: 'abc', queryString: 'foo=bar' }, null, null);
+  await compatibilityShim(createJobMock)(
+    { title: 'test', objectType: 'search', savedObjectId: 'abc', queryString: 'foo=bar' },
+    null,
+    null
+  );
 
   expect(mockLogger.warning.mock.calls.length).toBe(1);
   expect(mockLogger.warning.mock.calls[0][0]).toEqual(
@@ -221,7 +249,9 @@ test(`appends the queryString to the relativeUrl when generating from the savedO
   expect(mockLogger.error.mock.calls.length).toBe(0);
 
   expect(createJobMock.mock.calls.length).toBe(1);
-  expect(createJobMock.mock.calls[0][0].relativeUrls).toEqual(['/app/kibana#/discover/abc?foo=bar']);
+  expect(createJobMock.mock.calls[0][0].relativeUrls).toEqual([
+    '/app/kibana#/discover/abc?foo=bar',
+  ]);
 });
 
 test(`throw an Error if the objectType, savedObjectId and relativeUrls are provided`, async () => {
@@ -229,12 +259,16 @@ test(`throw an Error if the objectType, savedObjectId and relativeUrls are provi
   const compatibilityShim = compatibilityShimFactory(createMockServer(), mockLogger);
   const createJobMock = jest.fn();
 
-  const promise = compatibilityShim(createJobMock)({
-    title: 'test',
-    objectType: 'something',
-    relativeUrls: ['/something'],
-    savedObjectId: 'abc',
-  }, null, null);
+  const promise = compatibilityShim(createJobMock)(
+    {
+      title: 'test',
+      objectType: 'something',
+      relativeUrls: ['/something'],
+      savedObjectId: 'abc',
+    },
+    null,
+    null
+  );
 
   await expect(promise).rejects.toBeDefined();
 });
@@ -248,7 +282,11 @@ test(`passes headers and request through`, async () => {
   const headers = {};
   const request = createMockRequest();
 
-  await compatibilityShim(createJobMock)({ title: 'test', relativeUrls: ['/something'] }, headers, request);
+  await compatibilityShim(createJobMock)(
+    { title: 'test', relativeUrls: ['/something'] },
+    headers,
+    request
+  );
 
   expect(mockLogger.warning.mock.calls.length).toBe(0);
   expect(mockLogger.error.mock.calls.length).toBe(0);

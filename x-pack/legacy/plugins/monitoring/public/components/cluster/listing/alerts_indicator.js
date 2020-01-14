@@ -17,29 +17,40 @@ const LOW_SEVERITY = 0;
 export function AlertsIndicator({ alerts }) {
   if (alerts && alerts.count > 0) {
     const severity = (() => {
-      if (alerts.high > 0) { return HIGH_SEVERITY; }
-      if (alerts.medium > 0) { return MEDIUM_SEVERITY; }
+      if (alerts.high > 0) {
+        return HIGH_SEVERITY;
+      }
+      if (alerts.medium > 0) {
+        return MEDIUM_SEVERITY;
+      }
       return LOW_SEVERITY;
     })();
     const severityIcon = mapSeverity(severity);
     const tooltipText = (() => {
       switch (severity) {
         case HIGH_SEVERITY:
-          return i18n.translate('xpack.monitoring.cluster.listing.alertsInticator.highSeverityTooltip', {
-            defaultMessage: 'There are some critical cluster issues that require your immediate attention!'
-          });
+          return i18n.translate(
+            'xpack.monitoring.cluster.listing.alertsInticator.highSeverityTooltip',
+            {
+              defaultMessage:
+                'There are some critical cluster issues that require your immediate attention!',
+            }
+          );
         case MEDIUM_SEVERITY:
           return i18n.translate(
             'xpack.monitoring.cluster.listing.alertsInticator.mediumSeverityTooltip',
             {
-              defaultMessage: 'There are some issues that might have impact on your cluster.'
+              defaultMessage: 'There are some issues that might have impact on your cluster.',
             }
           );
         default:
           // might never show
-          return i18n.translate('xpack.monitoring.cluster.listing.alertsInticator.lowSeverityTooltip', {
-            defaultMessage: 'There are some low-severity cluster issues'
-          });
+          return i18n.translate(
+            'xpack.monitoring.cluster.listing.alertsInticator.lowSeverityTooltip',
+            {
+              defaultMessage: 'There are some low-severity cluster issues',
+            }
+          );
       }
     })();
 
@@ -57,9 +68,12 @@ export function AlertsIndicator({ alerts }) {
 
   return (
     <EuiToolTip
-      content={i18n.translate('xpack.monitoring.cluster.listing.alertsInticator.clearStatusTooltip', {
-        defaultMessage: 'Cluster status is clear!'
-      })}
+      content={i18n.translate(
+        'xpack.monitoring.cluster.listing.alertsInticator.clearStatusTooltip',
+        {
+          defaultMessage: 'Cluster status is clear!',
+        }
+      )}
       position="bottom"
     >
       <EuiHealth color="success" data-test-subj="alertIcon">

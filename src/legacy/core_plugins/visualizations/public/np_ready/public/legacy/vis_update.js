@@ -37,7 +37,7 @@ const updateVisualizationConfig = (stateConfig, config) => {
     boundsMargin: defaultYExtents ? config.boundsMargin : 0,
     min: isUserDefinedYAxis ? config.yAxis.min : undefined,
     max: isUserDefinedYAxis ? config.yAxis.max : undefined,
-    mode: mode
+    mode: mode,
   };
 
   // update series options
@@ -50,7 +50,7 @@ const updateVisualizationConfig = (stateConfig, config) => {
     interpolate: interpolate,
     drawLinesBetweenPoints: config.drawLinesBetweenPoints,
     showCircles: config.showCircles,
-    radiusRatio: config.radiusRatio
+    radiusRatio: config.radiusRatio,
   };
 };
 

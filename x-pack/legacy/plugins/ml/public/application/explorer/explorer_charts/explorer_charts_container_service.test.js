@@ -43,8 +43,8 @@ jest.mock('../../services/job_service', () => ({
       mockJobConfigClone.datafeed_config.indices = [`farequote-2017-${jobId}`];
       return mockJobConfigClone;
     },
-    detectorsByJob: mockDetectorsByJob
-  }
+    detectorsByJob: mockDetectorsByJob,
+  },
 }));
 
 jest.mock('../../services/results_service', () => {
@@ -52,7 +52,7 @@ jest.mock('../../services/results_service', () => {
   return {
     mlResultsService: {
       getMetricData(indices) {
-      // this is for 'call anomalyChangeListener with actual series config'
+        // this is for 'call anomalyChangeListener with actual series config'
         if (indices[0] === 'farequote-2017') {
           return of(mockSeriesPromisesResponse[0][0]);
         }
@@ -66,163 +66,115 @@ jest.mock('../../services/results_service', () => {
         return of(mockSeriesPromisesResponse[0][2]);
       },
       getEventDistributionData(indices) {
-      // this is for 'call anomalyChangeListener with actual series config'
+        // this is for 'call anomalyChangeListener with actual series config'
         if (indices[0] === 'farequote-2017') {
           return Promise.resolve([]);
         }
         // this is for 'filtering should skip values of null' and
         // resolves with a dummy object to trigger the processing
         // of the event distribution chartdata filtering
-        return Promise.resolve([{
-          entity: 'mock'
-        }]);
-      }
-    }
+        return Promise.resolve([
+          {
+            entity: 'mock',
+          },
+        ]);
+      },
+    },
   };
 });
 
 jest.mock('../../util/string_utils', () => ({
-  mlEscape(d) { return d; }
+  mlEscape(d) {
+    return d;
+  },
 }));
 
 jest.mock('../legacy_utils', () => ({
-  getChartContainerWidth() { return 1140; }
+  getChartContainerWidth() {
+    return 1140;
+  },
 }));
 
 jest.mock('ui/chrome', () => ({
-  getBasePath: (path) => path,
+  getBasePath: path => path,
   getUiSettingsClient: () => ({
-    get: () => null
+    get: () => null,
   }),
 }));
 
-import { explorerChartsContainerServiceFactory, getDefaultChartsData } from './explorer_charts_container_service';
+jest.mock('../explorer_dashboard_service', () => ({
+  explorerService: {
+    setCharts: jest.fn(),
+  },
+}));
+
+import { anomalyDataChange, getDefaultChartsData } from './explorer_charts_container_service';
+import { explorerService } from '../explorer_dashboard_service';
 
 describe('explorerChartsContainerService', () => {
-  test('Initialize factory', (done) => {
-    explorerChartsContainerServiceFactory(callback);
+  afterEach(() => {
+    explorerService.setCharts.mockClear();
+  });
 
-    function callback(data) {
-      expect(data).toEqual(getDefaultChartsData());
+  test('call anomalyChangeListener with empty series config', done => {
+    anomalyDataChange([], 1486656000000, 1486670399999);
+
+    setImmediate(() => {
+      expect(explorerService.setCharts.mock.calls.length).toBe(1);
+      expect(explorerService.setCharts.mock.calls[0][0]).toStrictEqual({
+        ...getDefaultChartsData(),
+        chartsPerRow: 2,
+      });
       done();
-    }
-  });
-
-  test('call anomalyChangeListener with empty series config', (done) => {
-    // callback will be called multiple times.
-    // the callbackData array contains the expected data values for each consecutive call.
-    const callbackData = [];
-    callbackData.push(getDefaultChartsData());
-    callbackData.push({
-      ...getDefaultChartsData(),
-      chartsPerRow: 2
     });
-
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
-
-    anomalyDataChangeListener(
-      [],
-      1486656000000,
-      1486670399999
-    );
-
-    function callback(data) {
-      if (callbackData.length > 0) {
-        expect(data).toEqual({
-          ...callbackData.shift()
-        });
-      }
-      if (callbackData.length === 0) {
-        done();
-      }
-    }
   });
 
-  test('call anomalyChangeListener with actual series config', (done) => {
-    let callbackCount = 0;
-    const expectedTestCount = 3;
+  test('call anomalyChangeListener with actual series config', done => {
+    anomalyDataChange(mockAnomalyChartRecords, 1486656000000, 1486670399999);
 
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
-
-    anomalyDataChangeListener(
-      mockAnomalyChartRecords,
-      1486656000000,
-      1486670399999
-    );
-
-    function callback(data) {
-      callbackCount++;
-      expect(data).toMatchSnapshot();
-      if (callbackCount === expectedTestCount) {
-        done();
-      }
-    }
+    setImmediate(() => {
+      expect(explorerService.setCharts.mock.calls.length).toBe(2);
+      expect(explorerService.setCharts.mock.calls[0][0]).toMatchSnapshot();
+      expect(explorerService.setCharts.mock.calls[1][0]).toMatchSnapshot();
+      done();
+    });
   });
 
-  test('filtering should skip values of null', (done) => {
-    let callbackCount = 0;
-    const expectedTestCount = 3;
-
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
-
-    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map((d) => {
+  test('filtering should skip values of null', done => {
+    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map(d => {
       d.job_id = 'mock-job-id-distribution';
       return d;
     });
 
-    anomalyDataChangeListener(
-      mockAnomalyChartRecordsClone,
-      1486656000000,
-      1486670399999
-    );
+    anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
 
-    function callback(data) {
-      callbackCount++;
+    setImmediate(() => {
+      expect(explorerService.setCharts.mock.calls.length).toBe(2);
+      expect(explorerService.setCharts.mock.calls[0][0].seriesToPlot.length).toBe(1);
+      expect(explorerService.setCharts.mock.calls[1][0].seriesToPlot.length).toBe(1);
 
-      if (callbackCount === 1) {
-        expect(data.seriesToPlot).toHaveLength(0);
-      }
-      if (callbackCount === 3) {
-        expect(data.seriesToPlot).toHaveLength(1);
-
-        // the mock source dataset has a length of 115. one data point has a value of `null`,
-        // and another one `0`. the received dataset should have a length of 114,
-        // it should remove the datapoint with `null` and keep the one with `0`.
-        const chartData = data.seriesToPlot[0].chartData;
-        expect(chartData).toHaveLength(114);
-        expect(chartData.filter(d => d.value === 0)).toHaveLength(1);
-        expect(chartData.filter(d => d.value === null)).toHaveLength(0);
-      }
-      if (callbackCount === expectedTestCount) {
-        done();
-      }
-    }
+      // the mock source dataset has a length of 115. one data point has a value of `null`,
+      // and another one `0`. the received dataset should have a length of 114,
+      // it should remove the datapoint with `null` and keep the one with `0`.
+      const chartData = explorerService.setCharts.mock.calls[1][0].seriesToPlot[0].chartData;
+      expect(chartData).toHaveLength(114);
+      expect(chartData.filter(d => d.value === 0)).toHaveLength(1);
+      expect(chartData.filter(d => d.value === null)).toHaveLength(0);
+      done();
+    });
   });
 
-  test('field value with trailing dot should not throw an error', (done) => {
-    let callbackCount = 0;
-    const expectedTestCount = 3;
-
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
-
+  test('field value with trailing dot should not throw an error', done => {
     const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords);
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
 
     expect(() => {
-      anomalyDataChangeListener(
-        mockAnomalyChartRecordsClone,
-        1486656000000,
-        1486670399999
-      );
-
+      anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
     }).not.toThrow();
 
-    function callback() {
-      callbackCount++;
-
-      if (callbackCount === expectedTestCount) {
-        done();
-      }
-    }
+    setImmediate(() => {
+      expect(explorerService.setCharts.mock.calls.length).toBe(2);
+      done();
+    });
   });
 });

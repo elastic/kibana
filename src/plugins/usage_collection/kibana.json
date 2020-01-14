@@ -3,5 +3,5 @@
   "configPath": ["usageCollection"],
   "version": "kibana",
   "server": true,
-  "ui": false
+  "ui": true
 }

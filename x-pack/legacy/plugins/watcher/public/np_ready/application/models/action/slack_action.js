@@ -13,13 +13,13 @@ export class SlackAction extends BaseAction {
     super(props);
 
     const toArray = get(props, 'to');
-    this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
+    this.to = isArray(toArray) ? toArray : toArray && [toArray];
 
     const defaultText = i18n.translate('xpack.watcher.models.slackAction.defaultText', {
       defaultMessage: 'Watch [{context}] has exceeded the threshold',
       values: {
         context: '{{ctx.metadata.name}}',
-      }
+      },
     });
     this.text = get(props, 'text', props.ignoreDefaults ? null : defaultText);
   }
@@ -36,17 +36,18 @@ export class SlackAction extends BaseAction {
   get upstreamJson() {
     const result = super.upstreamJson;
     const to = this.to && this.to.length > 0 ? this.to : undefined;
-    const message = this.text || to
-      ? {
-        text: this.text,
-        to,
-      }
-      : {};
+    const message =
+      this.text || to
+        ? {
+            text: this.text,
+            to,
+          }
+        : {};
     Object.assign(result, {
       to,
       text: this.text,
       slack: {
-        message
+        message,
       },
     });
 
@@ -59,7 +60,7 @@ export class SlackAction extends BaseAction {
       defaultMessage: 'Sample Slack message sent {toList}.',
       values: {
         toList: toList ? `to ${toList}` : '',
-      }
+      },
     });
   }
 
@@ -69,7 +70,7 @@ export class SlackAction extends BaseAction {
       defaultMessage: 'Failed to send sample Slack message {toList}.',
       values: {
         toList: toList ? `to ${toList}` : '',
-      }
+      },
     });
   }
 
@@ -78,13 +79,13 @@ export class SlackAction extends BaseAction {
   }
 
   static typeName = i18n.translate('xpack.watcher.models.slackAction.TypeName', {
-    defaultMessage: 'Slack'
+    defaultMessage: 'Slack',
   });
   static iconClass = 'logoSlack';
   static selectMessage = i18n.translate('xpack.watcher.models.slackAction.selectMessageText', {
-    defaultMessage: 'Send a message to a Slack user or channel.'
+    defaultMessage: 'Send a message to a Slack user or channel.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.slackAction.simulateButtonLabel', {
-    defaultMessage: 'Send a sample message'
+    defaultMessage: 'Send a sample message',
   });
 }

@@ -11,21 +11,15 @@ export interface MlSetupDependencies {
   npData: ReturnType<DataPlugin['start']>;
 }
 
-export interface MlStartDependencies {
-  __LEGACY: {
-    Storage: any;
-    xpackInfo: any;
-  };
-}
-
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   setup(core: CoreSetup, { npData }: MlSetupDependencies) {
     core.application.register({
       id: 'ml',
       title: 'Machine learning',
       async mount(context, params) {
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application/app');
-        return renderApp(context, {
+        return renderApp(coreStart, depsStart, {
           ...params,
           indexPatterns: npData.indexPatterns,
           npData,

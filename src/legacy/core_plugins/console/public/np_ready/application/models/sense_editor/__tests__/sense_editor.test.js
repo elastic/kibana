@@ -28,29 +28,26 @@ const utils = require('../../../../lib/utils/utils');
 describe('Editor', () => {
   let input;
 
-  beforeEach(function () {
+  beforeEach(function() {
     // Set up our document body
-    document.body.innerHTML =
-      `<div>
+    document.body.innerHTML = `<div>
         <div id="ConAppEditor" />
         <div id="ConAppEditorActions" />
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    input = create(
-      document.querySelector('#ConAppEditor')
-    );
+    input = create(document.querySelector('#ConAppEditor'));
     $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
   });
-  afterEach(function () {
+  afterEach(function() {
     $(input.getCoreEditor().getContainer()).hide();
     input.autocomplete._test.addChangeListener();
   });
 
   let testCount = 0;
 
-  const callWithEditorMethod = (editorMethod, fn) => async (done) => {
+  const callWithEditorMethod = (editorMethod, fn) => async done => {
     const results = await input[editorMethod]();
     fn(results, done);
   };
@@ -72,7 +69,7 @@ describe('Editor', () => {
       data = prefix;
     }
 
-    test('Utils test ' + id + ' : ' + name, async function (done) {
+    test('Utils test ' + id + ' : ' + name, async function(done) {
       await input.update(data, true);
       testToRun(done);
     });
@@ -84,7 +81,7 @@ describe('Editor', () => {
       expected = [expected];
     }
 
-    _.each(requests, function (r) {
+    _.each(requests, function(r) {
       delete r.range;
     });
     expect(requests).toEqual(expected);
@@ -106,10 +103,7 @@ describe('Editor', () => {
 
   const multiDocRequest = {
     prefix: 'POST _bulk',
-    data_as_array: [
-      '{ "index": { "_index": "index", "_type":"type" } }',
-      '{ "field": 1 }',
-    ],
+    data_as_array: ['{ "index": { "_index": "index", "_type":"type" } }', '{ "field": 1 }'],
   };
   multiDocRequest.data = multiDocRequest.data_as_array.join('\n');
 
@@ -118,7 +112,10 @@ describe('Editor', () => {
     simpleRequest.prefix,
     simpleRequest.data,
     callWithEditorMethod('getRequestRange', (range, done) => {
-      compareRequest(range, { start: { lineNumber: 1, column: 1 }, end: { lineNumber: 4, column: 2 } });
+      compareRequest(range, {
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 4, column: 2 },
+      });
       done();
     })
   );
@@ -145,7 +142,7 @@ describe('Editor', () => {
     callWithEditorMethod('getRequestRange', (range, done) => {
       expect(range).toEqual({
         start: { lineNumber: 1, column: 1 },
-        end: { lineNumber: 4, column: 2 }
+        end: { lineNumber: 4, column: 2 },
       });
       done();
     })
@@ -167,7 +164,6 @@ describe('Editor', () => {
     })
   );
 
-
   utilsTest(
     'simple request range, suffixed with spaces',
     simpleRequest.prefix + '   ',
@@ -175,7 +171,7 @@ describe('Editor', () => {
     callWithEditorMethod('getRequestRange', (range, done) => {
       compareRequest(range, {
         start: { lineNumber: 1, column: 1 },
-        end: { lineNumber: 4, column: 2 }
+        end: { lineNumber: 4, column: 2 },
       });
       done();
     })
@@ -197,7 +193,6 @@ describe('Editor', () => {
     })
   );
 
-
   utilsTest(
     'single line request range',
     singleLineRequest.prefix,
@@ -205,7 +200,7 @@ describe('Editor', () => {
     callWithEditorMethod('getRequestRange', (range, done) => {
       compareRequest(range, {
         start: { lineNumber: 1, column: 1 },
-        end: { lineNumber: 2, column: 33 }
+        end: { lineNumber: 2, column: 33 },
       });
       done();
     })
@@ -312,13 +307,7 @@ describe('Editor', () => {
 
   const scriptRequest = {
     prefix: 'POST _search',
-    data: [
-      '{',
-      '   "query": { "script": """',
-      '   some script ',
-      '   """}',
-      '}',
-    ].join('\n'),
+    data: ['{', '   "query": { "script": """', '   some script ', '   """}', '}'].join('\n'),
   };
 
   utilsTest(
@@ -333,7 +322,6 @@ describe('Editor', () => {
       done();
     })
   );
-
 
   utilsTest(
     'simple request data',
@@ -352,12 +340,11 @@ describe('Editor', () => {
   );
 
   function multiReqTest(name, editorInput, range, expected) {
-    utilsTest('multi request select - ' + name, editorInput, async function (done) {
+    utilsTest('multi request select - ' + name, editorInput, async function(done) {
       const requests = await input.getRequestsInRange(range, false);
       // convert to format returned by request.
-      _.each(expected, function (req) {
-        req.data =
-          req.data == null ? [] : [JSON.stringify(req.data, null, 2)];
+      _.each(expected, function(req) {
+        req.data = req.data == null ? [] : [JSON.stringify(req.data, null, 2)];
       });
 
       compareRequest(requests, expected);
@@ -464,7 +451,7 @@ describe('Editor', () => {
   );
 
   function multiReqCopyAsCurlTest(name, editorInput, range, expected) {
-    utilsTest('multi request copy as curl - ' + name, editorInput, async function (done) {
+    utilsTest('multi request copy as curl - ' + name, editorInput, async function(done) {
       const curl = await input.getRequestsAsCURL('http://localhost:9200', range);
       expect(curl).toEqual(expected);
       done();

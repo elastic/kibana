@@ -179,13 +179,13 @@ export class StepTimeField extends Component {
 
     const timeFieldOptions = timeFields
       ? [
-        { text: '', value: '' },
-        ...timeFields.map(timeField => ({
-          text: timeField.display,
-          value: timeField.fieldName,
-          disabled: timeFields.isDisabled,
-        })),
-      ]
+          { text: '', value: '' },
+          ...timeFields.map(timeField => ({
+            text: timeField.display,
+            value: timeField.fieldName,
+            disabled: timeFields.isDisabled,
+          })),
+        ]
       : [];
 
     const showTimeField = !timeFields || timeFields.length > 1;

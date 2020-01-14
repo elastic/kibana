@@ -9,10 +9,9 @@ import { VectorLayer } from './vector_layer';
 import { HeatmapStyle } from './styles/heatmap/heatmap_style';
 import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../common/constants';
 
-const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
+const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__'; //unique name to store scaled value for weighting
 
 export class HeatmapLayer extends VectorLayer {
-
   static type = LAYER_TYPE.HEATMAP;
 
   static createDescriptor(options) {
@@ -58,7 +57,7 @@ export class HeatmapLayer extends VectorLayer {
         id: heatmapLayerId,
         type: 'heatmap',
         source: this.getId(),
-        paint: {}
+        paint: {},
       });
     }
 
@@ -78,7 +77,8 @@ export class HeatmapLayer extends VectorLayer {
         max = Math.max(featureCollection.features[i].properties[propertyKey], max);
       }
       for (let i = 0; i < featureCollection.features.length; i++) {
-        featureCollection.features[i].properties[SCALED_PROPERTY_NAME] = featureCollection.features[i].properties[propertyKey] / max;
+        featureCollection.features[i].properties[SCALED_PROPERTY_NAME] =
+          featureCollection.features[i].properties[propertyKey] / max;
       }
       mbSourceAfter.setData(featureCollection);
     }
@@ -88,7 +88,7 @@ export class HeatmapLayer extends VectorLayer {
       mbMap,
       layerId: heatmapLayerId,
       propertyName: SCALED_PROPERTY_NAME,
-      resolution: this._source.getGridResolution()
+      resolution: this._source.getGridResolution(),
     });
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
     mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);

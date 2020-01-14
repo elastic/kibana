@@ -20,39 +20,34 @@
 import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  const createStatsMetric = (eventName) => ({
-    key: ReportManager.createMetricKey({ appName: 'myApp', type: METRIC_TYPE.CLICK, eventName }),
+  const createStatsMetric = eventName => ({
     eventName,
     appName: 'myApp',
     type: METRIC_TYPE.CLICK,
-    stats: { sum: 1, avg: 1, min: 1, max: 1 },
+    count: 1,
   });
 
-  const createUserAgentMetric = (appName) => ({
-    key: ReportManager.createMetricKey({ appName, type: METRIC_TYPE.USER_AGENT }),
+  const createUserAgentMetric = appName => ({
     appName,
     type: METRIC_TYPE.USER_AGENT,
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
+    userAgent:
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
   });
 
   describe('ui_metric API', () => {
-
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
+      const reportManager = new ReportManager();
       const uiStatsMetric = createStatsMetric('myEvent');
-      const report = {
-        uiStatsMetrics: {
-          [uiStatsMetric.key]: uiStatsMetric,
-        }
-      };
+      const { report } = reportManager.assignReports([uiStatsMetric]);
       await supertest
-        .post('/api/telemetry/report')
+        .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
-        .send(report)
+        .send({ report })
         .expect(200);
 
       const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
@@ -61,26 +56,23 @@ export default function ({ getService }) {
     });
 
     it('supports multiple events', async () => {
+      const reportManager = new ReportManager();
       const userAgentMetric = createUserAgentMetric('kibana');
       const uiStatsMetric1 = createStatsMetric('myEvent');
       const hrTime = process.hrtime();
       const nano = hrTime[0] * 1000000000 + hrTime[1];
       const uniqueEventName = `myEvent${nano}`;
       const uiStatsMetric2 = createStatsMetric(uniqueEventName);
-      const report = {
-        userAgent: {
-          [userAgentMetric.key]: userAgentMetric,
-        },
-        uiStatsMetrics: {
-          [uiStatsMetric1.key]: uiStatsMetric1,
-          [uiStatsMetric2.key]: uiStatsMetric2,
-        }
-      };
+      const { report } = reportManager.assignReports([
+        userAgentMetric,
+        uiStatsMetric1,
+        uiStatsMetric2,
+      ]);
       await supertest
-        .post('/api/telemetry/report')
+        .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
-        .send(report)
+        .send({ report })
         .expect(200);
 
       const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
@@ -91,4 +83,3 @@ export default function ({ getService }) {
     });
   });
 }
-

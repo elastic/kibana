@@ -8,7 +8,7 @@ import { first, get } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { getIdFieldName } from './get_id_field_name';
+import { findInventoryFields } from '../../../../common/inventory_models';
 
 export const getPodNodeName = async (
   framework: KibanaFramework,
@@ -17,6 +17,7 @@ export const getPodNodeName = async (
   nodeId: string,
   nodeType: 'host' | 'pod' | 'container'
 ): Promise<string | undefined> => {
+  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -28,7 +29,7 @@ export const getPodNodeName = async (
       query: {
         bool: {
           filter: [
-            { match: { [getIdFieldName(sourceConfiguration, nodeType)]: nodeId } },
+            { match: { [fields.id]: nodeId } },
             { exists: { field: `kubernetes.node.name` } },
           ],
         },

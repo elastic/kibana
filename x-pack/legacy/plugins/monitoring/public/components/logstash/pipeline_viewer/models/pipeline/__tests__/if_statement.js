@@ -22,8 +22,8 @@ describe('IfStatement class', () => {
           id: 'pipeline',
           column: 10,
           line: 17,
-          protocol: 'str'
-        }
+          protocol: 'str',
+        },
       };
 
       ifVertex = {
@@ -31,14 +31,13 @@ describe('IfStatement class', () => {
         hasExplicitId: false,
         name: '[is_rt] == "RT"',
         stats: {},
-        meta
+        meta,
       };
       pipelineStage = 'output';
     });
 
     describe('with one true statement, no false statements', () => {
       beforeEach(() => {
-
         // output {
         //   if (...) {
         //     elasticsearch {
@@ -51,7 +50,7 @@ describe('IfStatement class', () => {
         esVertex.pipelineStage = 'output';
 
         ifVertex.trueOutgoingVertex = esVertex;
-        ifVertex.trueOutgoingVertices = [ esVertex ];
+        ifVertex.trueOutgoingVertices = [esVertex];
         ifVertex.falseOutgoingVertices = [];
       });
 
@@ -73,7 +72,6 @@ describe('IfStatement class', () => {
 
     describe('with one true statement, one else statement', () => {
       beforeEach(() => {
-
         // output {
         //   if (...) {
         //     elasticsearch {
@@ -94,8 +92,8 @@ describe('IfStatement class', () => {
         ifVertex.trueOutgoingVertex = esVertex;
         ifVertex.falseOutgoingVertex = terminalVertex;
 
-        ifVertex.trueOutgoingVertices = [ esVertex ];
-        ifVertex.falseOutgoingVertices = [ terminalVertex ];
+        ifVertex.trueOutgoingVertices = [esVertex];
+        ifVertex.falseOutgoingVertices = [terminalVertex];
       });
 
       it('creates a IfStatement from vertex props', () => {
@@ -116,7 +114,6 @@ describe('IfStatement class', () => {
 
     describe('with two true statements, no false statements', () => {
       beforeEach(() => {
-
         // output {
         //   if (...) {
         //     elasticsearch {
@@ -128,14 +125,17 @@ describe('IfStatement class', () => {
         //   }
         // }
 
-        const s3Vertex = new PluginVertex({ edgesByFrom: {}, }, { id: 's3_output' });
+        const s3Vertex = new PluginVertex({ edgesByFrom: {} }, { id: 's3_output' });
         s3Vertex.pipelineStage = 'output';
 
-        const esVertex = new PluginVertex({ edgesByFrom: { es_output: [ { to: s3Vertex } ] } }, { id: 'es_output' });
+        const esVertex = new PluginVertex(
+          { edgesByFrom: { es_output: [{ to: s3Vertex }] } },
+          { id: 'es_output' }
+        );
         esVertex.pipelineStage = 'output';
 
         ifVertex.trueOutgoingVertex = esVertex;
-        ifVertex.trueOutgoingVertices = [ esVertex ];
+        ifVertex.trueOutgoingVertices = [esVertex];
         ifVertex.falseOutgoingVertices = [];
       });
 
@@ -157,7 +157,6 @@ describe('IfStatement class', () => {
 
     describe('with one true statement, two else statements', () => {
       beforeEach(() => {
-
         // output {
         //   if (...) {
         //     elasticsearch {
@@ -175,17 +174,20 @@ describe('IfStatement class', () => {
         const esVertex = new PluginVertex({ edgesByFrom: {} }, { id: 'es_output' });
         esVertex.pipelineStage = 'output';
 
-        const s3Vertex = new PluginVertex({ edgesByFrom: {}, }, { id: 's3_output' });
+        const s3Vertex = new PluginVertex({ edgesByFrom: {} }, { id: 's3_output' });
         s3Vertex.pipelineStage = 'output';
 
-        const terminalVertex = new PluginVertex({ edgesByFrom: { terminal: [ { to: s3Vertex } ] } }, { id: 'terminal' });
+        const terminalVertex = new PluginVertex(
+          { edgesByFrom: { terminal: [{ to: s3Vertex }] } },
+          { id: 'terminal' }
+        );
         terminalVertex.pipelineStage = 'output';
 
         ifVertex.trueOutgoingVertex = esVertex;
         ifVertex.falseOutgoingVertex = terminalVertex;
 
-        ifVertex.trueOutgoingVertices = [ esVertex ];
-        ifVertex.falseOutgoingVertices = [ terminalVertex ];
+        ifVertex.trueOutgoingVertices = [esVertex];
+        ifVertex.falseOutgoingVertices = [terminalVertex];
       });
 
       it('creates a IfStatement from vertex props', () => {

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
@@ -18,7 +16,7 @@ export class DataRecognizer extends Component {
     super(props);
 
     this.state = {
-      results: []
+      results: [],
     };
 
     this.indexPattern = props.indexPattern;
@@ -30,8 +28,8 @@ export class DataRecognizer extends Component {
   componentDidMount() {
     // once the mount is complete, call the recognize endpoint to see if the index format is known to us,
     ml.recognizeIndex({ indexPatternTitle: this.indexPattern.title })
-      .then((resp) => {
-        const results = resp.map((r) => (
+      .then(resp => {
+        const results = resp.map(r => (
           <RecognizedResult
             key={r.id}
             config={r}
@@ -47,20 +45,16 @@ export class DataRecognizer extends Component {
         }
 
         this.setState({
-          results
+          results,
         });
       })
-      .catch((e) => {
+      .catch(e => {
         console.error('Error attempting to recognize index', e);
       });
   }
 
   render() {
-    return (
-      <>
-        {this.state.results}
-      </>
-    );
+    return <>{this.state.results}</>;
   }
 }
 

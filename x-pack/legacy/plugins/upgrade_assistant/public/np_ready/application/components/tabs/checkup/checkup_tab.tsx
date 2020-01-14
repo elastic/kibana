@@ -8,8 +8,6 @@ import { find } from 'lodash';
 import React, { Fragment } from 'react';
 
 import {
-  // @ts-ignore
-  EuiAccordion,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLink,

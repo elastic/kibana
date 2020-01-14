@@ -16,24 +16,28 @@ describe.skip('get_all_stats', () => {
   const callCluster = sinon.stub();
   const server = {
     config: sinon.stub().returns({
-      get: sinon.stub().withArgs('xpack.monitoring.elasticsearch.index_pattern').returns('.monitoring-es-N-*')
-        .withArgs('xpack.monitoring.kibana.index_pattern').returns('.monitoring-kibana-N-*')
-        .withArgs('xpack.monitoring.logstash.index_pattern').returns('.monitoring-logstash-N-*')
-        .withArgs('xpack.monitoring.max_bucket_size').returns(size)
+      get: sinon
+        .stub()
+        .withArgs('xpack.monitoring.elasticsearch.index_pattern')
+        .returns('.monitoring-es-N-*')
+        .withArgs('xpack.monitoring.kibana.index_pattern')
+        .returns('.monitoring-kibana-N-*')
+        .withArgs('xpack.monitoring.logstash.index_pattern')
+        .returns('.monitoring-logstash-N-*')
+        .withArgs('xpack.monitoring.max_bucket_size')
+        .returns(size),
     }),
   };
 
   const esClusters = [
     { cluster_uuid: 'a' },
     { cluster_uuid: 'b', random_setting_not_removed: false },
-    { cluster_uuid: 'c', random_setting_not_removed: true }
+    { cluster_uuid: 'c', random_setting_not_removed: true },
   ];
   const kibanaStats = {
     a: {
       count: 2,
-      versions: [
-        { version: '1.2.3-alpha1', count: 2 }
-      ],
+      versions: [{ version: '1.2.3-alpha1', count: 2 }],
       cloud: [
         {
           name: 'bare-metal',
@@ -41,74 +45,68 @@ describe.skip('get_all_stats', () => {
           vms: 2,
           vm_types: [
             { vm_type: 'x1', count: 2 },
-            { vm_type: 'ps4', count: 2 }
+            { vm_type: 'ps4', count: 2 },
           ],
           regions: [
             { region: 'abc-123', count: 2 },
-            { region: 'def-123', count: 2 }
+            { region: 'def-123', count: 2 },
           ],
-          zones: [
-            { zone: 'def-123-A', count: 2 }
-          ]
-        }
-      ]
+          zones: [{ zone: 'def-123-A', count: 2 }],
+        },
+      ],
     },
     b: {
       count: 3,
       versions: [
         { version: '2.3.4-rc1', count: 1 },
-        { version: '2.3.4', count: 1 }
-      ]
-    }
+        { version: '2.3.4', count: 1 },
+      ],
+    },
   };
   const logstashStats = {
     a: {
       count: 23,
-      versions: [
-        { version: '1.2.3-beta1', count: 23 }
-      ]
+      versions: [{ version: '1.2.3-beta1', count: 23 }],
     },
     b: {
       count: 32,
       versions: [
         { version: '2.3.4-beta2', count: 15 },
-        { version: '2.3.4', count: 17 }
-      ]
-    }
+        { version: '2.3.4', count: 17 },
+      ],
+    },
   };
   const expectedClusters = [
     {
       cluster_uuid: 'a',
       stack_stats: {
         kibana: kibanaStats.a,
-        logstash: logstashStats.a
-      }
+        logstash: logstashStats.a,
+      },
     },
     {
       cluster_uuid: 'b',
       random_setting_not_removed: false,
       stack_stats: {
         kibana: kibanaStats.b,
-        logstash: logstashStats.b
-      }
+        logstash: logstashStats.b,
+      },
     },
     {
       cluster_uuid: 'c',
-      random_setting_not_removed: true
-    }
+      random_setting_not_removed: true,
+    },
   ];
 
   describe('getAllStats', () => {
     it('returns clusters', async () => {
       const clusterUuidsResponse = {
-        aggregations: { cluster_uuids: { buckets: [ { key: 'a' } ] } }
+        aggregations: { cluster_uuids: { buckets: [{ key: 'a' }] } },
       };
       const esStatsResponse = {
         hits: {
-          hits: [
-            { _id: 'a', _source: { cluster_uuid: 'a' } }
-          ]
-        }
+          hits: [{ _id: 'a', _source: { cluster_uuid: 'a' } }],
+        },
       };
       const kibanaStatsResponse = {
         hits: {
@@ -118,17 +116,17 @@ describe.skip('get_all_stats', () => {
                 cluster_uuid: 'a',
                 kibana_stats: {
                   kibana: {
-                    version: '1.2.3-alpha1'
+                    version: '1.2.3-alpha1',
                   },
                   os: {
                     platform: 'win',
-                    platformRelease: 'win-10.0'
-                  }
-                }
-              }
-            }
-          ]
-        }
+                    platformRelease: 'win-10.0',
+                  },
+                },
+              },
+            },
+          ],
+        },
       };
       const logstashStatsResponse = {
         hits: {
@@ -138,13 +136,13 @@ describe.skip('get_all_stats', () => {
                 cluster_uuid: 'a',
                 logstash_stats: {
                   logstash: {
-                    version: '2.3.4-beta2'
-                  }
-                }
-              }
-            }
-          ]
-        }
+                    version: '2.3.4-beta2',
+                  },
+                },
+              },
+            },
+          ],
+        },
       };
       const allClusters = [
         {
@@ -152,46 +150,47 @@ describe.skip('get_all_stats', () => {
           stack_stats: {
             kibana: {
               count: 1,
-              versions: [
-                { version: '1.2.3-alpha1', count: 1 }
-              ],
+              versions: [{ version: '1.2.3-alpha1', count: 1 }],
               os: {
                 platforms: [{ platform: 'win', count: 1 }],
                 platformReleases: [{ platformRelease: 'win-10.0', count: 1 }],
                 distros: [],
                 distroReleases: [],
               },
-              cloud: undefined
+              cloud: undefined,
             },
             logstash: {
               count: 1,
-              versions: [
-                { version: '2.3.4-beta2', count: 1 }
-              ],
+              versions: [{ version: '2.3.4-beta2', count: 1 }],
               os: {
                 platforms: [],
                 platformReleases: [],
                 distros: [],
                 distroReleases: [],
               },
-              cloud: undefined
-            }
-          }
-        }
+              cloud: undefined,
+            },
+          },
+        },
       ];
 
-      callCluster.withArgs('search')
-        .onCall(0).returns(Promise.resolve(clusterUuidsResponse))
-        .onCall(1).returns(Promise.resolve(esStatsResponse))
-        .onCall(2).returns(Promise.resolve(kibanaStatsResponse))
-        .onCall(3).returns(Promise.resolve(logstashStatsResponse));
+      callCluster
+        .withArgs('search')
+        .onCall(0)
+        .returns(Promise.resolve(clusterUuidsResponse))
+        .onCall(1)
+        .returns(Promise.resolve(esStatsResponse))
+        .onCall(2)
+        .returns(Promise.resolve(kibanaStatsResponse))
+        .onCall(3)
+        .returns(Promise.resolve(logstashStatsResponse));
 
       expect(await getAllStats({ callCluster, server, start, end })).to.eql(allClusters);
     });
 
     it('returns empty clusters', async () => {
       const clusterUuidsResponse = {
-        aggregations: { cluster_uuids: { buckets: [ ] } }
+        aggregations: { cluster_uuids: { buckets: [] } },
       };
 
       callCluster.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
@@ -222,15 +221,13 @@ describe.skip('get_all_stats', () => {
           count: 2,
           versions: [
             { version: '5.4.0', count: 1 },
-            { version: '5.5.0', count: 1 }
-          ]
+            { version: '5.5.0', count: 1 },
+          ],
         },
         b: {
           count: 2,
-          versions: [
-            { version: '5.4.0', count: 2 }
-          ]
-        }
+          versions: [{ version: '5.4.0', count: 2 }],
+        },
       };
 
       addStackStats(cluster, stats, 'xyz');

@@ -30,7 +30,7 @@ import esResponse from './__fixtures__/es_field_caps_response.json';
 
 describe('index_patterns/field_capabilities/field_caps_response', () => {
   let sandbox;
-  beforeEach(() => sandbox = sinon.createSandbox());
+  beforeEach(() => (sandbox = sinon.createSandbox()));
   afterEach(() => sandbox.restore());
 
   describe('readFieldCapsResponse()', () => {
@@ -40,26 +40,29 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(fields).toHaveLength(24);
       });
 
-      it('includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, ' +
-        'and subType of each field', () => {
-        const responseClone = cloneDeep(esResponse);
-        // try to trick it into including an extra field
-        responseClone.fields['@timestamp'].date.extraCapability = true;
-        const fields = readFieldCapsResponse(responseClone);
+      it(
+        'includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, ' +
+          'and subType of each field',
+        () => {
+          const responseClone = cloneDeep(esResponse);
+          // try to trick it into including an extra field
+          responseClone.fields['@timestamp'].date.extraCapability = true;
+          const fields = readFieldCapsResponse(responseClone);
 
-        fields.forEach(field => {
-          const fieldWithoutOptionalKeys = omit(field, 'conflictDescriptions', 'subType');
+          fields.forEach(field => {
+            const fieldWithoutOptionalKeys = omit(field, 'conflictDescriptions', 'subType');
 
-          expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
-            'name',
-            'type',
-            'esTypes',
-            'searchable',
-            'aggregatable',
-            'readFromDocValues'
-          ]);
-        });
-      });
+            expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
+              'name',
+              'type',
+              'esTypes',
+              'searchable',
+              'aggregatable',
+              'readFromDocValues',
+            ]);
+          });
+        }
+      );
 
       it('calls shouldReadFieldFromDocValues() for each non-conflict field', () => {
         sandbox.spy(shouldReadFieldFromDocValuesNS, 'shouldReadFieldFromDocValues');
@@ -79,7 +82,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
 
       it('should include the original ES types found for each field across indices', () => {
         const fields = readFieldCapsResponse(esResponse);
-        fields.forEach((field) => {
+        fields.forEach(field => {
           const fixtureTypes = Object.keys(esResponse.fields[field.name]);
           expect(field.esTypes).toEqual(fixtureTypes);
         });
@@ -97,14 +100,10 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
             aggregatable: true,
             readFromDocValues: false,
             conflictDescriptions: {
-              boolean: [
-                'index1'
-              ],
-              keyword: [
-                'index2'
-              ]
-            }
-          }
+              boolean: ['index1'],
+              keyword: ['index2'],
+            },
+          },
         ]);
       });
 
@@ -154,12 +153,10 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
       it('handles fields that are both nested and multi', () => {
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'nested_object_parent.child.keyword');
-        expect(child).toHaveProperty(
-          'subType',
-          {
-            nested: { path: 'nested_object_parent' },
-            multi: { parent: 'nested_object_parent.child' }
-          });
+        expect(child).toHaveProperty('subType', {
+          nested: { path: 'nested_object_parent' },
+          multi: { parent: 'nested_object_parent.child' },
+        });
       });
 
       it('does not include the field actually mapped as nested itself', () => {

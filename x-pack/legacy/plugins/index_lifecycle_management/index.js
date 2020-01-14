@@ -15,13 +15,15 @@ import { indexLifecycleDataEnricher } from './index_lifecycle_data';
 
 export function indexLifecycleManagement(kibana) {
   return new kibana.Plugin({
-    config: (Joi) => {
+    config: Joi => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
         }).default(),
-        filteredNodeAttributes: Joi.array().items(Joi.string()).default([])
+        filteredNodeAttributes: Joi.array()
+          .items(Joi.string())
+          .default([]),
       }).default();
     },
     id: PLUGIN_ID,
@@ -34,7 +36,7 @@ export function indexLifecycleManagement(kibana) {
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          ilmUiEnabled: config.get('xpack.ilm.ui.enabled')
+          ilmUiEnabled: config.get('xpack.ilm.ui.enabled'),
         };
       },
     },
@@ -45,7 +47,7 @@ export function indexLifecycleManagement(kibana) {
         config.get('xpack.index_management.enabled')
       );
     },
-    init: function (server) {
+    init: function(server) {
       registerLicenseChecker(server);
       registerTemplatesRoutes(server);
       registerNodesRoutes(server);

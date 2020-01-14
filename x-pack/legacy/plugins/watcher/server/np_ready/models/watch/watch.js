@@ -21,7 +21,7 @@ set(WatchTypes, WATCH_TYPES.THRESHOLD, ThresholdWatch);
 export class Watch {
   static getWatchTypes = () => {
     return WatchTypes;
-  }
+  };
 
   // from Kibana
   static fromDownstreamJson(json) {
@@ -30,19 +30,22 @@ export class Watch {
         i18n.translate('xpack.watcher.models.watch.typePropertyMissingBadRequestMessage', {
           defaultMessage: 'JSON argument must contain an {type} property',
           values: {
-            type: 'type'
-          }
-        }),
+            type: 'type',
+          },
+        })
       );
     }
 
     const WatchType = WatchTypes[json.type];
     if (!WatchType) {
       throw badRequest(
-        i18n.translate('xpack.watcher.models.watch.unknownWatchTypeLoadingAttemptBadRequestMessage', {
-          defaultMessage: 'Attempted to load unknown type {jsonType}',
-          values: { jsonType: json.type }
-        }),
+        i18n.translate(
+          'xpack.watcher.models.watch.unknownWatchTypeLoadingAttemptBadRequestMessage',
+          {
+            defaultMessage: 'Attempted to load unknown type {jsonType}',
+            values: { jsonType: json.type },
+          }
+        )
       );
     }
 
@@ -56,9 +59,9 @@ export class Watch {
         i18n.translate('xpack.watcher.models.watch.watchJsonPropertyMissingBadRequestMessage', {
           defaultMessage: 'JSON argument must contain a {watchJson} property',
           values: {
-            watchJson: 'watchJson'
-          }
-        }),
+            watchJson: 'watchJson',
+          },
+        })
       );
     }
 

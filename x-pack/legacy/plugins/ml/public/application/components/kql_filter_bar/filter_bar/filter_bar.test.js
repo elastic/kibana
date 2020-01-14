@@ -9,7 +9,6 @@ import { shallow, mount } from 'enzyme';
 import { keyCodes } from '@elastic/eui';
 import { FilterBar } from './filter_bar';
 
-
 const defaultProps = {
   disabled: false,
   initialValue: '',
@@ -17,26 +16,27 @@ const defaultProps = {
   isLoading: false,
   onChange: () => {},
   onSubmit: () => {},
-  suggestions: [{
-    description: '<p>Test description for fieldValueOne</p>',
-    end: 1,
-    start: 0,
-    text: 'fieldValueOne',
-    type: 'field'
-  },
-  {
-    description: '<p>Test description for fieldValueTwo</p>',
-    end: 1,
-    start: 0,
-    text: 'fieldValueTwo',
-    type: 'field'
-  }]
+  suggestions: [
+    {
+      description: '<p>Test description for fieldValueOne</p>',
+      end: 1,
+      start: 0,
+      text: 'fieldValueOne',
+      type: 'field',
+    },
+    {
+      description: '<p>Test description for fieldValueTwo</p>',
+      end: 1,
+      start: 0,
+      text: 'fieldValueTwo',
+      type: 'field',
+    },
+  ],
 };
 
 describe('FilterBar', () => {
-
   test('snapshot suggestions not shown', () => {
-    const wrapper = shallow(<FilterBar {...defaultProps}/>);
+    const wrapper = shallow(<FilterBar {...defaultProps} />);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -75,10 +75,9 @@ describe('FilterBar', () => {
     const wrapper = shallow(<FilterBar {...defaultProps} />);
     wrapper.setState({ isSuggestionsVisible: true, value: 'f', index: 0 });
     const searchBar = wrapper.find('EuiFieldSearch');
-    searchBar.simulate('keydown', { preventDefault: () => { }, keyCode: keyCodes.DOWN });
+    searchBar.simulate('keydown', { preventDefault: () => {}, keyCode: keyCodes.DOWN });
     wrapper.update();
 
     expect(wrapper.state('index')).toEqual(1);
   });
-
 });

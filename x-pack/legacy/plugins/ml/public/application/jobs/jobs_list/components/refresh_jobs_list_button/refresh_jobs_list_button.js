@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 
 export const RefreshJobsListButton = ({ onRefreshClick, isRefreshing }) => (
   <EuiButtonEmpty
@@ -21,14 +16,11 @@ export const RefreshJobsListButton = ({ onRefreshClick, isRefreshing }) => (
     onClick={onRefreshClick}
     isLoading={isRefreshing}
   >
-    <FormattedMessage
-      id="xpack.ml.jobsList.refreshButtonLabel"
-      defaultMessage="Refresh"
-    />
+    <FormattedMessage id="xpack.ml.jobsList.refreshButtonLabel" defaultMessage="Refresh" />
   </EuiButtonEmpty>
 );
 
 RefreshJobsListButton.propTypes = {
   onRefreshClick: PropTypes.func.isRequired,
-  isRefreshing: PropTypes.bool.isRequired
+  isRefreshing: PropTypes.bool.isRequired,
 };

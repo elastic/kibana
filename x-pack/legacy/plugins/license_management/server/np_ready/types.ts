@@ -5,7 +5,7 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { ElasticsearchPlugin } from '../../../../../../src/legacy/core_plugins/elasticsearch';
 
 export interface Dependencies {

@@ -16,7 +16,7 @@ export class JiraAction extends BaseAction {
       defaultMessage: 'Watch [{context}] has exceeded the threshold',
       values: {
         context: '{{ctx.metadata.name}}',
-      }
+      },
     });
 
     this.summary = get(props, 'summary', props.ignoreDefaults ? null : defaultSummary);
@@ -71,7 +71,7 @@ export class JiraAction extends BaseAction {
           },
           summary: this.summary,
         },
-      }
+      },
     });
 
     return result;
@@ -101,6 +101,6 @@ export class JiraAction extends BaseAction {
     defaultMessage: 'Create an issue in Atlassian’s Jira Software.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.jiraAction.simulateButtonLabel', {
-    defaultMessage: 'Create a sample Jira issue'
+    defaultMessage: 'Create a sample Jira issue',
   });
 }

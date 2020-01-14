@@ -24,4 +24,3 @@ exports.SOURCE_DIR = resolve(exports.ROOT_DIR, 'src');
 exports.BUILD_DIR = resolve(exports.ROOT_DIR, 'target');
 
 exports.BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
-

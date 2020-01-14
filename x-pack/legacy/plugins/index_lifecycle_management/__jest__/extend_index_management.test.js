@@ -14,6 +14,8 @@ import {
   ilmFilterExtension,
   ilmSummaryExtension,
 } from '../public/extend_index_management';
+
+jest.mock('ui/new_platform');
 const indexWithoutLifecyclePolicy = {
   health: 'yellow',
   status: 'open',
@@ -83,7 +85,7 @@ const indexWithLifecycleError = {
     step_info: {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
-      stack_trace: 'fakestacktrace'
+      stack_trace: 'fakestacktrace',
     },
     phase_execution: {
       policy: 'testy',
@@ -130,7 +132,7 @@ describe('remove lifecycle action extension', () => {
   test('should return null when some indices have index lifecycle policy', () => {
     const extension = removeLifecyclePolicyActionExtension([
       indexWithoutLifecyclePolicy,
-      indexWithLifecyclePolicy
+      indexWithLifecyclePolicy,
     ]);
     expect(extension).toBeNull();
   });
@@ -172,10 +174,7 @@ describe('ilm banner extension', () => {
     expect(extension).toBeNull();
   });
   test('should return null no index has lifecycle error', () => {
-    const extension = ilmBannerExtension([
-      indexWithoutLifecyclePolicy,
-      indexWithLifecyclePolicy,
-    ]);
+    const extension = ilmBannerExtension([indexWithoutLifecyclePolicy, indexWithLifecyclePolicy]);
     expect(extension).toBeNull();
   });
   test('should return extension when any index has lifecycle error', () => {

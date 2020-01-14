@@ -526,13 +526,10 @@ export class IndexPattern implements IIndexPattern {
             }
 
             if (unresolvedCollision) {
-              const message = i18n.translate(
-                'data.indexPatterns.unableWriteLabel',
-                {
-                  defaultMessage:
-                    'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-                } // eslint-disable-line max-len
-              );
+              const message = i18n.translate('data.indexPatterns.unableWriteLabel', {
+                defaultMessage:
+                  'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
+              });
               const { toasts } = getNotifications();
 
               toasts.addDanger(message);

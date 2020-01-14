@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
-import {
-  KuiTextArea,
-} from '../../../../components';
+import React, { Component } from 'react';
+import { KuiTextArea } from '../../../../components';
 
 class KuiTextAreaNonResizableExample extends Component {
   state = {
@@ -31,7 +27,7 @@ class KuiTextAreaNonResizableExample extends Component {
 
   handleChange = (event, key) => {
     this.setState({ [key]: event.target.value });
-  }
+  };
 
   render() {
     return (

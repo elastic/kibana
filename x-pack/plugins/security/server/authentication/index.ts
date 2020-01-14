@@ -16,7 +16,7 @@ import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { LegacyAPI } from '../plugin';
 import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
-import { SecurityLicense } from '../licensing';
+import { SecurityLicense } from '../../common/licensing';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';

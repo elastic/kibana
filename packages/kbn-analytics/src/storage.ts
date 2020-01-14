@@ -19,7 +19,13 @@
 
 import { Report } from './report';
 
-export type Storage = Map<string, any>;
+export interface Storage<T = any, S = void> {
+  get: (key: string) => T | null;
+  set: (key: string, value: T) => S;
+  remove: (key: string) => T | null;
+  clear: () => void;
+}
+
 export class ReportStorageManager {
   storageKey: string;
   private storage?: Storage;

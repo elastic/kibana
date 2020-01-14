@@ -54,7 +54,10 @@ export default async function install(settings, logger) {
 
     await prepareExternalProjectDependencies(settings.workingPath);
 
-    await renamePlugin(settings.workingPath, path.join(settings.pluginDir, settings.plugins[0].name));
+    await renamePlugin(
+      settings.workingPath,
+      path.join(settings.pluginDir, settings.plugins[0].name)
+    );
 
     logger.log('Plugin installation complete');
   } catch (err) {

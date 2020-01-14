@@ -26,7 +26,7 @@ export class ExecuteDetails {
       ignore_condition: this.ignoreCondition,
       alternative_input: this.alternativeInput,
       action_modes: this.actionModes,
-      record_execution: this.recordExecution
+      record_execution: this.recordExecution,
     };
 
     return omit(result, isUndefined);
@@ -37,4 +37,3 @@ export class ExecuteDetails {
     return new ExecuteDetails(downstreamJson);
   }
 }
-

@@ -37,7 +37,7 @@ describe('shortUrlLookupProvider', () => {
       get: sandbox.stub(),
       create: sandbox.stub().returns(Promise.resolve({ id: ID })),
       update: sandbox.stub(),
-      errors: SavedObjectsClient.errors
+      errors: SavedObjectsClient.errors,
     };
 
     req = { getSavedObjectsClient: () => savedObjectsClient };

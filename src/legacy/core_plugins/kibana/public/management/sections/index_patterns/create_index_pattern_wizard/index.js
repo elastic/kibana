@@ -20,7 +20,7 @@
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
-import 'ui/index_patterns';
+import { npStart } from 'ui/new_platform';
 import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 
@@ -29,7 +29,7 @@ import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from 
 uiRoutes.when('/management/kibana/index_pattern', {
   template: angularTemplate,
   k7Breadcrumbs: getCreateBreadcrumbs,
-  controller: function ($scope, $injector) {
+  controller: function($scope, $injector) {
     // Wait for the directives to execute
     const kbnUrl = $injector.get('kbnUrl');
     const Private = $injector.get('Private');
@@ -41,7 +41,7 @@ uiRoutes.when('/management/kibana/index_pattern', {
       const services = {
         config: $injector.get('config'),
         es: $injector.get('es'),
-        indexPatterns: $injector.get('indexPatterns'),
+        indexPatterns: npStart.plugins.data.indexPatterns,
         $http: $injector.get('$http'),
         savedObjectsClient: Private(SavedObjectsClientProvider),
         indexPatternCreationType,

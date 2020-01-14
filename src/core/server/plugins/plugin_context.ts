@@ -145,8 +145,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       createContextContainer: deps.context.createContextContainer,
     },
     elasticsearch: {
-      adminClient$: deps.elasticsearch.adminClient$,
-      dataClient$: deps.elasticsearch.dataClient$,
+      adminClient: deps.elasticsearch.adminClient,
+      dataClient: deps.elasticsearch.dataClient,
       createClient: deps.elasticsearch.createClient,
     },
     http: {
@@ -161,6 +161,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
+      csp: deps.http.csp,
       isTlsEnabled: deps.http.isTlsEnabled,
     },
     savedObjects: {
@@ -171,6 +172,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       register: deps.uiSettings.register,
+    },
+    uuid: {
+      getInstanceUuid: deps.uuid.getInstanceUuid,
     },
   };
 }
@@ -196,6 +200,11 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
-    savedObjects: { getScopedClient: deps.savedObjects.getScopedClient },
+    savedObjects: {
+      getScopedClient: deps.savedObjects.getScopedClient,
+    },
+    uiSettings: {
+      asScopedToClient: deps.uiSettings.asScopedToClient,
+    },
   };
 }

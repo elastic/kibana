@@ -21,7 +21,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('empty_kibana');
       await PageObjects.common.navigateToApp('home');
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     describe('space with no features disabled', () => {
@@ -41,9 +41,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Stack Monitoring');
       });
 
@@ -74,9 +72,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Stack Monitoring');
       });
 

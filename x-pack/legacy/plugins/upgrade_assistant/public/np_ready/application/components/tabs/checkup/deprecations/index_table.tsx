@@ -75,7 +75,9 @@ export class IndexDeprecationTableUI extends React.Component<
       columns.push(this.actionsColumn);
     }
 
-    const sorting = { sort: { field: sortField, direction: sortDirection } };
+    const sorting = {
+      sort: { field: sortField as keyof IndexDeprecationDetails, direction: sortDirection },
+    };
     const pagination = {
       pageIndex,
       pageSize,

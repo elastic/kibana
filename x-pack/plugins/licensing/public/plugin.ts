@@ -7,7 +7,8 @@ import { Subject, Subscription } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { ILicense, LicensingPluginSetup } from '../common/types';
+import { ILicense } from '../common/types';
+import { LicensingPluginSetup } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';

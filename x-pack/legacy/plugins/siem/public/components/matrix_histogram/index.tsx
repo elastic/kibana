@@ -14,13 +14,14 @@ import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
 import { ChartSeriesData } from '../charts/common';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { useUiSetting$ } from '../../lib/kibana';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
+import { InspectButtonContainer } from '../inspect';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { MatrixHistogramProps, MatrixHistogramDataTypes } from './types';
 
-export const MatrixHistogram = ({
+export const MatrixHistogramComponent: React.FC<MatrixHistogramProps<MatrixHistogramDataTypes>> = ({
   data,
   dataKey,
   endDate,
@@ -35,7 +36,7 @@ export const MatrixHistogram = ({
   updateDateRange,
   yTickFormatter,
   showLegend,
-}: MatrixHistogramProps<MatrixHistogramDataTypes>) => {
+}) => {
   const barchartConfigs = getBarchartConfigs({
     from: startDate,
     to: endDate,
@@ -44,8 +45,7 @@ export const MatrixHistogram = ({
     yTickFormatter,
     showLegend,
   });
-  const [showInspect, setShowInspect] = useState(false);
-  const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
+  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   const [loadingInitial, setLoadingInitial] = useState(false);
 
   const barChartData: ChartSeriesData[] = getCustomChartData(data, mapping);
@@ -54,39 +54,33 @@ export const MatrixHistogram = ({
     if (totalCount >= 0 && loadingInitial) {
       setLoadingInitial(false);
     }
-  }, [loading]);
+  }, [loading, loadingInitial, totalCount]);
 
   return (
-    <Panel
-      data-test-subj={`${dataKey}Panel`}
-      loading={loading}
-      onMouseEnter={() => setShowInspect(true)}
-      onMouseLeave={() => setShowInspect(false)}
-    >
-      <HeaderSection
-        id={id}
-        title={title}
-        showInspect={!loadingInitial && showInspect}
-        subtitle={!loadingInitial && subtitle}
-      />
+    <InspectButtonContainer show={!loadingInitial}>
+      <Panel data-test-subj={`${dataKey}Panel`} loading={loading}>
+        <HeaderSection id={id} title={title} subtitle={!loadingInitial && subtitle} />
 
-      {loadingInitial ? (
-        <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
-      ) : (
-        <>
-          <BarChart barChart={barChartData} configs={barchartConfigs} />
+        {loadingInitial ? (
+          <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
+        ) : (
+          <>
+            <BarChart barChart={barChartData} configs={barchartConfigs} />
 
-          {loading && (
-            <Loader
-              overlay
-              overlayBackground={
-                darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-              }
-              size="xl"
-            />
-          )}
-        </>
-      )}
-    </Panel>
+            {loading && (
+              <Loader
+                overlay
+                overlayBackground={
+                  darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+                }
+                size="xl"
+              />
+            )}
+          </>
+        )}
+      </Panel>
+    </InspectButtonContainer>
   );
 };
+
+export const MatrixHistogram = React.memo(MatrixHistogramComponent);

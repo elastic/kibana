@@ -22,8 +22,6 @@ import { isNumber } from 'lodash';
 import { npStart } from 'ui/new_platform';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
 
-
-
 export const createTickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
   const fieldFormats = npStart.plugins.data.fieldFormats;
 

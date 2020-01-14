@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { HttpServiceBase } from '../../../../../../../core/public';
+import { HttpSetup } from '../../../../../../../core/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
 
 interface SetupDependencies {
-  httpClient: HttpServiceBase;
+  httpClient: HttpSetup;
 }
 
 /**

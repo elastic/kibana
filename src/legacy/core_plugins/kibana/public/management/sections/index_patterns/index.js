@@ -67,7 +67,7 @@ export const destroyIndexPatternList = () => {
 };
 
 const indexPatternsResolutions = {
-  indexPatterns: function (Private) {
+  indexPatterns: function(Private) {
     const savedObjectsClient = Private(SavedObjectsClientProvider);
 
     return savedObjectsClient
@@ -109,12 +109,12 @@ uiRoutes.when('/management/kibana/index_patterns', {
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules
   .get('apps/management')
-  .directive('kbnManagementIndexPatterns', function ($route, config, kbnUrl) {
+  .directive('kbnManagementIndexPatterns', function($route, config, kbnUrl) {
     return {
       restrict: 'E',
       transclude: true,
       template: indexTemplate,
-      link: async function ($scope) {
+      link: async function($scope) {
         const indexPatternCreationOptions = await managementSetup.indexPattern.creation.getIndexPatternCreationOptions(
           url => {
             $scope.$evalAsync(() => kbnUrl.change(url));

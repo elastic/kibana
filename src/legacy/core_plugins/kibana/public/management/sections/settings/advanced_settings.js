@@ -20,13 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  Comparators,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  Query,
-} from '@elastic/eui';
+import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
@@ -39,7 +33,7 @@ import {
   registerDefaultComponents,
   PAGE_TITLE_COMPONENT,
   PAGE_SUBTITLE_COMPONENT,
-  PAGE_FOOTER_COMPONENT
+  PAGE_FOOTER_COMPONENT,
 } from './components/default_component_registry';
 import { getSettingsComponent } from './components/component_registry';
 
@@ -48,7 +42,7 @@ export class AdvancedSettings extends Component {
     config: PropTypes.object.isRequired,
     query: PropTypes.string,
     enableSaving: PropTypes.bool.isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -94,7 +88,7 @@ export class AdvancedSettings extends Component {
   mapConfig(config) {
     const all = config.getAll();
     return Object.entries(all)
-      .map((setting) => {
+      .map(setting => {
         return toEditableConfig({
           def: setting[1],
           name: setting[0],
@@ -103,7 +97,7 @@ export class AdvancedSettings extends Component {
           isOverridden: config.isOverridden(setting[0]),
         });
       })
-      .filter((c) => !c.readonly)
+      .filter(c => !c.readonly)
       .sort(Comparators.property('name', Comparators.default('asc')));
   }
 
@@ -120,18 +114,18 @@ export class AdvancedSettings extends Component {
 
   saveConfig = (name, value) => {
     return this.props.config.set(name, value);
-  }
+  };
 
-  clearConfig = (name) => {
+  clearConfig = name => {
     return this.props.config.remove(name);
-  }
+  };
 
   onQueryChange = ({ query }) => {
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
     });
-  }
+  };
 
   clearQuery = () => {
     this.setState({
@@ -139,13 +133,13 @@ export class AdvancedSettings extends Component {
       footerQueryMatched: false,
       filteredSettings: this.groupedSettings,
     });
-  }
+  };
 
-  onFooterQueryMatchChange = (matched) => {
+  onFooterQueryMatchChange = matched => {
     this.setState({
-      footerQueryMatched: matched
+      footerQueryMatched: matched,
     });
-  }
+  };
 
   render() {
     const { filteredSettings, query, footerQueryMatched } = this.state;
@@ -161,11 +155,7 @@ export class AdvancedSettings extends Component {
             <PageTitle />
           </EuiFlexItem>
           <EuiFlexItem>
-            <Search
-              query={query}
-              categories={this.categories}
-              onQueryChange={this.onQueryChange}
-            />
+            <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <PageSubtitle />
@@ -173,10 +163,7 @@ export class AdvancedSettings extends Component {
         <CallOuts />
         <EuiSpacer size="m" />
 
-        <AdvancedSettingsVoiceAnnouncement
-          queryText={query.text}
-          settings={filteredSettings}
-        />
+        <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 
         <Form
           settings={filteredSettings}
@@ -188,7 +175,11 @@ export class AdvancedSettings extends Component {
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
         />
-        <PageFooter query={query} onQueryMatchChange={this.onFooterQueryMatchChange} enableSaving={this.props.enableSaving} />
+        <PageFooter
+          query={query}
+          onQueryMatchChange={this.onFooterQueryMatchChange}
+          enableSaving={this.props.enableSaving}
+        />
       </div>
     );
   }

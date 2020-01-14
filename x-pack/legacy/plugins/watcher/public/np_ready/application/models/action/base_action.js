@@ -17,7 +17,7 @@ export class BaseAction {
   get upstreamJson() {
     const result = {
       id: this.id,
-      type: this.type
+      type: this.type,
     };
 
     return result;
@@ -39,8 +39,8 @@ export class BaseAction {
     return i18n.translate('xpack.watcher.models.baseAction.simulateMessage', {
       defaultMessage: 'Action {id} simulated successfully',
       values: {
-        id: this.id
-      }
+        id: this.id,
+      },
     });
   }
 

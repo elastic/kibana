@@ -38,7 +38,7 @@ const getSavedObjectRelativeUrl = (objectType, savedObjectId, queryString) => {
 
 export function compatibilityShimFactory(server, logger) {
   return function compatibilityShimFactory(createJobFn) {
-    return async function (
+    return async function(
       {
         savedObjectId, // deprecating
         queryString, // deprecating
@@ -46,12 +46,11 @@ export function compatibilityShimFactory(server, logger) {
         objectType,
         title,
         relativeUrls,
-        layout
+        layout,
       },
       headers,
       request
     ) {
-
       // input validation and deprecation logging
       if (savedObjectId) {
         if (typeof savedObjectId !== 'string') {
@@ -103,8 +102,8 @@ export function compatibilityShimFactory(server, logger) {
           } else {
             logger.warning(
               `A title parameter should be provided with the job generation ` +
-              `request. Please use Kibana to regenerate your POST URL to have a ` +
-              `title included in the PDF.`
+                `request. Please use Kibana to regenerate your POST URL to have a ` +
+                `title included in the PDF.`
             );
           }
         }

@@ -7,28 +7,23 @@
 import { copyPersistentState } from './util';
 
 describe('store/util', () => {
-
-
-
   describe('copyPersistentState', () => {
-
     it('should ignore state preceded by double underscores', async () => {
       const copy = copyPersistentState({
         foo: 'bar',
         nested: {
           bar: 'foo',
-          __bar: 'foo__'
-        }
+          __bar: 'foo__',
+        },
       });
 
       expect(copy).toEqual({
         foo: 'bar',
         nested: {
-          bar: 'foo'
-        }
+          bar: 'foo',
+        },
       });
     });
-
 
     it('should copy null value correctly', async () => {
       const copy = copyPersistentState({
@@ -36,18 +31,17 @@ describe('store/util', () => {
         nested: {
           nullval: null,
           bar: 'foo',
-          __bar: 'foo__'
-        }
+          __bar: 'foo__',
+        },
       });
 
       expect(copy).toEqual({
         foo: 'bar',
         nested: {
           nullval: null,
-          bar: 'foo'
-        }
+          bar: 'foo',
+        },
       });
     });
-
   });
 });

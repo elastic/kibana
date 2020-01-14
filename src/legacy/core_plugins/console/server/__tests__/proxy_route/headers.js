@@ -55,7 +55,7 @@ describe('Console Proxy Route', () => {
     await Promise.all(teardowns.splice(0).map(fn => fn()));
   });
 
-  describe('headers', function () {
+  describe('headers', function() {
     this.timeout(Infinity);
 
     it('forwards the remote header info', async () => {

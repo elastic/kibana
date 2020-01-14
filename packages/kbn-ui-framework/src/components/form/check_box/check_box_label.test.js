@@ -22,53 +22,31 @@ import { render, shallow } from 'enzyme';
 import { requiredProps } from '../../../test/required_props';
 import sinon from 'sinon';
 
-import {
-  KuiCheckBoxLabel,
-} from './check_box_label';
+import { KuiCheckBoxLabel } from './check_box_label';
 
 describe('KuiCheckBoxLabel', () => {
   test('renders', () => {
-    const component = (
-      <KuiCheckBoxLabel
-        onChange={()=>{}}
-        {...requiredProps}
-      />
-    );
+    const component = <KuiCheckBoxLabel onChange={() => {}} {...requiredProps} />;
 
     expect(render(component)).toMatchSnapshot();
   });
 
   describe('Props', () => {
     test('text', () => {
-      const component = (
-        <KuiCheckBoxLabel
-          text="text"
-          onChange={()=>{}}
-        />
-      );
+      const component = <KuiCheckBoxLabel text="text" onChange={() => {}} />;
 
       expect(render(component)).toMatchSnapshot();
     });
 
     describe('isChecked', () => {
       test('true renders checked', () => {
-        const component = (
-          <KuiCheckBoxLabel
-            isChecked
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiCheckBoxLabel isChecked onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
 
       test('false renders unchecked', () => {
-        const component = (
-          <KuiCheckBoxLabel
-            isChecked={false}
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiCheckBoxLabel isChecked={false} onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
@@ -76,23 +54,13 @@ describe('KuiCheckBoxLabel', () => {
 
     describe('isDisabled', () => {
       test('true renders disabled', () => {
-        const component = (
-          <KuiCheckBoxLabel
-            isDisabled
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiCheckBoxLabel isDisabled onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
 
       test('false renders enabled', () => {
-        const component = (
-          <KuiCheckBoxLabel
-            isDisabled={false}
-            onChange={()=>{}}
-          />
-        );
+        const component = <KuiCheckBoxLabel isDisabled={false} onChange={() => {}} />;
 
         expect(render(component)).toMatchSnapshot();
       });
@@ -102,11 +70,7 @@ describe('KuiCheckBoxLabel', () => {
       test(`is called when checkbox is changed`, () => {
         const onChangeHandler = sinon.spy();
 
-        const wrapper = shallow(
-          <KuiCheckBoxLabel
-            onChange={onChangeHandler}
-          />
-        );
+        const wrapper = shallow(<KuiCheckBoxLabel onChange={onChangeHandler} />);
 
         wrapper.find('KuiCheckBox').simulate('change');
         sinon.assert.calledOnce(onChangeHandler);

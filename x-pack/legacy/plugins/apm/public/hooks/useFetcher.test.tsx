@@ -5,24 +5,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { delay } from '../utils/testHelpers';
+import { delay, MockApmPluginContextWrapper } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
-import { KibanaCoreContext } from '../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'kibana/public';
-import React from 'react';
 
-// Wrap the hook with a provider so it can useKibanaCore
-const wrapper = ({ children }: { children?: React.ReactNode }) => (
-  <KibanaCoreContext.Provider
-    value={
-      ({
-        notifications: { toasts: { addWarning: () => {} } }
-      } as unknown) as LegacyCoreStart
-    }
-  >
-    {children}
-  </KibanaCoreContext.Provider>
-);
+// Wrap the hook with a provider so it can useApmPluginContext
+const wrapper = MockApmPluginContextWrapper;
 
 describe('useFetcher', () => {
   describe('when resolving after 500ms', () => {

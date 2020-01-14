@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, ReplaySubject, combineLatest, of, merge } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 
 import { i18n } from '@kbn/i18n';
@@ -118,16 +118,17 @@ export class ChromeService {
       // combineLatest below regardless of having an application value yet.
       of(isEmbedded),
       application.currentAppId$.pipe(
-        map(
-          appId =>
-            !!appId &&
-            application.availableApps.has(appId) &&
-            !!application.availableApps.get(appId)!.chromeless
+        flatMap(appId =>
+          application.applications$.pipe(
+            map(applications => {
+              return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
+            })
+          )
         )
       )
     );
-    this.isVisible$ = combineLatest(this.appHidden$, this.toggleHidden$).pipe(
-      map(([appHidden, chromeHidden]) => !(appHidden || chromeHidden)),
+    this.isVisible$ = combineLatest([this.appHidden$, this.toggleHidden$]).pipe(
+      map(([appHidden, toggleHidden]) => !(appHidden || toggleHidden)),
       takeUntil(this.stop$)
     );
   }

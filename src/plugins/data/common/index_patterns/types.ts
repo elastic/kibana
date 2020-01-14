@@ -20,6 +20,7 @@
 import { IFieldType } from './fields';
 
 export interface IIndexPattern {
+  [key: string]: any;
   fields: IFieldType[];
   title: string;
   id?: string;

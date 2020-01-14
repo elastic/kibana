@@ -21,33 +21,36 @@ export class MonitoringWatch extends BaseWatch {
   }
 
   get watchJson() {
-    const result = merge(
-      {},
-      super.watchJson
-    );
+    const result = merge({}, super.watchJson);
 
     return result;
   }
 
   getVisualizeQuery() {
     throw badRequest(
-      i18n.translate('xpack.watcher.models.monitoringWatch.getVisualizeQueryCalledBadRequestMessage', {
-        defaultMessage: '{getVisualizeQuery} called for monitoring watch',
-        values: {
-          getVisualizeQuery: 'getVisualizeQuery'
+      i18n.translate(
+        'xpack.watcher.models.monitoringWatch.getVisualizeQueryCalledBadRequestMessage',
+        {
+          defaultMessage: '{getVisualizeQuery} called for monitoring watch',
+          values: {
+            getVisualizeQuery: 'getVisualizeQuery',
+          },
         }
-      }),
+      )
     );
   }
 
   formatVisualizeData() {
     throw badRequest(
-      i18n.translate('xpack.watcher.models.monitoringWatch.formatVisualizeDataCalledBadRequestMessage', {
-        defaultMessage: '{formatVisualizeData} called for monitoring watch',
-        values: {
-          formatVisualizeData: 'formatVisualizeData'
+      i18n.translate(
+        'xpack.watcher.models.monitoringWatch.formatVisualizeDataCalledBadRequestMessage',
+        {
+          defaultMessage: '{formatVisualizeData} called for monitoring watch',
+          values: {
+            formatVisualizeData: 'formatVisualizeData',
+          },
         }
-      }),
+      )
     );
   }
 
@@ -57,31 +60,24 @@ export class MonitoringWatch extends BaseWatch {
       i18n.translate('xpack.watcher.models.monitoringWatch.upstreamJsonCalledBadRequestMessage', {
         defaultMessage: '{upstreamJson} called for monitoring watch',
         values: {
-          upstreamJson: 'upstreamJson'
-        }
-      }),
+          upstreamJson: 'upstreamJson',
+        },
+      })
     );
   }
 
   // To Kibana
   get downstreamJson() {
-    const result = merge(
-      {},
-      super.downstreamJson
-    );
+    const result = merge({}, super.downstreamJson);
 
     return result;
   }
 
   // From Elasticsearch
   static fromUpstreamJson(json) {
-    const props = merge(
-      {},
-      super.getPropsFromUpstreamJson(json),
-      {
-        type: WATCH_TYPES.MONITORING
-      }
-    );
+    const props = merge({}, super.getPropsFromUpstreamJson(json), {
+      type: WATCH_TYPES.MONITORING,
+    });
 
     return new MonitoringWatch(props);
   }
@@ -89,13 +85,15 @@ export class MonitoringWatch extends BaseWatch {
   // From Kibana
   static fromDownstreamJson() {
     throw badRequest(
-      i18n.translate('xpack.watcher.models.monitoringWatch.fromDownstreamJsonCalledBadRequestMessage', {
-        defaultMessage: '{fromDownstreamJson} called for monitoring watch',
-        values: {
-          fromDownstreamJson: 'fromDownstreamJson'
+      i18n.translate(
+        'xpack.watcher.models.monitoringWatch.fromDownstreamJsonCalledBadRequestMessage',
+        {
+          defaultMessage: '{fromDownstreamJson} called for monitoring watch',
+          values: {
+            fromDownstreamJson: 'fromDownstreamJson',
+          },
         }
-      }),
+      )
     );
   }
-
 }

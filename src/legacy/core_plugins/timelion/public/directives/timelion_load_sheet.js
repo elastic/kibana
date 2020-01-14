@@ -21,7 +21,7 @@ import { uiModules } from 'ui/modules';
 import template from 'plugins/timelion/partials/load_sheet.html';
 const app = uiModules.get('apps/timelion', []);
 
-app.directive('timelionLoad', function () {
+app.directive('timelionLoad', function() {
   return {
     replace: true,
     restrict: 'E',

@@ -104,25 +104,12 @@ export class LegacyCoreEditor implements CoreEditor {
     return this.editor.getValue();
   }
 
-  setValue(text: string, forceRetokenize: boolean): Promise<void> {
+  async setValue(text: string, forceRetokenize: boolean): Promise<void> {
     const session = this.editor.getSession();
     session.setValue(text);
-    return new Promise(resolve => {
-      if (!forceRetokenize) {
-        // resolve immediately
-        resolve();
-        return;
-      }
-
-      // force update of tokens, but not on this thread to allow for ace rendering.
-      setTimeout(function() {
-        let i;
-        for (i = 0; i < session.getLength(); i++) {
-          session.getTokens(i);
-        }
-        resolve();
-      });
-    });
+    if (forceRetokenize) {
+      await this.forceRetokenize();
+    }
   }
 
   getLineValue(lineNumber: number): string {
@@ -241,6 +228,20 @@ export class LegacyCoreEditor implements CoreEditor {
     return Boolean((this.editor as any).completer && (this.editor as any).completer.activated);
   }
 
+  private forceRetokenize() {
+    const session = this.editor.getSession();
+    return new Promise(resolve => {
+      // force update of tokens, but not on this thread to allow for ace rendering.
+      setTimeout(function() {
+        let i;
+        for (i = 0; i < session.getLength(); i++) {
+          session.getTokens(i);
+        }
+        resolve();
+      });
+    });
+  }
+
   // eslint-disable-next-line @typescript-eslint/camelcase
   private DO_NOT_USE_onPaste(text: string) {
     if (text && curl.detectCURL(text)) {
@@ -296,30 +297,32 @@ export class LegacyCoreEditor implements CoreEditor {
       // pageY is relative to page, so subtract the offset
       // from pageY to get the new top value
       const offsetFromPage = $(this.editor.container).offset()!.top;
-      const startRow = range.start.lineNumber - 1;
+      const startLine = range.start.lineNumber;
       const startColumn = range.start.column;
-      const firstLine = this.getLineValue(startRow);
+      const firstLine = this.getLineValue(startLine);
       const maxLineLength = this.getWrapLimit() - 5;
       const isWrapping = firstLine.length > maxLineLength;
-      const getScreenCoords = (row: number) =>
-        this.editor.renderer.textToScreenCoordinates(row, startColumn).pageY - offsetFromPage;
-      const topOfReq = getScreenCoords(startRow);
+      const getScreenCoords = (line: number) =>
+        this.editor.renderer.textToScreenCoordinates(line - 1, startColumn).pageY -
+        offsetFromPage +
+        (window.pageYOffset || 0);
+      const topOfReq = getScreenCoords(startLine);
 
       if (topOfReq >= 0) {
         let offset = 0;
         if (isWrapping) {
           // Try get the line height of the text area in pixels.
           const textArea = $(this.editor.container.querySelector('textArea')!);
-          const hasRoomOnNextLine = this.getLineValue(startRow + 1).length < maxLineLength;
+          const hasRoomOnNextLine = this.getLineValue(startLine).length < maxLineLength;
           if (textArea && hasRoomOnNextLine) {
             // Line height + the number of wraps we have on a line.
-            offset += this.getLineValue(startRow).length * textArea.height()!;
+            offset += this.getLineValue(startLine).length * textArea.height()!;
           } else {
-            if (startRow > 0) {
-              this.setActionsBar(getScreenCoords(startRow - 1));
+            if (startLine > 1) {
+              this.setActionsBar(getScreenCoords(startLine - 1));
               return;
             }
-            this.setActionsBar(getScreenCoords(startRow + 1));
+            this.setActionsBar(getScreenCoords(startLine + 1));
             return;
           }
         }

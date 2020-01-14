@@ -27,7 +27,7 @@ export default new Chainable('condition', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'operator', // <, <=, >, >=, ==, !=
@@ -40,39 +40,57 @@ export default new Chainable('condition', {
       suggestions: [
         {
           name: 'eq',
-          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.eqHelpText', {
-            defaultMessage: 'equal',
-          }),
+          help: i18n.translate(
+            'timelion.help.functions.condition.args.operator.suggestions.eqHelpText',
+            {
+              defaultMessage: 'equal',
+            }
+          ),
         },
         {
           name: 'ne',
-          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.neHelpText', {
-            defaultMessage: 'not equal',
-          }),
+          help: i18n.translate(
+            'timelion.help.functions.condition.args.operator.suggestions.neHelpText',
+            {
+              defaultMessage: 'not equal',
+            }
+          ),
         },
         {
           name: 'lt',
-          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.ltHelpText', {
-            defaultMessage: 'less than',
-          }),
+          help: i18n.translate(
+            'timelion.help.functions.condition.args.operator.suggestions.ltHelpText',
+            {
+              defaultMessage: 'less than',
+            }
+          ),
         },
         {
           name: 'lte',
-          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.lteHelpText', {
-            defaultMessage: 'less than equal',
-          }),
+          help: i18n.translate(
+            'timelion.help.functions.condition.args.operator.suggestions.lteHelpText',
+            {
+              defaultMessage: 'less than equal',
+            }
+          ),
         },
         {
           name: 'gt',
-          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.gtHelpText', {
-            defaultMessage: 'greater than',
-          }),
+          help: i18n.translate(
+            'timelion.help.functions.condition.args.operator.suggestions.gtHelpText',
+            {
+              defaultMessage: 'greater than',
+            }
+          ),
         },
         {
           name: 'gte',
-          help: i18n.translate('timelion.help.functions.condition.args.operator.suggestions.gteHelpText', {
-            defaultMessage: 'greater than equal',
-          }),
+          help: i18n.translate(
+            'timelion.help.functions.condition.args.operator.suggestions.gteHelpText',
+            {
+              defaultMessage: 'greater than equal',
+            }
+          ),
         },
       ],
     },
@@ -99,7 +117,7 @@ export default new Chainable('condition', {
         defaultMessage:
           'The value the point will be set to if the comparison is false. If you pass a seriesList here the first series will be used',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.conditionHelpText', {
     defaultMessage:
@@ -109,8 +127,8 @@ export default new Chainable('condition', {
   aliases: ['if'],
   fn: function conditionFn(args) {
     const config = args.byName;
-    return alter(args, function (eachSeries) {
-      const data = _.map(eachSeries.data, function (point, i) {
+    return alter(args, function(eachSeries) {
+      const data = _.map(eachSeries.data, function(point, i) {
         function getNumber(source) {
           if (argType(source) === 'number') return source;
           if (argType(source) === 'null') return null;
@@ -126,33 +144,36 @@ export default new Chainable('condition', {
         const thenVal = getNumber(config.then);
         const elseVal = _.isUndefined(config.else) ? point[1] : getNumber(config.else);
 
-        const newValue = (function () {
+        const newValue = (function() {
           switch (config.operator) {
             case 'lt':
-              return point[1] <   ifVal ? thenVal : elseVal;
+              return point[1] < ifVal ? thenVal : elseVal;
             case 'lte':
-              return point[1] <=  ifVal ? thenVal : elseVal;
+              return point[1] <= ifVal ? thenVal : elseVal;
             case 'gt':
-              return point[1] >   ifVal ? thenVal : elseVal;
+              return point[1] > ifVal ? thenVal : elseVal;
             case 'gte':
-              return point[1] >=  ifVal ? thenVal : elseVal;
+              return point[1] >= ifVal ? thenVal : elseVal;
             case 'eq':
               return point[1] === ifVal ? thenVal : elseVal;
             case 'ne':
               return point[1] !== ifVal ? thenVal : elseVal;
             default:
               throw new Error(
-                i18n.translate('timelion.serverSideErrors.conditionFunction.unknownOperatorErrorMessage', {
-                  defaultMessage: 'Unknown operator',
-                })
+                i18n.translate(
+                  'timelion.serverSideErrors.conditionFunction.unknownOperatorErrorMessage',
+                  {
+                    defaultMessage: 'Unknown operator',
+                  }
+                )
               );
           }
-        }());
+        })();
 
         return [point[0], newValue];
       });
       eachSeries.data = data;
       return eachSeries;
     });
-  }
+  },
 });

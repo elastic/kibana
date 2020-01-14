@@ -21,7 +21,11 @@ export class JsonWatch extends BaseWatch {
     super(props);
     const existingWatch = get(props, 'watch');
     this.watch = existingWatch ? existingWatch : defaultWatchJson;
-    this.watchString = get(props, 'watchString', JSON.stringify(existingWatch ? existingWatch : defaultWatchJson, null, 2));
+    this.watchString = get(
+      props,
+      'watchString',
+      JSON.stringify(existingWatch ? existingWatch : defaultWatchJson, null, 2)
+    );
     this.id = props.id;
   }
 
@@ -41,15 +45,19 @@ export class JsonWatch extends BaseWatch {
         })
       );
     } else if (!idRegex.test(this.id)) {
-      errors.id.push(i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidIdText', {
-        defaultMessage: 'ID can only contain letters, underscores, dashes, and numbers.',
-      }));
+      errors.id.push(
+        i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidIdText', {
+          defaultMessage: 'ID can only contain letters, underscores, dashes, and numbers.',
+        })
+      );
     }
     // JSON validation
     if (!this.watchString || this.watchString === '') {
-      errors.json.push(i18n.translate('xpack.watcher.sections.watchEdit.json.error.requiredJsonText', {
-        defaultMessage: 'JSON is required',
-      }));
+      errors.json.push(
+        i18n.translate('xpack.watcher.sections.watchEdit.json.error.requiredJsonText', {
+          defaultMessage: 'JSON is required',
+        })
+      );
     } else {
       try {
         const parsedJson = JSON.parse(this.watchString);
@@ -61,26 +69,33 @@ export class JsonWatch extends BaseWatch {
               const actionKeys = Object.keys(actions[actionKey]);
               let type;
               Object.keys(ACTION_TYPES).forEach(actionTypeKey => {
-                if (actionKeys.includes(ACTION_TYPES[actionTypeKey]) && !actionKeys.includes(ACTION_TYPES.UNKNOWN)) {
+                if (
+                  actionKeys.includes(ACTION_TYPES[actionTypeKey]) &&
+                  !actionKeys.includes(ACTION_TYPES.UNKNOWN)
+                ) {
                   type = ACTION_TYPES[actionTypeKey];
                 }
               });
               return !type;
             });
             if (invalidActions) {
-              errors.json.push(i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidActionType', {
-                defaultMessage: 'Unknown action type provided for action "{action}".',
-                values: {
-                  action: invalidActions,
-                },
-              }));
+              errors.json.push(
+                i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidActionType', {
+                  defaultMessage: 'Unknown action type provided for action "{action}".',
+                  values: {
+                    action: invalidActions,
+                  },
+                })
+              );
             }
           }
         }
       } catch (e) {
-        errors.json.push(i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidJsonText', {
-          defaultMessage: 'Invalid JSON',
-        }));
+        errors.json.push(
+          i18n.translate('xpack.watcher.sections.watchEdit.json.error.invalidJsonText', {
+            defaultMessage: 'Invalid JSON',
+          })
+        );
       }
     }
     return validationResult;
@@ -89,7 +104,7 @@ export class JsonWatch extends BaseWatch {
   get upstreamJson() {
     const result = super.upstreamJson;
     Object.assign(result, {
-      watch: this.watch
+      watch: this.watch,
     });
     return result;
   }
@@ -98,13 +113,13 @@ export class JsonWatch extends BaseWatch {
     return new JsonWatch(upstreamWatch);
   }
 
-  static defaultWatchJson =  defaultWatchJson;
+  static defaultWatchJson = defaultWatchJson;
   static typeName = i18n.translate('xpack.watcher.models.jsonWatch.typeName', {
-    defaultMessage: 'Advanced Watch'
+    defaultMessage: 'Advanced Watch',
   });
   static iconClass = '';
   static selectMessage = i18n.translate('xpack.watcher.models.jsonWatch.selectMessageText', {
-    defaultMessage: 'Set up a custom watch in raw JSON.'
+    defaultMessage: 'Set up a custom watch in raw JSON.',
   });
   static isCreatable = true;
   static selectSortOrder = 100;

@@ -23,18 +23,14 @@ const defaultProps = {
     {
       name: '@timestamp',
       type: 'date',
-    }
+    },
   ],
   selectedFields: [],
-  onSelect: () => {}
+  onSelect: () => {},
 };
 
 test('Should render', () => {
-  const component = shallow(
-    <AddTooltipFieldPopover
-      {...defaultProps}
-    />
-  );
+  const component = shallow(<AddTooltipFieldPopover {...defaultProps} />);
 
   expect(component).toMatchSnapshot();
 });

@@ -27,4 +27,3 @@ export function buildNode(value) {
 export function toElasticsearchQuery(node) {
   return node.value;
 }
-

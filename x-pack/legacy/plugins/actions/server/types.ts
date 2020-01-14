@@ -27,6 +27,7 @@ export interface ActionsPlugin {
 export interface ActionsConfigType {
   enabled: boolean;
   whitelistedHosts: string[];
+  enabledActionTypes: string[];
 }
 
 // the parameters passed to an action type executor function

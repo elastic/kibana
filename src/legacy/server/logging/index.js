@@ -25,7 +25,7 @@ import { setupLoggingRotate } from './rotate';
 export async function setupLogging(server, config) {
   return await server.register({
     plugin: good,
-    options: loggingConfiguration(config)
+    options: loggingConfiguration(config),
   });
 }
 

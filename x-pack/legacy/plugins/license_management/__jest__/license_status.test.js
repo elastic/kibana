@@ -11,7 +11,7 @@ describe('LicenseStatus component', () => {
   test('should display normally when license is active', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('gold')
+        license: createMockLicense('gold'),
       },
       LicenseStatus
     );
@@ -20,7 +20,7 @@ describe('LicenseStatus component', () => {
   test('should display display warning is expired', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('platinum', 0)
+        license: createMockLicense('platinum', 0),
       },
       LicenseStatus
     );

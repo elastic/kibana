@@ -13,7 +13,7 @@ watch.actions
 export function buildActions(actions) {
   const result = {};
 
-  forEach(actions, (action) => {
+  forEach(actions, action => {
     const actionModel = Action.fromDownstreamJson(action);
     Object.assign(result, actionModel.upstreamJson);
   });

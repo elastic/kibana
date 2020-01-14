@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-if [[ -n "$IS_PIPELINE_JOB" ]] ; then
-  source src/dev/ci_setup/setup_env.sh
-fi
-
-export TEST_BROWSER_HEADLESS=1
+source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   yarn run grunt functionalTests:ensureAllTestsInCiGroup;
@@ -24,5 +18,6 @@ checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run 
 if [ "$CI_GROUP" == "1" ]; then
   source test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh
   yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+  yarn run grunt run:exampleFunctionalTestsRelease --from=source;
   yarn run grunt run:interpreterFunctionalTestsRelease;
 fi

@@ -40,8 +40,9 @@ export const areaDefinition = {
   name: 'area',
   title: i18n.translate('kbnVislibVisTypes.area.areaTitle', { defaultMessage: 'Area' }),
   icon: 'visArea',
-  description: i18n.translate(
-    'kbnVislibVisTypes.area.areaDescription', { defaultMessage: 'Emphasize the quantity beneath a line chart' }),
+  description: i18n.translate('kbnVislibVisTypes.area.areaDescription', {
+    defaultMessage: 'Emphasize the quantity beneath a line chart',
+  }),
   visualization: vislibVisController,
   visConfig: {
     defaults: {
@@ -62,10 +63,10 @@ export const areaDefinition = {
           labels: {
             show: true,
             filter: true,
-            truncate: 100
+            truncate: 100,
           },
-          title: {}
-        }
+          title: {},
+        },
       ],
       valueAxes: [
         {
@@ -83,12 +84,12 @@ export const areaDefinition = {
             show: true,
             rotate: Rotates.HORIZONTAL,
             filter: false,
-            truncate: 100
+            truncate: 100,
           },
           title: {
-            text: countLabel
-          }
-        }
+            text: countLabel,
+          },
+        },
       ],
       seriesParams: [
         {
@@ -97,14 +98,14 @@ export const areaDefinition = {
           mode: ChartModes.STACKED,
           data: {
             label: countLabel,
-            id: '1'
+            id: '1',
           },
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
           interpolate: InterpolationModes.LINEAR,
           valueAxis: 'ValueAxis-1',
-        }
+        },
       ],
       addTooltip: true,
       addLegend: true,
@@ -116,9 +117,9 @@ export const areaDefinition = {
         value: 10,
         width: 1,
         style: ThresholdLineStyles.FULL,
-        color: palettes.euiPaletteColorBlind.colors[9]
+        color: palettes.euiPaletteColorBlind.colors[9],
       },
-      labels: {}
+      labels: {},
     },
   },
   events: {
@@ -134,9 +135,7 @@ export const areaDefinition = {
         title: i18n.translate('kbnVislibVisTypes.area.metricsTitle', { defaultMessage: 'Y-axis' }),
         aggFilter: ['!geo_centroid', '!geo_bounds'],
         min: 1,
-        defaults: [
-          { schema: 'metric', type: 'count' }
-        ]
+        defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
         group: AggGroupNames.Metrics,
@@ -144,7 +143,7 @@ export const areaDefinition = {
         title: i18n.translate('kbnVislibVisTypes.area.radiusTitle', { defaultMessage: 'Dot size' }),
         min: 0,
         max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -152,24 +151,28 @@ export const areaDefinition = {
         title: i18n.translate('kbnVislibVisTypes.area.segmentTitle', { defaultMessage: 'X-axis' }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.area.groupTitle', { defaultMessage: 'Split series' }),
+        title: i18n.translate('kbnVislibVisTypes.area.groupTitle', {
+          defaultMessage: 'Split series',
+        }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.area.splitTitle', { defaultMessage: 'Split chart' }),
+        title: i18n.translate('kbnVislibVisTypes.area.splitTitle', {
+          defaultMessage: 'Split chart',
+        }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-      }
-    ])
-  }
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+      },
+    ]),
+  },
 };

@@ -11,13 +11,13 @@ import { defineCommonRoutes } from './common';
 import { defineOIDCRoutes } from './oidc';
 import { RouteDefinitionParams } from '..';
 
-export function createCustomResourceResponse(body: string, contentType: string, cspRules: string) {
+export function createCustomResourceResponse(body: string, contentType: string, cspHeader: string) {
   return {
     body,
     headers: {
       'content-type': contentType,
       'cache-control': 'private, no-cache, no-store',
-      'content-security-policy': cspRules,
+      'content-security-policy': cspHeader,
     },
     statusCode: 200,
   };

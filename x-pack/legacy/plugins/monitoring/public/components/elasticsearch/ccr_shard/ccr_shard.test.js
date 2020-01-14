@@ -39,9 +39,9 @@ describe('CcrShard', () => {
     },
     oldestStat: {
       failed_read_requests: 0,
-      operations_written: 2976
+      operations_written: 2976,
     },
-    timestamp: '2018-09-27T13:32:09.412Z'
+    timestamp: '2018-09-27T13:32:09.412Z',
   };
 
   test('that it renders normally', () => {
@@ -57,10 +57,10 @@ describe('CcrShard', () => {
         read_exceptions: [
           {
             type: 'something_is_wrong',
-            reason: 'not sure but something happened'
-          }
-        ]
-      }
+            reason: 'not sure but something happened',
+          },
+        ],
+      },
     };
 
     const component = shallow(<CcrShard {...localProps} />);

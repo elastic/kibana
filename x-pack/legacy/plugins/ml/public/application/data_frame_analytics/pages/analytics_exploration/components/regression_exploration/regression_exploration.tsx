@@ -5,35 +5,49 @@
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { EvaluatePanel } from './evaluate_panel';
 import { ResultsTable } from './results_table';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-import { RegressionResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
+import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
+import { LoadingPanel } from '../loading_panel';
+import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
+import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-const LoadingPanel: FC = () => (
-  <EuiPanel className="eui-textCenter">
-    <EuiLoadingSpinner size="xl" />
-  </EuiPanel>
-);
-
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-        defaultMessage: 'Regression job ID {jobId}',
+      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
+        defaultMessage: 'Destination index for regression job ID {jobId}',
         values: { jobId },
       })}
     </span>
   </EuiTitle>
+);
+
+const jobConfigErrorTitle = i18n.translate(
+  'xpack.ml.dataframe.analytics.regressionExploration.jobConfigurationFetchError',
+  {
+    defaultMessage:
+      'Unable to fetch results. An error occurred loading the job configuration data.',
+  }
+);
+
+const jobCapsErrorTitle = i18n.translate(
+  'xpack.ml.dataframe.analytics.regressionExploration.jobCapsFetchError',
+  {
+    defaultMessage: "Unable to fetch results. An error occurred loading the index's field data.",
+  }
 );
 
 interface Props {
@@ -44,8 +58,13 @@ interface Props {
 export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
-  const [searchQuery, setSearchQuery] = useState<RegressionResultsSearchQuery>(defaultSearchQuery);
+  const [jobCapsServiceErrorMessage, setJobCapsServiceErrorMessage] = useState<undefined | string>(
+    undefined
+  );
+  const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
+  const kibanaContext = useKibanaContext();
 
   const loadJobConfig = async () => {
     setIsLoadingJobConfig(true);
@@ -74,23 +93,41 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
     loadJobConfig();
   }, []);
 
-  if (jobConfigErrorMessage !== undefined) {
+  const initializeJobCapsService = async () => {
+    if (jobConfig !== undefined) {
+      try {
+        const sourceIndex = jobConfig.source.index[0];
+        const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+        const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+        if (indexPattern !== undefined) {
+          await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+        }
+        setIsInitialized(true);
+      } catch (e) {
+        if (e.message !== undefined) {
+          setJobCapsServiceErrorMessage(e.message);
+        } else {
+          setJobCapsServiceErrorMessage(JSON.stringify(e));
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    initializeJobCapsService();
+  }, [JSON.stringify(jobConfig)]);
+
+  if (jobConfigErrorMessage !== undefined || jobCapsServiceErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false}>
         <ExplorationTitle jobId={jobId} />
         <EuiSpacer />
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.ml.dataframe.analytics.regressionExploration.jobConfigurationFetchError',
-            {
-              defaultMessage:
-                'Unable to fetch results. An error occurred loading the job configuration data.',
-            }
-          )}
+          title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}
           color="danger"
           iconType="cross"
         >
-          <p>{jobConfigErrorMessage}</p>
+          <p>{jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage}</p>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -99,12 +136,12 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   return (
     <Fragment>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && (
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && (
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <ResultsTable
           jobConfig={jobConfig}
           jobStatus={jobStatus}

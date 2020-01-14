@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiLoadingSpinner,
-  EuiCheckbox
+  EuiCheckbox,
 } from '@elastic/eui';
 
 const NavigationUi = ({
@@ -33,7 +33,7 @@ const NavigationUi = ({
     return (
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l"/>
+          <EuiLoadingSpinner size="l" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -55,10 +55,7 @@ const NavigationUi = ({
         onClick={goToPreviousStep}
         data-test-subj="rollupJobBackButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.backButton.label"
-          defaultMessage="Back"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.backButton.label" defaultMessage="Back" />
       </EuiButtonEmpty>
     </EuiFlexItem>
   );
@@ -73,10 +70,7 @@ const NavigationUi = ({
         fill
         data-test-subj="rollupJobNextButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.nextButton.label"
-          defaultMessage="Next"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.nextButton.label" defaultMessage="Next" />
       </EuiButton>
     </EuiFlexItem>
   );
@@ -90,14 +84,10 @@ const NavigationUi = ({
         fill
         data-test-subj="rollupJobSaveButton"
       >
-        <FormattedMessage
-          id="xpack.rollupJobs.create.saveButton.label"
-          defaultMessage="Save"
-        />
+        <FormattedMessage id="xpack.rollupJobs.create.saveButton.label" defaultMessage="Save" />
       </EuiButton>
     </EuiFlexItem>
   );
-
 
   const startAfterCreateCheckbox = (
     <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>

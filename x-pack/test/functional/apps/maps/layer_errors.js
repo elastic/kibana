@@ -6,12 +6,10 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects }) {
-
+export default function({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'header']);
 
   describe('layer errors', () => {
-
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });
@@ -19,7 +17,6 @@ export default function ({ getPageObjects }) {
     describe('ESSearchSource with missing index pattern id', () => {
       const MISSING_INDEX_ID = 'idThatDoesNotExitForESSearchSource';
       const LAYER_NAME = MISSING_INDEX_ID;
-
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
@@ -55,7 +52,9 @@ export default function ({ getPageObjects }) {
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Join error: Unable to find Index pattern for id: ${MISSING_INDEX_ID}`);
+        expect(errorMsg).to.equal(
+          `Join error: Unable to find Index pattern for id: ${MISSING_INDEX_ID}`
+        );
       });
 
       it('should allow deletion of layer', async () => {
@@ -88,7 +87,9 @@ export default function ({ getPageObjects }) {
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}`);
+        expect(errorMsg).to.equal(
+          `Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}`
+        );
       });
 
       it('should allow deletion of layer', async () => {
@@ -104,7 +105,9 @@ export default function ({ getPageObjects }) {
 
       it('should diplay error message in layer panel', async () => {
         const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
-        expect(errorMsg).to.equal(`Unable to find map.regionmap configuration for ${MISSING_REGION_NAME}`);
+        expect(errorMsg).to.equal(
+          `Unable to find map.regionmap configuration for ${MISSING_REGION_NAME}`
+        );
       });
 
       it('should allow deletion of layer', async () => {

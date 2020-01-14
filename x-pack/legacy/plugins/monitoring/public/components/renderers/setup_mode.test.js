@@ -14,11 +14,11 @@ describe('SetupModeRenderer', () => {
   it('should render with setup mode disabled', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
-        enabled: false
+        enabled: false,
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {}
+      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -33,7 +33,7 @@ describe('SetupModeRenderer', () => {
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
-            <ChildComponent setupMode={setupMode}/>
+            <ChildComponent setupMode={setupMode} />
             {bottomBarComponent}
           </Fragment>
         )}
@@ -49,12 +49,12 @@ describe('SetupModeRenderer', () => {
         enabled: true,
         data: {
           elasticsearch: {},
-          _meta: {}
-        }
+          _meta: {},
+        },
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {}
+      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -69,7 +69,7 @@ describe('SetupModeRenderer', () => {
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
-            <ChildComponent setupMode={setupMode}/>
+            <ChildComponent setupMode={setupMode} />
             {bottomBarComponent}
           </Fragment>
         )}
@@ -85,16 +85,14 @@ describe('SetupModeRenderer', () => {
         enabled: true,
         data: {
           elasticsearch: {
-            byUuid: {
-
-            }
+            byUuid: {},
           },
-          _meta: {}
-        }
+          _meta: {},
+        },
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {}
+      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -109,7 +107,7 @@ describe('SetupModeRenderer', () => {
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
-            <ChildComponent setupMode={setupMode}/>
+            <ChildComponent setupMode={setupMode} />
             {bottomBarComponent}
           </Fragment>
         )}
@@ -127,14 +125,14 @@ describe('SetupModeRenderer', () => {
         enabled: true,
         data: {
           elasticsearch: {
-            byUuid: {}
+            byUuid: {},
           },
-          _meta: {}
-        }
+          _meta: {},
+        },
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {}
+      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -149,7 +147,7 @@ describe('SetupModeRenderer', () => {
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
-            <ChildComponent setupMode={setupMode}/>
+            <ChildComponent setupMode={setupMode} />
             {bottomBarComponent}
           </Fragment>
         )}
@@ -171,25 +169,25 @@ describe('SetupModeRenderer', () => {
         data: {
           elasticsearch: {
             byUuid: {
-              2: newProduct
-            }
+              2: newProduct,
+            },
           },
-          _meta: {}
-        }
+          _meta: {},
+        },
       }),
       initSetupModeState: (_scope, _injectir, cb) => {
         setTimeout(() => {
           cb({
             elasticsearch: {
               byUuid: {
-                1: {}
-              }
-            }
+                1: {},
+              },
+            },
           });
         }, 500);
       },
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {}
+      setSetupModeMenuItem: () => {},
     }));
     const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
 
@@ -204,7 +202,7 @@ describe('SetupModeRenderer', () => {
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
-            <ChildComponent setupMode={setupMode}/>
+            <ChildComponent setupMode={setupMode} />
             {bottomBarComponent}
           </Fragment>
         )}
@@ -230,20 +228,20 @@ describe('SetupModeRenderer', () => {
         data: {
           elasticsearch: {
             byUuid: {
-              2: newProduct
-            }
+              2: newProduct,
+            },
           },
-          _meta: {}
-        }
+          _meta: {},
+        },
       }),
       initSetupModeState: (_scope, _injectir, cb) => {
         setTimeout(() => {
           cb({
             elasticsearch: {
               byUuid: {
-                1: {}
-              }
-            }
+                1: {},
+              },
+            },
           });
         }, 500);
       },
@@ -263,7 +261,7 @@ describe('SetupModeRenderer', () => {
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
-            <ChildComponent setupMode={setupMode}/>
+            <ChildComponent setupMode={setupMode} />
             {bottomBarComponent}
           </Fragment>
         )}

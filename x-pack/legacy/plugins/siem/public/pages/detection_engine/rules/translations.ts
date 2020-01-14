@@ -50,12 +50,30 @@ export const BATCH_ACTION_ACTIVATE_SELECTED = i18n.translate(
   }
 );
 
+export const BATCH_ACTION_ACTIVATE_SELECTED_ERROR = (totalRules: number) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.rules.allRules.batchActions.activateSelectedErrorTitle',
+    {
+      values: { totalRules },
+      defaultMessage: 'Error activating {totalRules, plural, =1 {rule} other {rules}}…',
+    }
+  );
+
 export const BATCH_ACTION_DEACTIVATE_SELECTED = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.batchActions.deactivateSelectedTitle',
   {
     defaultMessage: 'Deactivate selected',
   }
 );
+
+export const BATCH_ACTION_DEACTIVATE_SELECTED_ERROR = (totalRules: number) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.rules.allRules.batchActions.deactivateSelectedErrorTitle',
+    {
+      values: { totalRules },
+      defaultMessage: 'Error deactivating {totalRules, plural, =1 {rule} other {rules}}…',
+    }
+  );
 
 export const BATCH_ACTION_EXPORT_SELECTED = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.batchActions.exportSelectedTitle',
@@ -78,6 +96,22 @@ export const BATCH_ACTION_DELETE_SELECTED = i18n.translate(
   }
 );
 
+export const BATCH_ACTION_DELETE_SELECTED_IMMUTABLE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle',
+  {
+    defaultMessage: 'Selection contains immutable rules which cannot be deleted',
+  }
+);
+
+export const BATCH_ACTION_DELETE_SELECTED_ERROR = (totalRules: number) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.rules.allRules.batchActions.deleteSelectedErrorTitle',
+    {
+      values: { totalRules },
+      defaultMessage: 'Error deleting {totalRules, plural, =1 {rule} other {rules}}…',
+    }
+  );
+
 export const EXPORT_FILENAME = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.exportFilenameTitle',
   {
@@ -89,7 +123,7 @@ export const SUCCESSFULLY_EXPORTED_RULES = (totalRules: number) =>
   i18n.translate('xpack.siem.detectionEngine.rules.allRules.successfullyExportedRulesTitle', {
     values: { totalRules },
     defaultMessage:
-      'Successfully exported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+      'Successfully exported {totalRules, plural, =0 {all rules} =1 {{totalRules} rule} other {{totalRules} rules}}',
   });
 
 export const ALL_RULES = i18n.translate('xpack.siem.detectionEngine.rules.allRules.tableTitle', {
@@ -140,6 +174,13 @@ export const DUPLICATE_RULE = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {
     defaultMessage: 'Duplicate rule…',
+  }
+);
+
+export const DUPLICATE_RULE_ERROR = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',
+  {
+    defaultMessage: 'Error duplicating rule…',
   }
 );
 
@@ -205,3 +246,46 @@ export const COLUMN_ACTIVATE = i18n.translate(
     defaultMessage: 'Activate',
   }
 );
+
+export const DEFINE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.defineRuleTitle', {
+  defaultMessage: 'Define rule',
+});
+
+export const ABOUT_RULE = i18n.translate('xpack.siem.detectionEngine.rules.aboutRuleTitle', {
+  defaultMessage: 'About rule',
+});
+
+export const SCHEDULE_RULE = i18n.translate('xpack.siem.detectionEngine.rules.scheduleRuleTitle', {
+  defaultMessage: 'Schedule rule',
+});
+
+export const DEFINITION = i18n.translate('xpack.siem.detectionEngine.rules.stepDefinitionTitle', {
+  defaultMessage: 'Definition',
+});
+
+export const ABOUT = i18n.translate('xpack.siem.detectionEngine.rules.stepAboutTitle', {
+  defaultMessage: 'About',
+});
+
+export const SCHEDULE = i18n.translate('xpack.siem.detectionEngine.rules.stepScheduleTitle', {
+  defaultMessage: 'Schedule',
+});
+
+export const OPTIONAL_FIELD = i18n.translate(
+  'xpack.siem.detectionEngine.rules.optionalFieldDescription',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const CONTINUE = i18n.translate('xpack.siem.detectionEngine.rules.continueButtonTitle', {
+  defaultMessage: 'Continue',
+});
+
+export const UPDATE = i18n.translate('xpack.siem.detectionEngine.rules.updateButtonTitle', {
+  defaultMessage: 'Update',
+});
+
+export const DELETE = i18n.translate('xpack.siem.detectionEngine.rules.deleteDescription', {
+  defaultMessage: 'Delete',
+});

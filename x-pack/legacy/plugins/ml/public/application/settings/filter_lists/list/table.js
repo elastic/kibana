@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React table for displaying a table of filter lists.
  */
@@ -28,9 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 
-
-
-const UsedByIcon = injectI18n(function ({ usedBy, intl }) {
+const UsedByIcon = injectI18n(function({ usedBy, intl }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
   // the filter list is in use in a detectors in any jobs.
   let icon;
@@ -60,7 +57,7 @@ const UsedByIcon = injectI18n(function ({ usedBy, intl }) {
 });
 
 UsedByIcon.WrappedComponent.propTypes = {
-  usedBy: PropTypes.object
+  usedBy: PropTypes.object,
 };
 
 function NewFilterButton({ canCreateFilter }) {
@@ -68,7 +65,7 @@ function NewFilterButton({ canCreateFilter }) {
     <EuiButton
       key="new_filter_list"
       href="#/settings/filter_lists/new_filter_list"
-      isDisabled={(canCreateFilter === false)}
+      isDisabled={canCreateFilter === false}
       data-test-subj="mlFilterListsButtonCreate"
     >
       <FormattedMessage
@@ -80,46 +77,37 @@ function NewFilterButton({ canCreateFilter }) {
 }
 
 function getColumns() {
-
   const columns = [
     {
       field: 'filter_id',
       name: i18n.translate('xpack.ml.settings.filterLists.table.idColumnName', {
         defaultMessage: 'ID',
       }),
-      render: (id) => (
-        <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`} >
-          {id}
-        </EuiLink>
-      ),
-      sortable: true
+      render: id => <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`}>{id}</EuiLink>,
+      sortable: true,
     },
     {
       field: 'description',
       name: i18n.translate('xpack.ml.settings.filterLists.table.descriptionColumnName', {
         defaultMessage: 'Description',
       }),
-      sortable: true
+      sortable: true,
     },
     {
       field: 'item_count',
       name: i18n.translate('xpack.ml.settings.filterLists.table.itemCountColumnName', {
         defaultMessage: 'Item count',
       }),
-      sortable: true
+      sortable: true,
     },
     {
       field: 'used_by',
       name: i18n.translate('xpack.ml.settings.filterLists.table.inUseColumnName', {
         defaultMessage: 'In use',
       }),
-      render: (usedBy) => (
-        <UsedByIcon
-          usedBy={usedBy}
-        />
-      ),
-      sortable: true
-    }
+      render: usedBy => <UsedByIcon usedBy={usedBy} />,
+      sortable: true,
+    },
   ];
 
   return columns;
@@ -132,21 +120,14 @@ function renderToolsRight(
   refreshFilterLists
 ) {
   return [
-    (
-      <NewFilterButton
-        key="new_filter_list"
-        canCreateFilter={canCreateFilter}
-      />
-    ),
-    (
-      <DeleteFilterListModal
-        canDeleteFilter={canDeleteFilter}
-        selectedFilterLists={selectedFilterLists}
-        refreshFilterLists={refreshFilterLists}
-      />
-    )];
+    <NewFilterButton key="new_filter_list" canCreateFilter={canCreateFilter} />,
+    <DeleteFilterListModal
+      canDeleteFilter={canDeleteFilter}
+      selectedFilterLists={selectedFilterLists}
+      refreshFilterLists={refreshFilterLists}
+    />,
+  ];
 }
-
 
 export function FilterListsTable({
   canCreateFilter,
@@ -154,14 +135,13 @@ export function FilterListsTable({
   filterLists,
   selectedFilterLists,
   setSelectedFilterLists,
-  refreshFilterLists
+  refreshFilterLists,
 }) {
-
   const sorting = {
     sort: {
       field: 'filter_id',
       direction: 'asc',
-    }
+    },
   };
 
   const search = {
@@ -174,13 +154,14 @@ export function FilterListsTable({
     box: {
       incremental: true,
     },
-    filters: []
+    filters: [],
   };
 
   const tableSelection = {
-    selectable: (filterList) => (filterList.used_by === undefined || filterList.used_by.jobs.length === 0),
+    selectable: filterList =>
+      filterList.used_by === undefined || filterList.used_by.jobs.length === 0,
     selectableMessage: () => undefined,
-    onSelectionChange: (selection) => setSelectedFilterLists(selection)
+    onSelectionChange: selection => setSelectedFilterLists(selection),
   };
 
   return (
@@ -224,7 +205,6 @@ export function FilterListsTable({
       )}
     </React.Fragment>
   );
-
 }
 FilterListsTable.propTypes = {
   canCreateFilter: PropTypes.bool.isRequired,
@@ -232,7 +212,7 @@ FilterListsTable.propTypes = {
   filterLists: PropTypes.array,
   selectedFilterLists: PropTypes.array,
   setSelectedFilterLists: PropTypes.func.isRequired,
-  refreshFilterLists: PropTypes.func.isRequired
+  refreshFilterLists: PropTypes.func.isRequired,
 };
 
 UsedByIcon.displayName = 'UsedByIcon';

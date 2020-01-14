@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { AbstractField } from './field';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 
 export class ESDocField extends AbstractField {
-
   static type = 'ES_DOC';
 
   async _getField() {
@@ -42,16 +40,15 @@ export class ESDocField extends AbstractField {
     if (field.scripted) {
       extendedStats.script = {
         source: field.script,
-        lang: field.lang
+        lang: field.lang,
       };
     } else {
       extendedStats.field = this._fieldName;
     }
     return {
       [this._fieldName]: {
-        extended_stats: extendedStats
-      }
+        extended_stats: extendedStats,
+      },
     };
   }
-
 }

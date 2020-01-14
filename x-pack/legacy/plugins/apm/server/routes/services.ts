@@ -5,7 +5,6 @@
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import {
   createApmTelementry,
@@ -18,7 +17,7 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getServiceMap } from '../lib/services/map';
+import { getServiceAnnotations } from '../lib/services/annotations';
 
 export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
@@ -86,15 +85,28 @@ export const serviceNodeMetadataRoute = createRoute(() => ({
   }
 }));
 
-export const serviceMapRoute = createRoute(() => ({
-  path: '/api/apm/service-map',
+export const serviceAnnotationsRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/annotations',
   params: {
-    query: rangeRt
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.partial({
+        environment: t.string
+      })
+    ])
   },
-  handler: async ({ context }) => {
-    if (context.config['xpack.apm.serviceMapEnabled']) {
-      return getServiceMap();
-    }
-    return new Boom('Not found', { statusCode: 404 });
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { environment } = context.params.query;
+
+    return getServiceAnnotations({
+      setup,
+      serviceName,
+      environment
+    });
   }
 }));

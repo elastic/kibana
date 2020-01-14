@@ -56,8 +56,8 @@ describe('Output Tokenization', () => {
       data = JSON.stringify(data, null, 3);
     }
 
-    test('Token test ' + testCount++, async function (done) {
-      output.update(data, function () {
+    test('Token test ' + testCount++, async function(done) {
+      output.update(data, function() {
         const tokens = tokensAsList();
         const normTokenList = [];
         for (let i = 0; i < tokenList.length; i++) {
@@ -71,16 +71,7 @@ describe('Output Tokenization', () => {
   }
 
   tokenTest(
-    [
-      'warning',
-      '#! warning',
-      'comment',
-      '# GET url',
-      'paren.lparen',
-      '{',
-      'paren.rparen',
-      '}',
-    ],
+    ['warning', '#! warning', 'comment', '# GET url', 'paren.lparen', '{', 'paren.rparen', '}'],
     '#! warning\n' + '# GET url\n' + '{}'
   );
 

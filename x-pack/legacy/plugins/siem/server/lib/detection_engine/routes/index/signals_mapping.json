@@ -33,6 +33,12 @@
               "saved_id": {
                 "type": "keyword"
               },
+              "timeline_id": {
+                "type": "keyword"
+              },
+              "timeline_title": {
+                "type": "keyword"
+              },
               "max_signals": {
                 "type": "keyword"
               },
@@ -96,10 +102,19 @@
               "filters": {
                 "type": "object"
               },
+              "created_at": {
+                "type": "date"
+              },
+              "updated_at": {
+                "type": "date"
+              },
               "created_by": {
                 "type": "keyword"
               },
               "updated_by": {
+                "type": "keyword"
+              },
+              "version": {
                 "type": "keyword"
               }
             }

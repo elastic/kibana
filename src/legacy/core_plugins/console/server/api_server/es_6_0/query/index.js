@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { queryDsl as default }  from './dsl';
+export { queryDsl as default } from './dsl';

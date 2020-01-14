@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QueryContext } from './query_context';
 import { CursorPagination } from '../adapter_types';
 import { fetchChunk } from './fetch_chunk';
 import { CursorDirection } from '../../../../../common/graphql/types';
@@ -155,7 +155,7 @@ export class MonitorGroupIterator {
 
   // Returns a copy of this fetcher that goes backwards from the current position
   reverse(): MonitorGroupIterator | null {
-    const reverseContext = Object.assign({}, this.queryContext);
+    const reverseContext = this.queryContext.clone();
     const current = this.getCurrent();
 
     reverseContext.pagination = {

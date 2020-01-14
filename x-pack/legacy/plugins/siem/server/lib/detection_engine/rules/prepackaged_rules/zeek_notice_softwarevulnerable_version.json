@@ -1,0 +1,17 @@
+{
+  "rule_id": "97b4d80c-7671-4301-85a6-954aa0ba96ce",
+  "risk_score": 50,
+  "description": "Indicates that a vulnerable version of software was detected.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Software::Vulnerable_Version",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Software::Vulnerable_Version\" or rule.name: \"Software::Vulnerable_Version\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

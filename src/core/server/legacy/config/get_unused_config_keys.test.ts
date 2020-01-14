@@ -17,23 +17,15 @@
  * under the License.
  */
 
-import { LegacyPluginSpec } from '../plugins/find_legacy_plugin_specs';
-import { LegacyConfig } from './types';
+import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
 import { getUnusedConfigKeys } from './get_unused_config_keys';
-// @ts-ignore
-import { transformDeprecations } from '../../../../legacy/server/config/transform_deprecations';
-
-jest.mock('../../../../legacy/server/config/transform_deprecations', () => ({
-  transformDeprecations: jest.fn().mockImplementation(s => s),
-}));
 
 describe('getUnusedConfigKeys', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    transformDeprecations.mockImplementation((s: any) => s);
   });
 
-  const getConfig = (values: Record<string, any> = {}): LegacyConfig =>
+  const getConfig = (values: LegacyVars = {}): LegacyConfig =>
     ({
       get: () => values as any,
     } as LegacyConfig);
@@ -45,7 +37,7 @@ describe('getUnusedConfigKeys', () => {
           coreHandledConfigPaths: [],
           pluginSpecs: [],
           disabledPluginSpecs: [],
-          inputSettings: {},
+          settings: {},
           legacyConfig: getConfig(),
         })
       ).toEqual([]);
@@ -57,7 +49,7 @@ describe('getUnusedConfigKeys', () => {
           coreHandledConfigPaths: [],
           pluginSpecs: [],
           disabledPluginSpecs: [],
-          inputSettings: {
+          settings: {
             presentInBoth: true,
             alsoInBoth: 'someValue',
           },
@@ -75,7 +67,7 @@ describe('getUnusedConfigKeys', () => {
           coreHandledConfigPaths: [],
           pluginSpecs: [],
           disabledPluginSpecs: [],
-          inputSettings: {
+          settings: {
             presentInBoth: true,
           },
           legacyConfig: getConfig({
@@ -92,7 +84,7 @@ describe('getUnusedConfigKeys', () => {
           coreHandledConfigPaths: [],
           pluginSpecs: [],
           disabledPluginSpecs: [],
-          inputSettings: {
+          settings: {
             presentInBoth: true,
             onlyInSetting: 'value',
           },
@@ -109,7 +101,7 @@ describe('getUnusedConfigKeys', () => {
           coreHandledConfigPaths: [],
           pluginSpecs: [],
           disabledPluginSpecs: [],
-          inputSettings: {
+          settings: {
             elasticsearch: {
               username: 'foo',
               password: 'bar',
@@ -131,7 +123,7 @@ describe('getUnusedConfigKeys', () => {
           coreHandledConfigPaths: [],
           pluginSpecs: [],
           disabledPluginSpecs: [],
-          inputSettings: {
+          settings: {
             env: 'development',
           },
           legacyConfig: getConfig({
@@ -149,7 +141,7 @@ describe('getUnusedConfigKeys', () => {
           coreHandledConfigPaths: [],
           pluginSpecs: [],
           disabledPluginSpecs: [],
-          inputSettings: {
+          settings: {
             prop: ['a', 'b', 'c'],
           },
           legacyConfig: getConfig({
@@ -171,7 +163,7 @@ describe('getUnusedConfigKeys', () => {
             getConfigPrefix: () => 'foo.bar',
           } as unknown) as LegacyPluginSpec,
         ],
-        inputSettings: {
+        settings: {
           foo: {
             bar: {
               unused: true,
@@ -194,7 +186,7 @@ describe('getUnusedConfigKeys', () => {
         coreHandledConfigPaths: ['core', 'foo.bar'],
         pluginSpecs: [],
         disabledPluginSpecs: [],
-        inputSettings: {
+        settings: {
           core: {
             prop: 'value',
           },
@@ -209,46 +201,6 @@ describe('getUnusedConfigKeys', () => {
   });
 
   describe('using deprecation', () => {
-    it('calls transformDeprecations with the settings', async () => {
-      await getUnusedConfigKeys({
-        coreHandledConfigPaths: [],
-        pluginSpecs: [],
-        disabledPluginSpecs: [],
-        inputSettings: {
-          prop: 'settings',
-        },
-        legacyConfig: getConfig({
-          prop: 'config',
-        }),
-      });
-      expect(transformDeprecations).toHaveBeenCalledTimes(1);
-      expect(transformDeprecations).toHaveBeenCalledWith({
-        prop: 'settings',
-      });
-    });
-
-    it('uses the transformed settings', async () => {
-      transformDeprecations.mockImplementation((settings: Record<string, any>) => {
-        delete settings.deprecated;
-        settings.updated = 'new value';
-        return settings;
-      });
-      expect(
-        await getUnusedConfigKeys({
-          coreHandledConfigPaths: [],
-          pluginSpecs: [],
-          disabledPluginSpecs: [],
-          inputSettings: {
-            onlyInSettings: 'bar',
-            deprecated: 'value',
-          },
-          legacyConfig: getConfig({
-            updated: 'config',
-          }),
-        })
-      ).toEqual(['onlyInSettings']);
-    });
-
     it('should use the plugin deprecations provider', async () => {
       expect(
         await getUnusedConfigKeys({
@@ -262,7 +214,7 @@ describe('getUnusedConfigKeys', () => {
             } as unknown) as LegacyPluginSpec,
           ],
           disabledPluginSpecs: [],
-          inputSettings: {
+          settings: {
             foo: {
               foo: 'dolly',
               foo1: 'bar',

@@ -58,31 +58,35 @@ describe('CollectorSet', () => {
       const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
       const logger = mockLogger();
       const collectors = new CollectorSet({ logger });
-      collectors.registerCollector(new Collector(logger, {
-        type: 'MY_TEST_COLLECTOR',
-        fetch: caller => caller()
-      }));
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: caller => caller(),
+        })
+      );
 
       const result = await collectors.bulkFetch(mockCallCluster);
       const calls = logger.debug.getCalls();
       expect(calls.length).to.be(1);
-      expect(calls[0].args).to.eql([
-        'Fetching data from MY_TEST_COLLECTOR collector',
+      expect(calls[0].args).to.eql(['Fetching data from MY_TEST_COLLECTOR collector']);
+      expect(result).to.eql([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { passTest: 1000 },
+        },
       ]);
-      expect(result).to.eql([{
-        type: 'MY_TEST_COLLECTOR',
-        result: { passTest: 1000 }
-      }]);
     });
 
     it('should gracefully handle a collector fetch method throwing an error', async () => {
       const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
       const logger = mockLogger();
       const collectors = new CollectorSet({ logger });
-      collectors.registerCollector(new Collector(logger, {
-        type: 'MY_TEST_COLLECTOR',
-        fetch: () => new Promise((_resolve, reject) => reject())
-      }));
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => new Promise((_resolve, reject) => reject()),
+        })
+      );
 
       let result;
       try {
@@ -109,20 +113,16 @@ describe('CollectorSet', () => {
           load: {
             '15m': 2.3525390625,
             '1m': 2.22412109375,
-            '5m': 2.4462890625
+            '5m': 2.4462890625,
           },
           memory: {
             free_in_bytes: 458280960,
             total_in_bytes: 17179869184,
-            used_in_bytes: 16721588224
+            used_in_bytes: 16721588224,
           },
-          uptime_in_millis: 137844000
+          uptime_in_millis: 137844000,
         },
-        daysOfTheWeek: [
-          'monday',
-          'tuesday',
-          'wednesday',
-        ]
+        daysOfTheWeek: ['monday', 'tuesday', 'wednesday'],
       };
 
       const result = collectorSet.toApiFieldNames(apiData);
@@ -141,17 +141,17 @@ describe('CollectorSet', () => {
         daysOfTheWeek: [
           {
             dayName: 'monday',
-            dayIndex: 1
+            dayIndex: 1,
           },
           {
             dayName: 'tuesday',
-            dayIndex: 2
+            dayIndex: 2,
           },
           {
             dayName: 'wednesday',
-            dayIndex: 3
-          }
-        ]
+            dayIndex: 3,
+          },
+        ],
       };
 
       const result = collectorSet.toApiFieldNames(apiData);
@@ -173,7 +173,7 @@ describe('CollectorSet', () => {
       const collectors = new CollectorSet({ logger });
       const usageCollector = new UsageCollector(logger, collectorOptions);
       const collector = new Collector(logger, collectorOptions);
-      const randomClass = new (class Random {});
+      const randomClass = new (class Random {})();
       expect(collectors.isUsageCollector(usageCollector)).to.be(true);
       expect(collectors.isUsageCollector(collector)).to.be(false);
       expect(collectors.isUsageCollector(randomClass)).to.be(false);
@@ -184,5 +184,3 @@ describe('CollectorSet', () => {
     });
   });
 });
-
-

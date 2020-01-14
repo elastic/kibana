@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-import { ES_SIZE_LIMIT, FIELD_ORIGIN, METRIC_TYPE } from '../../../common/constants';
+import { DEFAULT_MAX_BUCKETS_LIMIT, FIELD_ORIGIN, METRIC_TYPE } from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
 import { AbstractESAggSource } from './es_agg_source';
 
@@ -26,8 +26,8 @@ const aggSchemas = new Schemas([
     title: 'Terms',
     aggFilter: 'terms',
     min: 1,
-    max: 1
-  }
+    max: 1,
+  },
 ]);
 
 export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName) {
@@ -42,18 +42,21 @@ export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName
         properties[propertyName] = _.get(termBucket, [propertyName, 'value']);
       }
     });
-    propertiesMap.set((termBucket.key).toString(), properties);
+    propertiesMap.set(termBucket.key.toString(), properties);
   });
   return propertiesMap;
 }
 
 export class ESTermSource extends AbstractESAggSource {
-
   static type = 'ES_TERM_SOURCE';
 
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
-    this._termField = new ESDocField({ fieldName: descriptor.term, source: this, origin: this.getOriginForField() });
+    this._termField = new ESDocField({
+      fieldName: descriptor.term,
+      source: this,
+      origin: this.getOriginForField(),
+    });
   }
 
   static renderEditor({}) {
@@ -62,11 +65,11 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   hasCompleteConfig() {
-    return (_.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term'));
+    return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
   getIndexPatternIds() {
-    return  [this._descriptor.indexPatternId];
+    return [this._descriptor.indexPatternId];
   }
 
   getTermField() {
@@ -83,7 +86,9 @@ export class ESTermSource extends AbstractESAggSource {
 
   formatMetricKey(aggType, fieldName) {
     const metricKey = aggType !== METRIC_TYPE.COUNT ? `${aggType}_of_${fieldName}` : aggType;
-    return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
+    return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${
+      this._descriptor.indexPatternTitle
+    }.${this._termField.getName()}`;
   }
 
   formatMetricLabel(type, fieldName) {
@@ -92,13 +97,12 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
-
     if (!this.hasCompleteConfig()) {
       return [];
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource  = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this._makeSearchSource(searchFilters, 0);
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
@@ -134,20 +138,24 @@ export class ESTermSource extends AbstractESAggSource {
   _getRequestDescription(leftSourceName, leftFieldName) {
     const metrics = this.getMetricFields().map(esAggMetric => esAggMetric.getRequestDescription());
     const joinStatement = [];
-    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
-      defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
-      values: { leftSourceName, leftFieldName }
-    }));
+    joinStatement.push(
+      i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
+        defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
+        values: { leftSourceName, leftFieldName },
+      })
+    );
     joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._termField.getName()}`);
-    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
-      defaultMessage: `for metrics {metrics}`,
-      values: { metrics: metrics.join(',') }
-    }));
+    joinStatement.push(
+      i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
+        defaultMessage: `for metrics {metrics}`,
+        values: { metrics: metrics.join(',') },
+      })
+    );
     return i18n.translate('xpack.maps.source.esJoin.joinDescription', {
       defaultMessage: `Elasticsearch terms aggregation request for {description}`,
       values: {
-        description: joinStatement.join(' ')
-      }
+        description: joinStatement.join(' '),
+      },
     });
   }
 
@@ -162,9 +170,9 @@ export class ESTermSource extends AbstractESAggSource {
         schema: 'segment',
         params: {
           field: this._termField.getName(),
-          size: ES_SIZE_LIMIT
-        }
-      }
+          size: DEFAULT_MAX_BUCKETS_LIMIT,
+        },
+      },
     ];
   }
 

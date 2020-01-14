@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 import moment from 'moment';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiInMemoryTable,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -47,18 +40,18 @@ export const EventsTable = injectI18n(function EventsTable({
   showSearchBar,
   showImportModal,
   showNewEventModal,
-  intl
+  intl,
 }) {
   const sorting = {
     sort: {
       field: 'description',
       direction: 'asc',
-    }
+    },
   };
 
   const pagination = {
     initialPageSize: 5,
-    pageSizeOptions: [5, 10]
+    pageSizeOptions: [5, 10],
   };
 
   const columns = [
@@ -66,50 +59,52 @@ export const EventsTable = injectI18n(function EventsTable({
       field: 'description',
       name: intl.formatMessage({
         id: 'xpack.ml.calendarsEdit.eventsTable.descriptionColumnName',
-        defaultMessage: 'Description'
+        defaultMessage: 'Description',
       }),
       sortable: true,
-      truncateText: true
+      truncateText: true,
     },
     {
       field: 'start_time',
       name: intl.formatMessage({
         id: 'xpack.ml.calendarsEdit.eventsTable.startColumnName',
-        defaultMessage: 'Start'
+        defaultMessage: 'Start',
       }),
       sortable: true,
-      render: (timeMs) => {
+      render: timeMs => {
         const time = moment(timeMs);
         return time.format(TIME_FORMAT);
-      }
+      },
     },
     {
       field: 'end_time',
       name: intl.formatMessage({
         id: 'xpack.ml.calendarsEdit.eventsTable.endColumnName',
-        defaultMessage: 'End'
+        defaultMessage: 'End',
       }),
       sortable: true,
-      render: (timeMs) => {
+      render: timeMs => {
         const time = moment(timeMs);
         return time.format(TIME_FORMAT);
-      }
+      },
     },
     {
       field: '',
       name: '',
-      render: (event) => (
+      render: event => (
         <DeleteButton
           data-testid="event_delete"
           canDeleteCalendar={canDeleteCalendar}
-          onClick={() => { onDeleteClick(event.event_id); }}
+          onClick={() => {
+            onDeleteClick(event.event_id);
+          }}
         />
-      )
+      ),
     },
   ];
 
   const search = {
-    toolsRight: [(
+    toolsRight: [
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_new_event"
@@ -122,8 +117,7 @@ export const EventsTable = injectI18n(function EventsTable({
           id="xpack.ml.calendarsEdit.eventsTable.newEventButtonLabel"
           defaultMessage="New event"
         />
-      </EuiButton>),
-    (
+      </EuiButton>,
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_import_event"
@@ -136,12 +130,12 @@ export const EventsTable = injectI18n(function EventsTable({
           id="xpack.ml.calendarsEdit.eventsTable.importEventsButtonLabel"
           defaultMessage="Import events"
         />
-      </EuiButton>
-    )],
+      </EuiButton>,
+    ],
     box: {
       incremental: true,
     },
-    filters: []
+    filters: [],
   };
 
   return (
@@ -172,5 +166,5 @@ EventsTable.WrappedComponent.propTypes = {
 EventsTable.WrappedComponent.defaultProps = {
   showSearchBar: false,
   canCreateCalendar: true,
-  canDeleteCalendar: true
+  canDeleteCalendar: true,
 };

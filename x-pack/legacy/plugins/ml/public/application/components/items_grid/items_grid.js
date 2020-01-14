@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for a paged grid of items.
  */
@@ -12,13 +11,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiCheckbox,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText
-} from '@elastic/eui';
+import { EuiCheckbox, EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { ItemsGridPagination } from './items_grid_pagination';
 
@@ -34,24 +27,25 @@ export function ItemsGrid({
   setItemsPerPage,
   setItemSelected,
   activePage,
-  setActivePage }) {
-
+  setActivePage,
+}) {
   if (items === undefined || items.length === 0) {
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiText>
-            <h4>{(totalItemCount === 0) ? (
-              <FormattedMessage
-                id="xpack.ml.itemsGrid.noItemsAddedTitle"
-                defaultMessage="No items have been added"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.ml.itemsGrid.noMatchingItemsTitle"
-                defaultMessage="No matching items"
-              />
-            )}
+            <h4>
+              {totalItemCount === 0 ? (
+                <FormattedMessage
+                  id="xpack.ml.itemsGrid.noItemsAddedTitle"
+                  defaultMessage="No items have been added"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.itemsGrid.noMatchingItemsTitle"
+                  defaultMessage="No matching items"
+                />
+              )}
             </h4>
           </EuiText>
         </EuiFlexItem>
@@ -67,8 +61,10 @@ export function ItemsGrid({
         <EuiCheckbox
           id={`ml_grid_item_${index}`}
           label={item}
-          checked={(selectedItems.indexOf(item) >= 0)}
-          onChange={(e) => { setItemSelected(item, e.target.checked); }}
+          checked={selectedItems.indexOf(item) >= 0}
+          onChange={e => {
+            setItemSelected(item, e.target.checked);
+          }}
         />
       </EuiFlexItem>
     );
@@ -76,11 +72,7 @@ export function ItemsGrid({
 
   return (
     <div>
-      <EuiFlexGrid
-        columns={numberColumns}
-        className="eui-textBreakWord"
-        gutterSize="m"
-      >
+      <EuiFlexGrid columns={numberColumns} className="eui-textBreakWord" gutterSize="m">
         {gridItems}
       </EuiFlexGrid>
       <ItemsGridPagination
@@ -93,10 +85,9 @@ export function ItemsGrid({
       />
     </div>
   );
-
 }
 ItemsGrid.propTypes = {
-  numberColumns: PropTypes.oneOf([2, 3, 4]),    // In line with EuiFlexGrid which supports 2, 3 or 4 columns.
+  numberColumns: PropTypes.oneOf([2, 3, 4]), // In line with EuiFlexGrid which supports 2, 3 or 4 columns.
   totalItemCount: PropTypes.number.isRequired,
   items: PropTypes.array,
   selectedItems: PropTypes.array,
@@ -105,7 +96,7 @@ ItemsGrid.propTypes = {
   setItemsPerPage: PropTypes.func.isRequired,
   setItemSelected: PropTypes.func.isRequired,
   activePage: PropTypes.number.isRequired,
-  setActivePage: PropTypes.func.isRequired
+  setActivePage: PropTypes.func.isRequired,
 };
 
 ItemsGrid.defaultProps = {

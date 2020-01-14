@@ -23,9 +23,11 @@ import { SharedComponent } from './shared_component';
 export class ListComponent extends SharedComponent {
   constructor(name, list, parent, multiValued, allowNonValidValues) {
     super(name, parent);
-    this.listGenerator = Array.isArray(list) ? function () {
-      return list;
-    } : list;
+    this.listGenerator = Array.isArray(list)
+      ? function() {
+          return list;
+        }
+      : list;
     this.multiValued = _.isUndefined(multiValued) ? true : multiValued;
     this.allowNonValidValues = _.isUndefined(allowNonValidValues) ? false : allowNonValidValues;
   }
@@ -42,9 +44,9 @@ export class ListComponent extends SharedComponent {
 
     if (this.getDefaultTermMeta()) {
       const meta = this.getDefaultTermMeta();
-      ret = _.map(ret, function (term) {
+      ret = _.map(ret, function(term) {
         if (_.isString(term)) {
-          term = { 'name': term };
+          term = { name: term };
         }
         return _.defaults(term, { meta: meta });
       });
@@ -60,7 +62,7 @@ export class ListComponent extends SharedComponent {
 
     // verify we have all tokens
     const list = this.listGenerator();
-    const notFound = _.any(tokens, function (token) {
+    const notFound = _.any(tokens, function(token) {
       return list.indexOf(token) === -1;
     });
 

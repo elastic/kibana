@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import 'react-vis/dist/style.css';
 import { PluginInitializerContext } from 'kibana/public';
 import 'ui/autoload/all';
@@ -13,8 +13,6 @@ import { plugin } from './new-platform';
 import { REACT_APP_ROOT_ID } from './new-platform/plugin';
 import './style/global_overrides.css';
 import template from './templates/index.html';
-
-const { core, plugins } = npStart;
 
 // This will be moved to core.application.register when the new platform
 // migration is complete.
@@ -32,5 +30,7 @@ const checkForRoot = () => {
   });
 };
 checkForRoot().then(() => {
-  plugin({} as PluginInitializerContext).start(core, plugins);
+  const pluginInstance = plugin({} as PluginInitializerContext);
+  pluginInstance.setup(npSetup.core, npSetup.plugins);
+  pluginInstance.start(npStart.core, npStart.plugins);
 });

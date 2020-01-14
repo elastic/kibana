@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -29,12 +29,11 @@ export default function ({ getService, getPageObjects }) {
   const visualTesting = getService('visualTesting');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:sampleSize': 1
+    'discover:sampleSize': 1,
   };
 
   describe('discover', function describeIndexTests() {
-
-    before(async function () {
+    before(async function() {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
@@ -46,11 +45,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('query', function () {
+    describe('query', function() {
       this.tags(['skipFirefox']);
       let renderCounter = 0;
 
-      it('should show bars in the correct time zone', async function () {
+      it('should show bars in the correct time zone', async function() {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
@@ -59,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct data for chart interval Hourly', async function () {
+      it('should show correct data for chart interval Hourly', async function() {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Hourly');
@@ -69,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct data for chart interval Daily', async function () {
+      it('should show correct data for chart interval Daily', async function() {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Daily');
@@ -79,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct data for chart interval Weekly', async function () {
+      it('should show correct data for chart interval Weekly', async function() {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Weekly');
@@ -89,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('browser back button should show previous interval Daily', async function () {
+      it('browser back button should show previous interval Daily', async function() {
         await browser.goBack();
         await retry.try(async function tryingForTime() {
           const actualInterval = await PageObjects.discover.getChartInterval();
@@ -103,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct data for chart interval Monthly', async function () {
+      it('should show correct data for chart interval Monthly', async function() {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Monthly');
@@ -113,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct data for chart interval Yearly', async function () {
+      it('should show correct data for chart interval Yearly', async function() {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Yearly');
@@ -123,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show correct data for chart interval Auto', async function () {
+      it('should show correct data for chart interval Auto', async function() {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Auto');
@@ -135,7 +134,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('time zone switch', () => {
-      it('should show bars in the correct time zone after switching', async function () {
+      it('should show bars in the correct time zone after switching', async function() {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();

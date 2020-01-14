@@ -43,15 +43,15 @@ for (let i = 0; i < 105; i++) {
     documents: 10000,
     documents_deleted: 100,
     size: '156kb',
-    primary_size: '156kb'
+    primary_size: '156kb',
   };
   indices.push({
     ...baseFake,
-    name: `testy${i}`
+    name: `testy${i}`,
   });
   indices.push({
     ...baseFake,
-    name: `.admin${i}`
+    name: `.admin${i}`,
   });
 }
 let component = null;
@@ -71,16 +71,10 @@ const openMenuAndClickButton = (rendered, rowIndex, buttonIndex) => {
   const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
   checkboxes.at(rowIndex).simulate('change', { target: { checked: true } });
   rendered.update();
-  const actionButton = findTestSubject(
-    rendered,
-    'indexActionsContextMenuButton'
-  );
+  const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
   actionButton.simulate('click');
   rendered.update();
-  const contextMenuButtons = findTestSubject(
-    rendered,
-    'indexTableContextMenuButton'
-  );
+  const contextMenuButtons = findTestSubject(rendered, 'indexTableContextMenuButton');
   contextMenuButtons.at(buttonIndex).simulate('click');
 };
 const testEditor = (buttonIndex, rowIndex = 0) => {
@@ -119,7 +113,6 @@ describe('index table', () => {
     uiMetricService.init(createUiStatsReporter);
     notificationService.init(notificationServiceMock.createStartContract());
 
-
     store = indexManagementStore();
     component = (
       <Provider store={store}>
@@ -133,17 +126,17 @@ describe('index table', () => {
     server.respondWith(`${API_BASE_PATH}/indices`, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(indices)
+      JSON.stringify(indices),
     ]);
     server.respondWith([
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify({ acknowledged: true })
+      JSON.stringify({ acknowledged: true }),
     ]);
     server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(indices)
+      JSON.stringify(indices),
     ]);
     server.respondImmediately = true;
   });
@@ -183,18 +176,14 @@ describe('index table', () => {
     const rendered = mountWithIntl(component);
     snapshot(
       rendered
-        .find(
-          '.euiPagination .euiPaginationButton .euiButtonEmpty__content > span'
-        )
+        .find('.euiPagination .euiPaginationButton .euiButtonEmpty__content > span')
         .map(span => span.text())
     );
     const switchControl = rendered.find('.euiSwitch__button');
     switchControl.simulate('click');
     snapshot(
       rendered
-        .find(
-          '.euiPagination .euiPaginationButton .euiButtonEmpty__content > span'
-        )
+        .find('.euiPagination .euiPaginationButton .euiButtonEmpty__content > span')
         .map(span => span.text())
     );
   });
@@ -208,10 +197,7 @@ describe('index table', () => {
   });
   test('should sort when header is clicked', () => {
     const rendered = mountWithIntl(component);
-    const nameHeader = findTestSubject(
-      rendered,
-      'indexTableHeaderCell-name'
-    ).find('button');
+    const nameHeader = findTestSubject(rendered, 'indexTableHeaderCell-name').find('button');
     nameHeader.simulate('click');
     rendered.update();
     snapshot(namesText(rendered));
@@ -232,34 +218,20 @@ describe('index table', () => {
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('should show the right context menu options when one index is selected and closed', () => {
     const rendered = mountWithIntl(component);
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(1).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('should show the right context menu options when one open and one closed index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -267,17 +239,10 @@ describe('index table', () => {
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     checkboxes.at(1).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('should show the right context menu options when more than one open index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -285,17 +250,10 @@ describe('index table', () => {
     checkboxes.at(0).simulate('change', { target: { checked: true } });
     checkboxes.at(2).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('should show the right context menu options when more than one closed index is selected', () => {
     const rendered = mountWithIntl(component);
@@ -303,17 +261,10 @@ describe('index table', () => {
     checkboxes.at(1).simulate('change', { target: { checked: true } });
     checkboxes.at(3).simulate('change', { target: { checked: true } });
     rendered.update();
-    const actionButton = findTestSubject(
-      rendered,
-      'indexActionsContextMenuButton'
-    );
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');
     rendered.update();
-    snapshot(
-      findTestSubject(rendered, 'indexTableContextMenuButton').map(span =>
-        span.text()
-      )
-    );
+    snapshot(findTestSubject(rendered, 'indexTableContextMenuButton').map(span => span.text()));
   });
   test('flush button works from context menu', done => {
     testAction(8, done);
@@ -339,10 +290,7 @@ describe('index table', () => {
       }
       count++;
     });
-    const confirmButton = findTestSubject(
-      rendered,
-      'confirmModalConfirmButton'
-    );
+    const confirmButton = findTestSubject(rendered, 'confirmModalConfirmButton');
     confirmButton.simulate('click');
     snapshot(status(rendered, rowIndex));
   });
@@ -350,14 +298,14 @@ describe('index table', () => {
     const modifiedIndices = indices.map(index => {
       return {
         ...index,
-        status: index.name === 'testy0' ? 'close' : index.status
+        status: index.name === 'testy0' ? 'close' : index.status,
       };
     });
 
     server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(modifiedIndices)
+      JSON.stringify(modifiedIndices),
     ]);
     testAction(4, done);
   });
@@ -365,13 +313,13 @@ describe('index table', () => {
     const modifiedIndices = indices.map(index => {
       return {
         ...index,
-        status: index.name === 'testy1' ? 'open' : index.status
+        status: index.name === 'testy1' ? 'open' : index.status,
       };
     });
     server.respondWith(`${API_BASE_PATH}/indices/reload`, [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(modifiedIndices)
+      JSON.stringify(modifiedIndices),
     ]);
     testAction(3, done, 1);
   });

@@ -25,7 +25,6 @@ exports[`SizeParamEditor should init with the default set of props 1`] = `
     data-test-subj="sizeParamEditor"
     fullWidth={true}
     isInvalid={false}
-    isLoading={false}
     min={1}
     onBlur={[MockFunction]}
     onChange={[Function]}

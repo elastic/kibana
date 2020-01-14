@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const appEntryTemplate = (bundle) => `
+export const appEntryTemplate = bundle => `
 /**
  * Kibana entry file
  *

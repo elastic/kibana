@@ -20,7 +20,6 @@
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
@@ -62,14 +61,10 @@ export async function bootstrap({
     isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
   });
 
-  const rawConfigService = new RawConfigService(
-    env.configs,
-    rawConfig => new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig))
-  );
-
+  const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const root = new Root(rawConfigService.getConfig$(), env, onRootShutdown);
+  const root = new Root(rawConfigService, env, onRootShutdown);
 
   process.on('SIGHUP', () => reloadLoggingConfig());
 

@@ -12,10 +12,10 @@ describe('Settings Checker Class for Elasticsearch Settings', () => {
       return Promise.resolve({
         data: {
           found: true,
-          reason: { context: 'unit_test' }
-        }
+          reason: { context: 'unit_test' },
+        },
       });
-    }
+    },
   });
 
   it('should construct a settings checker object', async () => {
@@ -29,7 +29,7 @@ describe('Settings Checker Class for Elasticsearch Settings', () => {
 
     expect(await checker.executeCheck()).toEqual({
       found: true,
-      reason: { context: 'unit_test' }
+      reason: { context: 'unit_test' },
     });
   });
 });

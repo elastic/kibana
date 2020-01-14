@@ -30,12 +30,8 @@ import { OptedInBanner } from '../../components/opted_in_notice_banner';
  */
 export function renderOptedInBanner(telemetryOptInProvider, { _banners = banners } = {}) {
   const bannerId = _banners.add({
-    component: (
-      <OptedInBanner
-        onSeenBanner={telemetryOptInProvider.setOptInNoticeSeen}
-      />
-    ),
-    priority: 10000
+    component: <OptedInBanner onSeenBanner={telemetryOptInProvider.setOptInNoticeSeen} />,
+    priority: 10000,
   });
 
   telemetryOptInProvider.setOptInBannerNoticeId(bannerId);

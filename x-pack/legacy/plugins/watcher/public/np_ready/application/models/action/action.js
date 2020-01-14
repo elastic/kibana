@@ -27,7 +27,7 @@ set(ActionTypes, ACTION_TYPES.JIRA, JiraAction);
 export class Action {
   static getActionTypes = () => {
     return ActionTypes;
-  }
+  };
 
   static fromUpstreamJson(upstreamAction) {
     const type = get(upstreamAction, 'type');

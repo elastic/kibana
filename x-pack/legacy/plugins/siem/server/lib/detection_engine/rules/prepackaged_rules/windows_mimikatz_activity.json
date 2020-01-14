@@ -1,0 +1,43 @@
+{
+  "rule_id": "5346463d-062f-419d-88ff-7a5e97875210",
+  "risk_score": 50,
+  "description": "Windows Mimikatz activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Mimikatz activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:mimikatz.exe",
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "Process Create (rule: ProcessCreate)",
+        "params": {
+          "query": "Process Create (rule: ProcessCreate)"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "Process Create (rule: ProcessCreate)",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false,
+  "version": 1
+}

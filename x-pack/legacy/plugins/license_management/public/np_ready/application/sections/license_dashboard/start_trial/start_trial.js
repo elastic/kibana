@@ -19,7 +19,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalBody,
-  EuiModalHeaderTitle
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
@@ -27,7 +27,6 @@ import { optInToTelemetry } from '../../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EXTERNAL_LINKS } from '../../../../../../common/constants';
 import { getDocLinks } from '../../../lib/docs_links';
-
 
 export class StartTrial extends React.PureComponent {
   constructor(props) {
@@ -43,10 +42,10 @@ export class StartTrial extends React.PureComponent {
       optInToTelemetry(true);
     }
     startLicenseTrial();
-  }
+  };
   cancel = () => {
     this.setState({ showConfirmation: false });
-  }
+  };
   acknowledgeModal() {
     const { showConfirmation } = this.state;
     if (!showConfirmation) {
@@ -55,10 +54,7 @@ export class StartTrial extends React.PureComponent {
 
     return (
       <EuiOverlayMask>
-        <EuiModal
-          className="licManagement__modal"
-          onClose={this.cancel}
-        >
+        <EuiModal className="licManagement__modal" onClose={this.cancel}>
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
               <FormattedMessage
@@ -75,19 +71,16 @@ export class StartTrial extends React.PureComponent {
                     <FormattedMessage
                       id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription"
                       defaultMessage="This trial is for the full set of {platinumLicenseFeaturesLinkText} of the Elastic Stack.
-                      You&apos;ll get immediate access to:"
+                      You'll get immediate access to:"
                       values={{
                         platinumLicenseFeaturesLinkText: (
-                          <EuiLink
-                            href={EXTERNAL_LINKS.SUBSCRIPTIONS}
-                            target="_blank"
-                          >
+                          <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
                             <FormattedMessage
                               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.platinumLicenseFeaturesLinkText"
                               defaultMessage="Platinum features"
                             />
                           </EuiLink>
-                        )
+                        ),
                       }}
                     />
                   </p>
@@ -117,7 +110,7 @@ export class StartTrial extends React.PureComponent {
                         values={{
                           jdbcStandard: 'JDBC',
                           odbcStandard: 'ODBC',
-                          sqlDataBase: 'SQL'
+                          sqlDataBase: 'SQL',
                         }}
                       />
                     </li>
@@ -131,17 +124,13 @@ export class StartTrial extends React.PureComponent {
                       values={{
                         authenticationTypeList: 'AD/LDAP, SAML, PKI, SAML/SSO',
                         securityDocumentationLinkText: (
-                          <EuiLink
-                            href={getDocLinks().securityDocumentationLink}
-                            target="_blank"
-                          >
+                          <EuiLink href={getDocLinks().securityDocumentationLink} target="_blank">
                             <FormattedMessage
-                              // eslint-disable-next-line max-len
                               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityDocumentationLinkText"
                               defaultMessage="documentation"
                             />
                           </EuiLink>
-                        )
+                        ),
                       }}
                     />
                   </p>
@@ -151,17 +140,13 @@ export class StartTrial extends React.PureComponent {
                       defaultMessage="By starting this trial, you agree that it is subject to these {termsAndConditionsLinkText}."
                       values={{
                         termsAndConditionsLinkText: (
-                          <EuiLink
-                            href={EXTERNAL_LINKS.TRIAL_LICENSE}
-                            target="_blank"
-                          >
+                          <EuiLink href={EXTERNAL_LINKS.TRIAL_LICENSE} target="_blank">
                             <FormattedMessage
-                              // eslint-disable-next-line max-len
                               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsLinkText"
                               defaultMessage="terms and conditions"
                             />
                           </EuiLink>
-                        )
+                        ),
                       }}
                     />
                   </p>
@@ -173,7 +158,12 @@ export class StartTrial extends React.PureComponent {
           <EuiModalFooter>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                <TelemetryOptIn isStartTrial={true} ref={(ref) => {this.telemetryOptIn = ref; }}/>
+                <TelemetryOptIn
+                  isStartTrial={true}
+                  ref={ref => {
+                    this.telemetryOptIn = ref;
+                  }}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false} className="licManagement__ieFlex">
                 <EuiFlexGroup responsive={false}>
@@ -225,23 +215,23 @@ export class StartTrial extends React.PureComponent {
           and all our other {platinumLicenseFeaturesLinkText} have to offer."
           values={{
             platinumLicenseFeaturesLinkText: (
-              <EuiLink
-                href={EXTERNAL_LINKS.SUBSCRIPTIONS}
-                target="_blank"
-              >
+              <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
                 <FormattedMessage
                   id="xpack.licenseMgmt.licenseDashboard.startTrial.platinumLicenseFeaturesLinkText"
                   defaultMessage="Platinum features"
                 />
               </EuiLink>
-            )
+            ),
           }}
         />
       </span>
     );
 
     const footer = (
-      <EuiButton data-test-subj="startTrialButton" onClick={() => this.setState({ showConfirmation: true })}>
+      <EuiButton
+        data-test-subj="startTrialButton"
+        onClick={() => this.setState({ showConfirmation: true })}
+      >
         <FormattedMessage
           id="xpack.licenseMgmt.licenseDashboard.startTrial.startTrialButtonLabel"
           defaultMessage="Start trial"
@@ -252,10 +242,12 @@ export class StartTrial extends React.PureComponent {
       <EuiFlexItem>
         {this.acknowledgeModal()}
         <EuiCard
-          title={(<FormattedMessage
-            id="xpack.licenseMgmt.licenseDashboard.startTrialTitle"
-            defaultMessage="Start a 30-day trial"
-          />)}
+          title={
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.startTrialTitle"
+              defaultMessage="Start a 30-day trial"
+            />
+          }
           description={description}
           footer={footer}
         />

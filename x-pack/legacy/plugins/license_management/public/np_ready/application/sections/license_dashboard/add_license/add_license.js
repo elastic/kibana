@@ -13,19 +13,20 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const AddLicense = ({ uploadPath = `#${BASE_PATH}upload_license` }) => {
   return (
     <EuiCard
-      title={(<FormattedMessage
-        id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseTitle"
-        defaultMessage="Update your license"
-      />)}
-      description={(<FormattedMessage
-        id="xpack.licenseMgmt.licenseDashboard.addLicense.useAvailableLicenseDescription"
-        defaultMessage="If you already have a new license, upload it now."
-      />)}
+      title={
+        <FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseTitle"
+          defaultMessage="Update your license"
+        />
+      }
+      description={
+        <FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.addLicense.useAvailableLicenseDescription"
+          defaultMessage="If you already have a new license, upload it now."
+        />
+      }
       footer={
-        <EuiButton
-          data-test-subj="updateLicenseButton"
-          href={uploadPath}
-        >
+        <EuiButton data-test-subj="updateLicenseButton" href={uploadPath}>
           <FormattedMessage
             id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseButtonLabel"
             defaultMessage="Update license"

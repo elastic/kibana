@@ -29,7 +29,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
@@ -37,7 +37,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await security.role.delete('global_all_role');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     describe('machine_learning_user', () => {
@@ -80,9 +80,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show ml navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Machine Learning');
       });
     });
@@ -103,9 +101,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows ML navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Machine Learning');
       });
     });

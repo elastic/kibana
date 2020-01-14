@@ -4,42 +4,60 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactChild, FunctionComponent } from 'react';
 import { render, wait, waitForElement } from '@testing-library/react';
 import { ServiceOverview } from '..';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'src/core/public';
 import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
+import {
+  MockApmPluginContextWrapper,
+  mockApmPluginContextValue
+} from '../../../../utils/testHelpers';
+import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 
-function renderServiceOverview() {
-  return render(<ServiceOverview />);
+jest.mock('ui/new_platform');
+
+function wrapper({ children }: { children: ReactChild }) {
+  return (
+    <MockApmPluginContextWrapper
+      value={
+        ({
+          ...mockApmPluginContextValue,
+          core: {
+            ...mockApmPluginContextValue.core,
+            http: { ...mockApmPluginContextValue.core.http, get: httpGet },
+            notifications: {
+              ...mockApmPluginContextValue.core.notifications,
+              toasts: {
+                ...mockApmPluginContextValue.core.notifications.toasts,
+                addWarning
+              }
+            }
+          }
+        } as unknown) as ApmPluginContextValue
+      }
+    >
+      {children}
+    </MockApmPluginContextWrapper>
+  );
 }
 
-const coreMock = ({
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`
-    },
-    get: jest.fn()
-  },
-  notifications: {
-    toasts: {
-      addWarning: () => {}
-    }
-  }
-} as unknown) as LegacyCoreStart & {
-  http: { get: jest.Mock<any, any> };
-};
+function renderServiceOverview() {
+  return render(<ServiceOverview />, { wrapper } as {
+    wrapper: FunctionComponent<{}>;
+  });
+}
+
+const addWarning = jest.fn();
+const httpGet = jest.fn();
 
 describe('Service Overview -> View', () => {
   beforeEach(() => {
     // @ts-ignore
     global.sessionStorage = new SessionStorageMock();
 
-    spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
     // mock urlParams
     spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
       urlParams: {
@@ -62,7 +80,7 @@ describe('Service Overview -> View', () => {
 
   it('should render services, when list is not empty', async () => {
     // mock rest requests
-    coreMock.http.get.mockResolvedValueOnce({
+    httpGet.mockResolvedValueOnce({
       hasLegacyData: false,
       hasHistoricalData: true,
       items: [
@@ -88,14 +106,14 @@ describe('Service Overview -> View', () => {
     const { container, getByText } = renderServiceOverview();
 
     // wait for requests to be made
-    await wait(() => expect(coreMock.http.get).toHaveBeenCalledTimes(1));
+    await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
     await waitForElement(() => getByText('My Python Service'));
 
     expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
   });
 
   it('should render getting started message, when list is empty and no historical data is found', async () => {
-    coreMock.http.get.mockResolvedValueOnce({
+    httpGet.mockResolvedValueOnce({
       hasLegacyData: false,
       hasHistoricalData: false,
       items: []
@@ -104,7 +122,7 @@ describe('Service Overview -> View', () => {
     const { container, getByText } = renderServiceOverview();
 
     // wait for requests to be made
-    await wait(() => expect(coreMock.http.get).toHaveBeenCalledTimes(1));
+    await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
     // wait for elements to be rendered
     await waitForElement(() =>
@@ -117,7 +135,7 @@ describe('Service Overview -> View', () => {
   });
 
   it('should render empty message, when list is empty and historical data is found', async () => {
-    coreMock.http.get.mockResolvedValueOnce({
+    httpGet.mockResolvedValueOnce({
       hasLegacyData: false,
       hasHistoricalData: true,
       items: []
@@ -126,7 +144,7 @@ describe('Service Overview -> View', () => {
     const { container, getByText } = renderServiceOverview();
 
     // wait for requests to be made
-    await wait(() => expect(coreMock.http.get).toHaveBeenCalledTimes(1));
+    await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
     await waitForElement(() => getByText('No services found'));
 
     expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
@@ -134,13 +152,7 @@ describe('Service Overview -> View', () => {
 
   describe('when legacy data is found', () => {
     it('renders an upgrade migration notification', async () => {
-      // create spies
-      const addWarning = jest.spyOn(
-        coreMock.notifications.toasts,
-        'addWarning'
-      );
-
-      coreMock.http.get.mockResolvedValueOnce({
+      httpGet.mockResolvedValueOnce({
         hasLegacyData: true,
         hasHistoricalData: true,
         items: []
@@ -149,7 +161,7 @@ describe('Service Overview -> View', () => {
       renderServiceOverview();
 
       // wait for requests to be made
-      await wait(() => expect(coreMock.http.get).toHaveBeenCalledTimes(1));
+      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
       expect(addWarning).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -161,12 +173,7 @@ describe('Service Overview -> View', () => {
 
   describe('when legacy data is not found', () => {
     it('does not render an upgrade migration notification', async () => {
-      // create spies
-      const addWarning = jest.spyOn(
-        coreMock.notifications.toasts,
-        'addWarning'
-      );
-      coreMock.http.get.mockResolvedValueOnce({
+      httpGet.mockResolvedValueOnce({
         hasLegacyData: false,
         hasHistoricalData: true,
         items: []
@@ -175,7 +182,7 @@ describe('Service Overview -> View', () => {
       renderServiceOverview();
 
       // wait for requests to be made
-      await wait(() => expect(coreMock.http.get).toHaveBeenCalledTimes(1));
+      await wait(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
       expect(addWarning).not.toHaveBeenCalled();
     });

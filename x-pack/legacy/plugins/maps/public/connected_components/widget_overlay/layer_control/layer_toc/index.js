@@ -11,16 +11,17 @@ import { getLayerList } from '../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../selectors/ui_selectors';
 
 const mapDispatchToProps = {
-  updateLayerOrder: newOrder => updateLayerOrder(newOrder)
+  updateLayerOrder: newOrder => updateLayerOrder(newOrder),
 };
 
 function mapStateToProps(state = {}) {
   return {
     isReadOnly: getIsReadOnly(state),
-    layerList: getLayerList(state)
+    layerList: getLayerList(state),
   };
 }
 
-const connectedLayerTOC = connect(mapStateToProps, mapDispatchToProps, null,
-  { withRef: true })(LayerTOC);
+const connectedLayerTOC = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(
+  LayerTOC
+);
 export { connectedLayerTOC as LayerTOC };

@@ -61,8 +61,8 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error }) 
 
   const defaultSorting = {
     sort: {
-      field: 'timestamp',
-      direction: 'asc',
+      field: 'timestamp' as const,
+      direction: 'asc' as const,
     },
   };
 
@@ -74,7 +74,6 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error }) 
         items={messages}
         columns={columns}
         sorting={defaultSorting}
-        // @ts-ignore
         compressed={true}
         loading={loading}
         error={error}

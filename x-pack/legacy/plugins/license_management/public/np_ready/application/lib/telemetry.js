@@ -12,20 +12,24 @@ export { OptInExampleFlyout } from '../../../../../../../../src/legacy/core_plug
 let telemetryEnabled;
 let httpClient;
 let telemetryOptInService;
-export const setTelemetryEnabled = (isTelemetryEnabled) => {
+export const setTelemetryEnabled = isTelemetryEnabled => {
   telemetryEnabled = isTelemetryEnabled;
 };
-export const setHttpClient = (anHttpClient) => {
+export const setHttpClient = anHttpClient => {
   httpClient = anHttpClient;
 };
-export const setTelemetryOptInService = (aTelemetryOptInService) => {
+export const setTelemetryOptInService = aTelemetryOptInService => {
   telemetryOptInService = aTelemetryOptInService;
 };
-export const optInToTelemetry = async (enableTelemetry) => {
+export const optInToTelemetry = async enableTelemetry => {
   await telemetryOptInService.setOptIn(enableTelemetry);
 };
 export const shouldShowTelemetryOptIn = () => {
-  return telemetryEnabled && !telemetryOptInService.getOptIn() && telemetryOptInService.canChangeOptInStatus();
+  return (
+    telemetryEnabled &&
+    !telemetryOptInService.getOptIn() &&
+    telemetryOptInService.canChangeOptInStatus()
+  );
 };
 export const getTelemetryFetcher = () => {
   return fetchTelemetry(httpClient, { unencrypted: true });

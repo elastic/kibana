@@ -15,7 +15,7 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import { usePlugins } from '../../../new-platform/plugin';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
   AutocompleteProvider,
@@ -71,7 +71,7 @@ export function KueryBar() {
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
-  const { data } = usePlugins();
+  const { data } = useApmPluginContext().plugins;
   const autocompleteProvider = data.autocomplete.getProvider('kuery');
 
   let currentRequestCheck;

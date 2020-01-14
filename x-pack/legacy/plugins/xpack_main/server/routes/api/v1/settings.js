@@ -9,7 +9,7 @@ import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants
 import { getKibanaInfoForStats } from '../../../../../monitoring/server/kibana_monitoring/lib';
 
 const getClusterUuid = async callCluster => {
-  const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
+  const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
   return uuid;
 };
 
@@ -35,7 +35,7 @@ export function settingsRoute(server, kbnServer) {
         const kibana = getKibanaInfoForStats({
           kbnServerStatus: kbnServer.status,
           kbnServerVersion: kbnServer.version,
-          config: server.config()
+          config: server.config(),
         });
 
         return {
@@ -43,9 +43,9 @@ export function settingsRoute(server, kbnServer) {
           settings: {
             ...settings,
             kibana,
-          }
+          },
         };
-      } catch(err) {
+      } catch (err) {
         req.log(['error'], err); // FIXME doesn't seem to log anything useful if ES times out
         if (err.isBoom) {
           return err;
@@ -53,6 +53,6 @@ export function settingsRoute(server, kbnServer) {
           return boomify(err, { statusCode: err.statusCode, message: err.message });
         }
       }
-    }
+    },
   });
 }

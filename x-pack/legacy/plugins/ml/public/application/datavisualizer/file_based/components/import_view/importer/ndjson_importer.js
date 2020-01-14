@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { Importer } from './importer';
 
 export class NdjsonImporter extends Importer {
-  constructor(results, settings) { // eslint-disable-line no-unused-vars
+  constructor(results, settings) {
+    // eslint-disable-line no-unused-vars
     super(settings);
   }
 

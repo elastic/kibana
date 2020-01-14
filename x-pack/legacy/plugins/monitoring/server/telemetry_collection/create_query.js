@@ -14,14 +14,11 @@ import moment from 'moment';
  * TODO: this backwards compatibility helper will only be supported for 5.x-6. This
  * function should be removed in 7.0
  */
-export const createTypeFilter = (type) => {
+export const createTypeFilter = type => {
   return {
     bool: {
-      should: [
-        { term: { _type: type } },
-        { term: { type } }
-      ]
-    }
+      should: [{ term: { _type: type } }, { term: { type } }],
+    },
   };
 };
 
@@ -50,7 +47,7 @@ export function createQuery(options) {
 
   let clusterUuidFilter;
   if (clusterUuid) {
-    clusterUuidFilter = { term: { 'cluster_uuid': clusterUuid } };
+    clusterUuidFilter = { term: { cluster_uuid: clusterUuid } };
   }
 
   let timeRangeFilter;
@@ -58,9 +55,9 @@ export function createQuery(options) {
     timeRangeFilter = {
       range: {
         timestamp: {
-          format: 'epoch_millis'
-        }
-      }
+          format: 'epoch_millis',
+        },
+      },
     };
 
     if (start) {
@@ -75,7 +72,7 @@ export function createQuery(options) {
 
   return {
     bool: {
-      filter: combinedFilters.filter(Boolean)
-    }
+      filter: combinedFilters.filter(Boolean),
+    },
   };
 }

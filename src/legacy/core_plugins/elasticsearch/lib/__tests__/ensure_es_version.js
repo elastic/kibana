@@ -31,24 +31,27 @@ describe('plugins/elasticsearch', () => {
 
     let server;
 
-    beforeEach(function () {
+    beforeEach(function() {
       server = {
         log: sinon.stub(),
         logWithMetadata: sinon.stub(),
         plugins: {
           elasticsearch: {
-            getCluster: sinon.stub().withArgs('admin').returns({ callWithInternalUser: sinon.stub() }),
+            getCluster: sinon
+              .stub()
+              .withArgs('admin')
+              .returns({ callWithInternalUser: sinon.stub() }),
             status: {
-              red: sinon.stub()
+              red: sinon.stub(),
             },
-            url: esTestConfig.getUrl()
-          }
+            url: esTestConfig.getUrl(),
+          },
         },
         config() {
           return {
-            get: sinon.stub()
+            get: sinon.stub(),
           };
-        }
+        },
       };
     });
 
@@ -58,7 +61,7 @@ describe('plugins/elasticsearch', () => {
       let i = 0;
 
       while (versions.length) {
-        const name = 'node-' + (++i);
+        const name = 'node-' + ++i;
         const version = versions.shift();
 
         const node = {
@@ -66,7 +69,7 @@ describe('plugins/elasticsearch', () => {
           http: {
             publish_address: 'http_address',
           },
-          ip: 'ip'
+          ip: 'ip',
         };
 
         if (!_.isString(version)) _.assign(node, version);
@@ -74,13 +77,17 @@ describe('plugins/elasticsearch', () => {
       }
 
       const cluster = server.plugins.elasticsearch.getCluster('admin');
-      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Bluebird.resolve({ nodes: nodes }));
+      cluster.callWithInternalUser
+        .withArgs('nodes.info', sinon.match.any)
+        .returns(Bluebird.resolve({ nodes: nodes }));
     }
 
     function setNodeWithoutHTTP(version) {
       const nodes = { 'node-without-http': { version, ip: 'ip' } };
       const cluster = server.plugins.elasticsearch.getCluster('admin');
-      cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any).returns(Bluebird.resolve({ nodes: nodes }));
+      cluster.callWithInternalUser
+        .withArgs('nodes.info', sinon.match.any)
+        .returns(Bluebird.resolve({ nodes: nodes }));
     }
 
     it('returns true with single a node that matches', async () => {
@@ -122,7 +129,7 @@ describe('plugins/elasticsearch', () => {
       setNodes('5.1.0', '5.2.0', '5.0.0');
 
       const ignoreVersionMismatch = true;
-      const result =  await ensureEsVersion(server, KIBANA_VERSION, ignoreVersionMismatch);
+      const result = await ensureEsVersion(server, KIBANA_VERSION, ignoreVersionMismatch);
       expect(result).to.be(true);
     });
 
@@ -151,11 +158,7 @@ describe('plugins/elasticsearch', () => {
     });
 
     it('fails if that single node is a client node', async () => {
-      setNodes(
-        '5.1.0',
-        '5.2.0',
-        { version: '5.0.0', attributes: { client: 'true' } },
-      );
+      setNodes('5.1.0', '5.2.0', { version: '5.0.0', attributes: { client: 'true' } });
       try {
         await ensureEsVersion(server, KIBANA_VERSION);
       } catch (e) {

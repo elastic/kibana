@@ -26,16 +26,18 @@
 
 import { uiModules } from '../modules';
 
-uiModules.get('kibana')
-  .directive('scrolltoActivedescendant', () => ({
-    link(scope, element, attrs) {
-      scope.$watch(() => attrs.ariaActivedescendant, (val) => {
+uiModules.get('kibana').directive('scrolltoActivedescendant', () => ({
+  link(scope, element, attrs) {
+    scope.$watch(
+      () => attrs.ariaActivedescendant,
+      val => {
         if (val) {
           const activeDescendant = element.find(`#${val}`);
           if (activeDescendant.length) {
             activeDescendant[0].scrollIntoView();
           }
         }
-      });
-    }
-  }));
+      }
+    );
+  },
+}));

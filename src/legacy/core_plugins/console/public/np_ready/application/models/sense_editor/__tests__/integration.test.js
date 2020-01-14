@@ -41,7 +41,7 @@ describe('Integration', () => {
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
-    test(testToRun.name, async function (done) {
+    test(testToRun.name, async function(done) {
       let lineOffset = 0; // add one for the extra method line
       let editorValue = data;
       if (requestLine != null) {
@@ -61,13 +61,13 @@ describe('Integration', () => {
       json[test.name] = kbSchemes || {};
       const testApi = kb._test.loadApisFromJson(json);
       if (kbSchemes) {
-      //  if (kbSchemes.globals) {
-      //    $.each(kbSchemes.globals, function (parent, rules) {
-      //      testApi.addGlobalAutocompleteRules(parent, rules);
-      //    });
-      //  }
+        //  if (kbSchemes.globals) {
+        //    $.each(kbSchemes.globals, function (parent, rules) {
+        //      testApi.addGlobalAutocompleteRules(parent, rules);
+        //    });
+        //  }
         if (kbSchemes.endpoints) {
-          $.each(kbSchemes.endpoints, function (endpoint, scheme) {
+          $.each(kbSchemes.endpoints, function(endpoint, scheme) {
             testApi.addEndpointDescription(endpoint, scheme);
           });
         }
@@ -81,7 +81,7 @@ describe('Integration', () => {
       //setTimeout(function () {
       senseEditor.completer = {
         base: {},
-        changeListener: function () {},
+        changeListener: function() {},
       }; // mimic auto complete
 
       senseEditor.autocomplete._test.getCompletions(
@@ -89,7 +89,7 @@ describe('Integration', () => {
         null,
         { row: cursor.lineNumber - 1, column: cursor.column - 1 },
         '',
-        function (err, terms) {
+        function(err, terms) {
           if (testToRun.assertThrows) {
             done();
             return;
@@ -112,7 +112,7 @@ describe('Integration', () => {
           }
 
           if (testToRun.autoCompleteSet) {
-            const expectedTerms = _.map(testToRun.autoCompleteSet, function (t) {
+            const expectedTerms = _.map(testToRun.autoCompleteSet, function(t) {
               if (typeof t !== 'object') {
                 t = { name: t };
               }
@@ -121,13 +121,10 @@ describe('Integration', () => {
             if (terms.length !== expectedTerms.length) {
               expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
             } else {
-              const filteredActualTerms = _.map(terms, function (
-                actualTerm,
-                i
-              ) {
+              const filteredActualTerms = _.map(terms, function(actualTerm, i) {
                 const expectedTerm = expectedTerms[i];
                 const filteredTerm = {};
-                _.each(expectedTerm, function (v, p) {
+                _.each(expectedTerm, function(v, p) {
                   filteredTerm[p] = actualTerm[p];
                 });
                 return filteredTerm;
@@ -137,7 +134,9 @@ describe('Integration', () => {
           }
 
           const context = terms[0].context;
-          const { cursor: { lineNumber, column } } = testToRun;
+          const {
+            cursor: { lineNumber, column },
+          } = testToRun;
           senseEditor.autocomplete._test.addReplacementInfoToContext(
             context,
             { lineNumber, column },
@@ -396,7 +395,6 @@ describe('Integration', () => {
     ]
   );
 
-
   contextTests(
     {
       object: 1,
@@ -561,7 +559,6 @@ describe('Integration', () => {
       },
     ]
   );
-
 
   contextTests(
     {
@@ -745,7 +742,7 @@ describe('Integration', () => {
                 },
               ],
               g: {
-                __scope_link: function () {
+                __scope_link: function() {
                   return {
                     a: 1,
                     b: 2,
@@ -1029,13 +1026,7 @@ describe('Integration', () => {
     {
       name: 'Endpoints with slashes - no slash',
       cursor: { lineNumber: 1, column: 9 },
-      autoCompleteSet: [
-        '_cluster/nodes/stats',
-        '_cluster/stats',
-        '_search',
-        'index1',
-        'index2',
-      ],
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
       prefixToAdd: '',
       suffixToAdd: '',
     },
@@ -1045,26 +1036,14 @@ describe('Integration', () => {
     {
       name: 'Endpoints with slashes - before slash',
       cursor: { lineNumber: 1, column: 8 },
-      autoCompleteSet: [
-        '_cluster/nodes/stats',
-        '_cluster/stats',
-        '_search',
-        'index1',
-        'index2',
-      ],
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
       prefixToAdd: '',
       suffixToAdd: '',
     },
     {
       name: 'Endpoints with slashes - on slash',
       cursor: { lineNumber: 1, column: 13 },
-      autoCompleteSet: [
-        '_cluster/nodes/stats',
-        '_cluster/stats',
-        '_search',
-        'index1',
-        'index2',
-      ],
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
       prefixToAdd: '',
       suffixToAdd: '',
     },
@@ -1133,7 +1112,7 @@ describe('Integration', () => {
       prefixToAdd: '',
       suffixToAdd: '',
       initialValue: 'cl',
-      method: 'GET'
+      method: 'GET',
     },
   ]);
 
@@ -1213,51 +1192,39 @@ describe('Integration', () => {
     },
   ]);
 
-  contextTests(
-    null,
-    MAPPING,
-    CLUSTER_KB,
-    'GET _search?format=yaml&search_type=cou',
-    [
-      {
-        name: 'Params on existing value',
-        cursor: { lineNumber: 1, column: 38 },
-        rangeToReplace: {
-          start: { lineNumber: 1, column: 37 },
-          end: { lineNumber: 1, column: 40 },
-        },
-        autoCompleteSet: [
-          { name: 'count', meta: 'search_type' },
-          { name: 'query_then_fetch', meta: 'search_type' },
-        ],
-        prefixToAdd: '',
-        suffixToAdd: '',
+  contextTests(null, MAPPING, CLUSTER_KB, 'GET _search?format=yaml&search_type=cou', [
+    {
+      name: 'Params on existing value',
+      cursor: { lineNumber: 1, column: 38 },
+      rangeToReplace: {
+        start: { lineNumber: 1, column: 37 },
+        end: { lineNumber: 1, column: 40 },
       },
-    ]
-  );
+      autoCompleteSet: [
+        { name: 'count', meta: 'search_type' },
+        { name: 'query_then_fetch', meta: 'search_type' },
+      ],
+      prefixToAdd: '',
+      suffixToAdd: '',
+    },
+  ]);
 
-  contextTests(
-    null,
-    MAPPING,
-    CLUSTER_KB,
-    'GET _search?format=yaml&search_type=cou',
-    [
-      {
-        name: 'Params on just after = with existing value',
-        cursor: { lineNumber: 1, column: 37 },
-        rangeToReplace: {
-          start: { lineNumber: 1, column: 37 },
-          end: { lineNumber: 1, column: 37 },
-        },
-        autoCompleteSet: [
-          { name: 'count', meta: 'search_type' },
-          { name: 'query_then_fetch', meta: 'search_type' },
-        ],
-        prefixToAdd: '',
-        suffixToAdd: '',
+  contextTests(null, MAPPING, CLUSTER_KB, 'GET _search?format=yaml&search_type=cou', [
+    {
+      name: 'Params on just after = with existing value',
+      cursor: { lineNumber: 1, column: 37 },
+      rangeToReplace: {
+        start: { lineNumber: 1, column: 37 },
+        end: { lineNumber: 1, column: 37 },
       },
-    ]
-  );
+      autoCompleteSet: [
+        { name: 'count', meta: 'search_type' },
+        { name: 'query_then_fetch', meta: 'search_type' },
+      ],
+      prefixToAdd: '',
+      suffixToAdd: '',
+    },
+  ]);
 
   contextTests(
     {

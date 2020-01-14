@@ -173,12 +173,14 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
         onMouseOver={[Function]}
       >
         <svg
+          aria-hidden={true}
           aria-label="Info"
           className="euiIcon euiIcon--medium euiIcon--warning euiIcon-isLoading"
           focusable="true"
           height={16}
           onBlur={[Function]}
           onFocus={[Function]}
+          role="img"
           style={null}
           tabIndex={0}
           viewBox="0 0 16 16"

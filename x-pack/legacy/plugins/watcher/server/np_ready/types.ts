@@ -5,7 +5,7 @@
  */
 
 import { IRouter, ElasticsearchServiceSetup, IClusterClient } from 'src/core/server';
-import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 
 export interface ServerShim {
   route: any;

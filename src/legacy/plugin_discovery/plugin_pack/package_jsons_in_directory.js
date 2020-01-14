@@ -36,7 +36,7 @@ import { createPackageJsonAtPath$ } from './package_json_at_path';
  *  @param  {String} path
  *  @return {Array<{pack}|{error}>}
  */
-export const createPackageJsonsInDirectory$ = (path) => (
+export const createPackageJsonsInDirectory$ = path =>
   createChildDirectory$(path).pipe(
     mergeMap(createPackageJsonAtPath$),
     catchError(error => {
@@ -49,5 +49,4 @@ export const createPackageJsonsInDirectory$ = (path) => (
 
       throw error;
     })
-  )
-);
+  );

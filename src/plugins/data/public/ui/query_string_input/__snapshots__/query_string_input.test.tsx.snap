@@ -209,6 +209,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -275,6 +276,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -298,7 +302,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -319,8 +323,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -347,6 +349,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -829,6 +832,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -895,6 +899,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -918,7 +925,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],
@@ -939,8 +946,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],
@@ -967,6 +972,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -1437,6 +1443,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -1503,6 +1510,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -1526,7 +1536,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -1547,8 +1557,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -1575,6 +1583,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -2054,6 +2063,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -2120,6 +2130,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -2143,7 +2156,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],
@@ -2164,8 +2177,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],
@@ -2192,6 +2203,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -2662,6 +2674,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
+                "SearchBar": [MockFunction],
               },
             },
             "docLinks": Object {
@@ -2728,6 +2741,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -2751,7 +2767,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
             },
             "http": Object {
-              "addLoadingCount": [MockFunction],
+              "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
                 "isAnonymous": [MockFunction],
                 "register": [MockFunction],
@@ -2772,8 +2788,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "patch": [MockFunction],
               "post": [MockFunction],
               "put": [MockFunction],
-              "removeAllInterceptors": [MockFunction],
-              "stop": [MockFunction],
             },
             "i18n": Object {
               "Context": [MockFunction],
@@ -2800,6 +2814,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -3279,6 +3294,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                       "ui": Object {
                         "IndexPatternSelect": [MockFunction],
+                        "SearchBar": [MockFunction],
                       },
                     },
                     "docLinks": Object {
@@ -3345,6 +3361,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -3368,7 +3387,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                     },
                     "http": Object {
-                      "addLoadingCount": [MockFunction],
+                      "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
                         "isAnonymous": [MockFunction],
                         "register": [MockFunction],
@@ -3389,8 +3408,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "patch": [MockFunction],
                       "post": [MockFunction],
                       "put": [MockFunction],
-                      "removeAllInterceptors": [MockFunction],
-                      "stop": [MockFunction],
                     },
                     "i18n": Object {
                       "Context": [MockFunction],
@@ -3417,6 +3434,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },

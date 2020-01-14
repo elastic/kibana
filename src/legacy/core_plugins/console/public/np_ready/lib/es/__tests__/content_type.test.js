@@ -22,14 +22,16 @@ import { getContentType } from '../es';
 const APPLICATION_JSON = 'application/json';
 describe('Content type', () => {
   test('body', () => {
-    const contentType = getContentType([
-      JSON.stringify({
-        foo: 'baz'
-      }),
-      JSON.stringify({
-        foo: 'bar'
-      })
-    ].join('\n'));
+    const contentType = getContentType(
+      [
+        JSON.stringify({
+          foo: 'baz',
+        }),
+        JSON.stringify({
+          foo: 'bar',
+        }),
+      ].join('\n')
+    );
 
     expect(contentType).toEqual(APPLICATION_JSON);
   });
@@ -40,4 +42,3 @@ describe('Content type', () => {
     expect(contentType).toBeUndefined();
   });
 });
-

@@ -1,14 +1,15 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 import { getRollupSearchCapabilities } from './rollup_search_capabilities';
 
 class DefaultSearchCapabilities {
-  constructor(request, fieldsCapabilities = {}) { // eslint-disable-line no-unused-vars
+  constructor(request, fieldsCapabilities = {}) {
+    // eslint-disable-line no-unused-vars
     this.fieldsCapabilities = fieldsCapabilities;
-    this.parseInterval = jest.fn((interval) => interval);
+    this.parseInterval = jest.fn(interval => interval);
   }
 }
 
@@ -60,7 +61,8 @@ describe('Rollup Search Capabilities', () => {
     let getSuitableUnit;
 
     beforeEach(() => {
-      rollupSearchCaps.parseInterval = jest.fn()
+      rollupSearchCaps.parseInterval = jest
+        .fn()
         .mockImplementationOnce(() => rollupJobInterval)
         .mockImplementationOnce(() => userInterval);
 
@@ -152,5 +154,4 @@ describe('Rollup Search Capabilities', () => {
       expect(rollupSearchCaps.getValidTimeInterval()).toBe('6m');
     });
   });
-
 });

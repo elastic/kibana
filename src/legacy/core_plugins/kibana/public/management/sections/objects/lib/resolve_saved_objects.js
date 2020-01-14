@@ -38,13 +38,14 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
     } catch (error) {
       throw new Error(
         i18n.translate('kbn.management.objects.parsingFieldErrorMessage', {
-          defaultMessage: 'Error encountered parsing {fieldName} for index pattern {indexName}: {errorMessage}',
+          defaultMessage:
+            'Error encountered parsing {fieldName} for index pattern {indexName}: {errorMessage}',
           values: {
             fieldName,
             indexName,
             errorMessage: error.message,
-          }
-        }),
+          },
+        })
       );
     }
   }
@@ -80,14 +81,18 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
     // We can override and we want to prompt for confirmation
     try {
       await confirmModalPromise(
-        i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
-          defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
+        i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', {
+          values: { title: this.title },
+          defaultMessage: "Are you sure you want to overwrite '{title}'?",
+        }),
         {
           title: i18n.translate('kbn.management.indexPattern.confirmOverwriteTitle', {
             defaultMessage: 'Overwrite {type}?',
             values: { type },
           }),
-          confirmButtonText: i18n.translate('kbn.management.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' }),
+          confirmButtonText: i18n.translate('kbn.management.indexPattern.confirmOverwriteButton', {
+            defaultMessage: 'Overwrite',
+          }),
         }
       );
       newId = await emptyPattern.create(true);
@@ -154,13 +159,15 @@ export async function resolveIndexPatternConflicts(
     }
 
     // Resolve filter index reference:
-    const filter = (obj.searchSource.getOwnField('filter') || []).map((filter) => {
+    const filter = (obj.searchSource.getOwnField('filter') || []).map(filter => {
       if (!(filter.meta && filter.meta.index)) {
         return filter;
       }
 
       resolution = resolutions.find(({ oldId }) => oldId === filter.meta.index);
-      return resolution ? ({ ...filter, ...{ meta: { ...filter.meta, index: resolution.newId } } }) : filter;
+      return resolution
+        ? { ...filter, ...{ meta: { ...filter.meta, index: resolution.newId } } }
+        : filter;
     });
 
     if (filter.length > 0) {
@@ -207,7 +214,13 @@ export async function resolveSavedSearches(savedSearches, services, indexPattern
   return importCount;
 }
 
-export async function resolveSavedObjects(savedObjects, overwriteAll, services, indexPatterns, confirmModalPromise) {
+export async function resolveSavedObjects(
+  savedObjects,
+  overwriteAll,
+  services,
+  indexPatterns,
+  confirmModalPromise
+) {
   const docTypes = groupByType(savedObjects);
 
   // Keep track of how many we actually import because the user
@@ -254,7 +267,6 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
         importedObjectCount++;
       }
     } catch (error) {
-
       if (error.constructor.name === 'SavedObjectNotFound') {
         if (error.savedObjectType === 'index-pattern') {
           conflictedIndexPatterns.push({ obj, doc: searchDoc });
@@ -275,7 +287,8 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
         importedObjectCount++;
       }
     } catch (error) {
-      const isIndexPatternNotFound = error.constructor.name === 'SavedObjectNotFound' &&
+      const isIndexPatternNotFound =
+        error.constructor.name === 'SavedObjectNotFound' &&
         error.savedObjectType === 'index-pattern';
       if (isIndexPatternNotFound && obj.savedSearchId) {
         conflictedSavedObjectsLinkedToSavedSearches.push(obj);

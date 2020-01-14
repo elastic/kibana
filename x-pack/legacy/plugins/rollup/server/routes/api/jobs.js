@@ -5,7 +5,7 @@
  */
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 
 export function registerJobsRoute(server) {
@@ -16,13 +16,13 @@ export function registerJobsRoute(server) {
     path: '/api/rollup/jobs',
     method: 'GET',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       try {
         const callWithRequest = callWithRequestFactory(server, request);
         return await callWithRequest('rollup.jobs');
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
         }
@@ -36,14 +36,11 @@ export function registerJobsRoute(server) {
     path: '/api/rollup/create',
     method: 'PUT',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       try {
-        const {
-          id,
-          ...rest
-        } = request.payload.job;
+        const { id, ...rest } = request.payload.job;
 
         const callWithRequest = callWithRequestFactory(server, request);
 
@@ -56,7 +53,7 @@ export function registerJobsRoute(server) {
         // Then request the newly created job.
         const results = await callWithRequest('rollup.job', { id });
         return results.jobs[0];
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
         }
@@ -70,16 +67,17 @@ export function registerJobsRoute(server) {
     path: '/api/rollup/start',
     method: 'POST',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       try {
         const { jobIds } = request.payload;
 
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.startJob', { id })))
-          .then(() => ({ success: true }));
-      } catch(err) {
+        return await Promise.all(
+          jobIds.map(id => callWithRequest('rollup.startJob', { id }))
+        ).then(() => ({ success: true }));
+      } catch (err) {
         // There is an issue opened on ES to handle the following error correctly
         // https://github.com/elastic/elasticsearch/issues/39845
         // Until then we'll modify the response here.
@@ -103,9 +101,9 @@ export function registerJobsRoute(server) {
     path: '/api/rollup/stop',
     method: 'POST',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       try {
         const { jobIds } = request.payload;
         // For our API integration tests we need to wait for the jobs to be stopped
@@ -113,13 +111,14 @@ export function registerJobsRoute(server) {
         const { waitForCompletion } = request.query;
         const callWithRequest = callWithRequestFactory(server, request);
 
-        const stopRollupJob = id => callWithRequest('rollup.stopJob', { id, waitForCompletion: waitForCompletion === 'true' });
+        const stopRollupJob = id =>
+          callWithRequest('rollup.stopJob', {
+            id,
+            waitForCompletion: waitForCompletion === 'true',
+          });
 
-        return await Promise
-          .all(jobIds.map(stopRollupJob))
-          .then(() => ({ success: true }));
-
-      } catch(err) {
+        return await Promise.all(jobIds.map(stopRollupJob)).then(() => ({ success: true }));
+      } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
         }
@@ -133,16 +132,17 @@ export function registerJobsRoute(server) {
     path: '/api/rollup/delete',
     method: 'POST',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       try {
         const { jobIds } = request.payload;
 
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })))
-          .then(() => ({ success: true }));
-      } catch(err) {
+        return await Promise.all(
+          jobIds.map(id => callWithRequest('rollup.deleteJob', { id }))
+        ).then(() => ({ success: true }));
+      } catch (err) {
         // There is an issue opened on ES to handle the following error correctly
         // https://github.com/elastic/elasticsearch/issues/39845
         // Until then we'll modify the response here.

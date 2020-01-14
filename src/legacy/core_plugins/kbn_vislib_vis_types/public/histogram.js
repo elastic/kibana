@@ -37,11 +37,13 @@ import { vislibVisController } from './controller';
 
 export const histogramDefinition = {
   name: 'histogram',
-  title: i18n.translate('kbnVislibVisTypes.histogram.histogramTitle', { defaultMessage: 'Vertical Bar' }),
+  title: i18n.translate('kbnVislibVisTypes.histogram.histogramTitle', {
+    defaultMessage: 'Vertical Bar',
+  }),
   icon: 'visBarVertical',
-  description: i18n.translate('kbnVislibVisTypes.histogram.histogramDescription',
-    { defaultMessage: 'Assign a continuous variable to each axis' }
-  ),
+  description: i18n.translate('kbnVislibVisTypes.histogram.histogramDescription', {
+    defaultMessage: 'Assign a continuous variable to each axis',
+  }),
   visualization: vislibVisController,
   visConfig: {
     defaults: {
@@ -62,10 +64,10 @@ export const histogramDefinition = {
           labels: {
             show: true,
             filter: true,
-            truncate: 100
+            truncate: 100,
           },
-          title: {}
-        }
+          title: {},
+        },
       ],
       valueAxes: [
         {
@@ -83,12 +85,12 @@ export const histogramDefinition = {
             show: true,
             rotate: Rotates.HORIZONTAL,
             filter: false,
-            truncate: 100
+            truncate: 100,
           },
           title: {
             text: countLabel,
-          }
-        }
+          },
+        },
       ],
       seriesParams: [
         {
@@ -97,13 +99,13 @@ export const histogramDefinition = {
           mode: ChartModes.STACKED,
           data: {
             label: countLabel,
-            id: '1'
+            id: '1',
           },
           valueAxis: 'ValueAxis-1',
           drawLinesBetweenPoints: true,
           lineWidth: 2,
-          showCircles: true
-        }
+          showCircles: true,
+        },
       ],
       addTooltip: true,
       addLegend: true,
@@ -118,8 +120,8 @@ export const histogramDefinition = {
         value: 10,
         width: 1,
         style: ThresholdLineStyles.FULL,
-        color: palettes.euiPaletteColorBlind.colors[9]
-      }
+        color: palettes.euiPaletteColorBlind.colors[9],
+      },
     },
   },
   events: {
@@ -132,46 +134,53 @@ export const histogramDefinition = {
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.histogram.metricTitle', { defaultMessage: 'Y-axis' }),
+        title: i18n.translate('kbnVislibVisTypes.histogram.metricTitle', {
+          defaultMessage: 'Y-axis',
+        }),
         min: 1,
         aggFilter: ['!geo_centroid', '!geo_bounds'],
-        defaults: [
-          { schema: 'metric', type: 'count' }
-        ]
+        defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('kbnVislibVisTypes.histogram.radiusTitle', { defaultMessage: 'Dot size' }),
+        title: i18n.translate('kbnVislibVisTypes.histogram.radiusTitle', {
+          defaultMessage: 'Dot size',
+        }),
         min: 0,
         max: 1,
-        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality'],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.histogram.segmentTitle', { defaultMessage: 'X-axis' }),
+        title: i18n.translate('kbnVislibVisTypes.histogram.segmentTitle', {
+          defaultMessage: 'X-axis',
+        }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.histogram.groupTitle', { defaultMessage: 'Split series' }),
+        title: i18n.translate('kbnVislibVisTypes.histogram.groupTitle', {
+          defaultMessage: 'Split series',
+        }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.histogram.splitTitle', { defaultMessage: 'Split chart' }),
+        title: i18n.translate('kbnVislibVisTypes.histogram.splitTitle', {
+          defaultMessage: 'Split chart',
+        }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-      }
-    ])
-  }
-
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+      },
+    ]),
+  },
 };

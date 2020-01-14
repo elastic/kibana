@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function prometheusMetricsSpecProvider(context) {
   const moduleName = 'prometheus';
@@ -34,7 +38,8 @@ export function prometheusMetricsSpecProvider(context) {
       defaultMessage: 'Fetch metrics from a Prometheus exporter.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.prometheusMetrics.longDescription', {
-      defaultMessage: 'The `{moduleName}` Metricbeat module fetches metrics from Prometheus endpoint. \
+      defaultMessage:
+        'The `{moduleName}` Metricbeat module fetches metrics from Prometheus endpoint. \
 [Learn more]({learnMoreLink}).',
       values: {
         moduleName,
@@ -44,19 +49,22 @@ export function prometheusMetricsSpecProvider(context) {
     euiIconType: 'logoPrometheus',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.prometheusMetrics.artifacts.application.label', {
-          defaultMessage: 'Discover',
-        }),
-        path: '/app/kibana#/discover'
+        label: i18n.translate(
+          'kbn.server.tutorials.prometheusMetrics.artifacts.application.label',
+          {
+            defaultMessage: 'Discover',
+          }
+        ),
+        path: '/app/kibana#/discover',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-' + moduleName + '.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-' + moduleName + '.html',
+      },
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

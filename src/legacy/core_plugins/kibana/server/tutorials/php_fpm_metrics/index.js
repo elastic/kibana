@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function phpfpmMetricsSpecProvider(context) {
   const moduleName = 'php_fpm';
@@ -34,7 +38,8 @@ export function phpfpmMetricsSpecProvider(context) {
       defaultMessage: 'Fetch internal metrics from PHP-FPM.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.longDescription', {
-      defaultMessage: 'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
+      defaultMessage:
+        'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',
@@ -50,13 +55,13 @@ export function phpfpmMetricsSpecProvider(context) {
         }*/
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-php_fpm.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-php_fpm.html',
+      },
     },
     completionTimeMinutes: 10,
     //previewImagePath: '/plugins/kibana/home/tutorial_resources/php_fpm_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

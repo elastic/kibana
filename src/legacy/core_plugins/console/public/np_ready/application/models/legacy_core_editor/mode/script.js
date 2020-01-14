@@ -37,11 +37,10 @@ export function ScriptMode() {
 
 oop.inherits(ScriptMode, TextMode);
 
-(function () {
-
+(function() {
   this.HighlightRules = ScriptHighlightRules;
 
-  this.getNextLineIndent = function (state, line, tab) {
+  this.getNextLineIndent = function(state, line, tab) {
     let indent = this.$getIndent(line);
     const match = line.match(/^.*[\{\[]\s*$/);
     if (match) {
@@ -51,18 +50,17 @@ oop.inherits(ScriptMode, TextMode);
     return indent;
   };
 
-  this.checkOutdent = function (state, line, input) {
+  this.checkOutdent = function(state, line, input) {
     return this.$outdent.checkOutdent(line, input);
   };
 
-  this.autoOutdent = function (state, doc, row) {
+  this.autoOutdent = function(state, doc, row) {
     this.$outdent.autoOutdent(doc, row);
   };
 
   // this.createWorker = function (session) {
   //   const worker = new WorkerClient(['ace', 'sense_editor'], 'sense_editor/mode/worker', 'SenseWorker', 'sense_editor/mode/worker');
   //   worker.attachToDocument(session.getDocument());
-
 
   //   worker.on('error', function (e) {
   //     session.setAnnotations([e.data]);
@@ -74,6 +72,4 @@ oop.inherits(ScriptMode, TextMode);
 
   //   return worker;
   // };
-
-
-}).call(ScriptMode.prototype);
+}.call(ScriptMode.prototype));

@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { mapAndFlattenFilters, esFilters, utils, IIndexPattern } from '../..';
+import { mapAndFlattenFilters, esFilters, IIndexPattern } from '../..';
 import { FilterLabel } from '../filter_bar';
 
 interface Props {
@@ -56,7 +56,7 @@ export class ApplyFiltersPopoverContent extends Component<Props, State> {
     };
   }
   private getLabel(filter: esFilters.Filter) {
-    const valueLabel = utils.getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = esFilters.getDisplayValueFromFilter(filter, this.props.indexPatterns);
     return <FilterLabel filter={filter} valueLabel={valueLabel} />;
   }
 

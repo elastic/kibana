@@ -129,10 +129,10 @@ export class JobCreateUi extends Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState) { // eslint-disable-line no-unused-vars
+  componentDidUpdate(prevProps, prevState) {
+    // eslint-disable-line no-unused-vars
     const indexPattern = this.getIndexPattern();
     if (indexPattern !== this.getIndexPattern(prevState)) {
-
       // If the user hasn't entered anything, then skip validation.
       if (!indexPattern || !indexPattern.trim()) {
         this.setState({
@@ -163,171 +163,175 @@ export class JobCreateUi extends Component {
   requestIndexPatternValidation = debounce((resetDefaults = true) => {
     const indexPattern = this.getIndexPattern();
 
-    const lastIndexPatternValidationTime = this.lastIndexPatternValidationTime = Date.now();
-    validateIndexPattern(indexPattern).then(response => {
-      // We don't need to do anything if this component has been unmounted.
-      if (!this._isMounted) {
-        return;
-      }
-
-      // Only re-request if the index pattern changed.
-      if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
-        return;
-      }
-
-      const {
-        doesMatchIndices: doesIndexPatternMatchIndices,
-        doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
-        dateFields: indexPatternDateFields,
-        numericFields,
-        keywordFields,
-      } = response.data;
-
-      let indexPatternAsyncErrors;
-
-      if (doesIndexPatternMatchRollupIndices) {
-        indexPatternAsyncErrors = [
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
-            defaultMessage="Index pattern must not match rollup indices."
-          />,
-        ];
-      } else if (!doesIndexPatternMatchIndices) {
-        indexPatternAsyncErrors = [
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
-            defaultMessage="Index pattern doesn't match any indices."
-          />,
-        ];
-      } else if (!indexPatternDateFields.length) {
-        indexPatternAsyncErrors = [
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
-            defaultMessage="Index pattern must match indices that contain time fields."
-          />,
-        ];
-      }
-
-      const numericType = i18n.translate('xpack.rollupJobs.create.numericTypeField', {
-        defaultMessage: 'numeric',
-      });
-      const keywordType = i18n.translate('xpack.rollupJobs.create.keywordTypeField', {
-        defaultMessage: 'keyword',
-      });
-      const dateType = i18n.translate('xpack.rollupJobs.create.dateTypeField', {
-        defaultMessage: 'date',
-      });
-
-      const formattedNumericFields = formatFields(numericFields, numericType);
-      const formattedKeywordFields = formatFields(keywordFields, keywordType);
-      const formattedDateFields = formatFields(indexPatternDateFields, dateType);
-
-      const { jobToClone, stepsFields } = this.state;
-      const {
-        [STEP_METRICS]: { metrics },
-      } = stepsFields;
-
-      // Only re-type metrics if they haven't been typed already
-      if (jobToClone && metrics && metrics.length && !first(metrics).type) {
-        // Re-type any pre-existing metrics entries for the job we are cloning.
-        const typeMaps = [
-          { fields: formattedNumericFields, type: numericType },
-          { fields: formattedKeywordFields, type: keywordType },
-          { fields: formattedDateFields, type: dateType },
-        ];
-        const retypedMetrics = retypeMetrics({ metrics, typeMaps });
-        this.onFieldsChange({ metrics: retypedMetrics }, STEP_METRICS);
-      }
-
-      function sortFields(a, b) {
-        const nameA = a.name.toUpperCase();
-        const nameB = b.name.toUpperCase();
-
-        if (nameA < nameB) {
-          return -1;
+    const lastIndexPatternValidationTime = (this.lastIndexPatternValidationTime = Date.now());
+    validateIndexPattern(indexPattern)
+      .then(response => {
+        // We don't need to do anything if this component has been unmounted.
+        if (!this._isMounted) {
+          return;
         }
 
-        if (nameA > nameB) {
-          return 1;
+        // Only re-request if the index pattern changed.
+        if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+          return;
         }
 
-        return 0;
-      }
+        const {
+          doesMatchIndices: doesIndexPatternMatchIndices,
+          doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
+          dateFields: indexPatternDateFields,
+          numericFields,
+          keywordFields,
+        } = response.data;
 
-      const indexPatternTermsFields = [...formattedNumericFields, ...formattedKeywordFields].sort(
-        sortFields
-      );
+        let indexPatternAsyncErrors;
 
-      const indexPatternHistogramFields = [...formattedNumericFields].sort(sortFields);
+        if (doesIndexPatternMatchRollupIndices) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
+              defaultMessage="Index pattern must not match rollup indices."
+            />,
+          ];
+        } else if (!doesIndexPatternMatchIndices) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
+              defaultMessage="Index pattern doesn't match any indices."
+            />,
+          ];
+        } else if (!indexPatternDateFields.length) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
+              defaultMessage="Index pattern must match indices that contain time fields."
+            />,
+          ];
+        }
 
-      const indexPatternMetricsFields = [...formattedNumericFields, ...formattedDateFields].sort(
-        sortFields
-      );
+        const numericType = i18n.translate('xpack.rollupJobs.create.numericTypeField', {
+          defaultMessage: 'numeric',
+        });
+        const keywordType = i18n.translate('xpack.rollupJobs.create.keywordTypeField', {
+          defaultMessage: 'keyword',
+        });
+        const dateType = i18n.translate('xpack.rollupJobs.create.dateTypeField', {
+          defaultMessage: 'date',
+        });
 
-      indexPatternDateFields.sort();
+        const formattedNumericFields = formatFields(numericFields, numericType);
+        const formattedKeywordFields = formatFields(keywordFields, keywordType);
+        const formattedDateFields = formatFields(indexPatternDateFields, dateType);
 
-      if (resetDefaults) {
-        // Whenever the index pattern changes we default to the first date field if there is one.
-        this.onFieldsChange(
-          {
-            dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : undefined,
-          },
-          STEP_DATE_HISTOGRAM
+        const { jobToClone, stepsFields } = this.state;
+        const {
+          [STEP_METRICS]: { metrics },
+        } = stepsFields;
+
+        // Only re-type metrics if they haven't been typed already
+        if (jobToClone && metrics && metrics.length && !first(metrics).type) {
+          // Re-type any pre-existing metrics entries for the job we are cloning.
+          const typeMaps = [
+            { fields: formattedNumericFields, type: numericType },
+            { fields: formattedKeywordFields, type: keywordType },
+            { fields: formattedDateFields, type: dateType },
+          ];
+          const retypedMetrics = retypeMetrics({ metrics, typeMaps });
+          this.onFieldsChange({ metrics: retypedMetrics }, STEP_METRICS);
+        }
+
+        function sortFields(a, b) {
+          const nameA = a.name.toUpperCase();
+          const nameB = b.name.toUpperCase();
+
+          if (nameA < nameB) {
+            return -1;
+          }
+
+          if (nameA > nameB) {
+            return 1;
+          }
+
+          return 0;
+        }
+
+        const indexPatternTermsFields = [...formattedNumericFields, ...formattedKeywordFields].sort(
+          sortFields
         );
-      }
 
-      this.setState({
-        indexPatternAsyncErrors,
-        indexPatternDateFields,
-        indexPatternTermsFields,
-        indexPatternHistogramFields,
-        indexPatternMetricsFields,
-        isValidatingIndexPattern: false,
-      });
-    }).catch(error => {
-      // We don't need to do anything if this component has been unmounted.
-      if (!this._isMounted) {
-        return;
-      }
+        const indexPatternHistogramFields = [...formattedNumericFields].sort(sortFields);
 
-      // Ignore all responses except that to the most recent request.
-      if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
-        return;
-      }
+        const indexPatternMetricsFields = [...formattedNumericFields, ...formattedDateFields].sort(
+          sortFields
+        );
 
-      // Expect an error in the shape provided by Angular's $http service.
-      if (error && error.data) {
-        const { error: errorString, statusCode } = error.data;
+        indexPatternDateFields.sort();
 
-        const indexPatternAsyncErrors = [
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternValidationError"
-            defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
-            values={{ error: errorString, statusCode }}
-          />,
-        ];
+        if (resetDefaults) {
+          // Whenever the index pattern changes we default to the first date field if there is one.
+          this.onFieldsChange(
+            {
+              dateHistogramField: indexPatternDateFields.length
+                ? indexPatternDateFields[0]
+                : undefined,
+            },
+            STEP_DATE_HISTOGRAM
+          );
+        }
 
         this.setState({
           indexPatternAsyncErrors,
-          indexPatternDateFields: [],
-          indexPatternTermsFields: [],
-          indexPatternHistogramFields: [],
-          indexPatternMetricsFields: [],
+          indexPatternDateFields,
+          indexPatternTermsFields,
+          indexPatternHistogramFields,
+          indexPatternMetricsFields,
           isValidatingIndexPattern: false,
         });
+      })
+      .catch(error => {
+        // We don't need to do anything if this component has been unmounted.
+        if (!this._isMounted) {
+          return;
+        }
 
-        return;
-      }
+        // Ignore all responses except that to the most recent request.
+        if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+          return;
+        }
 
-      // This error isn't an HTTP error, so let the fatal error screen tell the user something
-      // unexpected happened.
-      fatalError(
-        error,
-        i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
-          defaultMessage: 'Rollup Job Wizard index pattern validation',
-        })
-      );
-    });
+        // Expect an error in the shape provided by Angular's $http service.
+        if (error && error.data) {
+          const { error: errorString, statusCode } = error.data;
+
+          const indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternValidationError"
+              defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
+              values={{ error: errorString, statusCode }}
+            />,
+          ];
+
+          this.setState({
+            indexPatternAsyncErrors,
+            indexPatternDateFields: [],
+            indexPatternTermsFields: [],
+            indexPatternHistogramFields: [],
+            indexPatternMetricsFields: [],
+            isValidatingIndexPattern: false,
+          });
+
+          return;
+        }
+
+        // This error isn't an HTTP error, so let the fatal error screen tell the user something
+        // unexpected happened.
+        fatalError(
+          error,
+          i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
+            defaultMessage: 'Rollup Job Wizard index pattern validation',
+          })
+        );
+      });
   }, 300);
 
   getSteps() {
@@ -448,21 +452,10 @@ export class JobCreateUi extends Component {
           rollupDelay,
           rollupPageSize,
         },
-        [STEP_DATE_HISTOGRAM]: {
-          dateHistogramInterval,
-          dateHistogramTimeZone,
-          dateHistogramField,
-        },
-        [STEP_TERMS]: {
-          terms,
-        },
-        [STEP_HISTOGRAM]: {
-          histogram,
-          histogramInterval,
-        },
-        [STEP_METRICS]: {
-          metrics,
-        },
+        [STEP_DATE_HISTOGRAM]: { dateHistogramInterval, dateHistogramTimeZone, dateHistogramField },
+        [STEP_TERMS]: { terms },
+        [STEP_HISTOGRAM]: { histogram, histogramInterval },
+        [STEP_METRICS]: { metrics },
         [STEP_REVIEW]: {},
       },
       startJobAfterCreation,
@@ -519,13 +512,13 @@ export class JobCreateUi extends Component {
 
       if (cause) {
         if (cause.length === 1) {
-          errorBody = (
-            <p>{cause[0]}</p>
-          );
+          errorBody = <p>{cause[0]}</p>;
         } else {
           errorBody = (
             <ul>
-              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
+              {cause.map(causeValue => (
+                <li key={causeValue}>{causeValue}</li>
+              ))}
             </ul>
           );
         }
@@ -533,11 +526,7 @@ export class JobCreateUi extends Component {
 
       saveErrorFeedback = (
         <Fragment>
-          <EuiCallOut
-            title={message}
-            icon="cross"
-            color="danger"
-          >
+          <EuiCallOut title={message} icon="cross" color="danger">
             {errorBody}
           </EuiCallOut>
 
@@ -571,7 +560,6 @@ export class JobCreateUi extends Component {
           <EuiSpacer size="l" />
 
           {this.renderNavigation()}
-
         </EuiPageContent>
         {savingFeedback}
       </Fragment>
@@ -663,7 +651,7 @@ export class JobCreateUi extends Component {
     }
   }
 
-  onToggleStartAfterCreate = (eve) => {
+  onToggleStartAfterCreate = eve => {
     this.setState({ startJobAfterCreation: eve.target.checked });
   };
 
@@ -673,7 +661,7 @@ export class JobCreateUi extends Component {
       nextStepId,
       previousStepId,
       areStepErrorsVisible,
-      startJobAfterCreation
+      startJobAfterCreation,
     } = this.state;
 
     const { isSaving } = this.props;

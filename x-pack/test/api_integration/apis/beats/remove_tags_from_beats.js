@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { ES_INDEX_NAME } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
@@ -44,7 +44,10 @@ export default function ({ getService }) {
         .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [{ beatId: 'foo', tag: 'development' }, { beatId: 'bar', tag: 'development' }],
+          removals: [
+            { beatId: 'foo', tag: 'development' },
+            { beatId: 'bar', tag: 'development' },
+          ],
         })
         .expect(200);
 
@@ -80,7 +83,10 @@ export default function ({ getService }) {
         .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [{ beatId: 'foo', tag: 'development' }, { beatId: 'foo', tag: 'production' }],
+          removals: [
+            { beatId: 'foo', tag: 'development' },
+            { beatId: 'foo', tag: 'production' },
+          ],
         })
         .expect(200);
 
@@ -103,7 +109,10 @@ export default function ({ getService }) {
         .post('/api/beats/agents_tags/removals')
         .set('kbn-xsrf', 'xxx')
         .send({
-          removals: [{ beatId: 'foo', tag: 'production' }, { beatId: 'bar', tag: 'development' }],
+          removals: [
+            { beatId: 'foo', tag: 'production' },
+            { beatId: 'bar', tag: 'development' },
+          ],
         })
         .expect(200);
 

@@ -8,13 +8,14 @@ import { handleActions } from 'redux-actions';
 
 import { startBasicLicenseStatus, cancelStartBasicLicense } from '../actions/start_basic';
 
-export const startBasicStatus = handleActions({
-  [startBasicLicenseStatus](state, { payload }) {
-    return payload;
+export const startBasicStatus = handleActions(
+  {
+    [startBasicLicenseStatus](state, { payload }) {
+      return payload;
+    },
+    [cancelStartBasicLicense]() {
+      return {};
+    },
   },
-  [cancelStartBasicLicense]() {
-    return {};
-  }
-}, {});
-
-
+  {}
+);

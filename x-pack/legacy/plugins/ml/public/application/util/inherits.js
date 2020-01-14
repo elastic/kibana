@@ -11,7 +11,7 @@ function describeConst(val) {
     writable: false,
     enumerable: false,
     configurable: false,
-    value: val
+    value: val,
   };
 }
 
@@ -24,12 +24,12 @@ function describeConst(val) {
 export function inherits(SubClass, SuperClass) {
   const prototype = Object.create(SuperClass.prototype, {
     constructor: describeConst(SubClass),
-    superConstructor: describeConst(SuperClass)
+    superConstructor: describeConst(SuperClass),
   });
 
   Object.defineProperties(SubClass, {
     prototype: describeConst(prototype),
-    Super: describeConst(SuperClass)
+    Super: describeConst(SuperClass),
   });
 
   return SubClass;

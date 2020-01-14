@@ -22,11 +22,11 @@ import moment from 'moment';
 import { getUniqKeys } from './uniq_keys';
 
 /*
-  * Accepts a Kibana data object and returns
-  * an array of x axis values.
-  * values sorted by timestamp if isDate and Date Histogram agg
-  * else values sorted by index
-  */
+ * Accepts a Kibana data object and returns
+ * an array of x axis values.
+ * values sorted by timestamp if isDate and Date Histogram agg
+ * else values sorted by index
+ */
 export function orderXValues(obj, orderBucketsBySum = false) {
   if (!_.isObject(obj)) {
     throw new Error('orderXValues expects an object');
@@ -39,13 +39,13 @@ export function orderXValues(obj, orderBucketsBySum = false) {
   const dateInterval = moment.isDuration(interval) ? interval : false;
 
   return _(uniqKeysPairs)
-    .sortBy(function (d) {
+    .sortBy(function(d) {
       if (d[1].isDate || d[1].isOrdered) {
         return +d[0];
       }
       return orderBucketsBySum ? -d[1].sum : d[1].index;
     })
-    .map(function (d, i, list) {
+    .map(function(d, i, list) {
       if (!d[1].isNumber) return d[0];
 
       const val = +d[0];

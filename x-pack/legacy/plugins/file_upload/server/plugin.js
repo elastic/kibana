@@ -20,7 +20,7 @@ export class FileUploadPlugin {
       handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
       config: {
         payload: { maxBytes: MAX_BYTES },
-      }
+      },
     });
 
     registerFileUploadUsageCollector(plugins.usageCollection, {

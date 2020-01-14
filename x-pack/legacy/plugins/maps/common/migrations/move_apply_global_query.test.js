@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint max-len: 0 */
-
 import { moveApplyGlobalQueryToSources } from './move_apply_global_query';
 
 describe('moveApplyGlobalQueryToSources', () => {
-
   test('Should handle missing layerListJSON attribute', () => {
     const attributes = {
       title: 'my map',
@@ -24,13 +21,13 @@ describe('moveApplyGlobalQueryToSources', () => {
       {
         type: 'TILE',
         sourceDescriptor: {
-          type: 'EMS_TMS'
-        }
-      }
+          type: 'EMS_TMS',
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(moveApplyGlobalQueryToSources({ attributes })).toEqual({
       title: 'my map',
@@ -44,17 +41,18 @@ describe('moveApplyGlobalQueryToSources', () => {
         type: 'HEATMAP',
         applyGlobalQuery: false,
         sourceDescriptor: {
-          type: 'ES_GEO_GRID'
-        }
-      }
+          type: 'ES_GEO_GRID',
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(moveApplyGlobalQueryToSources({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON: '[{\"type\":\"HEATMAP\",\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"applyGlobalQuery\":false}}]',
+      layerListJSON:
+        '[{"type":"HEATMAP","sourceDescriptor":{"type":"ES_GEO_GRID","applyGlobalQuery":false}}]',
     });
   });
 
@@ -64,22 +62,23 @@ describe('moveApplyGlobalQueryToSources', () => {
         type: 'VECTOR',
         applyGlobalQuery: false,
         sourceDescriptor: {
-          type: 'EMS_FILE'
+          type: 'EMS_FILE',
         },
         joins: [
           {
-            right: {}
-          }
-        ]
-      }
+            right: {},
+          },
+        ],
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(moveApplyGlobalQueryToSources({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON: '[{\"type\":\"VECTOR\",\"sourceDescriptor\":{\"type\":\"EMS_FILE\"},\"joins\":[{\"right\":{\"applyGlobalQuery\":false}}]}]',
+      layerListJSON:
+        '[{"type":"VECTOR","sourceDescriptor":{"type":"EMS_FILE"},"joins":[{"right":{"applyGlobalQuery":false}}]}]',
     });
   });
 
@@ -88,22 +87,23 @@ describe('moveApplyGlobalQueryToSources', () => {
       {
         type: 'VECTOR',
         sourceDescriptor: {
-          type: 'ES_GEO_GRID'
+          type: 'ES_GEO_GRID',
         },
         joins: [
           {
-            right: {}
-          }
-        ]
-      }
+            right: {},
+          },
+        ],
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(moveApplyGlobalQueryToSources({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON: '[{\"type\":\"VECTOR\",\"sourceDescriptor\":{\"type\":\"ES_GEO_GRID\",\"applyGlobalQuery\":true},\"joins\":[{\"right\":{\"applyGlobalQuery\":true}}]}]',
+      layerListJSON:
+        '[{"type":"VECTOR","sourceDescriptor":{"type":"ES_GEO_GRID","applyGlobalQuery":true},"joins":[{"right":{"applyGlobalQuery":true}}]}]',
     });
   });
 });

@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.5.1>>
 * <<release-notes-7.5.0>>
 * <<release-notes-7.4.2>>
 * <<release-notes-7.4.1>>
@@ -28,6 +29,65 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-beta1>>
 * <<release-notes-7.0.0-alpha2>>
 * <<release-notes-7.0.0-alpha1>>
+
+[[release-notes-7.5.1]]
+== {kib} 7.5.1
+
+[float]
+[[breaking-7.5.1]]
+=== Breaking changes
+
+See <<breaking-changes-7.5, breaking changes in 7.5>>.
+
+[float]
+[[enhancement-7.5.1]]
+=== Enhancements
+Machine Learning::
+* Enables lat_long detector function in advanced wizard {pull}50787[#50787]
+* Truncates text in Overview page 'Latest timestamp' column {pull}50004[#50004]
+* Adds ML node warning to overview and analytics pages {pull}50766[#50766]
+Monitoring::
+*  Refactors the enter setup mode button {pull}51103[#51103]
+
+[float]
+[[bug-7.5.1]]
+=== Bug fixes
+APM::
+* Fixes ACM to ensure more than 10 items are displayed {pull}52262[#52262]
+* Fixes watcher integration {pull}51721[#51721]
+Canvas::
+* Fixes axisConfig position argument UI {pull}50717[#50717]
+Discover::
+* Fixes histogram min interval {pull}52758[#52758]
+Machine Learning::
+* Fixes escape special characters for Lucene query language   {pull}50494[#50494]
+* Fixes info content detector field selection {pull}51914[#51914]
+* Fixes word wrap in Overview page sidebar on IE {pull}50668[#50668]
+* Fixes lat_long anomalies table links menu and value formatting {pull}50916[#50916]
+* Fixes loading of data visualizer with KQL saved search {pull}51882[#51882]
+Maps::
+* Fixes a cross-site scripting (XSS) flaw in Coordinate and Region Map 
+visualizations. An attacker could create a malicious visualization that 
+executes JavaScript in a victim’s browser when the visualization, or dashboard 
+containing the visualization, was viewed. Since Kibana 7.0.0, Content Security 
+Policy (CSP), which prevents attackers from using this flaw, is enabled by 
+default. However, an attacker can still inject arbitrary HTML into the page. 
+See https://www.elastic.co/community/security/, CVE-2019-7621.
+* Prevents users from overflowing URL when filtering by shape {pull}50747[#50747]
+* Delays vector tile layer syncing until spritesheet is loaded {pull}48955[#48955]
+* Sanitizes attribution {pull}52309[#52309]
+Monitoring::
+* Fixes Logstash pipelines page in multi-cluster environment {pull}50166[#50166]
+* Improves permissions required around setup mode {pull}50421[#50421]
+Operations::
+* Prevents xpack.task_manager.index being set to .tasks {pull}52002[#52002]
+* Fixes elasticsearch.ssl.alwaysPresentCertificate default {pull}52242[#52242]
+Querying &amp; Filtering::
+* Fixes operator overflowing out popover {pull}50030[#50030]
+Uptime::
+* Removes react-router-dom warning in browse {pull}52008[#52008]
+Lens::
+* Shows keyword fields for pre-7.3 index patterns {pull}52410[#52410]
 
 --
 [[release-notes-7.5.0]]

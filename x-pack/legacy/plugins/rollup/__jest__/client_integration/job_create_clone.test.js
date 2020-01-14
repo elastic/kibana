@@ -147,9 +147,7 @@ describe('Cloning a rollup job through create job wizard', () => {
     await nextTick();
 
     const {
-      groups: {
-        date_histogram: dateHistogram
-      },
+      groups: { date_histogram: dateHistogram },
     } = jobConfig;
 
     await actions.clickNextStep();

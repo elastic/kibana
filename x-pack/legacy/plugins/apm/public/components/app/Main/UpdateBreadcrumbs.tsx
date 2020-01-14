@@ -6,19 +6,19 @@
 
 import { Location } from 'history';
 import React from 'react';
-import { LegacyCoreStart } from 'src/core/public';
-import { useKibanaCore } from '../../../../../observability/public';
+import { AppMountContext } from 'src/core/public';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import {
   Breadcrumb,
   ProvideBreadcrumbs,
   BreadcrumbRoute
 } from './ProvideBreadcrumbs';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 interface Props {
   location: Location;
   breadcrumbs: Breadcrumb[];
-  core: LegacyCoreStart;
+  core: AppMountContext['core'];
 }
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumb[]) {
@@ -57,7 +57,8 @@ interface UpdateBreadcrumbsProps {
 }
 
 export function UpdateBreadcrumbs({ routes }: UpdateBreadcrumbsProps) {
-  const core = useKibanaCore();
+  const { core } = useApmPluginContext();
+
   return (
     <ProvideBreadcrumbs
       routes={routes}

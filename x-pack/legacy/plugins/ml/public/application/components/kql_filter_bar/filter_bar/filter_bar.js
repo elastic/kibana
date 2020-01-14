@@ -15,13 +15,13 @@ export class FilterBar extends Component {
     isSuggestionsVisible: false,
     index: null,
     value: '',
-    inputIsPristine: true
+    inputIsPristine: true,
   };
 
   static getDerivedStateFromProps(props, state) {
     if (state.inputIsPristine && props.initialValue) {
       return {
-        value: props.initialValue
+        value: props.initialValue,
       };
     }
 
@@ -121,7 +121,7 @@ export class FilterBar extends Component {
       value,
       inputIsPristine: false,
       isSuggestionsVisible: hasValue,
-      index: null
+      index: null,
     });
 
     if (!hasValue) {
@@ -154,15 +154,12 @@ export class FilterBar extends Component {
     const { value } = this.state;
 
     return (
-      <ClickOutside
-        onClickOutside={this.onClickOutside}
-        style={{ position: 'relative' }}
-      >
+      <ClickOutside onClickOutside={this.onClickOutside} style={{ position: 'relative' }}>
         <div style={{ position: 'relative' }}>
           <EuiFieldSearch
             fullWidth
             style={{
-              backgroundImage: 'none'
+              backgroundImage: 'none',
             }}
             placeholder={this.props.placeholder}
             inputRef={node => {
@@ -188,7 +185,7 @@ export class FilterBar extends Component {
               position="absolute"
               style={{
                 bottom: 0,
-                top: 'initial'
+                top: 'initial',
               }}
             />
           )}

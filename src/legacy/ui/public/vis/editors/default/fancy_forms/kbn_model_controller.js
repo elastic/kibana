@@ -47,9 +47,7 @@ export function decorateModelController($delegate, $injector) {
   directive.controller = [
     ...$injector.annotate(KbnModelController),
     ...$injector.annotate(ModelController),
-    (...args) => (
-      new KbnModelController(...args)
-    )
+    (...args) => new KbnModelController(...args),
   ];
 
   return $delegate;

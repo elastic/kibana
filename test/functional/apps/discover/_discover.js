@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -32,8 +32,7 @@ export default function ({ getService, getPageObjects }) {
   };
 
   describe('discover app', function describeIndexTests() {
-
-    before(async function () {
+    before(async function() {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace(defaultSettings);
 
@@ -47,48 +46,44 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('query', function () {
+    describe('query', function() {
       this.tags(['skipFirefox']);
       const queryName1 = 'Query # 1';
 
-      it('should show correct time range string by timepicker', async function () {
+      it('should show correct time range string by timepicker', async function() {
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be(PageObjects.timePicker.defaultStartTime);
         expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
       });
 
-      it('save query should show toast message and display query name', async function () {
+      it('save query should show toast message and display query name', async function() {
         await PageObjects.discover.saveSearch(queryName1);
         const actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
         expect(actualQueryNameString).to.be(queryName1);
       });
 
-      it('load query should show query name', async function () {
+      it('load query should show query name', async function() {
         await PageObjects.discover.loadSavedSearch(queryName1);
 
-        await retry.try(async function () {
-          expect(await PageObjects.discover.getCurrentQueryName()).to.be(
-            queryName1
-          );
+        await retry.try(async function() {
+          expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName1);
         });
       });
 
-      it('should show the correct hit count', async function () {
+      it('should show the correct hit count', async function() {
         const expectedHitCount = '14,004';
-        await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be(
-            expectedHitCount
-          );
+        await retry.try(async function() {
+          expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
         });
       });
 
-      it('should show correct time range string in chart', async function () {
+      it('should show correct time range string in chart', async function() {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
         const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
-      it('should modify the time range when a bar is clicked', async function () {
+      it('should modify the time range when a bar is clicked', async function() {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.clickHistogramBar();
         const time = await PageObjects.timePicker.getTimeConfig();
@@ -98,17 +93,20 @@ export default function ({ getService, getPageObjects }) {
         expect(rowData).to.have.string('Sep 21, 2015 @ 11:59:22.316');
       });
 
-      it('should modify the time range when the histogram is brushed', async function () {
+      it('should modify the time range when the histogram is brushed', async function() {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.brushHistogram();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
         expect(Math.round(newDurationHours)).to.be(25);
         const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(Date.parse(rowData)).to.be.within(Date.parse('Sep 20, 2015 @ 22:00:00.000'), Date.parse('Sep 20, 2015 @ 23:30:00.000'));
+        expect(Date.parse(rowData)).to.be.within(
+          Date.parse('Sep 20, 2015 @ 22:00:00.000'),
+          Date.parse('Sep 20, 2015 @ 23:30:00.000')
+        );
       });
 
-      it('should show correct initial chart interval of Auto', async function () {
+      it('should show correct initial chart interval of Auto', async function() {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const actualInterval = await PageObjects.discover.getChartInterval();
@@ -117,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
         expect(actualInterval).to.be(expectedInterval);
       });
 
-      it('should show Auto chart interval', async function () {
+      it('should show Auto chart interval', async function() {
         const expectedChartInterval = 'Auto';
 
         const actualInterval = await PageObjects.discover.getChartInterval();
@@ -152,26 +150,22 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('nested query', () => {
-
       before(async () => {
         log.debug('setAbsoluteRangeForAnotherQuery');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
-      it('should support querying on nested fields', async function () {
+      it('should support querying on nested fields', async function() {
         await queryBar.setQuery('nestedField:{ child: nestedValue }');
         await queryBar.submitQuery();
-        await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be(
-            '1'
-          );
+        await retry.try(async function() {
+          expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
       });
-
     });
 
-    describe('data-shared-item', function () {
+    describe('data-shared-item', function() {
       it('should have correct data-shared-item title and description', async () => {
         const expected = {
           title: 'A Saved Search',
@@ -192,7 +186,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('time zone switch', () => {
       // skipping this until we get an elastic-chart alternative to check the ticks value
-      it.skip('should show ticks in the correct time zone after switching', async function () {
+      it.skip('should show ticks in the correct time zone after switching', async function() {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
@@ -206,10 +200,10 @@ export default function ({ getService, getPageObjects }) {
           '2015-09-22 00:00',
           '2015-09-22 12:00',
           '2015-09-23 00:00',
-          '2015-09-23 12:00'
+          '2015-09-23 12:00',
         ];
 
-        await retry.try(async function () {
+        await retry.try(async function() {
           for (const tick of await PageObjects.discover.getBarChartXTicks()) {
             if (!maxTicks.includes(tick)) {
               throw new Error(`unexpected x-axis tick "${tick}"`);
@@ -217,13 +211,15 @@ export default function ({ getService, getPageObjects }) {
           }
         });
       });
-      it('should show bars in the correct time zone after switching', async function () {
+      it('should show bars in the correct time zone after switching', async function() {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
-        log.debug('check that the newest doc timestamp is now -7 hours from the UTC time in the first test');
+        log.debug(
+          'check that the newest doc timestamp is now -7 hours from the UTC time in the first test'
+        );
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         expect(rowData.startsWith('Sep 22, 2015 @ 16:50:13.253')).to.be.ok();
       });

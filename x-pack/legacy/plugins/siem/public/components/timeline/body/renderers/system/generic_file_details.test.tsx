@@ -5,16 +5,17 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('SystemGenericFileDetails', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default SystemGenericDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
@@ -28,11 +29,11 @@ describe('SystemGenericFileDetails', () => {
           timelineId="test"
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it returns system rendering if the data does contain system data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <SystemGenericFileDetails
             contextId="[contextid-123]"
@@ -51,7 +52,7 @@ describe('SystemGenericFileDetails', () => {
 
   describe('#SystemGenericFileLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -98,7 +99,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it returns nothing if data is all null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -143,7 +144,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return only the host name', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -188,7 +189,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -233,7 +234,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -280,7 +281,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -327,7 +328,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -374,7 +375,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -421,7 +422,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -468,7 +469,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -515,7 +516,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -562,7 +563,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -609,7 +610,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -656,7 +657,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -703,7 +704,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -750,7 +751,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -797,7 +798,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -844,7 +845,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -891,7 +892,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -938,7 +939,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -985,7 +986,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1032,7 +1033,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title, args', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1079,7 +1080,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it renders a FileDraggable when endgameFileName and endgameFilePath are provided, but fileName and filePath are NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1124,7 +1125,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it prefers to render fileName and filePath over endgameFileName and endgameFilePath respectfully when all of those fields are provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1171,7 +1172,7 @@ describe('SystemGenericFileDetails', () => {
 
     ['file_create_event', 'created', 'file_delete_event', 'deleted'].forEach(eventAction => {
       test(`it renders the text "via" when eventAction is ${eventAction}`, () => {
-        const wrapper = mountWithIntl(
+        const wrapper = mount(
           <TestProviders>
             <div>
               <SystemGenericFileLine
@@ -1220,7 +1221,7 @@ describe('SystemGenericFileDetails', () => {
     test('it does NOT render the text "via" when eventAction is not a whitelisted action', () => {
       const eventAction = 'a_non_whitelisted_event_action';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1268,7 +1269,7 @@ describe('SystemGenericFileDetails', () => {
     test('it renders a ParentProcessDraggable when eventAction is NOT "process_stopped" and NOT "termination_event"', () => {
       const eventAction = 'something_else';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1318,7 +1319,7 @@ describe('SystemGenericFileDetails', () => {
     test('it does NOT render a ParentProcessDraggable when eventAction is "process_stopped"', () => {
       const eventAction = 'process_stopped';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1366,7 +1367,7 @@ describe('SystemGenericFileDetails', () => {
     test('it does NOT render a ParentProcessDraggable when eventAction is "termination_event"', () => {
       const eventAction = 'termination_event';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1412,7 +1413,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it returns renders the message when showMessage is true', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1458,7 +1459,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it does NOT render the message when showMessage is false', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1504,7 +1505,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it renders a ProcessDraggableWithNonExistentProcess when endgamePid and endgameProcessName are provided, but processPid and processName are NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1550,7 +1551,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it prefers to render processName and processPid over endgameProcessName and endgamePid respectfully when all of those fields are provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine

@@ -10,13 +10,11 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { IndexPattern } from 'ui/index_patterns';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 import { npStart } from 'ui/new_platform';
-import { start as data } from '../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 import { inputsActions } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';
@@ -37,12 +35,9 @@ import {
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
 import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
-const {
-  ui: { SearchBar },
-} = data;
-
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
 export const savedQueryService = npStart.plugins.data.query.savedQueries;
+const { SearchBar } = npStart.plugins.data.ui;
 
 interface SiemSearchBarRedux {
   end: number;
@@ -258,7 +253,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
         subscriptions.unsubscribe();
       };
     }, []);
-    const indexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>
         <SearchBar

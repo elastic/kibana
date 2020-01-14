@@ -25,7 +25,7 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
   const SUBJ_PIPELINES_EVENTS_EMITTED_RATES = `${SUBJ_TABLE_CONTAINER} > eventsEmittedRate`;
   const SUBJ_PIPELINES_NODE_COUNTS = `${SUBJ_TABLE_CONTAINER} > nodeCount`;
 
-  return new class LogstashPipelines {
+  return new (class LogstashPipelines {
     async isOnListing() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_LISTING_PAGE));
       return pageId !== null;
@@ -43,7 +43,9 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
 
     async getPipelinesAll() {
       const ids = await testSubjects.getVisibleTextAll(SUBJ_PIPELINES_IDS);
-      const eventsEmittedRates = await testSubjects.getVisibleTextAll(SUBJ_PIPELINES_EVENTS_EMITTED_RATES);
+      const eventsEmittedRates = await testSubjects.getVisibleTextAll(
+        SUBJ_PIPELINES_EVENTS_EMITTED_RATES
+      );
       const nodeCounts = await testSubjects.getVisibleTextAll(SUBJ_PIPELINES_NODE_COUNTS);
 
       // tuple-ize the icons and texts together into an array of objects
@@ -55,8 +57,8 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
           {
             id: ids[current],
             eventsEmittedRate: eventsEmittedRates[current],
-            nodeCount: nodeCounts[current]
-          }
+            nodeCount: nodeCounts[current],
+          },
         ];
       }, []);
     }
@@ -88,5 +90,5 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
     assertNoData() {
       return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
     }
-  };
+  })();
 }

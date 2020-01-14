@@ -94,7 +94,8 @@ export class Field implements IFieldType {
     if (!type) type = getKbnFieldType('unknown');
 
     let format = spec.format;
-    if (!format || !(format instanceof FieldFormat)) {
+
+    if (!FieldFormat.isInstanceOfFieldFormat(format)) {
       const fieldFormats = getFieldFormats();
 
       format =

@@ -20,7 +20,9 @@ import { trackUserRequest } from './track_ui_metric';
 const apiPrefix = chrome.addBasePath('/api/rollup');
 
 export async function loadJobs() {
-  const { data: { jobs } } = await getHttp().get(`${apiPrefix}/jobs`);
+  const {
+    data: { jobs },
+  } = await getHttp().get(`${apiPrefix}/jobs`);
   return jobs;
 }
 

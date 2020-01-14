@@ -59,7 +59,7 @@ export const useMetricsExplorerState = (
       setAfterKey(null);
       setTimeRange({ ...currentTimerange, from: start, to: end });
     },
-    [currentTimerange]
+    [currentTimerange, setTimeRange]
   );
 
   const handleGroupByChange = useCallback(
@@ -70,7 +70,7 @@ export const useMetricsExplorerState = (
         groupBy: groupBy || void 0,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleFilterQuerySubmit = useCallback(
@@ -81,7 +81,7 @@ export const useMetricsExplorerState = (
         filterQuery: query,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleMetricsChange = useCallback(
@@ -92,24 +92,24 @@ export const useMetricsExplorerState = (
         metrics,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleAggregationChange = useCallback(
     (aggregation: MetricsExplorerAggregation) => {
       setAfterKey(null);
       const metrics =
-        aggregation === MetricsExplorerAggregation.count
+        aggregation === 'count'
           ? [{ aggregation }]
           : options.metrics
-              .filter(metric => metric.aggregation !== MetricsExplorerAggregation.count)
+              .filter(metric => metric.aggregation !== 'count')
               .map(metric => ({
                 ...metric,
                 aggregation,
               }));
       setOptions({ ...options, aggregation, metrics });
     },
-    [options]
+    [options, setOptions]
   );
 
   const onViewStateChange = useCallback(
@@ -124,7 +124,7 @@ export const useMetricsExplorerState = (
         setOptions(vs.options);
       }
     },
-    [setChartOptions, setTimeRange, setTimeRange]
+    [setChartOptions, setOptions, setTimeRange]
   );
 
   return {

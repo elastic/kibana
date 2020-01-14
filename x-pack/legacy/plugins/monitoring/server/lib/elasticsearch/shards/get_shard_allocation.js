@@ -36,15 +36,17 @@ export function handleResponse(response) {
   }, []);
 }
 
-export function getShardAllocation(req, esIndexPattern, { shardFilter, stateUuid, showSystemIndices = false }) {
+export function getShardAllocation(
+  req,
+  esIndexPattern,
+  { shardFilter, stateUuid, showSystemIndices = false }
+) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardAllocation');
 
-  const filters = [ { term: { state_uuid: stateUuid } }, shardFilter ];
+  const filters = [{ term: { state_uuid: stateUuid } }, shardFilter];
   if (!showSystemIndices) {
     filters.push({
-      bool: { must_not: [
-        { prefix: { 'shard.index': '.' } }
-      ] }
+      bool: { must_not: [{ prefix: { 'shard.index': '.' } }] },
     });
   }
 
@@ -56,11 +58,10 @@ export function getShardAllocation(req, esIndexPattern, { shardFilter, stateUuid
     size: config.get('xpack.monitoring.max_bucket_size'),
     ignoreUnavailable: true,
     body: {
-      query: createQuery({ type: 'shards', clusterUuid, metric, filters })
-    }
+      query: createQuery({ type: 'shards', clusterUuid, metric, filters }),
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(handleResponse);
+  return callWithRequest(req, 'search', params).then(handleResponse);
 }

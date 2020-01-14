@@ -63,7 +63,7 @@ export const useMeasuredCharacterDimensions = (scale: TextScale) => {
         X
       </MonospaceCharacterDimensionsProbe>
     ),
-    [scale]
+    [measureElement, scale]
   );
 
   return {

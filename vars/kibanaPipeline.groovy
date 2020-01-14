@@ -116,6 +116,8 @@ def legacyJobRunner(name) {
 
 def jobRunner(label, useRamDisk, closure) {
   node(label) {
+    agentInfo.print()
+
     if (useRamDisk) {
       // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
       def originalWorkspace = env.WORKSPACE
@@ -135,13 +137,8 @@ def jobRunner(label, useRamDisk, closure) {
     def scmVars
 
     // Try to clone from Github up to 8 times, waiting 15 secs between attempts
-    retry(8) {
-      try {
-        scmVars = checkout scm
-      } catch (ex) {
-        sleep 15
-        throw ex
-      }
+    retryWithDelay(8, 15) {
+      scmVars = checkout scm
     }
 
     withEnv([

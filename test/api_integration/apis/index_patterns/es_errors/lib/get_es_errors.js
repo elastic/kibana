@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 export async function getIndexNotFoundError(es) {
   try {
     await es.indices.get({
-      index: 'SHOULD NOT EXIST'
+      index: 'SHOULD NOT EXIST',
     });
   } catch (err) {
     expect(err).to.have.property('status', 404); // sanity check
@@ -37,7 +37,7 @@ export async function getDocNotFoundError(es) {
     await es.get({
       index: 'basic_index',
       type: 'type',
-      id: '1234'
+      id: '1234',
     });
   } catch (err) {
     expect(err).to.have.property('status', 404); // sanity check

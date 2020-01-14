@@ -16,7 +16,7 @@ export class LoggingAction extends BaseAction {
       defaultMessage: 'Watch [{context}] has exceeded the threshold',
       values: {
         context: '{{ctx.metadata.name}}',
-      }
+      },
     });
     this.text = get(props, 'text', props.ignoreDefaults ? null : defaultText);
   }
@@ -43,7 +43,7 @@ export class LoggingAction extends BaseAction {
       text,
       logging: {
         text,
-      }
+      },
     });
 
     return result;

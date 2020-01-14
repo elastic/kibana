@@ -11,7 +11,7 @@
     "xpack.dashboardMode": "legacy/plugins/dashboard_mode",
     "xpack.features": "plugins/features",
     "xpack.fileUpload": "legacy/plugins/file_upload",
-    "xpack.graph": "legacy/plugins/graph",
+    "xpack.graph": ["legacy/plugins/graph", "plugins/graph"],
     "xpack.grokDebugger": "legacy/plugins/grokdebugger",
     "xpack.idxMgmt": "legacy/plugins/index_management",
     "xpack.indexLifecycleMgmt": "legacy/plugins/index_lifecycle_management",

@@ -1,16 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Ccr that it renders normally 1`] = `
-<EuiPage
-  restrictWidth={false}
->
-  <EuiPageBody
-    component="main"
-    restrictWidth={false}
-  >
-    <EuiPageContent
-      panelPaddingSize="l"
-    >
+<EuiPage>
+  <EuiPageBody>
+    <EuiPageContent>
       <EuiPageContentBody>
         <EuiInMemoryTable
           className="monitoringElasticsearchCcrListingTable"

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import _ from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -16,7 +15,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/data/public';
 
 const unitsDesc = dateMath.unitsDesc;
-const largeMax = unitsDesc.indexOf('w');    // Multiple units of week or longer converted to days for ES intervals.
+const largeMax = unitsDesc.indexOf('w'); // Multiple units of week or longer converted to days for ES intervals.
 
 const config = chrome.getUiSettingsClient();
 
@@ -41,7 +40,7 @@ export function TimeBuckets() {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setBarTarget = function (bt) {
+TimeBuckets.prototype.setBarTarget = function(bt) {
   this.barTarget = bt;
 };
 
@@ -52,7 +51,7 @@ TimeBuckets.prototype.setBarTarget = function (bt) {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setMaxBars = function (mb) {
+TimeBuckets.prototype.setMaxBars = function(mb) {
   this.maxBars = mb;
 };
 
@@ -67,7 +66,7 @@ TimeBuckets.prototype.setMaxBars = function (mb) {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setBounds = function (input) {
+TimeBuckets.prototype.setBounds = function(input) {
   if (!input) return this.clearBounds();
 
   let bounds;
@@ -100,7 +99,7 @@ TimeBuckets.prototype.setBounds = function (input) {
  *
  * @return {undefined}
  */
-TimeBuckets.prototype.clearBounds = function () {
+TimeBuckets.prototype.clearBounds = function() {
   this._lb = this._ub = null;
 };
 
@@ -109,7 +108,7 @@ TimeBuckets.prototype.clearBounds = function () {
  *
  * @return {Boolean}
  */
-TimeBuckets.prototype.hasBounds = function () {
+TimeBuckets.prototype.hasBounds = function() {
   return isValidMoment(this._ub) && isValidMoment(this._lb);
 };
 
@@ -125,11 +124,11 @@ TimeBuckets.prototype.hasBounds = function () {
  *                      min and max. Each property will be a moment()
  *                      object
  */
-TimeBuckets.prototype.getBounds = function () {
+TimeBuckets.prototype.getBounds = function() {
   if (!this.hasBounds()) return;
   return {
     min: this._lb,
-    max: this._ub
+    max: this._ub,
   };
 };
 
@@ -140,7 +139,7 @@ TimeBuckets.prototype.getBounds = function () {
  *
  * @return {moment.duration|undefined}
  */
-TimeBuckets.prototype.getDuration = function () {
+TimeBuckets.prototype.getDuration = function() {
   if (!this.hasBounds()) return;
   return moment.duration(this._ub - this._lb, 'ms');
 };
@@ -156,7 +155,7 @@ TimeBuckets.prototype.getDuration = function () {
  *
  * @param {string|moment.duration} input - see desc
  */
-TimeBuckets.prototype.setInterval = function (input) {
+TimeBuckets.prototype.setInterval = function(input) {
   // Preserve the original units because they're lost when the interval is converted to a
   // moment duration object.
   this.originalInterval = input;
@@ -218,7 +217,7 @@ TimeBuckets.prototype.setInterval = function (input) {
  *
  * @return {[type]} [description]
  */
-TimeBuckets.prototype.getInterval = function () {
+TimeBuckets.prototype.getInterval = function() {
   const self = this;
   const duration = self.getDuration();
   return decorateInterval(maybeScaleInterval(readInterval()), duration);
@@ -252,10 +251,9 @@ TimeBuckets.prototype.getInterval = function () {
     return _.assign(scaled, {
       preScaled: interval,
       scale: interval / scaled,
-      scaled: true
+      scaled: true,
     });
   }
-
 };
 
 /**
@@ -264,7 +262,7 @@ TimeBuckets.prototype.getInterval = function () {
  *
  * @return {moment.duration|undefined}
  */
-TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
+TimeBuckets.prototype.getIntervalToNearestMultiple = function(divisorSecs) {
   const interval = this.getInterval();
   const intervalSecs = interval.asSeconds();
 
@@ -274,8 +272,8 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
   }
 
   // Create a new interval which is a multiple of the supplied divisor (not zero).
-  let nearestMultiple = remainder > (divisorSecs / 2) ?
-    intervalSecs + divisorSecs - remainder : intervalSecs - remainder;
+  let nearestMultiple =
+    remainder > divisorSecs / 2 ? intervalSecs + divisorSecs - remainder : intervalSecs - remainder;
   nearestMultiple = nearestMultiple === 0 ? divisorSecs : nearestMultiple;
   const nearestMultipleInt = moment.duration(nearestMultiple, 'seconds');
   decorateInterval(nearestMultipleInt, this.getDuration());
@@ -302,7 +300,7 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
  *
  * @return {string}
  */
-TimeBuckets.prototype.getScaledDateFormat = function () {
+TimeBuckets.prototype.getScaledDateFormat = function() {
   const interval = this.getInterval();
   const rules = config.get('dateFormat:scaled');
 
@@ -316,12 +314,15 @@ TimeBuckets.prototype.getScaledDateFormat = function () {
   return config.get('dateFormat');
 };
 
-TimeBuckets.prototype.getScaledDateFormatter = function () {
+TimeBuckets.prototype.getScaledDateFormatter = function() {
   const fieldFormats = npStart.plugins.data.fieldFormats;
   const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
-  return new DateFieldFormat({
-    pattern: this.getScaledDateFormat()
-  }, getConfig);
+  return new DateFieldFormat(
+    {
+      pattern: this.getScaledDateFormat(),
+    },
+    getConfig
+  );
 };
 
 // Appends some TimeBuckets specific properties to the moment.js duration interval.
@@ -332,7 +333,8 @@ function decorateInterval(interval, originalDuration) {
   interval.esValue = esInterval.value;
   interval.esUnit = esInterval.unit;
   interval.expression = esInterval.expression;
-  interval.overflow = originalDuration > interval ? moment.duration(interval - originalDuration) : false;
+  interval.overflow =
+    originalDuration > interval ? moment.duration(interval - originalDuration) : false;
 
   const prettyUnits = moment.normalizeUnits(esInterval.unit);
   if (esInterval.value === 1) {
@@ -345,7 +347,7 @@ function decorateInterval(interval, originalDuration) {
 }
 
 function isValidMoment(m) {
-  return m && ('isValid' in m) && m.isValid();
+  return m && 'isValid' in m && m.isValid();
 }
 
 export function getBoundsRoundedToInterval(bounds, interval, inclusiveEnd = false) {
@@ -354,8 +356,8 @@ export function getBoundsRoundedToInterval(bounds, interval, inclusiveEnd = fals
   // the start of the next interval (Kibana dashboards search >= bounds min, and <= bounds max,
   // so we subtract 1ms off the max to avoid querying start of the new Elasticsearch aggregation bucket).
   const intervalMs = interval.asMilliseconds();
-  const adjustedMinMs = (Math.floor(bounds.min.valueOf() / intervalMs)) * intervalMs;
-  let adjustedMaxMs = (Math.ceil(bounds.max.valueOf() / intervalMs)) * intervalMs;
+  const adjustedMinMs = Math.floor(bounds.min.valueOf() / intervalMs) * intervalMs;
+  let adjustedMaxMs = Math.ceil(bounds.max.valueOf() / intervalMs) * intervalMs;
 
   // Don't include the start ms of the next bucket unless specified..
   if (inclusiveEnd === false) {
@@ -376,7 +378,6 @@ export function calcEsInterval(duration) {
     const val = duration.as(unit);
     // find a unit that rounds neatly
     if (val >= 1 && Math.floor(val) === val) {
-
       // if the unit is "large", like years, but isn't set to 1, ES will throw an error.
       // So keep going until we get out of the "large" units.
       if (i <= largeMax && val !== 1) {
@@ -386,7 +387,7 @@ export function calcEsInterval(duration) {
       return {
         value: val,
         unit: unit,
-        expression: val + unit
+        expression: val + unit,
       };
     }
   }
@@ -395,6 +396,6 @@ export function calcEsInterval(duration) {
   return {
     value: ms,
     unit: 'ms',
-    expression: ms + 'ms'
+    expression: ms + 'ms',
   };
 }

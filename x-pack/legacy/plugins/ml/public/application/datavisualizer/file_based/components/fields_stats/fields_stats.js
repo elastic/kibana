@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import { FieldStatsCard } from './field_stats_card';
 import { getFieldNames } from './get_field_names';
@@ -19,27 +16,22 @@ export class FieldsStats extends Component {
     super(props);
 
     this.state = {
-      fields: []
+      fields: [],
     };
   }
 
   componentDidMount() {
     this.setState({
-      fields: createFields(this.props.results)
+      fields: createFields(this.props.results),
     });
   }
 
   render() {
     return (
       <div className="fields-stats">
-        {
-          this.state.fields.map(f => (
-            <FieldStatsCard
-              field={f}
-              key={f.name}
-            />
-          ))
-        }
+        {this.state.fields.map(f => (
+          <FieldStatsCard field={f} key={f.name} />
+        ))}
       </div>
     );
   }
@@ -54,14 +46,13 @@ function createFields(results) {
   } = results;
 
   if (mappings && fieldStats) {
-
     const fieldNames = getFieldNames(results);
 
-    return fieldNames.map((name) => {
+    return fieldNames.map(name => {
       if (fieldStats[name] !== undefined) {
         const field = { name };
-        const f  = fieldStats[name];
-        const m  = mappings[name];
+        const f = fieldStats[name];
+        const m = mappings[name];
 
         // sometimes the timestamp field is not in the mappings, and so our
         // collection of fields will be missing a time field with a type of date
@@ -80,7 +71,7 @@ function createFields(results) {
           }
         }
 
-        const percent = ((field.count / numMessagesAnalyzed) * 100);
+        const percent = (field.count / numMessagesAnalyzed) * 100;
         field.percent = roundToDecimalPlace(percent);
 
         // round min, max, median, mean to 2dp.
@@ -96,8 +87,10 @@ function createFields(results) {
         // field is not in the field stats
         // this could be the message field for a semi-structured log file or a
         // field which the endpoint has not been able to work out any information for
-        const type = (mappings[name] && mappings[name].type === ML_JOB_FIELD_TYPES.TEXT) ?
-          ML_JOB_FIELD_TYPES.TEXT : ML_JOB_FIELD_TYPES.UNKNOWN;
+        const type =
+          mappings[name] && mappings[name].type === ML_JOB_FIELD_TYPES.TEXT
+            ? ML_JOB_FIELD_TYPES.TEXT
+            : ML_JOB_FIELD_TYPES.UNKNOWN;
 
         return {
           name,

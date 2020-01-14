@@ -61,7 +61,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       ...reduceFields(queryOptions.fields, eventFieldsMap),
     ]);
     delete queryOptions.fieldRequested;
-
     const dsl = buildTimelineQuery(queryOptions);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,

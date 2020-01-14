@@ -6,21 +6,68 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
     <EuiFlexItem
       grow={true}
     >
-      <EuiLink
-        href="https://expired.badssl.com"
-        target="_blank"
-      >
-        https://expired.badssl.com
-        <EuiIcon
-          color="subbdued"
-          size="s"
-          type="popout"
-        />
-      </EuiLink>
+      <EuiText>
+        <EuiLink
+          href="https://expired.badssl.com"
+          target="_blank"
+        >
+          https://expired.badssl.com
+          <EuiIcon
+            color="subbdued"
+            size="s"
+            type="popout"
+          />
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <Connect(MonitorListActionsPopoverComponent)
+        summary={
+          Object {
+            "monitor_id": "foo",
+            "state": Object {
+              "checks": Array [
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.1",
+                    "status": "up",
+                  },
+                  "timestamp": "121",
+                },
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.2",
+                    "status": "down",
+                  },
+                  "timestamp": "123",
+                },
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.3",
+                    "status": "up",
+                  },
+                  "timestamp": "125",
+                },
+              ],
+              "summary": Object {
+                "down": 0,
+                "up": 1,
+              },
+              "timestamp": "123",
+              "url": Object {
+                "domain": "expired.badssl.com",
+                "full": "https://expired.badssl.com",
+              },
+            },
+          }
+        }
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
-    size="s"
+    size="m"
   />
   <MonitorStatusList
     checks={
@@ -67,21 +114,54 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
     <EuiFlexItem
       grow={true}
     >
-      <EuiLink
-        href="https://expired.badssl.com"
-        target="_blank"
-      >
-        https://expired.badssl.com
-        <EuiIcon
-          color="subbdued"
-          size="s"
-          type="popout"
-        />
-      </EuiLink>
+      <EuiText>
+        <EuiLink
+          href="https://expired.badssl.com"
+          target="_blank"
+        >
+          https://expired.badssl.com
+          <EuiIcon
+            color="subbdued"
+            size="s"
+            type="popout"
+          />
+        </EuiLink>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <Connect(MonitorListActionsPopoverComponent)
+        summary={
+          Object {
+            "monitor_id": "foo",
+            "state": Object {
+              "checks": Array [
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.1",
+                    "status": "up",
+                  },
+                  "timestamp": "121",
+                },
+              ],
+              "summary": Object {
+                "down": 0,
+                "up": 1,
+              },
+              "timestamp": "123",
+              "url": Object {
+                "domain": "expired.badssl.com",
+                "full": "https://expired.badssl.com",
+              },
+            },
+          }
+        }
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
-    size="s"
+    size="m"
   />
   <MonitorStatusList
     checks={

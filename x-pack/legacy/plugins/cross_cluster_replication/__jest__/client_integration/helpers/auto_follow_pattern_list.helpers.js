@@ -12,13 +12,13 @@ import routing from '../../../public/app/services/routing';
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {
-    onRouter: (router) => routing.reactRouter = router
-  }
+    onRouter: router => (routing.reactRouter = router),
+  },
 };
 
 const initTestBed = registerTestBed(AutoFollowPatternList, testBedConfig);
 
-export const setup = (props) => {
+export const setup = props => {
   const testBed = initTestBed(props);
   const EUI_TABLE = 'autoFollowPatternListTable';
 
@@ -63,7 +63,10 @@ export const setup = (props) => {
 
   const clickAutoFollowPatternAt = (index = 0) => {
     const { rows } = testBed.table.getMetaData(EUI_TABLE);
-    const autoFollowPatternLink = findTestSubject(rows[index].reactWrapper, 'autoFollowPatternLink');
+    const autoFollowPatternLink = findTestSubject(
+      rows[index].reactWrapper,
+      'autoFollowPatternLink'
+    );
     autoFollowPatternLink.simulate('click');
   };
 
@@ -74,7 +77,7 @@ export const setup = (props) => {
       clickBulkDeleteButton,
       clickConfirmModalDeleteAutoFollowPattern,
       clickRowActionButtonAt,
-      clickAutoFollowPatternAt
-    }
+      clickAutoFollowPatternAt,
+    },
   };
 };

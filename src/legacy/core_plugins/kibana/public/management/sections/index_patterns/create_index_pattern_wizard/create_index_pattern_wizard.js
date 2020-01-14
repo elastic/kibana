@@ -20,9 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiGlobalToastList
-} from '@elastic/eui';
+import { EuiGlobalToastList } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { StepIndexPattern } from './components/step_index_pattern';
@@ -32,10 +30,7 @@ import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
 import { MAX_SEARCH_SIZE } from './constants';
-import {
-  ensureMinimumTime,
-  getIndices,
-} from './lib';
+import { ensureMinimumTime, getIndices } from './lib';
 import { i18n } from '@kbn/i18n';
 
 export class CreateIndexPatternWizard extends Component {
@@ -49,7 +44,7 @@ export class CreateIndexPatternWizard extends Component {
       config: PropTypes.object.isRequired,
       changeUrl: PropTypes.func.isRequired,
     }).isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -61,7 +56,7 @@ export class CreateIndexPatternWizard extends Component {
       remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
       isIncludingSystemIndices: false,
-      toasts: []
+      toasts: [],
     };
   }
 
@@ -74,12 +69,14 @@ export class CreateIndexPatternWizard extends Component {
       return await asyncFn;
     } catch (errors) {
       this.setState(prevState => ({
-        toasts: prevState.toasts.concat([{
-          title: errorMsg,
-          id: errorMsg.props.id,
-          color: 'warning',
-          iconType: 'alert',
-        }])
+        toasts: prevState.toasts.concat([
+          {
+            title: errorMsg,
+            id: errorMsg.props.id,
+            color: 'warning',
+            iconType: 'alert',
+          },
+        ]),
       }));
       return errorValue;
     }
@@ -91,29 +88,38 @@ export class CreateIndexPatternWizard extends Component {
     this.setState({
       allIndices: [],
       isInitiallyLoadingIndices: true,
-      remoteClustersExist: false
+      remoteClustersExist: false,
     });
 
-    const indicesFailMsg = (<FormattedMessage
-      id="kbn.management.createIndexPattern.loadIndicesFailMsg"
-      defaultMessage="Failed to load indices"
-    />);
+    const indicesFailMsg = (
+      <FormattedMessage
+        id="kbn.management.createIndexPattern.loadIndicesFailMsg"
+        defaultMessage="Failed to load indices"
+      />
+    );
 
-    const clustersFailMsg = (<FormattedMessage
-      id="kbn.management.createIndexPattern.loadClustersFailMsg"
-      defaultMessage="Failed to load remote clusters"
-    />);
+    const clustersFailMsg = (
+      <FormattedMessage
+        id="kbn.management.createIndexPattern.loadClustersFailMsg"
+        defaultMessage="Failed to load remote clusters"
+      />
+    );
 
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), [], indicesFailMsg)
+        getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
+        [],
+        indicesFailMsg
+      )
     ).then(allIndices => this.setState({ allIndices, isInitiallyLoadingIndices: false }));
 
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(services.es, this.indexPatternCreationType, `*:*`, 1), ['a'], clustersFailMsg
+      getIndices(services.es, this.indexPatternCreationType, `*:*`, 1),
+      ['a'],
+      clustersFailMsg
     ).then(remoteIndices => this.setState({ remoteClustersExist: !!remoteIndices.length }));
   };
 
@@ -127,15 +133,19 @@ export class CreateIndexPatternWizard extends Component {
       id: indexPatternId,
       title: indexPattern,
       timeFieldName,
-      ...this.indexPatternCreationType.getIndexPatternMappings()
+      ...this.indexPatternCreationType.getIndexPatternMappings(),
     });
 
     const createdId = await emptyPattern.create();
     if (!createdId) {
-      const confirmMessage = i18n.translate('kbn.management.indexPattern.titleExistsLabel', { values: { title: this.title },
-        defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
+      const confirmMessage = i18n.translate('kbn.management.indexPattern.titleExistsLabel', {
+        values: { title: this.title },
+        defaultMessage: "An index pattern with the title '{title}' already exists.",
+      });
       try {
-        await services.confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
+        await services.confirmModalPromise(confirmMessage, {
+          confirmButtonText: 'Go to existing pattern',
+        });
         return services.changeUrl(`/management/kibana/index_patterns/${indexPatternId}`);
       } catch (err) {
         return false;
@@ -148,21 +158,21 @@ export class CreateIndexPatternWizard extends Component {
 
     services.indexPatterns.clearCache(createdId);
     services.changeUrl(`/management/kibana/index_patterns/${createdId}`);
-  }
+  };
 
-  goToTimeFieldStep = (indexPattern) => {
+  goToTimeFieldStep = indexPattern => {
     this.setState({ step: 2, indexPattern });
-  }
+  };
 
   goToIndexPatternStep = () => {
     this.setState({ step: 1 });
-  }
+  };
 
   onChangeIncludingSystemIndices = () => {
     this.setState(state => ({
       isIncludingSystemIndices: !state.isIncludingSystemIndices,
     }));
-  }
+  };
 
   renderHeader() {
     const { isIncludingSystemIndices } = this.state;
@@ -186,7 +196,7 @@ export class CreateIndexPatternWizard extends Component {
       isIncludingSystemIndices,
       step,
       indexPattern,
-      remoteClustersExist
+      remoteClustersExist,
     } = this.state;
 
     if (isInitiallyLoadingIndices) {
@@ -194,9 +204,7 @@ export class CreateIndexPatternWizard extends Component {
     }
 
     const hasDataIndices = allIndices.some(({ name }) => !name.startsWith('.'));
-    if (!hasDataIndices &&
-      !isIncludingSystemIndices &&
-      !remoteClustersExist) {
+    if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
       return <EmptyState onRefresh={this.fetchData} />;
     }
 
@@ -231,7 +239,7 @@ export class CreateIndexPatternWizard extends Component {
     return null;
   }
 
-  removeToast = (removedToast) => {
+  removeToast = removedToast => {
     this.setState(prevState => ({
       toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
     }));
@@ -256,5 +264,3 @@ export class CreateIndexPatternWizard extends Component {
     );
   }
 }
-
-

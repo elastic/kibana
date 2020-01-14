@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -27,5 +25,5 @@ export function LoadingIndicator({ height, label }) {
 }
 LoadingIndicator.propTypes = {
   height: PropTypes.number,
-  label: PropTypes.string
+  label: PropTypes.string,
 };

@@ -5,7 +5,9 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
+import { findInventoryModel } from '../../common/inventory_models';
 import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
+import { InventoryItemType } from '../../common/inventory_models/types';
 
 interface Options {
   indexPattern: string;
@@ -24,8 +26,14 @@ export const calculateMetricInterval = async (
   framework: KibanaFramework,
   requestContext: RequestHandlerContext,
   options: Options,
-  modules: string[]
+  modules?: string[],
+  nodeType?: InventoryItemType // TODO: check that this type still makes sense
 ) => {
+  let from = options.timerange.from;
+  if (nodeType) {
+    const inventoryModel = findInventoryModel(nodeType);
+    from = options.timerange.to - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+  }
   const query = {
     allowNoIndices: true,
     index: options.indexPattern,
@@ -37,7 +45,7 @@ export const calculateMetricInterval = async (
             {
               range: {
                 [options.timestampField]: {
-                  gte: options.timerange.from,
+                  gte: from,
                   lte: options.timerange.to,
                   format: 'epoch_millis',
                 },

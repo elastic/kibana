@@ -6,7 +6,7 @@
 
 import { services as ossVisualRegressionServices } from '../../../test/visual_regression/services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   return {

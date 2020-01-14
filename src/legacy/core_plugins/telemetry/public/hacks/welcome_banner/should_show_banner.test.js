@@ -29,7 +29,7 @@ const getMockInjector = () => {
   const get = sinon.stub();
 
   const mockHttp = {
-    post: sinon.stub()
+    post: sinon.stub(),
   };
 
   get.withArgs('$http').returns(mockHttp);
@@ -41,14 +41,13 @@ const getTelemetryOptInProvider = ({ telemetryOptedIn = null } = {}) => {
   mockInjectedMetadata({ telemetryOptedIn, allowChangingOptInStatus: true });
   const injector = getMockInjector();
   const chrome = {
-    addBasePath: (url) => url
+    addBasePath: url => url,
   };
 
   return new TelemetryOptInProvider(injector, chrome);
 };
 
 describe('should_show_banner', () => {
-
   it('returns whatever handleOldSettings does when telemetry opt-in setting is unset', async () => {
     const config = { get: sinon.stub() };
     const telemetryOptInProvider = getTelemetryOptInProvider();
@@ -59,8 +58,12 @@ describe('should_show_banner', () => {
     handleOldSettingsTrue.returns(Promise.resolve(true));
     handleOldSettingsFalse.returns(Promise.resolve(false));
 
-    const showBannerTrue = await shouldShowBanner(telemetryOptInProvider, config, { _handleOldSettings: handleOldSettingsTrue });
-    const showBannerFalse = await shouldShowBanner(telemetryOptInProvider, config, { _handleOldSettings: handleOldSettingsFalse });
+    const showBannerTrue = await shouldShowBanner(telemetryOptInProvider, config, {
+      _handleOldSettings: handleOldSettingsTrue,
+    });
+    const showBannerFalse = await shouldShowBanner(telemetryOptInProvider, config, {
+      _handleOldSettings: handleOldSettingsFalse,
+    });
 
     expect(showBannerTrue).toBe(true);
     expect(showBannerFalse).toBe(false);
@@ -85,5 +88,4 @@ describe('should_show_banner', () => {
 
     expect(await shouldShowBanner(telemetryOptInProvider, config)).toBe(false);
   });
-
 });

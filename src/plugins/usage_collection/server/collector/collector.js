@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export class Collector {
   /*
    * @param {Object} logger - logger object
@@ -27,12 +26,17 @@ export class Collector {
    * @param {Function} options.formatForBulkUpload - optional
    * @param {Function} options.rest - optional other properties
    */
-  constructor(logger, { type, init, fetch, formatForBulkUpload = null, isReady = null, ...options } = {}) {
+  constructor(
+    logger,
+    { type, init, fetch, formatForBulkUpload = null, isReady = null, ...options } = {}
+  ) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
     }
     if (typeof init !== 'undefined' && typeof init !== 'function') {
-      throw new Error('If init property is passed, Collector must be instantiated with a options.init as a function property');
+      throw new Error(
+        'If init property is passed, Collector must be instantiated with a options.init as a function property'
+      );
     }
     if (typeof fetch !== 'function') {
       throw new Error('Collector must be instantiated with a options.fetch function property');

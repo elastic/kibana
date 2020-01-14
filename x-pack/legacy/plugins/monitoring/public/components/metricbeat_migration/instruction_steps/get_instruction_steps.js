@@ -10,7 +10,7 @@ import {
 } from './kibana';
 import {
   getElasticsearchInstructionsForEnablingMetricbeat,
-  getElasticsearchInstructionsForDisablingInternalCollection
+  getElasticsearchInstructionsForDisablingInternalCollection,
 } from './elasticsearch';
 import {
   getLogstashInstructionsForEnablingMetricbeat,
@@ -26,14 +26,14 @@ import {
 } from './apm';
 import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
-  INSTRUCTION_STEP_DISABLE_INTERNAL
+  INSTRUCTION_STEP_DISABLE_INTERNAL,
 } from '../constants';
 import {
   ELASTICSEARCH_SYSTEM_ID,
   APM_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
-  BEATS_SYSTEM_ID
+  BEATS_SYSTEM_ID,
 } from '../../../../common/constants';
 
 export function getInstructionSteps(productName, product, step, meta, opts) {

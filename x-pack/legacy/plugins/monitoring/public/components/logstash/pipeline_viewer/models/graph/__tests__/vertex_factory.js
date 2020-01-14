@@ -18,11 +18,11 @@ describe('vertexFactory', () => {
     graph = {
       verticesById: {
         mygenerator: {},
-        myqueue: {}
-      }
+        myqueue: {},
+      },
     };
     vertexJson = {
-      id: 'something'
+      id: 'something',
     };
   });
 

@@ -12,8 +12,8 @@ import {
 } from '../../../lib/adapters/framework';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { getIdFieldName } from './get_id_field_name';
-import { NAME_FIELDS } from '../../../lib/constants';
+import { findInventoryFields } from '../../../../common/inventory_models';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
@@ -26,10 +26,9 @@ export const getMetricMetadata = async (
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: 'host' | 'pod' | 'container'
+  nodeType: InventoryItemType
 ): Promise<InfraMetricsAdapterResponse> => {
-  const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
-
+  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const metricQuery = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -40,7 +39,7 @@ export const getMetricMetadata = async (
           must_not: [{ match: { 'event.dataset': 'aws.ec2' } }],
           filter: [
             {
-              match: { [idFieldName]: nodeId },
+              match: { [fields.id]: nodeId },
             },
           ],
         },
@@ -49,7 +48,7 @@ export const getMetricMetadata = async (
       aggs: {
         nodeName: {
           terms: {
-            field: NAME_FIELDS[nodeType],
+            field: fields.name,
             size: 1,
           },
         },

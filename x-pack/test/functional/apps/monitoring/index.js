@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('Monitoring app', function () {
+export default function({ loadTestFile }) {
+  describe('Monitoring app', function() {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./feature_controls'));

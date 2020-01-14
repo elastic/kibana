@@ -12,14 +12,30 @@ import { TOCEntry } from './view';
 const LAYER_ID = '1';
 
 const mockLayer = {
-  getId: () => { return LAYER_ID; },
-  hasLegendDetails: async () => { return true; },
-  renderLegendDetails: () => { return (<div>TOC details mock</div>); },
-  getDisplayName: () => { return 'layer 1'; },
-  isVisible: () => { return true; },
-  showAtZoomLevel: () => { return true; },
-  hasErrors: () => { return false; },
-  hasLegendDetails: () => { return true; },
+  getId: () => {
+    return LAYER_ID;
+  },
+  hasLegendDetails: async () => {
+    return true;
+  },
+  renderLegendDetails: () => {
+    return <div>TOC details mock</div>;
+  },
+  getDisplayName: () => {
+    return 'layer 1';
+  },
+  isVisible: () => {
+    return true;
+  },
+  showAtZoomLevel: () => {
+    return true;
+  },
+  hasErrors: () => {
+    return false;
+  },
+  hasLegendDetails: () => {
+    return true;
+  },
 };
 
 const defaultProps = {
@@ -35,54 +51,37 @@ const defaultProps = {
 
 describe('TOCEntry', () => {
   test('is rendered', async () => {
-    const component = shallowWithIntl(
-      <TOCEntry
-        {...defaultProps}
-      />
-    );
+    const component = shallowWithIntl(<TOCEntry {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
   describe('props', () => {
     test('isReadOnly', async () => {
-      const component = shallowWithIntl(
-        <TOCEntry
-          {...defaultProps}
-          isReadOnly={true}
-        />
-      );
+      const component = shallowWithIntl(<TOCEntry {...defaultProps} isReadOnly={true} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
-      expect(component)
-        .toMatchSnapshot();
+      expect(component).toMatchSnapshot();
     });
 
     test('should display layer details when isLegendDetailsOpen is true', async () => {
-      const component = shallowWithIntl(
-        <TOCEntry
-          {...defaultProps}
-          isLegendDetailsOpen={true}
-        />
-      );
+      const component = shallowWithIntl(<TOCEntry {...defaultProps} isLegendDetailsOpen={true} />);
 
       // Ensure all promises resolve
       await new Promise(resolve => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
-      expect(component)
-        .toMatchSnapshot();
+      expect(component).toMatchSnapshot();
     });
   });
 });

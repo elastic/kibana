@@ -7,28 +7,27 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
-
+import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
 export function validateIndexPattern(indexPattern, rollupIndex) {
   if (!indexPattern || !indexPattern.trim()) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternMissing"
         defaultMessage="Index pattern is required."
-      />
-    )];
+      />,
+    ];
   }
 
   if (indexPattern === rollupIndex) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternSameAsRollupIndex"
         defaultMessage="Index pattern cannot have the same as the rollup index."
-      />
-    )];
+      />,
+    ];
   }
 
-  const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
+  const illegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
     if (indexPattern.includes(char)) {
       chars.push(char);
     }
@@ -37,22 +36,22 @@ export function validateIndexPattern(indexPattern, rollupIndex) {
   }, []);
 
   if (illegalCharacters.length) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternIllegalCharacters"
         defaultMessage="Remove the characters {characterList} from your index pattern."
         values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
-      />
-    )];
+      />,
+    ];
   }
 
   if (indexPattern.includes(' ')) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternSpaces"
         defaultMessage="Remove the spaces from your index pattern."
-      />
-    )];
+      />,
+    ];
   }
 
   return undefined;

@@ -72,11 +72,13 @@ class VisEditorVisualizationUI extends Component {
 
     const { timeRange, savedObj, onDataChange } = this.props;
 
-    this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(savedObj, {
-      vis: {},
-      timeRange: timeRange,
-      filters: [],
-    });
+    this._handler = await embeddables
+      .getEmbeddableFactory('visualization')
+      .createFromObject(savedObj, {
+        vis: {},
+        timeRange: timeRange,
+        filters: [],
+      });
     await this._handler.render(this._visEl.current);
 
     this._subscription = this._handler.handler.data$.subscribe(data => {
