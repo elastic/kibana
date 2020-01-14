@@ -19,56 +19,56 @@ describe('LocationStatusTags component', () => {
         summary: { up: 0, down: 1 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 's')
+          .subtract('5', 's')
           .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'm')
+          .subtract('5', 'm')
           .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'h')
+          .subtract('5', 'h')
           .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Tokyo', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'd')
+          .subtract('5', 'd')
           .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'New York', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'w')
+          .subtract('5', 'w')
           .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Toronto', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'M')
+          .subtract('5', 'M')
           .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Sydney', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'y')
+          .subtract('5', 'y')
           .toISOString(),
       },
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Paris', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'y')
+          .subtract('5', 'y')
           .toISOString(),
       },
     ];
@@ -82,14 +82,14 @@ describe('LocationStatusTags component', () => {
         summary: { up: 4, down: 0 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 's')
+          .subtract('5', 's')
           .toISOString(),
       },
       {
         summary: { up: 4, down: 0 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'd')
+          .subtract('5', 'd')
           .toISOString(),
       },
     ];
@@ -103,14 +103,14 @@ describe('LocationStatusTags component', () => {
         summary: { up: 0, down: 2 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 's')
+          .subtract('5', 's')
           .toISOString(),
       },
       {
         summary: { up: 0, down: 2 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .add('5', 'm')
+          .subtract('5', 'm')
           .toISOString(),
       },
     ];
