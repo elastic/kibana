@@ -103,6 +103,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
         },
       }
     }
+    tableLayout="fixed"
   />
 </Fragment>
 `;
@@ -196,6 +197,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
         },
       }
     }
+    tableLayout="fixed"
   />
 </Fragment>
 `;

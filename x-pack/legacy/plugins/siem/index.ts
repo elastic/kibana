@@ -26,7 +26,6 @@ import {
   DEFAULT_TO,
   DEFAULT_SIGNALS_INDEX,
   SIGNALS_INDEX_KEY,
-  DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { initServerWithKibana } from './server/kibana.index';
@@ -106,20 +105,6 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
-        // DEPRECATED: This should be removed once the front end is no longer using any parts of it.
-        // TODO: Remove this as soon as no code is left that is pulling data from it.
-        [DEFAULT_SIGNALS_INDEX_KEY]: {
-          name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
-            defaultMessage: 'Elasticsearch signals index',
-          }),
-          value: DEFAULT_SIGNALS_INDEX,
-          description: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexDescription', {
-            defaultMessage:
-              '<p>Elasticsearch signals index from which outputted signals will appear by default</p>',
-          }),
-          category: ['siem'],
-          requiresPageReload: true,
-        },
         [DEFAULT_ANOMALY_SCORE]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
             defaultMessage: 'Anomaly threshold',
@@ -147,6 +132,7 @@ export const siem = (kibana: any) => {
           alerting: plugins.alerting,
           elasticsearch: plugins.elasticsearch,
           spaces: plugins.spaces,
+          savedObjects: server.savedObjects.SavedObjectsClient,
         },
         route: route.bind(server),
       };

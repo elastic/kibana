@@ -14,11 +14,8 @@ exports[`renders without crashing 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       disabled={false}
-      fullWidth={false}
       inputRef={[Function]}
-      isLoading={false}
       name="spaceInitials"
       onChange={[Function]}
       value=""
@@ -38,7 +35,7 @@ exports[`renders without crashing 1`] = `
     labelType="label"
   >
     <EuiColorPicker
-      color="#BFA180"
+      color="#F19F58"
       isInvalid={false}
       onChange={[Function]}
     />
