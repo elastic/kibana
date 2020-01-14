@@ -37,17 +37,9 @@ export const SearchResult = React.memo(
           <h3>
             <FormattedMessage
               id="xpack.idxMgmt.mappingsEditor.searchResult.emptyPromptTitle"
-              defaultMessage="No fields found"
+              defaultMessage="No fields match your search"
             />
           </h3>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.mappingsEditor.searchResult.emptyPromptDescription"
-              defaultMessage="No fields match the terms introduced."
-            />
-          </p>
         }
         actions={
           <EuiButton onClick={clearSearch}>
