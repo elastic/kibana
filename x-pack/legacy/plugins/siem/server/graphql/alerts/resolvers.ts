@@ -31,6 +31,7 @@ export const createAlertsResolvers = (
       const options = {
         ...createOptions(source, args, info),
         defaultIndex: args.defaultIndex,
+        stackByField: args.stackByField,
       };
       return libs.alerts.getAlertsHistogramData(req, options);
     },

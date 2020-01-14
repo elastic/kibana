@@ -76,6 +76,7 @@ export const createNetworkResolvers = (
         ...createOptionsPaginated(source, args, info),
         networkDnsSortField: args.sort,
         isPtrIncluded: args.isPtrIncluded,
+        stackByField: args.stackByField,
       };
       return libs.network.getNetworkDns(req, options);
     },

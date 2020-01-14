@@ -45,6 +45,7 @@ Array [
       }
     }
     responsive={true}
+    tableLayout="fixed"
   >
     <div
       className="euiBasicTable euiBasicTable-loading"
@@ -83,6 +84,7 @@ Array [
         </EuiTableHeaderMobile>
         <EuiTable
           responsive={true}
+          tableLayout="fixed"
         >
           <table
             className="euiTable euiTable--responsive"
@@ -288,6 +290,7 @@ Array [
       </EuiTableHeaderMobile>
       <EuiTable
         responsive={true}
+        tableLayout="fixed"
       >
         <table
           className="euiTable euiTable--responsive"
