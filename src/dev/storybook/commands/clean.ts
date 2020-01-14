@@ -18,13 +18,14 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { join } from 'path';
 import del from 'del';
 
-export const clean = async ({ log, rootDir }: { log: ToolingLog; rootDir: string }) => {
+export const clean = async ({ log }: { log: ToolingLog }) => {
   log.info('Cleaning Storybook build folder');
 
-  const dir = join(rootDir, 'built_assets', 'storybook');
+  const dir = join(REPO_ROOT, 'built_assets', 'storybook');
   log.info('Deleting folder:', dir);
   await del([join(dir, '*')]);
   await del([dir]);

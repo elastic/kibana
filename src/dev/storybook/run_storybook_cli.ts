@@ -19,10 +19,9 @@
 
 import { join } from 'path';
 import { run, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { storybookAliases } from './aliases';
 import { clean } from './commands/clean';
-
-const rootDir = join(__dirname, '..', '..', '..');
 
 run(
   async params => {
@@ -32,11 +31,11 @@ run(
     } = flags;
 
     if (flags.verbose) {
-      log.info('Flags:', flags);
+      log.verbose('Flags:', flags);
     }
 
     if (flags.clean) {
-      await clean({ log, rootDir });
+      await clean({ log });
       return;
     }
 
@@ -49,9 +48,9 @@ run(
     }
 
     const relative = (storybookAliases as any)[alias];
-    const absolute = join(rootDir, relative);
+    const absolute = join(REPO_ROOT, relative);
 
-    log.info('Loading Storybook:', absolute);
+    log.verbose('Loading Storybook:', absolute);
     process.chdir(join(absolute, '..', '..'));
     require(absolute);
   },
