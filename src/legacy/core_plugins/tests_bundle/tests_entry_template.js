@@ -29,16 +29,7 @@ export const createTestEntryTemplate = defaultUiSettings => bundle => `
  *
  */
 
-// import global polyfills before everything else
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
-import 'childnode-remove-polyfill';
 import fetchMock from 'fetch-mock/es5/client';
-import Symbol_observable from 'symbol-observable';
-
 import { CoreSystem } from '__kibanaCore__';
 
 // Fake uiCapabilities returned to Core in browser tests

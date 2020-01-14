@@ -6,7 +6,7 @@
 
 import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
 import { buildTimelineQuery } from '../events/query.dsl';
-import { RequestOptions, RequestBasicOptions } from '../framework';
+import { RequestOptions, MatrixHistogramRequestOptions } from '../framework';
 
 export const buildAlertsQuery = (options: RequestOptions) => {
   const eventsQuery = buildTimelineQuery(options);
@@ -35,7 +35,8 @@ export const buildAlertsHistogramQuery = ({
   sourceConfiguration: {
     fields: { timestamp },
   },
-}: RequestBasicOptions) => {
+  stackByField,
+}: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -84,7 +85,7 @@ export const buildAlertsHistogramQuery = ({
     return {
       alertsByModuleGroup: {
         terms: {
-          field: 'event.module',
+          field: stackByField,
           missing: 'All others',
           order: {
             _count: 'desc',

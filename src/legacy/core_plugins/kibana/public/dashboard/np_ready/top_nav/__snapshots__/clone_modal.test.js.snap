@@ -30,11 +30,8 @@ exports[`renders DashboardCloneModal 1`] = `
       <EuiSpacer />
       <EuiFieldText
         autoFocus={true}
-        compressed={false}
         data-test-subj="clonedDashboardTitle"
-        fullWidth={false}
         isInvalid={false}
-        isLoading={false}
         onChange={[Function]}
         value="dash title"
       />
