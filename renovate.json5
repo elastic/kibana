@@ -211,6 +211,14 @@
         ],
       },
       {
+        groupSlug: 'deep-freeze-strict',
+        groupName: 'deep-freeze-strict related packages',
+        packageNames: [
+          'deep-freeze-strict',
+          '@types/deep-freeze-strict',
+        ],
+      },
+      {
         groupSlug: 'delete-empty',
         groupName: 'delete-empty related packages',
         packageNames: [

@@ -359,11 +359,7 @@ const isJobRevisionCurrent = (jobId: string, currentRevision: number) => (
   jobSummaries
     .filter(jobSummary => jobSummary.id === jobId)
     .every(
-      jobSummary =>
-        jobSummary.fullJob &&
-        jobSummary.fullJob.custom_settings &&
-        jobSummary.fullJob.custom_settings.job_revision &&
-        jobSummary.fullJob.custom_settings.job_revision >= currentRevision
+      jobSummary => (jobSummary?.fullJob?.custom_settings?.job_revision ?? 0) >= currentRevision
     );
 
 const isJobConfigurationConsistent = (

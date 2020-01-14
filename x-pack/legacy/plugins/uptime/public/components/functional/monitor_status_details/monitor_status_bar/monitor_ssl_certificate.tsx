@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import moment from 'moment';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -21,30 +20,37 @@ interface Props {
 }
 
 export const MonitorSSLCertificate = ({ tls }: Props) => {
-  const certificateValidity: string | undefined = get(
-    tls,
-    'certificate_not_valid_after',
-    undefined
-  );
+  const certValidityDate = new Date(tls?.certificate_not_valid_after ?? '');
 
-  const validExpiryDate = certificateValidity && !isNaN(new Date(certificateValidity).valueOf());
+  const isValidDate = !isNaN(certValidityDate.valueOf());
 
-  return validExpiryDate && certificateValidity ? (
+  const dateIn30Days = moment().add('30', 'days');
+
+  const isExpiringInMonth = isValidDate && dateIn30Days > moment(certValidityDate);
+
+  return isValidDate ? (
     <>
       <EuiSpacer size="s" />
       <EuiText
-        color="subdued"
         grow={false}
         size="s"
-        aria-label={i18n.translate('xpack.uptime.monitorStatusBar.sslCertificateExpiry.ariaLabel', {
-          defaultMessage: 'SSL certificate expires',
-        })}
+        aria-label={i18n.translate(
+          'xpack.uptime.monitorStatusBar.sslCertificateExpiry.label.ariaLabel',
+          {
+            defaultMessage: 'SSL certificate expires {validityDate}',
+            values: { validityDate: moment(certValidityDate).fromNow() },
+          }
+        )}
       >
         <FormattedMessage
-          id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.content"
-          defaultMessage="SSL certificate expires {certificateValidity}"
+          id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.badgeContent"
+          defaultMessage="SSL certificate expires {emphasizedText}"
           values={{
-            certificateValidity: moment(new Date(certificateValidity).valueOf()).fromNow(),
+            emphasizedText: (
+              <EuiBadge color={isExpiringInMonth ? 'warning' : 'default'}>
+                {moment(certValidityDate).fromNow()}
+              </EuiBadge>
+            ),
           }}
         />
       </EuiText>
