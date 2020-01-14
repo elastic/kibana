@@ -87,8 +87,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
-    // Flakey, see https://github.com/elastic/kibana/issues/54541
-    describe.skip('snapshot counts', () => {
+    describe('snapshot counts', () => {
       it('updates the snapshot count when status filter is set to down', async () => {
         await pageObjects.uptime.goToUptimePageAndSetDateRange(
           DEFAULT_DATE_START,
