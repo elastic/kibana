@@ -19,7 +19,7 @@ export const allTimelinesQuery = gql`
       sort: $sort
       onlyUserFavorite: $onlyUserFavorite
     ) {
-      totalCount2
+      totalCount
       timeline {
         savedObjectId
         description
