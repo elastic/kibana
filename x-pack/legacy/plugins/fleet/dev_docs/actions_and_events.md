@@ -5,26 +5,7 @@ Agent is using `actions` and `events` to comunicate with fleet during checkin.
 ## Actions
 
 Action are returned to the agent during the checkin [see](./api/agents_checkin)
-Agent should aknowledge the fact they received an action for that they can send one of this two events during checkin:
-
-```js
-{
-  "events": [{
-  {
-    "type": "ACTION",
-    "subtype": "ACKNOWLEDGED"
-    "message": "acknowledge action : 1",
-    "action_id": "action_id_1" ,
-    "timestamp": "2018-01-02T.."
-  }, {
-    "type": "ACTION",
-    "subtype": "UNKNOWN"
-    "message": "Unsupported action : 2",
-    "action_id": "action_id_2" ,
-    "timestamp": "2018-01-02T.."
-  }]
-}
-```
+Agent should aknowledge actions they received using `POST /agents/{agentId}/acks` API.
 
 ### POLICY_CHANGE
 

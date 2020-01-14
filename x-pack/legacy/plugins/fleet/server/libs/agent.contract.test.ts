@@ -237,6 +237,49 @@ describe('Agent lib', () => {
     });
   });
 
+  describe('acknowledgeActions', () => {
+    it('should acknowledge actions', async () => {
+      const { agents } = libs;
+      await loadFixtures([
+        {
+          active: true,
+          policy_id: 'policy:1',
+          access_api_key_id: 'key1',
+          actions: [
+            {
+              created_at: '2019-09-05T15:43:26+0000',
+              type: 'PAUSE',
+              id: 'action-1',
+              sent_at: '2019-09-05T15:42:26+0000',
+            },
+            {
+              created_at: '2019-09-05T15:43:26+0000',
+              type: 'PAUSE',
+              id: 'action-2',
+            },
+            {
+              created_at: '2019-09-05T15:41:26+0000',
+              type: 'PAUSE',
+              id: 'action-3',
+            },
+          ],
+        },
+      ]);
+
+      const agent = await agents.getActiveByApiKeyId(getUser(), 'key1');
+      await agents.acknowledgeActions(getUser(), agent, ['action-2']);
+
+      const refreshAgent = await agents.getActiveByApiKeyId(getUser(), 'key1');
+
+      expect(refreshAgent.actions).toHaveLength(3);
+      expect(refreshAgent.actions.find(({ id }) => id === 'action-1')).toHaveProperty('sent_at');
+      expect(refreshAgent.actions.find(({ id }) => id === 'action-2')).toHaveProperty('sent_at');
+      expect(refreshAgent.actions.find(({ id }) => id === 'action-3')).not.toHaveProperty(
+        'sent_at'
+      );
+    });
+  });
+
   describe('checkin', () => {
     it('should persist new events', async () => {
       const { agents } = libs;
