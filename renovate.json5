@@ -274,6 +274,14 @@
         ],
       },
       {
+        groupSlug: 'flot',
+        groupName: 'flot related packages',
+        packageNames: [
+          'flot',
+          '@types/flot',
+        ],
+      },
+      {
         groupSlug: 'getopts',
         groupName: 'getopts related packages',
         packageNames: [
