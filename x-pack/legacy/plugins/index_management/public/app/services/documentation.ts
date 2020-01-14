@@ -57,6 +57,14 @@ class DocumentationService {
     return `${this.esDocsBase}/dynamic-field-mapping.html`;
   }
 
+  public getPercolatorQueryLink() {
+    return `${this.esDocsBase}/query-dsl-percolate-query.html`;
+  }
+
+  public getRankFeatureQueryLink() {
+    return `${this.esDocsBase}/rank-feature.html`;
+  }
+
   public getMetaFieldLink() {
     return `${this.esDocsBase}/mapping-meta-field.html`;
   }

@@ -377,6 +377,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/object.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.objectLongDescription"
+          defaultMessage="Object fields can contain children, which are queried as a flattened list. To query child objects independently, use the {nested}."
+          values={{
+            nested: (
+              <EuiLink href={documentationService.getTypeDocLink('nested')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.objectLongDescription.nestedTypeLink',
+                  {
+                    defaultMessage: 'nested data type',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   nested: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.nestedDescription', {
@@ -386,6 +406,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/nested.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.nestedLongDescription"
+          defaultMessage="Like {objects}, nested fields can contain children. The difference is that you can query their child objects independently."
+          values={{
+            objects: (
+              <EuiLink href={documentationService.getTypeDocLink('object')} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.nestedLongDescription.objectTypeLink',
+                  {
+                    defaultMessage: 'objects',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   rank_feature: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rankFeatureDescription', {
@@ -395,6 +435,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/rank-feature.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.rankFeatureLongDescription"
+          defaultMessage="The rank feature field accepts a number that will boost documents in {rankFeatureQuery}."
+          values={{
+            rankFeatureQuery: (
+              <EuiLink href={documentationService.getRankFeatureQueryLink()} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.rankFeatureLongDescription.queryLink',
+                  {
+                    defaultMessage: 'rank_feature queries',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   rank_features: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rankFeaturesDescription', {
@@ -404,6 +464,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/rank-features.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.rankFeaturesLongDescription"
+          defaultMessage="The rank features field accepts numeric vectors that will boost documents in {rankFeatureQuery}."
+          values={{
+            rankFeatureQuery: (
+              <EuiLink href={documentationService.getRankFeatureQueryLink()} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.rankFeaturesLongDescription.queryLink',
+                  {
+                    defaultMessage: 'rank_feature queries',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   dense_vector: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.denseVectorDescription', {
@@ -598,6 +678,26 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/percolator.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.percolatorLongDescription"
+          defaultMessage="The percolator data type enables {percolator}."
+          values={{
+            percolator: (
+              <EuiLink href={documentationService.getPercolatorQueryLink()} target="_blank">
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.dataType.percolatorLongDescription.learnMoreLink',
+                  {
+                    defaultMessage: 'percolator queries',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   join: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.joinDescription', {
@@ -607,6 +707,14 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/parent-join.html',
     },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.joinLongDescription"
+          defaultMessage="Join fields define parent-child relationships among documents of the same index."
+        />
+      </p>
+    ),
   },
   alias: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.aliasDescription', {
