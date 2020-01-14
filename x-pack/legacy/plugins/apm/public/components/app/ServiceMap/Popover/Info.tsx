@@ -9,15 +9,15 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
-const ItemRow = styled('div')`
+const ItemRow = styled.div`
   line-height: 2;
 `;
 
-const ItemTitle = styled('dt')`
+const ItemTitle = styled.dt`
   color: ${lightTheme.textColors.subdued};
 `;
 
-const ItemDescription = styled('dd')``;
+const ItemDescription = styled.dd``;
 
 interface InfoProps {
   type: string;
