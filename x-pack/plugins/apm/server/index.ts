@@ -16,6 +16,7 @@ export const config = {
   },
   schema: schema.object({
     serviceMapEnabled: schema.boolean({ defaultValue: false }),
+    serviceMapInitialTimeRange: schema.number({ defaultValue: 60 * 1000 * 60 }), // last 1 hour
     autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -37,6 +38,7 @@ export function mergeConfigs(apmOssConfig: APMOSSConfig, apmConfig: APMXPackConf
     'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
     'apm_oss.indexPattern': apmOssConfig.indexPattern,
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
+    'xpack.apm.serviceMapInitialTimeRange': apmConfig.serviceMapInitialTimeRange,
     'xpack.apm.ui.enabled': apmConfig.ui.enabled,
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize': apmConfig.ui.transactionGroupBucketSize,
