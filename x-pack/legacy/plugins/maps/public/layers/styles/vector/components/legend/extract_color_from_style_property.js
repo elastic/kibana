@@ -26,15 +26,15 @@ export function extractColorFromStyleProperty(colorStyleProperty, defaultColor) 
     if (colorStyleProperty.options.useCustomColorPalette) {
       return colorStyleProperty.options.customColorPalette &&
         colorStyleProperty.options.customColorPalette.length
-        ? colorStyleProperty.options.customColorPalette[0].color
+        ? colorStyleProperty.options.customColorPalette[0].colorCategory
         : defaultColor;
     }
 
-    if (!colorStyleProperty.options.color) {
+    if (!colorStyleProperty.options.colorCategory) {
       return null;
     }
 
-    const palette = getColorPalette(colorStyleProperty.options.color);
+    const palette = getColorPalette(colorStyleProperty.options.colorCategory);
     return palette[0];
   } else {
     // return middle of gradient for dynamic style property

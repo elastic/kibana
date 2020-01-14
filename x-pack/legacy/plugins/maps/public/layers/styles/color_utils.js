@@ -92,7 +92,7 @@ export function getLinearGradient(colorStrings) {
   return `${linearGradient} ${colorStrings[colorStrings.length - 1]} 100%)`;
 }
 
-export const COLOR_PALETTES = [
+const COLOR_PALETTES_CONFIGS = [
   {
     id: 'palette_0',
     colors: DEFAULT_FILL_COLORS.slice(0, COLOR_PALETTE_MAX_SIZE),
@@ -130,11 +130,11 @@ export const COLOR_PALETTES = [
 ];
 
 export function getColorPalette(paletteId) {
-  const palette = COLOR_PALETTES.find(palette => palette.id === paletteId);
+  const palette = COLOR_PALETTES_CONFIGS.find(palette => palette.id === paletteId);
   return palette ? palette.colors : null;
 }
 
-export const COLOR_PALETTES_INPUTS = COLOR_PALETTES.map(palette => {
+export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {
   const paletteDisplay = palette.colors.map(color => {
     const style = {
       backgroundColor: color,

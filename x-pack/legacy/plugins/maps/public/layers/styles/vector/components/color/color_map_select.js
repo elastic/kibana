@@ -55,38 +55,6 @@ export class ColorMapSelect extends Component {
     });
   };
 
-  componentDidMount() {
-    this._updateSelected();
-  }
-
-  componentDidUpdate() {
-    this._updateSelected();
-  }
-
-  _updateSelected() {
-    const { color, useCustomColorMap, colorMapOptions } = this.props;
-    let valueOfSelected;
-    let shouldUpdate = false;
-    if (useCustomColorMap) {
-      valueOfSelected = CUSTOM_COLOR_MAP;
-    } else {
-      if (colorMapOptions.find(option => option.value === color)) {
-        valueOfSelected = color;
-      } else {
-        valueOfSelected = colorMapOptions[0].value;
-        shouldUpdate = true;
-      }
-    }
-
-    if (this.state.selected !== valueOfSelected) {
-      this.setState({ selected: valueOfSelected }, () => {
-        if (shouldUpdate) {
-          this._onColorMapSelect(valueOfSelected);
-        }
-      });
-    }
-  }
-
   _renderColorStopsInput() {
     let colorStopsInput;
     if (this.props.useCustomColorMap) {
@@ -125,12 +93,21 @@ export class ColorMapSelect extends Component {
       ...this.props.colorMapOptions,
     ];
 
+    let valueOfSelected;
+    if (this.props.useCustomColorMap) {
+      valueOfSelected = CUSTOM_COLOR_MAP;
+    } else {
+      valueOfSelected = this.props.colorMapOptions.find(option => option.value === this.props.color)
+        ? this.props.color
+        : '';
+    }
+
     return (
       <Fragment>
         <EuiSuperSelect
           options={colorMapOptionsWithCustom}
           onChange={this._onColorMapSelect}
-          valueOfSelected={this.state.selected}
+          valueOfSelected={valueOfSelected}
           hasDividers={true}
         />
         {colorStopsInput}

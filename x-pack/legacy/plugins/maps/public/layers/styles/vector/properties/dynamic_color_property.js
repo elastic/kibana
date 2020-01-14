@@ -178,7 +178,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return EMPTY_STOPS;
     }
 
-    const colors = getColorPalette(this._options.color);
+    const colors = getColorPalette(this._options.colorCategory);
     if (!colors) {
       return EMPTY_STOPS;
     }
