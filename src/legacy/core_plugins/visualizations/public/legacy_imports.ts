@@ -18,10 +18,10 @@
  */
 
 export {
-  AggConfigs,
   IAggConfig,
   IAggConfigs,
   isDateHistogramBucketAggConfig,
   setBounds,
 } from '../../data/public';
+export { createAggConfigs } from 'ui/agg_types';
 export { createSavedSearchesLoader } from '../../../../plugins/discover/public';

@@ -14,8 +14,8 @@
   So, there is only ever one build status comment on a PR at any given time, the most recent one.
 */
 def withDefaultPrComments(closure) {
-  catchError {
-    catchError {
+  catchErrors {
+    catchErrors {
       closure()
     }
 

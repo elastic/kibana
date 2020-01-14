@@ -19,16 +19,12 @@
 
 import { createAction } from '../../ui_actions';
 import { ViewMode } from '../../types';
-import { IEmbeddable } from '../../embeddables';
+import { EmbeddableContext } from '../../triggers';
 
 export const EDIT_MODE_ACTION = 'EDIT_MODE_ACTION';
 
-interface ActionContext {
-  embeddable: IEmbeddable;
-}
-
 export function createEditModeAction() {
-  return createAction<ActionContext>({
+  return createAction<EmbeddableContext>({
     type: EDIT_MODE_ACTION,
     getDisplayName: () => 'I only show up in edit mode',
     isCompatible: async context => context.embeddable.getInput().viewMode === ViewMode.EDIT,

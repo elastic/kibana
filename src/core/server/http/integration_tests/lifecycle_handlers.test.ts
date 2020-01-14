@@ -36,6 +36,7 @@ const versionHeader = 'kbn-version';
 const xsrfHeader = 'kbn-xsrf';
 const nameHeader = 'kbn-name';
 const whitelistedTestPath = '/xsrf/test/route/whitelisted';
+const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
@@ -188,6 +189,12 @@ describe('core lifecycle handlers', () => {
             return res.ok({ body: 'ok' });
           }
         );
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+          { path: xsrfDisabledTestPath, validate: false, options: { xsrfRequired: false } },
+          (context, req, res) => {
+            return res.ok({ body: 'ok' });
+          }
+        );
       });
 
       await server.start();
@@ -234,6 +241,10 @@ describe('core lifecycle handlers', () => {
 
         it('accepts whitelisted requests without either an xsrf or version header', async () => {
           await getSupertest(method.toLowerCase(), whitelistedTestPath).expect(200, 'ok');
+        });
+
+        it('accepts requests on a route with disabled xsrf protection', async () => {
+          await getSupertest(method.toLowerCase(), xsrfDisabledTestPath).expect(200, 'ok');
         });
       });
     });

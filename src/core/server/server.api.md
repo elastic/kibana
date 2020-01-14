@@ -686,6 +686,9 @@ export interface DeprecationSettings {
 }
 
 // @public
+export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -1176,6 +1179,11 @@ export interface LogRecord {
     timestamp: Date;
 }
 
+// @public
+export interface MetricsServiceSetup {
+    getOpsMetrics$: () => Observable<OpsMetrics>;
+}
+
 // @public (undocumented)
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 
@@ -1225,6 +1233,63 @@ export interface OnPreResponseInfo {
 // @public
 export interface OnPreResponseToolkit {
     next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
+}
+
+// @public
+export interface OpsMetrics {
+    concurrent_connections: OpsServerMetrics['concurrent_connections'];
+    os: OpsOsMetrics;
+    process: OpsProcessMetrics;
+    requests: OpsServerMetrics['requests'];
+    response_times: OpsServerMetrics['response_times'];
+}
+
+// @public
+export interface OpsOsMetrics {
+    distro?: string;
+    distroRelease?: string;
+    load: {
+        '1m': number;
+        '5m': number;
+        '15m': number;
+    };
+    memory: {
+        total_in_bytes: number;
+        free_in_bytes: number;
+        used_in_bytes: number;
+    };
+    platform: NodeJS.Platform;
+    platformRelease: string;
+    uptime_in_millis: number;
+}
+
+// @public
+export interface OpsProcessMetrics {
+    event_loop_delay: number;
+    memory: {
+        heap: {
+            total_in_bytes: number;
+            used_in_bytes: number;
+            size_limit: number;
+        };
+        resident_set_size_in_bytes: number;
+    };
+    pid: number;
+    uptime_in_millis: number;
+}
+
+// @public
+export interface OpsServerMetrics {
+    concurrent_connections: number;
+    requests: {
+        disconnects: number;
+        total: number;
+        statusCodes: Record<number, number>;
+    };
+    response_times: {
+        avg_in_millis: number;
+        max_in_millis: number;
+    };
 }
 
 // @public (undocumented)
@@ -1397,6 +1462,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean;
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
+    xsrfRequired?: Method extends 'get' ? never : boolean;
 }
 
 // @public
@@ -1411,7 +1477,7 @@ export interface RouteConfigOptionsBody {
 export type RouteContentType = 'application/json' | 'application/*+json' | 'application/octet-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
 
 // @public
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
 // @public
 export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
@@ -1463,6 +1529,9 @@ export interface RouteValidatorOptions {
         body?: boolean;
     };
 }
+
+// @public
+export type SafeRouteMethod = 'get' | 'options';
 
 // @public (undocumented)
 export interface SavedObject<T = unknown> {

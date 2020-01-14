@@ -117,6 +117,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn>
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
+      previousColumn?: C;
     }
   ) => C;
   /**
@@ -169,7 +170,7 @@ export type OperationType = typeof internalOperationDefinitions[number]['type'];
 
 /**
  * This is an operation definition of an unspecified column out of all possible
- * column types. It
+ * column types.
  */
 export type GenericOperationDefinition = FieldBasedOperationDefinition<IndexPatternColumn>;
 

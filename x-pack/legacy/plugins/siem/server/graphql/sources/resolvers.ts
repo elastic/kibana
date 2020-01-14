@@ -4,41 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { QueryResolvers, SourceResolvers } from '../../graphql/types';
 import {
-  ResolversParentTypes,
-  Resolver,
-  ResolversTypes,
-  Maybe,
-  QuerySourceArgs,
-  RequireFields,
-} from '../../graphql/types';
+  AppResolverOf,
+  AppResolverWithFields,
+  ChildResolverOf,
+  ResultOf,
+} from '../../lib/framework';
 import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
-import { SiemContext } from '../../lib/types';
 
-export const createSourcesResolvers = (libs: {
+export type QuerySourceResolver = AppResolverWithFields<
+  QueryResolvers.SourceResolver,
+  'id' | 'configuration'
+>;
+
+export type QueryAllSourcesResolver = AppResolverWithFields<
+  QueryResolvers.AllSourcesResolver,
+  'id' | 'configuration'
+>;
+
+export type SourceStatusResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.StatusResolver<ResultOf<QuerySourceResolver>>>,
+  QuerySourceResolver
+>;
+
+export interface SourcesResolversDeps {
   sources: Sources;
   sourceStatus: SourceStatus;
-}): {
+}
+
+export const createSourcesResolvers = (
+  libs: SourcesResolversDeps
+): {
   Query: {
-    source: Resolver<
-      Pick<ResolversParentTypes['Source'], 'id' | 'configuration'>,
-      ResolversParentTypes['Source'],
-      SiemContext,
-      RequireFields<QuerySourceArgs, 'id'>
-    >;
-    allSources: Resolver<
-      Array<Pick<ResolversParentTypes['Source'], 'id' | 'configuration'>>,
-      ResolversParentTypes['Source'],
-      SiemContext
-    >;
+    source: QuerySourceResolver;
+    allSources: QueryAllSourcesResolver;
   };
   Source: {
-    status: Resolver<
-      Maybe<ResolversTypes['SourceStatus']>,
-      ResolversParentTypes['SourceStatus'],
-      SiemContext
-    >;
+    status: SourceStatusResolver;
   };
 } => ({
   Query: {

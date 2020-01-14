@@ -387,6 +387,14 @@ export class SavedObjectsService
       this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
+
+      // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
+      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+        if (!isCompatible && message) {
+          this.logger.error(message);
+        }
+      });
+
       await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
         filter(nodes => nodes.isCompatible),
         take(1)

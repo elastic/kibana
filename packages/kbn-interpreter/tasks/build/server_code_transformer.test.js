@@ -25,7 +25,7 @@ const JS_FIXTURE_PATH = resolve(__dirname, '__fixtures__/sample.js');
 const JS_FIXTURE = readFileSync(JS_FIXTURE_PATH);
 
 describe('js support', () => {
-  it('transpiles js file', () => {
+  it.skip('transpiles js file', () => {
     const transformer = createServerCodeTransformer();
     expect(transformer(JS_FIXTURE, JS_FIXTURE_PATH)).toMatchInlineSnapshot(`
 "\\"use strict\\";

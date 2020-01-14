@@ -46,8 +46,6 @@ const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
-  TRIGGER_INTERVAL_SIZE: 1,
-  TRIGGER_INTERVAL_UNIT: 'm',
   THRESHOLD: [1000, 5000],
   GROUP_BY: 'all',
 };
@@ -141,7 +139,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      triggerIntervalUnit: DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT,
       groupBy: DEFAULT_VALUES.GROUP_BY,
       threshold: DEFAULT_VALUES.THRESHOLD,
     });

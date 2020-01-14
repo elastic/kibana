@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from '../../ui_actions/public';
 import { Filter } from '../../data/public';
 import {
   applyFilterTrigger,
@@ -27,6 +27,7 @@ import {
   valueClickTrigger,
   EmbeddableVisTriggerContext,
   IEmbeddable,
+  EmbeddableContext,
   APPLY_FILTER_TRIGGER,
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
@@ -42,8 +43,8 @@ declare module '../../ui_actions/public' {
       embeddable: IEmbeddable;
       filters: Filter[];
     };
-    [CONTEXT_MENU_TRIGGER]: object;
-    [PANEL_BADGE_TRIGGER]: object;
+    [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
+    [PANEL_BADGE_TRIGGER]: EmbeddableContext;
   }
 }
 

@@ -45,16 +45,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should create an alert', async () => {
       const alertName = generateUniqueKey();
-
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-
       const nameInput = await testSubjects.find('alertNameInput');
       await nameInput.click();
       await nameInput.clearValue();
       await nameInput.type(alertName);
-
-      await testSubjects.click('threshold-SelectOption');
-
+      await testSubjects.click('.index-threshold-SelectOption');
+      await testSubjects.click('selectIndexExpression');
+      const comboBox = await find.byCssSelector('#indexSelectSearchBox');
+      await comboBox.click();
+      await comboBox.type('k');
+      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
+      await filterSelectItem.click();
+      await testSubjects.click('thresholdAlertTimeFieldSelect');
+      const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
+      await fieldOptions[1].click();
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
       const connectorNameInput = await testSubjects.find('nameInput');
@@ -62,28 +67,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await connectorNameInput.clearValue();
       const connectorName = generateUniqueKey();
       await connectorNameInput.type(connectorName);
-
       const slackWebhookUrlInput = await testSubjects.find('slackWebhookUrlInput');
       await slackWebhookUrlInput.click();
       await slackWebhookUrlInput.clearValue();
       await slackWebhookUrlInput.type('https://test');
-
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-
       const loggingMessageInput = await testSubjects.find('slackMessageTextArea');
       await loggingMessageInput.click();
       await loggingMessageInput.clearValue();
       await loggingMessageInput.type('test message');
-
-      await testSubjects.click('slackAddVariableButton');
-      const variableMenuButton = await testSubjects.find('variableMenuButton-0');
-      await variableMenuButton.click();
-
-      await testSubjects.click('selectIndexExpression');
-
-      await find.clickByCssSelector('[data-test-subj="cancelSaveAlertButton"]');
-
-      // TODO: implement saving to the server, when threshold API will be ready
+      // TODO: uncomment variables test when server API will be ready
+      // await testSubjects.click('slackAddVariableButton');
+      // const variableMenuButton = await testSubjects.find('variableMenuButton-0');
+      // await variableMenuButton.click();
+      await find.clickByCssSelector('[data-test-subj="saveAlertButton"]');
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Saved '${alertName}'`);
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
+      const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterEdit).to.eql([
+        {
+          name: alertName,
+          tagsText: '',
+          alertType: 'Index Threshold',
+          interval: '1m',
+        },
+      ]);
     });
 
     it('should search for alert', async () => {

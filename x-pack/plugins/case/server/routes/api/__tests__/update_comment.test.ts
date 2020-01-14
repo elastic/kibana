@@ -28,6 +28,7 @@ describe('UPDATE comment', () => {
       },
       body: {
         comment: 'Update my comment',
+        version: 'WzEsMV0=',
       },
     });
 
@@ -36,6 +37,24 @@ describe('UPDATE comment', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.comment).toEqual('Update my comment');
+  });
+  it(`Fails with 409 if version does not match`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases/comment/{id}',
+      method: 'patch',
+      params: {
+        id: 'mock-comment-1',
+      },
+      body: {
+        comment: 'Update my comment',
+        version: 'badv=',
+      },
+    });
+
+    const theContext = createRouteContext(createMockSavedObjectsRepository(mockCaseComments));
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(409);
   });
   it(`Returns an error if updateComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({

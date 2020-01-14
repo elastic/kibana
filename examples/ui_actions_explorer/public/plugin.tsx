@@ -35,6 +35,9 @@ import {
   makePhoneCallAction,
   showcasePluggability,
   SHOWCASE_PLUGGABILITY_ACTION,
+  UserContext,
+  CountryContext,
+  PhoneContext,
 } from './actions/actions';
 
 interface StartDeps {
@@ -43,6 +46,14 @@ interface StartDeps {
 
 interface SetupDeps {
   uiActions: UiActionsSetup;
+}
+
+declare module '../../../src/plugins/ui_actions/public' {
+  export interface TriggerContextMapping {
+    [USER_TRIGGER]: UserContext;
+    [COUNTRY_TRIGGER]: CountryContext;
+    [PHONE_TRIGGER]: PhoneContext;
+  }
 }
 
 export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps> {

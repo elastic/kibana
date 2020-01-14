@@ -11,10 +11,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/57946
-  describe.skip('Endpoint Policy List', function() {
+  describe('Endpoint Policy List', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
+      await pageObjects.endpoint.waitForTableToHaveData('policyTable');
     });
 
     it('loads the Policy List Page', async () => {
@@ -26,7 +27,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
     it('shows policy count total', async () => {
       const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
-      expect(policyTotal).to.equal('0 Policies');
+      expect(policyTotal).to.equal('100 Policies');
     });
     it('includes policy list table', async () => {
       await testSubjects.existOrFail('policyTable');

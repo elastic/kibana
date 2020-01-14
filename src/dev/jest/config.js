@@ -51,6 +51,7 @@ export default {
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
     'src/legacy/ui/public/{agg_types,vis}/**/*.{ts,tsx}',
     '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
+    'src/dev/code_coverage/ingest_coverage/**/*.js',
   ],
   moduleNameMapper: {
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',

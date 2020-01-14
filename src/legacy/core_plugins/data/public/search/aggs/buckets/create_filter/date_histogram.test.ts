@@ -21,14 +21,22 @@ import moment from 'moment';
 import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
-import { IBucketDateHistogramAggConfig } from '../date_histogram';
+import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
+import { dateHistogramBucketAgg, IBucketDateHistogramAggConfig } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../../../../plugins/data/public';
 
+// TODO: remove this once time buckets is migrated
 jest.mock('ui/new_platform');
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
+    beforeEach(() => {
+      mockDataServices();
+    });
+
+    const typesRegistry = mockAggTypesRegistry([dateHistogramBucketAgg]);
+
     let agg: IBucketDateHistogramAggConfig;
     let filter: RangeFilter;
     let bucketStart: any;
@@ -56,7 +64,7 @@ describe('AggConfig Filters', () => {
             params: { field: field.name, interval, customInterval: '5d' },
           },
         ],
-        null
+        { typesRegistry }
       );
       const bucketKey = 1422579600000;
 

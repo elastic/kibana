@@ -486,7 +486,7 @@ class FilterEditorUI extends Component<Props, State> {
         operator.type,
         operator.negate,
         this.props.filter.meta.disabled,
-        params,
+        params ?? '',
         alias,
         $state.store
       );
