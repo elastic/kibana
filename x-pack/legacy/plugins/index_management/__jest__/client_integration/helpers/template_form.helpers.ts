@@ -197,6 +197,7 @@ export type TemplateFormTestSubjects = TestSubjects;
 export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
+  | 'confirmModalConfirmButton'
   | 'createFieldWrapper.addChildButton'
   | 'createFieldWrapper.addButton'
   | 'createFieldWrapper.addFieldButton'
