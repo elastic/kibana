@@ -8,6 +8,7 @@ import { EuiGlobalToastList, EuiGlobalToastListToast as Toast, EuiButton } from 
 import { noop } from 'lodash/fp';
 import React, { createContext, Dispatch, useReducer, useContext, useState } from 'react';
 import styled from 'styled-components';
+import uuid from 'uuid';
 
 import { ModalAllErrors } from './modal_all_errors';
 import * as i18n from './translations';
@@ -59,6 +60,12 @@ export const ManageGlobalToaster = ({ children }: ManageGlobalToasterProps) => {
   );
 };
 
+const GlobalToasterListContainer = styled.div`
+  position: absolute;
+  right: 0;
+  bottom: 0;
+`;
+
 interface GlobalToasterProps {
   toastLifeTimeMs?: number;
 }
@@ -81,13 +88,15 @@ export const GlobalToaster = ({ toastLifeTimeMs = 5000 }: GlobalToasterProps) =>
   return (
     <>
       {toasts.length > 0 && !isShowing && (
-        <EuiGlobalToastList
-          toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
-          dismissToast={({ id }) => {
-            dispatch({ type: 'deleteToaster', id });
-          }}
-          toastLifeTimeMs={toastLifeTimeMs}
-        />
+        <GlobalToasterListContainer>
+          <EuiGlobalToastList
+            toasts={[formatToErrorToastIfNeeded(toasts[0], toggle)]}
+            dismissToast={({ id }) => {
+              dispatch({ type: 'deleteToaster', id });
+            }}
+            toastLifeTimeMs={toastLifeTimeMs}
+          />
+        </GlobalToasterListContainer>
       )}
       {toastInModal != null && (
         <ModalAllErrors isShowing={isShowing} toast={toastInModal} toggle={toggle} />
@@ -122,3 +131,28 @@ const ErrorToastContainer = styled.div`
 `;
 
 ErrorToastContainer.displayName = 'ErrorToastContainer';
+
+/**
+ * Displays an error toast for the provided title and message
+ *
+ * @param errorTitle Title of error to display in toaster and modal
+ * @param errorMessages Message to display in error modal when clicked
+ * @param dispatchToaster provided by useStateToaster()
+ */
+export const displayErrorToast = (
+  errorTitle: string,
+  errorMessages: string[],
+  dispatchToaster: React.Dispatch<ActionToaster>
+) => {
+  const toast: AppToast = {
+    id: uuid.v4(),
+    title: errorTitle,
+    color: 'danger',
+    iconType: 'alert',
+    errors: errorMessages,
+  };
+  dispatchToaster({
+    type: 'addToaster',
+    toast,
+  });
+};

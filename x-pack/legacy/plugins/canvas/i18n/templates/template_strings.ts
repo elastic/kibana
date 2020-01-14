@@ -42,7 +42,7 @@ export const getTemplateStrings = (): TemplateStringDict => ({
       defaultMessage: 'Pitch',
     }),
     help: i18n.translate('xpack.canvas.templates.pitchHelp', {
-      defaultMessage: 'Branded presentation with large photos"',
+      defaultMessage: 'Branded presentation with large photos',
     }),
   },
   Status: {
