@@ -121,7 +121,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
 
     def failures = retryable.getFlakyFailures()
     if (failures && failures.size() > 0) {
-      def list = failures.collect { message += "  * ${it.label}" }.join("\n")
+      def list = failures.collect { "  * ${it.label}" }.join("\n")
       messages << "* Flaky failures:\n${list}"
     }
   } else {
