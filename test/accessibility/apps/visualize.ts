@@ -20,12 +20,29 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'visChart',
+    'header',
+    'timePicker',
+  ]);
   const a11y = getService('a11y');
+  const pieChart = getService('pieChart');
+  const vizName = 'A11y markdown';
+  const vizName1 = 'A11y pie chart';
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Visualize', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('visualize');
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('visualize');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        'format:bytes:defaultPattern': '0,0.[000]b',
+      });
     });
 
     it('visualize', async () => {
@@ -40,6 +57,32 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     it.skip('create visualize button', async () => {
       await PageObjects.visualize.clickNewVisualization();
       await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on create a markdown viz', async () => {
+      await PageObjects.visualize.createSimpleMarkdownViz(vizName);
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on create a pie chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickPieChart();
+      await a11y.testAppSnapshot();
+      await PageObjects.visualize.clickNewSearch();
+      await a11y.testAppSnapshot();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await a11y.testAppSnapshot();
+      await PageObjects.visEditor.clickBucket('Split slices');
+      await a11y.testAppSnapshot();
+      await PageObjects.visEditor.selectAggregation('Histogram');
+      await a11y.testAppSnapshot();
+      await PageObjects.visEditor.selectField('memory');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.sleep(1003);
+      await a11y.testAppSnapshot();
+      await PageObjects.visEditor.setInterval('40000', { type: 'numeric' });
+      await a11y.testAppSnapshot();
+      await PageObjects.visEditor.clickGo();
     });
   });
 }
