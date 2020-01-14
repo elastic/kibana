@@ -782,22 +782,7 @@ function discoverController(
     }
   }
 
-  const callOncePerTick = fn => {
-    let alreadyCalled = false;
-
-    return (...args) => {
-      if (alreadyCalled) {
-        return;
-      }
-      fn(...args);
-      alreadyCalled = true;
-      setTimeout(() => {
-        alreadyCalled = false;
-      }, 0);
-    };
-  };
-
-  $scope.opts.fetch = $scope.fetch = callOncePerTick(function() {
+  $scope.opts.fetch = $scope.fetch = function() {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
 
@@ -838,12 +823,17 @@ function discoverController(
           });
         }
       });
-  });
+  };
 
   $scope.updateQueryAndFetch = function({ query, dateRange }) {
+    const oldDateRange = timefilter.getTime();
     timefilter.setTime(dateRange);
     $state.query = query;
-    $scope.fetch();
+    // storing the updated timerange in the state will trigger a fetch
+    // call automatically, so only trigger fetch in case this is a refresh call (no changes in parameters).
+    if (_.isEqual(oldDateRange, dateRange)) {
+      $scope.fetch();
+    }
   };
 
   function onResults(resp) {
