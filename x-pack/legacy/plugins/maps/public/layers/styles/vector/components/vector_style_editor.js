@@ -12,6 +12,7 @@ import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
+import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
 import { VectorStyle } from '../vector_style';
 import { OrientationEditor } from './orientation/orientation_editor';
 import {
@@ -246,6 +247,27 @@ export class VectorStyleEditor extends Component {
           defaultDynamicStyleOptions={
             this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_SIZE].options
           }
+        />
+        <EuiSpacer size="m" />
+
+        <VectorStyleColorEditor
+          swatches={DEFAULT_LINE_COLORS}
+          onStaticStyleChange={this._onStaticStyleChange}
+          onDynamicStyleChange={this._onDynamicStyleChange}
+          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_COLOR]}
+          fields={this._getOrdinalFields()}
+          defaultStaticStyleOptions={
+            this.state.defaultStaticProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
+          }
+          defaultDynamicStyleOptions={
+            this.state.defaultDynamicProperties[VECTOR_STYLES.LABEL_BORDER_COLOR].options
+          }
+        />
+        <EuiSpacer size="m" />
+
+        <VectorStyleLabelBorderSizeEditor
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_SIZE]}
         />
         <EuiSpacer size="m" />
       </Fragment>

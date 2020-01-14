@@ -7,12 +7,12 @@
 import { uniq } from 'lodash';
 import { RequestHandlerContext } from 'kibana/server';
 import { InfraSnapshotRequestOptions } from './types';
-import { InfraTimerangeInput } from '../../../public/graphql/types';
 import { getMetricsAggregations } from './query_helpers';
 import { calculateMetricInterval } from '../../utils/calculate_metric_interval';
 import { SnapshotModel, SnapshotModelMetricAggRT } from '../../../common/inventory_models/types';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { getDatasetForField } from '../../routes/metrics_explorer/lib/get_dataset_for_field';
+import { InfraTimerangeInput } from '../../../common/http_api/snapshot_api';
 
 export const createTimeRangeWithInterval = async (
   framework: KibanaFramework,

@@ -411,7 +411,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     });
   });
 
-  describe('getLatestMonitorDocs', () => {
+  describe('getLatestMonitorStatus', () => {
     let expectedGetLatestSearchParams: any;
     beforeEach(() => {
       expectedGetLatestSearchParams = {
@@ -429,7 +429,7 @@ describe('ElasticsearchPingsAdapter class', () => {
                   },
                 },
                 {
-                  term: { 'monitor.id': 'testmonitor' },
+                  term: { 'monitor.id': 'testMonitor' },
                 },
               ],
             },
@@ -467,7 +467,7 @@ describe('ElasticsearchPingsAdapter class', () => {
                         _source: {
                           '@timestamp': 123456,
                           monitor: {
-                            id: 'testmonitor',
+                            id: 'testMonitor',
                           },
                         },
                       },
@@ -483,17 +483,16 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('returns data in expected shape', async () => {
       const mockEsClient = jest.fn(async (_request: any, _params: any) => mockEsSearchResult);
-      const result = await adapter.getLatestMonitorDocs({
+      const result = await adapter.getLatestMonitorStatus({
         callES: mockEsClient,
-        dateRangeStart: 'now-1h',
-        dateRangeEnd: 'now',
-        monitorId: 'testmonitor',
+        dateStart: 'now-1h',
+        dateEnd: 'now',
+        monitorId: 'testMonitor',
       });
-      expect(result).toHaveLength(1);
-      expect(result[0].timestamp).toBe(123456);
-      expect(result[0].monitor).not.toBeFalsy();
+      expect(result.timestamp).toBe(123456);
+      expect(result.monitor).not.toBeFalsy();
       // @ts-ignore monitor will be defined
-      expect(result[0].monitor.id).toBe('testmonitor');
+      expect(result.monitor.id).toBe('testMonitor');
       expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetLatestSearchParams);
     });
   });
