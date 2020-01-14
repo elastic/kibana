@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
+
 /*
  * A simple utility for generating a handler that provides a signal to the handler that signals when
  * the client has closed the connection on this request.
