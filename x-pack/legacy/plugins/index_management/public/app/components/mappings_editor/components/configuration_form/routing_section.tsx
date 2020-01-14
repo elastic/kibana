@@ -22,7 +22,7 @@ export const RoutingSection = () => {
       description={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.routingDescription"
-          defaultMessage="A document can be routed to a particular shard in an index. When using custom routing, it is important to provide the routing value whenever indexing a document as Forgetting the routing value can lead to a document being indexed on more than one shard. {docsLink}"
+          defaultMessage="A document can be routed to a particular shard in an index. When using custom routing, it is important to provide the routing value whenever indexing a document as otherwise this could lead to a document being indexed on more than one shard. {docsLink}"
           values={{
             docsLink: (
               <EuiLink href={documentationService.getRoutingLink()} target="_blank">
