@@ -71,48 +71,148 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Byte',
     }),
     value: 'byte',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.byteLongDescription"
+          defaultMessage="Byte fields accept a signed 8-bit integer with a minimum value of {minValue} and a maximum value of {maxValue}."
+          values={{
+            minValue: <EuiCode>-128</EuiCode>,
+            maxValue: <EuiCode>127</EuiCode>,
+          }}
+        />
+      </p>
+    ),
   },
   double: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.doubleDescription', {
       defaultMessage: 'Double',
     }),
     value: 'double',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.doubleLongDescription"
+          defaultMessage="Double fields accept a double-precision 64-bit floating point number, restricted to finite values (IEEE 754)."
+        />
+      </p>
+    ),
   },
   integer: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.integerDescription', {
       defaultMessage: 'Integer',
     }),
     value: 'integer',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.integerLongDescription"
+          defaultMessage="Integer fields accept a signed 32-bit integer with a minimum value of {minValue} and a maximum value of {maxValue}."
+          values={{
+            minValue: (
+              <EuiCode>
+                -2<sup className="eui-alignTop">31</sup>
+              </EuiCode>
+            ),
+            maxValue: (
+              <EuiCode>
+                2<sup className="eui-alignTop">31</sup>-1
+              </EuiCode>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   long: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.longDescription', {
       defaultMessage: 'Long',
     }),
     value: 'long',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.longLongDescription"
+          defaultMessage="Long fields accept a signed 64-bit integer with a minimum value of {minValue} and a maximum value of {maxValue}."
+          values={{
+            minValue: (
+              <EuiCode>
+                -2<sup className="eui-alignTop">63</sup>
+              </EuiCode>
+            ),
+            maxValue: (
+              <EuiCode>
+                2<sup className="eui-alignTop">63</sup>-1
+              </EuiCode>
+            ),
+          }}
+        />
+      </p>
+    ),
   },
   float: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.floatDescription', {
       defaultMessage: 'Float',
     }),
     value: 'float',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.floatLongDescription"
+          defaultMessage="Float fields accept a single-precision 32-bit floating point number, restricted to finite values (IEEE 754)."
+        />
+      </p>
+    ),
   },
   half_float: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.halfFloatDescription', {
       defaultMessage: 'Half float',
     }),
     value: 'half_float',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.halfFloatLongDescription"
+          defaultMessage="Half-float fields accept a half-precision 16-bit floating point number, restricted to finite values (IEEE 754)."
+        />
+      </p>
+    ),
   },
   scaled_float: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.scaledFloatDescription', {
       defaultMessage: 'Scaled float',
     }),
     value: 'scaled_float',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.scaledFloatLongDescription"
+          defaultMessage="Scaled-float fields accept a floating point number that is backed by a {longType} and scaled by a fixed {doubleType} scaling factor. Use this data type to store floating-point data into an integer using a scaling factor. This is helpful to save disk space, but will affect accuracy."
+          values={{
+            longType: <EuiCode>long</EuiCode>,
+            doubleType: <EuiCode>double</EuiCode>,
+          }}
+        />
+      </p>
+    ),
   },
   short: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.shortDescription', {
       defaultMessage: 'Short',
     }),
     value: 'short',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.shortLongDescription"
+          defaultMessage="Short fields accept a signed 16-bit integer with a minimum value of {minValue} and a maximum value of {maxValue}."
+          values={{
+            minValue: <EuiCode>-32,768</EuiCode>,
+            maxValue: <EuiCode>32,767</EuiCode>,
+          }}
+        />
+      </p>
+    ),
   },
   date: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateDescription', {
