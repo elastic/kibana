@@ -31,18 +31,21 @@ exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
       items={
         Array [
           <EuiContextMenuItem
+            disabled={false}
             icon="exportAction"
             onClick={[Function]}
           >
             Duplicate rule…
           </EuiContextMenuItem>,
           <EuiContextMenuItem
+            disabled={false}
             icon="indexEdit"
             onClick={[Function]}
           >
             Export rule
           </EuiContextMenuItem>,
           <EuiContextMenuItem
+            disabled={false}
             icon="trash"
             onClick={[Function]}
           >

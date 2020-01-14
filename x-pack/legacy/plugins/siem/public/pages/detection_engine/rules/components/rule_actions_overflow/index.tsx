@@ -51,6 +51,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.DUPLICATE_RULE}
               icon="exportAction"
+              disabled={userHasNoPermissions}
               onClick={async () => {
                 setIsPopoverOpen(false);
                 await duplicateRuleAction(rule, noop, dispatchToaster);
@@ -61,6 +62,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="indexEdit"
+              disabled={userHasNoPermissions || rule.immutable}
               onClick={async () => {
                 setIsPopoverOpen(false);
                 setRulesToExport([rule]);
@@ -71,6 +73,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
+              disabled={userHasNoPermissions || rule.immutable}
               onClick={async () => {
                 setIsPopoverOpen(false);
                 await deleteRulesAction([rule.id], noop, dispatchToaster, onRuleDeletedCallback);
@@ -92,7 +95,7 @@ const RuleActionsOverflowComponent = ({
             <EuiButtonIcon
               iconType="boxesHorizontal"
               aria-label={i18n.ALL_ACTIONS}
-              isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
+              isDisabled={userHasNoPermissions}
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             />
           </EuiToolTip>
