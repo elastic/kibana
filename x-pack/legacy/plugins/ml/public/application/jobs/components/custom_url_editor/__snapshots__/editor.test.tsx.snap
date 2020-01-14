@@ -41,9 +41,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       <EuiFieldText
         compressed={true}
         data-test-subj="mlJobCustomUrlLabelInput"
-        fullWidth={false}
         isInvalid={false}
-        isLoading={false}
         name="label"
         onChange={[Function]}
         value="Open Dashboard 1"
@@ -105,9 +103,6 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     >
       <EuiSelect
         compressed={true}
-        fullWidth={false}
-        hasNoInitialSelection={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -182,9 +177,6 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
         >
           <EuiSelect
             compressed={true}
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -248,9 +240,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       <EuiFieldText
         compressed={true}
         data-test-subj="mlJobCustomUrlLabelInput"
-        fullWidth={false}
         isInvalid={false}
-        isLoading={false}
         name="label"
         onChange={[Function]}
         value="Open Discover"
@@ -312,9 +302,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     >
       <EuiSelect
         compressed={true}
-        fullWidth={false}
-        hasNoInitialSelection={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -395,9 +382,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         >
           <EuiSelect
             compressed={true}
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -441,9 +425,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
         >
           <EuiFieldText
             compressed={true}
-            fullWidth={false}
             isInvalid={true}
-            isLoading={false}
             onChange={[Function]}
             value=""
           />
@@ -495,9 +477,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       <EuiFieldText
         compressed={true}
         data-test-subj="mlJobCustomUrlLabelInput"
-        fullWidth={false}
         isInvalid={false}
-        isLoading={false}
         name="label"
         onChange={[Function]}
         value="Open Discover"
@@ -559,9 +539,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     >
       <EuiSelect
         compressed={true}
-        fullWidth={false}
-        hasNoInitialSelection={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -642,9 +619,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         >
           <EuiSelect
             compressed={true}
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -684,9 +658,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
         >
           <EuiFieldText
             compressed={true}
-            fullWidth={false}
             isInvalid={false}
-            isLoading={false}
             onChange={[Function]}
             value="1h"
           />
@@ -742,9 +714,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       <EuiFieldText
         compressed={true}
         data-test-subj="mlJobCustomUrlLabelInput"
-        fullWidth={false}
         isInvalid={true}
-        isLoading={false}
         name="label"
         onChange={[Function]}
         value=""
@@ -806,9 +776,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     >
       <EuiSelect
         compressed={true}
-        fullWidth={false}
-        hasNoInitialSelection={false}
-        isLoading={false}
         onChange={[Function]}
         options={
           Array [
@@ -883,9 +850,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
         >
           <EuiSelect
             compressed={true}
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -953,9 +917,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
       <EuiFieldText
         compressed={true}
         data-test-subj="mlJobCustomUrlLabelInput"
-        fullWidth={false}
         isInvalid={true}
-        isLoading={false}
         name="label"
         onChange={[Function]}
         value="Show airline"
@@ -1068,9 +1030,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
       <EuiFieldText
         compressed={true}
         data-test-subj="mlJobCustomUrlLabelInput"
-        fullWidth={false}
         isInvalid={false}
-        isLoading={false}
         name="label"
         onChange={[Function]}
         value="View airline"

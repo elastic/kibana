@@ -1,6 +1,83 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StatusByLocation component renders when all locations are down 1`] = `
+exports[`LocationStatusTags component renders properly against props 1`] = `
+<Fragment>
+  <styled.div>
+    <span>
+      <styled.div
+        key="0"
+      >
+        <EuiBadge
+          color="#bd271e"
+        >
+          <EuiText
+            size="m"
+          >
+            <styled.div>
+              Berlin
+            </styled.div>
+          </EuiText>
+        </EuiBadge>
+        <styled.span>
+          <EuiText
+            color="subdued"
+          >
+            1 Mon ago
+          </EuiText>
+        </styled.span>
+      </styled.div>
+    </span>
+    <span>
+      <styled.div
+        key="0"
+      >
+        <EuiBadge
+          color="#d3dae6"
+        >
+          <EuiText
+            size="m"
+          >
+            <styled.div>
+              Berlin
+            </styled.div>
+          </EuiText>
+        </EuiBadge>
+        <styled.span>
+          <EuiText
+            color="subdued"
+          >
+            1 Mon ago
+          </EuiText>
+        </styled.span>
+      </styled.div>
+      <styled.div
+        key="1"
+      >
+        <EuiBadge
+          color="#d3dae6"
+        >
+          <EuiText
+            size="m"
+          >
+            <styled.div>
+              Islamabad
+            </styled.div>
+          </EuiText>
+        </EuiBadge>
+        <styled.span>
+          <EuiText
+            color="subdued"
+          >
+            1 Mon ago
+          </EuiText>
+        </styled.span>
+      </styled.div>
+    </span>
+  </styled.div>
+</Fragment>
+`;
+
+exports[`LocationStatusTags component renders when all locations are down 1`] = `
 .c3 {
   display: inline-block;
   margin-left: 4px;
@@ -58,7 +135,7 @@ exports[`StatusByLocation component renders when all locations are down 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            3d ago
+            5s ago
           </div>
         </div>
       </span>
@@ -97,7 +174,7 @@ exports[`StatusByLocation component renders when all locations are down 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            3d ago
+            5m ago
           </div>
         </div>
       </span>
@@ -107,7 +184,7 @@ exports[`StatusByLocation component renders when all locations are down 1`] = `
 </div>
 `;
 
-exports[`StatusByLocation component renders when all locations are up 1`] = `
+exports[`LocationStatusTags component renders when all locations are up 1`] = `
 .c3 {
   display: inline-block;
   margin-left: 4px;
@@ -166,7 +243,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            3d ago
+            5s ago
           </div>
         </div>
       </span>
@@ -205,7 +282,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            3d ago
+            5d ago
           </div>
         </div>
       </span>
@@ -214,7 +291,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
 </div>
 `;
 
-exports[`StatusByLocation component renders when there are many location 1`] = `
+exports[`LocationStatusTags component renders when there are many location 1`] = `
 Array [
   .c3 {
   display: inline-block;
@@ -273,7 +350,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              5s ago
             </div>
           </div>
         </span>
@@ -312,7 +389,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              5m ago
             </div>
           </div>
         </span>
@@ -351,7 +428,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              5h ago
             </div>
           </div>
         </span>
@@ -375,7 +452,7 @@ Array [
                 <div
                   class="c2"
                 >
-                  Tokya
+                  Tokyo
                 </div>
               </div>
             </span>
@@ -390,7 +467,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              5d ago
             </div>
           </div>
         </span>
@@ -429,7 +506,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              1 Mon ago
             </div>
           </div>
         </span>
@@ -468,7 +545,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              5 Mon ago
             </div>
           </div>
         </span>
@@ -507,7 +584,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              5 Yr ago
             </div>
           </div>
         </span>
@@ -546,7 +623,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              5 Yr ago
             </div>
           </div>
         </span>

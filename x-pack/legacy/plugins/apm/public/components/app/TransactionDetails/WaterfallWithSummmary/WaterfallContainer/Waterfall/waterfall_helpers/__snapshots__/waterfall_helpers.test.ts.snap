@@ -808,8 +808,8 @@ Object {
     },
   },
   "serviceColors": Object {
-    "opbeans-node": "#3185fc",
-    "opbeans-ruby": "#00b3a4",
+    "opbeans-node": "#6092c0",
+    "opbeans-ruby": "#5bbaa0",
   },
 }
 `;
@@ -1212,7 +1212,7 @@ Object {
     },
   },
   "serviceColors": Object {
-    "opbeans-ruby": "#3185fc",
+    "opbeans-ruby": "#6092c0",
   },
 }
 `;

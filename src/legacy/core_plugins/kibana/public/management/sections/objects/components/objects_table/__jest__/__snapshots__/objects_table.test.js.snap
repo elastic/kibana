@@ -71,6 +71,7 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
     pagination={true}
     responsive={true}
     sorting={false}
+    tableLayout="fixed"
   />
 </EuiConfirmModal>
 `;

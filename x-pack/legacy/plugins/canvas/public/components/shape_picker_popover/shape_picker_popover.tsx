@@ -17,12 +17,13 @@ interface Props {
   };
   onChange?: (key: string) => void;
   value?: string;
+  ariaLabel?: string;
 }
 
-export const ShapePickerPopover = ({ shapes, onChange, value }: Props) => {
+export const ShapePickerPopover = ({ shapes, onChange, value, ariaLabel }: Props) => {
   const button = (handleClick: (ev: MouseEvent) => void) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
-      <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
+      <EuiLink aria-label={ariaLabel} style={{ fontSize: 0 }} onClick={handleClick}>
         <ShapePreview shape={value ? shapes[value] : undefined} />
       </EuiLink>
     </EuiPanel>
