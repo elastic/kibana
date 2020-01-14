@@ -28,6 +28,10 @@ class DocumentationService {
     return `${this.esDocsBase}/mapping.html`;
   }
 
+  public getRoutingLink() {
+    return `${this.esDocsBase}/mapping-routing-field.html`;
+  }
+
   public getTemplatesDocumentationLink() {
     return `${this.esDocsBase}/indices-templates.html`;
   }

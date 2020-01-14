@@ -202,6 +202,10 @@ export const mappingsConfigurationSchema = Joi.object().keys({
     includes: Joi.array().items(Joi.string()),
     excludes: Joi.array().items(Joi.string()),
   }),
+  _meta: Joi.object(),
+  _routing: Joi.object().keys({
+    required: Joi.boolean().strict(),
+  }),
 });
 
 const validateMappingsConfiguration = (

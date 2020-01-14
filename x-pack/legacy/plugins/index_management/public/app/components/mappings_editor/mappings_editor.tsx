@@ -29,6 +29,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     const {
       _source = {},
       _meta = {},
+      _routing,
       dynamic,
       numeric_detection,
       date_detection,
@@ -41,6 +42,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
       configuration: {
         _source,
         _meta,
+        _routing,
         dynamic,
         numeric_detection,
         date_detection,
