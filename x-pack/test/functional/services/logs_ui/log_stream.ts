@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
-export function InfraLogStreamProvider({ getService }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
+export function LogStreamPageProvider({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['infraLogs']);
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   return {
+    async navigateTo() {
+      pageObjects.infraLogs.navigateToTab('stream');
+    },
+
     async getColumnHeaderLabels(): Promise<string[]> {
       const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
         '~logColumnHeader'
@@ -34,6 +39,10 @@ export function InfraLogStreamProvider({ getService }: FtrProviderContext) {
       entryElement: WebElementWrapper
     ): Promise<WebElementWrapper[]> {
       return await testSubjects.findAllDescendant('~logColumn', entryElement);
+    },
+
+    async getNoLogsIndicesPrompt() {
+      return await testSubjects.find('noLogsIndicesPrompt');
     },
   };
 }

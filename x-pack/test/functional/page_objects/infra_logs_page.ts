@@ -18,12 +18,14 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
       await pageObjects.common.navigateToApp('infraLogs');
     },
 
+    async navigateToTab(logsUiTab: LogsUiTab) {
+      await pageObjects.common.navigateToActualUrl('infraLogs', `/logs/${logsUiTab}`);
+    },
+
     async getLogStream() {
       return await testSubjects.find('logStream');
     },
-
-    async getNoLogsIndicesPrompt() {
-      return await testSubjects.find('noLogsIndicesPrompt');
-    },
   };
 }
+
+type LogsUiTab = 'log-categories' | 'log-rate' | 'settings' | 'stream';
