@@ -36,22 +36,23 @@ import {
   asUpdateByQuery,
   shouldBeOneOf,
   mustBeAllOf,
+  filterDownBy,
   ExistsBoolClause,
   TermBoolClause,
   RangeBoolClause,
-  BoolClause,
-  IDsClause,
+  asPinnedQuery,
+  mergeBoolClauses,
 } from './queries/query_clauses';
 
 import {
   updateFields,
   IdleTaskWithExpiredRunAt,
+  InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
   TaskWithSchedule,
   taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
-  taskWithIDsAndRunnableStatus,
-  sortByIdsThenByScheduling,
+  claimedTasks,
 } from './queries/mark_available_tasks_as_claimed';
 
 export interface StoreOpts {
@@ -66,7 +67,7 @@ export interface StoreOpts {
 
 export interface SearchOpts {
   searchAfter?: any[];
-  sort?: object | object[];
+  sort?: string | object | object[];
   query?: object;
   size?: number;
   seq_no_primary_term?: boolean;
@@ -152,8 +153,8 @@ export class TaskStore {
     return this.events$;
   }
 
-  private emitEvent = (event: TaskClaim) => {
-    this.events$.next(event);
+  private emitEvents = (events: TaskClaim[]) => {
+    events.forEach(event => this.events$.next(event));
   };
 
   /**
@@ -211,28 +212,30 @@ export class TaskStore {
       this.serializer.generateRawId(undefined, 'task', id)
     );
 
-    const claimedTasks = await this.markAvailableTasksAsClaimed(
+    const numberOfTasksClaimed = await this.markAvailableTasksAsClaimed(
       claimOwnershipUntil,
       claimTasksByIdWithRawIds,
       size
     );
     const docs =
-      claimedTasks > 0 ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size) : [];
+      numberOfTasksClaimed > 0
+        ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size)
+        : [];
 
     // emit success/fail events for claimed tasks by id
     if (claimTasksById && claimTasksById.length) {
-      docs.map(doc => asTaskClaimEvent(doc.id, asOk(doc))).forEach(this.emitEvent);
+      this.emitEvents(docs.map(doc => asTaskClaimEvent(doc.id, asOk(doc))));
 
-      difference(
-        claimTasksById,
-        docs.map(doc => doc.id)
-      )
-        .map(id => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
-        .forEach(this.emitEvent);
+      this.emitEvents(
+        difference(
+          claimTasksById,
+          docs.map(doc => doc.id)
+        ).map(id => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
+      );
     }
 
     return {
-      claimedTasks,
+      claimedTasks: numberOfTasksClaimed,
       docs,
     };
   };
@@ -255,36 +258,33 @@ export class TaskStore {
       )
     );
 
-    const { query, sort } =
-      claimTasksById && claimTasksById.length
-        ? {
-            query: shouldBeOneOf<
-              | ExistsBoolClause
-              | TermBoolClause
-              | RangeBoolClause
-              | BoolClause<TermBoolClause | IDsClause>
-            >(queryForScheduledTasks, taskWithIDsAndRunnableStatus(claimTasksById)),
-            sort: sortByIdsThenByScheduling(claimTasksById),
-          }
-        : {
-            query: queryForScheduledTasks,
-            sort: SortByRunAtAndRetryAt,
-          };
-
     const { updated } = await this.updateByQuery(
       asUpdateByQuery({
-        query,
+        query: mergeBoolClauses(
+          mustBeAllOf(
+            claimTasksById && claimTasksById.length
+              ? asPinnedQuery(claimTasksById, queryForScheduledTasks)
+              : queryForScheduledTasks
+          ),
+          filterDownBy(InactiveTasks)
+        ),
         update: updateFields({
           ownerId: this.taskManagerId,
           status: 'claiming',
           retryAt: claimOwnershipUntil,
         }),
-        sort,
+        sort: [
+          // sort by score first, so the "pinned" Tasks are first
+          '_score',
+          // the nsort by other fields
+          SortByRunAtAndRetryAt,
+        ],
       }),
       {
         max_docs: size,
       }
     );
+
     return updated;
   }
 
@@ -295,28 +295,18 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<ConcreteTaskInstance[]> {
+    const claimedTasksQuery = claimedTasks(this.taskManagerId);
     const { docs } = await this.search({
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                'task.ownerId': this.taskManagerId,
-              },
-            },
-            { term: { 'task.status': 'claiming' } },
-          ],
-        },
-      },
-      size,
-      sort:
+      query:
         claimTasksById && claimTasksById.length
-          ? sortByIdsThenByScheduling(claimTasksById)
-          : SortByRunAtAndRetryAt,
+          ? asPinnedQuery(claimTasksById, claimedTasksQuery)
+          : claimedTasksQuery,
+      size,
+      sort: SortByRunAtAndRetryAt,
       seq_no_primary_term: true,
     });
 
-    return docs;
+    return claimTasksById && claimTasksById.length ? docs : docs;
   }
 
   /**

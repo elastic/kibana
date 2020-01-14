@@ -194,17 +194,49 @@ export function initRoutes(server, taskManager, legacyTaskManager, taskTestingEv
   });
 
   server.route({
-    path: '/api/sample_tasks',
-    method: 'DELETE',
-    async handler() {
+    path: '/api/sample_tasks/task/{taskId}',
+    method: 'GET',
+    async handler(request) {
       try {
-        const { docs: tasks } = await taskManager.fetch({
-          query: taskManagerQuery,
+        return taskManager.fetch({
+          query: {
+            bool: {
+              must: [
+                {
+                  ids: {
+                    values: [`task:${request.params.taskId}`],
+                  },
+                },
+              ],
+            },
+          },
         });
-        return Promise.all(tasks.map(task => taskManager.remove(task.id)));
       } catch (err) {
         return err;
       }
+    },
+  });
+
+  server.route({
+    path: '/api/sample_tasks',
+    method: 'DELETE',
+    async handler() {
+      async function deleteTasks() {
+        try {
+          let tasksFound = 0;
+          do {
+            const { docs: tasks } = await taskManager.fetch({
+              query: taskManagerQuery,
+            });
+            tasksFound = tasks.length;
+            await Promise.all(tasks.map(task => taskManager.remove(task.id)));
+          } while (tasksFound > 0);
+          return 'OK';
+        } catch (err) {
+          return err;
+        }
+      }
+      return await deleteTasks();
     },
   });
 }

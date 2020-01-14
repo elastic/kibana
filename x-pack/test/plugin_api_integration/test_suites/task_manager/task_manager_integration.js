@@ -22,11 +22,12 @@ export default function({ getService }) {
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
-    beforeEach(() =>
-      supertest
-        .delete('/api/sample_tasks')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200)
+    beforeEach(
+      async () =>
+        await supertest
+          .delete('/api/sample_tasks')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200)
     );
 
     beforeEach(async () => {
@@ -56,11 +57,19 @@ export default function({ getService }) {
         .then(response => response.body);
     }
 
-    function historyDocs() {
+    function currentTask(task) {
+      return supertest
+        .get(`/api/sample_tasks/task/${task}`)
+        .send({ task })
+        .expect(200)
+        .then(response => response.body.docs[0]);
+    }
+
+    function historyDocs(taskId) {
       return es
         .search({
           index: testHistoryIndex,
-          q: 'type:task',
+          q: taskId ? `taskId:${taskId}` : 'type:task',
         })
         .then(result => result.hits.hits);
     }
@@ -223,7 +232,7 @@ export default function({ getService }) {
       });
 
       await retry.try(async () => {
-        expect((await historyDocs()).length).to.eql(1);
+        expect((await historyDocs(originalTask.id)).length).to.eql(1);
 
         const [task] = (await currentTasks()).docs;
         expect(task.attempts).to.eql(0);
@@ -315,6 +324,48 @@ export default function({ getService }) {
 
         // ensure this task shouldnt run for another half hour
         expectReschedule(now, task, 30 * 60000);
+      });
+    });
+
+    it('should prioritize tasks which are called using runNow', async () => {
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: `30m` },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs(originalTask.id);
+        expect(docs.filter(taskDoc => taskDoc._source.taskId === originalTask.id).length).to.eql(1);
+
+        const task = await currentTask(originalTask.id);
+
+        expect(task.state.count).to.eql(1);
+
+        // ensure this task shouldnt run for another half hour
+        expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
+      });
+
+      // schedule multiple tasks that should clog Task Manager keeping
+      // it's workers constantly at capacity
+      await Promise.all(
+        _.times(50, () =>
+          scheduleTask({
+            taskType: 'sampleTask',
+            schedule: { interval: `1s` },
+            params: {},
+          })
+        )
+      );
+
+      const runNowResult = await runTaskNow({
+        id: originalTask.id,
+      });
+      expect(runNowResult).to.eql({ id: originalTask.id });
+
+      await retry.try(async () => {
+        const task = await currentTask(originalTask.id);
+        expect(task.state.count).to.eql(2);
       });
     });
 
