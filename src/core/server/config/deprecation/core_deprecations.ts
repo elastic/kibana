@@ -91,6 +91,15 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
+const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'map.manifestServiceUrl')) {
+    log(
+      `You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure Elastic Maps Service settings. Use "map.emsTileApiUrl" and "map.emsFileApiUrl" instead.`
+    );
+  }
+  return settings;
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   unusedFromRoot,
   renameFromRoot,
@@ -110,4 +119,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   dataPathDeprecation,
   rewriteBasePathDeprecation,
   cspRulesDeprecation,
+  mapManifestServiceUrlDeprecation,
 ];

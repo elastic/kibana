@@ -254,6 +254,9 @@ export default () =>
           )
           .default([]),
       }).default(),
+      manifestServiceUrl: Joi.string()
+        .default('')
+        .allow(''),
       emsFileApiUrl: Joi.string().default('https://vector-staging.maps.elastic.co'),
       emsTileApiUrl: Joi.string().default('https://tiles.maps.elastic.co'),
       emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.4'),
