@@ -8,6 +8,8 @@ import { createMockServer } from '../__mocks__/_mock_server';
 import { querySignalsRoute } from './query_signals_route';
 import * as myUtils from '../utils';
 import { ServerInjectOptions } from 'hapi';
+import { ServerFacade } from '../../../../types';
+
 import {
   getSignalsQueryRequest,
   getSignalsAggsQueryRequest,
@@ -26,7 +28,7 @@ describe('query for signal', () => {
     elasticsearch.getCluster = jest.fn(() => ({
       callWithRequest: jest.fn(() => true),
     }));
-    querySignalsRoute(server);
+    querySignalsRoute((server as unknown) as ServerFacade);
   });
 
   describe('query and agg on signals index', () => {
