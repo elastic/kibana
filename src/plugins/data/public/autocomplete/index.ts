@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export * from './autocomplete_service';
-export * from './types';
+export { AutocompleteService } from './autocomplete_service';
+export { QuerySuggestion, QuerySuggestionType, QuerySuggestionsGet } from './types';

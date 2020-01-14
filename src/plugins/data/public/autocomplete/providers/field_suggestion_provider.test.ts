@@ -18,11 +18,11 @@
  */
 
 import { stubIndexPattern, stubFields } from '../../stubs';
-import { SuggestionsProvider } from './suggestions_provider';
+import { setupFieldSuggestionProvider, FieldSuggestionsGet } from './field_suggestion_provider';
 import { IUiSettingsClient, CoreSetup } from 'kibana/public';
 
-describe('getSuggestions', () => {
-  let suggestionsProvider: SuggestionsProvider;
+describe('FieldSuggestions', () => {
+  let getFieldSuggestions: FieldSuggestionsGet;
   let http: any;
   let shouldSuggestValues: boolean;
 
@@ -30,15 +30,16 @@ describe('getSuggestions', () => {
     const uiSettings = { get: (key: string) => shouldSuggestValues } as IUiSettingsClient;
     http = { fetch: jest.fn() };
 
-    suggestionsProvider = new SuggestionsProvider();
-    suggestionsProvider.setup({ http, uiSettings } as CoreSetup);
+    getFieldSuggestions = setupFieldSuggestionProvider({ http, uiSettings } as CoreSetup);
   });
 
   describe('with value suggestions disabled', () => {
     it('should return an empty array', async () => {
-      const [field] = stubFields;
-      const query = '';
-      const suggestions = await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
+      const suggestions = await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field: stubFields[0],
+        query: '',
+      });
 
       expect(suggestions).toEqual([]);
       expect(http.fetch).not.toHaveBeenCalled();
@@ -50,8 +51,11 @@ describe('getSuggestions', () => {
 
     it('should return true/false for boolean fields', async () => {
       const [field] = stubFields.filter(({ type }) => type === 'boolean');
-      const query = '';
-      const suggestions = await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
+      const suggestions = await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+      });
 
       expect(suggestions).toEqual([true, false]);
       expect(http.fetch).not.toHaveBeenCalled();
@@ -59,8 +63,11 @@ describe('getSuggestions', () => {
 
     it('should return an empty array if the field type is not a string or boolean', async () => {
       const [field] = stubFields.filter(({ type }) => type !== 'string' && type !== 'boolean');
-      const query = '';
-      const suggestions = await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
+      const suggestions = await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+      });
 
       expect(suggestions).toEqual([]);
       expect(http.fetch).not.toHaveBeenCalled();
@@ -68,8 +75,11 @@ describe('getSuggestions', () => {
 
     it('should return an empty array if the field is not aggregatable', async () => {
       const [field] = stubFields.filter(({ aggregatable }) => !aggregatable);
-      const query = '';
-      const suggestions = await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
+      const suggestions = await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+      });
 
       expect(suggestions).toEqual([]);
       expect(http.fetch).not.toHaveBeenCalled();
@@ -79,9 +89,13 @@ describe('getSuggestions', () => {
       const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
-      const query = '';
 
-      await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
+      await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+      });
+
       expect(http.fetch).toHaveBeenCalled();
     });
 
@@ -89,10 +103,14 @@ describe('getSuggestions', () => {
       const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
-      const query = '';
+      const args = {
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+      };
 
-      await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
-      await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
+      await getFieldSuggestions(args);
+      await getFieldSuggestions(args);
 
       expect(http.fetch).toHaveBeenCalledTimes(1);
     });
@@ -101,13 +119,19 @@ describe('getSuggestions', () => {
       const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
-      const query = '';
+      const args = {
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+      };
 
       const { now } = Date;
       Date.now = jest.fn(() => 0);
-      await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
+
+      await getFieldSuggestions(args);
+
       Date.now = jest.fn(() => 60 * 1000);
-      await suggestionsProvider.getSuggestions(stubIndexPattern, field, query);
+      await getFieldSuggestions(args);
       Date.now = now;
 
       expect(http.fetch).toHaveBeenCalledTimes(2);
@@ -117,20 +141,53 @@ describe('getSuggestions', () => {
       const fields = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
+
+      await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field: fields[0],
+        query: '',
+      });
+      await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field: fields[0],
+        query: 'query',
+      });
+      await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field: fields[1],
+        query: '',
+      });
+      await getFieldSuggestions({
+        indexPattern: stubIndexPattern,
+        field: fields[1],
+        query: 'query',
+      });
+
       const customIndexPattern = {
         ...stubIndexPattern,
         title: 'customIndexPattern',
       };
 
-      await suggestionsProvider.getSuggestions(stubIndexPattern, fields[0], '');
-      await suggestionsProvider.getSuggestions(stubIndexPattern, fields[0], 'query');
-      await suggestionsProvider.getSuggestions(stubIndexPattern, fields[1], '');
-      await suggestionsProvider.getSuggestions(stubIndexPattern, fields[1], 'query');
-
-      await suggestionsProvider.getSuggestions(customIndexPattern, fields[0], '');
-      await suggestionsProvider.getSuggestions(customIndexPattern, fields[0], 'query');
-      await suggestionsProvider.getSuggestions(customIndexPattern, fields[1], '');
-      await suggestionsProvider.getSuggestions(customIndexPattern, fields[1], 'query');
+      await getFieldSuggestions({
+        indexPattern: customIndexPattern,
+        field: fields[0],
+        query: '',
+      });
+      await getFieldSuggestions({
+        indexPattern: customIndexPattern,
+        field: fields[0],
+        query: 'query',
+      });
+      await getFieldSuggestions({
+        indexPattern: customIndexPattern,
+        field: fields[1],
+        query: '',
+      });
+      await getFieldSuggestions({
+        indexPattern: customIndexPattern,
+        field: fields[1],
+        query: 'query',
+      });
 
       expect(http.fetch).toHaveBeenCalledTimes(8);
     });

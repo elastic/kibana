@@ -25,7 +25,7 @@ interface AutocompleteFieldProps {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   placeholder?: string;
-  suggestions: autocomplete.QuerySyntaxSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
   value: string;
 }
 

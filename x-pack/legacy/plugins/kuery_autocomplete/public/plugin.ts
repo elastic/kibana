@@ -8,7 +8,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core
 import { Plugin as DataPublicPlugin } from '../../../../../src/plugins/data/public';
 
 // @ts-ignore
-import { setupKueryProvider } from './autocomplete_providers';
+import { setupKqlQuerySuggestionProvider } from './kql_query_suggestion';
 
 /** @internal */
 export interface KueryAutocompletePluginSetupDependencies {
@@ -26,9 +26,9 @@ export class KueryAutocompletePlugin implements Plugin<Promise<void>, void> {
   }
 
   public async setup(core: CoreSetup, { data }: KueryAutocompletePluginSetupDependencies) {
-    const kueryProvider = setupKueryProvider(core);
+    const kueryProvider = setupKqlQuerySuggestionProvider(core);
 
-    data.autocomplete.addQuerySyntaxProvider(KUERY_LANGUAGE_NAME, kueryProvider);
+    data.autocomplete.addQuerySuggestionProvider(KUERY_LANGUAGE_NAME, kueryProvider);
   }
 
   public start(core: CoreStart) {

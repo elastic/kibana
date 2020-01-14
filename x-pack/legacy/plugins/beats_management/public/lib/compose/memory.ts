@@ -31,7 +31,7 @@ const onKibanaReady = uiModules.get('kibana').run;
 export function compose(
   mockIsKueryValid: (kuery: string) => boolean,
   mockKueryToEsQuery: (kuery: string) => string,
-  suggestions: autocomplete.QuerySyntaxSuggestion[]
+  suggestions: autocomplete.QuerySuggestion[]
 ): FrontendLibs {
   const esAdapter = new MemoryElasticsearchAdapter(
     mockIsKueryValid,

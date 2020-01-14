@@ -40,10 +40,10 @@ function getEuiIconType(type: string) {
 }
 
 interface Props {
-  onClick: (suggestion: autocomplete.QuerySyntaxSuggestion) => void;
+  onClick: (suggestion: autocomplete.QuerySuggestion) => void;
   onMouseEnter: () => void;
   selected: boolean;
-  suggestion: autocomplete.QuerySyntaxSuggestion;
+  suggestion: autocomplete.QuerySuggestion;
   innerRef: (node: HTMLDivElement) => void;
   ariaId: string;
 }

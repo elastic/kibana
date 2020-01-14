@@ -9,14 +9,14 @@ import { npStart } from 'ui/new_platform';
 import { autocomplete, IIndexPattern } from 'src/plugins/data/public';
 import { RendererFunction } from '../utils/typed_react';
 
-const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getQuerySyntaxProvider(language);
+const getQuerySuggestionProvider = (language: string) =>
+  npStart.plugins.data.autocomplete.getQuerySuggestionProvider(language);
 
 interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: autocomplete.QuerySyntaxSuggestion[];
+    suggestions: autocomplete.QuerySuggestion[];
   }>;
   indexPattern: IIndexPattern;
 }
@@ -28,7 +28,7 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: autocomplete.QuerySyntaxSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
 }
 
 export class WithKueryAutocompletion extends React.Component<
@@ -56,16 +56,11 @@ export class WithKueryAutocompletion extends React.Component<
     maxSuggestions?: number
   ) => {
     const { indexPattern } = this.props;
-    const autocompletionProvider = getAutocompleteProvider('kuery');
+    const getQuerySuggestions = getQuerySuggestionProvider('kuery');
 
-    if (!autocompletionProvider) {
+    if (!getQuerySuggestions) {
       return;
     }
-
-    const getSuggestions = autocompletionProvider({
-      indexPatterns: [indexPattern],
-      boolFilter: [],
-    });
 
     this.setState({
       currentRequest: {
@@ -75,10 +70,12 @@ export class WithKueryAutocompletion extends React.Component<
       suggestions: [],
     });
 
-    const suggestions = await getSuggestions({
+    const suggestions = await getQuerySuggestions({
       query: expression,
       selectionStart: cursorPosition,
       selectionEnd: cursorPosition,
+      indexPatterns: [indexPattern],
+      boolFilter: [],
     });
 
     this.setState(state =>

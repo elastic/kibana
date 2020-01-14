@@ -17,30 +17,17 @@
  * under the License.
  */
 
-import { AutocompleteService } from '.';
-
-import {
-  QuerySyntaxSuggestionType,
-  QuerySyntaxGetSuggestions,
-  QuerySyntaxSuggestion,
-  QuerySyntaxProvider,
-} from './providers/query_syntax_provider';
-
-import { SuggestionsProvider } from './providers/suggestions_provider';
+import { AutocompleteService } from './autocomplete_service';
 
 /** @public **/
-export type AutocompletePublicPluginSetup = ReturnType<AutocompleteService['setup']>;
+export type AutocompleteSetup = ReturnType<AutocompleteService['setup']>;
 
 /** @public **/
-export type AutocompletePublicPluginStart = ReturnType<AutocompleteService['start']>;
+export type AutocompleteStart = ReturnType<AutocompleteService['start']>;
 
 /** @public **/
 export {
-  QuerySyntaxSuggestionType,
-  QuerySyntaxSuggestion,
-  QuerySyntaxGetSuggestions,
-  QuerySyntaxProvider,
-};
-
-/** @public **/
-export { SuggestionsProvider };
+  QuerySuggestion,
+  QuerySuggestionsGet,
+  QuerySuggestionType,
+} from './providers/query_suggestion_provider';

@@ -16,7 +16,7 @@ import { TestProviders } from '../../mock';
 
 import { AutocompleteField } from '.';
 
-const mockAutoCompleteData: autocomplete.QuerySyntaxSuggestion[] = [
+const mockAutoCompleteData: autocomplete.QuerySuggestion[] = [
   {
     type: 'field',
     text: 'agent.ephemeral_id ',

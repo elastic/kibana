@@ -24,13 +24,10 @@ import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } f
 import { store } from '../state';
 import { setEsKueryString } from '../state/actions';
 import { PageHeader } from './page_header';
-import {
-  autocomplete as autocompleteNamespace,
-  esKuery,
-} from '../../../../../../src/plugins/data/public';
+import { esKuery, DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 interface OverviewPageProps {
-  autocomplete: autocompleteNamespace.AutocompletePublicPluginStart;
+  autocomplete: DataPublicPluginStart['autocomplete'];
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 

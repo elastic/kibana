@@ -15,7 +15,8 @@ import { toStaticIndexPattern } from '../../../lib/helper';
 import {
   esKuery,
   IIndexPattern,
-  autocomplete as autocompleteNamespace,
+  autocomplete,
+  DataPublicPluginStart,
 } from '../../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from '../../../hooks';
 
@@ -24,7 +25,7 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: autocompleteNamespace.QuerySyntaxSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
   isLoadingIndexPattern: boolean;
 }
 
@@ -37,30 +38,25 @@ function getSuggestions(
   query: string,
   selectionStart: number,
   apmIndexPattern: IIndexPattern,
-  autocomplete: autocompleteNamespace.AutocompletePublicPluginStart
-) {
-  const autocompleteProvider = autocomplete.getQuerySyntaxProvider('kuery');
-  if (!autocompleteProvider) {
-    return [];
+  autocompleteService: DataPublicPluginStart['autocomplete']
+): Promise<autocomplete.QuerySuggestion[]> | undefined {
+  const getQuerySuggestions = autocompleteService.getQuerySuggestionProvider('kuery');
+
+  if (getQuerySuggestions) {
+    return getQuerySuggestions({
+      query,
+      selectionStart,
+      selectionEnd: selectionStart,
+      indexPatterns: [apmIndexPattern],
+    });
   }
-
-  const getAutocompleteSuggestions = autocompleteProvider({
-    indexPatterns: [apmIndexPattern],
-  });
-
-  const suggestions = getAutocompleteSuggestions({
-    query,
-    selectionStart,
-    selectionEnd: selectionStart,
-  });
-  return suggestions;
 }
 
 interface Props {
-  autocomplete: autocompleteNamespace.AutocompletePublicPluginStart;
+  autocomplete: DataPublicPluginStart['autocomplete'];
 }
 
-export function KueryBar({ autocomplete }: Props) {
+export function KueryBar({ autocomplete: autocompleteService }: Props) {
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingIndexPattern: true,
@@ -94,17 +90,10 @@ export function KueryBar({ autocomplete }: Props) {
     currentRequestCheck = currentRequest;
 
     try {
-      let suggestions = await getSuggestions(
-        inputValue,
-        selectionStart,
-        indexPattern,
-        autocomplete
-      );
-      suggestions = suggestions
-        .filter(
-          (suggestion: autocompleteNamespace.QuerySyntaxSuggestion) =>
-            !startsWith(suggestion.text, 'span.')
-        )
+      const suggestions = (
+        (await getSuggestions(inputValue, selectionStart, indexPattern, autocompleteService)) || []
+      )
+        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {

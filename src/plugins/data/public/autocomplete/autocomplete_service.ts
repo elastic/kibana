@@ -18,47 +18,48 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { QuerySyntaxProvider } from './types';
-import { SuggestionsProvider } from './providers/suggestions_provider';
+import { QuerySuggestionsGet } from './providers/query_suggestion_provider';
+import {
+  setupFieldSuggestionProvider,
+  FieldSuggestionsGet,
+} from './providers/field_suggestion_provider';
 
 export class AutocompleteService {
-  private readonly querySyntaxProviders: Map<string, QuerySyntaxProvider> = new Map();
-  private suggestionsProvider: SuggestionsProvider = new SuggestionsProvider();
+  private readonly querySuggestionProviders: Map<string, QuerySuggestionsGet> = new Map();
+  private getFieldSuggestions?: FieldSuggestionsGet;
 
-  private addQuerySyntaxProvider = (language: string, provider: QuerySyntaxProvider): void => {
+  private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionsGet): void => {
     if (language && provider) {
-      this.querySyntaxProviders.set(language, provider);
+      this.querySuggestionProviders.set(language, provider);
     }
   };
 
-  private getQuerySyntaxProvider = (language: string): QuerySyntaxProvider | undefined =>
-    this.querySyntaxProviders.get(language);
-
-  private getSuggestionsProvider = (): SuggestionsProvider => this.suggestionsProvider;
+  private getQuerySuggestionProvider = (language: string) =>
+    this.querySuggestionProviders.get(language);
 
   /** @public **/
   public setup(core: CoreSetup) {
-    this.suggestionsProvider.setup(core);
+    this.getFieldSuggestions = setupFieldSuggestionProvider(core);
 
     return {
-      addQuerySyntaxProvider: this.addQuerySyntaxProvider,
+      addQuerySuggestionProvider: this.addQuerySuggestionProvider,
 
       /** @obsolete **/
       /** please use "getProvider" only from the start contract **/
-      getQuerySyntaxProvider: this.getQuerySyntaxProvider,
+      getQuerySuggestionProvider: this.getQuerySuggestionProvider,
     };
   }
 
   /** @public **/
   public start() {
     return {
-      getQuerySyntaxProvider: this.getQuerySyntaxProvider,
-      getSuggestionsProvider: this.getSuggestionsProvider,
+      getQuerySuggestionProvider: this.getQuerySuggestionProvider,
+      getFieldSuggestions: this.getFieldSuggestions!,
     };
   }
 
   /** @internal **/
   public clearProviders(): void {
-    this.querySyntaxProviders.clear();
+    this.querySuggestionProviders.clear();
   }
 }

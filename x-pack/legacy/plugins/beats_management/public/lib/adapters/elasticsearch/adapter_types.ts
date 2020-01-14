@@ -7,9 +7,6 @@ import { autocomplete } from '../../../../../../../../src/plugins/data/public';
 
 export interface ElasticsearchAdapter {
   convertKueryToEsQuery: (kuery: string) => Promise<string>;
-  getSuggestions: (
-    kuery: string,
-    selectionStart: any
-  ) => Promise<autocomplete.QuerySyntaxSuggestion[]>;
+  getSuggestions: (kuery: string, selectionStart: any) => Promise<autocomplete.QuerySuggestion[]>;
   isKueryValid(kuery: string): boolean;
 }

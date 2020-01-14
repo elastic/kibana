@@ -18,7 +18,7 @@ import { history } from '../../../utils/history';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
-  autocomplete as autocompleteNamespace,
+  autocomplete,
   esKuery,
   IIndexPattern
 } from '../../../../../../../../src/plugins/data/public';
@@ -28,35 +28,13 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: autocompleteNamespace.QuerySyntaxSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
   isLoadingSuggestions: boolean;
 }
 
 function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
   const ast = esKuery.fromKueryExpression(kuery);
   return esKuery.toElasticsearchQuery(ast, indexPattern);
-}
-
-function getSuggestions(
-  query: string,
-  selectionStart: number,
-  indexPattern: IIndexPattern,
-  boolFilter: unknown,
-  autocompleteProvider?: autocompleteNamespace.QuerySyntaxProvider
-) {
-  if (!autocompleteProvider) {
-    return [];
-  }
-
-  const getAutocompleteSuggestions = autocompleteProvider({
-    indexPatterns: [indexPattern],
-    boolFilter
-  });
-  return getAutocompleteSuggestions({
-    query,
-    selectionStart,
-    selectionEnd: selectionStart
-  });
 }
 
 export function KueryBar() {
@@ -66,10 +44,6 @@ export function KueryBar() {
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
-  const { data } = useApmPluginContext().plugins;
-  const autocompleteProvider = data.autocomplete.getQuerySyntaxProvider(
-    'kuery'
-  );
 
   let currentRequestCheck;
 
@@ -82,6 +56,28 @@ export function KueryBar() {
     defaults:
       'transaction.duration.us > 300000 AND http.response.status_code >= 400'
   };
+
+  const getSuggestions = (
+    query: string,
+    selectionStart: number,
+    indexPattern: IIndexPattern,
+    boolFilter: unknown,
+  ): Promise<autocomplete.QuerySuggestion[]> | undefined => {
+    const { data } = useApmPluginContext().plugins;
+    const getQuerySuggestions = data.autocomplete.getQuerySuggestionProvider(
+      'kuery'
+    );
+
+    if (getQuerySuggestions) {
+      return getQuerySuggestions({
+        indexPatterns: [indexPattern],
+        boolFilter,
+        query,
+        selectionStart,
+        selectionEnd: selectionStart
+      });
+    }
+  }
 
   const example = examples[processorEvent || 'defaults'];
 
@@ -104,13 +100,10 @@ export function KueryBar() {
           inputValue,
           selectionStart,
           indexPattern,
-          boolFilter,
-          autocompleteProvider
-        )
+          boolFilter
+        ) || []
       )
-        .filter(
-          suggestion => suggestion && !startsWith(suggestion.text, 'span.')
-        )
+        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {

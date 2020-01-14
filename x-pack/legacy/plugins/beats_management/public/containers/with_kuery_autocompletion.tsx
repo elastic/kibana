@@ -17,7 +17,7 @@ interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: autocomplete.QuerySyntaxSuggestion[];
+    suggestions: autocomplete.QuerySuggestion[];
   }>;
 }
 
@@ -28,7 +28,7 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: autocomplete.QuerySyntaxSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
 }
 
 export class WithKueryAutocompletion extends React.Component<

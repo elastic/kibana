@@ -28,21 +28,35 @@ function resolver(title: string, field: IFieldType, query: string, boolFilter: a
   return [ttl, query, title, field.name, JSON.stringify(boolFilter)].join('|');
 }
 
-export class SuggestionsProvider {
-  private core?: CoreSetup;
+export type FieldSuggestionsGet = (args: FieldSuggestionsGetArgs) => Promise<any[]>;
 
-  setup(core: CoreSetup) {
-    this.core = core;
-  }
+interface FieldSuggestionsGetArgs {
+  indexPattern: IIndexPattern;
+  field: IFieldType;
+  query: string;
+  boolFilter?: any[];
+  signal?: AbortSignal;
+}
 
-  async getSuggestions(
-    indexPattern: IIndexPattern,
-    field: IFieldType,
-    query: string,
-    boolFilter?: any,
-    signal?: AbortSignal
-  ): Promise<any[]> {
-    const shouldSuggestValues = this.core!.uiSettings.get<boolean>('filterEditor:suggestValues');
+export const setupFieldSuggestionProvider = (core: CoreSetup): FieldSuggestionsGet => {
+  const requestSuggestions = memoize(
+    (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>
+      core.http.fetch(`/api/kibana/suggestions/values/${index}`, {
+        method: 'POST',
+        body: JSON.stringify({ query, field: field.name, boolFilter }),
+        signal,
+      }),
+    resolver
+  );
+
+  return async ({
+    indexPattern,
+    field,
+    query,
+    boolFilter,
+    signal,
+  }: FieldSuggestionsGetArgs): Promise<any[]> => {
+    const shouldSuggestValues = core!.uiSettings.get<boolean>('filterEditor:suggestValues');
     const { title } = indexPattern;
 
     if (field.type === 'boolean') {
@@ -51,16 +65,6 @@ export class SuggestionsProvider {
       return [];
     }
 
-    return await this.requestSuggestions(title, field, query, boolFilter, signal);
-  }
-
-  private requestSuggestions = memoize(
-    (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>
-      this.core!.http.fetch(`/api/kibana/suggestions/values/${index}`, {
-        method: 'POST',
-        body: JSON.stringify({ query, field: field.name, boolFilter }),
-        signal,
-      }),
-    resolver
-  );
-}
+    return await requestSuggestions(title, field, query, boolFilter, signal);
+  };
+};

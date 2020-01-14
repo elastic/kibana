@@ -70,7 +70,7 @@ interface Props {
 interface State {
   isSuggestionsVisible: boolean;
   index: number | null;
-  suggestions: autocomplete.QuerySyntaxSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
@@ -89,7 +89,7 @@ const KEY_CODES = {
   END: 35,
 };
 
-const recentSearchType: autocomplete.QuerySyntaxSuggestionType = 'recentSearch';
+const recentSearchType: autocomplete.QuerySuggestionType = 'recentSearch';
 
 export class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -141,10 +141,12 @@ export class QueryStringInputUI extends Component<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const autocompleteProvider = this.services.data.autocomplete.getQuerySyntaxProvider(language);
+    const getQuerySuggestions = this.services.data.autocomplete.getQuerySuggestionProvider(
+      language
+    );
 
     if (
-      !autocompleteProvider ||
+      !getQuerySuggestions ||
       !Array.isArray(this.state.indexPatterns) ||
       compact(this.state.indexPatterns).length === 0
     ) {
@@ -152,7 +154,6 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
 
     const indexPatterns = this.state.indexPatterns;
-    const getAutocompleteSuggestions = autocompleteProvider({ indexPatterns });
 
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
@@ -162,7 +163,8 @@ export class QueryStringInputUI extends Component<Props, State> {
     try {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
-      const suggestions = await getAutocompleteSuggestions({
+      const suggestions = await getQuerySuggestions({
+        indexPatterns,
         query: queryString,
         selectionStart,
         selectionEnd,
@@ -316,7 +318,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = (suggestion: autocomplete.QuerySyntaxSuggestion) => {
+  private selectSuggestion = (suggestion: autocomplete.QuerySuggestion) => {
     if (!this.inputRef) {
       return;
     }
@@ -346,9 +348,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private handleNestedFieldSyntaxNotification = (
-    suggestion: autocomplete.QuerySyntaxSuggestion
-  ) => {
+  private handleNestedFieldSyntaxNotification = (suggestion: autocomplete.QuerySuggestion) => {
     if (
       'field' in suggestion &&
       suggestion.field.subType &&
@@ -450,7 +450,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onClickSuggestion = (suggestion: autocomplete.QuerySyntaxSuggestion) => {
+  private onClickSuggestion = (suggestion: autocomplete.QuerySuggestion) => {
     if (!this.inputRef) {
       return;
     }

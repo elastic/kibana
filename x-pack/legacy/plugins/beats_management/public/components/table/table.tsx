@@ -31,7 +31,7 @@ export interface KueryBarProps {
   loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
   onChange?: (value: string) => void;
   onSubmit?: (value: string) => void;
-  suggestions: autocomplete.QuerySyntaxSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
   value: string;
 }
 

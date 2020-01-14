@@ -15,7 +15,7 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
     indexPatterns.map(indexPattern => {
       return indexPattern.fields.map(field => ({
         ...field,
-        indexPatternTitle: indexPattern.title,
+        indexPattern,
       }));
     })
   );
@@ -27,17 +27,21 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
     const fields = allFields.filter(field => field.name === fullFieldName);
     const query = `${prefix}${suffix}`.trim();
-    const { getSuggestions } = npStart.plugins.data;
+    const { getFieldSuggestions } = npStart.plugins.data.autocomplete;
 
     const suggestionsByField = fields.map(field => {
-      return getSuggestions(field.indexPatternTitle, field, query, boolFilter, signal).then(
-        data => {
-          const quotedValues = data.map(value =>
-            typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`
-          );
-          return wrapAsSuggestions(start, end, query, quotedValues);
-        }
-      );
+      return getFieldSuggestions({
+        indexPattern: field.indexPattern,
+        field,
+        query,
+        boolFilter,
+        signal,
+      }).then(data => {
+        const quotedValues = data.map(value =>
+          typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`
+        );
+        return wrapAsSuggestions(start, end, query, quotedValues);
+      });
     });
 
     return Promise.all(suggestionsByField).then(suggestions => flatten(suggestions));

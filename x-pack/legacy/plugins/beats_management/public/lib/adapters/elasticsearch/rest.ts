@@ -9,8 +9,8 @@ import { npStart } from 'ui/new_platform';
 import { ElasticsearchAdapter } from './adapter_types';
 import { autocomplete, esKuery } from '../../../../../../../../src/plugins/data/public';
 
-const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getQuerySyntaxProvider(language);
+const getQuerySuggestionProvider = (language: string) =>
+  npStart.plugins.data.autocomplete.getQuerySuggestionProvider(language);
 
 export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   private cachedIndexPattern: any = null;
@@ -36,23 +36,20 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   public async getSuggestions(
     kuery: string,
     selectionStart: any
-  ): Promise<autocomplete.QuerySyntaxSuggestion[]> {
-    const autocompleteProvider = getAutocompleteProvider('kuery');
-    if (!autocompleteProvider) {
+  ): Promise<autocomplete.QuerySuggestion[]> {
+    const getQuerySuggestions = getQuerySuggestionProvider('kuery');
+    if (!getQuerySuggestions) {
       return [];
     }
     const indexPattern = await this.getIndexPattern();
 
-    const getAutocompleteSuggestions = autocompleteProvider({
+    return getQuerySuggestions({
       indexPatterns: [indexPattern],
       boolFilter: null,
-    });
-    const results = getAutocompleteSuggestions({
       query: kuery || '',
       selectionStart,
       selectionEnd: selectionStart,
     });
-    return results;
   }
 
   private async getIndexPattern() {
