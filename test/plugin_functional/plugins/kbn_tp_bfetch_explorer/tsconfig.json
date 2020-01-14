@@ -13,6 +13,8 @@
     "index.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
+    "server/**/*.ts",
+    "server/**/*.tsx",
     "../../../../typings/**/*",
   ],
   "exclude": []
