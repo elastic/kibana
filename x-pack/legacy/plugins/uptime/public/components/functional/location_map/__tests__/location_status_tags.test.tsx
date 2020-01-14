@@ -6,12 +6,35 @@
 
 import React from 'react';
 import moment from 'moment';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../';
 
 describe('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];
+
+  // For shallow test we don't need absolute time
+  it('renders properly against props', () => {
+    monitorLocations = [
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: '2020-01-09T12:22:32.567Z',
+      },
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: '2020-01-08T12:22:28.825Z',
+      },
+      {
+        summary: { up: 0, down: 2 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: '2020-01-09T12:22:28.825Z',
+      },
+    ];
+    const component = shallowWithIntl(<LocationStatusTags locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
+  });
 
   it('renders when there are many location', () => {
     monitorLocations = [

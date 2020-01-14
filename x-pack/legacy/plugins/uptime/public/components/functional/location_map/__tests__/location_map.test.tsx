@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { LocationMap } from '../location_map';
 import { MonitorLocations } from '../../../../../common/runtime_types';
 import { LocationMissingWarning } from '../location_missing';
 
+// Note For shallow test, we need absolute time strings
 describe('LocationMap component', () => {
   let monitorLocations: MonitorLocations;
 
@@ -86,25 +86,5 @@ describe('LocationMap component', () => {
 
     const warningComponent = component.find(LocationMissingWarning);
     expect(warningComponent).toHaveLength(0);
-  });
-
-  it('renders properly', () => {
-    monitorLocations = {
-      monitorId: 'wapo',
-      locations: [
-        {
-          summary: { up: 4, down: 0 },
-          geo: { name: 'New York', location: { lat: '40.730610', lon: ' -73.935242' } },
-          timestamp: '2020-01-13T22:50:06.536Z',
-        },
-        {
-          summary: { up: 4, down: 0 },
-          geo: { name: 'Tokyo', location: { lat: '52.487448', lon: ' 13.394798' } },
-          timestamp: '2020-01-13T22:50:04.354Z',
-        },
-      ],
-    };
-    const component = renderWithIntl(<LocationMap monitorLocations={monitorLocations} />);
-    expect(component).toMatchSnapshot();
   });
 });

@@ -66,7 +66,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
     return a.timestamp < b.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0;
   });
 
-  moment.locale('en', {
+  moment.updateLocale('en', {
     relativeTime: {
       future: 'in %s',
       past: '%s ago',
