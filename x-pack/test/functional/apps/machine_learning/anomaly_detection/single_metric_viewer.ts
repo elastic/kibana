@@ -6,8 +6,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import {
+  Job,
+  Datafeed,
+} from '../../../../..//legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
 
-const JOB_CONFIG = {
+const JOB_CONFIG: Job = {
   job_id: `fq_single_1_smv`,
   description: 'mean(responsetime) on farequote dataset with 15m bucket span',
   groups: ['farequote', 'automated', 'single-metric'],
@@ -26,7 +30,7 @@ const JOB_CONFIG = {
   model_plot_config: { enabled: true },
 };
 
-const DATAFEED_CONFIG = {
+const DATAFEED_CONFIG: Datafeed = {
   datafeed_id: 'datafeed-fq_single_1_smv',
   indices: ['farequote'],
   job_id: 'fq_single_1_smv',

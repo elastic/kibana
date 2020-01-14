@@ -6,8 +6,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import {
+  Job,
+  Datafeed,
+} from '../../../../..//legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
 
-const JOB_CONFIG = {
+const JOB_CONFIG: Job = {
   job_id: `fq_multi_1_ae`,
   description:
     'mean/min/max(responsetime) partition=airline on farequote dataset with 1h bucket span',
@@ -26,7 +30,7 @@ const JOB_CONFIG = {
   model_plot_config: { enabled: true },
 };
 
-const DATAFEED_CONFIG = {
+const DATAFEED_CONFIG: Datafeed = {
   datafeed_id: 'datafeed-fq_multi_1_se',
   indices: ['farequote'],
   job_id: 'fq_multi_1_ae',
