@@ -83,7 +83,7 @@ export class Plugin {
     });
 
     const alertTypeRegistry = new AlertTypeRegistry({
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
@@ -124,7 +124,7 @@ export class Plugin {
     const alertsClientFactory = new AlertsClientFactory({
       alertTypeRegistry: this.alertTypeRegistry!,
       logger: this.logger,
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       securityPluginSetup: plugins.security,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       spaceIdToNamespace,
