@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { Query as QueryType } from '../../../analytics_management/components/analytics_list/common';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 
 import {
   ColumnType,
@@ -37,20 +38,25 @@ import {
 } from '../../../../../components/ml_in_memory_table';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../util/date_utils';
+import { Field } from '../../../../../../../common/types/fields';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import {
+  BASIC_NUMERICAL_TYPES,
+  EXTENDED_NUMERICAL_TYPES,
+  isKeywordAndTextType,
+} from '../../../../common/fields';
 
 import {
-  sortRegressionResultsColumns,
-  sortRegressionResultsFields,
   toggleSelectedField,
+  EsDoc,
   DataFrameAnalyticsConfig,
   EsFieldName,
-  EsDoc,
   MAX_COLUMNS,
   getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
   defaultSearchQuery,
+  getDependentVar,
 } from '../../../../common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
@@ -71,11 +77,19 @@ export const ResultsTable: FC<Props> = React.memo(
   ({ jobConfig, jobStatus, setEvaluateSearchQuery }) => {
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(25);
-    const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
+    const [selectedFields, setSelectedFields] = useState([] as Field[]);
+    const [docFields, setDocFields] = useState([] as Field[]);
     const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
     const [searchError, setSearchError] = useState<any>(undefined);
     const [searchString, setSearchString] = useState<string | undefined>(undefined);
+
+    const predictedFieldName = getPredictedFieldName(
+      jobConfig.dest.results_field,
+      jobConfig.analysis
+    );
+
+    const dependentVariable = getDependentVar(jobConfig.analysis);
 
     function toggleColumnsPopover() {
       setColumnsPopoverVisible(!isColumnsPopoverVisible);
@@ -99,147 +113,140 @@ export const ResultsTable: FC<Props> = React.memo(
       sortDirection,
       status,
       tableItems,
-    } = useExploreData(jobConfig, selectedFields, setSelectedFields);
+    } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields);
 
-    let docFields: EsFieldName[] = [];
-    let docFieldsCount = 0;
-    if (tableItems.length > 0) {
-      docFields = Object.keys(tableItems[0]);
-      docFields.sort((a, b) => sortRegressionResultsFields(a, b, jobConfig));
-      docFieldsCount = docFields.length;
-    }
+    const columns: Array<ColumnType<TableItem>> = selectedFields.map(field => {
+      const { type } = field;
+      const isNumber =
+        type !== undefined &&
+        (BASIC_NUMERICAL_TYPES.has(type) || EXTENDED_NUMERICAL_TYPES.has(type));
 
-    const columns: Array<ColumnType<TableItem>> = [];
+      const column: ColumnType<TableItem> = {
+        field: field.name,
+        name: field.name,
+        sortable: true,
+        truncateText: true,
+      };
 
-    if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
-      columns.push(
-        ...selectedFields.sort(sortRegressionResultsColumns(tableItems[0], jobConfig)).map(k => {
-          const column: ColumnType<TableItem> = {
-            field: k,
-            name: k,
-            sortable: true,
-            truncateText: true,
-          };
+      const render = (d: any, fullItem: EsDoc) => {
+        if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
+          // If the cells data is an array of strings, return as a comma separated list.
+          // The list will get limited to 5 items with `…` at the end if there's more in the original array.
+          return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
+        } else if (Array.isArray(d)) {
+          // If the cells data is an array of e.g. objects, display a 'array' badge with a
+          // tooltip that explains that this type of field is not supported in this table.
+          return (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.ml.dataframe.analytics.classificationExploration.indexArrayToolTipContent',
+                {
+                  defaultMessage:
+                    'The full content of this array based column cannot be displayed.',
+                }
+              )}
+            >
+              <EuiBadge>
+                {i18n.translate(
+                  'xpack.ml.dataframe.analytics.classificationExploration.indexArrayBadgeContent',
+                  {
+                    defaultMessage: 'array',
+                  }
+                )}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        }
 
-          const render = (d: any, fullItem: EsDoc) => {
-            if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
-              // If the cells data is an array of strings, return as a comma separated list.
-              // The list will get limited to 5 items with `…` at the end if there's more in the original array.
-              return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
-            } else if (Array.isArray(d)) {
-              // If the cells data is an array of e.g. objects, display a 'array' badge with a
-              // tooltip that explains that this type of field is not supported in this table.
-              return (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.indexArrayToolTipContent',
-                    {
-                      defaultMessage:
-                        'The full content of this array based column cannot be displayed.',
-                    }
-                  )}
-                >
-                  <EuiBadge>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.indexArrayBadgeContent',
-                      {
-                        defaultMessage: 'array',
-                      }
-                    )}
-                  </EuiBadge>
-                </EuiToolTip>
-              );
-            } else if (typeof d === 'object' && d !== null) {
-              // If the cells data is an object, display a 'object' badge with a
-              // tooltip that explains that this type of field is not supported in this table.
-              return (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.indexObjectToolTipContent',
-                    {
-                      defaultMessage:
-                        'The full content of this object based column cannot be displayed.',
-                    }
-                  )}
-                >
-                  <EuiBadge>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.indexObjectBadgeContent',
-                      {
-                        defaultMessage: 'object',
-                      }
-                    )}
-                  </EuiBadge>
-                </EuiToolTip>
-              );
-            }
+        return d;
+      };
 
-            return d;
-          };
-
-          let columnType;
-
-          if (tableItems.length > 0) {
-            columnType = typeof tableItems[0][k];
-          }
-
-          if (typeof columnType !== 'undefined') {
-            switch (columnType) {
-              case 'boolean':
-                column.dataType = 'boolean';
-                break;
-              case 'Date':
-                column.align = 'right';
-                column.render = (d: any) =>
-                  formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-                break;
-              case 'number':
-                column.dataType = 'number';
-                column.render = render;
-                break;
-              default:
-                column.render = render;
-                break;
-            }
-          } else {
+      if (isNumber) {
+        column.dataType = 'number';
+        column.render = render;
+      } else if (typeof type !== 'undefined') {
+        switch (type) {
+          case ES_FIELD_TYPES.BOOLEAN:
+            column.dataType = ES_FIELD_TYPES.BOOLEAN;
+            break;
+          case ES_FIELD_TYPES.DATE:
+            column.align = 'right';
+            column.render = (d: any) => {
+              if (d !== undefined) {
+                return formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
+              }
+              return d;
+            };
+            break;
+          default:
             column.render = render;
-          }
+            break;
+        }
+      } else {
+        column.render = render;
+      }
 
-          return column;
-        })
-      );
-    }
+      return column;
+    });
+
+    const docFieldsCount = docFields.length;
 
     useEffect(() => {
-      if (jobConfig !== undefined) {
-        const predictedFieldName = getPredictedFieldName(
-          jobConfig.dest.results_field,
-          jobConfig.analysis
-        );
-        const predictedFieldSelected = selectedFields.includes(predictedFieldName);
+      if (
+        jobConfig !== undefined &&
+        columns.length > 0 &&
+        selectedFields.length > 0 &&
+        sortField !== undefined &&
+        sortDirection !== undefined &&
+        selectedFields.some(field => field.name === sortField)
+      ) {
+        let field = sortField;
+        // If sorting by predictedField use dependentVar type
+        if (predictedFieldName === sortField) {
+          field = dependentVariable;
+        }
+        const requiresKeyword = isKeywordAndTextType(field);
 
-        const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
-        const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-        loadExploreData({ field, direction, searchQuery });
+        loadExploreData({
+          field: sortField,
+          direction: sortDirection,
+          searchQuery,
+          requiresKeyword,
+        });
       }
     }, [JSON.stringify(searchQuery)]);
 
     useEffect(() => {
-      // by default set the sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
-      // if that's not available sort ascending on the first column.
-      // also check if the current sorting field is still available.
-      if (jobConfig !== undefined && columns.length > 0 && !selectedFields.includes(sortField)) {
-        const predictedFieldName = getPredictedFieldName(
-          jobConfig.dest.results_field,
-          jobConfig.analysis
+      // By default set sorting to descending on the prediction field (`<dependent_varible or prediction_field_name>_prediction`).
+      // if that's not available sort ascending on the first column. Check if the current sorting field is still available.
+      if (
+        jobConfig !== undefined &&
+        columns.length > 0 &&
+        selectedFields.length > 0 &&
+        !selectedFields.some(field => field.name === sortField)
+      ) {
+        const predictedFieldSelected = selectedFields.some(
+          field => field.name === predictedFieldName
         );
-        const predictedFieldSelected = selectedFields.includes(predictedFieldName);
 
-        const field = predictedFieldSelected ? predictedFieldName : selectedFields[0];
+        // CHECK IF keyword suffix is needed (if predicted field is selected we have to check the dependent variable type)
+        let sortByField = predictedFieldSelected ? dependentVariable : selectedFields[0].name;
+
+        const requiresKeyword = isKeywordAndTextType(sortByField);
+
+        sortByField = predictedFieldSelected ? predictedFieldName : sortByField;
+
         const direction = predictedFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-        loadExploreData({ field, direction, searchQuery });
+        loadExploreData({ field: sortByField, direction, searchQuery, requiresKeyword });
       }
-    }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
+    }, [
+      jobConfig,
+      columns.length,
+      selectedFields.length,
+      sortField,
+      sortDirection,
+      tableItems.length,
+    ]);
 
     let sorting: SortingPropType = false;
     let onTableChange;
@@ -261,7 +268,17 @@ export const ResultsTable: FC<Props> = React.memo(
         setPageSize(size);
 
         if (sort.field !== sortField || sort.direction !== sortDirection) {
-          loadExploreData({ ...sort, searchQuery });
+          let field = sort.field;
+          // If sorting by predictedField use depVar for type check
+          if (predictedFieldName === sort.field) {
+            field = dependentVariable;
+          }
+
+          loadExploreData({
+            ...sort,
+            searchQuery,
+            requiresKeyword: isKeywordAndTextType(field),
+          });
         }
       };
     }
@@ -422,14 +439,17 @@ export const ResultsTable: FC<Props> = React.memo(
                       )}
                     </EuiPopoverTitle>
                     <div style={{ maxHeight: '400px', overflowY: 'scroll' }}>
-                      {docFields.map(d => (
+                      {docFields.map(({ name }) => (
                         <EuiCheckbox
-                          key={d}
-                          id={d}
-                          label={d}
-                          checked={selectedFields.includes(d)}
-                          onChange={() => toggleColumn(d)}
-                          disabled={selectedFields.includes(d) && selectedFields.length === 1}
+                          key={name}
+                          id={name}
+                          label={name}
+                          checked={selectedFields.some(field => field.name === name)}
+                          onChange={() => toggleColumn(name)}
+                          disabled={
+                            selectedFields.some(field => field.name === name) &&
+                            selectedFields.length === 1
+                          }
                         />
                       ))}
                     </div>
