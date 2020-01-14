@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '../../../utils/eui_styled_components';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import {
   LogAnalysisJobProblemIndicator,

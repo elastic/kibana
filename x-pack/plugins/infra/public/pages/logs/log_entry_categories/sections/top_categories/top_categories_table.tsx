@@ -9,7 +9,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
-import euiStyled from '../../../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../../utils/eui_styled_components';
 import {
   LogEntryCategory,
   LogEntryCategoryHistogram,

@@ -11,7 +11,7 @@ import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
+import { CoreStart, AppMountParameters } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -25,11 +25,15 @@ import { HistoryContext } from '../utils/history_context';
 import {
   useUiSetting$,
   KibanaContextProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { ROOT_ELEMENT_ID } from '../app';
+} from '../../../../../src/plugins/kibana_react/public';
 
-// NP_TODO: Type plugins
-export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins: any) {
+export async function startApp(
+  libs: InfraFrontendLibs,
+  core: CoreStart,
+  plugins: object,
+  params: AppMountParameters
+) {
+  const { element } = params;
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
@@ -61,15 +65,15 @@ export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins
     );
   };
 
-  const node = await document.getElementById(ROOT_ELEMENT_ID);
-
-  const App = (
+  const App: React.FunctionComponent = () => (
     <KibanaContextProvider services={{ ...core, ...plugins }}>
       <InfraPluginRoot />
     </KibanaContextProvider>
   );
 
-  if (node) {
-    ReactDOM.render(App, node);
-  }
+  ReactDOM.render(<App />, element);
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
 }

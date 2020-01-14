@@ -9,7 +9,7 @@ import {
   CoreSetup,
   CoreStart,
   PluginInitializerContext,
-  AppMountParameters
+  AppMountParameters,
 } from 'kibana/public';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
@@ -36,26 +36,24 @@ export interface ClientPluginsStart {
   data: DataPublicPluginStart;
 }
 
-export class Plugin implements PluginClass<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
+export class Plugin
+  implements PluginClass<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
   constructor(context: PluginInitializerContext) {}
 
   setup(core: CoreSetup, plugins: ClientPluginsSetup) {
     registerFeatures(plugins.home);
 
     core.application.register({
-      id: 'infra',
-      title: i18n.translate('xpack.infra.pluginTitle', {
-        defaultMessage: 'Infra',
+      id: 'logs',
+      title: i18n.translate('xpack.infra.logs.pluginTitle', {
+        defaultMessage: 'Logs',
       }),
+      euiIconType: 'logsApp',
+      order: 8001,
       async mount(params: AppMountParameters) {
-        const [coreStart, plugins] = await core.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
         const { startApp } = await import('./apps/start_app');
-        return startApp(
-          this.composeLibs(coreStart, plugins),
-          coreStart,
-          plugins,
-          params
-        );
+        return startApp(this.composeLibs(coreStart, pluginsStart), coreStart, plugins, params);
       },
     });
   }

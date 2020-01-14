@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// NP_NOTE: Whilst we are in the transition period of the NP migration, this index file
-// is exclusively for our static code exports that other plugins (e.g. APM) use.
-// When we switch over to the real NP, and an export of "plugin" is expected and called,
-// we can do away with the middle "app.ts" layer. The "app.ts" layer is needed for now,
-// and needs to be situated differently to this index file, so that our code for setting the root template
-// and attempting to start the app doesn't try to run just because another plugin is importing from this file.
+import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
+import { Plugin, ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart } from './plugin';
+
+export const plugin: PluginInitializer<
+  ClientSetup,
+  ClientStart,
+  ClientPluginsSetup,
+  ClientPluginsStart
+> = (context: PluginInitializerContext) => {
+  return new Plugin(context);
+};
 
 export { useTrackPageview, trackEvent } from './hooks/use_track_metric';
 export { FORMATTERS } from './utils/formatters';

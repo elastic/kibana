@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
 
-import euiStyled from '../../../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../../utils/eui_styled_components';
 
 export const RegularExpressionRepresentation: React.FunctionComponent<{
   maximumSegmentCount?: number;
