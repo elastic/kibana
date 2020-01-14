@@ -782,7 +782,22 @@ function discoverController(
     }
   }
 
-  $scope.opts.fetch = $scope.fetch = function() {
+  const callOncePerTick = fn => {
+    let alreadyCalled = false;
+
+    return (...args) => {
+      if (alreadyCalled) {
+        return;
+      }
+      fn(...args);
+      alreadyCalled = true;
+      setTimeout(() => {
+        alreadyCalled = false;
+      }, 0);
+    };
+  };
+
+  $scope.opts.fetch = $scope.fetch = callOncePerTick(function() {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
 
@@ -823,7 +838,7 @@ function discoverController(
           });
         }
       });
-  };
+  });
 
   $scope.updateQueryAndFetch = function({ query, dateRange }) {
     timefilter.setTime(dateRange);
