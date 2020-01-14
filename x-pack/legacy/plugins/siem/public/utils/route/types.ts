@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { HostsTableType } from '../../store/hosts/model';
 import { NetworkRouteType } from '../../pages/network/navigation/types';
-import { FlowTarget } from '../../graphql/types';
+import { FlowTarget, FlowTarget } from '../../graphql/types';
 
 export type SiemRouteType = HostsTableType | NetworkRouteType;
 export interface RouteSpyState {
@@ -54,4 +54,5 @@ export type SpyRouteProps = RouteComponentProps<{
   detailName: string | undefined;
   tabName: HostsTableType | undefined;
   search: string;
+  flowTarget: FlowTarget | undefined;
 }>;
