@@ -64,12 +64,12 @@ describe('CancellationToken', function() {
 
   describe('isCancelled', function() {
     it('should default to false', function() {
-      expect(cancellationToken.isCancelled).to.be(false);
+      expect(cancellationToken.isCancelled()).to.be(false);
     });
 
     it('should switch to true after call to cancel', function() {
       cancellationToken.cancel();
-      expect(cancellationToken.isCancelled).to.be(true);
+      expect(cancellationToken.isCancelled()).to.be(true);
     });
   });
 });
