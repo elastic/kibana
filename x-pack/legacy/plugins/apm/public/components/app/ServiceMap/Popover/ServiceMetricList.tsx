@@ -63,8 +63,6 @@ export function ServiceMetricList({ serviceName }: MetricListProps) {
     urlParams: { start, end, environment }
   } = useUrlParams();
 
-  // FIXME: Don't fetch if it's not a service. Perhaps this fetching should go
-  // in ServiceMetricList instead.
   const { data = {} as ServiceNodeMetrics, status } = useFetcher(
     callApmApi => {
       if (serviceName && start && end) {
