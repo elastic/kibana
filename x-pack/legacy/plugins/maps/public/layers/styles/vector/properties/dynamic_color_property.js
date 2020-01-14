@@ -219,8 +219,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     const mbStops = [];
     for (let i = 0; i < stops.length; i++) {
       const stop = stops[i];
-      mbStops.push(stop.stop);
-      mbStops.push(stop.color);
+      const branch = `${stop.stop}`;
+      if (typeof branch === 'string') {
+        mbStops.push(branch);
+        mbStops.push(stop.color);
+      }
     }
 
     mbStops.push(defaultColor); //last color is default color
