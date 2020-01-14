@@ -9,8 +9,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error', 'settings']);
   const appsMenu = getService('appsMenu');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
 
   describe('spaces', () => {
@@ -39,6 +40,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
+        await PageObjects.common.navigateToApp('settings');
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
+        await browser.refresh();
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Machine Learning');
       });
