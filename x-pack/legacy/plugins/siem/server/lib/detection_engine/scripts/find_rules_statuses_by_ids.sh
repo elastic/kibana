@@ -9,9 +9,9 @@
 set -e
 ./check_env_variables.sh
 
-./delete_all_actions.sh
-./delete_all_alerts.sh
-./delete_all_alert_tasks.sh
-./delete_all_statuses.sh
-./delete_signal_index.sh
-./post_signal_index.sh
+
+# Example: ./find_rules_statuses_by_ids.sh '["12345","6789abc"]'
+curl -g -k \
+ -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+ -X GET "${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_find_statuses?ids=$1" \
+ | jq .
