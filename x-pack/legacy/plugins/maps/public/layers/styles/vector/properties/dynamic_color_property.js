@@ -26,6 +26,8 @@ import {
   getOtherCategoryLabel,
 } from '../components/color/color_stops_utils';
 
+const EMPTY_STOPS = { stops: [], defaultColor: null };
+
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
     const color = this._getMbColor();
@@ -153,7 +155,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   _getColorPaletteStops() {
     if (this._options.useCustomColorPalette && this._options.customColorPalette) {
       if (isCategoricalStopsInvalid(this._options.customColorPalette)) {
-        return [];
+        return EMPTY_STOPS;
       }
 
       const stops = [];
@@ -164,33 +166,36 @@ export class DynamicColorProperty extends DynamicStyleProperty {
           color: config.color,
         });
       }
-      stops.push({
-        stop: this._options.customColorPalette[0].stop,
-        color: this._options.customColorPalette[0].color,
-      });
-      return stops;
+
+      return {
+        defaultColor: this._options.customColorPalette[0].color,
+        stops,
+      };
     }
 
     const fieldMeta = this.getFieldMeta();
     if (!fieldMeta || !fieldMeta.categories) {
-      return [];
+      return EMPTY_STOPS;
     }
 
     const colors = getColorPalette(this._options.color);
     if (!colors) {
-      return [];
+      return EMPTY_STOPS;
     }
-    const maxLength = Math.min(colors.length, fieldMeta.categories.length + 1);
 
+    const maxLength = Math.min(colors.length, fieldMeta.categories.length + 1);
     const stops = [];
-    for (let i = 0; i < maxLength; i++) {
-      const isDefault = i === maxLength - 1;
+
+    for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
-        stop: isDefault ? '__DEFAULT__' : fieldMeta.categories[i].key,
+        stop: fieldMeta.categories[i].key,
         color: colors[i],
       });
     }
-    return stops;
+    return {
+      stops,
+      defaultColor: colors[maxLength - 1],
+    };
   }
 
   _getMbDataDrivenCategoricalColor() {
@@ -201,26 +206,23 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
-    const paletteStops = this._getColorPaletteStops();
-    if (paletteStops.length < 2) {
+    const { stops, defaultColor } = this._getColorPaletteStops();
+    if (stops.length < 1) {
       //occurs when no data
       return null;
     }
 
-    const mbStops = [];
-    let defaultColor = null;
-    for (let i = 0; i < paletteStops.length; i++) {
-      const stop = paletteStops[i];
-      if (i === paletteStops.length - 1) {
-        defaultColor = stop.color;
-      } else {
-        mbStops.push(stop.stop);
-        mbStops.push(stop.color);
-      }
-    }
     if (!defaultColor) {
       return null;
     }
+
+    const mbStops = [];
+    for (let i = 0; i < stops.length; i++) {
+      const stop = stops[i];
+      mbStops.push(stop.stop);
+      mbStops.push(stop.color);
+    }
+
     mbStops.push(defaultColor); //last color is default color
     return ['match', ['get', this._options.field.name], ...mbStops];
   }
@@ -266,42 +268,47 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   _getColorRampStops() {
-    if (this._options.useCustomColorRamp && this._options.customColorRamp) {
-      return this._options.customColorRamp;
-    } else {
-      return [];
-    }
+    return this._options.useCustomColorRamp && this._options.customColorRamp
+      ? this._options.customColorRamp
+      : [];
   }
 
   _getColorStops() {
     if (this.isOrdinal()) {
-      return this._getColorRampStops();
+      return {
+        stops: this._getColorRampStops(),
+        defaultColor: null,
+      };
     } else if (this.isCategorical()) {
       return this._getColorPaletteStops();
     } else {
-      return [];
+      return EMPTY_STOPS;
     }
   }
 
   _renderColorbreaks({ isLinesOnly, isPointsOnly, symbolId }) {
-    const stops = this._getColorStops();
-    return stops.map((config, index) => {
-      let textValue;
-      if (index === stops.length - 1) {
-        textValue = (
-          <EuiText size={'xs'}>
-            <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>
-          </EuiText>
-        );
-      } else {
-        const value = this.formatField(config.stop);
-        textValue = <EuiText size={'xs'}>{value}</EuiText>;
-      }
+    const { stops, defaultColor } = this._getColorStops();
+    const colorAndLabels = stops.map(config => {
+      return {
+        label: this.formatField(config.stop),
+        color: config.color,
+      };
+    });
 
+    if (defaultColor) {
+      colorAndLabels.push({
+        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        color: defaultColor,
+      });
+    }
+
+    return colorAndLabels.map((config, index) => {
       return (
         <EuiFlexItem key={index}>
           <EuiFlexGroup direction={'row'} gutterSize={'none'}>
-            <EuiFlexItem>{textValue}</EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size={'xs'}>{config.label}</EuiText>
+            </EuiFlexItem>
             <EuiFlexItem>
               {this._renderStopIcon(config.color, isLinesOnly, isPointsOnly, symbolId)}
             </EuiFlexItem>

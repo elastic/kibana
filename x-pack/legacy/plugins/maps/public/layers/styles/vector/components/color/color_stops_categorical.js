@@ -45,6 +45,7 @@ export const ColorStopsCategorical = ({
   };
 
   const renderStopInput = (stop, onStopChange, index) => {
+    const stopValue = typeof stop === 'string' ? stop : '';
     if (index === 0) {
       return (
         <EuiFieldText
@@ -54,7 +55,7 @@ export const ColorStopsCategorical = ({
               defaultMessage: 'Default stop',
             }
           )}
-          value={stop}
+          value={stopValue}
           placeholder={getOtherCategoryLabel()}
           disabled
           onChange={onStopChange}
@@ -70,7 +71,7 @@ export const ColorStopsCategorical = ({
               defaultMessage: 'Category',
             }
           )}
-          value={stop}
+          value={stopValue}
           onChange={onStopChange}
           compressed
         />
