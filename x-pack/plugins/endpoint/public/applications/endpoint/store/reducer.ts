@@ -5,11 +5,12 @@
  */
 import { combineReducers, Reducer } from 'redux';
 import { endpointListReducer, EndpointListState } from './endpoint_list';
+import { AppAction } from './actions';
 
 export interface GlobalState {
   endpointList: EndpointListState;
 }
 
-export const appReducer: Reducer<GlobalState> = combineReducers({
+export const appReducer: Reducer<GlobalState, AppAction> = combineReducers({
   endpointList: endpointListReducer,
 });
