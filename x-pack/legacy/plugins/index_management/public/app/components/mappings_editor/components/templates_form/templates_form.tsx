@@ -110,7 +110,7 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
           component={JsonEditorField}
           componentProps={{
             euiCodeEditorProps: {
-              height: '400px',
+              height: '600px',
               'aria-label': i18n.translate(
                 'xpack.idxMgmt.mappingsEditor.dynamicTemplatesEditorAriaLabel',
                 {
