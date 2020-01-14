@@ -25,6 +25,7 @@ export interface EuiBasicTableOnChange {
 
 export interface TableData {
   id: string;
+  immutable: boolean;
   rule_id: string;
   rule: {
     href: string;

@@ -5,7 +5,7 @@
  */
 
 import * as H from 'history';
-import React from 'react';
+import React, { Dispatch } from 'react';
 
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import {
@@ -16,40 +16,92 @@ import {
 } from '../../../../containers/detection_engine/rules';
 import { Action } from './reducer';
 
+import { ActionToaster, displayErrorToast } from '../../../../components/toasters';
+
+import * as i18n from '../translations';
+import { bucketRulesResponse } from './helpers';
+
 export const editRuleAction = (rule: Rule, history: H.History) => {
   history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${rule.id}/edit`);
 };
 
 export const runRuleAction = () => {};
 
-export const duplicateRuleAction = async (rule: Rule, dispatch: React.Dispatch<Action>) => {
-  dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: true });
-  const duplicatedRule = await duplicateRules({ rules: [rule] });
-  dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: false });
-  dispatch({ type: 'updateRules', rules: duplicatedRule, appendRuleId: rule.id });
+export const duplicateRuleAction = async (
+  rule: Rule,
+  dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>
+) => {
+  try {
+    dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: true });
+    const duplicatedRule = await duplicateRules({ rules: [rule] });
+    dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: false });
+    dispatch({ type: 'updateRules', rules: duplicatedRule, appendRuleId: rule.id });
+  } catch (e) {
+    displayErrorToast(i18n.DUPLICATE_RULE_ERROR, [e.message], dispatchToaster);
+  }
 };
 
 export const exportRulesAction = async (rules: Rule[], dispatch: React.Dispatch<Action>) => {
   dispatch({ type: 'setExportPayload', exportPayload: rules });
 };
 
-export const deleteRulesAction = async (ids: string[], dispatch: React.Dispatch<Action>) => {
-  dispatch({ type: 'updateLoading', ids, isLoading: true });
-  const deletedRules = await deleteRules({ ids });
-  dispatch({ type: 'deleteRules', rules: deletedRules });
+export const deleteRulesAction = async (
+  ids: string[],
+  dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>
+) => {
+  try {
+    dispatch({ type: 'updateLoading', ids, isLoading: true });
+
+    const response = await deleteRules({ ids });
+    const { rules, errors } = bucketRulesResponse(response);
+
+    dispatch({ type: 'deleteRules', rules });
+
+    if (errors.length > 0) {
+      displayErrorToast(
+        i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ids.length),
+        errors.map(e => e.error.message),
+        dispatchToaster
+      );
+    }
+  } catch (e) {
+    displayErrorToast(
+      i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ids.length),
+      [e.message],
+      dispatchToaster
+    );
+  }
 };
 
 export const enableRulesAction = async (
   ids: string[],
   enabled: boolean,
-  dispatch: React.Dispatch<Action>
+  dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>
 ) => {
+  const errorTitle = enabled
+    ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(ids.length)
+    : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(ids.length);
+
   try {
     dispatch({ type: 'updateLoading', ids, isLoading: true });
-    const updatedRules = await enableRules({ ids, enabled });
-    dispatch({ type: 'updateRules', rules: updatedRules });
-  } catch {
-    // TODO Add error toast support to actions (and @throw jsdoc to api calls)
+
+    const response = await enableRules({ ids, enabled });
+    const { rules, errors } = bucketRulesResponse(response);
+
+    dispatch({ type: 'updateRules', rules });
+
+    if (errors.length > 0) {
+      displayErrorToast(
+        errorTitle,
+        errors.map(e => e.error.message),
+        dispatchToaster
+      );
+    }
+  } catch (e) {
+    displayErrorToast(errorTitle, [e.message], dispatchToaster);
     dispatch({ type: 'updateLoading', ids, isLoading: false });
   }
 };
