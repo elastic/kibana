@@ -12,14 +12,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   describe('security feature controls', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
-      await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
-        ensureCurrentUrl: false,
-      });
+      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.settings.clickKibanaSettings();
       await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
+      await browser.refresh();
     });
 
     after(async () => {

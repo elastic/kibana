@@ -68,6 +68,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   describe('application status management', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('settings');
+      await PageObjects.settings.clickKibanaSettings();
       await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
       await browser.refresh();
     });
