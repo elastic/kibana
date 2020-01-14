@@ -14,7 +14,7 @@ export const DocumentFieldsHeader = () => {
     <EuiText size="s" color="subdued">
       <FormattedMessage
         id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
-        defaultMessage="Define the fields you expect your indexed documents to have. {docsLink}"
+        defaultMessage="Define the fields for your indexed documents. {docsLink}"
         values={{
           docsLink: (
             <EuiLink href={documentationService.getMappingTypesLink()} target="_blank">
