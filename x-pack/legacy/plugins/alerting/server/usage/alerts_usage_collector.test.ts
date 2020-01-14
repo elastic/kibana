@@ -9,7 +9,7 @@ import { registerAlertsUsageCollector } from './alerts_usage_collector';
 import { AlertTypeRegistry } from '../alert_type_registry';
 import { taskManagerMock } from '../../../task_manager/server/task_manager.mock';
 import { TaskRunnerFactory } from '../task_runner';
-const taskManager = taskManagerMock.create();
+const taskManager = taskManagerMock.setup();
 
 const alertTypeRegistryParams = {
   taskManager,

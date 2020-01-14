@@ -11,7 +11,7 @@ import { taskManagerMock } from '../../../task_manager/server/task_manager.mock'
 import { TaskRunnerFactory, ActionExecutor } from '../lib';
 import { configUtilsMock } from '../actions_config.mock';
 
-const mockTaskManager = taskManagerMock.create();
+const mockTaskManager = taskManagerMock.setup();
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
   taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
