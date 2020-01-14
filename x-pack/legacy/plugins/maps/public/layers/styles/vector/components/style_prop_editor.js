@@ -34,6 +34,14 @@ export class StylePropEditor extends Component {
     }
   };
 
+  _onFieldMetaOptionsChange = fieldMetaOptions => {
+    const options = {
+      ...this.props.styleProperty.getOptions(),
+      fieldMetaOptions,
+    };
+    this.props.onDynamicStyleChange(this.props.styleProperty.getStyleName(), options);
+  };
+
   renderStaticDynamicSelect() {
     const options = [
       {
@@ -71,6 +79,10 @@ export class StylePropEditor extends Component {
   }
 
   render() {
+    const fieldMetaOptionsPopover = this.props.styleProperty.renderFieldMetaPopover(
+      this._onFieldMetaOptionsChange
+    );
+
     return (
       <EuiFormRow
         label={getVectorStyleLabel(this.props.styleProperty.getStyleName())}
@@ -80,6 +92,7 @@ export class StylePropEditor extends Component {
           {React.cloneElement(this.props.children, {
             staticDynamicSelect: this.renderStaticDynamicSelect(),
           })}
+          {fieldMetaOptionsPopover}
         </Fragment>
       </EuiFormRow>
     );

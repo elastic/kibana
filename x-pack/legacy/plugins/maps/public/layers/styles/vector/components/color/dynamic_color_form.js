@@ -10,7 +10,6 @@ import { FieldSelect } from '../field_select';
 import { ColorMapSelect } from './color_map_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
-import { OrdinalFieldMetaOptionsPopover } from '../ordinal_field_meta_options_popover';
 import { COLOR_GRADIENTS, COLOR_PALETTES_INPUTS } from '../../../color_utils';
 import { i18n } from '@kbn/i18n';
 
@@ -50,14 +49,6 @@ export class DynamicColorForm extends React.Component {
       this.setState({ colorMapType });
     }
   }
-
-  _onFieldMetaOptionsChange = fieldMetaOptions => {
-    const options = {
-      ...this.props.styleProperty.getOptions(),
-      fieldMetaOptions,
-    };
-    this.props.onDynamicStyleChange(this.props.styleProperty.getStyleName(), options);
-  };
 
   _getColorSelector() {
     const { onDynamicStyleChange, styleProperty } = this.props;
@@ -146,14 +137,6 @@ export class DynamicColorForm extends React.Component {
 
     const colorSelect = this._getColorSelector();
 
-    const fieldMetaOptionsPopover =
-      this.state.colorMapType === COLOR_MAP_TYPE.ORDINAL && styleProperty.supportsFieldMeta() ? (
-        <OrdinalFieldMetaOptionsPopover
-          styleProperty={this.props.styleProperty}
-          onChange={this._onFieldMetaOptionsChange}
-        />
-      ) : null;
-
     return (
       <Fragment>
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
@@ -169,7 +152,6 @@ export class DynamicColorForm extends React.Component {
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         {colorSelect}
-        {fieldMetaOptionsPopover}
       </Fragment>
     );
   }
