@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface IStackframeBase {
-  filename: string;
+type IStackframeBase = {
   function?: string;
   library_frame?: boolean;
   exclude_from_grouping?: boolean;
@@ -19,13 +18,13 @@ interface IStackframeBase {
   line: {
     number: number;
   };
-}
+} & ({ classname: string } | { filename: string });
 
-export interface IStackframeWithLineContext extends IStackframeBase {
+export type IStackframeWithLineContext = IStackframeBase & {
   line: {
     number: number;
     context: string;
   };
-}
+};
 
 export type IStackframe = IStackframeBase | IStackframeWithLineContext;

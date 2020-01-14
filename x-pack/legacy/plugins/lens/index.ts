@@ -11,6 +11,7 @@ import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import mappings from './mappings.json';
 import { PLUGIN_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from './common';
 import { lensServerPlugin } from './server';
+import { getTaskManagerSetup, getTaskManagerStart } from '../task_manager/server';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -64,6 +65,12 @@ export const lens: LegacyPluginInitializer = kibana => {
         savedObjects: server.savedObjects,
         config: server.config(),
         server,
+        taskManager: getTaskManagerSetup(server)!,
+      });
+
+      plugin.start(kbnServer.newPlatform.start.core, {
+        server,
+        taskManager: getTaskManagerStart(server)!,
       });
 
       server.events.on('stop', () => {
