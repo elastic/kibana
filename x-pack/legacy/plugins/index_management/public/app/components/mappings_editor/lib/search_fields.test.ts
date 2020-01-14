@@ -132,8 +132,8 @@ describe('Search fields', () => {
 
     const result = searchFields(searchTerm, allFields);
     expect(result.length).toBe(2);
-    expect(result[0].field.path).toEqual(field1.path);
-    expect(result[1].field.path).toEqual(field2.path);
+    expect(result[0].field.path).toEqual(field2.path);
+    expect(result[1].field.path).toEqual(field1.path);
   });
 
   test('should refine search with multiple terms', () => {
