@@ -29,16 +29,16 @@ export default function({ getService, getPageObjects }) {
 
   describe('date_nanos', function() {
     before(async function() {
-      await security.testUser.setRoles(['kibana_user', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
+      await security.testUser.setRoles(['kibana_user', 'kibana_date_nanos']);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async function unloadMakelogs() {
-      await esArchiver.unload('date_nanos');
       await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos');
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function() {

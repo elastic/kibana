@@ -42,8 +42,8 @@ export default function({ getService, getPageObjects }) {
     });
 
     after(async function unloadMakelogs() {
-      await esArchiver.unload('date_nanos');
       await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos');
     });
 
     it('displays predessors - anchor - successors in right order ', async function() {

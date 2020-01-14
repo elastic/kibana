@@ -82,8 +82,10 @@ export async function createTestUserService(
       });
 
       if (browser && testSubjects) {
-        await browser.refresh();
-        await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);
+        if (await testSubjects.exists('kibanaChrome')) {
+          await browser.refresh();
+          await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);
+        }
       }
     }
 
