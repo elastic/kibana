@@ -53,7 +53,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
     }
 
-    public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
+    public async pageUrlContains(value: string, expected: boolean = true) {
       retry.try(async () => {
         expect(await uptimeService.urlContains(value)).to.eql(expected);
       });
