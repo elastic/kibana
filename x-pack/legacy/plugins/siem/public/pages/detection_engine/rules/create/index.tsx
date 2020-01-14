@@ -27,26 +27,17 @@ import * as i18n from './translations';
 
 const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
 
-const ResizeEuiPanel = styled(EuiPanel)<{
-  height?: number;
+const MyEuiPanel = styled(EuiPanel)<{
+  zIndex?: number;
 }>`
+  position: relative;
+  z-index: ${props => props.zIndex}; /* ugly fix to allow searchBar to overflow the EuiPanel */
+
   .euiAccordion__iconWrapper {
     display: none;
   }
   .euiAccordion__childWrapper {
-    height: ${props => (props.height !== -1 ? `${props.height}px !important` : 'auto')};
-  }
-  .euiAccordion__button {
-    cursor: default !important;
-    &:hover {
-      text-decoration: none !important;
-    }
-  }
-`;
-
-const MyEuiPanel = styled(EuiPanel)`
-  .euiAccordion__iconWrapper {
-    display: none;
+    overflow: visible;
   }
   .euiAccordion__button {
     cursor: default !important;
@@ -64,7 +55,6 @@ export const CreateRuleComponent = React.memo(() => {
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
-  const [heightAccordion, setHeightAccordion] = useState(-1);
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
@@ -239,7 +229,7 @@ export const CreateRuleComponent = React.memo(() => {
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
         />
-        <ResizeEuiPanel height={heightAccordion}>
+        <MyEuiPanel zIndex={3}>
           <EuiAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
@@ -259,18 +249,19 @@ export const CreateRuleComponent = React.memo(() => {
               )
             }
           >
-            <EuiHorizontalRule margin="xs" />
+            <EuiHorizontalRule margin="m" />
             <StepDefineRule
+              addPadding={true}
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
-              resizeParentContainer={height => setHeightAccordion(height)}
+              descriptionDirection="row"
             />
           </EuiAccordion>
-        </ResizeEuiPanel>
-        <EuiSpacer size="s" />
-        <MyEuiPanel>
+        </MyEuiPanel>
+        <EuiSpacer size="l" />
+        <MyEuiPanel zIndex={2}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.aboutRule}
@@ -290,8 +281,10 @@ export const CreateRuleComponent = React.memo(() => {
               )
             }
           >
-            <EuiHorizontalRule margin="xs" />
+            <EuiHorizontalRule margin="m" />
             <StepAboutRule
+              addPadding={true}
+              descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -299,8 +292,8 @@ export const CreateRuleComponent = React.memo(() => {
             />
           </EuiAccordion>
         </MyEuiPanel>
-        <EuiSpacer size="s" />
-        <MyEuiPanel>
+        <EuiSpacer size="l" />
+        <MyEuiPanel zIndex={1}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.scheduleRule}
@@ -320,8 +313,10 @@ export const CreateRuleComponent = React.memo(() => {
               )
             }
           >
-            <EuiHorizontalRule margin="xs" />
+            <EuiHorizontalRule margin="m" />
             <StepScheduleRule
+              addPadding={true}
+              descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}

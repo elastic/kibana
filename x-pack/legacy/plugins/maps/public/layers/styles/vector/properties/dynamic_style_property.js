@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import { STYLE_TYPE } from '../../../../../common/constants';
-import { scaleValue } from '../style_util';
+import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
@@ -29,6 +29,13 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   getField() {
     return this._field;
+  }
+
+  getComputedFieldName() {
+    if (!this.isComplete()) {
+      return null;
+    }
+    return getComputedFieldName(this._styleName, this.getField().getName());
   }
 
   isDynamic() {

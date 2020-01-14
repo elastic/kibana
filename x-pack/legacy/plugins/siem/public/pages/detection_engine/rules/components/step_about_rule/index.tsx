@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual, get } from 'lodash/fp';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
@@ -22,6 +22,7 @@ import { isUrlInvalid } from './helpers';
 import { schema } from './schema';
 import * as I18n from './translations';
 import { PickTimeline } from '../pick_timeline';
+import { StepContentWrapper } from '../step_content_wrapper';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -33,64 +34,67 @@ const TagContainer = styled.div`
   margin-top: 16px;
 `;
 
-export const StepAboutRule = memo<StepAboutRuleProps>(
-  ({
-    defaultValues,
-    descriptionDirection = 'row',
-    isReadOnlyView,
-    isUpdateView = false,
-    isLoading,
-    setForm,
-    setStepData,
-  }) => {
-    const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
+const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
+  addPadding = false,
+  defaultValues,
+  descriptionDirection = 'row',
+  isReadOnlyView,
+  isUpdateView = false,
+  isLoading,
+  setForm,
+  setStepData,
+}) => {
+  const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
 
-    const { form } = useForm({
-      defaultValue: myStepData,
-      options: { stripEmptyFields: false },
-      schema,
-    });
+  const { form } = useForm({
+    defaultValue: myStepData,
+    options: { stripEmptyFields: false },
+    schema,
+  });
 
-    const onSubmit = useCallback(async () => {
-      if (setStepData) {
-        setStepData(RuleStep.aboutRule, null, false);
-        const { isValid, data } = await form.submit();
-        if (isValid) {
-          setStepData(RuleStep.aboutRule, data, isValid);
-          setMyStepData({ ...data, isNew: false } as AboutStepRule);
-        }
+  const onSubmit = useCallback(async () => {
+    if (setStepData) {
+      setStepData(RuleStep.aboutRule, null, false);
+      const { isValid, data } = await form.submit();
+      if (isValid) {
+        setStepData(RuleStep.aboutRule, data, isValid);
+        setMyStepData({ ...data, isNew: false } as AboutStepRule);
       }
-    }, [form]);
+    }
+  }, [form]);
 
-    useEffect(() => {
-      const { isNew, ...initDefaultValue } = myStepData;
-      if (defaultValues != null && !isEqual(initDefaultValue, defaultValues)) {
-        const myDefaultValues = {
-          ...defaultValues,
-          isNew: false,
-        };
-        setMyStepData(myDefaultValues);
-        if (!isReadOnlyView) {
-          Object.keys(schema).forEach(key => {
-            const val = get(key, myDefaultValues);
-            if (val != null) {
-              form.setFieldValue(key, val);
-            }
-          });
-        }
+  useEffect(() => {
+    const { isNew, ...initDefaultValue } = myStepData;
+    if (defaultValues != null && !isEqual(initDefaultValue, defaultValues)) {
+      const myDefaultValues = {
+        ...defaultValues,
+        isNew: false,
+      };
+      setMyStepData(myDefaultValues);
+      if (!isReadOnlyView) {
+        Object.keys(schema).forEach(key => {
+          const val = get(key, myDefaultValues);
+          if (val != null) {
+            form.setFieldValue(key, val);
+          }
+        });
       }
-    }, [defaultValues]);
+    }
+  }, [defaultValues]);
 
-    useEffect(() => {
-      if (setForm != null) {
-        setForm(RuleStep.aboutRule, form);
-      }
-    }, [form]);
+  useEffect(() => {
+    if (setForm != null) {
+      setForm(RuleStep.aboutRule, form);
+    }
+  }, [form]);
 
-    return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView && myStepData != null ? (
+    <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
-    ) : (
-      <>
+    </StepContentWrapper>
+  ) : (
+    <>
+      <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepAboutRule">
           <CommonUseField
             path="name"
@@ -205,24 +209,26 @@ export const StepAboutRule = memo<StepAboutRuleProps>(
             }}
           </FormDataProvider>
         </Form>
-        {!isUpdateView && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="xs"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-                  {RuleI18n.CONTINUE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-      </>
-    );
-  }
-);
+      </StepContentWrapper>
+      {!isUpdateView && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+                {RuleI18n.CONTINUE}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
+  );
+};
+
+export const StepAboutRule = memo(StepAboutRuleComponent);

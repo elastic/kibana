@@ -10,6 +10,7 @@ import { CheckGeoType, SummaryType } from '../common';
 export const MonitorLocationType = t.partial({
   summary: SummaryType,
   geo: CheckGeoType,
+  timestamp: t.string,
 });
 
 // Typescript type for type checking
