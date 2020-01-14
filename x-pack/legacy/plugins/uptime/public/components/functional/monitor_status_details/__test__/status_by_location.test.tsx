@@ -9,7 +9,7 @@ import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 import { StatusByLocations } from '../';
 
-describe('StatusByLocation component', () => {
+describe.skip('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];
 
   it('renders when up in all locations', () => {
