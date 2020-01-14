@@ -39,7 +39,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'count of kibana_sample_data_logs:geo.src',
               name: '__kbnjoin__count_groupby_kibana_sample_data_logs.geo.src',
               origin: 'join',
             },
@@ -135,7 +134,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'bytes',
               name: 'bytes',
               origin: 'source',
             },
@@ -179,7 +177,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'Count',
               name: 'doc_count',
               origin: 'source',
             },
@@ -202,7 +199,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'sum of bytes',
               name: 'sum_of_bytes',
               origin: 'source',
             },
@@ -214,7 +210,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'Count',
               name: 'doc_count',
               origin: 'source',
             },
@@ -224,7 +219,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'Count',
               name: 'doc_count',
               origin: 'source',
             },

@@ -23,12 +23,7 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import {
-  SOURCE_DATA_ID_ORIGIN,
-  ES_GEO_GRID,
-  COUNT_PROP_LABEL,
-  COUNT_PROP_NAME,
-} from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID, COUNT_PROP_NAME } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
@@ -251,7 +246,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },
@@ -275,7 +269,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },
@@ -286,7 +279,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },
