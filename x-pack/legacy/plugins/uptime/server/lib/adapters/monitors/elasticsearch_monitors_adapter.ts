@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { INDEX_NAMES, UNNAMED_LOCATION } from '../../../../common/constants';
 import { MonitorChart, LocationDurationLine } from '../../../../common/graphql/types';
 import { getHistogramIntervalFormatted } from '../../helper';
 import { MonitorError, MonitorLocation } from '../../../../common/runtime_types';
@@ -334,7 +334,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
                       order: 'desc',
                     },
                   },
-                  _source: ['monitor', 'summary', 'observer'],
+                  _source: ['monitor', 'summary', 'observer', '@timestamp'],
                 },
               },
             },
@@ -347,27 +347,32 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     const locations = result?.aggregations?.location?.buckets ?? [];
 
     const getGeo = (locGeo: any) => {
-      const { name, location } = locGeo;
-      const latLon = location.trim().split(',');
-      return {
-        name,
-        location: {
-          lat: latLon[0],
-          lon: latLon[1],
-        },
-      };
+      if (locGeo) {
+        const { name, location } = locGeo;
+        const latLon = location.trim().split(',');
+        return {
+          name,
+          location: {
+            lat: latLon[0],
+            lon: latLon[1],
+          },
+        };
+      } else {
+        return {
+          name: UNNAMED_LOCATION,
+        };
+      }
     };
 
     const monLocs: MonitorLocation[] = [];
     locations.forEach((loc: any) => {
-      if (loc?.key !== '__location_missing__') {
-        const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
-        const location: MonitorLocation = {
-          summary: mostRecentLocation?.summary,
-          geo: getGeo(mostRecentLocation?.observer?.geo),
-        };
-        monLocs.push(location);
-      }
+      const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
+      const location: MonitorLocation = {
+        summary: mostRecentLocation?.summary,
+        geo: getGeo(mostRecentLocation?.observer?.geo),
+        timestamp: mostRecentLocation['@timestamp'],
+      };
+      monLocs.push(location);
     });
 
     return {
