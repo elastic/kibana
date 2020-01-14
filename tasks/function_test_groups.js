@@ -29,6 +29,21 @@ const TEST_TAGS = safeLoad(JOBS_YAML)
   .JOB.filter(id => id.startsWith('kibana-ciGroup'))
   .map(id => id.replace(/^kibana-/, ''));
 
+const getDefaultArgs = tag => {
+  return [
+    'scripts/functional_tests',
+    '--include-tag',
+    tag,
+    '--config',
+    'test/functional/config.js',
+    '--config',
+    'test/ui_capabilities/newsfeed_err/config.ts',
+    // '--config', 'test/functional/config.firefox.js',
+    '--bail',
+    '--debug',
+  ];
+};
+
 export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
   return {
     // include a run task for each test group
@@ -38,18 +53,8 @@ export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
         [`functionalTests_${tag}`]: {
           cmd: process.execPath,
           args: [
-            'scripts/functional_tests',
-            '--include-tag',
-            tag,
-            '--config',
-            'test/functional/config.js',
-            '--config',
-            'test/ui_capabilities/newsfeed_err/config.ts',
-            // '--config', 'test/functional/config.firefox.js',
-            '--bail',
-            '--debug',
-            '--kibana-install-dir',
-            kibanaInstallDir,
+            ...getDefaultArgs(tag),
+            ...(!!process.env.CODE_COVERAGE ? [] : ['--kibana-install-dir', kibanaInstallDir]),
           ],
         },
       }),

@@ -283,6 +283,7 @@ import rule273 from './splunk_detect_use_of_cmdexe_to_launch_script_interpreters
 import rule274 from './splunk_child_processes_of_spoolsvexe.json';
 import rule275 from './splunk_detect_psexec_with_accepteula_flag.json';
 import rule276 from './splunk_processes_created_by_netsh.json';
+import rule277 from './process_execution_via_wmi.json';
 
 export const rawRules = [
   rule1,
@@ -561,4 +562,5 @@ export const rawRules = [
   rule274,
   rule275,
   rule276,
+  rule277,
 ];

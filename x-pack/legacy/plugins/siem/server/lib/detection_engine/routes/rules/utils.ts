@@ -9,7 +9,13 @@ import { pickBy } from 'lodash/fp';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
 import { OutputRuleAlertRest } from '../../types';
-import { createBulkErrorObject, BulkError } from '../utils';
+import {
+  createBulkErrorObject,
+  BulkError,
+  createSuccessObject,
+  ImportSuccessError,
+  createImportErrorObject,
+} from '../utils';
 
 export const getIdError = ({
   id,
@@ -85,6 +91,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     references: alert.params.references,
     saved_id: alert.params.savedId,
     timeline_id: alert.params.timelineId,
+    timeline_title: alert.params.timelineTitle,
     meta: alert.params.meta,
     severity: alert.params.severity,
     updated_by: alert.updatedBy,
@@ -94,6 +101,21 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     threats: alert.params.threats,
     version: alert.params.version,
   });
+};
+
+export const transformRulesToNdjson = (rules: Array<Partial<OutputRuleAlertRest>>): string => {
+  if (rules.length !== 0) {
+    const rulesString = rules.map(rule => JSON.stringify(rule)).join('\n');
+    return `${rulesString}\n`;
+  } else {
+    return '';
+  }
+};
+
+export const transformAlertsToRules = (
+  alerts: RuleAlertType[]
+): Array<Partial<OutputRuleAlertRest>> => {
+  return alerts.map(alert => transformAlertToRule(alert));
 };
 
 export const transformFindAlertsOrError = (findResults: { data: unknown[] }): unknown | Boom => {
@@ -124,6 +146,23 @@ export const transformOrBulkError = (
       ruleId,
       statusCode: 500,
       message: 'Internal error transforming',
+    });
+  }
+};
+
+export const transformOrImportError = (
+  ruleId: string,
+  alert: unknown,
+  existingImportSuccessError: ImportSuccessError
+): ImportSuccessError => {
+  if (isAlertType(alert)) {
+    return createSuccessObject(existingImportSuccessError);
+  } else {
+    return createImportErrorObject({
+      ruleId,
+      statusCode: 500,
+      message: 'Internal error transforming',
+      existingImportSuccessError,
     });
   }
 };

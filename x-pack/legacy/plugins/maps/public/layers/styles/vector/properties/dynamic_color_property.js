@@ -55,6 +55,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
   }
 
+  syncLabelBorderColorWithMb(mbLayerId, mbMap) {
+    const color = this._getMbColor();
+    mbMap.setPaintProperty(mbLayerId, 'text-halo-color', color);
+  }
+
   isCustomColorRamp() {
     return this._options.useCustomColorRamp;
   }
@@ -146,28 +151,14 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       );
     }
 
-    const loadIsLinesOnly = () => {
-      return isLinesOnly;
-    };
-
-    const loadIsPointsOnly = () => {
-      return isPointsOnly;
-    };
-
-    const getColorForProperty = (styleProperty, isLinesOnly) => {
-      if (isLinesOnly) {
-        return color;
-      }
-
-      return this.getStyleName() === styleProperty ? color : 'none';
-    };
-
+    const fillColor = this.getStyleName() === VECTOR_STYLES.FILL_COLOR ? color : 'none';
     return (
       <VectorIcon
+        fillColor={fillColor}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
+        strokeColor={color}
         symbolId={symbolId}
-        loadIsPointsOnly={loadIsPointsOnly}
-        loadIsLinesOnly={loadIsLinesOnly}
-        getColorForProperty={getColorForProperty}
       />
     );
   }
