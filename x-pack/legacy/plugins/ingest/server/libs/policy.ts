@@ -279,7 +279,7 @@ export class PolicyLib {
         );
       } catch (err) {
         // Log error but do not stop kbn to boot
-        this.libs.framework.log(err);
+        this.libs.framework.log(['error'], err);
       }
     }
   }
