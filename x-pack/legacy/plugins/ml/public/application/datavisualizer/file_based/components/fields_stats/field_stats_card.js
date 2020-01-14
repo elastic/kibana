@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldTypeIcon } from '../../../../components/field_type_icon';
@@ -113,16 +113,29 @@ export function FieldStatsCard({ field }) {
                     {field.top_hits.map(({ count, value }) => {
                       const pcnt = Math.round((count / field.count) * 100 * 100) / 100;
                       return (
-                        <div key={value} className="top-value">
-                          <div className="field-label">{value}&nbsp;</div>
-                          <div className="top-value-bar-holder">
-                            <div
-                              className={`top-value-bar ${type}`}
-                              style={{ width: `${pcnt}%` }}
-                            />
-                          </div>
-                          <div className="count-label">{pcnt}%</div>
-                        </div>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" key={value}>
+                          <EuiFlexItem
+                            grow={false}
+                            style={{ width: 100 }}
+                            className="eui-textTruncate"
+                          >
+                            <EuiText size="xs" textAlign="right" color="subdued">
+                              {value}&nbsp;
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiProgress value={count} max={field.count} color="primary" size="m" />
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                            style={{ width: 70 }}
+                            className="eui-textTruncate"
+                          >
+                            <EuiText size="xs" textAlign="left" color="subdued">
+                              {pcnt}%
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       );
                     })}
                   </div>

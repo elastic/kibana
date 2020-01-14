@@ -30,9 +30,9 @@ export class FieldsStats extends Component {
   render() {
     return (
       <div className="fields-stats">
-        <EuiFlexGrid gutterSize="m" style={{ minWidth: '360px' }}>
+        <EuiFlexGrid gutterSize="m">
           {this.state.fields.map(f => (
-            <EuiFlexItem key={f.name}>
+            <EuiFlexItem key={f.name} style={{ minWidth: '360px' }}>
               <FieldStatsCard field={f} />
             </EuiFlexItem>
           ))}
