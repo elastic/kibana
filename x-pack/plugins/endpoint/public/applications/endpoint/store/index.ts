@@ -5,17 +5,18 @@
  */
 
 import { createStore, compose, applyMiddleware } from 'redux';
-import { endpointAppReducers } from './reducers';
-import { endpointAppSagas } from './sagas';
+import { CoreStart } from 'kibana/public';
+import { appSagaFactory } from './saga';
+import { appReducer } from './reducer';
 
-export { GlobalState } from './reducers';
+export { GlobalState } from './reducer';
 
 const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-export const appStoreFactory = () => {
+export const appStoreFactory = (coreStart: CoreStart) => {
   const store = createStore(
-    endpointAppReducers,
-    composeWithReduxDevTools(applyMiddleware(endpointAppSagas))
+    appReducer,
+    composeWithReduxDevTools(applyMiddleware(appSagaFactory(coreStart)))
   );
   return store;
 };

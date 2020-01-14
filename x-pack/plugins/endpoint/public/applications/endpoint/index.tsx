@@ -9,8 +9,11 @@ import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { Route, BrowserRouter, Switch } from 'react-router-dom';
+import { Dispatch } from 'redux';
 import { appStoreFactory } from './store';
-import { AppDispatch } from './store/actions/app';
+
+// FIXME: temporary until we figure out if redux can be upgraded to use hooks
+let dispatch: Dispatch;
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -18,22 +21,13 @@ import { AppDispatch } from './store/actions/app';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
 
-  const store = appStoreFactory();
-  const dispatch: AppDispatch = store.dispatch;
-
-  dispatch({
-    type: 'appWillMount',
-    payload: {
-      coreStartServices: coreStart,
-      appBasePath,
-    },
-  });
+  const store = appStoreFactory(coreStart);
+  dispatch = store.dispatch;
 
   ReactDOM.render(<AppRoot basename={appBasePath} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-    dispatch({ type: 'appDidUnmount' });
   };
 }
 
@@ -56,14 +50,18 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename }) 
         />
         <Route
           path="/management"
-          render={() => (
-            <h1 data-test-subj="endpointManagement">
-              <FormattedMessage
-                id="xpack.endpoint.endpointManagement"
-                defaultMessage="Manage Endpoints"
-              />
-            </h1>
-          )}
+          render={() => {
+            dispatch({ type: 'userEnteredEndpointListPage' });
+
+            return (
+              <h1 data-test-subj="endpointManagement">
+                <FormattedMessage
+                  id="xpack.endpoint.endpointManagement"
+                  defaultMessage="Manage Endpoints"
+                />
+              </h1>
+            );
+          }}
         />
         <Route
           render={() => (

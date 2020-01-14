@@ -13,7 +13,13 @@ interface StoreAction extends AnyAction {
 }
 
 interface QueuedAction {
+  /**
+   * The Redux action that was dispatched
+   */
   action: StoreAction;
+  /**
+   * The Global state at the time the action was dispatched
+   */
   state: GlobalState;
 }
 
