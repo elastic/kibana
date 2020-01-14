@@ -9,6 +9,7 @@ exports[`after fetch hideWriteControls 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    headingId="dashboardListingHeading"
     initialFilter=""
     listingLimit={1}
     noItemsFragment={
@@ -16,13 +17,15 @@ exports[`after fetch hideWriteControls 1`] = `
         <EuiEmptyPrompt
           iconType="visualizeApp"
           title={
-            <h2>
+            <h1
+              id="dashboardListingHeading"
+            >
               <FormattedMessage
                 defaultMessage="Looks like you don't have any dashboards."
                 id="kbn.dashboard.listing.noItemsMessage"
                 values={Object {}}
               />
-            </h2>
+            </h1>
           }
         />
       </div>
@@ -63,6 +66,7 @@ exports[`after fetch initialFilter 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    headingId="dashboardListingHeading"
     initialFilter="my dashboard"
     listingLimit={1000}
     noItemsFragment={
@@ -114,13 +118,15 @@ exports[`after fetch initialFilter 1`] = `
           }
           iconType="dashboardApp"
           title={
-            <h2>
+            <h1
+              id="dashboardListingHeading"
+            >
               <FormattedMessage
                 defaultMessage="Create your first dashboard"
                 id="kbn.dashboard.listing.createNewDashboard.title"
                 values={Object {}}
               />
-            </h2>
+            </h1>
           }
         />
       </div>
@@ -161,6 +167,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    headingId="dashboardListingHeading"
     initialFilter=""
     listingLimit={1}
     noItemsFragment={
@@ -212,13 +219,15 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           }
           iconType="dashboardApp"
           title={
-            <h2>
+            <h1
+              id="dashboardListingHeading"
+            >
               <FormattedMessage
                 defaultMessage="Create your first dashboard"
                 id="kbn.dashboard.listing.createNewDashboard.title"
                 values={Object {}}
               />
-            </h2>
+            </h1>
           }
         />
       </div>
@@ -259,6 +268,7 @@ exports[`after fetch renders table rows 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    headingId="dashboardListingHeading"
     initialFilter=""
     listingLimit={1000}
     noItemsFragment={
@@ -310,13 +320,15 @@ exports[`after fetch renders table rows 1`] = `
           }
           iconType="dashboardApp"
           title={
-            <h2>
+            <h1
+              id="dashboardListingHeading"
+            >
               <FormattedMessage
                 defaultMessage="Create your first dashboard"
                 id="kbn.dashboard.listing.createNewDashboard.title"
                 values={Object {}}
               />
-            </h2>
+            </h1>
           }
         />
       </div>
@@ -357,6 +369,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    headingId="dashboardListingHeading"
     initialFilter=""
     listingLimit={1}
     noItemsFragment={
@@ -408,13 +421,15 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           }
           iconType="dashboardApp"
           title={
-            <h2>
+            <h1
+              id="dashboardListingHeading"
+            >
               <FormattedMessage
                 defaultMessage="Create your first dashboard"
                 id="kbn.dashboard.listing.createNewDashboard.title"
                 values={Object {}}
               />
-            </h2>
+            </h1>
           }
         />
       </div>
@@ -455,6 +470,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
     entityName="dashboard"
     entityNamePlural="dashboards"
     findItems={[Function]}
+    headingId="dashboardListingHeading"
     initialFilter=""
     listingLimit={1000}
     noItemsFragment={
@@ -506,13 +522,15 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
           }
           iconType="dashboardApp"
           title={
-            <h2>
+            <h1
+              id="dashboardListingHeading"
+            >
               <FormattedMessage
                 defaultMessage="Create your first dashboard"
                 id="kbn.dashboard.listing.createNewDashboard.title"
                 values={Object {}}
               />
-            </h2>
+            </h1>
           }
         />
       </div>

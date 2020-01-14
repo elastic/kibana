@@ -6,15 +6,21 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
+import { MonitorLocations } from '../../../../common/runtime_types';
 
+// These height/width values are used to make sure map is in center of panel
+// And to make sure, it doesn't take too much space
 const MapPanel = styled.div`
-  height: 400px;
+  height: 240px;
   width: 520px;
+  margin-right: 20px;
 `;
 
 interface LocationMapProps {
-  monitorLocations: any;
+  monitorLocations: MonitorLocations;
 }
 
 export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
@@ -31,8 +37,15 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
     });
   }
   return (
-    <MapPanel>
-      <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
-    </MapPanel>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <LocationStatusTags locations={monitorLocations?.locations || []} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <MapPanel>
+          <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
+        </MapPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

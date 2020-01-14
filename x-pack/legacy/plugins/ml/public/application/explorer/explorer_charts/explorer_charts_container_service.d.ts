@@ -13,6 +13,9 @@ export declare interface ExplorerChartsData {
 
 export declare const getDefaultChartsData: () => ExplorerChartsData;
 
-export declare const explorerChartsContainerServiceFactory: (
-  callback: (data: ExplorerChartsData) => void
-) => (anomalyRecords: any[], earliestMs: number, latestMs: number) => void;
+export declare const anomalyDataChange: (
+  anomalyRecords: any[],
+  earliestMs: number,
+  latestMs: number,
+  severity?: number
+) => void;
