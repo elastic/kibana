@@ -261,7 +261,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.objectLongDescription"
-          defaultMessage="Object fields can contain children. To allow child objects to be queried independently of one another, use the {nested}."
+          defaultMessage="Object fields can contain children, which are queried as a flattened list. To query child objects independently, use the {nested}."
           values={{
             nested: (
               <EuiLink href={documentationService.getTypeDocLink('nested')} target="_blank">
@@ -290,7 +290,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.nestedLongDescription"
-          defaultMessage="Like {objects}, nested fields can contain children. The difference is that their child objects can be queried independently of one another."
+          defaultMessage="Like {objects}, nested fields can contain children. The difference is that you can query their child objects independently."
           values={{
             objects: (
               <EuiLink href={documentationService.getTypeDocLink('object')} target="_blank">
@@ -319,7 +319,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.rankFeatureLongDescription"
-          defaultMessage="Ranke feature fields accept numbers that will boost documents in {rankFeatureQuery}."
+          defaultMessage="The rank feature field accepts a number that will boost documents in {rankFeatureQuery}."
           values={{
             rankFeatureQuery: (
               <EuiLink href={documentationService.getRankFeatureQueryLink()} target="_blank">
@@ -348,7 +348,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.rankFeaturesLongDescription"
-          defaultMessage="Ranke features fields accept numeric feature vectors that will boost documents in {rankFeatureQuery}."
+          defaultMessage="The rank features field accepts numeric vectors that will boost documents in {rankFeatureQuery}."
           values={{
             rankFeatureQuery: (
               <EuiLink href={documentationService.getRankFeatureQueryLink()} target="_blank">
