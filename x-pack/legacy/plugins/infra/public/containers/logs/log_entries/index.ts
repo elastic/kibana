@@ -67,6 +67,8 @@ export interface LogEntriesStateParams {
   isReloading: boolean;
   isLoadingMore: boolean;
   lastLoadedTime: Date | null;
+  hasMoreBeforeStart: boolean;
+  hasMoreAfterEnd: boolean;
 }
 
 export interface LogEntriesCallbacks {
@@ -84,6 +86,8 @@ export const logEntriesInitialState: LogEntriesStateParams = {
   isReloading: true,
   isLoadingMore: false,
   lastLoadedTime: null,
+  hasMoreBeforeStart: false,
+  hasMoreAfterEnd: false,
 };
 
 const cleanDuplicateItems = (entriesA: LogEntry[], entriesB: LogEntry[]) => {
@@ -291,6 +295,11 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
         entries: action.payload.entries,
         lastLoadedTime: new Date(),
         isReloading: false,
+
+        // Be optimistic. If any of the before/after requests comes empty, set
+        // the corresponding flag to `false`
+        hasMoreBeforeStart: true,
+        hasMoreAfterEnd: true,
       };
     case Action.ReceiveEntriesBefore: {
       const newEntries = action.payload.entries;
@@ -299,7 +308,9 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       const update = {
         entries: [...newEntries, ...prevEntries],
         isLoadingMore: false,
-        topCursor: action.payload.topCursor,
+        hasMoreBeforeStart: newEntries.length > 0,
+        // Keep the previous cursor if request comes empty, to easily extend the range.
+        topCursor: newEntries.length > 0 ? action.payload.topCursor : prevState.topCursor,
         lastLoadedTime: new Date(),
       };
 
@@ -312,7 +323,9 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       const update = {
         entries: [...prevEntries, ...newEntries],
         isLoadingMore: false,
-        bottomCursor: action.payload.bottomCursor,
+        hasMoreAfterEnd: newEntries.length > 0,
+        // Keep the previous cursor if request comes empty, to easily extend the range.
+        bottomCursor: newEntries.length > 0 ? action.payload.bottomCursor : prevState.bottomCursor,
         lastLoadedTime: new Date(),
       };
 
