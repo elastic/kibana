@@ -15,5 +15,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./saved_search_job'));
     loadTestFile(require.resolve('./advanced_job'));
     loadTestFile(require.resolve('./single_metric_viewer'));
+    loadTestFile(require.resolve('./anomaly_explorer'));
   });
 }
