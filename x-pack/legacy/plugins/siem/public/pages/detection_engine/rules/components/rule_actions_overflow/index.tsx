@@ -85,26 +85,26 @@ const RuleActionsOverflowComponent = ({
 
   return (
     <>
-      <EuiToolTip position="top" content={i18n.ALL_ACTIONS}>
-        <EuiPopover
-          anchorPosition="leftCenter"
-          button={
+      <EuiPopover
+        anchorPosition="leftCenter"
+        button={
+          <EuiToolTip position="top" content={i18n.ALL_ACTIONS}>
             <EuiButtonIcon
               iconType="boxesHorizontal"
               aria-label={i18n.ALL_ACTIONS}
               isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             />
-          }
-          closePopover={() => setIsPopoverOpen(false)}
-          id="ruleActionsOverflow"
-          isOpen={isPopoverOpen}
-          ownFocus={true}
-          panelPaddingSize="none"
-        >
-          <EuiContextMenuPanel items={actions} />
-        </EuiPopover>
-      </EuiToolTip>
+          </EuiToolTip>
+        }
+        closePopover={() => setIsPopoverOpen(false)}
+        id="ruleActionsOverflow"
+        isOpen={isPopoverOpen}
+        ownFocus={true}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel items={actions} />
+      </EuiPopover>
       <RuleDownloader
         filename={`${i18nActions.EXPORT_FILENAME}.ndjson`}
         rules={rulesToExport}
