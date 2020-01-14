@@ -52,6 +52,8 @@ export interface EditorFrameProps {
 export function EditorFrame(props: EditorFrameProps) {
   const [state, dispatch] = useReducer(reducer, props, getInitialState);
   const { onError } = props;
+  const activeVisualization =
+    state.visualization.activeId && props.visualizationMap[state.visualization.activeId];
 
   const allLoaded = Object.values(state.datasourceStates).every(
     ({ isLoading }) => typeof isLoading === 'boolean' && !isLoading
@@ -125,7 +127,20 @@ export function EditorFrame(props: EditorFrameProps) {
 
       return newLayerId;
     },
-    removeLayers: (layerIds: string[]) => {
+
+    removeLayers(layerIds: string[]) {
+      if (activeVisualization && activeVisualization.removeLayer && state.visualization.state) {
+        dispatch({
+          type: 'UPDATE_VISUALIZATION_STATE',
+          visualizationId: activeVisualization.id,
+          newState: layerIds.reduce(
+            (acc, layerId) =>
+              activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
+            state.visualization.state
+          ),
+        });
+      }
+
       layerIds.forEach(layerId => {
         const layerDatasourceId = Object.entries(props.datasourceMap).find(
           ([datasourceId, datasource]) =>
@@ -158,16 +173,15 @@ export function EditorFrame(props: EditorFrameProps) {
 
   // Initialize visualization as soon as all datasources are ready
   useEffect(() => {
-    if (allLoaded && state.visualization.state === null && state.visualization.activeId !== null) {
-      const initialVisualizationState = props.visualizationMap[
-        state.visualization.activeId
-      ].initialize(framePublicAPI);
+    if (allLoaded && state.visualization.state === null && activeVisualization) {
+      const initialVisualizationState = activeVisualization.initialize(framePublicAPI);
       dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
+        visualizationId: activeVisualization.id,
         newState: initialVisualizationState,
       });
     }
-  }, [allLoaded, state.visualization.activeId, state.visualization.state]);
+  }, [allLoaded, activeVisualization, state.visualization.state]);
 
   // The frame needs to call onChange every time its internal state changes
   useEffect(() => {
@@ -176,11 +190,7 @@ export function EditorFrame(props: EditorFrameProps) {
         ? props.datasourceMap[state.activeDatasourceId]
         : undefined;
 
-    const visualization = state.visualization.activeId
-      ? props.visualizationMap[state.visualization.activeId]
-      : undefined;
-
-    if (!activeDatasource || !visualization) {
+    if (!activeDatasource || !activeVisualization) {
       return;
     }
 
@@ -208,13 +218,14 @@ export function EditorFrame(props: EditorFrameProps) {
         }),
         {}
       ),
-      visualization,
+      visualization: activeVisualization,
       state,
       framePublicAPI,
     });
 
     props.onChange({ filterableIndexPatterns: indexPatterns, doc });
   }, [
+    activeVisualization,
     state.datasourceStates,
     state.visualization,
     props.query,
@@ -248,6 +259,7 @@ export function EditorFrame(props: EditorFrameProps) {
       configPanel={
         allLoaded && (
           <ConfigPanelWrapper
+            activeDatasourceId={state.activeDatasourceId!}
             datasourceMap={props.datasourceMap}
             datasourceStates={state.datasourceStates}
             visualizationMap={props.visualizationMap}
