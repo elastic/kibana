@@ -63,6 +63,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
         },
       }
     }
+    tableLayout="fixed"
   />
 </Fragment>
 `;
@@ -166,6 +167,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         },
       }
     }
+    tableLayout="fixed"
   />
 </Fragment>
 `;
