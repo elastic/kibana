@@ -45,31 +45,17 @@ export const DocumentFields = React.memo(() => {
     dispatch({ type: 'search:update', value });
   }, []);
 
-  const goBackToSearchResult = useCallback(() => {
-    dispatch({
-      type: 'search:setSelectedField',
-      value: null,
-    });
-  }, []);
-
   const searchTerm = search.term.trim();
 
   return (
     <>
-      <DocumentFieldsHeader
-        searchValue={search.term}
-        onSearchChange={onSearchChange}
-        goBackToSearchResult={search.selected === null ? undefined : goBackToSearchResult}
-      />
+      <DocumentFieldsHeader searchValue={search.term} onSearchChange={onSearchChange} />
       <EuiSpacer size="m" />
-      {searchTerm !== '' && (
-        <SearchResult
-          style={{ display: search.selected === null ? 'block' : 'none' }}
-          result={search.result}
-          documentFieldsState={documentFields}
-        />
+      {searchTerm !== '' ? (
+        <SearchResult result={search.result} documentFieldsState={documentFields} />
+      ) : (
+        editor
       )}
-      {(searchTerm === '' || search.selected !== null) && editor}
       {renderEditField()}
     </>
   );

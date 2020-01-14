@@ -32,13 +32,6 @@
   }
 }
 
-.mappingsEditor__fieldsListItem__field--selected {
-  background-color: $euiColorLightShade;
-  &:hover {
-    background-color: $euiColorLightShade;
-  }
-}
-
 .mappingsEditor__fieldsListItem__field--dim {
   opacity: 0.3;
 

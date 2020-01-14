@@ -72,7 +72,6 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
     },
     search: {
       term: '',
-      selected: null,
       result: [],
     },
   };

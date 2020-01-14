@@ -15,7 +15,6 @@ import {
   normalize,
   updateFieldsPathAfterFieldNameChange,
   searchFields,
-  getFieldAncestors,
 } from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
 
@@ -63,7 +62,6 @@ export interface State {
   };
   search: {
     term: string;
-    selected: string | null;
     result: SearchResult[];
   };
 }
@@ -82,8 +80,7 @@ export type Action =
   | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
   | { type: 'documentField.changeEditor'; value: FieldsEditor }
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
-  | { type: 'search:update'; value: string }
-  | { type: 'search:setSelectedField'; value: string | null };
+  | { type: 'search:update'; value: string };
 
 export type Dispatch = (action: Action) => void;
 
@@ -297,11 +294,6 @@ export const reducer = (state: State, action: Action): State => {
       return nextState;
     }
     case 'documentField.createField': {
-      // Make sure to clear the search selection when we add a new field
-      // as it means that the user is not interested anymore in the search result
-      const updatedSearch: State['search'] =
-        state.search.term !== '' ? { term: '', result: [], selected: null } : state.search;
-
       return {
         ...state,
         documentFields: {
@@ -309,17 +301,9 @@ export const reducer = (state: State, action: Action): State => {
           fieldToAddFieldTo: action.value,
           status: 'creatingField',
         },
-        search: updatedSearch,
       };
     }
     case 'documentField.editField': {
-      // Make sure to clear the search selection if we edit another field that the one we have selected in our search result
-      const doResetSearch =
-        state.search.selected !== null && state.search.selected !== action.value;
-      const updatedSearch: State['search'] = doResetSearch
-        ? { term: '', result: [], selected: null }
-        : state.search;
-
       return {
         ...state,
         documentFields: {
@@ -327,7 +311,6 @@ export const reducer = (state: State, action: Action): State => {
           status: 'editingField',
           fieldToEdit: action.value,
         },
-        search: updatedSearch,
       };
     }
     case 'documentField.changeStatus':
@@ -548,34 +531,8 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         search: {
-          selected: null,
           term: action.value,
           result: searchFields(action.value, state.fields.byId),
-        },
-      };
-    }
-    case 'search:setSelectedField': {
-      let updatedById = state.fields.byId;
-
-      if (action.value !== null) {
-        // Get all the ancestors of the field
-        updatedById = { ...state.fields.byId };
-        const ancestors = getFieldAncestors(action.value, updatedById);
-
-        // We update the expanded state of all the fields, leaving only the ancestors expanded.
-        Object.entries(updatedById).forEach(([id, field]) => {
-          field.isExpanded = Boolean(ancestors[id]);
-        });
-      }
-      return {
-        ...state,
-        fields: {
-          ...state.fields,
-          byId: updatedById,
-        },
-        search: {
-          ...state.search,
-          selected: action.value,
         },
       };
     }

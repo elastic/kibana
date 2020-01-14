@@ -13,54 +13,48 @@ import { documentationService } from '../../../../services/documentation';
 interface Props {
   searchValue: string;
   onSearchChange(value: string): void;
-  goBackToSearchResult?: () => void;
 }
 
-export const DocumentFieldsHeader = React.memo(
-  ({ searchValue, onSearchChange, goBackToSearchResult }: Props) => {
-    return (
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
-              defaultMessage="Define the fields you expect your indexed documents to have. {docsLink}"
-              values={{
-                docsLink: (
-                  <EuiLink href={documentationService.getMappingTypesLink()} target="_blank">
-                    {i18n.translate(
-                      'xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink',
-                      {
-                        defaultMessage: 'Learn more.',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFieldSearch
-            style={{ minWidth: '350px' }}
-            placeholder={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsPlaceholder',
-              {
-                defaultMessage: 'Search fields',
-              }
-            )}
-            value={searchValue}
-            onChange={e => onSearchChange(e.target.value)}
-            aria-label={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsAriaLabel',
-              {
-                defaultMessage: 'Search mapped fields',
-              }
-            )}
+export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }: Props) => {
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem>
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
+            defaultMessage="Define the fields you expect your indexed documents to have. {docsLink}"
+            values={{
+              docsLink: (
+                <EuiLink href={documentationService.getMappingTypesLink()} target="_blank">
+                  {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink', {
+                    defaultMessage: 'Learn more.',
+                  })}
+                </EuiLink>
+              ),
+            }}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+        </EuiText>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFieldSearch
+          style={{ minWidth: '350px' }}
+          placeholder={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsPlaceholder',
+            {
+              defaultMessage: 'Search fields',
+            }
+          )}
+          value={searchValue}
+          onChange={e => onSearchChange(e.target.value)}
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.documentFields.searchFieldsAriaLabel',
+            {
+              defaultMessage: 'Search mapped fields',
+            }
+          )}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
