@@ -109,9 +109,12 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
-    return this._getMBDataDrivenColor({
-      targetName: getComputedFieldName(this._styleName, this._options.field.name),
-    });
+    const targetName = getComputedFieldName(this._styleName, this._options.field.name);
+    if (this.isCategorical()) {
+      return this._getMbDataDrivenCategoricalColor({ targetName });
+    } else {
+      return this._getMbDataDrivenOrdinalColor({ targetName });
+    }
   }
 
   _getMbDataDrivenOrdinalColor({ targetName }) {
@@ -159,13 +162,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         stops.push({
           stop: config.stop,
           color: config.color,
-          isDefault: false,
         });
       }
       stops.push({
         stop: this._options.customColorPalette[0].stop,
         color: this._options.customColorPalette[0].color,
-        isDefault: true,
       });
       return stops;
     }
@@ -186,7 +187,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       const isDefault = i === maxLength - 1;
       stops.push({
         stop: isDefault ? '__DEFAULT__' : fieldMeta.categories[i].key,
-        isDefault: isDefault,
         color: colors[i],
       });
     }
@@ -211,7 +211,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     let defaultColor = null;
     for (let i = 0; i < paletteStops.length; i++) {
       const stop = paletteStops[i];
-      if (stop.isDefault) {
+      if (i === paletteStops.length - 1) {
         defaultColor = stop.color;
       } else {
         mbStops.push(stop.stop);
@@ -225,23 +225,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return ['match', ['get', this._options.field.name], ...mbStops];
   }
 
-  _getMBDataDrivenColor({ targetName }) {
-    if (this.isCategorical()) {
-      return this._getMbDataDrivenCategoricalColor({ targetName });
-    } else {
-      return this._getMbDataDrivenOrdinalColor({ targetName });
-    }
-  }
-
-  _getOrdinalColorStopsFromCustom() {
-    return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
-      return [...accumulatedStops, nextStop.stop, nextStop.color];
-    }, []);
-  }
-
   _getMbOrdinalColorStops() {
     if (this._options.useCustomColorRamp) {
-      return this._getOrdinalColorStopsFromCustom();
+      return this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+        return [...accumulatedStops, nextStop.stop, nextStop.color];
+      }, []);
     } else {
       return getOrdinalColorRampStops(this._options.color);
     }
@@ -299,7 +287,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     const stops = this._getColorStops();
     return stops.map((config, index) => {
       let textValue;
-      if (config.isDefault) {
+      if (index === stops.length - 1) {
         textValue = (
           <EuiText size={'xs'}>
             <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>
