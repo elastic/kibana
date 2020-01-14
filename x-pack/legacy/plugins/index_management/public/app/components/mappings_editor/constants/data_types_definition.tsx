@@ -538,7 +538,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.percolatorLongDescription"
-          defaultMessage="Use this data type to enable {percolator}."
+          defaultMessage="The percolator data type enables {percolator}."
           values={{
             percolator: (
               <EuiLink href={documentationService.getPercolatorQueryLink()} target="_blank">
