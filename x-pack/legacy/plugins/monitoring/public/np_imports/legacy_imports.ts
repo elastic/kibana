@@ -9,7 +9,7 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { SavedObjectRegistryProvider } from 'ui/saved_objects';
+
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { GlobalStateProvider } from 'ui/state_management/global_state';
