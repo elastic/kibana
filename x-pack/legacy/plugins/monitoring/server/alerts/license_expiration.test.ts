@@ -42,7 +42,6 @@ const clusterUuid = 'a4545jhjb';
 const params: AlertParams = {
   dateFormat: 'YYYY',
   timezone: 'UTC',
-  ccs: null,
 };
 
 interface MockServices {

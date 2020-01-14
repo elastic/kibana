@@ -25,7 +25,6 @@ jest.mock('ui/kfetch', () => ({
 const defaultProps: AlertsStatusProps = {
   clusterUuid: '1adsb23',
   emailAddress: 'test@elastic.co',
-  ccs: '',
 };
 
 describe('Status', () => {

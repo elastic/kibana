@@ -15,7 +15,6 @@ jest.mock('ui/kfetch', () => ({
 }));
 
 const defaultProps: AlertsConfigurationProps = {
-  ccs: '',
   emailAddress: 'test@elastic.co',
   onDone: jest.fn(),
 };
