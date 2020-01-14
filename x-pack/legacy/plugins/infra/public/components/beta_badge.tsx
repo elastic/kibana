@@ -13,6 +13,7 @@ export const BetaBadge: React.FunctionComponent = () => (
     aria-label={betaBadgeLabel}
     label={betaBadgeLabel}
     tooltipContent={betaBadgeTooltipContent}
+    className="eui-alignMiddle"
   />
 );
 const betaBadgeLabel = i18n.translate('xpack.infra.common.tabBetaBadgeLabel', {
