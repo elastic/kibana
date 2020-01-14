@@ -49,18 +49,18 @@ export function useTrackMetric(
   { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
   effectDependencies: EffectDeps = []
 ) {
-  useEffect(() => {
-    let decoratedMetric = metric;
-    if (delay > 0) {
-      decoratedMetric += `__delayed_${delay}ms`;
-    }
-    const trackUiMetric = getTrackerForApp(app);
-    const id = setTimeout(() => trackUiMetric(metricType, decoratedMetric), Math.max(delay, 0));
-    return () => clearTimeout(id);
+  // useEffect(() => {
+  //   let decoratedMetric = metric;
+  //   if (delay > 0) {
+  //     decoratedMetric += `__delayed_${delay}ms`;
+  //   }
+  //   const trackUiMetric = getTrackerForApp(app);
+  //   const id = setTimeout(() => trackUiMetric(metricType, decoratedMetric), Math.max(delay, 0));
+  //   return () => clearTimeout(id);
 
-    // the dependencies are managed externally
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, effectDependencies);
+  //   // the dependencies are managed externally
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, effectDependencies);
 }
 
 /**
@@ -84,6 +84,6 @@ interface TrackEventProps {
 }
 
 export function trackEvent({ app, name, metricType = METRIC_TYPE.CLICK }: TrackEventProps) {
-  const trackUiMetric = getTrackerForApp(app);
-  trackUiMetric(metricType, `event__${name}`);
+  // const trackUiMetric = getTrackerForApp(app);
+  // trackUiMetric(metricType, `event__${name}`);
 }
