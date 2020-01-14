@@ -40,12 +40,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import {
-  defaultEditor,
-  VisEditorTypesRegistryProvider,
-  VisualizeEmbeddableFactory,
-  VISUALIZE_EMBEDDABLE_TYPE,
-} from './legacy_imports';
+import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
 
@@ -170,8 +165,5 @@ export class VisualizePlugin implements Plugin {
       share,
       visualizations,
     };
-
-    const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
-    embeddables.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 }

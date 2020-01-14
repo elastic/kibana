@@ -35,9 +35,6 @@ import 'uiExports/visualize';
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
-import { npSetup, npStart } from 'ui/new_platform';
-
-import { Legacy } from 'kibana';
 
 import { SavedObjectAttributes } from 'kibana/server';
 import {
@@ -46,8 +43,7 @@ import {
   Container,
   EmbeddableOutput,
 } from '../../../../../plugins/embeddable/public';
-import { start as visualizations } from '../np_ready/public/legacy';
-import { showNewVisModal } from '../../../kibana/public/visualize';
+import { showNewVisModal } from '../../../kibana/public/visualize/np_ready/wizard/show_new_vis';
 import { SavedVisualizations } from '../../../kibana/public/visualize/np_ready/types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
@@ -58,7 +54,15 @@ import {
   VisSavedObject,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { TypesStart } from '../np_ready/public/types';
+
+import {
+  getUISettings,
+  getCapabilities,
+  getHttp,
+  getTypes,
+  getSavedObjectsClient,
+  getUsageCollector,
+} from '../np_ready/public/services';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -71,60 +75,48 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   VisualizationAttributes
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private readonly visTypes: TypesStart;
 
   static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    return new VisualizeEmbeddableFactory(visualizations.types);
+    return new VisualizeEmbeddableFactory();
   }
 
-  constructor(visTypes: TypesStart) {
+  constructor() {
     super({
       savedObjectMetaData: {
-        name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
+        name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
         includeFields: ['visState'],
         type: 'visualization',
         getIconForSavedObject: savedObject => {
-          if (!visTypes) {
-            return 'visualizeApp';
-          }
           return (
-            visTypes.get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
+            getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
           );
         },
         getTooltipForSavedObject: savedObject => {
-          if (!visTypes) {
-            return '';
-          }
           return `${savedObject.attributes.title} (${
-            visTypes.get(JSON.parse(savedObject.attributes.visState).type).title
+            getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
           })`;
         },
         showSavedObject: savedObject => {
-          if (!visTypes) {
-            return false;
-          }
           const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = visTypes.get(typeName);
+          const visType = getTypes().get(typeName);
           if (!visType) {
             return false;
           }
-          if (npStart.core.uiSettings.get('visualize:enableLabs')) {
+          if (getUISettings().get('visualize:enableLabs')) {
             return true;
           }
           return visType.stage !== 'experimental';
         },
       },
     });
-
-    this.visTypes = visTypes;
   }
 
   public isEditable() {
-    return npStart.core.application.capabilities.visualize.save as boolean;
+    return getCapabilities().visualize.save as boolean;
   }
 
   public getDisplayName() {
-    return i18n.translate('kbn.embeddable.visualizations.displayName', {
+    return i18n.translate('visualizations.displayName', {
       defaultMessage: 'visualization',
     });
   }
@@ -135,16 +127,15 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const $injector = await chrome.dangerouslyGetActiveInjector();
-    const config = $injector.get<Legacy.KibanaConfig>('config');
     const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
 
     try {
       const visId = savedObject.id as string;
 
       const editUrl = visId
-        ? npStart.core.http.basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+        ? getHttp().basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
         : '';
-      const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
+      const isLabsEnabled = getUISettings().get<boolean>('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
         return new DisabledLabEmbeddable(savedObject.title, input);
@@ -192,18 +183,16 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    if (this.visTypes) {
-      showNewVisModal(
-        this.visTypes,
-        {
-          editorParams: ['addToDashboard'],
-        },
-        npStart.core.http.basePath.prepend,
-        npStart.core.uiSettings,
-        npStart.core.savedObjects,
-        npSetup.plugins.usageCollection
-      );
-    }
+    showNewVisModal(
+      getTypes(),
+      {
+        editorParams: ['addToDashboard'],
+      },
+      getHttp().basePath.prepend,
+      getUISettings(),
+      getSavedObjectsClient(),
+      getUsageCollector()
+    );
     return undefined;
   }
 }

@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { npStart } from 'ui/new_platform';
-
 import { VisSavedObject } from './visualize_embeddable';
 import { indexPatterns, IIndexPattern } from '../../../../../plugins/data/public';
+import { getUISettings, getSavedObjectsClient } from '../np_ready/public/services';
 
 export async function getIndexPattern(
   savedVis: VisSavedObject
@@ -29,8 +28,8 @@ export async function getIndexPattern(
     return savedVis.vis.indexPattern;
   }
 
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const defaultIndex = npStart.core.uiSettings.get('defaultIndex');
+  const savedObjectsClient = getSavedObjectsClient().client;
+  const defaultIndex = getUISettings().get('defaultIndex');
 
   if (savedVis.vis.params.index_pattern) {
     const indexPatternObjects = await savedObjectsClient.find({
