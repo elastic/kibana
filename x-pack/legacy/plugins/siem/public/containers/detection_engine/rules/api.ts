@@ -16,13 +16,18 @@ import {
   Rule,
   FetchRuleProps,
   BasicFetchProps,
+  ImportRulesProps,
+  ExportRulesProps,
+  ExportRulesPayload,
   RuleError,
+  ImportRulesResponse,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
+import * as i18n from '../../../pages/detection_engine/rules/translations';
 
 /**
  * Add provided Rule
@@ -222,4 +227,84 @@ export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promi
   });
   await throwIfNotOk(response);
   return true;
+};
+
+/**
+ * Imports rules in the same format as exported via the _export API
+ *
+ * @param fileToImport File to upload containing rules to import
+ * @param overwrite whether or not to overwrite rules with the same ruleId
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const importRules = async ({
+  fileToImport,
+  overwrite = false,
+  signal,
+}: ImportRulesProps): Promise<ImportRulesResponse> => {
+  const formData = new FormData();
+  formData.append('file', fileToImport);
+
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_import?overwrite=${overwrite}`,
+    {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'kbn-xsrf': 'true',
+      },
+      body: formData,
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response);
+  return response.json();
+};
+
+/**
+ * Export rules from the server as a file download
+ *
+ * @param excludeExportDetails whether or not to exclude additional details at bottom of exported file (defaults to false)
+ * @param filename of exported rules. Be sure to include `.ndjson` extension! (defaults to localized `rules_export.ndjson`)
+ * @param ruleIds array of rule_id's (not id!) to export (empty array exports _all_ rules)
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const exportRules = async ({
+  excludeExportDetails = false,
+  filename = `${i18n.EXPORT_FILENAME}.ndjson`,
+  ruleIds = [],
+  signal,
+}: ExportRulesProps): Promise<Blob> => {
+  const body =
+    ruleIds.length > 0
+      ? JSON.stringify(
+          ruleIds.reduce<ExportRulesPayload>(
+            (acc, ruleId) => ({ objects: [...acc.objects, { rule_id: ruleId }] }),
+            { objects: [] }
+          )
+        )
+      : undefined;
+
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_export?exclude_export_details=${excludeExportDetails}&file_name=${encodeURIComponent(
+      filename
+    )}`,
+    {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+      },
+      body,
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response);
+  return response.blob();
 };

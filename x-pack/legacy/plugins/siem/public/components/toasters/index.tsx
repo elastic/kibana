@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastList, EuiGlobalToastListToast as Toast, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiGlobalToastList, EuiGlobalToastListToast as Toast } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { createContext, Dispatch, useReducer, useContext, useState } from 'react';
+import React, { createContext, Dispatch, useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
 
@@ -142,6 +142,28 @@ export const displayErrorToast = (
     color: 'danger',
     iconType: 'alert',
     errors: errorMessages,
+  };
+  dispatchToaster({
+    type: 'addToaster',
+    toast,
+  });
+};
+
+/**
+ * Displays a success toast for the provided title and message
+ *
+ * @param title success message to display in toaster and modal
+ * @param dispatchToaster provided by useStateToaster()
+ */
+export const displaySuccessToast = (
+  title: string,
+  dispatchToaster: React.Dispatch<ActionToaster>
+) => {
+  const toast: AppToast = {
+    id: uuid.v4(),
+    title,
+    color: 'success',
+    iconType: 'check',
   };
   dispatchToaster({
     type: 'addToaster',
