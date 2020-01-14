@@ -1398,13 +1398,14 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@elastic/ems-client@1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-1.0.5.tgz#e2c10816c5eebdf128590170d8f09fcc693db50b"
-  integrity sha512-J+jDjtpHfGnbsgdhuA1zp/JoZftCpx6/h/4bP5ik+2Ysa30sAHIpHs0D3921R75O9WDNs6SHVnV/oqdJKL/HCg==
+"@elastic/ems-client@7.6.0":
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.6.0.tgz#ca548aba1a1f5170a1892de129b537b5248c74be"
+  integrity sha512-oBtLH24qIgTaMhlSske49FTd35Y0nv+PlZCZaHkBhOH+ScsTDL3LO2lbIcSmcYQod43Ly34v/xwJvFCTxojVEQ==
   dependencies:
     lodash "^4.17.15"
     node-fetch "^1.7.3"
+    semver "^6.3.0"
 
 "@elastic/eslint-plugin-eui@0.0.2":
   version "0.0.2"
