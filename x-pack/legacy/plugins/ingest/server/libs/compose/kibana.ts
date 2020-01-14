@@ -19,15 +19,21 @@ import { OutputsLib } from '../outputs';
 import { PolicyLib } from '../policy';
 import { ServerLibs } from '../types';
 import { BackendFrameworkLib } from './../framework';
+import { OutputAdapter } from '../adapters/outputs/default';
+import { ElasticsearchAdapter } from '../adapters/elasticsearch/default';
 
 export function compose(server: KibanaLegacyServer): ServerLibs {
   const framework = new BackendFrameworkLib(
     new BackendFrameworkAdapter(camelCase(PLUGIN.ID), server, CONFIG_PREFIX)
   );
+
+  const elasticsearch = new ElasticsearchAdapter(server.plugins.elasticsearch);
+
   const database = new ESDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
   const soDatabase = new SODatabaseAdapter(server.savedObjects, server.plugins.elasticsearch);
 
-  const outputs = new OutputsLib({ framework });
+  const outputsAdapter = new OutputAdapter(soDatabase);
+  const outputs = new OutputsLib({ framework }, elasticsearch, outputsAdapter);
 
   const datasourceAdapter = new DatasourceAdapter(soDatabase);
   const datasources = new DatasourcesLib(datasourceAdapter, { framework });

@@ -258,29 +258,24 @@ export class PolicyLib {
       if (info === null) {
         throw new Error('Could not get version information about Kibana from xpack');
       }
-      try {
-        const newDefaultPolicy: StoredPolicy = {
-          name: 'Default policy',
-          description: 'Default policy created by Kibana',
-          status: Status.Active,
-          datasources: [],
-          updated_on: new Date().toISOString(),
-          updated_by: 'Fleet (system action)',
-        };
+      const newDefaultPolicy: StoredPolicy = {
+        name: 'Default policy',
+        description: 'Default policy created by Kibana',
+        status: Status.Active,
+        datasources: [],
+        updated_on: new Date().toISOString(),
+        updated_by: 'Fleet (system action)',
+      };
 
-        await this.adapter.create(this.libs.framework.internalUser, newDefaultPolicy, {
-          id: DEFAULT_POLICY_ID,
-        });
+      await this.adapter.create(this.libs.framework.internalUser, newDefaultPolicy, {
+        id: DEFAULT_POLICY_ID,
+      });
 
-        await this._triggerPolicyUpdatedEvent(
-          this.libs.framework.internalUser,
-          'created',
-          DEFAULT_POLICY_ID
-        );
-      } catch (err) {
-        // Log error but do not stop kbn to boot
-        this.libs.framework.log(['error'], err);
-      }
+      await this._triggerPolicyUpdatedEvent(
+        this.libs.framework.internalUser,
+        'created',
+        DEFAULT_POLICY_ID
+      );
     }
   }
 
