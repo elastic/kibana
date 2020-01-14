@@ -19,18 +19,11 @@ describe('LocationStatusTags component', () => {
         summary: { up: 4, down: 0 },
         geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
-          .subtract('5', 'w')
+          .subtract('5', 'd')
           .toISOString(),
       },
       {
         summary: { up: 4, down: 0 },
-        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment()
-          .subtract('5', 'w')
-          .toISOString(),
-      },
-      {
-        summary: { up: 0, down: 2 },
         geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
           .subtract('5', 'w')
@@ -88,13 +81,6 @@ describe('LocationStatusTags component', () => {
       {
         summary: { up: 0, down: 1 },
         geo: { name: 'Sydney', location: { lat: '52.487448', lon: ' 13.394798' } },
-        timestamp: moment()
-          .subtract('5', 'y')
-          .toISOString(),
-      },
-      {
-        summary: { up: 0, down: 1 },
-        geo: { name: 'Paris', location: { lat: '52.487448', lon: ' 13.394798' } },
         timestamp: moment()
           .subtract('5', 'y')
           .toISOString(),
