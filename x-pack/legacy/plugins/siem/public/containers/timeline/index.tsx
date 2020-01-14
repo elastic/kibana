@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
@@ -81,17 +81,18 @@ class TimelineQueryComponent extends QueryTemplate<
       sourceId,
       sortField,
     } = this.props;
-
+    // I needed to do that to avoid test to yell at me since there is no good way yet to mock withKibana
+    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY) ?? [];
+    const defaultIndex = isEmpty(indexPattern)
+      ? [...defaultKibanaIndex, ...indexToAdd]
+      : indexPattern?.title.split(',') ?? [];
     const variables: GetTimelineQuery.Variables = {
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex: indexPattern?.title.split(',') ?? [
-        ...kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
-        ...indexToAdd,
-      ],
+      defaultIndex,
       inspect: isInspected,
     };
     return (
