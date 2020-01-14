@@ -5,11 +5,12 @@
  */
 
 import { IScopedClusterClient } from 'src/core/server';
+import { CheckContext } from '../../types';
 
-export async function check(es: IScopedClusterClient, deploymentId: string) {
+export async function check(es: IScopedClusterClient, { deploymentId, indexName }: CheckContext) {
   // TODO: modify the search query for full text search
   const response = await es.callAsInternalUser('search', {
-    index: 'pulse-poc-raw-errors',
+    index: indexName,
     size: 100,
     allow_no_indices: true,
     ignore_unavailable: true,

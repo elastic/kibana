@@ -46,7 +46,7 @@ interface ChannelResponse {
   instructions: PulseInstruction[];
 }
 
-interface InstructionsResponse {
+export interface InstructionsResponse {
   channels: ChannelResponse[];
 }
 

@@ -43,12 +43,12 @@ export class PulseChannel<Payload = any, Rec = Payload> {
   private readonly collector: any;
 
   constructor(private readonly config: ChannelConfig) {
-    const Collector: PulseCollectorContructor = require(`${__dirname}/collectors/${this.id}`)
+    const Collector: PulseCollectorConstructor = require(`${__dirname}/collectors/${this.id}`)
       .Collector;
     this.collector = new Collector(this.config.logger);
   }
 
-  public async setup(setupContext: ChannelSetupContexxt) {
+  public async setup(setupContext: ChannelSetupContext) {
     return this.collector.setup(setupContext);
   }
 
