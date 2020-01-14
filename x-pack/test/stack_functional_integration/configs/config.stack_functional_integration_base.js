@@ -43,7 +43,6 @@ export default async ({ readConfigFile }) => {
   };
 };
 const splitRight = re => testPath => re.exec(testPath)[1];
-
 function truncate(testPath) {
   const dropKibanaPath = splitRight(/^.+kibana[\\/](.*$)/gm);
   return dropKibanaPath(testPath);
@@ -54,12 +53,13 @@ function highLight(testPath) {
   const colored = chalk.greenBright.bold(cleaned);
   return testPath.replace(cleaned, colored);
 }
-
 function logTest(testPath) {
   log.info(`Testing: '${highLight(truncate(testPath))}'`);
   return testPath;
 }
 function mutateProtocols(servers, provisionedConfigs) {
-  servers.kibana.protocol = provisionedConfigs.ESPROTO;
-  servers.elasticsearch.protocol = servers.kibana.protocol;
+  if (provisionedConfigs.TLS === 'YES') {
+    servers.kibana.protocol = provisionedConfigs.ESPROTO;
+    servers.elasticsearch.protocol = servers.kibana.protocol;
+  }
 }
