@@ -13,6 +13,7 @@ import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
+import { EndpointList } from './management';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -54,15 +55,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
             render={() => {
               // FIXME: This is temporary. Will be removed in next PR for endpoint list
               store.dispatch({ type: 'userEnteredEndpointListPage' });
-
-              return (
-                <h1 data-test-subj="endpointManagement">
-                  <FormattedMessage
-                    id="xpack.endpoint.endpointManagement"
-                    defaultMessage="Manage Endpoints"
-                  />
-                </h1>
-              );
+              return <EndpointList />;
             }}
           />
           <Route path="/alerts" component={AlertIndex} />
