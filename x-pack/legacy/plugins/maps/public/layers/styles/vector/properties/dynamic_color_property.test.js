@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line no-unused-vars
+jest.mock('../components/vector_style_editor', () => ({
+  VectorStyleEditor: () => {
+    return <div>mockVectorStyleEditor</div>;
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -24,7 +29,7 @@ const mockField = {
   },
 };
 
-test('Should render ranged legend', async () => {
+test('Should render ranged legend', () => {
   const colorStyle = new DynamicColorProperty(
     {
       color: 'Blues',
@@ -40,25 +45,15 @@ test('Should render ranged legend', async () => {
   );
 
   const legendRow = colorStyle.renderLegendDetailRow({
-    loadIsPointsOnly: () => {
-      return true;
-    },
-    loadIsLinesOnly: () => {
-      return false;
-    },
+    isPointsOnly: true,
+    isLinesOnly: false,
   });
-
   const component = shallow(legendRow);
-
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
 
   expect(component).toMatchSnapshot();
 });
 
-test('Should render categorical legend', async () => {
+test('Should render categorical legend', () => {
   const colorStyle = new DynamicColorProperty(
     {
       useCustomColorRamp: true,
@@ -84,20 +79,10 @@ test('Should render categorical legend', async () => {
   );
 
   const legendRow = colorStyle.renderLegendDetailRow({
-    loadIsPointsOnly: () => {
-      return true;
-    },
-    loadIsLinesOnly: () => {
-      return false;
-    },
+    isPointsOnly: true,
+    isLinesOnly: false,
   });
-
   const component = shallow(legendRow);
-
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
 
   expect(component).toMatchSnapshot();
 });
