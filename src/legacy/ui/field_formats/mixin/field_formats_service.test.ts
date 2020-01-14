@@ -18,13 +18,13 @@
  */
 
 import { FieldFormatsService } from './field_formats_service';
-import { DefaultNumberFormat } from '../../../../plugins/data/public';
+import { DefaultNumberFormat, CustomNumberFormat } from '../../../../plugins/data/public';
 
 const getConfig = (key: string) => {
   switch (key) {
     case 'format:defaultTypeMap':
       return {
-        number: { id: 'number', params: {} },
+        number: { id: 'default_number', params: {} },
         _default_: { id: 'string', params: {} },
       };
     case 'format:number:defaultPattern':
@@ -36,7 +36,7 @@ describe('FieldFormatsService', () => {
   let fieldFormatsService: FieldFormatsService;
 
   beforeEach(() => {
-    const fieldFormatClasses = [DefaultNumberFormat];
+    const fieldFormatClasses = [DefaultNumberFormat, CustomNumberFormat];
 
     fieldFormatsService = new FieldFormatsService(fieldFormatClasses, getConfig);
   });
@@ -50,7 +50,7 @@ describe('FieldFormatsService', () => {
   test('getDefaultInstance returns default FieldFormat instance for fieldType', () => {
     const instance = fieldFormatsService.getDefaultInstance('number');
 
-    expect(instance.type.id).toBe('number');
+    expect(instance.type.id).toBe('default_number');
     expect(instance.convert('0.33333')).toBe('0.333');
   });
 });

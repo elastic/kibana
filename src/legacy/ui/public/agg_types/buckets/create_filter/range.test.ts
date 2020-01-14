@@ -72,7 +72,7 @@ describe('AggConfig Filters', () => {
       expect(filter.range).toHaveProperty('bytes');
       expect(filter.range.bytes).toHaveProperty('gte', 1024.0);
       expect(filter.range.bytes).toHaveProperty('lt', 2048.0);
-      expect(filter.meta).toHaveProperty('formattedValue', '≥ 1,024 and < 2,048');
+      expect(filter.meta).toHaveProperty('formattedValue', '≥ 1KB and < 2KB');
     });
   });
 });

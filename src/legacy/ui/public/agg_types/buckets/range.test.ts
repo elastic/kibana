@@ -85,9 +85,9 @@ describe('Range Agg', () => {
 
       const format = (val: any) => agg.fieldFormatter()(agg.getKey(val));
 
-      expect(format(buckets[0])).toBe('≥ -∞ and < 1 KB');
-      expect(format(buckets[1])).toBe('≥ 1 KB and < 2.5 KB');
-      expect(format(buckets[2])).toBe('≥ 2.5 KB and < +∞');
+      expect(format(buckets[0])).toBe('≥ -∞ and < 1KB');
+      expect(format(buckets[1])).toBe('≥ 1KB and < 2.5KB');
+      expect(format(buckets[2])).toBe('≥ 2.5KB and < +∞');
     });
   });
 });
