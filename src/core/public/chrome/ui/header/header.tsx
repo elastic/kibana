@@ -195,6 +195,7 @@ function truncateRecentItemLabel(label: string): string {
 }
 
 export type HeaderProps = Pick<Props, Exclude<keyof Props, 'intl'>>;
+type navSetting = 'grouped' | 'individual';
 
 interface Props {
   kibanaVersion: string;
@@ -216,7 +217,7 @@ interface Props {
   intl: InjectedIntl;
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
-  navSetting: 'individual' | 'grouped';
+  navSetting$: Rx.Observable<navSetting>;
   onIsLockedUpdate?: (isLocked: boolean) => void;
 }
 
@@ -231,6 +232,7 @@ interface State {
   forceNavigation: boolean;
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
+  navSetting: navSetting;
 }
 
 function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
@@ -268,6 +270,7 @@ class HeaderUI extends Component<Props, State> {
       forceNavigation: false,
       navControlsLeft: [],
       navControlsRight: [],
+      navSetting: 'grouped',
     };
   }
 
@@ -282,7 +285,8 @@ class HeaderUI extends Component<Props, State> {
       Rx.combineLatest(
         this.props.navControlsLeft$,
         this.props.navControlsRight$,
-        this.props.application.currentAppId$
+        this.props.application.currentAppId$,
+        this.props.navSetting$
       )
     ).subscribe({
       next: ([
@@ -291,7 +295,7 @@ class HeaderUI extends Component<Props, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId],
+        [navControlsLeft, navControlsRight, currentAppId, navSetting],
       ]) => {
         this.setState({
           appTitle,
@@ -313,6 +317,7 @@ class HeaderUI extends Component<Props, State> {
           ),
           navControlsLeft,
           navControlsRight,
+          navSetting,
         });
       },
     });
@@ -384,7 +389,7 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public renderNavLinks() {
-    const disableGroupedNavSetting = this.props.navSetting === 'individual';
+    const disableGroupedNavSetting = this.state.navSetting === 'individual';
     const groupedNavLinks = groupBy(this.state.navLinks, link => link?.category?.label);
     const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
     const { Administration: admin, ...mainCategories } = allCategorizedLinks;

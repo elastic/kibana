@@ -1188,7 +1188,6 @@ export function getUiSettingDefaults() {
           defaultMessage: 'Individual',
         }),
       },
-      requiresPageReload: true,
     },
   };
 }
