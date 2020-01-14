@@ -64,6 +64,7 @@ const getActions = (
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
     onClick: (rowItem: TableData) => exportRulesAction([rowItem.sourceRule], dispatch),
+    enabled: (rowItem: TableData) => !rowItem.immutable,
   },
   {
     description: i18n.DELETE_RULE,

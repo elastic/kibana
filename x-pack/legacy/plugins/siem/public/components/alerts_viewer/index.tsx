@@ -3,57 +3,74 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { noop } from 'lodash/fp';
-import React from 'react';
-
+import React, { useEffect, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { manageQuery } from '../page/manage_query';
-import { AlertsOverTimeHistogram } from '../page/hosts/alerts_over_time';
-import { AlertsComponentsQueryProps } from './types';
-import { AlertsOverTimeQuery } from '../../containers/alerts/alerts_over_time';
-import { hostsModel } from '../../store/model';
-import { AlertsTable } from './alerts_table';
 
-const AlertsOverTimeManage = manageQuery(AlertsOverTimeHistogram);
+import { AlertsComponentsQueryProps } from './types';
+import { AlertsTable } from './alerts_table';
+import * as i18n from './translations';
+import { MatrixHistogramOption } from '../matrix_histogram/types';
+import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
+import { MatrixHistogramGqlQuery } from '../../containers/matrix_histogram/index.gql_query';
+const ID = 'alertsOverTimeQuery';
+const alertsStackByOptions: MatrixHistogramOption[] = [
+  {
+    text: i18n.ALERTS_STACK_BY_MODULE,
+    value: 'event.module',
+  },
+];
+const dataKey = 'AlertsHistogram';
+
 export const AlertsView = ({
-  defaultFilters,
   deleteQuery,
   endDate,
   filterQuery,
   pageFilters,
-  skip,
   setQuery,
+  skip,
   startDate,
   type,
   updateDateRange = noop,
-}: AlertsComponentsQueryProps) => (
-  <>
-    <AlertsOverTimeQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      sourceId="default"
-      startDate={startDate}
-      type={hostsModel.HostsType.page}
-    >
-      {({ alertsOverTime, loading, id, inspect, refetch, totalCount }) => (
-        <AlertsOverTimeManage
-          data={alertsOverTime!}
-          endDate={endDate}
-          id={id}
-          inspect={inspect}
-          loading={loading}
-          refetch={refetch}
-          setQuery={setQuery}
-          startDate={startDate}
-          totalCount={totalCount}
-          updateDateRange={updateDateRange}
-        />
-      )}
-    </AlertsOverTimeQuery>
-    <EuiSpacer size="l" />
-    <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
-  </>
-);
+}: AlertsComponentsQueryProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
 
+  const getSubtitle = useCallback(
+    (totalCount: number) => `${i18n.SHOWING}: ${totalCount} ${i18n.UNIT(totalCount)}`,
+    []
+  );
+
+  return (
+    <>
+      <MatrixHistogramContainer
+        dataKey={dataKey}
+        deleteQuery={deleteQuery}
+        defaultStackByOption={alertsStackByOptions[0]}
+        endDate={endDate}
+        errorMessage={i18n.ERROR_FETCHING_ALERTS_DATA}
+        filterQuery={filterQuery}
+        id={ID}
+        isAlertsHistogram={true}
+        query={MatrixHistogramGqlQuery}
+        setQuery={setQuery}
+        skip={skip}
+        sourceId="default"
+        stackByOptions={alertsStackByOptions}
+        startDate={startDate}
+        subtitle={getSubtitle}
+        title={i18n.ALERTS_DOCUMENT_TYPE}
+        type={type}
+        updateDateRange={updateDateRange}
+      />
+      <EuiSpacer size="l" />
+      <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+    </>
+  );
+};
 AlertsView.displayName = 'AlertsView';
