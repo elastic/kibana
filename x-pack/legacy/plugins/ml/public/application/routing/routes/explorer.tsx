@@ -4,27 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { decode } from 'rison-node';
-import { Subscription } from 'rxjs';
+import moment from 'moment';
+import React, { FC, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
-// @ts-ignore
-import queryString from 'query-string';
+import { i18n } from '@kbn/i18n';
+
 import { timefilter } from 'ui/timefilter';
+
+import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+
 import { MlRoute, PageLoader, PageProps } from '../router';
+import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
+import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { mlJobService } from '../../services/job_service';
-import { getExplorerDefaultAppState, ExplorerAppState } from '../../explorer/reducers';
+import { ml } from '../../services/ml_api_service';
+import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
-import { jobSelectServiceFactory } from '../../components/job_selector/job_select_service_utils';
-import { subscribeAppStateToObservable } from '../../util/app_state_utils';
-
-import { interval$ } from '../../components/controls/select_interval';
-import { severity$ } from '../../components/controls/select_severity';
-import { showCharts$ } from '../../components/controls/checkbox_showcharts';
+import { getDateFormatTz } from '../../explorer/explorer_utils';
+import { useSwimlaneLimit } from '../../explorer/select_limit';
+import { useJobSelection } from '../../components/job_selector/use_job_selection';
+import { useShowCharts } from '../../components/controls/checkbox_showcharts';
+import { useTableInterval } from '../../components/controls/select_interval';
+import { useTableSeverity } from '../../components/controls/select_severity';
+import { useUrlState } from '../../util/url_state';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
 
 const breadcrumbs = [
@@ -44,111 +50,140 @@ export const explorerRoute: MlRoute = {
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { index } = queryString.parse(location.search);
-  const { context } = useResolver(index, undefined, config, {
+const PageWrapper: FC<PageProps> = ({ config, deps }) => {
+  const { context, results } = useResolver(undefined, undefined, config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
+    jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
   });
-  const { _a, _g } = queryString.parse(location.search);
-  let appState: any = {};
-  let globalState: any = {};
-  try {
-    appState = decode(_a);
-    globalState = decode(_g);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Could not parse global or app state');
-  }
-
-  if (appState.mlExplorerSwimlane === undefined) {
-    appState.mlExplorerSwimlane = {};
-  }
-
-  if (appState.mlExplorerFilter === undefined) {
-    appState.mlExplorerFilter = {};
-  }
-
-  appState.fetch = () => {};
-  appState.on = () => {};
-  appState.off = () => {};
-  appState.save = () => {};
-  globalState.fetch = () => {};
-  globalState.on = () => {};
-  globalState.off = () => {};
-  globalState.save = () => {};
 
   return (
     <PageLoader context={context}>
-      <ExplorerWrapper
-        {...{
-          globalState,
-          appState,
-        }}
-      />
+      <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
     </PageLoader>
   );
 };
 
-class AppState {
-  fetch() {}
-  on() {}
-  off() {}
-  save() {}
+interface ExplorerUrlStateManagerProps {
+  jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-const ExplorerWrapper: FC<{ globalState: any; appState: any }> = ({ globalState, appState }) => {
-  const subscriptions = new Subscription();
+const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
+  const [appState, setAppState] = useUrlState('_a');
+  const [globalState] = useUrlState('_g');
+  const [lastRefresh, setLastRefresh] = useState(0);
 
-  const { jobSelectService$, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
-  appState = getExplorerDefaultAppState();
-  const { mlExplorerFilter, mlExplorerSwimlane } = appState;
-  window.setTimeout(() => {
-    // Pass the current URL AppState on to anomaly explorer's reactive state.
-    // After this hand-off, the appState stored in explorerState$ is the single
-    // source of truth.
-    explorerService.setAppState({ mlExplorerSwimlane, mlExplorerFilter });
+  const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
 
-    // Now that appState in explorerState$ is the single source of truth,
-    // subscribe to it and update the actual URL appState on changes.
-    subscriptions.add(
-      explorerService.appState$.subscribe((appStateIn: ExplorerAppState) => {
-        // appState.fetch();
-        appState.mlExplorerFilter = appStateIn.mlExplorerFilter;
-        appState.mlExplorerSwimlane = appStateIn.mlExplorerSwimlane;
-        // appState.save();
-      })
-    );
-  });
-
-  subscriptions.add(subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => {}));
-  subscriptions.add(
-    subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => {})
-  );
-  subscriptions.add(
-    subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => {})
-  );
-
-  if (globalState.time) {
-    timefilter.setTime({
-      from: globalState.time.from,
-      to: globalState.time.to,
-    });
-  }
+  const refresh = useRefresh();
+  useEffect(() => {
+    if (refresh !== undefined) {
+      setLastRefresh(refresh?.lastRefresh);
+      const activeBounds = timefilter.getActiveBounds();
+      if (activeBounds !== undefined) {
+        explorerService.setBounds(activeBounds);
+      }
+    }
+  }, [refresh?.lastRefresh]);
 
   useEffect(() => {
-    return () => {
-      subscriptions.unsubscribe();
-      unsubscribeFromGlobalState();
-    };
-  });
+    timefilter.enableTimeRangeSelector();
+    timefilter.enableAutoRefreshSelector();
+
+    const viewByFieldName = appState?.mlExplorerSwimlane?.viewByFieldName;
+    if (viewByFieldName !== undefined) {
+      explorerService.setViewBySwimlaneFieldName(viewByFieldName);
+    }
+
+    const filterData = appState?.mlExplorerFilter;
+    if (filterData !== undefined) {
+      explorerService.setFilterData(filterData);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+      explorerService.setBounds({
+        min: moment(globalState.time.from),
+        max: moment(globalState.time.to),
+      });
+    }
+  }, [globalState?.time?.from, globalState?.time?.to]);
+
+  useEffect(() => {
+    if (jobIds.length > 0) {
+      explorerService.updateJobSelection(jobIds);
+    } else {
+      explorerService.clearJobs();
+    }
+  }, [JSON.stringify(jobIds)]);
+
+  const [explorerData, loadExplorerData] = useExplorerData();
+  useEffect(() => {
+    if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
+      explorerService.setExplorerData(explorerData);
+    }
+  }, [explorerData]);
+
+  const explorerAppState = useObservable(explorerService.appState$);
+  useEffect(() => {
+    if (
+      explorerAppState !== undefined &&
+      explorerAppState.mlExplorerSwimlane.viewByFieldName !== undefined
+    ) {
+      setAppState(explorerAppState);
+    }
+  }, [explorerAppState]);
+
+  const explorerState = useObservable(explorerService.state$);
+
+  const [showCharts] = useShowCharts();
+  const [tableInterval] = useTableInterval();
+  const [tableSeverity] = useTableSeverity();
+  const [swimlaneLimit] = useSwimlaneLimit();
+  useEffect(() => {
+    explorerService.setSwimlaneLimit(swimlaneLimit);
+  }, [swimlaneLimit]);
+
+  const [selectedCells, setSelectedCells] = useSelectedCells();
+  useEffect(() => {
+    explorerService.setSelectedCells(selectedCells);
+  }, [JSON.stringify(selectedCells)]);
+
+  const loadExplorerDataConfig =
+    (explorerState !== undefined && {
+      bounds: explorerState.bounds,
+      lastRefresh,
+      influencersFilterQuery: explorerState.influencersFilterQuery,
+      noInfluencersConfigured: explorerState.noInfluencersConfigured,
+      selectedCells,
+      selectedJobs: explorerState.selectedJobs,
+      swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
+      swimlaneLimit: explorerState.swimlaneLimit,
+      tableInterval: tableInterval.val,
+      tableSeverity: tableSeverity.val,
+      viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
+    }) ||
+    undefined;
+  useEffect(() => {
+    loadExplorerData(loadExplorerDataConfig);
+  }, [JSON.stringify(loadExplorerDataConfig)]);
+
+  if (explorerState === undefined || refresh === undefined || showCharts === undefined) {
+    return null;
+  }
 
   return (
     <div className="ml-explorer">
       <Explorer
         {...{
-          globalState,
-          jobSelectService$,
+          explorerState,
+          setSelectedCells,
+          showCharts,
         }}
       />
     </div>
