@@ -21,6 +21,7 @@ import { format as formatUrl } from 'url';
 
 import { Role } from './role';
 import { User } from './user';
+import { RoleMappings } from './role_mappings';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createTestUserService } from './test_user';
 
@@ -34,8 +35,9 @@ export async function SecurityServiceProvider(context: FtrProviderContext) {
   const testUser = await createTestUserService(role, user, context);
 
   return new (class SecurityService {
-    role = role;
-    user = user;
+    role = new Role(url, log);
+    roleMappings = new RoleMappings(url, log);
+    user = new User(url, log);
     testUser = testUser;
   })();
 }

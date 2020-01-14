@@ -21,21 +21,24 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'context', 'discover']);
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
   const toTime = 'Sep 23, 2019 @ 03:31:44.000';
 
   describe('date_nanos', function() {
     before(async function() {
+      await security.testUser.setRoles(['kibana_user', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('date_nanos');
+    after(async function unloadMakelogs() {
+      await esArchiver.unload('date_nanos');
+      await security.testUser.restoreDefaults();
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function() {

@@ -64,10 +64,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
-          'Graph',
-          'Management',
-        ]);
+        expect(navLinks.map(link => link.text)).to.eql(['Graph', 'Management']);
       });
 
       it('landing page shows "Create new graph" button', async () => {
@@ -129,9 +126,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows graph navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Graph', 'Management']);
       });
 
@@ -183,9 +178,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show graph navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Graph');
       });
 

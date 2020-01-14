@@ -35,8 +35,8 @@ import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
-
 import {
+  VISUALIZE_EMBEDDABLE_TYPE,
   subscribeWithScope,
   absoluteToParsedUrl,
   KibanaParsedUrl,
@@ -588,7 +588,11 @@ function VisualizeAppController(
                 getBasePath()
               );
               dashboardParsedUrl.addQueryParameter(
-                DashboardConstants.NEW_VISUALIZATION_ID_PARAM,
+                DashboardConstants.ADD_EMBEDDABLE_TYPE,
+                VISUALIZE_EMBEDDABLE_TYPE
+              );
+              dashboardParsedUrl.addQueryParameter(
+                DashboardConstants.ADD_EMBEDDABLE_ID,
                 savedVis.id
               );
               kbnUrl.change(dashboardParsedUrl.appPath);

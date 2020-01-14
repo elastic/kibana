@@ -194,6 +194,21 @@ export default async function({ readConfigFile }) {
           },
           kibana: [],
         },
+
+        kibana_date_nanos: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['date-nanos'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
       },
       defaultRoles: [
         'test_logstash_reader',

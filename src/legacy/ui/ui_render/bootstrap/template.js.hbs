@@ -14,6 +14,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   window.onload = function () {
     var files = [
       '{{dllBundlePath}}/vendors.bundle.dll.js',
+      '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
       '{{regularBundlePath}}/commons.bundle.js',
       '{{regularBundlePath}}/{{appId}}.bundle.js'
     ];
