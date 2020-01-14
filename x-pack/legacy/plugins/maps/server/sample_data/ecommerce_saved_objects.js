@@ -420,6 +420,11 @@ const layerList = [
             maxSize: 24,
           },
         },
+        labelBorderSize: {
+          options: {
+            size: 'MEDIUM',
+          },
+        },
       },
     },
     type: 'VECTOR',

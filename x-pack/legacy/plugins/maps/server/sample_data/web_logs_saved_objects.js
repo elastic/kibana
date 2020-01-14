@@ -202,7 +202,7 @@ const layerList = [
               name: 'sum_of_bytes',
               origin: 'source',
             },
-            minSize: 1,
+            minSize: 7,
             maxSize: 25,
           },
         },
