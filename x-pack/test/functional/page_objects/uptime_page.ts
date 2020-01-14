@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
   const uptimeService = getService('uptime');
+  const retry = getService('retry');
 
   return new (class UptimePage {
     public async goToUptimePageAndSetDateRange(
@@ -51,14 +53,11 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
     }
 
-    public async pageUrlContains(value: string, expected: boolean = true, timeout: number = 2000) {
-      const limit = Date.now().valueOf() + timeout;
-      let result: boolean;
-      while ((result = await uptimeService.urlContains(value)) !== expected) {
-        if (Date.now().valueOf() > limit) break;
-        await new Promise(r => setTimeout(r, 10));
-      }
-      return result;
+    public async pageUrlContains(value: string, expected: boolean = true): Promise<void> {
+      retry.try(async () => {
+        const f = await uptimeService.urlContains(value);
+        expect(f).to.eql(expected);
+      });
     }
 
     public async changePage(direction: 'next' | 'prev') {
