@@ -99,7 +99,6 @@ export interface RequestFacade {
   query: ReportingRequestQuery;
   route: Legacy.Request['route'];
   pre: ReportingRequestPre;
-  getRawRequest: () => Legacy.Request;
 }
 
 export type ResponseFacade = ResponseObject & {

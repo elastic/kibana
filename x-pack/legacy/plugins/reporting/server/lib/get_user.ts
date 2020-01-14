@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade, ServerFacade } from '../../types';
+import { Legacy } from 'kibana';
+import { ServerFacade } from '../../types';
 
 export function getUserFactory(server: ServerFacade) {
-  return async (request: RequestFacade) => {
+  return async (request: Legacy.Request) => {
     if (!server.plugins.security) {
       return null;
     }
 
     try {
-      const workingRequest = request ? request.getRawRequest() : request; // for unit tests
-      return await server.plugins.security.getUser(workingRequest);
+      return await server.plugins.security.getUser(request);
     } catch (err) {
-      server.log(['reporting', 'getUser', 'debug'], err);
+      server.log(['reporting', 'getUser', 'error'], err);
       return null;
     }
   };
