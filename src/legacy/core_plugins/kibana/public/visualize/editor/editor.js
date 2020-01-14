@@ -436,7 +436,7 @@ function VisEditor(
     };
 
     $scope.showQueryBarTimePicker = () => {
-      return vis.type.options.showTimePicker;
+      return vis.type.options.showTimePicker && !!$scope.indexPattern.timeFieldName;
     };
 
     $scope.timeRange = timefilter.getTime();
