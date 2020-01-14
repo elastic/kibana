@@ -34,3 +34,70 @@ export const ACTIVATE_RULE = i18n.translate(
 export const UNKNOWN = i18n.translate('xpack.siem.detectionEngine.ruleDetails.unknownDescription', {
   defaultMessage: 'Unknown',
 });
+
+export const STATUS = i18n.translate('xpack.siem.detectionEngine.ruleDetails.statusDescription', {
+  defaultMessage: 'Status',
+});
+
+export const STATUS_AT = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.statusAtDescription',
+  {
+    defaultMessage: 'at',
+  }
+);
+
+export const STATUS_DATE = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.statusDateDescription',
+  {
+    defaultMessage: 'Status date',
+  }
+);
+
+export const ERROR_CALLOUT_TITLE = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.errorCalloutTitle',
+  {
+    defaultMessage: 'Rule failure at',
+  }
+);
+
+export const FAILURE_HISTORY_TAB = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.failureHistoryTab',
+  {
+    defaultMessage: 'Failure History',
+  }
+);
+
+export const LAST_FIVE_ERRORS = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.lastFiveErrorsTitle',
+  {
+    defaultMessage: 'Last five errors',
+  }
+);
+
+export const COLUMN_STATUS_TYPE = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.statusTypeColumn',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const COLUMN_FAILED_AT = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.statusFailedAtColumn',
+  {
+    defaultMessage: 'Failed at',
+  }
+);
+
+export const COLUMN_FAILED_MSG = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.statusFailedMsgColumn',
+  {
+    defaultMessage: 'Failed message',
+  }
+);
+
+export const TYPE_FAILED = i18n.translate(
+  'xpack.siem.detectionEngine.ruleDetails.statusFailedDescription',
+  {
+    defaultMessage: 'Failed',
+  }
+);
