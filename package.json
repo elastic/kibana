@@ -163,7 +163,6 @@
     "compare-versions": "3.5.1",
     "core-js": "^3.2.1",
     "css-loader": "2.1.1",
-    "custom-event-polyfill": "^0.3.0",
     "d3": "3.5.17",
     "d3-cloud": "1.2.5",
     "deep-freeze-strict": "^1.1.1",

@@ -1,5 +1,82 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`LocationStatusTags component renders properly against props 1`] = `
+<Fragment>
+  <styled.div>
+    <span>
+      <styled.div
+        key="0"
+      >
+        <EuiBadge
+          color="#bd271e"
+        >
+          <EuiText
+            size="m"
+          >
+            <styled.div>
+              Berlin
+            </styled.div>
+          </EuiText>
+        </EuiBadge>
+        <styled.span>
+          <EuiText
+            color="subdued"
+          >
+            1 Mon ago
+          </EuiText>
+        </styled.span>
+      </styled.div>
+    </span>
+    <span>
+      <styled.div
+        key="0"
+      >
+        <EuiBadge
+          color="#d3dae6"
+        >
+          <EuiText
+            size="m"
+          >
+            <styled.div>
+              Berlin
+            </styled.div>
+          </EuiText>
+        </EuiBadge>
+        <styled.span>
+          <EuiText
+            color="subdued"
+          >
+            1 Mon ago
+          </EuiText>
+        </styled.span>
+      </styled.div>
+      <styled.div
+        key="1"
+      >
+        <EuiBadge
+          color="#d3dae6"
+        >
+          <EuiText
+            size="m"
+          >
+            <styled.div>
+              Islamabad
+            </styled.div>
+          </EuiText>
+        </EuiBadge>
+        <styled.span>
+          <EuiText
+            color="subdued"
+          >
+            1 Mon ago
+          </EuiText>
+        </styled.span>
+      </styled.div>
+    </span>
+  </styled.div>
+</Fragment>
+`;
+
 exports[`LocationStatusTags component renders when all locations are down 1`] = `
 .c3 {
   display: inline-block;
