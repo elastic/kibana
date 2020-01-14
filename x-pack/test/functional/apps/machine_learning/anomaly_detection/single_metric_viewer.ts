@@ -64,7 +64,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('pre-fills the job selection', async () => {
-      await ml.jobSelection.assertSelectedJobBadges([JOB_CONFIG.job_id]);
+      await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
     });
 
     it('pre-fills the detector input', async () => {

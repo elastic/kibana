@@ -11,16 +11,16 @@ export function MachineLearningJobSelectionProvider({ getService }: FtrProviderC
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertSelectedJobBadges(expectedBadgesLabels: string[]) {
-      const selectedBadges = await testSubjects.findAll(
+    async assertJobSelection(jobOrGroupIds: string[]) {
+      const selectedJobsOrGroups = await testSubjects.findAll(
         'mlJobSelectionBadges > ~mlJobSelectionBadge'
       );
-      const actualBadgesLabels = await Promise.all(
-        selectedBadges.map(async badge => await badge.getVisibleText())
+      const actualJobOrGroupLabels = await Promise.all(
+        selectedJobsOrGroups.map(async badge => await badge.getVisibleText())
       );
-      expect(actualBadgesLabels).to.eql(
-        expectedBadgesLabels,
-        `Job selection should display badges '${expectedBadgesLabels}' (got '${actualBadgesLabels}')`
+      expect(actualJobOrGroupLabels).to.eql(
+        jobOrGroupIds,
+        `Job selection should display jobs or groups '${jobOrGroupIds}' (got '${actualJobOrGroupLabels}')`
       );
     },
   };
