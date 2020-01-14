@@ -203,14 +203,15 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
 
   const onItemsRendered = useCallback(() => {
     if (!hasInitializedColumnWidth) {
-      // Recompute the column size after the first initial render. Even though
-      // recalculateColumnSize calls requestAnimationFrame within itself, this
-      // doesn't actually work unless we also call setTimeout here (NOT requestAnimationFrame)
-      // for some cosmic, unknowable reason
-      setTimeout(recalculateColumnSize, 0);
-      setHasInitializedColumnWidth(true);
+      // It will take a few animation frames for the message columns to render at their full width on
+      // initial render. Recalculate until the column width returns a value greater than two characters wide
+      if (characterDimensions.width > 0 && messageColumnWidth >= characterDimensions.width * 2) {
+        setHasInitializedColumnWidth(true);
+        return;
+      }
+      recalculateColumnSize();
     }
-  }, [hasInitializedColumnWidth]);
+  }, [hasInitializedColumnWidth, messageColumnWidth, characterDimensions.width]);
 
   return (
     <>
