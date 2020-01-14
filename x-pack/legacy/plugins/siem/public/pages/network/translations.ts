@@ -35,6 +35,20 @@ export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.network.navigatio
   defaultMessage: 'DNS',
 });
 
+export const NAVIGATION_DNS_STACK_BY_DOMAIN = i18n.translate(
+  'xpack.siem.hosts.navigation.dns.stackByDomain',
+  {
+    defaultMessage: 'domain',
+  }
+);
+
+export const ERROR_FETCHING_DNS_DATA = i18n.translate(
+  'xpack.siem.hosts.navigation.dns.histogram.errorFetchingDnsData',
+  {
+    defaultMessage: 'Failed to query DNS data',
+  }
+);
+
 export const NAVIGATION_TLS_TITLE = i18n.translate('xpack.siem.network.navigation.tlsTitle', {
   defaultMessage: 'TLS',
 });

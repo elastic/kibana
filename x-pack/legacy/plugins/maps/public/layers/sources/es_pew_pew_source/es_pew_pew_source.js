@@ -17,12 +17,7 @@ import {
   VECTOR_STYLES,
 } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
-import {
-  SOURCE_DATA_ID_ORIGIN,
-  ES_PEW_PEW,
-  COUNT_PROP_NAME,
-  COUNT_PROP_LABEL,
-} from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW, COUNT_PROP_NAME } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -139,7 +134,6 @@ export class ESPewPewSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },
@@ -151,7 +145,6 @@ export class ESPewPewSource extends AbstractESAggSource {
         options: {
           ...defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH].options,
           field: {
-            label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },

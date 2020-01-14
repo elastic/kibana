@@ -43,11 +43,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
           >
             <EuiFieldText
               autoFocus={true}
-              compressed={false}
               data-test-subj="savedObjectTitle"
               fullWidth={true}
               isInvalid={false}
-              isLoading={false}
               onChange={[Function]}
               value="Saved Object title"
             />
