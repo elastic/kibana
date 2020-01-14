@@ -51,8 +51,14 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
     }
 
-    public async pageUrlContains(value: string) {
-      return await uptimeService.urlContains(value);
+    public async pageUrlContains(value: string, expected: boolean = true, timeout: number = 1000) {
+      const limit = Date.now().valueOf() + timeout;
+      let result: boolean;
+      while ((result = await uptimeService.urlContains(value)) !== expected) {
+        if (Date.now().valueOf() > limit) break;
+        await new Promise(r => setTimeout(r, 10));
+      }
+      return result;
     }
 
     public async changePage(direction: 'next' | 'prev') {
@@ -61,6 +67,17 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       } else if (direction === 'prev') {
         await uptimeService.goToPreviousPage();
       }
+      // await new Promise(r => setTimeout(r, 1000 * 60 * 60));
+      // await new Promise((res, rej) => {
+      //   const limit = Date.now().valueOf() + maxTimeout;
+      //   const interval = setInterval(async () => {
+      //     const exists = await uptimeService.assertExists(elementToCheck);
+      //     if (exists) {
+      //       clearInterval(interval);
+      //       res();
+      //     }
+      //   }, 50);
+      // });
     }
 
     public async setStatusFilter(value: 'up' | 'down') {
