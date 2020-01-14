@@ -61,7 +61,9 @@ const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
 
   const palette = astToPalette(argValue);
 
-  return <PalettePicker value={palette} onChange={handleChange} />;
+  return (
+    <PalettePicker value={palette} onChange={handleChange} ariaLabel={strings.getDisplayName()} />
+  );
 };
 
 PaletteArgInput.propTypes = {

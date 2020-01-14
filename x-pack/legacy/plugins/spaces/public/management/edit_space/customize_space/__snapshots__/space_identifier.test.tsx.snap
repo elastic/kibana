@@ -49,10 +49,8 @@ exports[`renders without crashing 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       fullWidth={true}
       inputRef={[Function]}
-      isLoading={false}
       onChange={[Function]}
       placeholder="awesome-space"
       readOnly={true}

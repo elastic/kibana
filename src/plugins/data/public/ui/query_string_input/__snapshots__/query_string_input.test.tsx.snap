@@ -1076,11 +1076,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={false}
-                        compressed={false}
                         data-test-subj="queryInput"
                         fullWidth={true}
                         inputRef={[Function]}
-                        isLoading={false}
                         onChange={[Function]}
                         onClick={[Function]}
                         onKeyDown={[Function]}
@@ -1098,9 +1096,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                               onSelectLanguage={[Function]}
                             />
                           }
-                          compressed={false}
                           fullWidth={true}
-                          isLoading={false}
                         >
                           <div
                             className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
@@ -1127,9 +1123,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                                   value="response:200"
                                 />
                               </EuiValidatableControl>
-                              <EuiFormControlLayoutIcons
-                                isLoading={false}
-                              />
+                              <EuiFormControlLayoutIcons />
                             </div>
                             <QueryLanguageSwitcher
                               className="euiFormControlLayout__append"
@@ -2307,11 +2301,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={true}
-                        compressed={false}
                         data-test-subj="queryInput"
                         fullWidth={true}
                         inputRef={[Function]}
-                        isLoading={false}
                         onChange={[Function]}
                         onClick={[Function]}
                         onKeyDown={[Function]}
@@ -2329,9 +2321,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                               onSelectLanguage={[Function]}
                             />
                           }
-                          compressed={false}
                           fullWidth={true}
-                          isLoading={false}
                         >
                           <div
                             className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
@@ -2358,9 +2348,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                                   value="response:200"
                                 />
                               </EuiValidatableControl>
-                              <EuiFormControlLayoutIcons
-                                isLoading={false}
-                              />
+                              <EuiFormControlLayoutIcons />
                             </div>
                             <QueryLanguageSwitcher
                               className="euiFormControlLayout__append"
@@ -3538,11 +3526,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={true}
-                        compressed={false}
                         data-test-subj="queryInput"
                         fullWidth={true}
                         inputRef={[Function]}
-                        isLoading={false}
                         onChange={[Function]}
                         onClick={[Function]}
                         onKeyDown={[Function]}
@@ -3560,9 +3546,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                               onSelectLanguage={[Function]}
                             />
                           }
-                          compressed={false}
                           fullWidth={true}
-                          isLoading={false}
                         >
                           <div
                             className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
@@ -3589,9 +3573,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                                   value="response:200"
                                 />
                               </EuiValidatableControl>
-                              <EuiFormControlLayoutIcons
-                                isLoading={false}
-                              />
+                              <EuiFormControlLayoutIcons />
                             </div>
                             <QueryLanguageSwitcher
                               className="euiFormControlLayout__append"
