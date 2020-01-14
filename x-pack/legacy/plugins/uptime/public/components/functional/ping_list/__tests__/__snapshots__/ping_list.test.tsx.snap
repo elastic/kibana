@@ -384,6 +384,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
         }
       }
       responsive={true}
+      tableLayout="fixed"
     />
   </EuiPanel>
 </Fragment>
