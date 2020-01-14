@@ -69,3 +69,15 @@ export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
     defaultMessage: 'Filter or Search with KQL',
   }
 );
+
+export const ALL_EVENT = i18n.translate('xpack.siem.timeline.searchOrFilter.eventTypeAllEvent', {
+  defaultMessage: 'All events',
+});
+
+export const RAW_EVENT = i18n.translate('xpack.siem.timeline.searchOrFilter.eventTypeAllEvent', {
+  defaultMessage: 'Raw events',
+});
+
+export const SIGNAL_EVENT = i18n.translate('xpack.siem.timeline.searchOrFilter.eventTypeAllEvent', {
+  defaultMessage: 'Signal events',
+});

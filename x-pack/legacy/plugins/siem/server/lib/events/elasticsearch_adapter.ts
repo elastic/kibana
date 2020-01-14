@@ -103,6 +103,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       response: [inspectStringifyObject(searchResponse)],
     };
     const data = getDataFromHits(merge(sourceData, hitsData));
+
     return {
       data,
       inspect,

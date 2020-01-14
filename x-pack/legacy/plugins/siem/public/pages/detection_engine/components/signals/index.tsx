@@ -7,10 +7,25 @@
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
-import { SignalsUtilityBar } from './signals_utility_bar';
+
+import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
+import { Query } from '../../../../../../../../../src/plugins/data/common/query';
+import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../../components/events_viewer';
-import * as i18n from './translations';
+import { HeaderSection } from '../../../../components/header_section';
+import { DispatchUpdateTimeline } from '../../../../components/open_timeline/types';
+import { combineQueries } from '../../../../components/timeline/helpers';
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { useKibana } from '../../../../lib/kibana';
+import { inputsSelectors, State } from '../../../../store';
+import { InputsRange } from '../../../../store/inputs/model';
+import { timelineActions, timelineSelectors } from '../../../../store/timeline';
+import { timelineDefaults, TimelineModel } from '../../../../store/timeline/model';
+import { useApolloClient } from '../../../../utils/apollo_context';
+
+import { updateSignalStatusAction } from './actions';
 import {
   getSignalsActions,
   requiredFieldsForActions,
@@ -18,21 +33,14 @@ import {
   signalsDefaultModel,
   signalsOpenFilters,
 } from './default_config';
-import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { timelineDefaults, TimelineModel } from '../../../../store/timeline/model';
 import {
   FILTER_CLOSED,
   FILTER_OPEN,
   SignalFilterOption,
   SignalsTableFilterGroup,
 } from './signals_filter_group';
-import { useKibana } from '../../../../lib/kibana';
-import { defaultHeaders } from '../../../../components/timeline/body/column_headers/default_headers';
-import { ColumnHeader } from '../../../../components/timeline/body/column_headers/column_header';
-import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
-import { TimelineNonEcsData } from '../../../../graphql/types';
-import { inputsSelectors, SerializedFilterQuery, State } from '../../../../store';
-import { updateSignalStatusAction } from './actions';
+import { SignalsUtilityBar } from './signals_utility_bar';
+import * as i18n from './translations';
 import {
   CreateTimelineProps,
   SetEventsDeletedProps,
@@ -40,13 +48,7 @@ import {
   UpdateSignalsStatus,
   UpdateSignalsStatusProps,
 } from './types';
-import { inputsActions } from '../../../../store/inputs';
-import { combineQueries } from '../../../../components/timeline/helpers';
-import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
-import { InputsRange } from '../../../../store/inputs/model';
-import { Query } from '../../../../../../../../../src/plugins/data/common/query';
-
-import { HeaderSection } from '../../../../components/header_section';
+import { dispatchUpdateTimeline } from '../../../../components/open_timeline/helpers';
 
 const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
@@ -60,23 +62,9 @@ interface ReduxProps {
 }
 
 interface DispatchProps {
-  createTimeline: ActionCreator<{
-    dateRange?: {
-      start: number;
-      end: number;
-    };
-    filters?: esFilters.Filter[];
-    id: string;
-    kqlQuery?: {
-      filterQuery: SerializedFilterQuery | null;
-    };
-    columns: ColumnHeader[];
-    show?: boolean;
-  }>;
   clearEventsDeleted?: ActionCreator<{ id: string }>;
   clearEventsLoading?: ActionCreator<{ id: string }>;
   clearSelected?: ActionCreator<{ id: string }>;
-  removeTimelineLinkTo: ActionCreator<{}>;
   setEventsDeleted?: ActionCreator<{
     id: string;
     eventIds: string[];
@@ -87,6 +75,8 @@ interface DispatchProps {
     eventIds: string[];
     isLoading: boolean;
   }>;
+  updateTimelineIsLoading: ActionCreator<{ id: string; isLoading: boolean }>;
+  updateTimeline: DispatchUpdateTimeline;
 }
 
 interface OwnProps {
@@ -104,7 +94,6 @@ type SignalsTableComponentProps = OwnProps & ReduxProps & DispatchProps;
 export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
   ({
     canUserCRUD,
-    createTimeline,
     clearEventsDeleted,
     clearEventsLoading,
     clearSelected,
@@ -116,14 +105,16 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     isSelectAllChecked,
     loading,
     loadingEventIds,
-    removeTimelineLinkTo,
     selectedEventIds,
     setEventsDeleted,
     setEventsLoading,
     signalsIndex,
     to,
+    updateTimeline,
+    updateTimelineIsLoading,
   }) => {
     const [selectAll, setSelectAll] = useState(false);
+    const apolloClient = useApolloClient();
 
     const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
     const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
@@ -150,11 +141,21 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
 
     // Callback for creating a new timeline -- utilized by row/batch actions
     const createTimelineCallback = useCallback(
-      ({ id, kqlQuery, filters, dateRange }: CreateTimelineProps) => {
-        removeTimelineLinkTo({});
-        createTimeline({ id, columns: defaultHeaders, show: true, filters, dateRange, kqlQuery });
+      ({ from: fromTimeline, timeline, to: toTimeline }: CreateTimelineProps) => {
+        updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
+        updateTimeline({
+          duplicate: true,
+          from: fromTimeline,
+          id: 'timeline-1',
+          notes: [],
+          timeline: {
+            ...timeline,
+            show: true,
+          },
+          to: toTimeline,
+        })();
       },
-      [createTimeline, removeTimelineLinkTo]
+      [updateTimeline, updateTimelineIsLoading]
     );
 
     const setEventsLoadingCallback = useCallback(
@@ -260,20 +261,24 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     const additionalActions = useMemo(
       () =>
         getSignalsActions({
+          apolloClient,
           canUserCRUD,
           hasIndexWrite,
           createTimeline: createTimelineCallback,
           setEventsLoading: setEventsLoadingCallback,
           setEventsDeleted: setEventsDeletedCallback,
           status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
+          updateTimelineIsLoading,
         }),
       [
+        apolloClient,
         canUserCRUD,
         createTimelineCallback,
         hasIndexWrite,
         filterGroup,
         setEventsLoadingCallback,
         setEventsDeletedCallback,
+        updateTimelineIsLoading,
       ]
     );
 
@@ -351,12 +356,33 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const SignalsTable = connect(makeMapStateToProps, {
-  removeTimelineLinkTo: inputsActions.removeTimelineLinkTo,
-  clearSelected: timelineActions.clearSelected,
-  setEventsLoading: timelineActions.setEventsLoading,
-  clearEventsLoading: timelineActions.clearEventsLoading,
-  setEventsDeleted: timelineActions.setEventsDeleted,
-  clearEventsDeleted: timelineActions.clearEventsDeleted,
-  createTimeline: timelineActions.createTimeline,
-})(SignalsTableComponent);
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
+  setEventsLoading: ({
+    id,
+    eventIds,
+    isLoading,
+  }: {
+    id: string;
+    eventIds: string[];
+    isLoading: boolean;
+  }) => dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading })),
+  clearEventsLoading: ({ id }: { id: string }) =>
+    dispatch(timelineActions.clearEventsLoading({ id })),
+  setEventsDeleted: ({
+    id,
+    eventIds,
+    isDeleted,
+  }: {
+    id: string;
+    eventIds: string[];
+    isDeleted: boolean;
+  }) => dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted })),
+  clearEventsDeleted: ({ id }: { id: string }) =>
+    dispatch(timelineActions.clearEventsDeleted({ id })),
+  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
+    dispatch(timelineActions.updateIsLoading({ id, isLoading })),
+  updateTimeline: dispatchUpdateTimeline(dispatch),
+});
+
+export const SignalsTable = connect(makeMapStateToProps, mapDispatchToProps)(SignalsTableComponent);

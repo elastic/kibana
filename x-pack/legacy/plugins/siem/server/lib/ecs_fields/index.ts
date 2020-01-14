@@ -284,6 +284,21 @@ export const systemFieldsMap: Readonly<Record<string, string>> = {
   'system.auth.ssh.method': 'system.auth.ssh.method',
 };
 
+export const signalFieldsMap: Readonly<Record<string, string>> = {
+  'signal.original_time': 'signal.original_time',
+  'signal.rule.id': 'signal.rule.id',
+  'signal.rule.saved_id': 'signal.rule.saved_id',
+  'signal.rule.timeline_id': 'signal.rule.timeline_id',
+  'signal.rule.timeline_title': 'signal.rule.timeline_title',
+  'signal.rule.output_index': 'signal.rule.output_index',
+  'signal.rule.from': 'signal.rule.from',
+  'signal.rule.index': 'signal.rule.index',
+  'signal.rule.language': 'signal.rule.language',
+  'signal.rule.query': 'signal.rule.query',
+  'signal.rule.to': 'signal.rule.to',
+  'signal.rule.filters': 'signal.rule.filters',
+};
+
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',
@@ -293,9 +308,11 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...dnsFieldsMap },
   ...{ ...endgameFieldsMap },
   ...{ ...eventBaseFieldsMap },
+  ...{ ...fileMap },
   ...{ ...geoFieldsMap },
   ...{ ...hostFieldsMap },
   ...{ ...networkFieldsMap },
+  ...{ ...signalFieldsMap },
   ...{ ...sourceFieldsMap },
   ...{ ...suricataFieldsMap },
   ...{ ...systemFieldsMap },
@@ -305,5 +322,4 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...userFieldsMap },
   ...{ ...winlogFieldsMap },
   ...{ ...processFieldsMap },
-  ...{ ...fileMap },
 };

@@ -47,6 +47,7 @@ export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
   id: string;
   indexPattern?: IIndexPattern;
+  indexToAdd?: string[];
   limit: number;
   sortField: SortField;
   fields: string[];
@@ -71,6 +72,7 @@ class TimelineQueryComponent extends QueryTemplate<
       children,
       id,
       indexPattern,
+      indexToAdd = [],
       isInspected,
       kibana,
       limit,
@@ -79,15 +81,17 @@ class TimelineQueryComponent extends QueryTemplate<
       sourceId,
       sortField,
     } = this.props;
+
     const variables: GetTimelineQuery.Variables = {
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex:
-        indexPattern?.title.split(',') ??
-        kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex: indexPattern?.title.split(',') ?? [
+        ...kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+        ...indexToAdd,
+      ],
       inspect: isInspected,
     };
     return (

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
@@ -30,6 +30,7 @@ import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
+import { getEventType } from '../helpers';
 import { StatefulEventChild } from './stateful_event_child';
 
 interface Props {
@@ -141,6 +142,8 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const divElement = useRef<HTMLDivElement | null>(null);
 
+  const eventType = useMemo(() => getEventType(event.ecs), [event]);
+
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
     setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
@@ -215,6 +218,8 @@ const StatefulEventComponent: React.FC<Props> = ({
                 <EventsTrGroup
                   className={STATEFUL_EVENT_CSS_CLASS_NAME}
                   data-test-subj="event"
+                  eventType={eventType}
+                  showLeftBorder={!isEventViewer}
                   ref={c => {
                     if (c != null) {
                       divElement.current = c;
@@ -232,6 +237,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                         columnHeaders={columnHeaders}
                         columnRenderers={columnRenderers}
                         data={event.data}
+                        ecsData={event.ecs}
                         eventIdToNoteIds={eventIdToNoteIds}
                         expanded={!!expanded[event._id]}
                         getNotesByIds={getNotesByIds}
