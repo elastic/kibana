@@ -94,7 +94,10 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'map.manifestServiceUrl')) {
     log(
-      `You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure Elastic Maps Service settings. Use "map.emsTileApiUrl" and "map.emsFileApiUrl" instead.`
+      'You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure the location ' +
+        'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
+        '"map.emsFileApiUrl" settings instead. These settings are for development use only and should not be ' +
+        'modified for use in production environments.'
     );
   }
   return settings;
@@ -106,6 +109,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
 }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
+  unusedFromRoot('maps.manifestServiceUrl'),
   renameFromRoot('optimize.lazy', 'optimize.watch'),
   renameFromRoot('optimize.lazyPort', 'optimize.watchPort'),
   renameFromRoot('optimize.lazyHost', 'optimize.watchHost'),
