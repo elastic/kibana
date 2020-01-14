@@ -4,16 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonIcon,
-  EuiColorPicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  isValidHex,
-} from '@elastic/eui';
-import React from 'react';
-import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
+import { isValidHex } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 
@@ -29,95 +20,35 @@ export function removeRow(colorStops, index) {
 }
 
 export function addOrdinalRow(colorStops, index) {
-  return addRow(colorStops, index, COLOR_MAP_TYPE.ORDINAL);
+  const currentStop = colorStops[index].stop;
+  let delta = 1;
+  if (index === colorStops.length - 1) {
+    // Adding row to end of list.
+    if (index !== 0) {
+      const prevStop = colorStops[index - 1].stop;
+      delta = currentStop - prevStop;
+    }
+  } else {
+    // Adding row in middle of list.
+    const nextStop = colorStops[index + 1].stop;
+    delta = (nextStop - currentStop) / 2;
+  }
+  const nextValue = currentStop + delta;
+  return addRow(colorStops, index, nextValue);
 }
 
 export function addCategoricalRow(colorStops, index) {
-  return addRow(colorStops, index, COLOR_MAP_TYPE.CATEGORICAL);
+  const currentStop = colorStops[index].stop;
+  const nextValue = currentStop === '' ? currentStop + 'a' : '';
+  return addRow(colorStops, index, nextValue);
 }
 
-export function addRow(colorStops, index, colorMapType) {
-  const currentStop = colorStops[index].stop;
-
-  let nextValue;
-  if (colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-    let delta = 1;
-    if (index === colorStops.length - 1) {
-      // Adding row to end of list.
-      if (index !== 0) {
-        const prevStop = colorStops[index - 1].stop;
-        delta = currentStop - prevStop;
-      }
-    } else {
-      // Adding row in middle of list.
-      const nextStop = colorStops[index + 1].stop;
-      delta = (nextStop - currentStop) / 2;
-    }
-    nextValue = currentStop + delta;
-  } else {
-    nextValue = currentStop === '' ? currentStop + 'a' : '';
-  }
+function addRow(colorStops, index, nextValue) {
   const newRow = {
     stop: nextValue,
     color: DEFAULT_CUSTOM_COLOR,
   };
   return [...colorStops.slice(0, index + 1), newRow, ...colorStops.slice(index + 1)];
-}
-
-export function getDeleteButton(onRemove) {
-  return (
-    <EuiButtonIcon
-      iconType="trash"
-      color="danger"
-      aria-label={i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
-        defaultMessage: 'Delete',
-      })}
-      title={i18n.translate('xpack.maps.styles.colorStops.deleteButtonLabel', {
-        defaultMessage: 'Delete',
-      })}
-      onClick={onRemove}
-    />
-  );
-}
-
-export function getColorInput(colorStops, onColorChange, color) {
-  return {
-    colorError: isColorInvalid(color)
-      ? i18n.translate('xpack.maps.styles.colorStops.hexWarningLabel', {
-          defaultMessage: 'Color must provide a valid hex value',
-        })
-      : undefined,
-    colorInput: <EuiColorPicker onChange={onColorChange} color={color} compressed />,
-  };
-}
-
-export function getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, onAdd }) {
-  return (
-    <EuiFormRow
-      key={index}
-      className="mapColorStop"
-      isInvalid={errors.length !== 0}
-      error={errors}
-      display="rowCompressed"
-    >
-      <div>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-          <EuiFlexItem>{stopInput}</EuiFlexItem>
-          <EuiFlexItem>{colorInput}</EuiFlexItem>
-        </EuiFlexGroup>
-        <div className="mapColorStop__icons">
-          {deleteButton}
-          <EuiButtonIcon
-            iconType="plusInCircle"
-            color="primary"
-            aria-label="Add"
-            title="Add"
-            onClick={onAdd}
-          />
-        </div>
-      </div>
-    </EuiFormRow>
-  );
 }
 
 export function isColorInvalid(color) {

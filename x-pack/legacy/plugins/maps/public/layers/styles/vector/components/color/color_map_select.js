@@ -31,11 +31,9 @@ export class ColorMapSelect extends Component {
 
   _onColorMapSelect = selectedValue => {
     const useCustomColorMap = selectedValue === CUSTOM_COLOR_MAP;
-    const newProps = { useCustomColorMap };
-    newProps.color = useCustomColorMap ? null : selectedValue;
-
     this.props.onChange({
-      ...newProps,
+      color: useCustomColorMap ? null : selectedValue,
+      useCustomColorMap,
       type: this.props.colorMapType,
     });
   };
@@ -50,12 +48,11 @@ export class ColorMapSelect extends Component {
       return;
     }
 
-    const newProps = {
+    this.props.onChange({
       useCustomColorMap: true,
       customColorMap: colorStops,
       type: this.props.colorMapType,
-    };
-    this.props.onChange(newProps);
+    });
   };
 
   componentDidMount() {
@@ -90,7 +87,7 @@ export class ColorMapSelect extends Component {
     }
   }
 
-  render() {
+  _renderColorStopsInput() {
     let colorStopsInput;
     if (this.props.useCustomColorMap) {
       if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
@@ -115,7 +112,11 @@ export class ColorMapSelect extends Component {
         );
       }
     }
+    return colorStopsInput;
+  }
 
+  render() {
+    const colorStopsInput = this._renderColorStopsInput();
     const colorMapOptionsWithCustom = [
       {
         value: CUSTOM_COLOR_MAP,

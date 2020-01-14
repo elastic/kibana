@@ -45,9 +45,8 @@ export const ColorStopsCategorical = ({
   };
 
   const renderStopInput = (stop, onStopChange, index) => {
-    let stopInput;
     if (index === 0) {
-      stopInput = (
+      return (
         <EuiFieldText
           aria-label={i18n.translate(
             'xpack.maps.styles.colorStops.categoricalStop.defaultCategoryAriaLabel',
@@ -63,7 +62,7 @@ export const ColorStopsCategorical = ({
         />
       );
     } else {
-      stopInput = (
+      return (
         <EuiFieldText
           aria-label={i18n.translate(
             'xpack.maps.styles.colorStops.categoricalStop.categoryAriaLabel',
@@ -77,7 +76,6 @@ export const ColorStopsCategorical = ({
         />
       );
     }
-    return stopInput;
   };
 
   const canDeleteStop = (colorStops, index) => {
