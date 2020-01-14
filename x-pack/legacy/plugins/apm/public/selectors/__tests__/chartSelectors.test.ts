@@ -77,7 +77,7 @@ describe('chartSelectors', () => {
           type: 'linemark'
         },
         {
-          color: '##da8b45',
+          color: '#da8b45',
           data: [
             { x: 0, y: 300 },
             { x: 1000, y: 400 }
