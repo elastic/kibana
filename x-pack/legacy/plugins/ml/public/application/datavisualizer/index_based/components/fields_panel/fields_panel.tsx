@@ -96,12 +96,12 @@ export const FieldsPanel: FC<Props> = ({
                   <FormattedMessage
                     id="xpack.ml.datavisualizer.fieldsPanel.countDescription"
                     defaultMessage="{cardsCount} {cardsCount, plural, one {field exists} other {fields exist}} in documents sampled"
-                    values={{ cardsCount: fieldVisConfigs.length }}
+                    values={{ cardsCount: populatedFieldCount }}
                   />
                 }
               >
                 <EuiBadge title="">
-                  <b>{fieldVisConfigs.length}</b>
+                  <b>{populatedFieldCount}</b>
                 </EuiBadge>
               </EuiToolTip>
             </EuiFlexItem>
@@ -111,9 +111,7 @@ export const FieldsPanel: FC<Props> = ({
                   id="xpack.ml.datavisualizer.fieldsPanel.totalFieldLabel"
                   defaultMessage="Total fields: {wrappedTotalFields}"
                   values={{
-                    wrappedTotalFields: (
-                      <b>{showAllFields ? totalFieldCount : populatedFieldCount}</b>
-                    ),
+                    wrappedTotalFields: <b>{totalFieldCount}</b>,
                   }}
                 />
               </EuiText>
