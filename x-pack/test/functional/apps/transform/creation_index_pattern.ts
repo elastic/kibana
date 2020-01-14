@@ -27,6 +27,7 @@ export default function({ getService }: FtrProviderContext) {
       await esArchiver.unload('ml/ecommerce');
       await transform.api.cleanTransformIndices();
     });
+    const id = `ec_1_${Date.now()}`;
 
     const testDataList = [
       {
@@ -49,7 +50,7 @@ export default function({ getService }: FtrProviderContext) {
             label: 'products.base_price.avg',
           },
         ],
-        transformId: `ec_1_${Date.now()}`,
+        transformId: id,
         transformDescription:
           'ecommerce batch transform with groups terms(category.keyword) + date_histogram(order_date) 1m and aggregation avg(products.base_price)',
         get destinationIndex(): string {
@@ -180,7 +181,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('inputs the destination index', async () => {
           await transform.wizard.assertDestinationIndexInputExists();
-          await transform.wizard.assertDestinationIndexValue('');
+          await transform.wizard.assertDestinationIndexValue(id);
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
         });
 
