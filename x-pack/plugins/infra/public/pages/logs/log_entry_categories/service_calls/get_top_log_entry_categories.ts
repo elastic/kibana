@@ -7,7 +7,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
-import { npStart } from 'ui/new_platform';
+import { npStart } from '../../../../legacy_singletons';
 
 import {
   getLogEntryCategoriesRequestPayloadRT,
@@ -25,7 +25,7 @@ export const callGetTopLogEntryCategoriesAPI = async (
 ) => {
   const intervalDuration = endTime - startTime;
 
-  const response = await npStart.core.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH, {
+  const response = await npStart.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORIES_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getLogEntryCategoriesRequestPayloadRT.encode({
