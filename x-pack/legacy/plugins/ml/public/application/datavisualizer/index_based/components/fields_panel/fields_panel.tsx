@@ -112,7 +112,7 @@ export const FieldsPanel: FC<Props> = ({
                   defaultMessage="Total fields: {wrappedTotalFields}"
                   values={{
                     wrappedTotalFields: (
-                      <b>{showAllFields ? populatedFieldCount : totalFieldCount}</b>
+                      <b>{showAllFields ? totalFieldCount : populatedFieldCount}</b>
                     ),
                   }}
                 />
