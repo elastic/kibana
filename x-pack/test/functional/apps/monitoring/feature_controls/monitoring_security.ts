@@ -10,7 +10,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'security']);
+  const PageObjects = getPageObjects(['common', 'security', 'settings']);
+  const browser = getService('browser');
 
   describe('security', () => {
     before(async () => {
@@ -97,6 +98,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows monitoring navlink', async () => {
+        await PageObjects.common.navigateToApp('settings');
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
+        await browser.refresh();
+
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Stack Monitoring');
       });

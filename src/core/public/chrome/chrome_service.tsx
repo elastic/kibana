@@ -167,7 +167,7 @@ export class ChromeService {
     const settings = injectedMetadata.getLegacyMetadata().uiSettings;
 
     const navSetting =
-      settings?.user?.pageNavigation?.userValue || settings.defaults.pageNavigation.value;
+      settings?.user?.pageNavigation?.userValue || settings.defaults.pageNavigation?.value;
 
     return {
       navControls,

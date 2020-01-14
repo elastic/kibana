@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const browser = getService('browser');
 
   describe('spaces feature controls', () => {
     before(async () => {
@@ -37,14 +38,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
-          basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
-        });
-        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
+        await PageObjects.common.navigateToApp('settings');
+        await PageObjects.settings.clickKibanaSettings();
+        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
+        await browser.refresh();
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Management');
       });
