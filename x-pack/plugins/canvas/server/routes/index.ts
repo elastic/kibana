@@ -7,6 +7,7 @@
 import { IRouter, Logger } from 'src/core/server';
 import { initWorkpadRoutes } from './workpad';
 import { initCustomElementsRoutes } from './custom_elements';
+import { initESFieldsRoutes } from './es_fields';
 
 export interface RouteInitializerDeps {
   router: IRouter;
@@ -16,4 +17,5 @@ export interface RouteInitializerDeps {
 export function initRoutes(deps: RouteInitializerDeps) {
   initWorkpadRoutes(deps);
   initCustomElementsRoutes(deps);
+  initESFieldsRoutes(deps);
 }

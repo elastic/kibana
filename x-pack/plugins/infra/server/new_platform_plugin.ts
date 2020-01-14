@@ -17,7 +17,7 @@ import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_sta
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
-import { InfraLogAnalysis } from './lib/log_analysis';
+import { LogEntryCategoriesAnalysis, LogEntryRateAnalysis } from './lib/log_analysis';
 import { InfraSnapshot } from './lib/snapshot';
 import { InfraSourceStatus } from './lib/source_status';
 import { InfraSources } from './lib/sources';
@@ -87,7 +87,8 @@ export class InfraServerPlugin {
       }
     );
     const snapshot = new InfraSnapshot({ sources, framework });
-    const logAnalysis = new InfraLogAnalysis({ framework });
+    const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
+    const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
     const domainLibs: InfraDomainLibs = {
@@ -103,7 +104,8 @@ export class InfraServerPlugin {
     this.libs = {
       configuration: this.config,
       framework,
-      logAnalysis,
+      logEntryCategoriesAnalysis,
+      logEntryRateAnalysis,
       snapshot,
       sources,
       sourceStatus,

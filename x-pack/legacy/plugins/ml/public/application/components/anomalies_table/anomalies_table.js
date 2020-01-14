@@ -146,7 +146,7 @@ class AnomaliesTable extends Component {
   };
 
   render() {
-    const { timefilter, tableData, filter, influencerFilter } = this.props;
+    const { bounds, tableData, filter, influencerFilter } = this.props;
 
     if (
       tableData === undefined ||
@@ -175,7 +175,7 @@ class AnomaliesTable extends Component {
       tableData.examplesByJobId,
       this.isShowingAggregatedData(),
       tableData.interval,
-      timefilter,
+      bounds,
       tableData.showViewSeriesLink,
       this.state.showRuleEditorFlyout,
       this.state.itemIdToExpandedRowMap,
@@ -224,7 +224,7 @@ class AnomaliesTable extends Component {
   }
 }
 AnomaliesTable.propTypes = {
-  timefilter: PropTypes.object.isRequired,
+  bounds: PropTypes.object.isRequired,
   tableData: PropTypes.object,
   filter: PropTypes.func,
   influencerFilter: PropTypes.func,
