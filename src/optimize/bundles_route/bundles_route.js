@@ -19,6 +19,7 @@
 
 import { isAbsolute, extname } from 'path';
 import LruCache from 'lru-cache';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { createDynamicAssetResponse } from './dynamic_asset_response';
 
 /**
@@ -66,6 +67,12 @@ export function createBundlesRoute({
   }
 
   return [
+    buildRouteForBundles(
+      `${basePublicPath}/bundles/kbn-ui-shared-deps/`,
+      '/bundles/kbn-ui-shared-deps/',
+      UiSharedDeps.distDir,
+      fileHashCache
+    ),
     buildRouteForBundles(
       `${basePublicPath}/bundles/`,
       '/bundles/',

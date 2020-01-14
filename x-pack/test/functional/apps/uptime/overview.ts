@@ -29,7 +29,29 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await pageObjects.uptime.pageHasExpectedIds(['0000-intermittent']);
     });
 
-    it('pagination is cleared when filter criteria changes', async () => {
+    it('applies filters for multiple fields', async () => {
+      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await pageObjects.uptime.selectFilterItems({
+        location: ['mpls'],
+        port: ['5678'],
+        scheme: ['http'],
+      });
+      await pageObjects.uptime.pageHasExpectedIds([
+        '0000-intermittent',
+        '0001-up',
+        '0002-up',
+        '0003-up',
+        '0004-up',
+        '0005-up',
+        '0006-up',
+        '0007-up',
+        '0008-up',
+        '0009-up',
+      ]);
+    });
+
+    // flakey see https://github.com/elastic/kibana/issues/54527
+    it.skip('pagination is cleared when filter criteria changes', async () => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await pageObjects.uptime.changePage('next');
       // there should now be pagination data in the URL
@@ -65,7 +87,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
-    describe('snapshot counts', () => {
+    // Flakey, see https://github.com/elastic/kibana/issues/54541
+    describe.skip('snapshot counts', () => {
       it('updates the snapshot count when status filter is set to down', async () => {
         await pageObjects.uptime.goToUptimePageAndSetDateRange(
           DEFAULT_DATE_START,
