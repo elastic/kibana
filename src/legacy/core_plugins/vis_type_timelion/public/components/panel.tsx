@@ -22,9 +22,6 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
 
-import { CoreStart } from 'src/core/public';
-import { TimefilterContract } from 'src/plugins/data/public';
-import { IUiSettingsClient } from 'kibana/public';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
 import '../flot';
 // @ts-ignore
@@ -32,6 +29,7 @@ import { DEFAULT_TIME_FORMAT } from '../../../timelion/common/lib';
 
 import { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors } from '../helpers/panel_utils';
 import { Series, Sheet } from '../helpers/timelion_request_handler';
+import { TimelionVisDependencies } from '../plugin';
 
 export interface PanelProps {
   interval: string;
@@ -58,17 +56,12 @@ interface Ranges {
   yaxis: Range;
 }
 
-interface ITimelionVisPluginServices extends Partial<CoreStart> {
-  timefilter: TimefilterContract;
-  uiSettings: IUiSettingsClient;
-}
-
 const DEBOUNCE_DELAY = 50;
 // ensure legend is the same height with or without a caption so legend items do not move around
 const emptyCaption = '<br>';
 
 function Panel({ interval, seriesList, renderComplete }: PanelProps) {
-  const kibana = useKibana<ITimelionVisPluginServices>();
+  const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
   const [canvasElem, setCanvasElem] = useState();
   const [chartElem, setChartElem] = useState();

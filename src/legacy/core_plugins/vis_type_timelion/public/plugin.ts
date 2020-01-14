@@ -31,7 +31,6 @@ import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/publ
 import { PluginsStart } from './legacy_imports';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { getTimeChart, IPanelWrapper } from './timechart';
-import { setPanels } from './services';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
@@ -40,10 +39,11 @@ import { setIndexPatterns, setSavedObjectsClient } from './helpers/plugin_servic
 type TimelionVisCoreSetup = CoreSetup<TimelionVisSetupDependencies>;
 
 /** @internal */
-export interface TimelionVisDependencies {
+export interface TimelionVisDependencies extends Partial<CoreStart> {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timefilter: TimefilterContract;
+  timelionPanels: Map<string, IPanelWrapper>;
 }
 
 /** @internal */
@@ -62,23 +62,18 @@ export class TimelionVisPlugin implements Plugin<void, void> {
     { expressions, visualizations, data }: TimelionVisSetupDependencies
   ) {
     const timelionPanels: Map<string, IPanelWrapper> = new Map();
+    const [name, timeChartPanel] = getTimeChart();
+    timelionPanels.set(name, timeChartPanel);
 
     const dependencies: TimelionVisDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
       timefilter: data.query.timefilter.timefilter,
+      timelionPanels,
     };
-    this.registerPanels(timelionPanels);
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     visualizations.types.createReactVisualization(getTimelionVisDefinition(dependencies));
-  }
-
-  private registerPanels(timelionPanels: Map<string, IPanelWrapper>) {
-    const [name, timeChartPanel] = getTimeChart();
-
-    timelionPanels.set(name, timeChartPanel);
-    setPanels(timelionPanels);
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
