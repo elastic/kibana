@@ -9,9 +9,8 @@ import { RequestHandler } from 'kibana/server';
 import { get } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { ExecuteDetails } from '../../../models/execute_details/index';
 // @ts-ignore
@@ -28,7 +27,7 @@ function executeWatch(callWithRequest: any, executeDetails: any, watchJson: any)
   });
 }
 
-export function registerExecuteRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerExecuteRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const executeDetails = ExecuteDetails.fromDownstreamJson(request.body.executeDetails);
@@ -73,6 +72,6 @@ export function registerExecuteRoute(deps: RouteDependencies, legacy: ServerShim
         }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

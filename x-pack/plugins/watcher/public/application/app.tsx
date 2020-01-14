@@ -13,7 +13,6 @@ import {
   IUiSettingsClient,
 } from 'kibana/public';
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
 import {
   HashRouter,
   Switch,
@@ -22,15 +21,13 @@ import {
   withRouter,
   RouteComponentProps,
 } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
 import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
-import { LICENSE_STATUS_VALID } from '../../../../legacy/common/constants';
 import { AppContextProvider } from './app_context';
-import { LegacyDependencies } from '../types';
+import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -38,41 +35,18 @@ const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { c
 });
 
 export interface AppDeps {
+  data: DataPublicPluginSetup;
   chrome: ChromeStart;
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
-  legacy: LegacyDependencies;
   euiUtils: any;
+  TimeBuckets: any;
+  MANAGEMENT_BREADCRUMB: any;
 }
 
 export const App = (deps: AppDeps) => {
-  const { status, message } = deps.legacy.licenseStatus;
-
-  if (status !== LICENSE_STATUS_VALID) {
-    return (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.watcher.app.licenseErrorTitle"
-            defaultMessage="License error"
-          />
-        }
-        color="warning"
-        iconType="help"
-      >
-        {message}{' '}
-        <EuiLink href="#/management/elasticsearch/license_management/home">
-          <FormattedMessage
-            id="xpack.watcher.app.licenseErrorLinkText"
-            defaultMessage="Manage your license."
-          />
-        </EuiLink>
-      </EuiCallOut>
-    );
-  }
-
   return (
     <HashRouter>
       <ShareRouter>

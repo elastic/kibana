@@ -6,9 +6,9 @@
 
 import { registerListRoute } from './register_list_route';
 import { registerDeleteRoute } from './register_delete_route';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
-export function registerWatchesRoutes(deps: RouteDependencies, legacy: ServerShim) {
-  registerListRoute(deps, legacy);
-  registerDeleteRoute(deps, legacy);
+export function registerWatchesRoutes(deps: RouteDependencies) {
+  registerListRoute(deps);
+  registerDeleteRoute(deps);
 }

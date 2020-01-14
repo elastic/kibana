@@ -5,7 +5,13 @@
  */
 
 import { IRouter, ElasticsearchServiceSetup, IClusterClient } from 'kibana/server';
+import { LicensingPluginSetup } from '../../licensing/server';
+
 import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
+
+export interface Dependencies {
+  licensing: LicensingPluginSetup;
+}
 
 export interface ServerShim {
   route: any;

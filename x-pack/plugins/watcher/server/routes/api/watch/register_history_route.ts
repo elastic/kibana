@@ -11,8 +11,7 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item/index';
 
@@ -42,7 +41,7 @@ function fetchHistoryItems(callWithRequest: any, watchId: any, startTime: any) {
   );
 }
 
-export function registerHistoryRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerHistoryRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const { watchId } = request.params;
@@ -92,6 +91,6 @@ export function registerHistoryRoute(deps: RouteDependencies, legacy: ServerShim
         }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

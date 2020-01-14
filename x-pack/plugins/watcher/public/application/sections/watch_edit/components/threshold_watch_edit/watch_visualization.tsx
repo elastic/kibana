@@ -20,8 +20,9 @@ import moment from 'moment-timezone';
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { VisualizeOptions } from 'plugins/watcher/np_ready/application/models/visualize_options';
-import { ThresholdWatch } from 'plugins/watcher/np_ready/application/models/watch/threshold_watch';
+
+import { VisualizeOptions } from '../../../../models/visualize_options';
+import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
 
 import { useGetWatchVisualizationData } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
@@ -85,11 +86,7 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 };
 
 export const WatchVisualization = () => {
-  const {
-    legacy: { TimeBuckets },
-    euiUtils,
-    uiSettings,
-  } = useAppContext();
+  const { TimeBuckets, euiUtils, uiSettings, data } = useAppContext();
   const { watch } = useContext(WatchContext);
   const chartsTheme = euiUtils.useChartsTheme();
   const {
@@ -109,7 +106,7 @@ export const WatchVisualization = () => {
   } = watch;
 
   const domain = getDomain(watch);
-  const timeBuckets = new TimeBuckets();
+  const timeBuckets = new TimeBuckets(uiSettings, data);
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
   const visualizeOptions = new VisualizeOptions({
@@ -196,8 +193,8 @@ export const WatchVisualization = () => {
     const actualThreshold = getThreshold(watch);
     let maxY = actualThreshold[actualThreshold.length - 1];
 
-    (Object.values(watchVisualizationData) as number[][][]).forEach(data => {
-      data.forEach(([, y]) => {
+    (Object.values(watchVisualizationData) as number[][][]).forEach(watchData => {
+      watchData.forEach(([, y]) => {
         if (y > maxY) {
           maxY = y;
         }
@@ -206,7 +203,7 @@ export const WatchVisualization = () => {
     const dateFormatter = (d: number) => {
       return moment(d)
         .tz(timezone)
-        .format(getTimeBuckets(watch, new TimeBuckets()).getScaledDateFormat());
+        .format(getTimeBuckets(watch, new TimeBuckets(uiSettings, data)).getScaledDateFormat());
     };
     const aggLabel = aggTypes[watch.aggType].text;
     return (

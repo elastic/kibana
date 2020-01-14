@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpSetup, SavedObjectsClientContract } from 'kibana/public';
-import { Settings } from 'plugins/watcher/np_ready/application/models/settings';
-import { Watch } from 'plugins/watcher/np_ready/application/models/watch';
-import { WatchHistoryItem } from 'plugins/watcher/np_ready/application/models/watch_history_item';
-import { WatchStatus } from 'plugins/watcher/np_ready/application/models/watch_status';
+
+import { Settings } from '../models/settings';
+import { Watch } from '../models/watch';
+import { WatchHistoryItem } from '../models/watch_history_item';
+import { WatchStatus } from '../models/watch_status';
 
 import { BaseWatch, ExecutedWatchDetails } from '../../../common/types/watch_types';
 import { useRequest, sendRequest } from './use_request';

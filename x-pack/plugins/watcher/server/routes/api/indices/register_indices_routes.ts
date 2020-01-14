@@ -5,8 +5,8 @@
  */
 
 import { registerGetRoute } from './register_get_route';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
-export function registerIndicesRoutes(deps: RouteDependencies, legacy: ServerShim) {
-  registerGetRoute(deps, legacy);
+export function registerIndicesRoutes(deps: RouteDependencies) {
+  registerGetRoute(deps);
 }

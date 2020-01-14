@@ -10,8 +10,7 @@ import { RequestHandler } from 'kibana/server';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
 import { INDEX_NAMES } from '../../../common/constants';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../types';
+import { RouteDependencies } from '../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../models/watch_history_item/index';
 
@@ -28,7 +27,7 @@ function fetchHistoryItem(callWithRequest: any, watchHistoryItemId: string) {
   });
 }
 
-export function registerLoadHistoryRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerLoadHistoryRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const id = request.params.id;
@@ -72,6 +71,6 @@ export function registerLoadHistoryRoute(deps: RouteDependencies, legacy: Server
         }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

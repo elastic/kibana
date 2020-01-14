@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ExecuteDetails } from 'plugins/watcher/np_ready/application/models/execute_details/execute_details';
+import { ExecuteDetails } from '../../../../models/execute_details';
 import { getActionType } from '../../../../../../common/lib/get_action_type';
 import { BaseWatch, ExecutedWatchDetails } from '../../../../../../common/types/watch_types';
 import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';

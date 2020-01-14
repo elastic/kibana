@@ -9,10 +9,9 @@ import { get } from 'lodash';
 import { RequestHandler } from 'kibana/server';
 import { callWithRequestFactory } from '../../../../lib/call_with_request_factory';
 import { isEsError } from '../../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchStatus } from '../../../../models/watch_status/index';
-import { RouteDependencies, ServerShim } from '../../../../types';
+import { RouteDependencies } from '../../../../types';
 
 function acknowledgeAction(callWithRequest: any, watchId: string, actionId: string) {
   return callWithRequest('watcher.ackWatch', {
@@ -21,7 +20,7 @@ function acknowledgeAction(callWithRequest: any, watchId: string, actionId: stri
   });
 }
 
-export function registerAcknowledgeRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerAcknowledgeRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const { watchId, actionId } = request.params;
@@ -60,6 +59,6 @@ export function registerAcknowledgeRoute(deps: RouteDependencies, legacy: Server
         }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

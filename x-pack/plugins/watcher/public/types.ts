@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface LegacyDependencies {
-  MANAGEMENT_BREADCRUMB: { text: string; href?: string };
-  TimeBuckets: any;
-  licenseStatus: any;
+import { ManagementSetup } from 'src/plugins/management/public';
+import { EuiUtilsStart } from 'src/plugins/eui_utils/public';
+import { LicensingPluginSetup } from '../../licensing/public';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+
+export interface Dependencies {
+  management: ManagementSetup;
+  licensing: LicensingPluginSetup;
+  eui_utils: EuiUtilsStart;
+  data: DataPublicPluginSetup;
 }

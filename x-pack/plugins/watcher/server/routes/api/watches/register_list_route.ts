@@ -10,8 +10,7 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
 
@@ -30,7 +29,7 @@ function fetchWatches(callWithRequest: any) {
   );
 }
 
-export function registerListRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerListRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
 
@@ -81,6 +80,6 @@ export function registerListRoute(deps: RouteDependencies, legacy: ServerShim) {
       path: '/api/watcher/watches',
       validate: false,
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

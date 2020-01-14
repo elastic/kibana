@@ -5,8 +5,7 @@
  */
 
 import { RequestHandler } from 'kibana/server';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 /*
 In order for the client to have the most up-to-date snapshot of the current license,
@@ -14,7 +13,7 @@ it needs to make a round-trip to the kibana server. This refresh endpoint is pro
 for when the client needs to check the license, but doesn't need to pull data from the
 server for any reason, i.e., when adding a new watch.
 */
-export function registerRefreshRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerRefreshRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = (ctx, request, response) => {
     return response.ok({ body: { success: true } });
   };
@@ -24,6 +23,6 @@ export function registerRefreshRoute(deps: RouteDependencies, legacy: ServerShim
       path: '/api/watcher/license/refresh',
       validate: false,
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

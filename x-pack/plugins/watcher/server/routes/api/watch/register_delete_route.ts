@@ -8,8 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 function deleteWatch(callWithRequest: any, watchId: string) {
   return callWithRequest('watcher.deleteWatch', {
@@ -17,7 +16,7 @@ function deleteWatch(callWithRequest: any, watchId: string) {
   });
 }
 
-export function registerDeleteRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerDeleteRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
 
@@ -47,6 +46,6 @@ export function registerDeleteRoute(deps: RouteDependencies, legacy: ServerShim)
         }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

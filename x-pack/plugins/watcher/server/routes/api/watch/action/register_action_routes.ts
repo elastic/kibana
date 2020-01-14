@@ -5,8 +5,8 @@
  */
 
 import { registerAcknowledgeRoute } from './register_acknowledge_route';
-import { RouteDependencies, ServerShim } from '../../../../types';
+import { RouteDependencies } from '../../../../types';
 
-export function registerActionRoutes(server: RouteDependencies, legacy: ServerShim) {
-  registerAcknowledgeRoute(server, legacy);
+export function registerActionRoutes(deps: RouteDependencies) {
+  registerAcknowledgeRoute(deps);
 }

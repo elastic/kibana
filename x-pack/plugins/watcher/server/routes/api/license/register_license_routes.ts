@@ -5,8 +5,8 @@
  */
 
 import { registerRefreshRoute } from './register_refresh_route';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
-export function registerLicenseRoutes(deps: RouteDependencies, legacy: ServerShim) {
-  registerRefreshRoute(deps, legacy);
+export function registerLicenseRoutes(deps: RouteDependencies) {
+  registerRefreshRoute(deps);
 }

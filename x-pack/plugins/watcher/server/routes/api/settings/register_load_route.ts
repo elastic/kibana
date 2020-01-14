@@ -6,10 +6,9 @@
 
 import { IClusterClient, RequestHandler } from 'kibana/server';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Settings } from '../../../models/settings/index';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 function fetchClusterSettings(client: IClusterClient) {
   return client.callAsInternalUser('cluster.getSettings', {
@@ -18,7 +17,7 @@ function fetchClusterSettings(client: IClusterClient) {
   });
 }
 
-export function registerLoadRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerLoadRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
       const settings = await fetchClusterSettings(deps.elasticsearch);
@@ -38,6 +37,6 @@ export function registerLoadRoute(deps: RouteDependencies, legacy: ServerShim) {
       path: '/api/watcher/settings',
       validate: false,
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

@@ -16,8 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { Action } from 'plugins/watcher/np_ready/application/models/action';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { Action } from '../../../../models/action';
 import { ACTION_TYPES } from '../../../../../../common/constants';
 import { WatchContext } from '../../watch_context';
 

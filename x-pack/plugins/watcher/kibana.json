@@ -4,7 +4,9 @@
   "requiredPlugins": [
     "home",
     "licensing",
-    "management"
+    "management",
+    "eui_utils",
+    "data"
   ],
   "server": true,
   "ui": true

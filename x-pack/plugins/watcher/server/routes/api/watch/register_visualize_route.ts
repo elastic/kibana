@@ -8,8 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
@@ -28,7 +27,7 @@ function fetchVisualizeData(callWithRequest: any, index: any, body: any) {
   return callWithRequest('search', params);
 }
 
-export function registerVisualizeRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerVisualizeRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const watch = Watch.fromDownstreamJson(request.body.watch);
@@ -65,6 +64,6 @@ export function registerVisualizeRoute(deps: RouteDependencies, legacy: ServerSh
         }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

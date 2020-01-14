@@ -10,8 +10,8 @@ import { isEqual } from 'lodash';
 import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Watch } from 'plugins/watcher/np_ready/application/models/watch';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Watch } from '../../../models/watch';
 import { WATCH_TYPES } from '../../../../../common/constants';
 import { BaseWatch } from '../../../../../common/types/watch_types';
 import { getPageErrorCode, PageError, SectionLoading, SectionError } from '../../../components';
@@ -96,10 +96,7 @@ export const WatchEdit = ({
   };
 }) => {
   // hooks
-  const {
-    legacy: { MANAGEMENT_BREADCRUMB },
-    chrome,
-  } = useAppContext();
+  const { MANAGEMENT_BREADCRUMB, chrome } = useAppContext();
   const [{ watch, loadError }, dispatch] = useReducer(watchReducer, { watch: null });
 
   const setWatchProperty = (property: string, value: any) => {

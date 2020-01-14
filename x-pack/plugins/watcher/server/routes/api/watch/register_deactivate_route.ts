@@ -8,8 +8,7 @@ import { RequestHandler } from 'kibana/server';
 import { get } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { WatchStatus } from '../../../models/watch_status/index';
 
@@ -19,7 +18,7 @@ function deactivateWatch(callWithRequest: any, watchId: string) {
   });
 }
 
-export function registerDeactivateRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerDeactivateRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
 
@@ -60,6 +59,6 @@ export function registerDeactivateRoute(deps: RouteDependencies, legacy: ServerS
         }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

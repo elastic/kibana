@@ -8,14 +8,10 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../common/constants';
-import {
-  serializeJsonWatch,
-  serializeThresholdWatch,
-} from '../../../../common/lib/serialization';
+import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 function fetchWatch(callWithRequest: any, watchId: string) {
   return callWithRequest('watcher.getWatch', {
@@ -30,7 +26,7 @@ function saveWatch(callWithRequest: any, id: string, body: any) {
   });
 }
 
-export function registerSaveRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerSaveRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const { id } = request.params;
@@ -99,6 +95,6 @@ export function registerSaveRoute(deps: RouteDependencies, legacy: ServerShim) {
         body: schema.object({}, { allowUnknowns: true }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

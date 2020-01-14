@@ -5,8 +5,8 @@
  */
 
 import { registerLoadRoute } from './register_load_route';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
-export function registerSettingsRoutes(deps: RouteDependencies, legacy: ServerShim) {
-  registerLoadRoute(deps, legacy);
+export function registerSettingsRoutes(deps: RouteDependencies) {
+  registerLoadRoute(deps);
 }

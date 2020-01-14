@@ -8,10 +8,9 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
-import { RouteDependencies, ServerShim } from '../../types';
+import { RouteDependencies } from '../../types';
 
 function fetchFields(callWithRequest: any, indexes: string[]) {
   const params = {
@@ -25,7 +24,7 @@ function fetchFields(callWithRequest: any, indexes: string[]) {
   return callWithRequest('fieldCaps', params);
 }
 
-export function registerListFieldsRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerListFieldsRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const { indexes } = request.body;
@@ -60,6 +59,6 @@ export function registerListFieldsRoute(deps: RouteDependencies, legacy: ServerS
         }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

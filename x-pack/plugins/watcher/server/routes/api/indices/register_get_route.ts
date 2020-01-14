@@ -9,8 +9,7 @@ import { RequestHandler } from 'kibana/server';
 import { reduce, size } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { RouteDependencies, ServerShim } from '../../../types';
+import { RouteDependencies } from '../../../types';
 
 function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   return reduce(
@@ -61,7 +60,7 @@ function getIndices(callWithRequest: any, pattern: string, limit = 10) {
   });
 }
 
-export function registerGetRoute(deps: RouteDependencies, legacy: ServerShim) {
+export function registerGetRoute(deps: RouteDependencies) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const { pattern } = request.body;
@@ -87,6 +86,6 @@ export function registerGetRoute(deps: RouteDependencies, legacy: ServerShim) {
         body: schema.object({}, { allowUnknowns: true }),
       },
     },
-    licensePreRoutingFactory(legacy, handler)
+    handler
   );
 }

@@ -24,9 +24,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ExecuteDetails } from 'plugins/watcher/np_ready/application/models/execute_details/execute_details';
-import { WatchHistoryItem } from 'plugins/watcher/np_ready/application/models/watch_history_item';
+
+import { WatchHistoryItem } from '../../../../models/watch_history_item';
+
 import { ACTION_MODES, TIME_UNITS } from '../../../../../../common/constants';
+import { ExecuteDetails } from '../../../../models/execute_details';
 import {
   ExecutedWatchDetails,
   ExecutedWatchResults,

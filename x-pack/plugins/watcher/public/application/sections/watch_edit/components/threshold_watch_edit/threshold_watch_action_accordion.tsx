@@ -21,13 +21,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ExecuteDetails } from 'plugins/watcher/np_ready/application/models/execute_details/execute_details';
-import { Action } from 'plugins/watcher/np_ready/application/models/action';
-import { WatchHistoryItem } from 'plugins/watcher/np_ready/application/models/watch_history_item';
-import { ThresholdWatch } from 'plugins/watcher/np_ready/application/models/watch/threshold_watch';
+
+import { Action } from '../../../../models/action';
+import { WatchHistoryItem } from '../../../../models/watch_history_item';
+import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
+import { ExecuteDetails } from '../../../../models/execute_details';
+
 import { ActionType } from '../../../../../../common/types/action_types';
 import { ACTION_TYPES, ACTION_MODES } from '../../../../../../common/constants';
 import { WatchContext } from '../../watch_context';
+
 import {
   WebhookActionFields,
   LoggingActionFields,
