@@ -50,7 +50,7 @@ describe('Search fields', () => {
     const allFields = {
       [field.id]: field,
     };
-    const searchTerm = 'some property';
+    const searchTerm = 'proper';
 
     const result = searchFields(searchTerm, allFields);
     expect(result.length).toBe(1);
@@ -86,8 +86,8 @@ describe('Search fields', () => {
 
   test('should extract the "type" in multi words search', () => {
     const field1 = getField({ type: 'date' });
-    const field2 = getField({ type: 'keyword' }, ['doesNotStart', 'myField']); // higher score as the type fully matches + path also matches
-    const field3 = getField({ type: 'text' }, ['myField', 'someProps']); // Comes second as only the path matches
+    const field2 = getField({ type: 'keyword' }, ['myField', 'someProp']); // Should come in result as second as only the type matches
+    const field3 = getField({ type: 'text' }, ['myField', 'keyword']); // Path match scores higher than the field type
 
     const allFields = {
       [field1.id]: field1,
@@ -98,14 +98,14 @@ describe('Search fields', () => {
 
     const result = searchFields(searchTerm, allFields);
     expect(result.length).toBe(2);
-    expect(result[0].field.path).toEqual(field2.path);
-    expect(result[1].field.path).toEqual(field3.path);
+    expect(result[0].field.path).toEqual(field3.path);
+    expect(result[1].field.path).toEqual(field2.path);
   });
 
   test('should *NOT* extract the "type" in multi-words search if in the middle of 2 words', () => {
     const field1 = getField({ type: 'date' });
-    const field2 = getField({ type: 'keyword' }, ['doesNotMatch']);
-    const field3 = getField({ type: 'text' }, ['myObject', 'hasMore']); // Only valid result. Case incensitive.
+    const field2 = getField({ type: 'keyword' }, ['shouldNotMatch']);
+    const field3 = getField({ type: 'text' }, ['myField', 'keyword_more']); // Only valid result. Case incensitive.
 
     const allFields = {
       [field1.id]: field1,
@@ -136,21 +136,20 @@ describe('Search fields', () => {
     expect(result[1].field.path).toEqual(field2.path);
   });
 
-  test('should find any word', () => {
-    const field1 = getField({ type: 'text' }, ['this']);
-    const field2 = getField({ type: 'keyword' }, ['myObject', 'isOK']);
+  test('should refine search with multiple terms', () => {
+    const field1 = getField({ type: 'text' }, ['myObject']);
+    const field2 = getField({ type: 'keyword' }, ['myObject', 'someProp']);
 
     const allFields = {
       [field1.id]: field1,
       [field2.id]: field2,
     };
 
-    const searchTerm = 'keyword bad but this one isOk';
+    const searchTerm = 'myObject someProp';
 
     const result = searchFields(searchTerm, allFields);
-    expect(result.length).toBe(2);
+    expect(result.length).toBe(1);
     expect(result[0].field.path).toEqual(field2.path); // Field 2 first as it matches the type
-    expect(result[1].field.path).toEqual(field1.path); // Matches the string "this"
   });
 
   test('should sort first match on field name before descendants', () => {
