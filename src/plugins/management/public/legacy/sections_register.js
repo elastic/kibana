@@ -24,10 +24,10 @@ export class LegacyManagementAdapter {
   main = undefined;
   init = capabilities => {
     this.main = new LegacyManagementSection(
-      'management',
+      'management', // @myasonik ??
       {
         display: i18n.translate('management.displayName', {
-          defaultMessage: 'Management',
+          defaultMessage: 'Stack Management',
         }),
       },
       capabilities

@@ -146,7 +146,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   );
 
   if (noIndexPatterns) {
-    const managementUrl = chrome.navLinks.get('kibana:management')!.url;
+    const managementUrl = chrome.navLinks.get('kibana:stack_management')!.url;
     const indexPatternUrl = `${managementUrl}/kibana/index_patterns`;
     const sampleDataUrl = `${application.getUrlForApp(
       'kibana'

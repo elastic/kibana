@@ -195,7 +195,7 @@ function truncateRecentItemLabel(label: string): string {
 }
 
 export type HeaderProps = Pick<Props, Exclude<keyof Props, 'intl'>>;
-type navSetting = 'grouped' | 'individual';
+export type NavSetting = 'grouped' | 'individual';
 
 interface Props {
   kibanaVersion: string;
@@ -217,7 +217,7 @@ interface Props {
   intl: InjectedIntl;
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
-  navSetting$: Rx.Observable<navSetting>;
+  navSetting$: Rx.Observable<NavSetting>;
   onIsLockedUpdate?: (isLocked: boolean) => void;
 }
 
@@ -232,7 +232,7 @@ interface State {
   forceNavigation: boolean;
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
-  navSetting: navSetting;
+  navSetting: NavSetting;
 }
 
 function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
@@ -392,7 +392,7 @@ class HeaderUI extends Component<Props, State> {
     const disableGroupedNavSetting = this.state.navSetting === 'individual';
     const groupedNavLinks = groupBy(this.state.navLinks, link => link?.category?.label);
     const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
-    const { Administration: admin, ...mainCategories } = allCategorizedLinks;
+    const { Management: management, ...mainCategories } = allCategorizedLinks;
     const categoryDictionary = getAllCategories(allCategorizedLinks);
     const orderedCategories = getOrderedCategories(mainCategories, categoryDictionary);
     const showUngroupedNav =
@@ -474,16 +474,16 @@ class HeaderUI extends Component<Props, State> {
         <EuiNavDrawerGroup
           data-test-subj="navDrawerManagementMenu"
           aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
-            defaultMessage: 'Administration navigation links',
+            defaultMessage: 'Management navigation links',
           })}
           listItems={[
             {
-              label: categoryDictionary.Administration!.label,
-              iconType: categoryDictionary.Administration!.euiIconType,
+              label: categoryDictionary.Management!.label,
+              iconType: categoryDictionary.Management!.euiIconType,
               'data-test-subj': 'navDrawerCategory',
               flyoutMenu: {
-                title: categoryDictionary.Administration!.label,
-                listItems: sortBy(admin, 'order').map(link => {
+                title: categoryDictionary.Management!.label,
+                listItems: sortBy(management, 'order').map(link => {
                   link['data-test-subj'] = 'navDrawerFlyoutLink';
                   return link;
                 }),

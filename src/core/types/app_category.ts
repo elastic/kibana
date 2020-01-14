@@ -19,8 +19,29 @@
 
 /** @public */
 export interface AppCategory {
+  /**
+   * Label used for cateogry name.
+   * Also used as aria-label if one isn't set.
+   */
   label: string;
+
+  /**
+   * If the visual label isn't appropriate for screen readers,
+   * can override it here
+   */
   ariaLabel?: string;
+
+  /**
+   * The order that categories will be sorted in
+   * Prefer large steps between categories to allow for further editing
+   * (Default categories are in steps of 1000)
+   */
   order?: number;
+
+  /**
+   * Define an icon to be used for the category
+   * If the category is only 1 item, and no icon is defined, will default to the product icon
+   * Defaults to initials if no icon is defined
+   */
   euiIconType?: string;
 }

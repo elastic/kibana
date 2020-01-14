@@ -27,7 +27,7 @@ export const getUiExports = () => ({
     euiIconType: 'monitoringApp',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/monitoring',
-    category: DEFAULT_APP_CATEGORIES.administration,
+    category: DEFAULT_APP_CATEGORIES.management,
   },
   injectDefaultVars(server) {
     const config = server.config();

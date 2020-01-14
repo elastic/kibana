@@ -118,18 +118,18 @@ export default function(kibana) {
           order: 9001,
           url: '/app/kibana#/dev_tools',
           euiIconType: 'devToolsApp',
-          category: DEFAULT_APP_CATEGORIES.administration,
+          category: DEFAULT_APP_CATEGORIES.management,
         },
         {
-          id: 'kibana:management',
+          id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Management',
+            defaultMessage: 'Stack Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
           euiIconType: 'managementApp',
           linkToLastSubUrl: false,
-          category: DEFAULT_APP_CATEGORIES.administration,
+          category: DEFAULT_APP_CATEGORIES.management,
         },
       ],
 

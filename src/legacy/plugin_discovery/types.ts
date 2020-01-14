@@ -54,13 +54,13 @@ export interface LegacyPluginOptions {
   uiExports: Partial<{
     app: Partial<{
       title: string;
+      category?: AppCategory;
       description: string;
       main: string;
       icon: string;
       euiIconType: string;
       order: number;
       listed: boolean;
-      category?: AppCategory;
     }>;
     apps: any;
     hacks: string[];

@@ -173,11 +173,11 @@ uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnV
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
-    id: 'management',
-    title: i18n.translate('kbn.management.managementLabel', {
-      defaultMessage: 'Management',
+    id: 'stack-management',
+    title: i18n.translate('kbn.stackManagement.managementLabel', {
+      defaultMessage: 'Stack Management',
     }),
-    description: i18n.translate('kbn.management.managementDescription', {
+    description: i18n.translate('kbn.stackManagement.managementDescription', {
       defaultMessage: 'Your center console for managing the Elastic Stack.',
     }),
     icon: 'managementApp',

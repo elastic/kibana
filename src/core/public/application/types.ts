@@ -46,8 +46,9 @@ export interface AppBase {
   title: string;
 
   /**
-   * The category the app lives in
-   * Default categories defined in {@link DEFAULT_APP_CATEGORIES}
+   * The category definition of the product
+   * See {@link AppCategory}
+   * See DEFAULT_APP_CATEGORIES for more reference
    */
   category?: AppCategory;
 

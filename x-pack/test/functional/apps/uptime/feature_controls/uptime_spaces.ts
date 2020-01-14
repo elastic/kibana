@@ -20,11 +20,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           name: 'custom_space',
           disabledFeatures: [],
         });
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
-          basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
-        });
-        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
+        await PageObjects.settings.setNavType('individual');
       });
 
       after(async () => {

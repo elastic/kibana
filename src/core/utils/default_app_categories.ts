@@ -39,9 +39,9 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
     }),
     order: 3000,
   },
-  administration: {
+  management: {
     label: i18n.translate('core.ui.managementNavList.label', {
-      defaultMessage: 'Administration',
+      defaultMessage: 'Management',
     }),
     euiIconType: 'managementApp',
   },

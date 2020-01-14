@@ -58,8 +58,8 @@ export class ManagementApp {
           const [coreStart] = await getStartServices();
           coreStart.chrome.setBreadcrumbs([
             {
-              text: i18n.translate('management.breadcrumb', {
-                defaultMessage: 'Management',
+              text: i18n.translate('stackManagement.breadcrumb', {
+                defaultMessage: 'Stack Management',
               }),
               href: '#/management',
             },

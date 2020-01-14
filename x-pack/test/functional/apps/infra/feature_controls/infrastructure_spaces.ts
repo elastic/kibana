@@ -37,17 +37,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
         await esArchiver.load('empty_kibana');
-
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
           disabledFeatures: [],
         });
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
-          basePath: `/s/custom_space`,
-          ensureCurrentUrl: false,
-        });
-        await PageObjects.settings.setAdvancedSettingsSelect('pageNavigation', 'individual');
+        await PageObjects.settings.setNavType('individual');
       });
 
       after(async () => {
