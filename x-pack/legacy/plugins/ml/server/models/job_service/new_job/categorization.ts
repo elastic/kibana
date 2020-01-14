@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { chunk } from 'lodash';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
-import { CATEGORY_EXAMPLES_MULTIPLIER } from '../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../common/constants/new_job';
 import { CategoryId, Category, Token } from '../../../../common/types/categories';
 import { callWithRequestType } from '../../../../common/types/kibana';
+
+const VALID_TOKEN_COUNT = 3;
+const CHUNK_SIZE = 100;
 
 export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
   async function categorizationExamples(
@@ -54,21 +58,31 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     });
     const examples: string[] = results.hits?.hits
       ?.map((doc: any) => doc._source[categorizationFieldName])
-      .filter((example: string | undefined) => example !== undefined);
+      .filter((example: string | null | undefined) => example !== undefined && example !== null);
 
-    let tokens: Token[] = [];
-    try {
-      const { tokens: tempTokens } = await callWithRequest('indices.analyze', {
-        body: {
-          ...getAnalyzer(analyzer),
-          text: examples,
-        },
-      });
-      tokens = tempTokens;
-    } catch (error) {
-      // fail silently, the tokens could not be loaded
-      // an empty list of tokens will be returned for each example
+    async function loadTokens(chunkSize: number) {
+      const exampleChunks = chunk(examples, chunkSize);
+      const tokensPerChunks = await Promise.all(exampleChunks.map(c => getTokens(c, analyzer)));
+      const tokensPerExample = tokensPerChunks.flat();
+      return examples.map((e, i) => ({ text: e, tokens: tokensPerExample[i] }));
     }
+    try {
+      return loadTokens(CHUNK_SIZE);
+    } catch (error) {
+      // if an error is thrown when loading the tokens, lower the chunk size by half and try again
+      // the error may have been caused by too many tokens being found.
+      // the _analyze endpoint has a maximum of 10000 tokens.
+      return loadTokens(CHUNK_SIZE / 2);
+    }
+  }
+
+  async function getTokens(examples: string[], analyzer?: any) {
+    const { tokens }: { tokens: Token[] } = await callWithRequest('indices.analyze', {
+      body: {
+        ...getAnalyzer(analyzer),
+        text: examples,
+      },
+    });
 
     const lengths = examples.map(e => e.length);
     const sumLengths = lengths.map((s => (a: number) => (s += a))(0));
@@ -88,8 +102,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
         }
       }
     });
-
-    return examples.map((e, i) => ({ text: e, tokens: tokensPerExample[i] }));
+    return tokensPerExample;
   }
 
   function getAnalyzer(analyzer: any) {
@@ -110,10 +123,10 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     end: number,
     analyzer?: any
   ) {
-    const examples = await categorizationExamples(
+    const resp = await categorizationExamples(
       indexPatternTitle,
       query,
-      size * CATEGORY_EXAMPLES_MULTIPLIER,
+      CATEGORY_EXAMPLES_SAMPLE_SIZE,
       categorizationFieldName,
       timeField,
       start,
@@ -121,20 +134,27 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       analyzer
     );
 
-    const sortedExamples = examples
+    const sortedExamples = resp
       .map((e, i) => ({ ...e, origIndex: i }))
       .sort((a, b) => b.tokens.length - a.tokens.length);
-    const validExamples = sortedExamples.filter(e => e.tokens.length > 1);
+    const validExamples = sortedExamples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT);
+    const sampleSize = sortedExamples.length;
+
+    const multiple = Math.floor(sampleSize / size) || sampleSize;
+    const filteredExamples = [];
+    let i = 0;
+    while (filteredExamples.length < size && i < sortedExamples.length) {
+      filteredExamples.push(sortedExamples[i]);
+      i += multiple;
+    }
+    const examples = filteredExamples
+      .sort((a, b) => a.origIndex - b.origIndex)
+      .map(e => ({ text: e.text, tokens: e.tokens }));
 
     return {
+      sampleSize,
       valid: sortedExamples.length === 0 ? 0 : validExamples.length / sortedExamples.length,
-      examples: sortedExamples
-        .filter(
-          (e, i) =>
-            i / CATEGORY_EXAMPLES_MULTIPLIER - Math.floor(i / CATEGORY_EXAMPLES_MULTIPLIER) === 0
-        )
-        .sort((a, b) => a.origIndex - b.origIndex)
-        .map(e => ({ text: e.text, tokens: e.tokens })),
+      examples,
     };
   }
 

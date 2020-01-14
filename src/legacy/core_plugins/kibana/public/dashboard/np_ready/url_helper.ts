@@ -28,7 +28,7 @@ export function getUrlVars(url: string): Record<string, string> {
   // @ts-ignore
   url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(_, key, value) {
     // @ts-ignore
-    vars[key] = value;
+    vars[key] = decodeURIComponent(value);
   });
   return vars;
 }

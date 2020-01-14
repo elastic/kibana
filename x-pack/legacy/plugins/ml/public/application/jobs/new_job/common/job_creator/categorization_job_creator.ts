@@ -102,10 +102,10 @@ export class CategorizationJobCreator extends JobCreator {
   }
 
   public async loadCategorizationFieldExamples() {
-    const { valid, examples } = await this._examplesLoader.loadExamples();
+    const { valid, examples, sampleSize } = await this._examplesLoader.loadExamples();
     this._categoryFieldExamples = examples;
     this._categoryFieldValid = valid;
-    return { valid, examples };
+    return { valid, examples, sampleSize };
   }
 
   public get categoryFieldExamples() {

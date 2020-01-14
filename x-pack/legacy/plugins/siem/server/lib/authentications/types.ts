@@ -9,7 +9,11 @@ import {
   AuthenticationsOverTimeData,
   LastSourceHost,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptionsPaginated, RequestBasicOptions } from '../framework';
+import {
+  FrameworkRequest,
+  RequestOptionsPaginated,
+  MatrixHistogramRequestOptions,
+} from '../framework';
 import { Hit, SearchHit, TotalHit } from '../types';
 
 export interface AuthenticationsAdapter {
@@ -19,7 +23,7 @@ export interface AuthenticationsAdapter {
   ): Promise<AuthenticationsData>;
   getAuthenticationsOverTime(
     req: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<AuthenticationsOverTimeData>;
 }
 
