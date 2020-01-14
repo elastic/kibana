@@ -281,12 +281,7 @@ export const exportRules = async ({
 }: ExportRulesProps): Promise<Blob> => {
   const body =
     ruleIds.length > 0
-      ? JSON.stringify(
-          ruleIds.reduce<ExportRulesPayload>(
-            (acc, ruleId) => ({ objects: [...acc.objects, { rule_id: ruleId }] }),
-            { objects: [] }
-          )
-        )
+      ? JSON.stringify({ objects: ruleIds.map(rule => ({ rule_id: rule })) })
       : undefined;
 
   const response = await fetch(

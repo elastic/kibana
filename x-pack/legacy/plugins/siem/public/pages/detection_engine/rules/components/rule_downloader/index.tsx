@@ -6,6 +6,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { isFunction } from 'lodash/fp';
 import { exportRules, Rule } from '../../../../../containers/detection_engine/rules';
 import { displayErrorToast, useStateToaster } from '../../../../../components/toasters';
 import * as i18n from './translations';
@@ -48,16 +49,14 @@ export const RuleDownloaderComponent = ({
           });
 
           if (isSubscribed) {
-            // @ts-ignore function is not always defined -- this is for supporting IE
-            if (window.navigator.msSaveOrOpenBlob) {
+            // this is for supporting IE
+            if (isFunction(window.navigator.msSaveOrOpenBlob)) {
               window.navigator.msSaveBlob(exportResponse);
             } else {
               const objectURL = window.URL.createObjectURL(exportResponse);
               // These are safe-assignments as writes to anchorRef are isolated to exportData
-              // eslint-disable-next-line require-atomic-updates
-              anchorRef.current.href = objectURL;
-              // eslint-disable-next-line require-atomic-updates
-              anchorRef.current.download = filename;
+              anchorRef.current.href = objectURL; // eslint-disable-line require-atomic-updates
+              anchorRef.current.download = filename; // eslint-disable-line require-atomic-updates
               anchorRef.current.click();
               window.URL.revokeObjectURL(objectURL);
             }

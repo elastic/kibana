@@ -135,7 +135,7 @@ export const displayErrorToast = (
   errorTitle: string,
   errorMessages: string[],
   dispatchToaster: React.Dispatch<ActionToaster>
-) => {
+): void => {
   const toast: AppToast = {
     id: uuid.v4(),
     title: errorTitle,
@@ -158,7 +158,7 @@ export const displayErrorToast = (
 export const displaySuccessToast = (
   title: string,
   dispatchToaster: React.Dispatch<ActionToaster>
-) => {
+): void => {
   const toast: AppToast = {
     id: uuid.v4(),
     title,
