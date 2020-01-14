@@ -50,10 +50,8 @@ exports[`Field for array setting should render as read only if saving is disable
       >
         <EuiFieldText
           aria-label="array test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={true}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -150,10 +148,8 @@ exports[`Field for array setting should render as read only with help text if ov
       >
         <EuiFieldText
           aria-label="array test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={true}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -229,10 +225,8 @@ exports[`Field for array setting should render custom setting icon if it is cust
       >
         <EuiFieldText
           aria-label="array test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -297,10 +291,8 @@ exports[`Field for array setting should render default value if there is no user
       >
         <EuiFieldText
           aria-label="array test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -404,10 +396,8 @@ exports[`Field for array setting should render user value if there is user value
       >
         <EuiFieldText
           aria-label="array test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-array:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -2839,11 +2829,8 @@ exports[`Field for select setting should render as read only if saving is disabl
       >
         <EuiSelect
           aria-label="select test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={true}
-          fullWidth={false}
-          hasNoInitialSelection={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -2956,11 +2943,8 @@ exports[`Field for select setting should render as read only with help text if o
       >
         <EuiSelect
           aria-label="select test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={true}
-          fullWidth={false}
-          hasNoInitialSelection={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3052,11 +3036,8 @@ exports[`Field for select setting should render custom setting icon if it is cus
       >
         <EuiSelect
           aria-label="select test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
-          fullWidth={false}
-          hasNoInitialSelection={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3137,11 +3118,8 @@ exports[`Field for select setting should render default value if there is no use
       >
         <EuiSelect
           aria-label="select test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
-          fullWidth={false}
-          hasNoInitialSelection={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3261,11 +3239,8 @@ exports[`Field for select setting should render user value if there is user valu
       >
         <EuiSelect
           aria-label="select test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-select:test:setting"
           disabled={false}
-          fullWidth={false}
-          hasNoInitialSelection={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3346,10 +3321,8 @@ exports[`Field for string setting should render as read only if saving is disabl
       >
         <EuiFieldText
           aria-label="string test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={true}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3446,10 +3419,8 @@ exports[`Field for string setting should render as read only with help text if o
       >
         <EuiFieldText
           aria-label="string test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={true}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3525,10 +3496,8 @@ exports[`Field for string setting should render custom setting icon if it is cus
       >
         <EuiFieldText
           aria-label="string test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3593,10 +3562,8 @@ exports[`Field for string setting should render default value if there is no use
       >
         <EuiFieldText
           aria-label="string test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3700,10 +3667,8 @@ exports[`Field for string setting should render user value if there is user valu
       >
         <EuiFieldText
           aria-label="string test setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3768,10 +3733,8 @@ exports[`Field for stringWithValidation setting should render as read only if sa
       >
         <EuiFieldText
           aria-label="string test validation setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test-validation:setting"
           disabled={true}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3868,10 +3831,8 @@ exports[`Field for stringWithValidation setting should render as read only with 
       >
         <EuiFieldText
           aria-label="string test validation setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test-validation:setting"
           disabled={true}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -3947,10 +3908,8 @@ exports[`Field for stringWithValidation setting should render custom setting ico
       >
         <EuiFieldText
           aria-label="string test validation setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test-validation:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -4015,10 +3974,8 @@ exports[`Field for stringWithValidation setting should render default value if t
       >
         <EuiFieldText
           aria-label="string test validation setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test-validation:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}
@@ -4122,10 +4079,8 @@ exports[`Field for stringWithValidation setting should render user value if ther
       >
         <EuiFieldText
           aria-label="string test validation setting"
-          compressed={false}
           data-test-subj="advancedSetting-editField-string:test-validation:setting"
           disabled={false}
-          fullWidth={false}
           isLoading={false}
           onChange={[Function]}
           onKeyDown={[Function]}

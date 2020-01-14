@@ -31,7 +31,7 @@ import { getBatchItems } from './batch_actions';
 import { EuiBasicTableOnChange, TableData } from '../types';
 import { allRulesReducer, State } from './reducer';
 import * as i18n from '../translations';
-import { JSONDownloader } from '../components/json_downloader';
+import { RuleDownloader } from '../components/rule_downloader';
 import { useStateToaster } from '../../../../components/toasters';
 
 const initialState: State = {
@@ -150,9 +150,9 @@ export const AllRules = React.memo<{
 
   return (
     <>
-      <JSONDownloader
+      <RuleDownloader
         filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-        payload={exportPayload}
+        rules={exportPayload}
         onExportComplete={exportCount => {
           dispatchToaster({
             type: 'addToaster',
@@ -185,6 +185,10 @@ export const AllRules = React.memo<{
                       ...filterOptions,
                       filter: filterString,
                     },
+                  });
+                  dispatch({
+                    type: 'updatePagination',
+                    pagination: { ...pagination, page: 1 },
                   });
                 }}
               />
@@ -221,7 +225,7 @@ export const AllRules = React.memo<{
             <EuiBasicTable
               columns={columns}
               isSelectable={!hasNoPermissions ?? false}
-              itemId="rule_id"
+              itemId="id"
               items={tableData}
               onChange={tableOnChangeCallback}
               pagination={{
