@@ -27,7 +27,7 @@ import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
 import { managementApi } from './server/routes/api/management';
 import { registerFieldFormats } from './server/field_formats/register';
-import { registerTutorials } from './server/tutorials/register';
+import { registerTutorials } from '../../../plugins/home/server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
