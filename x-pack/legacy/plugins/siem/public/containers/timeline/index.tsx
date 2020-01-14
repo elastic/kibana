@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { isEmpty, getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
@@ -79,15 +79,17 @@ class TimelineQueryComponent extends QueryTemplate<
       sourceId,
       sortField,
     } = this.props;
+    const defaultIndex =
+      indexPattern == null || isEmpty(indexPattern)
+        ? kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY)
+        : indexPattern?.title.split(',');
     const variables: GetTimelineQuery.Variables = {
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex:
-        indexPattern?.title.split(',') ??
-        kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+      defaultIndex,
       inspect: isInspected,
     };
     return (
