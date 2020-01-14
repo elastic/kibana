@@ -5,7 +5,7 @@
  */
 
 export enum KpiHostsChartColors {
-  authSuccess = '#5BBAA0',
+  authSuccess = '#54B399',
   authFailure = '#E7664C',
   uniqueSourceIps = '#D36086',
   uniqueDestinationIps = '#9170B8',
