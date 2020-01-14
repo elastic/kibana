@@ -276,6 +276,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -346,6 +349,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -895,6 +899,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -965,6 +972,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -1502,6 +1510,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -1572,6 +1583,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -2118,6 +2130,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -2188,6 +2203,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -2725,6 +2741,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -2795,6 +2814,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -3341,6 +3361,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -3411,6 +3434,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },

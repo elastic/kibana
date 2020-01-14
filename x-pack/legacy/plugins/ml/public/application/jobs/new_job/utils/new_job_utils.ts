@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
 import { esQuery, Query, esKuery } from '../../../../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
@@ -15,7 +15,7 @@ import { getQueryFromSavedSearch } from '../../../util/index_utils';
 
 export function createSearchItems(
   kibanaConfig: KibanaConfigTypeFix,
-  indexPattern: IndexPattern,
+  indexPattern: IIndexPattern,
   savedSearch: SavedSearchSavedObject | null
 ) {
   // query is only used by the data visualizer as it needs

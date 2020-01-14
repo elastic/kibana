@@ -1,0 +1,17 @@
+{
+  "rule_id": "14ba7cd9-1489-459b-99a4-153c7a3f9abb",
+  "risk_score": 50,
+  "description": "Process Execution via WMI",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Process Execution via WMI",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:scrcons.exe",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

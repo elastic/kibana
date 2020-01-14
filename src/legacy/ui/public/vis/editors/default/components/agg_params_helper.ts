@@ -20,7 +20,6 @@
 import { get, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { aggTypeFilters } from 'ui/agg_types/filter';
-import { IndexPattern, Field } from 'ui/index_patterns';
 import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { AggConfig, VisState } from '../../..';
@@ -28,6 +27,7 @@ import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from '../../config/types';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
+import { IndexPattern, Field } from '../../../../../../../plugins/data/public';
 
 interface ParamInstanceBase {
   agg: AggConfig;

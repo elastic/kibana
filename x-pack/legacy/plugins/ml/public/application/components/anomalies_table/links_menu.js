@@ -37,10 +37,10 @@ export const LinksMenu = injectI18n(
   class LinksMenu extends Component {
     static propTypes = {
       anomaly: PropTypes.object.isRequired,
+      bounds: PropTypes.object.isRequired,
       showViewSeriesLink: PropTypes.bool,
       isAggregatedData: PropTypes.bool,
       interval: PropTypes.string,
-      timefilter: PropTypes.object.isRequired,
       showRuleEditorFlyout: PropTypes.func,
     };
 
@@ -146,7 +146,7 @@ export const LinksMenu = injectI18n(
 
     viewSeries = () => {
       const record = this.props.anomaly.source;
-      const bounds = this.props.timefilter.getActiveBounds();
+      const bounds = this.props.bounds;
       const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
       const to = bounds.max.toISOString();
 

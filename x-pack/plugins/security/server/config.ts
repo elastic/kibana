@@ -8,7 +8,6 @@ import crypto from 'crypto';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
-import { duration } from 'moment';
 import { PluginInitializerContext } from '../../../../src/core/server';
 
 export type ConfigType = ReturnType<typeof createConfig$> extends Observable<infer P>
@@ -35,7 +34,6 @@ export const ConfigSchema = schema.object(
       schema.maybe(schema.string({ minLength: 32 })),
       schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
     ),
-    sessionTimeout: schema.maybe(schema.nullable(schema.number())), // DEPRECATED
     session: schema.object({
       idleTimeout: schema.nullable(schema.duration()),
       lifespan: schema.nullable(schema.duration()),
@@ -88,22 +86,11 @@ export function createConfig$(context: PluginInitializerContext, isTLSEnabled: b
         secureCookies = true;
       }
 
-      // "sessionTimeout" is deprecated and replaced with "session.idleTimeout"
-      // however, NP does not yet have a mechanism to automatically rename deprecated keys
-      // for the time being, we'll do it manually:
-      const deprecatedSessionTimeout =
-        typeof config.sessionTimeout === 'number' ? duration(config.sessionTimeout) : null;
-      const val = {
+      return {
         ...config,
         encryptionKey,
         secureCookies,
-        session: {
-          ...config.session,
-          idleTimeout: config.session.idleTimeout || deprecatedSessionTimeout,
-        },
       };
-      delete val.sessionTimeout; // DEPRECATED
-      return val;
     })
   );
 }
