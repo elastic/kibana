@@ -11,8 +11,8 @@ import { ColorMapSelect } from './color_map_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { OrdinalFieldMetaOptionsPopover } from '../ordinal_field_meta_options_popover';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { COLOR_GRADIENTS, COLOR_PALETTES_INPUTS } from '../../../color_utils';
+import { i18n } from '@kbn/i18n';
 
 export class DynamicColorForm extends React.Component {
   state = {
@@ -63,82 +63,78 @@ export class DynamicColorForm extends React.Component {
     const { onDynamicStyleChange, styleProperty } = this.props;
     const styleOptions = styleProperty.getOptions();
 
-    let colorSelect;
-    if (styleOptions.field && styleOptions.field.name) {
-      const onColorChange = colorOptions => {
-        const newColorOptions = {
-          type: colorOptions.type,
-          color: colorOptions.color,
-        };
-        if (colorOptions.type === COLOR_MAP_TYPE.ORDINAL) {
-          newColorOptions.useCustomColorRamp = colorOptions.useCustomColorMap;
-          newColorOptions.customColorRamp = colorOptions.customColorMap;
-        } else {
-          newColorOptions.useCustomColorPalette = colorOptions.useCustomColorMap;
-          newColorOptions.customColorPalette = colorOptions.customColorMap;
-        }
-
-        const oldStyleOptions = { ...styleOptions };
-
-        if (oldStyleOptions.type === !newColorOptions.type) {
-          delete oldStyleOptions.type;
-          if (newColorOptions.type === COLOR_MAP_TYPE.ORDINAL) {
-            delete oldStyleOptions.useCustomColorPalette;
-            delete oldStyleOptions.customColorPalette;
-          } else {
-            delete oldStyleOptions.useCustomColorRamp;
-            delete oldStyleOptions.customColorRamp;
-          }
-        }
-
-        const newOptions = {
-          ...oldStyleOptions,
-          ...newColorOptions,
-        };
-        onDynamicStyleChange(styleProperty.getStyleName(), newOptions);
-      };
-
-      if (this.state.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-        const customOptionLabel = (
-          <FormattedMessage
-            id="xpack.maps.style.customColorRampLabel"
-            defaultMessage="Custom color ramp"
-          />
-        );
-        colorSelect = (
-          <ColorMapSelect
-            colorMapOptions={COLOR_GRADIENTS}
-            customOptionLabel={customOptionLabel}
-            onChange={options => onColorChange(options)}
-            colorMapType={COLOR_MAP_TYPE.ORDINAL}
-            color={styleOptions.color}
-            customColorMap={styleOptions.customColorRamp}
-            useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
-            compressed
-          />
-        );
-      } else if (this.state.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
-        const customOptionLabel = (
-          <FormattedMessage
-            id="xpack.maps.style.customColorPaletteLabel"
-            defaultMessage="Custom color palette"
-          />
-        );
-        colorSelect = (
-          <ColorMapSelect
-            colorMapOptions={COLOR_PALETTES_INPUTS}
-            customOptionLabel={customOptionLabel}
-            onChange={options => onColorChange(options)}
-            colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
-            color={styleOptions.color}
-            customColorMap={styleOptions.customColorPalette}
-            useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
-            compressed
-          />
-        );
-      }
-      return colorSelect;
+    if (!styleOptions.field || !styleOptions.field.name) {
+      return;
     }
+
+    let colorSelect;
+    const onColorChange = colorOptions => {
+      const newColorOptions = {
+        type: colorOptions.type,
+        color: colorOptions.color,
+      };
+      if (colorOptions.type === COLOR_MAP_TYPE.ORDINAL) {
+        newColorOptions.useCustomColorRamp = colorOptions.useCustomColorMap;
+        newColorOptions.customColorRamp = colorOptions.customColorMap;
+      } else {
+        newColorOptions.useCustomColorPalette = colorOptions.useCustomColorMap;
+        newColorOptions.customColorPalette = colorOptions.customColorMap;
+      }
+
+      const oldStyleOptions = { ...styleOptions };
+
+      if (oldStyleOptions.type === !newColorOptions.type) {
+        delete oldStyleOptions.type;
+        if (newColorOptions.type === COLOR_MAP_TYPE.ORDINAL) {
+          delete oldStyleOptions.useCustomColorPalette;
+          delete oldStyleOptions.customColorPalette;
+        } else {
+          delete oldStyleOptions.useCustomColorRamp;
+          delete oldStyleOptions.customColorRamp;
+        }
+      }
+
+      const newOptions = {
+        ...oldStyleOptions,
+        ...newColorOptions,
+      };
+      onDynamicStyleChange(styleProperty.getStyleName(), newOptions);
+    };
+
+    if (this.state.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
+      const customOptionLabel = i18n.translate('xpack.maps.style.customColorRampLabel', {
+        defaultMessage: 'Custom color ramp',
+      });
+      colorSelect = (
+        <ColorMapSelect
+          colorMapOptions={COLOR_GRADIENTS}
+          customOptionLabel={customOptionLabel}
+          onChange={options => onColorChange(options)}
+          colorMapType={COLOR_MAP_TYPE.ORDINAL}
+          color={styleOptions.color}
+          customColorMap={styleOptions.customColorRamp}
+          useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
+          compressed
+        />
+      );
+    } else if (this.state.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
+      const customOptionLabel = i18n.translate('xpack.maps.style.customColorPaletteLabel', {
+        defaultMessage: 'Custom color palette',
+      });
+      colorSelect = (
+        <ColorMapSelect
+          colorMapOptions={COLOR_PALETTES_INPUTS}
+          customOptionLabel={customOptionLabel}
+          onChange={options => onColorChange(options)}
+          colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
+          color={styleOptions.color}
+          customColorMap={styleOptions.customColorPalette}
+          useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
+          compressed
+        />
+      );
+    }
+    return colorSelect;
   }
 
   render() {
