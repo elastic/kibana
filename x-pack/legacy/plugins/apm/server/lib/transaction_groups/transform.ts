@@ -27,13 +27,11 @@ function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
 
 const getBuckets = (response: ESResponse) => {
   if (response.aggregations) {
-    const buckets =
-      'services' in response.aggregations
-        ? response.aggregations.services.buckets.flatMap(
-            bucket => bucket.transactions.buckets
-          )
-        : response.aggregations.transactions.buckets;
-    return sortByOrder(buckets, ['sum.value'], ['desc']);
+    return sortByOrder(
+      response.aggregations.compositeTransactions.buckets,
+      ['sum.value'],
+      ['desc']
+    );
   }
   return [];
 };
@@ -49,7 +47,7 @@ function getTransactionGroup(
   const sample = bucket.sample.hits.hits[0]._source;
 
   return {
-    name: bucket.key as string,
+    name: bucket.key.transaction,
     sample,
     p95: bucket.p95.values['95.0'],
     averageResponseTime,

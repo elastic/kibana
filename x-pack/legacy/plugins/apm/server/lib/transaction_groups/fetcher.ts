@@ -7,7 +7,8 @@
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
-  TRANSACTION_SAMPLED
+  TRANSACTION_SAMPLED,
+  TRANSACTION_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
@@ -39,7 +40,7 @@ export function transactionGroupsFetcher(
   options: Options,
   setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { client, config } = setup;
+  const { client } = setup;
 
   const projection = getTransactionGroupsProjection({
     setup,
@@ -51,32 +52,8 @@ export function transactionGroupsFetcher(
     { '@timestamp': { order: 'desc' as const } }
   ];
 
-  const transactionsAggregation = {
-    transactions: {
-      terms: {
-        ...projection.body.aggs.transactions.terms,
-        size: config['xpack.apm.ui.transactionGroupBucketSize']
-      },
-      aggs: {
-        sample: { top_hits: { size: 1, sort } },
-        avg: { avg: { field: TRANSACTION_DURATION } },
-        p95: { percentiles: { field: TRANSACTION_DURATION, percents: [95] } },
-        sum: { sum: { field: TRANSACTION_DURATION } }
-      }
-    }
-  };
-
-  const servicesAggregation = {
-    services: {
-      terms: {
-        field: SERVICE_NAME,
-        size: 10000
-      },
-      aggs: transactionsAggregation
-    }
-  };
-
   const isTopTraces = options.type === 'top_traces';
+
   if (isTopTraces) {
     // Delete the projection aggregation when searching for traces, as it should use the combined aggregation instead
     delete projection.body.aggs;
@@ -91,7 +68,27 @@ export function transactionGroupsFetcher(
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
         }
       },
-      aggs: isTopTraces ? servicesAggregation : transactionsAggregation
+      aggs: {
+        compositeTransactions: {
+          composite: {
+            size: 10000,
+            sources: [
+              ...(isTopTraces
+                ? [{ service: { terms: { field: SERVICE_NAME } } }]
+                : []),
+              { transaction: { terms: { field: TRANSACTION_NAME } } }
+            ]
+          },
+          aggs: {
+            sample: { top_hits: { size: 1, sort } },
+            avg: { avg: { field: TRANSACTION_DURATION } },
+            p95: {
+              percentiles: { field: TRANSACTION_DURATION, percents: [95] }
+            },
+            sum: { sum: { field: TRANSACTION_DURATION } }
+          }
+        }
+      }
     }
   });
 
