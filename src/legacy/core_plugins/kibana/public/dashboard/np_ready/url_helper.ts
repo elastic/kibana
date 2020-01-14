@@ -26,7 +26,7 @@ import { DashboardConstants } from './dashboard_constants';
 export function getUrlVars(url: string): Record<string, string> {
   const vars: Record<string, string> = {};
   for (const [, key, value] of url.matchAll(/[?&]+([^=&]+)=([^&]*)/gi)) {
-    vars[key] = value;
+    vars[key] = decodeURIComponent(value);
   }
   return vars;
 }

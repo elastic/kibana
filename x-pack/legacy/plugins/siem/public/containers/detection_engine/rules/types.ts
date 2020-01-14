@@ -148,3 +148,30 @@ export interface DuplicateRulesProps {
 export interface BasicFetchProps {
   signal: AbortSignal;
 }
+
+export interface ImportRulesProps {
+  fileToImport: File;
+  overwrite?: boolean;
+  signal: AbortSignal;
+}
+
+export interface ImportRulesResponseError {
+  rule_id: string;
+  error: {
+    status_code: number;
+    message: string;
+  };
+}
+
+export interface ImportRulesResponse {
+  success: boolean;
+  success_count: number;
+  errors: ImportRulesResponseError[];
+}
+
+export interface ExportRulesProps {
+  ruleIds?: string[];
+  filename?: string;
+  excludeExportDetails?: boolean;
+  signal: AbortSignal;
+}

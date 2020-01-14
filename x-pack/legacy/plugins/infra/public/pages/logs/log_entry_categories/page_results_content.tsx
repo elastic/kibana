@@ -156,7 +156,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     <ResultsContentPage>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="m">
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem />
               <EuiFlexItem grow={false}>
@@ -188,7 +188,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="m">
             <TopCategoriesSection
               availableDatasets={logEntryCategoryDatasets}
               isLoadingDatasets={isLoadingLogEntryCategoryDatasets}
