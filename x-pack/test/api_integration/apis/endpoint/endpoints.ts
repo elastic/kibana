@@ -21,7 +21,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.total).to.eql(0);
         expect(body.endpoints.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
-        expect(body.request_index).to.eql(0);
+        expect(body.request_page_index).to.eql(0);
       });
     });
 
@@ -37,7 +37,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.total).to.eql(3);
         expect(body.endpoints.length).to.eql(3);
         expect(body.request_page_size).to.eql(10);
-        expect(body.request_index).to.eql(0);
+        expect(body.request_page_index).to.eql(0);
       });
 
       it('endpoints api should return page based on params passed.', async () => {
@@ -58,7 +58,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.total).to.eql(3);
         expect(body.endpoints.length).to.eql(1);
         expect(body.request_page_size).to.eql(1);
-        expect(body.request_index).to.eql(1);
+        expect(body.request_page_index).to.eql(1);
       });
 
       /* test that when paging properties produces no result, the total should reflect the actual number of endpoints
@@ -82,7 +82,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.total).to.eql(3);
         expect(body.endpoints.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
-        expect(body.request_index).to.eql(30);
+        expect(body.request_page_index).to.eql(30);
       });
 
       it('endpoints api should return 400 when pagingProperties is below boundaries.', async () => {

@@ -7,22 +7,13 @@
 import { IRouter } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { EndpointAppContext, EndpointData } from '../types';
+
 import { kibanaRequestToEndpointListQuery } from '../services/endpoint/endpoint_query_builders';
+import { EndpointData, EndpointResultList } from '../../common/types';
+import { EndpointAppContext } from '../types';
 
 interface HitSource {
   _source: EndpointData;
-}
-
-export interface EndpointResultList {
-  // the endpoint restricted by the page size
-  endpoints: EndpointData[];
-  // the total number of unique endpoints in the index
-  total: number;
-  // the page size requested
-  request_page_size: number;
-  // the index requested
-  request_index: number;
 }
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
@@ -70,7 +61,7 @@ function mapToEndpointResultList(
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
-      request_index: queryParams.from,
+      request_page_index: queryParams.from,
       endpoints: searchResponse.hits.hits
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
@@ -80,7 +71,7 @@ function mapToEndpointResultList(
   } else {
     return {
       request_page_size: queryParams.size,
-      request_index: queryParams.from,
+      request_page_index: queryParams.from,
       total: totalNumberOfEndpoints,
       endpoints: [],
     };

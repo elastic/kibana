@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { KibanaRequest } from 'kibana/server';
-import { EndpointAppConstants, EndpointAppContext } from '../../types';
+import { EndpointAppConstants } from '../../../common/types';
+import { EndpointAppContext } from '../../types';
 
 export const kibanaRequestToEndpointListQuery = async (
   request: KibanaRequest<any, any, any>,
