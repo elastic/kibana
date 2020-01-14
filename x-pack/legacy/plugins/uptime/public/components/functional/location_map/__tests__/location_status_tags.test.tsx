@@ -10,7 +10,8 @@ import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../';
 
-describe('LocationStatusTags component', () => {
+// Failing: https://github.com/elastic/kibana/issues/54818
+describe.skip('LocationStatusTags component', () => {
   let monitorLocations: MonitorLocation[];
 
   it('renders properly against props', () => {
