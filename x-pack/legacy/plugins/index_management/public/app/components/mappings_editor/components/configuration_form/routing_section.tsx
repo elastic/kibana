@@ -8,7 +8,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
 import { UseField, FormRow, ToggleField } from '../../shared_imports';
