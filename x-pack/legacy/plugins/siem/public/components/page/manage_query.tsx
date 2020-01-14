@@ -8,18 +8,14 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { inputsModel } from '../../store';
+import { SetQuery } from '../../pages/hosts/navigation/types';
 
 interface OwnProps {
   deleteQuery?: ({ id }: { id: string }) => void;
   id: string;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
+  setQuery: SetQuery;
   inspect?: inputsModel.InspectQuery;
 }
 
