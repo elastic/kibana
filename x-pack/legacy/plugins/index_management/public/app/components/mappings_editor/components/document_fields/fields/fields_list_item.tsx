@@ -102,6 +102,10 @@ function FieldListItemComponent(
   };
 
   const renderActionButtons = () => {
+    if (!areActionButtonsVisible) {
+      return null;
+    }
+
     const addMultiFieldButtonLabel = i18n.translate(
       'xpack.idxMgmt.mappingsEditor.addMultiFieldTooltipLabel',
       {
