@@ -116,23 +116,6 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      describe('Preserve Layout', () => {
-        it('downloads a PDF file', async function() {
-          this.timeout(300000);
-
-          await PageObjects.reporting.openPdfReportingPanel();
-          await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-          await PageObjects.reporting.clickGenerateReportButton();
-          await PageObjects.reporting.removeForceSharedItemsContainerSize();
-
-          const url = await PageObjects.reporting.getReportURL(60000);
-          const res = await PageObjects.reporting.getResponse(url);
-
-          expect(res.statusCode).to.equal(200);
-          expect(res.headers['content-type']).to.equal('application/pdf');
-        });
-      });
-
       describe('Print PNG button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
