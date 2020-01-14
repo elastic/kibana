@@ -8,6 +8,8 @@ import { createMockServer } from '../__mocks__/_mock_server';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import * as myUtils from '../utils';
 import { ServerInjectOptions } from 'hapi';
+import { ServerFacade } from '../../../../types';
+
 import {
   getSetSignalStatusByIdsRequest,
   getSetSignalStatusByQueryRequest,
@@ -27,7 +29,7 @@ describe('set signal status', () => {
     elasticsearch.getCluster = jest.fn(() => ({
       callWithRequest: jest.fn(() => true),
     }));
-    setSignalsStatusRoute(server);
+    setSignalsStatusRoute((server as unknown) as ServerFacade);
   });
 
   describe('status on signal', () => {

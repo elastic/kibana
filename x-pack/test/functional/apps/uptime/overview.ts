@@ -50,7 +50,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
-    it('pagination is cleared when filter criteria changes', async () => {
+    // flakey see https://github.com/elastic/kibana/issues/54527
+    it.skip('pagination is cleared when filter criteria changes', async () => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await pageObjects.uptime.changePage('next');
       // there should now be pagination data in the URL
@@ -86,7 +87,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
-    describe('snapshot counts', () => {
+    // Flakey, see https://github.com/elastic/kibana/issues/54541
+    describe.skip('snapshot counts', () => {
       it('updates the snapshot count when status filter is set to down', async () => {
         await pageObjects.uptime.goToUptimePageAndSetDateRange(
           DEFAULT_DATE_START,

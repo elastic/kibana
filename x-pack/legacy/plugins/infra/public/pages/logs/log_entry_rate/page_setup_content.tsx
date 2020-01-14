@@ -8,6 +8,7 @@ import { EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
+import { BetaBadge } from '../../../components/beta_badge';
 import {
   createInitialConfigurationStep,
   createProcessStep,
@@ -82,7 +83,8 @@ export const LogEntryRateSetupContent: React.FunctionComponent = () => {
         <FormattedMessage
           id="xpack.infra.analysisSetup.analysisSetupTitle"
           defaultMessage="Enable Machine Learning analysis"
-        />
+        />{' '}
+        <BetaBadge />
       </LogAnalysisSetupPageHeader>
       <LogAnalysisSetupPageContent>
         <EuiText size="s">
