@@ -4,13 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Rule } from '../../../../containers/detection_engine/rules';
+import {
+  Rule,
+  RuleError,
+  RuleResponseBuckets,
+} from '../../../../containers/detection_engine/rules';
 import { TableData } from '../types';
 import { getEmptyValue } from '../../../../components/empty_value';
 
+/**
+ * Formats rules into the correct format for the AllRulesTable
+ *
+ * @param rules as returned from the Rules API
+ * @param selectedIds ids of the currently selected rules
+ */
 export const formatRules = (rules: Rule[], selectedIds?: string[]): TableData[] =>
   rules.map(rule => ({
     id: rule.id,
+    immutable: rule.immutable,
     rule_id: rule.rule_id,
     rule: {
       href: `#/detection-engine/rules/id/${encodeURIComponent(rule.id)}`,
@@ -28,3 +39,18 @@ export const formatRules = (rules: Rule[], selectedIds?: string[]): TableData[] 
     sourceRule: rule,
     isLoading: selectedIds?.includes(rule.id) ?? false,
   }));
+
+/**
+ * Separates rules/errors from bulk rules API response (create/update/delete)
+ *
+ * @param response Array<Rule | RuleError> from bulk rules API
+ */
+export const bucketRulesResponse = (response: Array<Rule | RuleError>) =>
+  response.reduce<RuleResponseBuckets>(
+    (acc, cv): RuleResponseBuckets => {
+      return 'error' in cv
+        ? { rules: [...acc.rules], errors: [...acc.errors, cv] }
+        : { rules: [...acc.rules, cv], errors: [...acc.errors] };
+    },
+    { rules: [], errors: [] }
+  );

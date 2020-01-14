@@ -10,7 +10,9 @@ import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../';
 
-describe('StatusByLocation component', () => {
+// These tests use absolute time
+// Failing: https://github.com/elastic/kibana/issues/54672
+describe.skip('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];
 
   const start = moment('2020-01-10T12:22:32.567Z');
