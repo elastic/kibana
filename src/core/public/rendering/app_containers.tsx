@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
-import { VisTypeTimeseriesPlugin } from './plugin';
-export { VisTypeTimeseriesSetup, Framework } from './plugin';
+import React from 'react';
+import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import classNames from 'classnames';
 
-export const config = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
+export const AppWrapper: React.FunctionComponent<{
+  chromeVisible$: Observable<boolean>;
+}> = ({ chromeVisible$, children }) => {
+  const visible = useObservable(chromeVisible$);
+  return <div className={classNames('app-wrapper', { 'hidden-chrome': !visible })}>{children}</div>;
 };
 
-export type VisTypeTimeseriesConfig = TypeOf<typeof config.schema>;
-
-export { ValidationTelemetryServiceSetup } from './validation_telemetry';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new VisTypeTimeseriesPlugin(initializerContext);
-}
+export const AppContainer: React.FunctionComponent<{
+  classes$: Observable<string[]>;
+}> = ({ classes$, children }) => {
+  const classes = useObservable(classes$);
+  return <div className={classNames('application', classes)}>{children}</div>;
+};
