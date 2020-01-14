@@ -585,7 +585,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.tokenCountLongDescription"
-          defaultMessage="Token count fields accept string values and index their analyzed tokens."
+          defaultMessage="Token count fields accept string values.  These values are analyzed, and the number of tokens in the string are indexed."
         />
       </p>
     ),
