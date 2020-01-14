@@ -194,11 +194,8 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
         iconType={showingAllErrors ? 'arrowUp' : 'arrowDown'}
       >
         {showingAllErrors
-          ? i18n.translate('xpack.idxMgmt.mappingsEditor.showFirstErrorsButtonLabel', {
+          ? i18n.translate('xpack.idxMgmt.mappingsEditor.hideErrorsButtonLabel', {
               defaultMessage: 'Hide errors',
-              values: {
-                numErrors: MAX_ERRORS_TO_DISPLAY,
-              },
             })
           : i18n.translate('xpack.idxMgmt.mappingsEditor.showAllErrorsButtonLabel', {
               defaultMessage: 'Show {numErrors} more errors',
