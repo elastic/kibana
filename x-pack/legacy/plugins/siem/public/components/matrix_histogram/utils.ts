@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
@@ -17,6 +16,7 @@ export const getBarchartConfigs = ({
   onBrushEnd,
   yTickFormatter,
   showLegend,
+  legendPosition,
 }: {
   from: number;
   to: number;
@@ -24,6 +24,7 @@ export const getBarchartConfigs = ({
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
+  legendPosition?: Position;
 }) => ({
   series: {
     xScaleType: scaleType || ScaleType.Time,
@@ -39,7 +40,7 @@ export const getBarchartConfigs = ({
     tickSize: 8,
   },
   settings: {
-    legendPosition: Position.Bottom,
+    legendPosition: legendPosition || Position.Bottom,
     onBrushEnd,
     showLegend: showLegend || true,
     theme: {
@@ -72,18 +73,18 @@ export const formatToChartDataItem = ([key, value]: [
 });
 
 export const getCustomChartData = (
-  data: MatrixHistogramDataTypes[],
+  data: MatrixHistogramDataTypes[] | null,
   mapping?: MatrixHistogramMappingTypes
 ): ChartSeriesData[] => {
+  if (!data) return [];
   const dataGroupedByEvent = groupBy('g', data);
   const dataGroupedEntries = toPairs(dataGroupedByEvent);
   const formattedChartData = map(formatToChartDataItem, dataGroupedEntries);
 
   if (mapping)
     return map((item: ChartSeriesData) => {
-      const customColor = get(`${item.key}.color`, mapping);
-      item.color = customColor;
-      return item;
+      const mapItem = get(item.key, mapping);
+      return { ...item, color: mapItem.color };
     }, formattedChartData);
   else return formattedChartData;
 };

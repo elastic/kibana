@@ -1314,6 +1314,7 @@ export class TimeSeriesExplorer extends React.Component {
                   onChange={this.detectorIndexChangeHandler}
                   value={selectedDetectorIndex}
                   options={detectorSelectOptions}
+                  data-test-subj="mlSingleMetricViewerDetectorSelect"
                 />
               </EuiFormRow>
             </EuiFlexItem>

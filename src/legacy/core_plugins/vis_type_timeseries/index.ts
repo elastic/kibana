@@ -32,6 +32,20 @@ const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlu
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({}),
+      mappings: {
+        'tsvb-validation-telemetry': {
+          properties: {
+            failedRequests: {
+              type: 'long',
+            },
+          },
+        },
+      },
+      savedObjectSchemas: {
+        'tsvb-validation-telemetry': {
+          isNamespaceAgnostic: true,
+        },
+      },
     },
     init: (server: Legacy.Server) => {
       const visTypeTimeSeriesPlugin = server.newPlatform.setup.plugins
