@@ -5,5 +5,5 @@
  */
 
 export const PLUGIN = {
-  ID: 'painlessPlayground',
+  ID: 'painless_playground',
 };

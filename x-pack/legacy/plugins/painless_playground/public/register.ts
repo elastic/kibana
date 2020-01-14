@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { npSetup, npStart } from 'ui/new_platform';
+import { registerPainless } from './register_painless';
 
 npSetup.plugins.dev_tools.register({
   order: 7,
@@ -19,6 +20,7 @@ npSetup.plugins.dev_tools.register({
   disabled: false,
   tooltipContent: xpackInfo.get('features.painless_playground.message'),
   async mount(context, { element }) {
+    registerPainless();
     /**
     const licenseCheck = {
       showPage: xpackInfo.get('features.painless_playground.enableLink'),

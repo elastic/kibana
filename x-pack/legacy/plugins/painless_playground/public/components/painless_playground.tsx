@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiForm,
   EuiButton,
@@ -13,7 +13,6 @@ import {
   EuiPageContentBody,
   EuiSpacer,
   EuiFormRow,
-  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
@@ -24,107 +23,105 @@ interface Props {
 
 interface State {
   code: string;
-  output: any;
+  request?: string;
+  response?: string;
 }
-export class PainlessPlayground extends React.Component<Props, State> {
-  state = {
+export function PainlessPlayground(props: Props) {
+  const [state, setState] = useState<State>({
     code: '',
-    output: '',
-  };
+    request: '',
+    response: '',
+  });
 
-  onPatternChange = (code: string) => {
-    this.setState({ code });
-  };
-
-  submit = async () => {
+  const submit = async () => {
+    const request = {
+      script: {
+        source: state.code,
+      },
+    };
     try {
-      const payload = {
-        script: {
-          source: this.state.code,
-        },
-      };
-      const response = await this.props.service.simulate(payload);
-      this.setState({
-        output: response,
+      const response = await props.service.simulate(request);
+      setState({
+        code: state.code,
+        response: JSON.stringify(response, null, 2),
+        request: JSON.stringify(request, null, 2),
       });
     } catch (e) {
-      this.setState({
-        output: e,
+      setState({
+        code: state.code,
+        response: JSON.stringify(e, null, 2),
+        request: JSON.stringify(request, null, 2),
       });
     }
   };
 
-  onSimulateClick = () => {
-    this.submit();
+  const onSimulateClick = () => {
+    submit();
   };
-
-  isSimulateDisabled = () => {
-    return this.state.code.trim() === '';
-  };
-
-  render() {
-    return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <EuiForm data-test-subj="painlessPlayground">
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.painlessPlayground.codeLabel"
-                      defaultMessage="Painless Code"
-                    />
-                  }
-                  fullWidth
-                  data-test-subj="codeInput"
-                >
-                  <EuiPanel paddingSize="s">
-                    <CodeEditor
-                      languageId="javascript"
-                      height={250}
-                      value={this.state.code}
-                      onChange={this.onPatternChange}
-                      options={{
-                        fontSize: 12,
-                        minimap: {
-                          enabled: false,
-                        },
-                        scrollBeyondLastLine: false,
-                        wordWrap: 'on',
-                        wrappingIndent: 'indent',
-                      }}
-                    />
-                  </EuiPanel>
-                </EuiFormRow>
-                <EuiSpacer />
-                <EuiButton
-                  fill
-                  onClick={this.onSimulateClick}
-                  isDisabled={this.isSimulateDisabled()}
-                  data-test-subj="btnSimulate"
-                >
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiPageContentBody>
+            <EuiForm data-test-subj="painlessPlayground">
+              <EuiFormRow
+                label={
                   <FormattedMessage
-                    id="xpack.painlessPlayground.simulateButtonLabel"
-                    defaultMessage="Simulate"
+                    id="xpack.painlessPlayground.codeLabel"
+                    defaultMessage="Painless Code"
                   />
-                </EuiButton>
-                <EuiSpacer />
+                }
+                fullWidth
+                data-test-subj="codeInput"
+              >
+                <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+                  <CodeEditor
+                    languageId="painless"
+                    height={250}
+                    value={state.code}
+                    onChange={code => setState({ code })}
+                    options={{
+                      fontSize: 12,
+                      minimap: {
+                        enabled: false,
+                      },
+                      scrollBeyondLastLine: false,
+                      wordWrap: 'on',
+                      wrappingIndent: 'indent',
+                    }}
+                  />
+                </div>
+              </EuiFormRow>
+              <EuiSpacer />
+              <EuiButton
+                fill
+                onClick={onSimulateClick}
+                isDisabled={state.code.trim() === ''}
+                data-test-subj="btnSimulate"
+              >
+                <FormattedMessage
+                  id="xpack.painlessPlayground.simulateButtonLabel"
+                  defaultMessage="Simulate"
+                />
+              </EuiButton>
+              <EuiSpacer />
+
+              {state.request && (
                 <EuiFormRow
                   label={
                     <FormattedMessage
                       id="xpack.painlessPlayground.outputLabel"
-                      defaultMessage="Output"
+                      defaultMessage="Request"
                     />
                   }
                   fullWidth
-                  data-test-subj="output"
+                  data-test-subj="request"
                 >
-                  <EuiPanel paddingSize="s">
+                  <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
                     <CodeEditor
                       languageId="json"
                       height={250}
-                      value={JSON.stringify(this.state.output, null, 2)}
+                      value={'POST /_scripts/painless/_execute\n' + state.request}
                       options={{
                         fontSize: 12,
                         minimap: {
@@ -132,13 +129,38 @@ export class PainlessPlayground extends React.Component<Props, State> {
                         },
                       }}
                     />
-                  </EuiPanel>
+                  </div>
                 </EuiFormRow>
-              </EuiForm>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
+              )}
+
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.painlessPlayground.outputLabel"
+                    defaultMessage="Response"
+                  />
+                }
+                fullWidth
+                data-test-subj="response"
+              >
+                <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+                  <CodeEditor
+                    languageId="json"
+                    height={250}
+                    value={state.response || ''}
+                    options={{
+                      fontSize: 12,
+                      minimap: {
+                        enabled: false,
+                      },
+                    }}
+                  />
+                </div>
+              </EuiFormRow>
+            </EuiForm>
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
+  );
 }
