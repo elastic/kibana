@@ -24,6 +24,7 @@ import { Vis } from './../..';
 export interface VisOptionsProps<VisParamType = unknown> {
   aggs: AggConfigs;
   hasHistogramAgg: boolean;
+  isTabSelected: boolean;
   stateParams: VisParamType;
   vis: Vis;
   uiState: PersistedState;

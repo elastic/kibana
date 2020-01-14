@@ -18,6 +18,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
       }
     }
     changeValueAxis={[Function]}
+    isTabSelected={true}
     setParamByIndex={[Function]}
     setValue={[MockFunction]}
     stateParams={
@@ -127,6 +128,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
       }
     }
     isCategoryAxisHorizontal={true}
+    isTabSelected={true}
     onValueAxisPositionChanged={[Function]}
     removeValueAxis={[Function]}
     setParamByIndex={[Function]}
@@ -257,6 +259,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
         "type": "category",
       }
     }
+    isTabSelected={true}
     onPositionChanged={[Function]}
     setCategoryAxis={[Function]}
     setValue={[MockFunction]}

@@ -88,6 +88,7 @@ describe('MetricsAxisOptions component', () => {
 
     defaultProps = {
       aggs: createAggs([aggCount]),
+      isTabSelected: true,
       vis: {
         type: {
           type: ChartTypes.AREA,
@@ -189,17 +190,11 @@ describe('MetricsAxisOptions component', () => {
       });
 
       const updatedSeriesParams = [{ ...chart, data: { ...chart.data, label: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenLastCalledWith(SERIES_PARAMS, updatedSeriesParams);
-
-      comp.setProps({
-        stateParams: {
-          ...defaultProps.stateParams,
-          seriesParams: updatedSeriesParams,
-        },
-      });
-
       const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenLastCalledWith(VALUE_AXES, updatedValues);
+
+      expect(setValue).toHaveBeenCalledTimes(3);
+      expect(setValue).toHaveBeenNthCalledWith(2, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(3, VALUE_AXES, updatedValues);
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {

@@ -42,6 +42,7 @@ import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_comm
 export interface DefaultEditorDataTabProps {
   dispatch: React.Dispatch<EditorAction>;
   formIsTouched: boolean;
+  isTabSelected: boolean;
   metricAggs: AggConfig[];
   schemas: ISchemas;
   state: VisState;

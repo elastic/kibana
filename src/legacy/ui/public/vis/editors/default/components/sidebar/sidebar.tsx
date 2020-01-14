@@ -176,16 +176,23 @@ function DefaultEditorSideBar({
               />
             )}
 
-            {optionTabs.map(({ editor: Editor, name }) => (
-              <div
-                key={name}
-                className={`visEditorSidebar__config ${
-                  selectedTab === name ? '' : 'visEditorSidebar__config-isHidden'
-                }`}
-              >
-                <Editor {...(name === 'data' ? dataTabProps : optionTabProps)} />
-              </div>
-            ))}
+            {optionTabs.map(({ editor: Editor, name }) => {
+              const isTabSelected = selectedTab === name;
+
+              return (
+                <div
+                  key={name}
+                  className={`visEditorSidebar__config ${
+                    isTabSelected ? '' : 'visEditorSidebar__config-isHidden'
+                  }`}
+                >
+                  <Editor
+                    isTabSelected={isTabSelected}
+                    {...(name === 'data' ? dataTabProps : optionTabProps)}
+                  />
+                </div>
+              );
+            })}
           </form>
         </EuiFlexItem>
 
