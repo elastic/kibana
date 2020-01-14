@@ -28,87 +28,86 @@ import {
 } from './types';
 import { generateTablePaginationOptions } from '../paginated_table/helpers';
 import { ChartSeriesData } from '../charts/common';
+import { InspectButtonContainer } from '../inspect';
 
-export const MatrixHistogram = React.memo(
-  ({
-    activePage,
+export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
+  MatrixHistogramQueryProps> = ({
+  activePage,
 
-    dataKey,
-    defaultStackByOption,
-    endDate,
-    errorMessage,
-    filterQuery,
-    hideHistogramIfEmpty = false,
-    id,
-    isAlertsHistogram,
-    isAnomaliesHistogram,
-    isAuthenticationsHistogram,
-    isDNSHistogram,
-    isEventsType,
-    isPtrIncluded,
-    isInspected,
-    legendPosition,
-    limit,
-    mapping,
-    query,
-    scaleType = ScaleType.Time,
-    setQuery,
-    showLegend,
-    skip,
-    stackByOptions,
-    startDate,
-    subtitle,
-    title,
-    updateDateRange,
+  dataKey,
+  defaultStackByOption,
+  endDate,
+  errorMessage,
+  filterQuery,
+  hideHistogramIfEmpty = false,
+  id,
+  isAlertsHistogram,
+  isAnomaliesHistogram,
+  isAuthenticationsHistogram,
+  isDNSHistogram,
+  isEventsType,
+  isPtrIncluded,
+  isInspected,
+  legendPosition,
+  limit,
+  mapping,
+  query,
+  scaleType = ScaleType.Time,
+  setQuery,
+  showLegend,
+  skip,
+  stackByOptions,
+  startDate,
+  subtitle,
+  title,
+  updateDateRange,
+  yTickFormatter,
+  sort,
+}) => {
+  const barchartConfigs = getBarchartConfigs({
+    from: startDate,
+    to: endDate,
+    onBrushEnd: updateDateRange,
+    scaleType,
     yTickFormatter,
-    sort,
-  }: MatrixHistogramProps & MatrixHistogramQueryProps) => {
-    const barchartConfigs = getBarchartConfigs({
-      from: startDate,
-      to: endDate,
-      onBrushEnd: updateDateRange,
-      scaleType,
-      yTickFormatter,
-      showLegend,
-      legendPosition,
-    });
-    const [showInspect, setShowInspect] = useState(false);
-    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+    showLegend,
+    legendPosition,
+  });
+  const [showInspect, setShowInspect] = useState(false);
+  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 
-    const handleOnMouseEnter = useCallback(() => {
-      if (!showInspect) {
-        setShowInspect(true);
-      }
-    }, [showInspect, setShowInspect]);
-    const handleOnMouseLeave = useCallback(() => {
-      if (showInspect) {
-        setShowInspect(false);
-      }
-    }, [showInspect, setShowInspect]);
+  const handleOnMouseEnter = useCallback(() => {
+    if (!showInspect) {
+      setShowInspect(true);
+    }
+  }, [showInspect, setShowInspect]);
+  const handleOnMouseLeave = useCallback(() => {
+    if (showInspect) {
+      setShowInspect(false);
+    }
+  }, [showInspect, setShowInspect]);
 
-    const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
-      defaultStackByOption
-    );
-    const [subtitleWithCounts, setSubtitle] = useState<string>('');
-    const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
-    const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
-    const setSelectedChartOptionCallback = useCallback(
-      (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedStackByOption(
-          stackByOptions?.find(co => co.value === event.target.value) ?? defaultStackByOption
-        );
-      },
-      []
-    );
-    const getPagination = () =>
-      activePage != null && limit != null
-        ? generateTablePaginationOptions(activePage, limit)
-        : undefined;
+  const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
+    defaultStackByOption
+  );
+  const [subtitleWithCounts, setSubtitle] = useState<string>('');
+  const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
+  const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
+  const setSelectedChartOptionCallback = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedStackByOption(
+        stackByOptions?.find(co => co.value === event.target.value) ?? defaultStackByOption
+      );
+    },
+    []
+  );
+  const getPagination = () =>
+    activePage != null && limit != null
+      ? generateTablePaginationOptions(activePage, limit)
+      : undefined;
 
-    const { data, loading, inspect, totalCount, refetch = noop } = useQuery<
-      {},
-      HistogramAggregation
-    >({
+  const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
+    {
       dataKey,
       endDate,
       errorMessage,
@@ -127,39 +126,41 @@ export const MatrixHistogram = React.memo(
       isPtrIncluded,
       pagination: useMemo(() => getPagination(), [activePage, limit]),
       stackByField: selectedStackByOption.value,
-    });
+    }
+  );
 
-    useEffect(() => {
-      if (subtitle != null)
-        setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
+  useEffect(() => {
+    if (subtitle != null)
+      setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
 
-      if (totalCount <= 0) {
-        if (hideHistogramIfEmpty) {
-          setHideHistogram(true);
-        } else {
-          setHideHistogram(false);
-        }
+    if (totalCount <= 0) {
+      if (hideHistogramIfEmpty) {
+        setHideHistogram(true);
       } else {
         setHideHistogram(false);
       }
+    } else {
+      setHideHistogram(false);
+    }
 
-      setBarChartData(getCustomChartData(data, mapping));
+    setBarChartData(getCustomChartData(data, mapping));
 
-      setQuery({ id, inspect, loading, refetch });
-    }, [
-      subtitle,
-      setSubtitle,
-      setHideHistogram,
-      setBarChartData,
-      setQuery,
-      hideHistogramIfEmpty,
-      totalCount,
-      isInspected,
-      loading,
-      data,
-    ]);
+    setQuery({ id, inspect, loading, refetch });
+  }, [
+    subtitle,
+    setSubtitle,
+    setHideHistogram,
+    setBarChartData,
+    setQuery,
+    hideHistogramIfEmpty,
+    totalCount,
+    isInspected,
+    loading,
+    data,
+  ]);
 
-    return !hideHistogram ? (
+  return !hideHistogram ? (
+    <InspectButtonContainer show={showInspect}>
       <Panel
         data-test-subj={`${id}Panel`}
         loading={loading}
@@ -169,7 +170,6 @@ export const MatrixHistogram = React.memo(
         <HeaderSection
           id={id}
           title={title}
-          showInspect={showInspect}
           subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
         >
           {stackByOptions && (
@@ -199,6 +199,8 @@ export const MatrixHistogram = React.memo(
           </>
         )}
       </Panel>
-    ) : null;
-  }
-);
+    </InspectButtonContainer>
+  ) : null;
+};
+
+export const MatrixHistogram = React.memo(MatrixHistogramComponent);
