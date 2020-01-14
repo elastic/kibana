@@ -163,4 +163,15 @@ export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
       ],
     },
   },
+  _routing: {
+    required: {
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.routingLabel', {
+        defaultMessage: 'Require _routing value',
+      }),
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.routingHelpText', {
+        defaultMessage: 'Make a custom routing value required for all CRUD operations',
+      }),
+      defaultValue: false,
+    },
+  },
 };
