@@ -56,6 +56,15 @@ export class ColorMapSelect extends Component {
     this.props.onChange(newProps);
   };
 
+  componentDidUpdate(prevProps) {
+    if (!prevProps.useCustomColorMap) {
+      if (!prevProps.colorMapOptions.find(option => option.value === prevProps.color)) {
+        const nw = this.props.colorMapOptions[0].value;
+        this._onColorMapSelect(nw);
+      }
+    }
+  }
+
   render() {
     const { color, useCustomColorMap } = this.props;
 
@@ -99,8 +108,7 @@ export class ColorMapSelect extends Component {
       if (colorMapOptionsWithCustom.find(option => option.value === color)) {
         valueOfSelected = color;
       } else {
-        valueOfSelected = this.props.colorMapOptions[0].value;
-        this._onColorMapSelect(valueOfSelected);
+        return null;
       }
     }
 

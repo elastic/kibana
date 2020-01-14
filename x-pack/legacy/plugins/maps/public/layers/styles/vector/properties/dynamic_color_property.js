@@ -123,6 +123,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     const colorStops = this._getMbOrdinalColorStops();
+    if (!colorStops) {
+      return null;
+    }
+
     if (this._options.useCustomColorRamp) {
       const firstStopValue = colorStops[0];
       const lessThenFirstStopValue = firstStopValue - 1;
@@ -198,7 +202,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     const paletteStops = this._getColorPaletteStops();
-    if (!paletteStops.length) {
+    if (paletteStops.length < 2) {
+      //occurs when no data
       return null;
     }
 
