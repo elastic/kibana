@@ -119,8 +119,8 @@ function buildOptions(
   // Get the X-axis tick format
   const time: TimeRangeBounds = timefilter.getBounds();
   const interval = calculateInterval(
-    time.min && time.min.valueOf(),
-    time.max && time.max.valueOf(),
+    (time.min && time.min.valueOf()) || 0,
+    (time.max && time.max.valueOf()) || 0,
     uiSettings.get('timelion:target_buckets') || 200,
     intervalValue,
     uiSettings.get('timelion:min_interval') || '1ms'
