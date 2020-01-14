@@ -1709,7 +1709,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 />
                               </EuiSpacer>
                               <NewVisHelp
-                                addBasePath={[Function]}
+                                onPromotionClicked={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>
@@ -3336,7 +3336,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 />
                               </EuiSpacer>
                               <NewVisHelp
-                                addBasePath={[Function]}
+                                onPromotionClicked={[Function]}
                                 promotedTypes={Array []}
                               >
                                 <EuiText>

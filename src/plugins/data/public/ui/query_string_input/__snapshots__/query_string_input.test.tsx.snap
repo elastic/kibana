@@ -276,6 +276,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -896,6 +899,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -1497,6 +1503,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                 },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
@@ -2115,6 +2124,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -2716,6 +2728,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                 },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
@@ -3333,6 +3348,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+                        },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                         },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
