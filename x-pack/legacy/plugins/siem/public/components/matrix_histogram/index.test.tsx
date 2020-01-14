@@ -38,6 +38,7 @@ describe('Matrix Histogram Component', () => {
     defaultIndex: ['defaultIndex'],
     defaultStackByOption: { text: 'text', value: 'value' },
     endDate: new Date('2019-07-18T20:00:00.000Z').valueOf(),
+    errorMessage: 'error',
     id: 'mockId',
     isInspected: false,
     isPtrIncluded: false,

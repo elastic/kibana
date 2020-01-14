@@ -64,7 +64,6 @@ export interface MatrixHistogramQueryProps {
   isEventsType?: boolean;
   isInspected: boolean;
   isPtrIncluded?: boolean;
-  isDNSHistogram?: boolean;
   pagination?: PaginationInputPaginated;
 }
 

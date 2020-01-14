@@ -28,7 +28,7 @@ import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_te
 import { networkDnsQuery } from './index.gql_query';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../store/constants';
 import { MatrixHistogram } from '../../components/matrix_histogram';
-import { MatrixHistogramOption } from '../../components/matrix_histogram/types';
+import { MatrixHistogramOption, GetSubTitle } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
@@ -56,16 +56,19 @@ export interface OwnProps extends QueryTemplatePaginatedProps {
 interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
   dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
+  errorMessage: string;
+  isDNSHistogram?: boolean;
   limit: number;
   query: DocumentNode;
   scaleType: ScaleType;
   setQuery: SetQuery;
+  showLegend?: boolean;
   stackByOptions: MatrixHistogramOption[];
+  subtitle?: string | GetSubTitle;
   title: string;
   type: networkModel.NetworkType;
   updateDateRange: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
-  showLegend?: boolean;
 }
 
 export interface NetworkDnsComponentReduxProps {

@@ -38,8 +38,8 @@ export interface OwnProps extends QueryTemplateProps {
   sourceId: string;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
-  type: hostsModel.HostsType | networkModel.NetworkType;
   title: string;
+  type: hostsModel.HostsType | networkModel.NetworkType;
   updateDateRange: UpdateDateRange;
 }
 
