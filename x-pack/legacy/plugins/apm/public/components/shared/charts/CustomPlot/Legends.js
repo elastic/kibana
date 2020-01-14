@@ -129,7 +129,7 @@ export default function Legends({
           }
           indicator={() => (
             <div style={{ marginRight: px(units.quarter) }}>
-              <EuiIcon type="tag" color={theme.euiColorSecondary} />
+              <EuiIcon type="annotation" color={theme.euiColorSecondary} />
             </div>
           )}
           disabled={!showAnnotations}

@@ -67,20 +67,26 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={documentationService.getMappingDocumentationLink()}
-            target="_blank"
-            iconType="help"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepMappings.docsButtonLabel"
-              defaultMessage="Mapping docs"
-            />
-          </EuiButtonEmpty>
-          <br />
-          <LoadMappingsFromJsonButton onJson={onJsonLoaded} />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <LoadMappingsFromJsonButton onJson={onJsonLoaded} />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                flush="right"
+                href={documentationService.getMappingDocumentationLink()}
+                target="_blank"
+                iconType="help"
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepMappings.docsButtonLabel"
+                  defaultMessage="Mapping docs"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
