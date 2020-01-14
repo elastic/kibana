@@ -134,10 +134,13 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
       const term = feature.properties[fieldName];
-      if (counts.has(term)) {
-        counts.set(term, counts.get(term) + 1);
-      } else {
-        counts.set(term, 1);
+      //properties object may be sparse, so need to check if the field is effectively present
+      if (typeof term !== undefined) {
+        if (counts.has(term)) {
+          counts.set(term, counts.get(term) + 1);
+        } else {
+          counts.set(term, 1);
+        }
       }
     }
 
