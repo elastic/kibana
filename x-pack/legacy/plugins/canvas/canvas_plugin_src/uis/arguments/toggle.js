@@ -27,6 +27,7 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError, typeInsta
         onChange={handleChange}
         className="canvasArg__switch"
         aria-label={typeInstance.displayName}
+        label=""
         showLabel={false}
       />
     </EuiFormRow>
