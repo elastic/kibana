@@ -46,7 +46,7 @@ import { ml } from '../../../../../services/ml_api_service';
 
 import {
   sortColumns,
-  toggleSelectedField,
+  toggleSelectedFieldSimple,
   DataFrameAnalyticsConfig,
   EsFieldName,
   EsDoc,
@@ -138,7 +138,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   function toggleColumn(column: EsFieldName) {
     if (tableItems.length > 0 && jobConfig !== undefined) {
       // spread to a new array otherwise the component wouldn't re-render
-      setSelectedFields([...toggleSelectedField(selectedFields, column)]);
+      setSelectedFields([...toggleSelectedFieldSimple(selectedFields, column)]);
     }
   }
 
