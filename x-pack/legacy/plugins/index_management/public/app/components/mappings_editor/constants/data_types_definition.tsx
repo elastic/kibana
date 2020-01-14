@@ -54,7 +54,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.keywordLongDescription"
-          defaultMessage="Keyword fields support search by their exact value. This data type is useful for filtering, sorting, and aggregations. To index full-text content, such as an email body, use the {textType}."
+          defaultMessage="Keyword fields support searching for an exact value and are useful for filtering, sorting, and aggregations. To index full-text content, such as an email body, use the {textType}."
           values={{
             textType: (
               <EuiLink href={documentationService.getTypeDocLink('text')} target="_blank">
@@ -497,7 +497,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.denseVectorLongDescription"
-          defaultMessage="Dense vector fields store dense vectors of float values. This data type is useful for document scoring."
+          defaultMessage="Dense vector fields store vectors of float values, useful for document scoring."
         />
       </p>
     ),
@@ -648,7 +648,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.completionSuggesterLongDescription"
-          defaultMessage="Completion suggester fields support autocomplete functionality. This data type uses data structures to enable fast lookups, but are costly to build and stored in-memory."
+          defaultMessage="Completion suggester fields support autocomplete, but require special data structures that occupy memory and build slowly."
         />
       </p>
     ),
@@ -665,7 +665,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.tokenCountLongDescription"
-          defaultMessage="Token count fields accept string values. These values are analyzed, then the number of tokens in the string are indexed."
+          defaultMessage="Token count fields accept string values.  These values are analyzed, and the number of tokens in the string are indexed."
         />
       </p>
     ),
@@ -728,7 +728,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.aliasLongDescription"
-          defaultMessage="Alias fields accept an alternative name for a field in the index. Aliases can be used in place of the target field in search requests."
+          defaultMessage="Alias fields accept an alternative name for a field, which you can use in search requests."
         />
       </p>
     ),
@@ -745,7 +745,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.searchAsYouTypeLongDescription"
-          defaultMessage="Search-as-you-type fields supports as-you-type search by breaking strings into a series of subfields. Both prefix completion and infix completion are supported."
+          defaultMessage="Search-as-you-type fields break strings into subfields for search suggestions, and will match terms at any position in the string."
         />
       </p>
     ),
@@ -762,7 +762,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.flattenedLongDescription"
-          defaultMessage="Flattened fields map an entire field as a single object. This data type is useful for indexing objects with a large or unknown number of unique keys. Flattened fields only support basic queries."
+          defaultMessage="Flattened fields map an object as a single field and are useful for indexing objects with a large or unknown number of unique keys. Flattened fields support basic queries only."
         />
       </p>
     ),
