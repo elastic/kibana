@@ -58,7 +58,7 @@ exports[`StatusByLocation component renders when all locations are down 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            3d ago
+            in 5s
           </div>
         </div>
       </span>
@@ -97,7 +97,7 @@ exports[`StatusByLocation component renders when all locations are down 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            3d ago
+            in 5m
           </div>
         </div>
       </span>
@@ -151,7 +151,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
               <div
                 class="c2"
               >
-                Islamabad
+                Berlin
               </div>
             </div>
           </span>
@@ -166,7 +166,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            3d ago
+            in 5d
           </div>
         </div>
       </span>
@@ -190,7 +190,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
               <div
                 class="c2"
               >
-                Berlin
+                Islamabad
               </div>
             </div>
           </span>
@@ -205,7 +205,7 @@ exports[`StatusByLocation component renders when all locations are up 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            3d ago
+            in 5s
           </div>
         </div>
       </span>
@@ -273,7 +273,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              in 5s
             </div>
           </div>
         </span>
@@ -312,7 +312,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              in 5m
             </div>
           </div>
         </span>
@@ -351,7 +351,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              in 5h
             </div>
           </div>
         </span>
@@ -375,7 +375,7 @@ Array [
                 <div
                   class="c2"
                 >
-                  Tokya
+                  Tokyo
                 </div>
               </div>
             </span>
@@ -390,7 +390,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              in 5d
             </div>
           </div>
         </span>
@@ -429,7 +429,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              in 1 Mon
             </div>
           </div>
         </span>
@@ -468,7 +468,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              in 5 Mon
             </div>
           </div>
         </span>
@@ -507,7 +507,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              in 5 Yr
             </div>
           </div>
         </span>
@@ -546,7 +546,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              3d ago
+              in 5 Yr
             </div>
           </div>
         </span>
