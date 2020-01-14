@@ -5,16 +5,25 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { act } from 'react-dom/test-utils';
+import { MemoryRouter } from 'react-router-dom';
+import { mount } from 'enzyme';
+
+import { EuiSuperSelect } from '@elastic/eui';
+
 import { SelectSeverity } from './select_severity';
 
 describe('SelectSeverity', () => {
   test('creates correct severity options and initial selected value', () => {
-    const wrapper = shallowWithIntl(<SelectSeverity />);
-    const select = wrapper.first().shallow();
+    const wrapper = mount(
+      <MemoryRouter>
+        <SelectSeverity />
+      </MemoryRouter>
+    );
+    const select = wrapper.find(EuiSuperSelect);
 
-    const options = select.instance().getOptions();
-    const defaultSelectedValue = wrapper.props().severity.display;
+    const options = select.props().options;
+    const defaultSelectedValue = select.props().valueOfSelected;
 
     expect(defaultSelectedValue).toBe('warning');
     expect(options.length).toEqual(4);
@@ -53,15 +62,31 @@ describe('SelectSeverity', () => {
     );
   });
 
-  test('state for currently selected value is updated correctly on click', () => {
-    const wrapper = shallowWithIntl(<SelectSeverity />);
-    const select = wrapper.first().shallow();
+  test('state for currently selected value is updated correctly on click', done => {
+    const wrapper = mount(
+      <MemoryRouter>
+        <SelectSeverity />
+      </MemoryRouter>
+    );
 
-    const defaultSelectedValue = wrapper.props().severity.display;
+    const select = wrapper.find(EuiSuperSelect).first();
+    const defaultSelectedValue = select.props().valueOfSelected;
     expect(defaultSelectedValue).toBe('warning');
 
-    select.simulate('change', 'critical');
-    const updatedSelectedValue = wrapper.props().severity.display;
-    expect(updatedSelectedValue).toBe('critical');
+    const onChange = select.props().onChange;
+
+    act(() => {
+      if (onChange !== undefined) {
+        onChange('critical');
+      }
+    });
+
+    setImmediate(() => {
+      wrapper.update();
+      const updatedSelect = wrapper.find(EuiSuperSelect).first();
+      const updatedSelectedValue = updatedSelect.props().valueOfSelected;
+      expect(updatedSelectedValue).toBe('critical');
+      done();
+    });
   });
 });
