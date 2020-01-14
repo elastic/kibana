@@ -147,6 +147,7 @@ export const siem = (kibana: any) => {
           alerting: plugins.alerting,
           elasticsearch: plugins.elasticsearch,
           spaces: plugins.spaces,
+          savedObjects: server.savedObjects.SavedObjectsClient,
         },
         route: route.bind(server),
       };

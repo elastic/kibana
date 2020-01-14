@@ -155,7 +155,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     <ResultsContentPage>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="m">
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 {logEntryRate ? (
@@ -196,7 +196,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="m">
             {isFirstUse && !hasResults ? (
               <>
                 <FirstUseCallout />
@@ -212,7 +212,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiPanel paddingSize="l">
+          <EuiPanel paddingSize="m">
             <AnomaliesResults
               isLoading={isLoading}
               jobStatus={jobStatus['log-entry-rate']}
