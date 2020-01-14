@@ -7,7 +7,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styled from 'styled-components';
-import Legend from '../Legend';
+import { Legend } from '../Legend';
 import {
   unit,
   units,
@@ -129,7 +129,7 @@ export default function Legends({
           }
           indicator={() => (
             <div style={{ marginRight: px(units.quarter) }}>
-              <EuiIcon type="tag" color={theme.euiColorSecondary} />
+              <EuiIcon type="annotation" color={theme.euiColorSecondary} />
             </div>
           )}
           disabled={!showAnnotations}

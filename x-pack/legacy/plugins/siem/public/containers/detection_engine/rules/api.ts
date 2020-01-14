@@ -15,25 +15,28 @@ import {
   NewRule,
   Rule,
   FetchRuleProps,
+  BasicFetchProps,
+  RuleError,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_PREPACKAGED_URL,
+} from '../../../../common/constants';
 
 /**
  * Add provided Rule
  *
  * @param rule to add
- * @param kbnVersion current Kibana Version to use for headers
  * @param signal to cancel request
  */
-export const addRule = async ({ rule, kbnVersion, signal }: AddRulesProps): Promise<NewRule> => {
+export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
     method: rule.id != null ? 'PUT' : 'POST',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
     body: JSON.stringify(rule),
     signal,
@@ -49,7 +52,6 @@ export const addRule = async ({ rule, kbnVersion, signal }: AddRulesProps): Prom
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param id if specified, will return specific rule if exists
- * @param kbnVersion current Kibana Version to use for headers
  * @param signal to cancel request
  */
 export const fetchRules = async ({
@@ -64,7 +66,6 @@ export const fetchRules = async ({
     total: 0,
   },
   id,
-  kbnVersion,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const queryParams = [
@@ -101,16 +102,14 @@ export const fetchRules = async ({
  * Fetch a Rule by providing a Rule ID
  *
  * @param id Rule ID's (not rule_id)
- * @param kbnVersion current Kibana Version to use for headers
  */
-export const fetchRuleById = async ({ id, kbnVersion, signal }: FetchRuleProps): Promise<Rule> => {
+export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
   const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
+      'kbn-xsrf': 'true',
     },
     signal,
   });
@@ -124,78 +123,65 @@ export const fetchRuleById = async ({ id, kbnVersion, signal }: FetchRuleProps):
  *
  * @param ids array of Rule ID's (not rule_id) to enable/disable
  * @param enabled to enable or disable
- * @param kbnVersion current Kibana Version to use for headers
+ *
+ * @throws An error if response is not OK
  */
-export const enableRules = async ({
-  ids,
-  enabled,
-  kbnVersion,
-}: EnableRulesProps): Promise<Rule[]> => {
-  const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    {
       method: 'PUT',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
-        'kbn-version': kbnVersion,
-        'kbn-xsrf': kbnVersion,
+        'kbn-xsrf': 'true',
       },
-      body: JSON.stringify({ id, enabled }),
-    })
+      body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+    }
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await throwIfNotOk(response);
+  return response.json();
 };
 
 /**
  * Deletes provided Rule ID's
  *
  * @param ids array of Rule ID's (not rule_id) to delete
- * @param kbnVersion current Kibana Version to use for headers
+ *
+ * @throws An error if response is not OK
  */
-export const deleteRules = async ({ ids, kbnVersion }: DeleteRulesProps): Promise<Rule[]> => {
-  // TODO: Don't delete if immutable!
-  const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
+export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule | RuleError>> => {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    {
       method: 'DELETE',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
-        'kbn-version': kbnVersion,
-        'kbn-xsrf': kbnVersion,
+        'kbn-xsrf': 'true',
       },
-    })
+      body: JSON.stringify(ids.map(id => ({ id }))),
+    }
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await throwIfNotOk(response);
+  return response.json();
 };
 
 /**
  * Duplicates provided Rules
  *
  * @param rule to duplicate
- * @param kbnVersion current Kibana Version to use for headers
  */
-export const duplicateRules = async ({
-  rules,
-  kbnVersion,
-}: DuplicateRulesProps): Promise<Rule[]> => {
+export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Rule[]> => {
   const requests = rules.map(rule =>
     fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
-        'kbn-version': kbnVersion,
-        'kbn-xsrf': kbnVersion,
+        'kbn-xsrf': 'true',
       },
       body: JSON.stringify({
         ...rule,
@@ -217,4 +203,23 @@ export const duplicateRules = async ({
   return Promise.all(
     responses.map<Promise<Rule>>(response => response.json())
   );
+};
+
+/**
+ * Create Prepackaged Rules
+ *
+ * @param signal AbortSignal for cancelling request
+ */
+export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_PREPACKAGED_URL}`, {
+    method: 'PUT',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-xsrf': 'true',
+    },
+    signal,
+  });
+  await throwIfNotOk(response);
+  return true;
 };
