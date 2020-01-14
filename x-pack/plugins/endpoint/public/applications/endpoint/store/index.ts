@@ -11,7 +11,9 @@ import { appReducer } from './reducer';
 
 export { GlobalState } from './reducer';
 
-const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+  ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
+  : compose;
 
 export const appStoreFactory = (coreStart: CoreStart) => {
   const store = createStore(
