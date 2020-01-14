@@ -803,7 +803,13 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public (undocumented)
 export interface IRenderOptions {
+    // @internal @deprecated
+    app?: {
+        getId(): string;
+    };
     includeUserSettings?: boolean;
+    // @internal @deprecated
+    vars?: Record<string, any>;
 }
 
 // @public
@@ -832,7 +838,7 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 
 // @public (undocumented)
 export interface IScopedRenderingClient {
-    render(options?: IRenderOptions): Promise<string>;
+    render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
 }
 
 // @public
@@ -932,20 +938,12 @@ export class LegacyInternals implements ILegacyInternals {
     // (undocumented)
     getInjectedUiAppVars(id: string): Promise<Record<string, any>>;
     // (undocumented)
-    getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
+    getVars(id: string, request: KibanaRequest | LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
     // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     injectUiAppVars(id: string, injector: VarsInjector): void;
     }
-
-// @internal @deprecated (undocumented)
-export interface LegacyRenderOptions extends IRenderOptions {
-    app?: {
-        getId(): string;
-    };
-    vars?: Record<string, any>;
-}
 
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
@@ -1233,7 +1231,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 
 // @internal (undocumented)
 export interface RenderingServiceSetup {
-    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions): Promise<string>;
+    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: IRenderOptions): Promise<string>;
 }
 
 // @public

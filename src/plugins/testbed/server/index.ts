@@ -23,7 +23,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   CoreSetup,
   CoreStart,
-  LegacyRenderOptions,
+  IRenderOptions,
   Logger,
   PluginInitializerContext,
   PluginConfigDescriptor,
@@ -89,13 +89,13 @@ class Plugin {
       },
       async (context, req, res) => {
         const { id } = req.params;
-        const options: Partial<LegacyRenderOptions> = { app: { getId: () => id! } };
+        const options: Partial<IRenderOptions> = { app: { getId: () => id! } };
         const body = await context.core.rendering.render(options);
 
         return res.ok({
           body,
           headers: {
-            'content-securty-policy': core.http.csp.header,
+            'content-security-policy': core.http.csp.header,
           },
         });
       }
