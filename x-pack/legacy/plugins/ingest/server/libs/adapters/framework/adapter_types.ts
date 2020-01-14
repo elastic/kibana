@@ -57,7 +57,6 @@ export interface KibanaLegacyServer extends Server {
   expose: { (key: string, value: any): void; (obj: object): void };
   policy: () => any;
   route: (routePolicy: any) => void;
-  log: (message: string) => void;
 }
 
 export const RuntimeFrameworkInfo = t.interface(

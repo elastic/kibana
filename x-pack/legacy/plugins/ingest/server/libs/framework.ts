@@ -29,7 +29,7 @@ export class BackendFrameworkLib {
     return get(this.adapter, 'info.security.enabled', false);
   }
 
-  public log = this.adapter.log;
+  public log = this.adapter.log.bind(this.adapter);
   public on = this.adapter.on.bind(this.adapter);
   public internalUser = this.adapter.internalUser;
   constructor(private readonly adapter: BackendFrameworkAdapter) {}

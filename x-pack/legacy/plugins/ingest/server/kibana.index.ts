@@ -9,7 +9,7 @@ import { initRestApi } from './rest_api/init_api';
 
 export const initServerWithKibana = (hapiServer: any) => {
   const libs = compose(hapiServer);
-  libs.framework.log('Ingest is composed -- debug message');
+  libs.framework.log(['debug'], 'Ingest is composed -- debug message');
 
   libs.framework.expose('policy', libs.policy);
   libs.framework.expose('outputs', libs.outputs);

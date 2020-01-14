@@ -46,7 +46,7 @@ export class MemorizedBackendFrameworkAdapter {
     });
   }
 
-  public log(text: string) {}
+  public log(tags: string[], text: string) {}
 
   public expose(name: string, thing: any) {}
 

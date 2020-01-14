@@ -70,14 +70,9 @@ export class BackendFrameworkAdapter {
     return this.server.config().get(settingPath);
   }
 
-  public log(text: string) {
-    if (this.server) {
-      this.server.log(text);
-    } else {
-      console.log(text); // eslint-disable-line
-    }
+  public log(tags: string[], text: string) {
+    this.server.log([...tags, this.PLUGIN_ID], text);
   }
-
   public expose(name: string, thing: any) {
     this.server.expose(name, thing);
   }
@@ -136,7 +131,7 @@ export class BackendFrameworkAdapter {
         },
       };
     } catch (e) {
-      this.log(`Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
+      this.log(['error'], `Error accessing required xPackInfo in ${this.PLUGIN_ID} Kibana adapter`);
       throw e;
     }
 
