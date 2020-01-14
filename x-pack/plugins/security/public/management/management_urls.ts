@@ -7,7 +7,10 @@
 const MANAGEMENT_PATH = '/management';
 const SECURITY_PATH = `${MANAGEMENT_PATH}/security`;
 export const ROLES_PATH = `${SECURITY_PATH}/roles`;
+export const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
+export const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
 export const USERS_PATH = `${SECURITY_PATH}/users`;
+export const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
 export const ROLE_MAPPINGS_PATH = `${SECURITY_PATH}/role_mappings`;
 const CREATE_ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/edit`;
 
