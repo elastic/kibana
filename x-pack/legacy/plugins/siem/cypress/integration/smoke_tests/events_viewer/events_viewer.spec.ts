@@ -24,7 +24,13 @@ import {
   addsHostGeoCountryNameToHeader,
   resetFields,
 } from '../../../tasks/hosts/events';
-
+import {
+  elementShouldExist,
+  elementShouldEqualText,
+  elementShouldNotExist,
+  elementShouldBeChecked,
+  elementShouldNotEqualText,
+} from '../../../tasks/should';
 import {
   HEADER_SUBTITLE,
   INSPECT_MODAL,
@@ -33,7 +39,6 @@ import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
 } from '../../../screens/hosts/events';
-import { DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -58,24 +63,20 @@ describe('Events Viewer', () => {
 
     afterEach(() => {
       closeFieldsBrowser();
-      cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
+      elementShouldNotExist(FIELDS_BROWSER_CONTAINER);
     });
 
     it('renders the fields browser with the expected title when the Events Viewer Fields Browser button is clicked', () => {
-      cy.get(FIELDS_BROWSER_TITLE)
-        .invoke('text')
-        .should('eq', 'Customize Columns');
+      elementShouldEqualText(FIELDS_BROWSER_TITLE, 'Customize Columns');
     });
 
     it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE)
-        .invoke('text')
-        .should('eq', 'default ECS');
+      elementShouldEqualText(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE, 'default ECS');
     });
 
     it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
       defaultHeadersInDefaultEcsCategory.forEach(header =>
-        cy.get(FIELDS_BROWSER_CHECKBOX(header.id)).should('be.checked')
+        elementShouldBeChecked(FIELDS_BROWSER_CHECKBOX(header.id))
       );
     });
   });
@@ -88,13 +89,13 @@ describe('Events Viewer', () => {
 
     after(() => {
       closeModal();
-      cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('not.exist');
+      elementShouldNotExist(INSPECT_MODAL);
     });
 
     it('launches the inspect query modal when the inspect button is clicked', () => {
       waitsForEventsToBeLoaded();
       opensInspectQueryModal();
-      cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('exist');
+      elementShouldExist(INSPECT_MODAL);
     });
   });
 
@@ -112,20 +113,20 @@ describe('Events Viewer', () => {
       const filterInput = 'host.geo.c';
 
       filterFieldsBrowser(filterInput);
-      cy.get(HOST_GEO_CITY_NAME_HEADER).should('not.exist');
+      elementShouldNotExist(HOST_GEO_CITY_NAME_HEADER);
       addsHostGeoCityNameToHeader();
       closeFieldsBrowser();
-      cy.get(HOST_GEO_CITY_NAME_HEADER).should('exist');
+      elementShouldExist(HOST_GEO_CITY_NAME_HEADER);
     });
 
     it('resets all fields in the events viewer when `Reset Fields` is clicked', () => {
       const filterInput = 'host.geo.c';
 
       filterFieldsBrowser(filterInput);
-      cy.get(HOST_GEO_COUNTRY_NAME_HEADER).should('not.exist');
+      elementShouldNotExist(HOST_GEO_COUNTRY_NAME_HEADER);
       addsHostGeoCountryNameToHeader();
       resetFields();
-      cy.get(HOST_GEO_COUNTRY_NAME_HEADER).should('not.exist');
+      elementShouldNotExist(HOST_GEO_COUNTRY_NAME_HEADER);
     });
   });
 
@@ -142,23 +143,17 @@ describe('Events Viewer', () => {
         .invoke('text')
         .then(initialNumberOfEvents => {
           filterSearchBar(filterInput);
-          cy.get(HEADER_SUBTITLE)
-            .invoke('text')
-            .should('not.equal', initialNumberOfEvents);
+          elementShouldNotEqualText(HEADER_SUBTITLE, initialNumberOfEvents);
         });
     });
 
     it('loads more events when the load more button is clicked', () => {
       const defaultNumberOfLoadedEvents = '25';
-      cy.get(LOCAL_EVENTS_COUNT)
-        .invoke('text')
-        .should('equal', defaultNumberOfLoadedEvents);
+      elementShouldEqualText(LOCAL_EVENTS_COUNT, defaultNumberOfLoadedEvents);
 
       cy.get(LOAD_MORE).click({ force: true });
 
-      cy.get(LOCAL_EVENTS_COUNT)
-        .invoke('text')
-        .should('not.equal', defaultNumberOfLoadedEvents);
+      elementShouldNotEqualText(LOCAL_EVENTS_COUNT, defaultNumberOfLoadedEvents);
     });
   });
 });
