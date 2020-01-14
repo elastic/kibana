@@ -25,6 +25,7 @@ import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
+import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
@@ -102,8 +103,14 @@ export function uiRenderMixin(kbnServer, server, config) {
         const basePath = config.get('server.basePath');
         const regularBundlePath = `${basePath}/bundles`;
         const dllBundlePath = `${basePath}/built_assets/dlls`;
+        const dllStyleChunks = DllCompiler.getRawDllConfig().chunks.map(
+          chunk => `${dllBundlePath}/vendors${chunk}.style.dll.css`
+        );
+        const dllJsChunks = DllCompiler.getRawDllConfig().chunks.map(
+          chunk => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
+        );
         const styleSheetPaths = [
-          `${dllBundlePath}/vendors.style.dll.css`,
+          ...dllStyleChunks,
           ...(darkMode
             ? [
                 `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
@@ -131,6 +138,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             appId: isCore ? 'core' : app.getId(),
             regularBundlePath,
             dllBundlePath,
+            dllJsChunks,
             styleSheetPaths,
             sharedDepsFilename: UiSharedDeps.distFilename,
           },
