@@ -12,11 +12,11 @@ interface StoreAction extends AnyAction {
   type: string;
 }
 
-interface QueuedAction {
+interface QueuedAction<TAction = StoreAction> {
   /**
    * The Redux action that was dispatched
    */
-  action: StoreAction;
+  action: TAction;
   /**
    * The Global state at the time the action was dispatched
    */
@@ -30,14 +30,14 @@ interface IteratorInstance {
 
 type Saga = (storeContext: SagaContext) => Promise<void>;
 
-type StoreActionsAndState = AsyncIterableIterator<QueuedAction>;
+type StoreActionsAndState<TAction = StoreAction> = AsyncIterableIterator<QueuedAction<TAction>>;
 
-export interface SagaContext {
+export interface SagaContext<TAction extends AnyAction = StoreAction> {
   /**
    * A generator function that will `yield` `Promise`s that resolve with a `QueuedAction`
    */
-  actionsAndState: () => StoreActionsAndState;
-  dispatch: Dispatch;
+  actionsAndState: () => StoreActionsAndState<TAction>;
+  dispatch: Dispatch<TAction>;
 }
 
 const noop = () => {};
@@ -52,12 +52,14 @@ const noop = () => {};
  *
  * @example
  *
- * const endpointsSaga = async ({ actionsAndState, dispatch }: SagaContext) => {
+ * type TPossibleActions = { type: 'add', payload: any[] };
+ * //...
+ * const endpointsSaga = async ({ actionsAndState, dispatch }: SagaContext<TPossibleActions>) => {
  *   for await (const { action, state } of actionsAndState()) {
  *     if (action.type === "userRequestedResource") {
  *       const resourceData = await doApiFetch('of/some/resource');
  *       dispatch({
- *         type: 'serverReturnedUserRequestedResource',
+ *         type: 'add',
  *         payload: [ resourceData ]
  *       });
  *     }

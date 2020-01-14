@@ -6,9 +6,10 @@
 
 import { CoreStart } from 'kibana/public';
 import { SagaContext } from '../../lib';
+import { EndpointListAction } from './action';
 
 export const endpointsListSaga = async (
-  { actionsAndState, dispatch }: SagaContext,
+  { actionsAndState, dispatch }: SagaContext<EndpointListAction>,
   coreStart: CoreStart
 ) => {
   const { post: httpPost } = coreStart.http;
