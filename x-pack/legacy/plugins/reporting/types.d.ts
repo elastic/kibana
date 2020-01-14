@@ -93,14 +93,13 @@ export interface ReportingRequestPre {
 export interface RequestFacade {
   getBasePath: Legacy.Request['getBasePath'];
   getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
-  auth: Legacy.Request['auth'];
   headers: Legacy.Request['headers'];
   params: Legacy.Request['params'];
   payload: JobParamPostPayload | GenerateExportTypePayload;
   query: ReportingRequestQuery;
   route: Legacy.Request['route'];
   pre: ReportingRequestPre;
-  raw: Legacy.Request['raw'];
+  getRawRequest: () => Legacy.Request;
 }
 
 export type ResponseFacade = ResponseObject & {

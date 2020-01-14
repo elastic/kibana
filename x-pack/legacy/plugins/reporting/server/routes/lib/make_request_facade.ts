@@ -21,13 +21,12 @@ export function makeRequestFacade(request: Legacy.Request): RequestFacade {
   return {
     getSavedObjectsClient,
     headers: request.headers,
-    auth: request.auth, // for getUser
     params: request.params,
     payload: (request.payload as object) as ReportingRequestPayload,
     query: ((request.query as RequestQuery) as object) as ReportingRequestQuery,
     pre: (request.pre as Record<string, any>) as ReportingRequestPre,
     getBasePath: request.getBasePath,
     route: request.route,
-    raw: request.raw,
+    getRawRequest: () => request, // for security plugin dependency
   };
 }
