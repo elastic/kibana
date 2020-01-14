@@ -1,0 +1,11 @@
+{
+  "id": "watcher",
+  "version": "kibana",
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "management"
+  ],
+  "server": true,
+  "ui": true
+}
