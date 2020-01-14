@@ -74,6 +74,15 @@ export interface UserProvidedValues<T = any> {
 }
 
 /**
+ * UiSettings deprecation field options.
+ * @public
+ * */
+export interface DeprecationSettings {
+  message: string;
+  docLinksKey: string;
+}
+
+/**
  * UI element type to represent the settings.
  * @public
  * */
@@ -110,6 +119,8 @@ export interface UiSettingsParams {
   readonly?: boolean;
   /** defines a type of UI element {@link UiSettingsType} */
   type?: UiSettingsType;
+  /** optional deprecation information. Used to generate a deprecation warning. */
+  deprecation?: DeprecationSettings;
   /*
    * Allows defining a custom validation applicable to value change on the client.
    * @deprecated

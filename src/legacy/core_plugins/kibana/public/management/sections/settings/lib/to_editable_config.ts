@@ -44,6 +44,7 @@ export function toEditableConfig({ def, name, value, isCustom, isOverridden }: S
     defVal: def.value,
     type: getValType(def, value),
     description: def.description,
+    deprecation: def.deprecation,
     validation:
       def.validation && def.validation.regexString
         ? {
