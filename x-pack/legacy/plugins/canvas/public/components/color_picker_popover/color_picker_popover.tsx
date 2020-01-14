@@ -14,7 +14,7 @@ import { Popover } from '../popover';
 
 export interface Props extends ColorPickerProps {
   anchorPosition: PopoverAnchorPosition;
-  ariaLabel: string;
+  ariaLabel?: string;
 }
 
 export const ColorPickerPopover: FunctionComponent<Props> = (props: Props) => {
