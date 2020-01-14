@@ -80,6 +80,8 @@ export const RuleSchema = t.intersection([
   t.partial({
     output_index: t.string,
     saved_id: t.string,
+    status: t.string,
+    status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
     version: t.number,

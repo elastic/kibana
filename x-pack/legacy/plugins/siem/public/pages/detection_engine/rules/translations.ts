@@ -220,9 +220,9 @@ export const COLUMN_SEVERITY = i18n.translate(
 );
 
 export const COLUMN_LAST_COMPLETE_RUN = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.columns.lastCompletedRunTitle',
+  'xpack.siem.detectionEngine.rules.allRules.columns.lastRunTitle',
   {
-    defaultMessage: 'Last completed run',
+    defaultMessage: 'Last run',
   }
 );
 
@@ -244,6 +244,19 @@ export const COLUMN_ACTIVATE = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.columns.activateTitle',
   {
     defaultMessage: 'Activate',
+  }
+);
+
+export const COLUMN_STATUS = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.currentStatusTitle',
+  {
+    defaultMessage: 'Current status',
+  }
+);
+export const NO_STATUS = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.unknownStatusDescription',
+  {
+    defaultMessage: 'Unknown',
   }
 );
 
