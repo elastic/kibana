@@ -25,6 +25,9 @@ export const Influencers: FC = () => {
   useEffect(() => {
     jobCreator.removeAllInfluencers();
     influencers.forEach(i => jobCreator.addInfluencer(i));
+    if (jobCreator instanceof MultiMetricJobCreator) {
+      jobCreator.calculateModelMemoryLimit();
+    }
     jobCreatorUpdate();
   }, [influencers.join()]);
 
