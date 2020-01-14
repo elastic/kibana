@@ -36,8 +36,6 @@ export function saveDashboard(
   dashboardStateManager: DashboardStateManager,
   saveOptions: SavedObjectSaveOpts
 ): Promise<string> {
-  dashboardStateManager.saveState();
-
   const savedDashboard = dashboardStateManager.savedDashboard;
   const appState = dashboardStateManager.appState;
 

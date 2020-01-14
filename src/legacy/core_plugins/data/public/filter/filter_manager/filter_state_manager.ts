@@ -18,10 +18,11 @@
  */
 
 import _ from 'lodash';
+import { Subscription } from 'rxjs';
 import { State } from 'ui/state_management/state';
 import { FilterManager, esFilters } from '../../../../../../plugins/data/public';
 
-type GetAppStateFunc = () => State | undefined | null;
+type GetAppStateFunc = () => { filters?: esFilters.Filter[]; save?: () => void } | undefined | null;
 
 /**
  * FilterStateManager is responsible for watching for filter changes
@@ -29,6 +30,8 @@ type GetAppStateFunc = () => State | undefined | null;
  * back to the URL.
  **/
 export class FilterStateManager {
+  private subs: Subscription[] = [];
+
   filterManager: FilterManager;
   globalState: State;
   getAppState: GetAppStateFunc;
@@ -41,15 +44,18 @@ export class FilterStateManager {
 
     this.watchFilterState();
 
-    this.filterManager.getUpdates$().subscribe(() => {
-      this.updateAppState();
-    });
+    this.subs.push(
+      this.filterManager.getUpdates$().subscribe(() => {
+        this.updateAppState();
+      })
+    );
   }
 
   destroy() {
     if (this.interval) {
       clearInterval(this.interval);
     }
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   private watchFilterState() {
@@ -80,7 +86,7 @@ export class FilterStateManager {
 
   private saveState() {
     const appState = this.getAppState();
-    if (appState) appState.save();
+    if (appState && appState.save) appState.save();
     this.globalState.save();
   }
 

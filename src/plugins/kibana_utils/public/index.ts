@@ -58,3 +58,4 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
+export { removeQueryParam } from './history';
