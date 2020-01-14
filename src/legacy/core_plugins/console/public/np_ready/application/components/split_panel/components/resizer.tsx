@@ -30,9 +30,6 @@ export interface Props {
   className?: string;
 }
 
-/**
- * TODO: This component uses styling constants from public UI - should be removed, next iteration should incl. horizontal and vertical resizers.
- */
 export function Resizer(props: Props) {
   return (
     <button

@@ -46,11 +46,11 @@ export function useEditorReducer(vis: Vis): [VisState, React.Dispatch<EditorActi
 
   const wrappedDispatch = useCallback(
     (action: EditorAction) => {
+      dispatch(action);
+
       vis.emit('dirtyStateChange', {
         isDirty: action.type !== EditorStateActionTypes.DISCARD_CHANGES,
       });
-
-      dispatch(action);
     },
     [vis]
   );

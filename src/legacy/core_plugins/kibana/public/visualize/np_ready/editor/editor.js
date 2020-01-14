@@ -116,12 +116,9 @@ function VisualizeAppController(
     dirty: !savedVis.id,
   });
 
-  $scope.isDirty = false;
-
   vis.on('dirtyStateChange', ({ isDirty }) => {
-    $scope.$evalAsync(() => {
-      $scope.isDirty = isDirty;
-    });
+    vis.dirty = isDirty;
+    $scope.$digest();
   });
 
   $scope.topNavMenu = [
@@ -140,10 +137,10 @@ function VisualizeAppController(
             ),
             testId: 'visualizeSaveButton',
             disableButton() {
-              return Boolean($scope.isDirty);
+              return Boolean(vis.dirty);
             },
             tooltip() {
-              if ($scope.isDirty) {
+              if (vis.dirty) {
                 return i18n.translate(
                   'kbn.visualize.topNavMenu.saveVisualizationDisabledButtonTooltip',
                   {
@@ -211,7 +208,7 @@ function VisualizeAppController(
       }),
       testId: 'shareTopNavButton',
       run: anchorElement => {
-        const hasUnappliedChanges = $scope.isDirty;
+        const hasUnappliedChanges = vis.dirty;
         const hasUnsavedChanges = $appStatus.dirty;
         share.toggleShareContextMenu({
           anchorElement,
