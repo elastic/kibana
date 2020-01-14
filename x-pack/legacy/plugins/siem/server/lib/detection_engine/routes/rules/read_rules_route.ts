@@ -55,7 +55,7 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
           search: rule.id,
           searchFields: ['alertId'],
         });
-        return transformOrError(rule, ruleStatuses); // update this to run with an array of rule statuses
+        return transformOrError(rule, ruleStatuses.saved_objects[0]);
       } else {
         return getIdError({ id, ruleId });
       }

@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./delete_all_alerts.sh
+# Example: ./delete_all_statuses.sh
 # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html
 curl -s -k \
   -H "Content-Type: application/json" \

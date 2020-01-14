@@ -87,7 +87,6 @@ export const signalRulesAlertType = ({
         search: `${alertId}`,
         searchFields: ['alertId'],
       });
-      logger.debug(`ruleStatusSavedObjects: ${JSON.stringify(ruleStatusSavedObjects, null, 4)}`);
       let currentStatusSavedObject;
       if (ruleStatusSavedObjects.saved_objects.length === 0) {
         // create

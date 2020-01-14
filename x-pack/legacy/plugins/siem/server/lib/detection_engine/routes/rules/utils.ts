@@ -82,7 +82,7 @@ export const transformAlertToRule = (
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     created_at: alert.params.createdAt,
-    updated_at: ruleStatus?.attributes.statusDate ?? alert.params.updatedAt,
+    updated_at: alert.params.updatedAt,
     created_by: alert.createdBy,
     description: alert.params.description,
     enabled: alert.enabled,
@@ -141,9 +141,7 @@ export const transformFindAlertsOrError = (
   ruleStatuses?: unknown[]
 ): unknown | Boom => {
   if (!ruleStatuses && isAlertTypes(findResults.data)) {
-    findResults.data = findResults.data.map(
-      alert => transformAlertToRule(alert) // fix type
-    );
+    findResults.data = findResults.data.map(alert => transformAlertToRule(alert));
     return findResults;
   }
   if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {

@@ -1,5 +1,5 @@
 {
-  "name": "Query with a rule id",
+  "name": "Query with a rule_id that causes an error",
   "description": "Query with a rule_id that acts like an external id",
   "rule_id": "query-rule-id-errors-2",
   "risk_score": 1,
@@ -8,5 +8,5 @@
   "type": "query",
   "from": "now-6m",
   "to": "now",
-  "query": "user.name: root devin user.name: admin"
+  "query": "user.name: root badstringcauseserror user.name: admin"
 }
