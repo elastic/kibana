@@ -210,6 +210,28 @@ const layerList = [
             maxSize: 25,
           },
         },
+        labelText: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'Count',
+              name: 'doc_count',
+              origin: 'source',
+            },
+          },
+        },
+        labelSize: {
+          type: 'DYNAMIC',
+          options: {
+            field: {
+              label: 'Count',
+              name: 'doc_count',
+              origin: 'source',
+            },
+            minSize: 12,
+            maxSize: 24,
+          },
+        },
       },
     },
     type: 'VECTOR',

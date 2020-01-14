@@ -281,6 +281,17 @@ export class ESGeoGridSource extends AbstractESAggSource {
           },
         },
       },
+      [VECTOR_STYLES.LABEL_TEXT]: {
+        type: DynamicStyleProperty.type,
+        options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+          field: {
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
+            origin: SOURCE_DATA_ID_ORIGIN,
+          },
+        },
+      },
     });
     return descriptor;
   }
