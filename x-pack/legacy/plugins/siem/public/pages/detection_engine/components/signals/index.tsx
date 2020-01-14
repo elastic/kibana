@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -25,8 +26,7 @@ import {
   SignalFilterOption,
   SignalsTableFilterGroup,
 } from './signals_filter_group';
-import { useKibana, useUiSetting$ } from '../../../../lib/kibana';
-import { DEFAULT_KBN_VERSION } from '../../../../../common/constants';
+import { useKibana } from '../../../../lib/kibana';
 import { defaultHeaders } from '../../../../components/timeline/body/column_headers/default_headers';
 import { ColumnHeader } from '../../../../components/timeline/body/column_headers/column_header';
 import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
@@ -46,6 +46,8 @@ import { combineQueries } from '../../../../components/timeline/helpers';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { InputsRange } from '../../../../store/inputs/model';
 import { Query } from '../../../../../../../../../src/plugins/data/common/query';
+
+import { HeaderSection } from '../../../../components/header_section';
 
 const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
@@ -89,8 +91,11 @@ interface DispatchProps {
 }
 
 interface OwnProps {
+  canUserCRUD: boolean;
   defaultFilters?: esFilters.Filter[];
+  hasIndexWrite: boolean;
   from: number;
+  loading: boolean;
   signalsIndex: string;
   to: number;
 }
@@ -99,6 +104,7 @@ type SignalsTableComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
   ({
+    canUserCRUD,
     createTimeline,
     clearEventsDeleted,
     clearEventsLoading,
@@ -107,7 +113,9 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     from,
     globalFilters,
     globalQuery,
+    hasIndexWrite,
     isSelectAllChecked,
+    loading,
     loadingEventIds,
     removeTimelineLinkTo,
     selectedEventIds,
@@ -121,7 +129,6 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
     const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
     const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([signalsIndex]);
-    const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
     const kibana = useKibana();
 
     const getGlobalQuery = useCallback(() => {
@@ -208,7 +215,6 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
           status,
           setEventsDeleted: setEventsDeletedCallback,
           setEventsLoading: setEventsLoadingCallback,
-          kbnVersion,
         });
       },
       [
@@ -231,8 +237,10 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       (totalCount: number) => {
         return (
           <SignalsUtilityBar
+            canUserCRUD={canUserCRUD}
             areEventsLoading={loadingEventIds.length > 0}
             clearSelection={clearSelectionCallback}
+            hasIndexWrite={hasIndexWrite}
             isFilteredToOpen={filterGroup === FILTER_OPEN}
             selectAll={selectAllCallback}
             selectedEventIds={selectedEventIds}
@@ -244,6 +252,8 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         );
       },
       [
+        canUserCRUD,
+        hasIndexWrite,
         clearSelectionCallback,
         filterGroup,
         loadingEventIds.length,
@@ -257,13 +267,14 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
     const additionalActions = useMemo(
       () =>
         getSignalsActions({
+          canUserCRUD,
+          hasIndexWrite,
           createTimeline: createTimelineCallback,
           setEventsLoading: setEventsLoadingCallback,
           setEventsDeleted: setEventsDeletedCallback,
           status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
-          kbnVersion,
         }),
-      [createTimelineCallback, filterGroup, kbnVersion]
+      [canUserCRUD, createTimelineCallback, filterGroup]
     );
 
     const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
@@ -283,10 +294,19 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
         queryFields: requiredFieldsForActions,
         timelineActions: additionalActions,
         title: i18n.SIGNALS_TABLE_TITLE,
-        selectAll,
+        selectAll: canUserCRUD ? selectAll : false,
       }),
-      [additionalActions, selectAll]
+      [additionalActions, canUserCRUD, selectAll]
     );
+
+    if (loading) {
+      return (
+        <EuiPanel>
+          <HeaderSection title={i18n.SIGNALS_TABLE_TITLE} />
+          <EuiLoadingContent />
+        </EuiPanel>
+      );
+    }
 
     return (
       <StatefulEventsViewer

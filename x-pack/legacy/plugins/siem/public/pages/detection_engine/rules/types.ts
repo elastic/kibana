@@ -8,6 +8,7 @@ import { esFilters } from '../../../../../../../../src/plugins/data/common';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FieldValueQueryBar } from './components/query_bar';
 import { FormData, FormHook } from './components/shared_imports';
+import { FieldValueTimeline } from './components/pick_timeline';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -24,6 +25,7 @@ export interface EuiBasicTableOnChange {
 
 export interface TableData {
   id: string;
+  immutable: boolean;
   rule_id: string;
   rule: {
     href: string;
@@ -56,6 +58,7 @@ export interface RuleStepData {
 }
 
 export interface RuleStepProps {
+  addPadding?: boolean;
   descriptionDirection?: 'row' | 'column';
   setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
   isReadOnlyView: boolean;
@@ -76,11 +79,11 @@ export interface AboutStepRule extends StepRuleData {
   references: string[];
   falsePositives: string[];
   tags: string[];
+  timeline: FieldValueTimeline;
   threats: IMitreEnterpriseAttack[];
 }
 
 export interface DefineStepRule extends StepRuleData {
-  useIndicesConfig: string;
   index: string[];
   queryBar: FieldValueQueryBar;
 }
@@ -108,6 +111,8 @@ export interface AboutStepRuleJson {
   references: string[];
   false_positives: string[];
   tags: string[];
+  timeline_id?: string;
+  timeline_title?: string;
   threats: IMitreEnterpriseAttack[];
 }
 

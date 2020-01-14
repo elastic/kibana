@@ -73,6 +73,7 @@ export function Cytoscape({
       cy.on('data', event => {
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
+          cy.nodes().removeClass('primary');
           cy.getElementById(serviceName).addClass('primary');
         }
 

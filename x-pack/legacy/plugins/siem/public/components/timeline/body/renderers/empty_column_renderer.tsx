@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import * as React from 'react';
+import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { DraggableWrapper, DragEffects } from '../../../drag_and_drop/draggable_wrapper';
