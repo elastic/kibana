@@ -9,11 +9,9 @@ import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { Route, BrowserRouter, Switch } from 'react-router-dom';
-import { Dispatch } from 'redux';
+import { Provider } from 'react-redux';
+import { Store } from 'redux';
 import { appStoreFactory } from './store';
-
-// FIXME: temporary until we figure out if redux can be upgraded to use hooks
-let dispatch: Dispatch;
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -22,9 +20,8 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
   coreStart.http.get('/api/endpoint/hello-world');
 
   const store = appStoreFactory(coreStart);
-  dispatch = store.dispatch;
 
-  ReactDOM.render(<AppRoot basename={appBasePath} />, element);
+  ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
@@ -33,42 +30,45 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
 
 interface RouterProps {
   basename: string;
+  store: Store;
 }
 
-const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename }) => (
-  <I18nProvider>
-    <BrowserRouter basename={basename}>
-      <Switch>
-        <Route
-          exact
-          path="/"
-          render={() => (
-            <h1 data-test-subj="welcomeTitle">
-              <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
-            </h1>
-          )}
-        />
-        <Route
-          path="/management"
-          render={() => {
-            dispatch({ type: 'userEnteredEndpointListPage' });
-
-            return (
-              <h1 data-test-subj="endpointManagement">
-                <FormattedMessage
-                  id="xpack.endpoint.endpointManagement"
-                  defaultMessage="Manage Endpoints"
-                />
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
+  <Provider store={store}>
+    <I18nProvider>
+      <BrowserRouter basename={basename}>
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <h1 data-test-subj="welcomeTitle">
+                <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
               </h1>
-            );
-          }}
-        />
-        <Route
-          render={() => (
-            <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
-          )}
-        />
-      </Switch>
-    </BrowserRouter>
-  </I18nProvider>
+            )}
+          />
+          <Route
+            path="/management"
+            render={() => {
+              store.dispatch({ type: 'userEnteredEndpointListPage' });
+
+              return (
+                <h1 data-test-subj="endpointManagement">
+                  <FormattedMessage
+                    id="xpack.endpoint.endpointManagement"
+                    defaultMessage="Manage Endpoints"
+                  />
+                </h1>
+              );
+            }}
+          />
+          <Route
+            render={() => (
+              <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
+            )}
+          />
+        </Switch>
+      </BrowserRouter>
+    </I18nProvider>
+  </Provider>
 ));
