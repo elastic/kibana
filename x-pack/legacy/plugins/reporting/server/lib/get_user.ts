@@ -13,7 +13,8 @@ export function getUserFactory(server: ServerFacade) {
     }
 
     try {
-      return await server.plugins.security.getUser(request.getRawRequest());
+      const workingRequest = request ? request.getRawRequest : request; // for unit tests
+      return await server.plugins.security.getUser(workingRequest);
     } catch (err) {
       server.log(['reporting', 'getUser', 'debug'], err);
       return null;
