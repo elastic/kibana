@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,6 +28,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useDebounce } from 'react-use';
+
 import { Vis } from 'ui/vis';
 import { discardChanges, EditorAction } from './state';
 
@@ -53,11 +55,15 @@ function DefaultEditorControls({
   const toggleAutoApply = useCallback(e => setAutoApplyEnabled(e.target.checked), []);
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
 
-  useEffect(() => {
-    if (autoApplyEnabled && isDirty) {
-      applyChanges();
-    }
-  }, [isDirty, autoApplyEnabled, applyChanges]);
+  useDebounce(
+    () => {
+      if (autoApplyEnabled && isDirty) {
+        applyChanges();
+      }
+    },
+    300,
+    [isDirty, autoApplyEnabled, applyChanges]
+  );
 
   return (
     <div className="visEditorSidebar__controls">
