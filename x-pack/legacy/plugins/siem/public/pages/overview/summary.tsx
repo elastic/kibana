@@ -29,7 +29,7 @@ export const Summary = React.memo(() => {
             defaultMessage="Welcome to Security Information &amp; Event Management (SIEM). Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {siemSolution} page."
             values={{
               docs: (
-                <EuiLink href={docLinks.links.siem} target="blank">
+                <EuiLink href={docLinks.links.siem.guide} target="blank">
                   <FormattedMessage
                     id="xpack.siem.overview.startedText.docsLinkText"
                     defaultMessage="documentation"
