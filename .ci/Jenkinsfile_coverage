@@ -95,9 +95,9 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   cp -r /tmp/extracted_coverage/target/kibana-coverage/mocha target/kibana-coverage/mocha-combined
                   # ingest code coverage
                   echo "###  Ingest Code Coverage"
-                  ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243 node scripts/convert_and_send_json_summary.js --verbose --path target/kibana-coverage/jest-combined/coverage-summary.json
-                  ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243 node scripts/convert_and_send_json_summary.js --verbose --path target/kibana-coverage/functional-combined/coverage-summary.json
-                  ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243 node scripts/convert_and_send_json_summary.js --verbose --path target/kibana-coverage/mocha-combined/coverage-summary.json
+                  ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243 node scripts/convert_and_send_json_summary.js --verbose --path target/kibana-coverage/jest-combined/coverage-summary.json || echo "### target/kibana-coverage/jest-combined/coverage-summary.json not found?"
+                  ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243 node scripts/convert_and_send_json_summary.js --verbose --path target/kibana-coverage/functional-combined/coverage-summary.json || echo "### target/kibana-coverage/functional-combined/coverage-summary.json not found?"
+                  ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243 node scripts/convert_and_send_json_summary.js --verbose --path target/kibana-coverage/mocha-combined/coverage-summary.json || echo "### target/kibana-coverage/mocha-combined/coverage-summary.json not found?" 
                 ''',
                 "run `yarn kbn bootstrap && merge coverage`"
               )
