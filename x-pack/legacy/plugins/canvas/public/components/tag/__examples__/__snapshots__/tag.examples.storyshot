@@ -6,7 +6,7 @@ exports[`Storyshots components/Tags/Tag as badge 1`] = `
   style={
     Object {
       "backgroundColor": "#666666",
-      "color": "#FFFFFF",
+      "color": "#fff",
     }
   }
 >
@@ -28,7 +28,7 @@ exports[`Storyshots components/Tags/Tag as badge with color 1`] = `
   style={
     Object {
       "backgroundColor": "#327b53",
-      "color": "#FFFFFF",
+      "color": "#fff",
     }
   }
 >

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ICON_TYPES, palettes, EuiIcon } from '@elastic/eui';
+import { ICON_TYPES, euiPaletteColorBlind, EuiIcon } from '@elastic/eui';
 
 function stringToNum(s: string) {
   return Array.from(s).reduce((acc, ch) => acc + ch.charCodeAt(0), 1);
@@ -23,7 +23,7 @@ function getIconForDataType(dataType: string) {
 
 export function getColorForDataType(type: string) {
   const iconType = getIconForDataType(type);
-  const { colors } = palettes.euiPaletteColorBlind;
+  const colors = euiPaletteColorBlind();
   const colorIndex = stringToNum(iconType) % colors.length;
   return colors[colorIndex];
 }

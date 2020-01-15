@@ -36,7 +36,7 @@ export class CategorizationExamplesLoader {
     const analyzer = this._jobCreator.categorizationAnalyzer;
     const categorizationFieldName = this._jobCreator.categorizationFieldName;
     if (categorizationFieldName === null) {
-      return { valid: 0, examples: [] };
+      return { valid: 0, examples: [], sampleSize: 0 };
     }
 
     const start = Math.floor(

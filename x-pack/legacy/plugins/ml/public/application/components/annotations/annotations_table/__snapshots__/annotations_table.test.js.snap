@@ -89,6 +89,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
         },
       }
     }
+    tableLayout="fixed"
   />
 </Fragment>
 `;
