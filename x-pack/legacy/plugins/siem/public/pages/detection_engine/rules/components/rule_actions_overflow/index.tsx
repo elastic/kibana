@@ -12,6 +12,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
@@ -22,6 +23,17 @@ import { deleteRulesAction, duplicateRuleAction } from '../../all/actions';
 import { displaySuccessToast, useStateToaster } from '../../../../../components/toasters';
 import { RuleDownloader } from '../rule_downloader';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../../components/link_to/redirect_to_detection_engine';
+
+const MyEuiButtonIcon = styled(EuiButtonIcon)`
+  &.euiButtonIcon {
+    svg {
+      transform: rotate(90deg);
+    }
+    border: 1px solid  ${({ theme }) => theme.euiColorPrimary};
+    width: 40px;
+    height: 40px;
+  }
+`;
 
 interface RuleActionsOverflowComponentProps {
   rule: Rule | null;
@@ -86,20 +98,29 @@ const RuleActionsOverflowComponent = ({
     [rule, userHasNoPermissions]
   );
 
+  const handlePopoverOpen = useCallback(() => {
+    setIsPopoverOpen(!isPopoverOpen);
+  }, [setIsPopoverOpen, isPopoverOpen]);
+
+  const button = useMemo(
+    () => (
+      <EuiToolTip position="top" content={i18n.ALL_ACTIONS}>
+        <MyEuiButtonIcon
+          iconType="boxesHorizontal"
+          aria-label={i18n.ALL_ACTIONS}
+          isDisabled={userHasNoPermissions}
+          onClick={handlePopoverOpen}
+        />
+      </EuiToolTip>
+    ),
+    [handlePopoverOpen, userHasNoPermissions]
+  );
+
   return (
     <>
       <EuiPopover
         anchorPosition="leftCenter"
-        button={
-          <EuiToolTip position="top" content={i18n.ALL_ACTIONS}>
-            <EuiButtonIcon
-              iconType="boxesHorizontal"
-              aria-label={i18n.ALL_ACTIONS}
-              isDisabled={userHasNoPermissions}
-              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            />
-          </EuiToolTip>
-        }
+        button={button}
         closePopover={() => setIsPopoverOpen(false)}
         id="ruleActionsOverflow"
         isOpen={isPopoverOpen}
