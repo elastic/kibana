@@ -26,7 +26,6 @@ import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { managementApi } from './server/routes/api/management';
 import { registerFieldFormats } from './server/field_formats/register';
-import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
@@ -325,7 +324,6 @@ export default function(kibana) {
       exportApi(server);
       managementApi(server);
       registerFieldFormats(server);
-      registerTutorials(server);
       registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));

@@ -1,33 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
 
 import { i18n } from '@kbn/i18n';
-import { TutorialsCategory } from '../../../../../../plugins/home/server';
-import { Server } from '../../../../../server/kbn_server';
+import { TutorialsCategory } from '../../../../../../../src/plugins/home/server';
 
-export function emsBoundariesSpecProvider(server: Server) {
-  function addBasePath(url: string) {
-    const basePath: string = server.config().get('server.basePath');
-    return `${basePath.length > 0 ? `${basePath}` : ''}${url}`;
-  }
-
-  return {
+export function emsBoundariesSpecProvider({
+  emsLandingPageUrl,
+  prependBasePath,
+}: {
+  emsLandingPageUrl: string;
+  prependBasePath: (path: string) => string;
+}) {
+  return () => ({
     id: 'emsBoundaries',
     name: i18n.translate('kbn.server.tutorials.ems.nameTitle', {
       defaultMessage: 'EMS Boundaries',
@@ -62,7 +49,7 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
 2. In the left sidebar, select an administrative boundary.\n\
 3. Click `Download GeoJSON` button.',
                     values: {
-                      emsLandingPageUrl: server.config().get('map.emsLandingPageUrl'),
+                      emsLandingPageUrl,
                     },
                   }),
                 },
@@ -76,7 +63,7 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
 2. Click `Add layer`, then select `Upload GeoJSON`.\n\
 3. Upload the GeoJSON file and click `Import file`.',
                     values: {
-                      newMapUrl: addBasePath('/app/maps#/map'),
+                      newMapUrl: prependBasePath('/app/maps#/map'),
                     },
                   }),
                 },
@@ -86,5 +73,5 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
         },
       ],
     },
-  };
+  });
 }
