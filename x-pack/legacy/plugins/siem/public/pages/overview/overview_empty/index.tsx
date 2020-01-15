@@ -5,16 +5,14 @@
  */
 
 import React from 'react';
-import chrome from 'ui/chrome';
 
 import * as i18nCommon from '../../common/translations';
 import { EmptyPage } from '../../../components/empty_page';
 import { useKibana } from '../../../lib/kibana';
 
-const basePath = chrome.getBasePath();
-
 const OverviewEmptyComponent: React.FC = () => {
-  const docLinks = useKibana().services.docLinks;
+  const { http, docLinks } = useKibana().services;
+  const basePath = http.basePath.get();
 
   return (
     <EmptyPage

@@ -4,23 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { npStart } from 'ui/new_platform';
+
 import { throwIfNotOk } from '../../hooks/api/api';
 import { MeApiResponse } from './recent_timelines';
 
-export const getMeApiUrl = (getBasePath: () => string): string =>
-  `${getBasePath()}/internal/security/me`;
-
-export const fetchUsername = async (meApiUrl: string) => {
-  const response = await fetch(meApiUrl, {
+export const fetchUsername = async () => {
+  const response = await npStart.core.http.fetch<MeApiResponse>('/internal/security/me', {
     method: 'GET',
     credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-    },
+    asResponse: true,
   });
 
-  await throwIfNotOk(response);
-  const apiResponse: MeApiResponse = await response.json();
-
-  return apiResponse.username;
+  await throwIfNotOk(response.response);
+  return response.body!.username;
 };

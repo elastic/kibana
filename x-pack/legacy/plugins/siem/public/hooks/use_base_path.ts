@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useDateFormat, useTimeZone } from './use_ui_settings';
-export { useBasePath } from './use_base_path';
+import { useKibana } from '../lib/kibana';
+
+export const useBasePath = (): string => useKibana().services.http.basePath.get();
