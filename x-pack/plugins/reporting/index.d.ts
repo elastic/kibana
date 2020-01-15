@@ -7,7 +7,7 @@
 import {
   CoreSetup,
   CoreStart,
-  HttpServiceBase,
+  HttpSetup,
   Plugin,
   PluginInitializerContext,
   NotificationsStart,
@@ -16,7 +16,7 @@ import {
 export type JobId = string;
 export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';
 
-export type HttpService = HttpServiceBase;
+export type HttpService = HttpSetup;
 export type NotificationsService = NotificationsStart;
 
 export interface SourceJob {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/';
 
 import { NavTab } from '../../../components/navigation/types';
 import { FlowTargetSourceDest } from '../../../graphql/types';
@@ -52,7 +52,9 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
 
 export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &
   NetworkRouteType.flows &
-  NetworkRouteType.tls;
+  NetworkRouteType.http &
+  NetworkRouteType.tls &
+  NetworkRouteType.alerts;
 
 type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
   NetworkRouteType.anomalies;
@@ -67,6 +69,7 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
+  alerts = 'alerts',
 }
 
 export type GetNetworkRoutePath = (

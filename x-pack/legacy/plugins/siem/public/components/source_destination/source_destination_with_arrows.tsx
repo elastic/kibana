@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { SourceDestinationArrows } from './source_destination_arrows';
 import { SourceDestinationIp } from './source_destination_ip';

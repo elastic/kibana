@@ -33,14 +33,18 @@ exports[`is rendered 1`] = `
             type="arrowLeft"
           >
             <EuiIconEmpty
+              aria-hidden={true}
               className="euiIcon euiIcon--small euiIcon-isLoading"
               focusable="false"
+              role="img"
               style={null}
             >
               <svg
+                aria-hidden={true}
                 className="euiIcon euiIcon--small euiIcon-isLoading"
                 focusable="false"
                 height={16}
+                role="img"
                 style={null}
                 viewBox="0 0 16 16"
                 width={16}

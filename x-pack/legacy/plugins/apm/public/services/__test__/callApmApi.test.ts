@@ -6,7 +6,7 @@
 
 import * as callApiExports from '../rest/callApi';
 import { createCallApmApi, APMClient } from '../rest/createCallApmApi';
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 
 const callApi = jest
   .spyOn(callApiExports, 'callApi')
@@ -15,7 +15,7 @@ const callApi = jest
 describe('callApmApi', () => {
   let callApmApi: APMClient;
   beforeEach(() => {
-    callApmApi = createCallApmApi({} as HttpServiceBase);
+    callApmApi = createCallApmApi({} as HttpSetup);
   });
 
   afterEach(() => {

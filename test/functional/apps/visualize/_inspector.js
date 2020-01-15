@@ -21,7 +21,7 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
     this.tags('smoke');
@@ -39,10 +39,10 @@ export default function({ getService, getPageObjects }) {
         await inspector.expectTableHeaders(['Count']);
 
         log.debug('Add Average Metric on machine.ram field');
-        await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
-        await PageObjects.visualize.selectAggregation('Average', 'metrics');
-        await PageObjects.visualize.selectField('machine.ram', 'metrics');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickBucket('Y-axis', 'metrics');
+        await PageObjects.visEditor.selectAggregation('Average', 'metrics');
+        await PageObjects.visEditor.selectField('machine.ram', 'metrics');
+        await PageObjects.visEditor.clickGo();
         await inspector.open();
         await inspector.expectTableHeaders(['Count', 'Average machine.ram']);
       });
@@ -50,23 +50,23 @@ export default function({ getService, getPageObjects }) {
       describe('filtering on inspector table values', function() {
         before(async function() {
           log.debug('Add X-axis terms agg on machine.os.raw');
-          await PageObjects.visualize.clickBucket('X-axis');
-          await PageObjects.visualize.selectAggregation('Terms');
-          await PageObjects.visualize.selectField('machine.os.raw');
-          await PageObjects.visualize.setSize(2);
-          await PageObjects.visualize.toggleOtherBucket(3);
-          await PageObjects.visualize.clickGo();
+          await PageObjects.visEditor.clickBucket('X-axis');
+          await PageObjects.visEditor.selectAggregation('Terms');
+          await PageObjects.visEditor.selectField('machine.os.raw');
+          await PageObjects.visEditor.setSize(2);
+          await PageObjects.visEditor.toggleOtherBucket(3);
+          await PageObjects.visEditor.clickGo();
         });
 
         beforeEach(async function() {
           await inspector.open();
-          await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         });
 
         afterEach(async function() {
           await inspector.close();
           await filterBar.removeFilter('machine.os.raw');
-          await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         });
 
         it('should allow filtering for values', async function() {

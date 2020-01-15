@@ -45,7 +45,7 @@ describe('getPaginatedNodes', () => {
       }),
     },
   };
-  const esIndexPattern = '.monitoring-es-*';
+  const esIndexPattern = '.monitoring-es-*,monitoring-es-*';
   const clusterUuid = '1abc';
   const metricSet = ['foo', 'bar'];
   const pagination = { index: 0, size: 10 };
@@ -58,7 +58,7 @@ describe('getPaginatedNodes', () => {
       },
     },
   };
-  const shardStats = {
+  const nodesShardCount = {
     nodes: {
       1: {
         shardCount: 10,
@@ -78,7 +78,7 @@ describe('getPaginatedNodes', () => {
       pagination,
       sort,
       queryText,
-      { clusterStats, shardStats }
+      { clusterStats, nodesShardCount }
     );
     expect(nodes).toEqual({
       pageOfNodes: [
@@ -98,7 +98,7 @@ describe('getPaginatedNodes', () => {
       pagination,
       { ...sort, field: 'foo', direction: 'desc' },
       queryText,
-      { clusterStats, shardStats }
+      { clusterStats, nodesShardCount }
     );
     expect(nodes).toEqual({
       pageOfNodes: [
@@ -118,7 +118,7 @@ describe('getPaginatedNodes', () => {
       pagination,
       sort,
       'tw',
-      { clusterStats, shardStats }
+      { clusterStats, nodesShardCount }
     );
     expect(nodes).toEqual({
       pageOfNodes: [{ name: 'two', uuid: 2, isOnline: false, shardCount: 5, foo: 12 }],

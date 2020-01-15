@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
-import { RequestBasicOptions } from '../framework';
+import { MatrixHistogramRequestOptions } from '../framework';
 
 export const buildEventsOverTimeQuery = ({
   filterQuery,
@@ -13,7 +13,8 @@ export const buildEventsOverTimeQuery = ({
   sourceConfiguration: {
     fields: { timestamp },
   },
-}: RequestBasicOptions) => {
+  stackByField = 'event.action',
+}: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -44,7 +45,7 @@ export const buildEventsOverTimeQuery = ({
     return {
       eventActionGroup: {
         terms: {
-          field: 'event.action',
+          field: stackByField,
           missing: 'All others',
           order: {
             _count: 'desc',

@@ -4,29 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
 import { getUserDisplayName, AuthenticatedUser } from '../../../../common/model';
 import { ChangePassword } from './change_password';
 import { PersonalInfo } from './personal_info';
 
 interface Props {
-  user: AuthenticatedUser;
+  securitySetup: SecurityPluginSetup;
 }
 
-export const AccountManagementPage: React.FC<Props> = props => (
-  <EuiPage>
-    <EuiPageBody restrictWidth>
-      <EuiPanel>
-        <EuiText data-test-subj={'userDisplayName'}>
-          <h1>{getUserDisplayName(props.user)}</h1>
-        </EuiText>
+export const AccountManagementPage = (props: Props) => {
+  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
+  useEffect(() => {
+    props.securitySetup.authc.getCurrentUser().then(setCurrentUser);
+  }, [props]);
 
-        <EuiSpacer size="xl" />
+  if (!currentUser) {
+    return null;
+  }
 
-        <PersonalInfo user={props.user} />
+  return (
+    <EuiPage>
+      <EuiPageBody restrictWidth>
+        <EuiPanel>
+          <EuiText data-test-subj={'userDisplayName'}>
+            <h1>{getUserDisplayName(currentUser)}</h1>
+          </EuiText>
 
-        <ChangePassword user={props.user} />
-      </EuiPanel>
-    </EuiPageBody>
-  </EuiPage>
-);
+          <EuiSpacer size="xl" />
+
+          <PersonalInfo user={currentUser} />
+
+          <ChangePassword user={currentUser} />
+        </EuiPanel>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};

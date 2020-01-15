@@ -19,14 +19,13 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   setIpDetailsTablesActivePageToZero,
   setNetworkTablesActivePageToZero,
-  updateIpDetailsFlowTarget,
   updateNetworkTable,
 } from './actions';
 import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
 } from './helpers';
-import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
+import { IpDetailsTableType, NetworkModel, NetworkTableType } from './model';
 
 export type NetworkState = NetworkModel;
 
@@ -88,6 +87,10 @@ export const initialNetworkState: NetworkState = {
           field: NetworkTopTablesFields.bytes_in,
           direction: Direction.desc,
         },
+      },
+      [NetworkTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },
@@ -183,13 +186,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
     details: {
       ...state.details,
       queries: setNetworkDetailsQueriesActivePageToZero(state),
-    },
-  }))
-  .case(updateIpDetailsFlowTarget, (state, { flowTarget }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      flowTarget,
     },
   }))
   .build();

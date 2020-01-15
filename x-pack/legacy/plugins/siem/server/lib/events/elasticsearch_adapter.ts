@@ -31,7 +31,7 @@ import { baseCategoryFields } from '../../utils/beat_schema/8.0.0';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { mergeFieldsWithHit, inspectStringifyObject } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildTimelineQuery } from './query.dsl';
@@ -61,7 +61,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       ...reduceFields(queryOptions.fields, eventFieldsMap),
     ]);
     delete queryOptions.fieldRequested;
-
     const dsl = buildTimelineQuery(queryOptions);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
@@ -104,6 +103,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       response: [inspectStringifyObject(searchResponse)],
     };
     const data = getDataFromHits(merge(sourceData, hitsData));
+
     return {
       data,
       inspect,
@@ -132,7 +132,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
 
   public async getEventsOverTime(
     request: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<EventsOverTimeData> {
     const dsl = buildEventsOverTimeQuery(options);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
@@ -148,7 +148,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     };
     return {
       inspect,
-      eventsOverTime: getEventsOverTimeByActionName(eventsOverTimeBucket),
+      matrixHistogramData: getEventsOverTimeByActionName(eventsOverTimeBucket),
       totalCount,
     };
   }

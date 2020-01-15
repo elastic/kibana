@@ -24,11 +24,11 @@ import { WrapperPage } from '../../../components/wrapper_page';
 import { IpOverviewQuery } from '../../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../../containers/source';
 import { FlowTargetSourceDest, LastEventIndexKey } from '../../../graphql/types';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
+import { useKibana } from '../../../lib/kibana';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { ConditionalFlexGroup } from '../../../pages/network/navigation/conditional_flex_group';
-import { networkModel, networkSelectors, State, inputsSelectors } from '../../../store';
+import { networkModel, State, inputsSelectors } from '../../../store';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../store/inputs/actions';
 import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../../store/network/actions';
 import { SpyRoute } from '../../../utils/route/spy_routes';
@@ -68,13 +68,13 @@ export const IPDetailsComponent = ({
         to: fromTo.to,
       });
     },
-    [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
+    [setAbsoluteRangeDatePicker]
   );
-  const core = useKibanaCore();
+  const kibana = useKibana();
 
   useEffect(() => {
     setIpDetailsTablesActivePageToZero(null);
-  }, [detailName]);
+  }, [detailName, setIpDetailsTablesActivePageToZero]);
 
   return (
     <>
@@ -82,7 +82,7 @@ export const IPDetailsComponent = ({
         {({ indicesExist, indexPattern }) => {
           const ip = decodeIpv6(detailName);
           const filterQuery = convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(core.uiSettings),
+            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
             indexPattern,
             queries: [query],
             filters,
@@ -102,7 +102,7 @@ export const IPDetailsComponent = ({
                   subtitle={<LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />}
                   title={ip}
                 >
-                  <FlowTargetSelectConnected />
+                  <FlowTargetSelectConnected flowTarget={flowTarget} />
                 </HeaderPage>
 
                 <IpOverviewQuery
@@ -134,14 +134,7 @@ export const IPDetailsComponent = ({
                           setQuery={setQuery}
                           startDate={from}
                           endDate={to}
-                          narrowDateRange={(score, interval) => {
-                            const fromTo = scoreIntervalToDateTime(score, interval);
-                            setAbsoluteRangeDatePicker({
-                              id: 'global',
-                              from: fromTo.from,
-                              to: fromTo.to,
-                            });
-                          }}
+                          narrowDateRange={narrowDateRange}
                         />
                       )}
                     </AnomalyTableProvider>
@@ -286,11 +279,9 @@ IPDetailsComponent.displayName = 'IPDetailsComponent';
 const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   return (state: State) => ({
     query: getGlobalQuerySelector(state),
     filters: getGlobalFiltersQuerySelector(state),
-    flowTarget: getIpDetailsFlowTargetSelector(state),
   });
 };
 

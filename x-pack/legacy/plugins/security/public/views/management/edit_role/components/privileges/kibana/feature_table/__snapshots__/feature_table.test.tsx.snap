@@ -32,10 +32,8 @@ exports[`FeatureTable can render without spaces 1`] = `
       },
     ]
   }
-  executeQueryOptions={Object {}}
   items={Array []}
-  pagination={false}
   responsive={false}
-  sorting={false}
+  tableLayout="fixed"
 />
 `;

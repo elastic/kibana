@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
+import { showSaveModal } from './legacy_imports';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -32,24 +32,21 @@ import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
 import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
 import { formatHttpError } from './helpers/format_http_error';
-import { checkLicense } from '../../../../plugins/graph/common/check_license';
 
 export function initGraphApp(angularModule, deps) {
   const {
     chrome,
-    savedGraphWorkspaces,
     toastNotifications,
     savedObjectsClient,
     indexPatterns,
-    kbnBaseUrl,
     addBasePath,
     getBasePath,
     npData,
     config,
-    savedObjectRegistry,
+    savedWorkspaceLoader,
     capabilities,
     coreStart,
-    Storage,
+    storage,
     canEditDrillDownUrls,
     graphSavePolicy,
   } = deps;
@@ -110,22 +107,19 @@ export function initGraphApp(angularModule, deps) {
         template: listingTemplate,
         badge: getReadonlyBadge,
         controller($location, $scope) {
-          const services = savedObjectRegistry.byLoaderPropertiesName;
-          const graphService = services['Graph workspace'];
-
           $scope.listingLimit = config.get('savedObjects:listingLimit');
           $scope.create = () => {
             $location.url(getNewPath());
           };
           $scope.find = search => {
-            return graphService.find(search, $scope.listingLimit);
+            return savedWorkspaceLoader.find(search, $scope.listingLimit);
           };
           $scope.editItem = workspace => {
             $location.url(getEditPath(workspace));
           };
           $scope.getViewUrl = workspace => getEditUrl(addBasePath, workspace);
           $scope.delete = workspaces => {
-            return graphService.delete(workspaces.map(({ id }) => id));
+            return savedWorkspaceLoader.delete(workspaces.map(({ id }) => id));
           };
           $scope.capabilities = capabilities;
           $scope.initialFilter = $location.search().filter || '';
@@ -139,14 +133,14 @@ export function initGraphApp(angularModule, deps) {
         resolve: {
           savedWorkspace: function($route) {
             return $route.current.params.id
-              ? savedGraphWorkspaces.get($route.current.params.id).catch(function() {
+              ? savedWorkspaceLoader.get($route.current.params.id).catch(function() {
                   toastNotifications.addDanger(
                     i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                       defaultMessage: 'Missing workspace',
                     })
                   );
                 })
-              : savedGraphWorkspaces.get();
+              : savedWorkspaceLoader.get();
           },
           indexPatterns: function() {
             return savedObjectsClient
@@ -300,7 +294,7 @@ export function initGraphApp(angularModule, deps) {
 
     // register things on scope passed down to react components
     $scope.pluginDataStart = npData;
-    $scope.storage = new Storage(window.localStorage);
+    $scope.storage = storage;
     $scope.coreStart = coreStart;
     $scope.loading = false;
     $scope.reduxStore = store;

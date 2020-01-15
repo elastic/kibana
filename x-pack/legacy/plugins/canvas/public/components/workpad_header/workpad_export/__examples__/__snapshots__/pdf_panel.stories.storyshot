@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Export/PDFPanel default 1`] = `
+<div
+  className="euiPanel"
+>
+  <div
+    className="canvasWorkpadExport__panelContent"
+  >
+    <div
+      className="euiText euiText--small"
+    >
+      <p>
+        PDFs can take a minute or two to generate based on the size of your workpad.
+      </p>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <button
+      className="euiButton euiButton--primary euiButton--small euiButton--fill"
+      onClick={[Function]}
+      style={
+        Object {
+          "width": "100%",
+        }
+      }
+      type="button"
+    >
+      <span
+        className="euiButton__content"
+      >
+        <span
+          className="euiButton__text"
+        >
+          Generate PDF
+        </span>
+      </span>
+    </button>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiText euiText--small"
+    >
+      <p>
+        Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
+      </p>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="canvasClipboard"
+      onClick={[Function]}
+      onKeyPress={[Function]}
+      role="button"
+      tabIndex={0}
+    >
+      <button
+        aria-label="Alternatively, you can generate a PDF from a script or with Watcher by using this URL. Press Enter to copy the URL to clipboard."
+        className="euiButton euiButton--primary euiButton--small"
+        style={
+          Object {
+            "width": "100%",
+          }
+        }
+        type="button"
+      >
+        <span
+          className="euiButton__content"
+        >
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+            focusable="false"
+            height={16}
+            role="img"
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            className="euiButton__text"
+          >
+            Copy POST URL
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

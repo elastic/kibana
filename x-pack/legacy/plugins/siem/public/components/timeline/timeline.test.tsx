@@ -5,17 +5,14 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import { timelineQuery } from '../../containers/timeline/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
-import { mockUiSettings } from '../../mock/ui_settings';
 import { flyoutHeaderHeight } from '../flyout';
 
 import {
@@ -30,12 +27,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 
 const testFlyoutHeight = 980;
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
-  savedObjects: {},
-}));
+jest.mock('../../lib/kibana');
 
 describe('Timeline', () => {
   const sort: Sort = {
@@ -66,11 +58,13 @@ describe('Timeline', () => {
           flyoutHeight={testFlyoutHeight}
           flyoutHeaderHeight={flyoutHeaderHeight}
           indexPattern={indexPattern}
+          indexToAdd={[]}
           isLive={false}
           itemsPerPage={5}
           itemsPerPageOptions={[5, 10, 20]}
           kqlMode="search"
           kqlQueryExpression=""
+          loadingIndexName={false}
           onChangeDataProviderKqlQuery={jest.fn()}
           onChangeDroppableAndProvider={jest.fn()}
           onChangeItemsPerPage={jest.fn()}
@@ -85,7 +79,7 @@ describe('Timeline', () => {
           toggleColumn={jest.fn()}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the timeline header', () => {
@@ -102,11 +96,13 @@ describe('Timeline', () => {
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
+              indexToAdd={[]}
               isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
               kqlQueryExpression=""
+              loadingIndexName={false}
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
@@ -141,11 +137,13 @@ describe('Timeline', () => {
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
+              indexToAdd={[]}
               isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
               kqlQueryExpression=""
+              loadingIndexName={false}
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
@@ -180,11 +178,13 @@ describe('Timeline', () => {
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
+              indexToAdd={[]}
               isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
               kqlQueryExpression=""
+              loadingIndexName={false}
               onChangeDataProviderKqlQuery={jest.fn()}
               onChangeDroppableAndProvider={jest.fn()}
               onChangeItemsPerPage={jest.fn()}
@@ -224,11 +224,13 @@ describe('Timeline', () => {
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                indexToAdd={[]}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                loadingIndexName={false}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -270,11 +272,13 @@ describe('Timeline', () => {
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                indexToAdd={[]}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                loadingIndexName={false}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -324,11 +328,13 @@ describe('Timeline', () => {
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                indexToAdd={[]}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                loadingIndexName={false}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -382,11 +388,13 @@ describe('Timeline', () => {
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                indexToAdd={[]}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                loadingIndexName={false}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -443,11 +451,13 @@ describe('Timeline', () => {
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                indexToAdd={[]}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                loadingIndexName={false}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -494,11 +504,13 @@ describe('Timeline', () => {
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                indexToAdd={[]}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                loadingIndexName={false}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -551,11 +563,13 @@ describe('Timeline', () => {
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                indexToAdd={[]}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                loadingIndexName={false}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}
@@ -612,11 +626,13 @@ describe('Timeline', () => {
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                indexToAdd={[]}
                 isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
                 kqlQueryExpression=""
+                loadingIndexName={false}
                 onChangeDataProviderKqlQuery={jest.fn()}
                 onChangeDroppableAndProvider={jest.fn()}
                 onChangeItemsPerPage={jest.fn()}

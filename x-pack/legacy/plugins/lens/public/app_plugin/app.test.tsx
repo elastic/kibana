@@ -80,6 +80,7 @@ describe('Lens App', () => {
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
+    addToDashboardMode?: boolean;
   }> {
     return ({
       editorFrame: createMockFrame(),
@@ -126,6 +127,7 @@ describe('Lens App', () => {
       docId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string) => void;
+      addToDashboardMode?: boolean;
     }>;
   }
 
@@ -190,6 +192,7 @@ describe('Lens App', () => {
     (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
       id: '1234',
       title: 'Daaaaaaadaumching!',
+      expression: 'valid expression',
       state: {
         query: 'fake query',
         datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
@@ -219,6 +222,7 @@ describe('Lens App', () => {
       args.editorFrame = frame;
       (args.docStorage.load as jest.Mock).mockResolvedValue({
         id: '1234',
+        expression: 'valid expression',
         state: {
           query: 'fake query',
           datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
@@ -244,6 +248,7 @@ describe('Lens App', () => {
         expect.objectContaining({
           doc: {
             id: '1234',
+            expression: 'valid expression',
             state: {
               query: 'fake query',
               datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
@@ -294,6 +299,31 @@ describe('Lens App', () => {
         newTitle: string;
       }
 
+      let defaultArgs: jest.Mocked<{
+        editorFrame: EditorFrameInstance;
+        data: typeof dataStartMock;
+        core: typeof core;
+        dataShim: DataStart;
+        storage: Storage;
+        docId?: string;
+        docStorage: SavedObjectStore;
+        redirectTo: (id?: string) => void;
+        addToDashboardMode?: boolean;
+      }>;
+
+      beforeEach(() => {
+        defaultArgs = makeDefaultArgs();
+        (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
+          id: '1234',
+          title: 'My cool doc',
+          expression: 'valid expression',
+          state: {
+            query: 'kuery',
+            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+          },
+        } as jest.ResolvedValue<Document>);
+      });
+
       function getButton(instance: ReactWrapper): TopNavMenuData {
         return (instance
           .find('[data-test-subj="lnsApp_topNav"]')
@@ -317,17 +347,23 @@ describe('Lens App', () => {
 
       async function save({
         initialDocId,
+        addToDashboardMode,
         ...saveProps
       }: SaveProps & {
         initialDocId?: string;
+        addToDashboardMode?: boolean;
       }) {
         const args = {
-          ...makeDefaultArgs(),
+          ...defaultArgs,
           docId: initialDocId,
         };
+        if (addToDashboardMode) {
+          args.addToDashboardMode = addToDashboardMode;
+        }
         args.editorFrame = frame;
         (args.docStorage.load as jest.Mock).mockResolvedValue({
           id: '1234',
+          expression: 'kibana',
           state: {
             query: 'fake query',
             datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
@@ -335,6 +371,7 @@ describe('Lens App', () => {
         });
         (args.docStorage.save as jest.Mock).mockImplementation(async ({ id }) => ({
           id: id || 'aaa',
+          expression: 'kibana 2',
         }));
 
         const instance = mount(<App {...args} />);
@@ -350,13 +387,12 @@ describe('Lens App', () => {
         const onChange = frame.mount.mock.calls[0][1].onChange;
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: initialDocId } as unknown) as Document,
+          doc: ({ id: initialDocId, expression: 'kibana 3' } as unknown) as Document,
         });
 
         instance.update();
 
         expect(getButton(instance).disableButton).toEqual(false);
-
         testSave(instance, saveProps);
 
         await waitForPromises();
@@ -365,7 +401,7 @@ describe('Lens App', () => {
       }
 
       it('shows a disabled save button when the user does not have permissions', async () => {
-        const args = makeDefaultArgs();
+        const args = defaultArgs;
         args.core.application = {
           ...args.core.application,
           capabilities: {
@@ -380,15 +416,40 @@ describe('Lens App', () => {
         expect(getButton(instance).disableButton).toEqual(true);
 
         const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ filterableIndexPatterns: [], doc: ('will save this' as unknown) as Document });
-
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: 'will save this', expression: 'valid expression' } as unknown) as Document,
+        });
         instance.update();
-
         expect(getButton(instance).disableButton).toEqual(true);
       });
 
+      it('shows a disabled save button when there are no changes to the document', async () => {
+        const args = defaultArgs;
+        (args.docStorage.load as jest.Mock).mockResolvedValue({
+          id: '1234',
+          title: 'My cool doc',
+          expression: '',
+        } as jest.ResolvedValue<Document>);
+        args.editorFrame = frame;
+
+        const instance = mount(<App {...args} />);
+        expect(getButton(instance).disableButton).toEqual(true);
+
+        const onChange = frame.mount.mock.calls[0][1].onChange;
+
+        act(() => {
+          onChange({
+            filterableIndexPatterns: [],
+            doc: ({ id: '1234', expression: 'valid expression' } as unknown) as Document,
+          });
+        });
+        instance.update();
+        expect(getButton(instance).disableButton).toEqual(false);
+      });
+
       it('shows a save button that is enabled when the frame has provided its state', async () => {
-        const args = makeDefaultArgs();
+        const args = defaultArgs;
         args.editorFrame = frame;
 
         const instance = mount(<App {...args} />);
@@ -396,8 +457,10 @@ describe('Lens App', () => {
         expect(getButton(instance).disableButton).toEqual(true);
 
         const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ filterableIndexPatterns: [], doc: ('will save this' as unknown) as Document });
-
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: 'will save this', expression: 'valid expression' } as unknown) as Document,
+        });
         instance.update();
 
         expect(getButton(instance).disableButton).toEqual(false);
@@ -413,6 +476,7 @@ describe('Lens App', () => {
         expect(args.docStorage.save).toHaveBeenCalledWith({
           id: undefined,
           title: 'hello there',
+          expression: 'kibana 3',
         });
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa');
@@ -432,6 +496,7 @@ describe('Lens App', () => {
         expect(args.docStorage.save).toHaveBeenCalledWith({
           id: undefined,
           title: 'hello there',
+          expression: 'kibana 3',
         });
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa');
@@ -451,6 +516,7 @@ describe('Lens App', () => {
         expect(args.docStorage.save).toHaveBeenCalledWith({
           id: '1234',
           title: 'hello there',
+          expression: 'kibana 3',
         });
 
         expect(args.redirectTo).not.toHaveBeenCalled();
@@ -461,14 +527,17 @@ describe('Lens App', () => {
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
-        const args = makeDefaultArgs();
+        const args = defaultArgs;
         args.editorFrame = frame;
         (args.docStorage.save as jest.Mock).mockRejectedValue({ message: 'failed' });
 
         const instance = mount(<App {...args} />);
 
         const onChange = frame.mount.mock.calls[0][1].onChange;
-        onChange({ filterableIndexPatterns: [], doc: ({ id: undefined } as unknown) as Document });
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({ id: undefined, expression: 'new expression' } as unknown) as Document,
+        });
 
         instance.update();
 
@@ -482,12 +551,53 @@ describe('Lens App', () => {
 
         expect(getButton(instance).disableButton).toEqual(false);
       });
+
+      it('saves new doc and redirects to dashboard', async () => {
+        const { args } = await save({
+          initialDocId: undefined,
+          addToDashboardMode: true,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          expression: 'kibana 3',
+          id: undefined,
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+      });
     });
   });
 
   describe('query bar state management', () => {
+    let defaultArgs: jest.Mocked<{
+      editorFrame: EditorFrameInstance;
+      data: typeof dataStartMock;
+      core: typeof core;
+      dataShim: DataStart;
+      storage: Storage;
+      docId?: string;
+      docStorage: SavedObjectStore;
+      redirectTo: (id?: string) => void;
+    }>;
+
+    beforeEach(() => {
+      defaultArgs = makeDefaultArgs();
+      (defaultArgs.docStorage.load as jest.Mock).mockResolvedValue({
+        id: '1234',
+        title: 'My cool doc',
+        expression: 'valid expression',
+        state: {
+          query: 'kuery',
+          datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
+        },
+      } as jest.ResolvedValue<Document>);
+    });
+
     it('uses the default time and query language settings', () => {
-      const args = makeDefaultArgs();
+      const args = defaultArgs;
       args.editorFrame = frame;
 
       mount(<App {...args} />);
@@ -510,7 +620,7 @@ describe('Lens App', () => {
     });
 
     it('updates the index patterns when the editor frame is changed', async () => {
-      const args = makeDefaultArgs();
+      const args = defaultArgs;
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);
@@ -525,7 +635,7 @@ describe('Lens App', () => {
       const onChange = frame.mount.mock.calls[0][1].onChange;
       onChange({
         filterableIndexPatterns: [{ id: '1', title: 'newIndex' }],
-        doc: ({ id: undefined } as unknown) as Document,
+        doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
       });
 
       await waitForPromises();
@@ -541,7 +651,7 @@ describe('Lens App', () => {
       // Do it again to verify that the dirty checking is done right
       onChange({
         filterableIndexPatterns: [{ id: '2', title: 'second index' }],
-        doc: ({ id: undefined } as unknown) as Document,
+        doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
       });
 
       await waitForPromises();
@@ -556,7 +666,7 @@ describe('Lens App', () => {
     });
 
     it('updates the editor frame when the user changes query or time in the search bar', () => {
-      const args = makeDefaultArgs();
+      const args = defaultArgs;
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);
@@ -586,7 +696,7 @@ describe('Lens App', () => {
     });
 
     it('updates the filters when the user changes them', () => {
-      const args = makeDefaultArgs();
+      const args = defaultArgs;
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);

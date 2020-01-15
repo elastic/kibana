@@ -1,0 +1,16 @@
+{
+  "description": "Linux: Netcat Network Connection",
+  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Linux: Netcat Network Activity",
+  "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional) and event.action: (connected-to or bound-socket or socket_opened)",
+  "risk_score": 50,
+  "rule_id": "adb961e0-cb74-42a0-af9e-29fc41f88f5f",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

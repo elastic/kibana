@@ -8,7 +8,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState } from 'react';
-import { FieldType } from 'ui/index_patterns';
+import { IFieldType } from 'src/plugins/data/public';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
 import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
@@ -18,7 +18,7 @@ interface Props {
   autoFocus?: boolean;
   options: MetricsExplorerOptions;
   onChange: (metrics: MetricsExplorerMetric[]) => void;
-  fields: FieldType[];
+  fields: IFieldType[];
 }
 
 interface SelectedOption {
@@ -71,6 +71,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
 
   return (
     <EuiComboBox
+      aria-label={placeholderText}
       isDisabled={options.aggregation === 'count'}
       placeholder={placeholderText}
       fullWidth

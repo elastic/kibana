@@ -32,6 +32,14 @@ When security is enabled, an SSL connection to Elasticsearch is required in orde
 
 When security is enabled, users who create alerts will need the `manage_api_key` cluster privilege. There is currently work in progress to remove this requirement.
 
+Note that the `manage_own_api_key` cluster privilege is not enough - it can be used to create API keys, but not invalidate them, and the alerting plugin currently both creates and invalidates APIs keys as part of it's processing.  When using only the `manage_own_api_key` privilege, you will see the following message logged in the server when the alerting plugin attempts to invalidate an API key:
+
+```
+[error][alerting][plugins] Failed to invalidate API Key: [security_exception] \
+    action [cluster:admin/xpack/security/api_key/invalidate] \
+    is unauthorized for user [user-name-here]
+```
+
 ## Alert types
 
 ### Methods
@@ -63,6 +71,13 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |previousStartedAt|The previous date and time the alert type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (example threshold). Use alert type validation to ensure values are set before execution.|
 |state|State returned from previous execution. This is the alert level state. What the executor returns will be serialized and provided here at the next execution.|
+|alertId|The id of this alert.|
+|spaceId|The id of the space of this alert.|
+|namespace|The namespace of the space of this alert; same as spaceId, unless spaceId === 'default', then namespace = undefined.|
+|name|The name of this alert.|
+|tags|The tags associated with this alert.|
+|createdBy|The userid that created this alert.|
+|updatedBy|The userid that last updated this alert.|
 
 ### Example
 
@@ -200,7 +215,7 @@ Payload:
 |name|A name to reference and search in the future.|string|
 |tags|A list of keywords to reference and search in the future.|string[]|
 |alertTypeId|The id value of the alert type you want to call when the alert is scheduled to execute.|string|
-|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
+|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
 |actions|Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).|array|
 
@@ -242,7 +257,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|interval|The interval in seconds, minutes, hours or days the alert should execute. Example: `10s`, `5m`, `1h`, `1d`.|string|
+|schedule|The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below|object|
 |name|A name to reference and search in the future.|string|
 |tags|A list of keywords to reference and search in the future.|string[]|
 |params|The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.|object|
@@ -303,6 +318,14 @@ Params:
 |Property|Description|Type|
 |---|---|---|
 |id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
+
+##### Schedule Formats
+A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
+
+We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
+Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
+
+There are plans to support multiple other schedule formats in the near fuiture.
 
 ## Alert instance factory
 

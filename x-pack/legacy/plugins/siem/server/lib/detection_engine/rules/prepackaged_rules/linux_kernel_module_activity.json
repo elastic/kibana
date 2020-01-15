@@ -1,0 +1,16 @@
+{
+  "description": "Linux: Kernel Module Activity",
+  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Linux: Kernel Module Activity",
+  "query": "process.name: (insmod or kmod or modprobe or rmod) and event.action:executed",
+  "risk_score": 50,
+  "rule_id": "81cc58f5-8062-49a2-ba84-5cc4b4d31c40",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

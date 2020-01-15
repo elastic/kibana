@@ -8,8 +8,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
-import { kfetch } from 'ui/kfetch';
-
+import { npStart } from 'ui/new_platform';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { getJobIdPrefix } from '../../../../../common/log_analysis';
 
@@ -23,9 +22,8 @@ export const callSetupMlModuleAPI = async (
   jobOverrides: SetupMlModuleJobOverrides[] = [],
   datafeedOverrides: SetupMlModuleDatafeedOverrides[] = []
 ) => {
-  const response = await kfetch({
+  const response = await npStart.core.http.fetch(`/api/ml/modules/setup/${moduleId}`, {
     method: 'POST',
-    pathname: `/api/ml/modules/setup/${moduleId}`,
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
         start,

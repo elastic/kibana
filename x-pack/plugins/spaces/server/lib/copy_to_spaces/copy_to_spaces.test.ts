@@ -176,6 +176,7 @@ describe('copySavedObjectsToSpaces', () => {
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
+                "autoDestroy": false,
                 "awaitDrain": 0,
                 "buffer": BufferList {
                   "head": null,
@@ -228,6 +229,7 @@ describe('copySavedObjectsToSpaces', () => {
               "_maxListeners": undefined,
               "_read": [Function],
               "_readableState": ReadableState {
+                "autoDestroy": false,
                 "awaitDrain": 0,
                 "buffer": BufferList {
                   "head": null,

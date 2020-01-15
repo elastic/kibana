@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../graphql/types';
@@ -13,7 +13,6 @@ import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { TestProviders } from '../../mock';
-import '../../mock/ui_settings';
 
 import { LastEventTime } from '.';
 

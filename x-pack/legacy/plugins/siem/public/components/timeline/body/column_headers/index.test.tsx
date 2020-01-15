@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../helpers';
 import { defaultHeaders } from './default_headers';
@@ -17,14 +16,6 @@ import { TestProviders } from '../../../../mock/test_providers';
 import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { ColumnHeadersComponent } from '.';
-
-jest.mock('../../../resize_handle/is_resizing', () => ({
-  ...jest.requireActual('../../../resize_handle/is_resizing'),
-  useIsContainerResizing: () => ({
-    isResizing: true,
-    setIsResizing: jest.fn(),
-  }),
-}));
 
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();
@@ -41,17 +32,20 @@ describe('ColumnHeaders', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           browserFields={mockBrowserFields}
           columnHeaders={defaultHeaders}
+          isSelectAllChecked={false}
           onColumnSorted={jest.fn()}
           onColumnRemoved={jest.fn()}
           onColumnResized={jest.fn()}
+          onSelectAll={jest.fn}
           onUpdateColumns={jest.fn()}
           showEventsSelect={false}
+          showSelectAllCheckbox={false}
           sort={sort}
           timelineId={'test'}
           toggleColumn={jest.fn()}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the field browser', () => {
@@ -61,11 +55,14 @@ describe('ColumnHeaders', () => {
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
+            isSelectAllChecked={false}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
+            onSelectAll={jest.fn}
             onUpdateColumns={jest.fn()}
             showEventsSelect={false}
+            showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
             toggleColumn={jest.fn()}
@@ -88,11 +85,14 @@ describe('ColumnHeaders', () => {
             actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
             browserFields={mockBrowserFields}
             columnHeaders={defaultHeaders}
+            isSelectAllChecked={false}
             onColumnSorted={jest.fn()}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
+            onSelectAll={jest.fn}
             onUpdateColumns={jest.fn()}
             showEventsSelect={false}
+            showSelectAllCheckbox={false}
             sort={sort}
             timelineId={'test'}
             toggleColumn={jest.fn()}
@@ -107,35 +107,6 @@ describe('ColumnHeaders', () => {
             .first()
             .text()
         ).toContain(h.id);
-      });
-    });
-
-    test('it disables dragging during a column resize', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ColumnHeadersComponent
-            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-            browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
-            onColumnSorted={jest.fn()}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            showEventsSelect={false}
-            sort={sort}
-            timelineId={'test'}
-            toggleColumn={jest.fn()}
-          />
-        </TestProviders>
-      );
-
-      defaultHeaders.forEach(h => {
-        expect(
-          wrapper
-            .find('[data-test-subj="draggable"]')
-            .first()
-            .prop('isDragDisabled')
-        ).toBe(true);
       });
     });
   });

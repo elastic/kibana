@@ -7,8 +7,9 @@
 import React, { useContext } from 'react';
 import { EuiHealth, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UptimeSettingsContext } from '../../../../contexts';
-import { UNNAMED_LOCATION, UP } from './monitor_status_list';
+import { UptimeThemeContext } from '../../../../contexts';
+import { UP } from './monitor_status_list';
+import { UNNAMED_LOCATION } from '../../../../../common/constants';
 
 interface MonitorStatusRowProps {
   /**
@@ -24,7 +25,7 @@ interface MonitorStatusRowProps {
 export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProps) => {
   const {
     colors: { success, danger },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
 
   const color = status === UP ? success : danger;
 
@@ -57,7 +58,7 @@ export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProp
           />
         )}
       </EuiHealth>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
     </>
   );
 };

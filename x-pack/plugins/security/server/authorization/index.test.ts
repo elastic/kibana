@@ -24,7 +24,7 @@ import {
   elasticsearchServiceMock,
   loggingServiceMock,
 } from '../../../../../src/core/server/mocks';
-import { licenseMock } from '../licensing/index.mock';
+import { licenseMock } from '../../common/licensing/index.mock';
 
 test(`returns exposed services`, () => {
   const kibanaIndexName = '.a-kibana-index';
