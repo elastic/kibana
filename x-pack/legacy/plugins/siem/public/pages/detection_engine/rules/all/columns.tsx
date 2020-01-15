@@ -7,12 +7,12 @@
 /* eslint-disable react/display-name */
 
 import {
-  EuiTableActionsColumnType,
-  EuiBasicTableColumn,
   EuiBadge,
   EuiIconTip,
   EuiLink,
   EuiTextColor,
+  EuiBasicTableColumn,
+  EuiTableActionsColumnType,
 } from '@elastic/eui';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
@@ -22,7 +22,6 @@ import {
   duplicateRuleAction,
   editRuleAction,
   exportRulesAction,
-  runRuleAction,
 } from './actions';
 
 import { Action } from './reducer';
@@ -45,14 +44,6 @@ const getActions = (
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: TableData) => editRuleAction(rowItem.sourceRule, history),
     enabled: (rowItem: TableData) => !rowItem.sourceRule.immutable,
-  },
-  {
-    description: i18n.RUN_RULE_MANUALLY,
-    type: 'icon',
-    icon: 'play',
-    name: i18n.RUN_RULE_MANUALLY,
-    onClick: runRuleAction,
-    enabled: () => false,
   },
   {
     description: i18n.DUPLICATE_RULE,
