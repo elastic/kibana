@@ -3,6 +3,9 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
+// TODO: Remove
+env.KBN_ES_SNAPSHOT_USE_UNVERIFIED = '1'
+
 stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a little bit
   timeout(time: 135, unit: 'MINUTES') {
     timestamps {
