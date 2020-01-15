@@ -94,7 +94,10 @@ export const useExploreData = (
               field: resultsField,
             },
           };
-        } else if (isResultsSearchBoolQuery(searchQueryClone)) {
+        } else if (
+          isResultsSearchBoolQuery(searchQueryClone) &&
+          Array.isArray(searchQueryClone.bool.must)
+        ) {
           searchQueryClone.bool.must.push({
             exists: {
               field: resultsField,
