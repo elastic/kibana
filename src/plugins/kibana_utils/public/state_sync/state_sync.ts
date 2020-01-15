@@ -23,6 +23,7 @@ import defaultComparator from 'fast-deep-equal';
 import { IStateSyncConfig } from './types';
 import { IStateStorage } from './state_sync_state_storage';
 import { distinctUntilChangedWithInitialValue } from '../../common';
+import { BaseState } from '../state_containers';
 
 /**
  * Utility for syncing application state wrapped in state container
@@ -86,7 +87,10 @@ export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorag
   // start syncing state with storage
   start: StartSyncStateFnType;
 }
-export function syncState<State = unknown, StateStorage extends IStateStorage = IStateStorage>({
+export function syncState<
+  State extends BaseState,
+  StateStorage extends IStateStorage = IStateStorage
+>({
   storageKey,
   stateStorage,
   stateContainer,

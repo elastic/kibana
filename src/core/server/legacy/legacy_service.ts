@@ -125,7 +125,11 @@ export class LegacyService implements CoreService {
       disabledPluginSpecs,
       uiExports,
       navLinks,
-    } = await findLegacyPluginSpecs(this.settings, this.coreContext.logger);
+    } = await findLegacyPluginSpecs(
+      this.settings,
+      this.coreContext.logger,
+      this.coreContext.env.packageInfo
+    );
 
     this.legacyPlugins = {
       pluginSpecs,
