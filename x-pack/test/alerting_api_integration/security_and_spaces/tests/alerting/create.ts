@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -92,6 +92,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 createdBy: user.username,
                 schedule: { interval: '1m' },
                 scheduledTaskId: response.body.scheduledTaskId,
+                createdAt: response.body.createdAt,
+                updatedAt: response.body.updatedAt,
                 throttle: '1m',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
@@ -99,12 +101,22 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 mutedInstanceIds: [],
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+
               const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
                 alertId: response.body.id,
                 spaceId: space.id,
+              });
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: response.body.id,
               });
               break;
             default:

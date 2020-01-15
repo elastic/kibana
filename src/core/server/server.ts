@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import {
@@ -29,6 +28,7 @@ import {
 } from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
+import { RenderingService, RenderingServiceSetup } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
@@ -44,7 +44,7 @@ import { config as pathConfig } from './path';
 import { config as kibanaConfig } from './kibana_config';
 import { config as savedObjectsConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
-import { mapToObject } from '../utils/';
+import { mapToObject } from '../utils';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup } from './internal_types';
@@ -60,6 +60,7 @@ export class Server {
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
+  private readonly rendering: RenderingService;
   private readonly legacy: LegacyService;
   private readonly log: Logger;
   private readonly plugins: PluginsService;
@@ -78,6 +79,7 @@ export class Server {
     const core = { coreId, configService: this.configService, env, logger };
     this.context = new ContextService(core);
     this.http = new HttpService(core);
+    this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
@@ -144,12 +146,18 @@ export class Server {
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
+    const renderingSetup = await this.rendering.setup({
+      http: httpSetup,
+      legacyPlugins,
+      plugins: pluginsSetup,
+    });
+
     await this.legacy.setup({
-      core: { ...coreSetup, plugins: pluginsSetup },
+      core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
       plugins: mapToObject(pluginsSetup.contracts),
     });
 
-    this.registerCoreContext(coreSetup);
+    this.registerCoreContext(coreSetup, renderingSetup);
 
     return coreSetup;
   }
@@ -178,6 +186,7 @@ export class Server {
     });
 
     await this.http.start();
+    await this.rendering.start();
 
     return coreStart;
   }
@@ -191,6 +200,7 @@ export class Server {
     await this.elasticsearch.stop();
     await this.http.stop();
     await this.uiSettings.stop();
+    await this.rendering.stop();
   }
 
   private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
@@ -200,27 +210,27 @@ export class Server {
     );
   }
 
-  private registerCoreContext(coreSetup: InternalCoreSetup) {
+  private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
-      async (context, req): Promise<RequestHandlerContext['core']> => {
-        const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-        const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
+      async (context, req, res): Promise<RequestHandlerContext['core']> => {
         const savedObjectsClient = coreSetup.savedObjects.getScopedClient(req);
+        const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
 
         return {
+          rendering: {
+            render: rendering.render.bind(rendering, req, uiSettingsClient),
+          },
           savedObjects: {
-            // Note: the client provider doesn't support new ES clients
-            // emitted from adminClient$
             client: savedObjectsClient,
           },
           elasticsearch: {
-            adminClient: adminClient.asScoped(req),
-            dataClient: dataClient.asScoped(req),
+            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
+            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
           },
           uiSettings: {
-            client: coreSetup.uiSettings.asScopedToClient(savedObjectsClient),
+            client: uiSettingsClient,
           },
         };
       }
@@ -242,6 +252,14 @@ export class Server {
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
+    this.configService.addDeprecationProvider(
+      elasticsearchConfig.path,
+      elasticsearchConfig.deprecations!
+    );
+    this.configService.addDeprecationProvider(
+      uiSettingsConfig.path,
+      uiSettingsConfig.deprecations!
+    );
 
     for (const [path, schema] of schemas) {
       await this.configService.setSchema(path, schema);

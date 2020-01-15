@@ -23,7 +23,7 @@ import { WrapperPage } from '../../components/wrapper_page';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
+import { useKibana } from '../../lib/kibana';
 import { convertToBuildEsQuery } from '../../lib/keury';
 import { networkModel, State, inputsSelectors } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -51,7 +51,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     hasMlUserPermissions,
     capabilitiesFetched,
   }) => {
-    const core = useKibanaCore();
+    const kibana = useKibana();
     const { tabName } = useParams();
 
     const networkFilters = useMemo(() => {
@@ -59,7 +59,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         return filters.length > 0 ? [...filters, ...filterAlertsNetwork] : filterAlertsNetwork;
       }
       return filters;
-    }, [tabName]);
+    }, [tabName, filters]);
+
     const narrowDateRange = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
@@ -72,7 +73,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         <WithSource sourceId={sourceId}>
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               indexPattern,
               queries: [query],
               filters: networkFilters,
@@ -132,14 +133,14 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                       <EuiSpacer />
 
                       <NetworkRoutes
-                        to={to}
                         filterQuery={filterQuery}
-                        isInitializing={isInitializing}
                         from={from}
-                        type={networkModel.NetworkType.page}
+                        isInitializing={isInitializing}
                         indexPattern={indexPattern}
                         setQuery={setQuery}
                         setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                        type={networkModel.NetworkType.page}
+                        to={to}
                         networkPagePath={networkPagePath}
                       />
                     </>

@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { palettes, EuiIcon } from '@elastic/eui';
+import { euiPaletteColorBlind, EuiIcon } from '@elastic/eui';
 import { IconSize } from '@elastic/eui/src/components/icon/icon';
 
 interface IconMapEntry {
@@ -43,7 +43,7 @@ interface FieldIconProps {
   className?: string;
 }
 
-const { colors } = palettes.euiPaletteColorBlind;
+const colors = euiPaletteColorBlind();
 
 // defaultIcon => a unknown datatype
 const defaultIcon = { icon: 'questionInCircle', color: colors[0] };

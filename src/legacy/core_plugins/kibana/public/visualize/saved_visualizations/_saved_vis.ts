@@ -29,12 +29,12 @@ import { Vis } from 'ui/vis';
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { updateOldState } from '../../../../visualizations/public';
-import { VisualizeConstants } from '../visualize_constants';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../../../plugins/data/public';
 import { VisSavedObject } from '../legacy_imports';
 
 import { createSavedSearchesService } from '../../discover';
+import { VisualizeConstants } from '..';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
   await _getLinkedSavedSearch(savedVis, services);

@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS as ILLEGAL_CHARACTERS } from 'ui/index_patterns';
+import { indexPatterns } from '../../../../../../../../../../plugins/data/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
@@ -71,7 +71,7 @@ export class StepIndexPattern extends Component {
       indexPatternName: indexPatternCreationType.getIndexPatternName(),
     };
 
-    this.ILLEGAL_CHARACTERS = [...ILLEGAL_CHARACTERS];
+    this.ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
     this.lastQuery = null;
   }
 
@@ -243,7 +243,7 @@ export class StepIndexPattern extends Component {
     if (!query || !query.length || query === '.' || query === '..') {
       // This is an error scenario but do not report an error
       containsErrors = true;
-    } else if (containsIllegalCharacters(query, ILLEGAL_CHARACTERS)) {
+    } else if (containsIllegalCharacters(query, indexPatterns.ILLEGAL_CHARACTERS)) {
       const errorMessage = i18n.translate(
         'kbn.management.createIndexPattern.step.invalidCharactersErrorMessage',
         {

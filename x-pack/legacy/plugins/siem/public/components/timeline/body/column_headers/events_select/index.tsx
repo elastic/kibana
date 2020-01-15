@@ -6,7 +6,7 @@
 
 import { EuiCheckbox, EuiSuperSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import { getEventsSelectOptions } from './helpers';

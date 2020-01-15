@@ -70,13 +70,13 @@ describe('getTransactionBreakdown', () => {
 
     expect(response.kpis[0]).toEqual({
       name: 'app',
-      color: '#00b3a4',
+      color: '#5bbaa0',
       percentage: 0.5408550899466306
     });
 
     expect(response.kpis[3]).toEqual({
       name: 'postgresql',
-      color: '#490092',
+      color: '#9170b8',
       percentage: 0.047366859295002
     });
   });

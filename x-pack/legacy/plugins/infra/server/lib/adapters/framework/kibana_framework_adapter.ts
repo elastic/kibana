@@ -10,7 +10,7 @@ import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Legacy } from 'kibana';
 import { runHttpQuery } from 'apollo-server-core';
-import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
   InfraRouteConfig,
   InfraTSVBResponse,
@@ -43,12 +43,7 @@ export class KibanaFramework {
     this.plugins = plugins;
   }
 
-  public registerRoute<
-    params extends ObjectType = any,
-    query extends ObjectType = any,
-    body extends ObjectType = any,
-    method extends RouteMethod = any
-  >(
+  public registerRoute<params = any, query = any, body = any, method extends RouteMethod = any>(
     config: InfraRouteConfig<params, query, body, method>,
     handler: RequestHandler<params, query, body>
   ) {

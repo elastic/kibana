@@ -16,10 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+// @ts-ignore
+import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { createSavedDashboardLoader } from './saved_dashboards';
 
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import './saved_dashboards';
+const module = uiModules.get('app/dashboard');
 
-SavedObjectRegistryProvider.register((savedDashboards: any) => {
-  return savedDashboards;
+// Register this service with the saved object registry so it can be
+// edited by the object editor.
+savedObjectManagementRegistry.register({
+  service: 'savedDashboards',
+  title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
+    defaultMessage: 'dashboards',
+  }),
 });
+
+// this is no longer used in the conroller, but just here for savedObjectManagementRegistry
+module.service('savedDashboards', () =>
+  createSavedDashboardLoader({
+    savedObjectsClient: npStart.core.savedObjects.client,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  })
+);

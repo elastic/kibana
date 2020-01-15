@@ -63,7 +63,6 @@ export interface InfraSource {
   /** Sequences of log entries matching sets of highlighting queries within an interval */
   logEntryHighlights: InfraLogEntryInterval[];
 
-  logItem: InfraLogItem;
   /** A snapshot of nodes */
   snapshot?: InfraSnapshotResponse | null;
 
@@ -231,24 +230,6 @@ export interface InfraLogEntryFieldColumn {
   value: string;
   /** A list of highlighted substrings of the value */
   highlights: string[];
-}
-
-export interface InfraLogItem {
-  /** The ID of the document */
-  id: string;
-  /** The index where the document was found */
-  index: string;
-  /** Time key for the document - derived from the source configuration timestamp and tiebreaker settings */
-  key: InfraTimeKey;
-  /** An array of flattened fields and values */
-  fields: InfraLogItemField[];
-}
-
-export interface InfraLogItemField {
-  /** The flattened field name */
-  field: string;
-  /** The value for the Field as a string */
-  value: string;
 }
 
 export interface InfraSnapshotResponse {
@@ -452,9 +433,6 @@ export interface LogEntryHighlightsInfraSourceArgs {
   /** The highlighting to apply to the log entries */
   highlights: InfraLogEntryHighlightInput[];
 }
-export interface LogItemInfraSourceArgs {
-  id: string;
-}
 export interface SnapshotInfraSourceArgs {
   timerange: InfraTimerangeInput;
 
@@ -513,7 +491,7 @@ export enum InfraNodeType {
   awsEC2 = 'awsEC2',
   awsS3 = 'awsS3',
   awsRDS = 'awsRDS',
-  awsSQS = 'awsSQS'
+  awsSQS = 'awsSQS',
 }
 
 export enum InfraSnapshotMetricType {
@@ -675,7 +653,6 @@ export namespace InfraSourceResolvers {
     /** Sequences of log entries matching sets of highlighting queries within an interval */
     logEntryHighlights?: LogEntryHighlightsResolver<InfraLogEntryInterval[], TypeParent, Context>;
 
-    logItem?: LogItemResolver<InfraLogItem, TypeParent, Context>;
     /** A snapshot of nodes */
     snapshot?: SnapshotResolver<InfraSnapshotResponse | null, TypeParent, Context>;
 
@@ -756,15 +733,6 @@ export namespace InfraSourceResolvers {
     filterQuery?: string | null;
     /** The highlighting to apply to the log entries */
     highlights: InfraLogEntryHighlightInput[];
-  }
-
-  export type LogItemResolver<
-    R = InfraLogItem,
-    Parent = InfraSource,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context, LogItemArgs>;
-  export interface LogItemArgs {
-    id: string;
   }
 
   export type SnapshotResolver<
@@ -1307,60 +1275,6 @@ export namespace InfraLogEntryFieldColumnResolvers {
   export type HighlightsResolver<
     R = string[],
     Parent = InfraLogEntryFieldColumn,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace InfraLogItemResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogItem> {
-    /** The ID of the document */
-    id?: IdResolver<string, TypeParent, Context>;
-    /** The index where the document was found */
-    index?: IndexResolver<string, TypeParent, Context>;
-    /** Time key for the document - derived from the source configuration timestamp and tiebreaker settings */
-    key?: KeyResolver<InfraTimeKey, TypeParent, Context>;
-    /** An array of flattened fields and values */
-    fields?: FieldsResolver<InfraLogItemField[], TypeParent, Context>;
-  }
-
-  export type IdResolver<R = string, Parent = InfraLogItem, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type IndexResolver<R = string, Parent = InfraLogItem, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type KeyResolver<
-    R = InfraTimeKey,
-    Parent = InfraLogItem,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type FieldsResolver<
-    R = InfraLogItemField[],
-    Parent = InfraLogItem,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace InfraLogItemFieldResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogItemField> {
-    /** The flattened field name */
-    field?: FieldResolver<string, TypeParent, Context>;
-    /** The value for the Field as a string */
-    value?: ValueResolver<string, TypeParent, Context>;
-  }
-
-  export type FieldResolver<
-    R = string,
-    Parent = InfraLogItemField,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type ValueResolver<
-    R = string,
-    Parent = InfraLogItemField,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }

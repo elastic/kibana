@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { DataServerPlugin } from './plugin';
+import { DataServerPlugin, DataPluginSetup } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
@@ -47,6 +47,8 @@ export {
   // timefilter
   RefreshInterval,
   TimeRange,
+  // utils
+  parseInterval,
 } from '../common';
 
 /**
@@ -91,4 +93,4 @@ export {
   getKbnTypeNames,
 } from '../common';
 
-export { DataServerPlugin as Plugin };
+export { DataServerPlugin as Plugin, DataPluginSetup as PluginSetup };

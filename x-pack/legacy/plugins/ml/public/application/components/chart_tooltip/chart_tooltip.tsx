@@ -7,10 +7,7 @@
 import classNames from 'classnames';
 import React, { useRef, FC } from 'react';
 import { TooltipValueFormatter } from '@elastic/charts';
-
-// TODO: Below import is temporary, use `react-use` lib instead.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useObservable } from '../../../../../../../../src/plugins/kibana_react/public/util/use_observable';
+import useObservable from 'react-use/lib/useObservable';
 
 import { chartTooltip$, ChartTooltipValue } from './chart_tooltip_service';
 
@@ -40,8 +37,7 @@ function useRefWithCallback() {
       if (left + tooltipWidth > contentWidth) {
         // the tooltip is hanging off the side of the page,
         // so move it to the other side of the target
-        const markerWidthAdjustment = 25;
-        left = left - (tooltipWidth + offset.x + markerWidthAdjustment);
+        left = left - (tooltipWidth + offset.x);
       }
 
       const top = targetPosition.top + offset.y - parentBounding.top;

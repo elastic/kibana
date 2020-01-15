@@ -17,46 +17,4 @@
  * under the License.
  */
 
-interface SearchErrorOptions {
-  status: string;
-  title: string;
-  message: string;
-  path: string;
-  type: string;
-}
-
-export class SearchError extends Error {
-  public name: string;
-  public status: string;
-  public title: string;
-  public message: string;
-  public path: string;
-  public type: string;
-
-  constructor({ status, title, message, path, type }: SearchErrorOptions) {
-    super(message);
-    this.name = 'SearchError';
-    this.status = status;
-    this.title = title;
-    this.message = message;
-    this.path = path;
-    this.type = type;
-
-    // captureStackTrace is only available in the V8 engine, so any browser using
-    // a different JS engine won't have access to this method.
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, SearchError);
-    }
-
-    // Babel doesn't support traditional `extends` syntax for built-in classes.
-    // https://babeljs.io/docs/en/caveats/#classes
-    Object.setPrototypeOf(this, SearchError.prototype);
-  }
-}
-
-export function getSearchErrorType({ message }: Pick<SearchError, 'message'>) {
-  const msg = message.toLowerCase();
-  if (msg.indexOf('unsupported query') > -1) {
-    return 'UNSUPPORTED_QUERY';
-  }
-}
+export { SearchError } from '../index';

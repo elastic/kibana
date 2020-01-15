@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export * from './fetch/types';
-export * from './search_source/types';
-export * from './search_strategy/types';
-export * from './utils/types';
+export {
+  ISearchSource,
+  EsQuerySortValue, // used externally by Discover
+  FetchOptions, // used externally by AggTypes
+  SortDirection, // used externally by Discover
+} from './index';

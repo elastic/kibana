@@ -6,9 +6,18 @@
 
 import React from 'react';
 import { ColorPickerPopover, Props } from '../color_picker_popover';
+import { ComponentStrings } from '../../../i18n';
+
+const { WorkpadConfig: strings } = ComponentStrings;
 
 export const WorkpadColorPicker = (props: Props) => {
-  return <ColorPickerPopover {...props} hasButtons={true} />;
+  return (
+    <ColorPickerPopover
+      {...props}
+      hasButtons={true}
+      ariaLabel={strings.getBackgroundColorLabel()}
+    />
+  );
 };
 
 WorkpadColorPicker.propTypes = ColorPickerPopover.propTypes;

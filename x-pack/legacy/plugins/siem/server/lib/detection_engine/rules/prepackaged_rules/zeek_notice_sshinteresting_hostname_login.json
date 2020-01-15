@@ -1,0 +1,17 @@
+{
+  "rule_id": "6a7f2b0a-3f24-4d58-aa84-243f1f0556d9",
+  "risk_score": 50,
+  "description": "Generated if a login originates or responds with a host where the reverse hostname lookup resolves to a name matched by the SSH::interesting_hostnames regular expression.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice SSH::Interesting_Hostname_Login",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"SSH::Interesting_Hostname_Login\" or rule.name: \"SSH::Interesting_Hostname_Login\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

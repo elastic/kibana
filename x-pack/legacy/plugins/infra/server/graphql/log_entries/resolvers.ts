@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
-
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import {
   InfraLogEntryColumn,
   InfraLogEntryFieldColumn,
@@ -20,7 +15,6 @@ import {
   InfraSourceResolvers,
 } from '../../graphql/types';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
-import { SourceConfigurationRuntimeType } from '../../lib/sources';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
@@ -40,11 +34,6 @@ export type InfraSourceLogEntryHighlightsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-export type InfraSourceLogItem = ChildResolverOf<
-  InfraResolverOf<InfraSourceResolvers.LogItemResolver>,
-  QuerySourceResolver
->;
-
 export const createLogEntriesResolvers = (libs: {
   logEntries: InfraLogEntriesDomain;
 }): {
@@ -52,7 +41,6 @@ export const createLogEntriesResolvers = (libs: {
     logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
     logEntryHighlights: InfraSourceLogEntryHighlightsResolver;
-    logItem: InfraSourceLogItem;
   };
   InfraLogEntryColumn: {
     __resolveType(
@@ -136,16 +124,6 @@ export const createLogEntriesResolvers = (libs: {
         filterQuery: args.filterQuery,
         entries,
       }));
-    },
-    async logItem(source, args, { req }) {
-      const sourceConfiguration = pipe(
-        SourceConfigurationRuntimeType.decode(source.configuration),
-        fold(errors => {
-          throw new Error(failure(errors).join('\n'));
-        }, identity)
-      );
-
-      return await libs.logEntries.getLogItem(req, args.id, sourceConfiguration);
     },
   },
   InfraLogEntryColumn: {

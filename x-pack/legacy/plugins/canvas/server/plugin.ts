@@ -7,7 +7,6 @@
 import { CoreSetup, PluginsSetup } from './shim';
 import { routes } from './routes';
 import { functions } from '../canvas_plugin_src/functions/server';
-import { registerCanvasUsageCollector } from './usage';
 import { loadSampleData } from './sample_data';
 
 export class Plugin {
@@ -61,10 +60,9 @@ export class Plugin {
       },
     });
 
-    registerCanvasUsageCollector(plugins.usageCollection, core);
     loadSampleData(
-      plugins.sampleData.addSavedObjectsToSampleDataset,
-      plugins.sampleData.addAppLinksToSampleDataset
+      plugins.home.sampleData.addSavedObjectsToSampleDataset,
+      plugins.home.sampleData.addAppLinksToSampleDataset
     );
   }
 }

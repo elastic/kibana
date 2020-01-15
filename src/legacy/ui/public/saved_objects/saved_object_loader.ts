@@ -18,7 +18,7 @@
  */
 import { SavedObject } from 'ui/saved_objects/types';
 import { ChromeStart, SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
-import { StringUtils } from '../utils/string_utils';
+import { StringUtils } from './helpers/string_utils';
 
 /**
  * The SavedObjectLoader class provides some convenience functions

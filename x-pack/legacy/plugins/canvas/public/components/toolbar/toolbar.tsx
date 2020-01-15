@@ -141,6 +141,7 @@ export const Toolbar = (props: Props) => {
                 color="text"
                 iconType="editorCodeBlock"
                 onClick={() => showHideTray(TrayType.expression)}
+                data-test-subj="canvasExpressionEditorButton"
               >
                 {strings.getEditorButtonLabel()}
               </EuiButtonEmpty>
