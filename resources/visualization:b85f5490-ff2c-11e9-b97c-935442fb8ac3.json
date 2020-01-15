@@ -1,0 +1,29 @@
+{
+   "migrationVersion": {
+      "visualization": "7.2.0"
+   }, 
+   "visualization": {
+      "visState": "{\"title\":\"Count of Alarms\",\"type\":\"metric\",\"params\":{\"addLegend\":false,\"addTooltip\":true,\"dimensions\":{\"metrics\":[{\"accessor\":0,\"aggType\":\"count\",\"format\":{\"id\":\"number\"},\"params\":{}}]},\"metric\":{\"colorSchema\":\"Green to Red\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"invertColors\":false,\"labels\":{\"show\":true},\"metricColorMode\":\"None\",\"percentageMode\":false,\"style\":{\"bgColor\":false,\"bgFill\":\"#000\",\"fontSize\":60,\"labelColor\":false,\"subText\":\"\"},\"useRanges\":false},\"type\":\"metric\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"# of Alarms\"}}]}", 
+      "description": "", 
+      "title": "Count of Alarms", 
+      "uiStateJSON": "{}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"exists\":{\"field\":\"RuleName\"},\"meta\":{\"alias\":null,\"disabled\":false,\"key\":\"RuleName\",\"negate\":false,\"type\":\"exists\",\"value\":\"exists\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2020-01-14T21:04:04.730Z", 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "id": "f655f660-db31-11e9-9a47-f1b6a93b3342", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index"
+      }, 
+      {
+         "type": "index-pattern", 
+         "id": "f655f660-db31-11e9-9a47-f1b6a93b3342", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      }
+   ]
+}

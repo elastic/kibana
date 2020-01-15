@@ -1,0 +1,29 @@
+{
+   "migrationVersion": {
+      "visualization": "7.2.0"
+   }, 
+   "visualization": {
+      "visState": "{\"title\":\"High Severity Alarms (Gauge)\",\"type\":\"gauge\",\"params\":{\"type\":\"gauge\",\"addTooltip\":true,\"addLegend\":true,\"isDisplayWarning\":false,\"gauge\":{\"verticalSplit\":false,\"extendRange\":true,\"percentageMode\":false,\"gaugeType\":\"Arc\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"Labels\",\"colorsRange\":[{\"from\":0,\"to\":10},{\"from\":11,\"to\":20},{\"from\":21,\"to\":50},{\"from\":51,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":true,\"color\":\"black\"},\"scale\":{\"show\":true,\"labels\":false,\"color\":\"rgba(105,112,125,0.2)\"},\"type\":\"meter\",\"style\":{\"bgWidth\":0.9,\"width\":0.9,\"mask\":false,\"bgMask\":false,\"maskBars\":50,\"bgFill\":\"rgba(105,112,125,0.2)\",\"bgColor\":true,\"subText\":\"\",\"fontSize\":60}},\"dimensions\":{\"x\":null,\"y\":[{\"accessor\":0,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"# Of High Severity Alarms\"}}]}", 
+      "description": "", 
+      "title": "High Severity Alarms (Gauge)", 
+      "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 10\":\"rgb(0,104,55)\",\"11 - 20\":\"rgb(183,224,117)\",\"21 - 50\":\"rgb(253,191,111)\",\"51 - 100\":\"rgb(165,0,38)\"}}}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"alias\":null,\"negate\":false,\"type\":\"phrase\",\"key\":\"RuleSeverity\",\"value\":\"High\",\"params\":{\"query\":\"High\"},\"disabled\":false,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"RuleSeverity\":{\"query\":\"High\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2020-01-14T21:04:04.730Z", 
+   "references": [
+      {
+         "type": "index-pattern", 
+         "id": "f655f660-db31-11e9-9a47-f1b6a93b3342", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index"
+      }, 
+      {
+         "type": "index-pattern", 
+         "id": "f655f660-db31-11e9-9a47-f1b6a93b3342", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      }
+   ]
+}
