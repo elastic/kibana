@@ -60,9 +60,9 @@ export const LocationStatusTags = ({ locations }: Props) => {
     }
   });
 
-  // Sort by recent timestamp
+  // Sort lexicographically by label
   upLocations.sort((a, b) => {
-    return a.timestamp < b.timestamp ? 1 : b.timestamp < a.timestamp ? -1 : 0;
+    return a.label > b.label ? 1 : b.label > a.label ? -1 : 0;
   });
 
   moment.locale('en', {
