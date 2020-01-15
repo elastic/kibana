@@ -20,18 +20,25 @@
 import React, { useCallback } from 'react';
 import { debounce } from 'lodash';
 
+import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '../../components/split_panel';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
-import { useServicesContext } from '../../contexts';
+import { useEditorReadContext, useServicesContext } from '../../contexts';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
-export const Editor = () => {
+interface Props {
+  loading: boolean;
+}
+
+export const Editor = ({ loading }: Props) => {
   const {
     services: { storage },
   } = useServicesContext();
+
+  const { currentTextObject } = useEditorReadContext();
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
@@ -45,19 +52,25 @@ export const Editor = () => {
     []
   );
 
+  if (!currentTextObject) return null;
+
   return (
     <PanelsContainer onPanelWidthChange={onPanelWidthChange} resizerClassName="conApp__resizer">
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
         initialWidth={firstPanelWidth}
       >
-        <EditorUI />
+        {loading ? (
+          <EditorContentSpinner />
+        ) : (
+          <EditorUI initialTextValue={currentTextObject.text} />
+        )}
       </Panel>
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
         initialWidth={secondPanelWidth}
       >
-        <EditorOutput />
+        {loading ? <EditorContentSpinner /> : <EditorOutput />}
       </Panel>
     </PanelsContainer>
   );

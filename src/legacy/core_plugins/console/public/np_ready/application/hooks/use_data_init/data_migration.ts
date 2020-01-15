@@ -17,11 +17,30 @@
  * under the License.
  */
 
-export * from './split_panel';
-export { SomethingWentWrongCallout } from './something_went_wrong_callout';
-export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
-export { ConsoleMenu } from './console_menu';
-export { WelcomePanel } from './welcome_panel';
-export { AutocompleteOptions, DevToolsSettingsModal } from './settings_modal';
-export { HelpPanel } from './help_panel';
-export { EditorContentSpinner } from './editor_content_spinner';
+import { History } from '../../../services';
+import { ObjectStorageClient } from '../../../../../common/types';
+
+export interface Dependencies {
+  history: History;
+  objectStorageClient: ObjectStorageClient;
+}
+
+/**
+ * Once off migration to new text object data structure
+ */
+export async function migrateToTextObjects({
+  history,
+  objectStorageClient: objectStorageClient,
+}: Dependencies): Promise<void> {
+  const legacyTextContent = history.getLegacySavedEditorState();
+
+  if (!legacyTextContent) return;
+
+  await objectStorageClient.text.create({
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    text: legacyTextContent.content,
+  });
+
+  history.deleteLegacySavedEditorState();
+}
