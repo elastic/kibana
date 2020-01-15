@@ -7,6 +7,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const DEFAULT_MAX_WORKERS = 100;
+export const DEFAULT_POLL_INTERVAL = 3000;
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -17,7 +18,7 @@ export const configSchema = schema.object({
   }),
   /* How often, in milliseconds, the task manager will look for more work. */
   poll_interval: schema.number({
-    defaultValue: 3000,
+    defaultValue: DEFAULT_POLL_INTERVAL,
     min: 100,
   }),
   /* How many requests can Task Manager buffer before it rejects new requests. */
