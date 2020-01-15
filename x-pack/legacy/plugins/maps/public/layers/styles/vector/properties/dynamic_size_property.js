@@ -5,7 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { getComputedFieldName } from '../style_util';
+
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
   LARGE_MAKI_ICON_SIZE,
@@ -43,8 +43,27 @@ function getSymbolSizeIcons() {
 }
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, isSymbolizedAsIcon) {
+    super(options, styleName, field, getFieldMeta, getFieldFormatter);
+    this._isSymbolizedAsIcon = isSymbolizedAsIcon;
+  }
+
+  supportsFeatureState() {
+    // mb style "icon-size" does not support feature state
+    if (this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon) {
+      return false;
+    }
+
+    // mb style "text-size" does not support feature state
+    if (this.getStyleName() === VECTOR_STYLES.LABEL_SIZE) {
+      return false;
+    }
+
+    return true;
+  }
+
   syncHaloWidthWithMb(mbLayerId, mbMap) {
-    const haloWidth = this._getMbSize();
+    const haloWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
   }
 
@@ -57,7 +76,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
 
       const halfIconPixels = iconPixels / 2;
-      const targetName = getComputedFieldName(VECTOR_STYLES.ICON_SIZE, this._options.field.name);
+      const targetName = this.getComputedFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
@@ -75,24 +94,29 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   syncCircleStrokeWidthWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
+    const lineWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
   }
 
   syncCircleRadiusWithMb(mbLayerId, mbMap) {
-    const circleRadius = this._getMbSize();
+    const circleRadius = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
   }
 
   syncLineWidthWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
+    const lineWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'line-width', lineWidth);
   }
 
-  _getMbSize() {
+  syncLabelSizeWithMb(mbLayerId, mbMap) {
+    const lineWidth = this.getMbSizeExpression();
+    mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
+  }
+
+  getMbSizeExpression() {
     if (this._isSizeDynamicConfigComplete(this._options)) {
       return this._getMbDataDrivenSize({
-        targetName: getComputedFieldName(this._styleName, this._options.field.name),
+        targetName: this.getComputedFieldName(),
         minSize: this._options.minSize,
         maxSize: this._options.maxSize,
       });
@@ -101,10 +125,11 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
+    const lookup = this.supportsFeatureState() ? 'feature-state' : 'get';
     return [
       'interpolate',
       ['linear'],
-      ['coalesce', ['feature-state', targetName], 0],
+      ['coalesce', [lookup, targetName], 0],
       0,
       minSize,
       1,
@@ -121,7 +146,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     );
   }
 
-  renderHeader() {
+  renderRangeLegendHeader() {
     let icons;
     if (this.getStyleName() === VECTOR_STYLES.LINE_WIDTH) {
       icons = getLineWidthIcons();
@@ -132,7 +157,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     }
 
     return (
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
         {icons.map((icon, index) => {
           const isLast = index === icons.length - 1;
           let spacer;

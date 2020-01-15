@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { HttpServiceBase } from '../../../../../../../../core/public';
+import { HttpSetup } from '../../../../../../../../core/public';
 import { IndexPatternCreationConfig, UrlHandler, IndexPatternCreationOption } from './config';
 
 export class IndexPatternCreationManager {
   private configs: IndexPatternCreationConfig[];
 
-  constructor(private readonly httpClient: HttpServiceBase) {
+  constructor(private readonly httpClient: HttpSetup) {
     this.configs = [];
   }
 

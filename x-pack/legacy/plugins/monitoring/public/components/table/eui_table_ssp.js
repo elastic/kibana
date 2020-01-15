@@ -26,6 +26,11 @@ export function EuiMonitoringSSPTable({
     index: pagination.pageIndex,
     size: pagination.pageSize,
   });
+
+  if (!pagination.totalItemCount) {
+    pagination.totalItemCount = (items && items.length) || 0;
+  }
+
   const [sort, setSort] = React.useState(props.sorting);
 
   if (search.box && !search.box['data-test-subj']) {

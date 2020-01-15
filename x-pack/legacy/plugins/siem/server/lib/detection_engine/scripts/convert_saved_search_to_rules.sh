@@ -9,4 +9,6 @@
 set -e
 ./check_env_variables.sh
 
-node ../../../../scripts/convert_saved_search_to_rules.js $1 $2
+OUTPUT=${2:-../rules/prepackaged_rules}
+
+node ../../../../scripts/convert_saved_search_to_rules.js $1 $OUTPUT

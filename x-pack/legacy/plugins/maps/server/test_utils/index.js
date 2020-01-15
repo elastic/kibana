@@ -25,24 +25,3 @@ export const getMockCallWithInternal = (hits = defaultMockSavedObjects) => {
 export const getMockTaskFetch = (docs = defaultMockTaskDocs) => {
   return () => Promise.resolve({ docs });
 };
-
-export const getMockKbnServer = (
-  mockCallWithInternal = getMockCallWithInternal(),
-  mockTaskFetch = getMockTaskFetch()
-) => ({
-  plugins: {
-    elasticsearch: {
-      getCluster: () => ({
-        callWithInternalUser: mockCallWithInternal,
-      }),
-    },
-    xpack_main: {},
-    task_manager: {
-      registerTaskDefinitions: () => undefined,
-      schedule: () => Promise.resolve(),
-      fetch: mockTaskFetch,
-    },
-  },
-  config: () => ({ get: () => '' }),
-  log: () => undefined,
-});

@@ -8,15 +8,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
-import { kfetch } from 'ui/kfetch';
-
+import { npStart } from 'ui/new_platform';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { jobCustomSettingsRT } from './ml_api_types';
 
 export const callGetMlModuleAPI = async (moduleId: string) => {
-  const response = await kfetch({
+  const response = await npStart.core.http.fetch(`/api/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
-    pathname: `/api/ml/modules/get_module/${moduleId}`,
   });
 
   return pipe(

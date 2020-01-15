@@ -1,0 +1,17 @@
+{
+  "description": "EQL - PsExec Lateral Movement Command",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "EQL - PsExec Lateral Movement Command",
+  "query": "process.name:psexec.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" ",
+  "risk_score": 50,
+  "rule_id": "55d551c6-333b-4665-ab7e-5d14a59715ce",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

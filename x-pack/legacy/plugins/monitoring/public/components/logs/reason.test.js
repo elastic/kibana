@@ -29,6 +29,13 @@ describe('Logs', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('should render with a no structured logs reason', () => {
+    const component = shallow(
+      <Reason reason={{ indexPatternExists: true, typeExists: true, usingStructuredLogs: false }} />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
   it('should render with a no cluster found reason', () => {
     const component = shallow(
       <Reason reason={{ indexPatternExists: true, typeExists: true, clusterExists: false }} />

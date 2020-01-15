@@ -30,6 +30,26 @@ export function getVectorStyleLabel(styleName) {
       return i18n.translate('xpack.maps.styles.vector.orientationLabel', {
         defaultMessage: 'Symbol orientation',
       });
+    case VECTOR_STYLES.LABEL_TEXT:
+      return i18n.translate('xpack.maps.styles.vector.labelLabel', {
+        defaultMessage: 'Label',
+      });
+    case VECTOR_STYLES.LABEL_COLOR:
+      return i18n.translate('xpack.maps.styles.vector.labelColorLabel', {
+        defaultMessage: 'Label color',
+      });
+    case VECTOR_STYLES.LABEL_SIZE:
+      return i18n.translate('xpack.maps.styles.vector.labelSizeLabel', {
+        defaultMessage: 'Label size',
+      });
+    case VECTOR_STYLES.LABEL_BORDER_COLOR:
+      return i18n.translate('xpack.maps.styles.vector.labelBorderColorLabel', {
+        defaultMessage: 'Label border color',
+      });
+    case VECTOR_STYLES.LABEL_BORDER_SIZE:
+      return i18n.translate('xpack.maps.styles.vector.labelBorderWidthLabel', {
+        defaultMessage: 'Label border width',
+      });
     default:
       return styleName;
   }

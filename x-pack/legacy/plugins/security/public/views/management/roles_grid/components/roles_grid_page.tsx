@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
   EuiButtonIcon,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
@@ -108,17 +109,14 @@ class RolesGridPageUI extends Component<Props, State> {
           ) : null}
 
           {
-            // @ts-ignore missing rowProps typedef
             <EuiInMemoryTable
               itemId="name"
               responsive={false}
               columns={this.getColumnConfig(intl)}
               hasActions={true}
               selection={{
-                itemId: 'name',
                 selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
-                selectableMessage: (selectable: boolean) =>
-                  !selectable ? 'Role is reserved' : undefined,
+                selectableMessage: (selectable: boolean) => (!selectable ? 'Role is reserved' : ''),
                 onSelectionChange: (selection: Role[]) => this.setState({ selection }),
               }}
               pagination={{
@@ -144,7 +142,6 @@ class RolesGridPageUI extends Component<Props, State> {
                   direction: 'asc',
                 },
               }}
-              // @ts-ignore missing rowProps typedef
               rowProps={() => {
                 return {
                   'data-test-subj': 'roleRow',
@@ -271,7 +268,7 @@ class RolesGridPageUI extends Component<Props, State> {
           },
         ],
       },
-    ];
+    ] as Array<EuiBasicTableColumn<Role>>;
   };
 
   private getVisibleRoles = () => {

@@ -26,23 +26,26 @@ exports[`ApiKeysGridPage renders a callout when API keys are not enabled 1`] = `
           type="alert"
         >
           <EuiIconAlert
-            aria-hidden="true"
+            aria-hidden={true}
             className="euiIcon euiIcon--medium euiIcon-isLoaded euiCallOutHeader__icon"
             focusable="false"
+            role="img"
             style={null}
           >
             <svg
-              aria-hidden="true"
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoaded euiCallOutHeader__icon"
               focusable="false"
               height={16}
+              role="img"
               style={null}
               viewBox="0 0 16 16"
               width={16}
               xmlns="http://www.w3.org/2000/svg"
             >
+              <title />
               <path
-                d="M7.59 10.059L7.35 5.18h1.3L8.4 10.06h-.81zm.394 1.901a.61.61 0 0 1-.448-.186.606.606 0 0 1-.186-.444c0-.174.062-.323.186-.446a.614.614 0 0 1 .448-.184c.169 0 .315.06.44.182.124.122.186.27.186.448a.6.6 0 0 1-.189.446.607.607 0 0 1-.437.184zM2 14a1 1 0 0 1-.878-1.479l6-11a1 1 0 0 1 1.756 0l6 11A1 1 0 0 1 14 14H2zm0-1h12L8 2 2 13z"
+                d="M7.59 10.059L7.35 5.18h1.3L8.4 10.06h-.81zm.394 1.901a.61.61 0 01-.448-.186.606.606 0 01-.186-.444c0-.174.062-.323.186-.446a.614.614 0 01.448-.184c.169 0 .315.06.44.182.124.122.186.27.186.448a.6.6 0 01-.189.446.607.607 0 01-.437.184zM2 14a1 1 0 01-.878-1.479l6-11a1 1 0 011.756 0l6 11A1 1 0 0114 14H2zm0-1h12L8 2 2 13z"
                 fillRule="evenodd"
               />
             </svg>
@@ -123,7 +126,6 @@ exports[`ApiKeysGridPage renders permission denied if user does not have require
     >
       <EuiPageContent
         horizontalPosition="center"
-        panelPaddingSize="l"
       >
         <EuiPanel
           className="euiPageContent euiPageContent--horizontalCenter"
@@ -164,25 +166,30 @@ exports[`ApiKeysGridPage renders permission denied if user does not have require
                   type="securityApp"
                 >
                   <EuiIconAppSecurity
+                    aria-hidden={true}
                     className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoaded"
                     focusable="false"
+                    role="img"
                     style={null}
                   >
                     <svg
+                      aria-hidden={true}
                       className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoaded"
                       focusable="false"
                       height={32}
+                      role="img"
                       style={null}
                       viewBox="0 0 32 32"
                       width={32}
                       xmlns="http://www.w3.org/2000/svg"
                     >
+                      <title />
                       <path
-                        d="M14 32l-.36-.14A21.07 21.07 0 0 1 0 12.07V5.44L14 .06l14 5.38v6.63a21.07 21.07 0 0 1-13.64 19.78L14 32zM2 6.82v5.25a19.08 19.08 0 0 0 12 17.77 19.08 19.08 0 0 0 12-17.77V6.82L14 2.2 2 6.82z"
+                        d="M14 32l-.36-.14A21.07 21.07 0 010 12.07V5.44L14 .06l14 5.38v6.63a21.07 21.07 0 01-13.64 19.78L14 32zM2 6.82v5.25a19.08 19.08 0 0012 17.77 19.08 19.08 0 0012-17.77V6.82L14 2.2 2 6.82z"
                       />
                       <path
                         className="euiIcon__fillSecondary"
-                        d="M9 17.83h2V23H9zM11 10.18V7H9v3.18a3 3 0 1 0 2 0zM10 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM17 7h2v5.17h-2zM21 17a3 3 0 1 0-4 2.82V23h2v-3.18A3 3 0 0 0 21 17zm-3 1a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                        d="M9 17.83h2V23H9zM11 10.18V7H9v3.18a3 3 0 102 0zM10 14a1 1 0 110-2 1 1 0 010 2zM17 7h2v5.17h-2zM21 17a3 3 0 10-4 2.82V23h2v-3.18A3 3 0 0021 17zm-3 1a1 1 0 110-2 1 1 0 010 2z"
                       />
                     </svg>
                   </EuiIconAppSecurity>

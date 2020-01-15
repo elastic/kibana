@@ -31,7 +31,7 @@ import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { APPLICATION_PREFIX } from '../../common/constants';
-import { SecurityLicense } from '../licensing';
+import { SecurityLicense } from '../../common/licensing';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';

@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { TaskManagerStartContract } from './shim';
+import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
 import { GetBasePathFunction } from './types';
 
 interface CreateExecuteFunctionOptions {
@@ -18,7 +18,7 @@ export interface ExecuteOptions {
   id: string;
   params: Record<string, any>;
   spaceId: string;
-  apiKey?: string;
+  apiKey: string | null;
 }
 
 export function createExecuteFunction({

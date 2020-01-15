@@ -304,7 +304,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
   const sorting = {
     sort: {
       field: 'name',
-      direction: 'asc',
+      direction: 'asc' as const,
     },
   };
 
@@ -394,7 +394,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'repository',
         name: i18n.translate('xpack.snapshotRestore.policyList.table.repositoryFilterLabel', {
           defaultMessage: 'Repository',

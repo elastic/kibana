@@ -5,6 +5,7 @@
  */
 
 import React, { createContext, memo, useContext, useEffect, useState } from 'react';
+import { TimelineAction } from './body/actions';
 
 const initTimelineContext = false;
 export const TimelineContext = createContext<boolean>(initTimelineContext);
@@ -17,15 +18,19 @@ export const useTimelineWidthContext = () => useContext(TimelineWidthContext);
 export interface TimelineTypeContextProps {
   documentType?: string;
   footerText?: string;
-  showCheckboxes: boolean;
-  showRowRenderers: boolean;
+  loadingText?: string;
+  queryFields?: string[];
+  selectAll?: boolean;
+  timelineActions?: TimelineAction[];
   title?: string;
 }
 const initTimelineType: TimelineTypeContextProps = {
   documentType: undefined,
   footerText: undefined,
-  showCheckboxes: false,
-  showRowRenderers: true,
+  loadingText: undefined,
+  queryFields: [],
+  selectAll: false,
+  timelineActions: [],
   title: undefined,
 };
 export const TimelineTypeContext = createContext<TimelineTypeContextProps>(initTimelineType);
@@ -40,30 +45,35 @@ interface ManageTimelineContextProps {
 
 // todo we need to refactor this as more complex context/reducer with useReducer
 // to avoid so many Context, at least the separation of code is there now
-export const ManageTimelineContext = memo<ManageTimelineContextProps>(
-  ({ children, loading, width, type = initTimelineType }) => {
-    const [myLoading, setLoading] = useState(initTimelineContext);
-    const [myWidth, setWidth] = useState(initTimelineWidth);
-    const [myType, setType] = useState(initTimelineType);
+const ManageTimelineContextComponent: React.FC<ManageTimelineContextProps> = ({
+  children,
+  loading,
+  width,
+  type = initTimelineType,
+}) => {
+  const [myLoading, setLoading] = useState(initTimelineContext);
+  const [myWidth, setWidth] = useState(initTimelineWidth);
+  const [myType, setType] = useState(initTimelineType);
 
-    useEffect(() => {
-      setLoading(loading);
-    }, [loading]);
+  useEffect(() => {
+    setLoading(loading);
+  }, [loading]);
 
-    useEffect(() => {
-      setType(type);
-    }, [type]);
+  useEffect(() => {
+    setType(type);
+  }, [type]);
 
-    useEffect(() => {
-      setWidth(width);
-    }, [width]);
+  useEffect(() => {
+    setWidth(width);
+  }, [width]);
 
-    return (
-      <TimelineContext.Provider value={myLoading}>
-        <TimelineWidthContext.Provider value={myWidth}>
-          <TimelineTypeContext.Provider value={myType}>{children}</TimelineTypeContext.Provider>
-        </TimelineWidthContext.Provider>
-      </TimelineContext.Provider>
-    );
-  }
-);
+  return (
+    <TimelineContext.Provider value={myLoading}>
+      <TimelineWidthContext.Provider value={myWidth}>
+        <TimelineTypeContext.Provider value={myType}>{children}</TimelineTypeContext.Provider>
+      </TimelineWidthContext.Provider>
+    </TimelineContext.Provider>
+  );
+};
+
+export const ManageTimelineContext = memo(ManageTimelineContextComponent);

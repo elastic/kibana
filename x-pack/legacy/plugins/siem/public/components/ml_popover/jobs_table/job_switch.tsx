@@ -5,7 +5,7 @@
  */
 
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import { SiemJob } from '../types';
 
@@ -47,6 +47,13 @@ export const JobSwitchComponent = ({
   onJobStateChange,
 }: JobSwitchProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const handleChange = useCallback(
+    e => {
+      setIsLoading(true);
+      onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
+    },
+    [job, setIsLoading, onJobStateChange]
+  );
 
   return (
     <EuiFlexGroup justifyContent="spaceAround">
@@ -58,10 +65,7 @@ export const JobSwitchComponent = ({
             data-test-subj="job-switch"
             disabled={isFailure(job.jobState, job.datafeedState)}
             checked={isChecked(job.jobState, job.datafeedState)}
-            onChange={e => {
-              setIsLoading(true);
-              onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
-            }}
+            onChange={handleChange}
             showLabel={false}
             label=""
           />

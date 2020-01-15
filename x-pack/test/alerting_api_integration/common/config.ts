@@ -18,17 +18,18 @@ interface CreateTestConfigOptions {
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
-  '.server-log',
-  '.slack',
   '.email',
   '.index',
   '.pagerduty',
+  '.server-log',
+  '.servicenow',
+  '.slack',
   '.webhook',
-  'test.noop',
-  'test.index-record',
-  'test.failing',
-  'test.rate-limit',
   'test.authorization',
+  'test.failing',
+  'test.index-record',
+  'test.noop',
+  'test.rate-limit',
 ];
 
 // eslint-disable-next-line import/no-default-export
@@ -77,6 +78,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

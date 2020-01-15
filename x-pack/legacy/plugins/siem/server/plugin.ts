@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Logger } from 'src/core/server';
+import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../../../plugins/features/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -15,8 +16,11 @@ import {
   timelineSavedObjectType,
 } from './saved_objects';
 
+export type SiemPluginSecurity = Pick<SecurityPlugin, 'authc'>;
+
 export interface PluginsSetup {
   features: FeaturesSetupContract;
+  security: SiemPluginSecurity;
 }
 
 export class Plugin {
@@ -33,7 +37,6 @@ export class Plugin {
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     this.logger.debug('Shim plugin setup');
-
     plugins.features.registerFeature({
       id: this.name,
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
@@ -57,7 +60,16 @@ export class Plugin {
             ],
             read: ['config'],
           },
-          ui: ['show'],
+          ui: [
+            'show',
+            'crud',
+            'alerting:show',
+            'actions:show',
+            'alerting:save',
+            'actions:save',
+            'alerting:delete',
+            'actions:delete',
+          ],
         },
         read: {
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
@@ -70,12 +82,20 @@ export class Plugin {
               timelineSavedObjectType,
             ],
           },
-          ui: ['show'],
+          ui: [
+            'show',
+            'alerting:show',
+            'actions:show',
+            'alerting:save',
+            'actions:save',
+            'alerting:delete',
+            'actions:delete',
+          ],
         },
       },
     });
 
-    const libs = compose(core, this.context.env);
+    const libs = compose(core, plugins, this.context.env);
     initServer(libs);
   }
 }

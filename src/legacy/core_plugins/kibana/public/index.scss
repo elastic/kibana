@@ -11,7 +11,7 @@
 @import './dev_tools/index';
 
 // Discover styles
-@import './discover/index';
+@import 'discover/index';
 
 // Home styles
 @import './home/index';
@@ -24,6 +24,9 @@
 
 // Management styles
 @import './management/index';
+
+// Local application mount wrapper styles
+@import 'local_application_service/index';
 
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS

@@ -30,13 +30,7 @@ import { Browsers } from './remote/browsers';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const { driver, browserType, consoleLog$ } = await getService('__webdriver__').init();
-
-  consoleLog$.subscribe(({ message, level }) => {
-    log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
-      `browser[${level}] ${message}`
-    );
-  });
+  const { driver, browserType } = await getService('__webdriver__').init();
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
 
@@ -203,6 +197,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         return await driver.get(urlWithTime);
       }
       return await driver.get(url);
+    }
+
+    /**
+     * Pauses the execution in the browser, similar to setting a breakpoint for debugging.
+     * @return {Promise<void>}
+     */
+    public async pause() {
+      await driver.executeAsyncScript(`(async () => { debugger; return Promise.resolve(); })()`);
     }
 
     /**

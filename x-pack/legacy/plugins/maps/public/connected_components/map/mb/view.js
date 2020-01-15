@@ -16,6 +16,7 @@ import { getGlyphUrl, isRetina } from '../../../meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
+import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 import chrome from 'ui/chrome';
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
@@ -24,6 +25,7 @@ import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
 
 mapboxgl.workerUrl = mbWorkerUrl;
+mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
 export class MBMapContainer extends React.Component {
   state = {
@@ -188,18 +190,20 @@ export class MBMapContainer extends React.Component {
         this.props.extentChanged(this._getMapState());
       }, 100)
     );
-
-    const throttledSetMouseCoordinates = _.throttle(e => {
-      this.props.setMouseCoordinates({
-        lat: e.lngLat.lat,
-        lon: e.lngLat.lng,
+    // Attach event only if view control is visible, which shows lat/lon
+    if (!this.props.hideViewControl) {
+      const throttledSetMouseCoordinates = _.throttle(e => {
+        this.props.setMouseCoordinates({
+          lat: e.lngLat.lat,
+          lon: e.lngLat.lng,
+        });
+      }, 100);
+      this.state.mbMap.on('mousemove', throttledSetMouseCoordinates);
+      this.state.mbMap.on('mouseout', () => {
+        throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
+        this.props.clearMouseCoordinates();
       });
-    }, 100);
-    this.state.mbMap.on('mousemove', throttledSetMouseCoordinates);
-    this.state.mbMap.on('mouseout', () => {
-      throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
-      this.props.clearMouseCoordinates();
-    });
+    }
   }
 
   _initResizerChecker() {

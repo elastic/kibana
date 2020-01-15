@@ -1,0 +1,189 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/AxisConfig extended 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
+    id="generated-id-row"
+  >
+    <div
+      className="euiFormRow__labelWrapper"
+    >
+      <label
+        className="euiFormLabel euiFormRow__label"
+        htmlFor="generated-id"
+      >
+        Position
+      </label>
+    </div>
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        className="euiFormControlLayout euiFormControlLayout--compressed"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <select
+            className="euiSelect euiSelect--compressed"
+            id="generated-id"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            onMouseUp={[Function]}
+            value="bottom"
+          >
+            <option
+              value="bottom"
+            >
+              bottom
+            </option>
+            <option
+              value="top"
+            >
+              top
+            </option>
+          </select>
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              className="euiFormControlLayoutCustomIcon"
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                focusable="false"
+                height={16}
+                role="img"
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+</div>
+`;
+
+exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
+    id="generated-id-row"
+  >
+    <div
+      className="euiFormRow__labelWrapper"
+    >
+      <label
+        className="euiFormLabel euiFormRow__label"
+        htmlFor="generated-id"
+      >
+        Position
+      </label>
+    </div>
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        className="euiFormControlLayout euiFormControlLayout--compressed"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <select
+            className="euiSelect euiSelect--compressed"
+            id="generated-id"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            onMouseUp={[Function]}
+            value="left"
+          >
+            <option
+              value="left"
+            >
+              left
+            </option>
+            <option
+              value="right"
+            >
+              right
+            </option>
+          </select>
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              className="euiFormControlLayoutCustomIcon"
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                focusable="false"
+                height={16}
+                role="img"
+                style={null}
+                viewBox="0 0 16 16"
+                width={16}
+                xmlns="http://www.w3.org/2000/svg"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+</div>
+`;
+
+exports[`Storyshots arguments/AxisConfig/components extended disabled 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiText euiText--extraSmall"
+  >
+    <div
+      className="euiTextColor euiTextColor--subdued"
+    >
+      <p>
+        Switch on to view axis settings
+      </p>
+    </div>
+  </div>
+</div>
+`;

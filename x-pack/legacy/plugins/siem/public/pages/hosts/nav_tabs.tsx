@@ -49,6 +49,13 @@ export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
       disabled: false,
       urlKey: 'host',
     },
+    [HostsTableType.alerts]: {
+      id: HostsTableType.alerts,
+      name: i18n.NAVIGATION_ALERTS_TITLE,
+      href: getTabsOnHostsUrl(HostsTableType.alerts),
+      disabled: false,
+      urlKey: 'host',
+    },
   };
 
   return hasMlUserPermissions ? hostsNavTabs : omit([HostsTableType.anomalies], hostsNavTabs);

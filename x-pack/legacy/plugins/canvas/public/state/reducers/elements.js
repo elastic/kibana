@@ -28,7 +28,7 @@ function getNodeIndexById(page, nodeId, location) {
   return page[location].findIndex(node => node.id === nodeId);
 }
 
-function assignNodeProperties(workpadState, pageId, nodeId, props) {
+export function assignNodeProperties(workpadState, pageId, nodeId, props) {
   const pageIndex = getPageIndexById(workpadState, pageId);
   const location = getLocationFromIds(workpadState, pageId, nodeId);
   const nodesPath = `pages.${pageIndex}.${location}`;

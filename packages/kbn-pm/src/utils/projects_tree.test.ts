@@ -43,7 +43,7 @@ test('handles projects outside root folder', async () => {
 });
 
 test('handles projects within projects outside root folder', async () => {
-  const projectPaths = getProjectPaths(rootPath, {});
+  const projectPaths = getProjectPaths({ rootPath });
   const projects = await getProjects(rootPath, projectPaths);
 
   const tree = await renderProjectsTree(rootPath, projects);
