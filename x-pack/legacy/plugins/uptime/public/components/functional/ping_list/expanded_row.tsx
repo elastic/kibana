@@ -5,7 +5,14 @@
  */
 // @ts-ignore formatNumber
 import { formatNumber } from '@elastic/eui/lib/services/format';
-import { EuiCodeBlock, EuiDescriptionList, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Ping, HttpBody } from '../../../../common/graphql/types';
@@ -43,16 +50,8 @@ const BodyExcerpt = ({ content }: { content: string }) =>
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
 
-  // Show the error block
-  if (ping.error) {
-    listItems.push({
-      title: i18n.translate('xpack.uptime.pingList.expandedRow.error', { defaultMessage: 'Error' }),
-      description: <EuiText>{ping.error.message}</EuiText>,
-    });
-  }
-
   // Show the body, if present
-  if (ping.http && ping.http.response && ping.http.response.body) {
+  if (ping.http?.response?.body) {
     const body = ping.http.response.body;
 
     listItems.push({
@@ -67,5 +66,25 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
       ),
     });
   }
-  return <EuiDescriptionList listItems={listItems} />;
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        {ping?.error && (
+          <EuiCallOut
+            color={'danger'}
+            title={i18n.translate('xpack.uptime.pingList.expandedRow.error', {
+              defaultMessage: 'Error',
+            })}
+          >
+            <EuiText>{ping.error.message}</EuiText>
+          </EuiCallOut>
+        )}
+        {ping.http?.response?.body && (
+          <EuiCallOut>
+            <EuiDescriptionList listItems={listItems} />
+          </EuiCallOut>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };

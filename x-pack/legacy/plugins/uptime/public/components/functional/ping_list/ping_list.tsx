@@ -196,17 +196,20 @@ export const PingListComponent = ({
     align: 'right',
     width: '24px',
     isExpander: true,
-    render: (item: Ping) => (
-      <EuiButtonIcon
-        onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
-        aria-label={
-          itemIdToExpandedRowMap[item.id]
-            ? i18n.translate('xpack.uptime.pingList.collapseRow', { defaultMessage: 'Collapse' })
-            : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
-        }
-        iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-      />
-    ),
+    render: (item: Ping) => {
+      return (
+        <EuiButtonIcon
+          onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
+          disabled={!item.error && !(item.http?.response?.body?.bytes > 0)}
+          aria-label={
+            itemIdToExpandedRowMap[item.id]
+              ? i18n.translate('xpack.uptime.pingList.collapseRow', { defaultMessage: 'Collapse' })
+              : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
+          }
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+        />
+      );
+    },
   });
   const pagination: Pagination = {
     initialPageSize: 20,
