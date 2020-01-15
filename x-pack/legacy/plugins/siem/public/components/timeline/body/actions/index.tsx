@@ -14,15 +14,15 @@ import { EventsLoading, EventsTd, EventsTdContent, EventsTdGroupActions } from '
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
 import { OnRowSelected } from '../../events';
-import { TimelineNonEcsData } from '../../../../graphql/types';
+import { Ecs } from '../../../../graphql/types';
 
 export interface TimelineActionProps {
   eventId: string;
-  data: TimelineNonEcsData[];
+  ecsData: Ecs;
 }
 
 export interface TimelineAction {
-  getAction: ({ eventId, data }: TimelineActionProps) => JSX.Element;
+  getAction: ({ eventId, ecsData }: TimelineActionProps) => JSX.Element;
   width: number;
   id: string;
 }

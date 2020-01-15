@@ -24,7 +24,13 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  'detection-engine': [],
+  'detection-engine': [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   host: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
