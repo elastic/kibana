@@ -12,6 +12,7 @@ import { security } from './legacy/plugins/security';
 import { searchprofiler } from './legacy/plugins/searchprofiler';
 import { ml } from './legacy/plugins/ml';
 import { tilemap } from './legacy/plugins/tilemap';
+import { watcher } from './legacy/plugins/watcher';
 import { grokdebugger } from './legacy/plugins/grokdebugger';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { logstash } from './legacy/plugins/logstash';
@@ -54,6 +55,7 @@ module.exports = function(kibana) {
     searchprofiler(kibana),
     ml(kibana),
     tilemap(kibana),
+    watcher(kibana),
     grokdebugger(kibana),
     dashboardMode(kibana),
     logstash(kibana),
