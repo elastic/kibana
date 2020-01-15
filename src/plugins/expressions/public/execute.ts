@@ -65,6 +65,7 @@ export class ExpressionDataHandler {
         getInitialContext,
         inspectorAdapters: this.inspectorAdapters,
         abortSignal: this.abortController.signal,
+        variables: params.variables,
       })
       .then(
         (v: IInterpreterResult) => {
