@@ -27,7 +27,7 @@ Each plugin should declare dependencies on the other plugins explicitly. Plugins
 "optionalPlugins": ["c"],
 ```
 ### Explicit API declaration
-Each plugins defines API & extension points explicitly. Any other API is not declared explicitly as public, should be considered private.
+Each plugins defines API & extension points explicitly. Any other API that not declared explicitly as public should be considered private. HTTP endpoints belonging to other plugins are considered private. Plugins should expose JavaScript interfaces on top of these HTTP endpoints for other plugins to consume.
 ```js
 // GOOD
 deps.plugin.getData();
@@ -35,7 +35,7 @@ deps.plugin.getData();
 `GET /api/plugin/data`
 ```
 ### Encapsulated state
-Each plugin encapsulates its internal state. It doesn't rely on any kind of global state. Plugins provide an internal state via explicit API, reflecting the dynamic nature of the state (an event bus, observables, getter/setter functions). A plugin can change other plugin state calling its public API method.
+Each plugin encapsulates its internal state. It doesn't rely on any kind of global state. Plugins provide an internal state via explicit API, reflecting the dynamic nature of the state (an event bus, observables, getter/setter functions). A plugin can change other plugin state by calling its public API method.
 ```js
 // GOOD
 deps.plugin.getData();
