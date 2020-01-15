@@ -141,6 +141,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
                     this._handleChange('name', e.target.value)
                   }
                   required
+                  data-test-subj="canvasCustomElementForm-name"
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -156,6 +157,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
                     e.target.value.length <= MAX_DESCRIPTION_LENGTH &&
                     this._handleChange('description', e.target.value)
                   }
+                  data-test-subj="canvasCustomElementForm-description"
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -197,6 +199,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
                 onClick={() => {
                   onSave(name, description, image);
                 }}
+                data-test-subj="canvasCustomElementForm-submit"
               >
                 {strings.getSaveButtonLabel()}
               </EuiButton>
