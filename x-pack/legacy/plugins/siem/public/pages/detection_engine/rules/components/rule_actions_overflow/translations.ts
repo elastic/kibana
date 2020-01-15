@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
-const euiVisPalette = euiPaletteColorBlind();
+import { i18n } from '@kbn/i18n';
 
-export const proportion = () => ({ name: 'proportion', color: euiVisPalette[3] });
+export const ALL_ACTIONS = i18n.translate(
+  'xpack.siem.detectionEngine.rules.components.ruleActionsOverflow.allActionsTitle',
+  {
+    defaultMessage: 'All actions',
+  }
+);

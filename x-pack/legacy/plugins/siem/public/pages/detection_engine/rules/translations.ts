@@ -21,13 +21,6 @@ export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.add
   defaultMessage: 'Add new rule',
 });
 
-export const ACTIVITY_MONITOR = i18n.translate(
-  'xpack.siem.detectionEngine.rules.activityMonitorTitle',
-  {
-    defaultMessage: 'Activity monitor',
-  }
-);
-
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageTitle', {
   defaultMessage: 'Rules',
 });
@@ -163,10 +156,10 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
-export const RUN_RULE_MANUALLY = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.actions.runRuleManuallyDescription',
+export const DUPLICATE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.actions.duplicateTitle',
   {
-    defaultMessage: 'Run rule manually…',
+    defaultMessage: 'Duplicate',
   }
 );
 
@@ -176,6 +169,13 @@ export const DUPLICATE_RULE = i18n.translate(
     defaultMessage: 'Duplicate rule…',
   }
 );
+
+export const SUCCESSFULLY_DUPLICATED_RULES = (totalRules: number) =>
+  i18n.translate('xpack.siem.detectionEngine.rules.allRules.successfullyDuplicatedRulesTitle', {
+    values: { totalRules },
+    defaultMessage:
+      'Successfully duplicated {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+  });
 
 export const DUPLICATE_RULE_ERROR = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',

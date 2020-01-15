@@ -63,6 +63,7 @@ import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
+import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -301,6 +302,12 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                                 >
                                   {ruleI18n.EDIT_RULE_SETTINGS}
                                 </EuiButton>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <RuleActionsOverflow
+                                  rule={rule}
+                                  userHasNoPermissions={userHasNoPermissions}
+                                />
                               </EuiFlexItem>
                             </EuiFlexGroup>
                           </EuiFlexItem>
