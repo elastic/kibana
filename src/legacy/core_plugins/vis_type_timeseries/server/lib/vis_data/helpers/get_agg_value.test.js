@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { getAggValue } from '../../helpers/get_agg_value';
+import { getAggValue } from './get_agg_value';
 
 function testAgg(row, metric, expected) {
   let name = metric.type;
   if (metric.mode) name += `(${metric.mode})`;
   if (metric.percent) name += `(${metric.percent})`;
-  it(`it should return ${name}(${expected})`, () => {
+  test(`it should return ${name}(${expected})`, () => {
     const value = getAggValue(row, metric);
-    expect(value).to.eql(expected);
+    expect(value).toEqual(expected);
   });
 }
 

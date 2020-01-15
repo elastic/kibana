@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { SeriesAgg as seriesAgg } from '../_series_agg';
+import { SeriesAgg as seriesAgg } from './_series_agg';
 
 describe('seriesAgg', () => {
   const series = [
@@ -40,8 +39,8 @@ describe('seriesAgg', () => {
   ];
 
   describe('basic', () => {
-    it('returns the series sum', () => {
-      expect(seriesAgg.sum(series)).to.eql([
+    test('returns the series sum', () => {
+      expect(seriesAgg.sum(series)).toEqual([
         [
           [0, 8],
           [1, 4],
@@ -50,8 +49,8 @@ describe('seriesAgg', () => {
       ]);
     });
 
-    it('returns the series max', () => {
-      expect(seriesAgg.max(series)).to.eql([
+    test('returns the series max', () => {
+      expect(seriesAgg.max(series)).toEqual([
         [
           [0, 4],
           [1, 2],
@@ -60,8 +59,8 @@ describe('seriesAgg', () => {
       ]);
     });
 
-    it('returns the series min', () => {
-      expect(seriesAgg.min(series)).to.eql([
+    test('returns the series min', () => {
+      expect(seriesAgg.min(series)).toEqual([
         [
           [0, 2],
           [1, 1],
@@ -70,8 +69,8 @@ describe('seriesAgg', () => {
       ]);
     });
 
-    it('returns the series mean', () => {
-      expect(seriesAgg.mean(series)).to.eql([
+    test('returns the series mean', () => {
+      expect(seriesAgg.mean(series)).toEqual([
         [
           [0, 8 / 3],
           [1, 4 / 3],
@@ -82,8 +81,8 @@ describe('seriesAgg', () => {
   });
 
   describe('overall', () => {
-    it('returns the series overall sum', () => {
-      expect(seriesAgg.overall_sum(series)).to.eql([
+    test('returns the series overall sum', () => {
+      expect(seriesAgg.overall_sum(series)).toEqual([
         [
           [0, 21],
           [1, 21],
@@ -92,8 +91,8 @@ describe('seriesAgg', () => {
       ]);
     });
 
-    it('returns the series overall max', () => {
-      expect(seriesAgg.overall_max(series)).to.eql([
+    test('returns the series overall max', () => {
+      expect(seriesAgg.overall_max(series)).toEqual([
         [
           [0, 4],
           [1, 4],
@@ -102,8 +101,8 @@ describe('seriesAgg', () => {
       ]);
     });
 
-    it('returns the series overall min', () => {
-      expect(seriesAgg.overall_min(series)).to.eql([
+    test('returns the series overall min', () => {
+      expect(seriesAgg.overall_min(series)).toEqual([
         [
           [0, 1],
           [1, 1],
@@ -112,9 +111,9 @@ describe('seriesAgg', () => {
       ]);
     });
 
-    it('returns the series overall mean', () => {
+    test('returns the series overall mean', () => {
       const value = (8 + 4 + 9) / 3;
-      expect(seriesAgg.overall_avg(series)).to.eql([
+      expect(seriesAgg.overall_avg(series)).toEqual([
         [
           [0, value],
           [1, value],
@@ -125,8 +124,8 @@ describe('seriesAgg', () => {
   });
 
   describe('cumulative sum', () => {
-    it('returns the series cumulative sum', () => {
-      expect(seriesAgg.cumulative_sum(series)).to.eql([
+    test('returns the series cumulative sum', () => {
+      expect(seriesAgg.cumulative_sum(series)).toEqual([
         [
           [0, 8],
           [1, 12],

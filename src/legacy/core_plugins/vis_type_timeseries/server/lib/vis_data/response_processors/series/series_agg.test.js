@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { seriesAgg } from '../series_agg';
-import { stdMetric } from '../std_metric';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { seriesAgg } from './series_agg';
+import { stdMetric } from './std_metric';
 
 describe('seriesAgg(resp, panel, series)', () => {
   let panel;
@@ -93,18 +91,18 @@ describe('seriesAgg(resp, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
+  test('calls next when finished', () => {
+    const next = jest.fn();
     seriesAgg(resp, panel, series)(next)([]);
-    expect(next.calledOnce).to.equal(true);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('creates a series', () => {
+  test('creates a series', () => {
     const next = seriesAgg(resp, panel, series)(results => results);
     const results = stdMetric(resp, panel, series)(next)([]);
-    expect(results).to.have.length(1);
+    expect(results).toHaveLength(1);
 
-    expect(results[0]).to.eql({
+    expect(results[0]).toEqual({
       id: 'test',
       color: '#F00',
       label: 'Total CPU',

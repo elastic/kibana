@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { stdSibling } from '../std_sibling';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { stdDeviationSibling } from './std_deviation_sibling';
 
-describe('stdSibling(resp, panel, series)', () => {
+describe('stdDeviationSibling(resp, panel, series)', () => {
   let panel;
   let series;
   let resp;
@@ -47,6 +45,7 @@ describe('stdSibling(resp, panel, series)', () => {
         {
           id: 'sib',
           type: 'std_deviation_bucket',
+          mode: 'band',
           field: 'avgcpu',
         },
       ],
@@ -56,6 +55,10 @@ describe('stdSibling(resp, panel, series)', () => {
         test: {
           sib: {
             std_deviation: 0.23,
+            std_deviation_bounds: {
+              upper: 0.7,
+              lower: 0.01,
+            },
           },
           timeseries: {
             buckets: [
@@ -74,37 +77,38 @@ describe('stdSibling(resp, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
-    stdSibling(resp, panel, series)(next)([]);
-    expect(next.calledOnce).to.equal(true);
+  test('calls next when finished', () => {
+    const next = jest.fn();
+    stdDeviationSibling(resp, panel, series)(next)([]);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('calls next when std. deviation bands set', () => {
-    series.metrics[1].mode = 'band';
-    const next = sinon.spy(results => results);
-    const results = stdSibling(resp, panel, series)(next)([]);
-    expect(next.calledOnce).to.equal(true);
-    expect(results).to.have.length(0);
-  });
-
-  it('creates a series', () => {
+  test('creates a series', () => {
     const next = results => results;
-    const results = stdSibling(resp, panel, series)(next)([]);
-    expect(results).to.have.length(1);
+    const results = stdDeviationSibling(resp, panel, series)(next)([]);
+    expect(results).toHaveLength(2);
 
-    expect(results[0]).to.eql({
-      id: 'test',
+    expect(results[0]).toEqual({
+      id: 'test:lower',
+      color: 'rgb(255, 0, 0)',
+      lines: { show: true, fill: false, lineWidth: 0 },
+      points: { show: false },
+      data: [
+        [1, 0.01],
+        [2, 0.01],
+      ],
+    });
+
+    expect(results[1]).toEqual({
+      id: 'test:upper',
       label: 'Overall Std. Deviation of Average of cpu',
       color: 'rgb(255, 0, 0)',
-      stack: false,
-      seriesId: 'test',
-      lines: { show: true, fill: 0, lineWidth: 1, steps: false },
-      points: { show: true, radius: 1, lineWidth: 1 },
-      bars: { fill: 0, lineWidth: 1, show: false },
+      fillBetween: 'test:lower',
+      lines: { show: true, fill: 0.5, lineWidth: 0 },
+      points: { show: false },
       data: [
-        [1, 0.23],
-        [2, 0.23],
+        [1, 0.7],
+        [2, 0.7],
       ],
     });
   });

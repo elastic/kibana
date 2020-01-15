@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { getSplits } from '../../helpers/get_splits';
+import { getSplits } from './get_splits';
 
 describe('getSplits(resp, panel, series)', () => {
-  it('should return a splits for everything/filter group bys', () => {
+  test('should return a splits for everything/filter group bys', () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -41,7 +40,7 @@ describe('getSplits(resp, panel, series)', () => {
         { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
       ],
     };
-    expect(getSplits(resp, panel, series)).to.eql([
+    expect(getSplits(resp, panel, series)).toEqual([
       {
         id: 'SERIES',
         label: 'Overall Average of Average of cpu',
@@ -53,7 +52,7 @@ describe('getSplits(resp, panel, series)', () => {
     ]);
   });
 
-  it('should return a splits for terms group bys for top_n', () => {
+  test('should return a splits for terms group bys for top_n', () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -85,7 +84,7 @@ describe('getSplits(resp, panel, series)', () => {
       ],
     };
     const panel = { type: 'top_n' };
-    expect(getSplits(resp, panel, series)).to.eql([
+    expect(getSplits(resp, panel, series)).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -107,7 +106,7 @@ describe('getSplits(resp, panel, series)', () => {
     ]);
   });
 
-  it('should return a splits for terms group bys', () => {
+  test('should return a splits for terms group bys', () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -139,7 +138,7 @@ describe('getSplits(resp, panel, series)', () => {
       ],
     };
     const panel = { type: 'timeseries' };
-    expect(getSplits(resp, panel, series)).to.eql([
+    expect(getSplits(resp, panel, series)).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -161,7 +160,7 @@ describe('getSplits(resp, panel, series)', () => {
     ]);
   });
 
-  it('should return a splits for filters group bys', () => {
+  test('should return a splits for filters group bys', () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -188,7 +187,7 @@ describe('getSplits(resp, panel, series)', () => {
       metrics: [{ id: 'COUNT', type: 'count' }],
     };
     const panel = { type: 'timeseries' };
-    expect(getSplits(resp, panel, series)).to.eql([
+    expect(getSplits(resp, panel, series)).toEqual([
       {
         id: 'SERIES:filter-1',
         key: 'filter-1',

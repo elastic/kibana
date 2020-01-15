@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { percentile } from '../percentile';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { percentile } from './percentile';
 
 describe('percentile(resp, panel, series)', () => {
   let panel;
@@ -82,72 +80,72 @@ describe('percentile(resp, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
+  test('calls next when finished', () => {
+    const next = jest.fn();
     percentile(resp, panel, series)(next)([]);
-    expect(next.calledOnce).to.equal(true);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('creates a series', () => {
+  test('creates a series', () => {
     const next = results => results;
     const results = percentile(resp, panel, series)(next)([]);
-    expect(results).to.have.length(3);
+    expect(results).toHaveLength(3);
 
-    expect(results[0]).to.have.property('id', 'test:10-90');
-    expect(results[0]).to.have.property('color', 'rgb(255, 0, 0)');
-    expect(results[0]).to.have.property('fillBetween', 'test:10-90:90');
-    expect(results[0]).to.have.property('label', 'Percentile of cpu (10)');
-    expect(results[0]).to.have.property('legend', false);
-    expect(results[0]).to.have.property('lines');
-    expect(results[0].lines).to.eql({
+    expect(results[0]).toHaveProperty('id', 'test:10-90');
+    expect(results[0]).toHaveProperty('color', 'rgb(255, 0, 0)');
+    expect(results[0]).toHaveProperty('fillBetween', 'test:10-90:90');
+    expect(results[0]).toHaveProperty('label', 'Percentile of cpu (10)');
+    expect(results[0]).toHaveProperty('legend', false);
+    expect(results[0]).toHaveProperty('lines');
+    expect(results[0].lines).toEqual({
       fill: 0.2,
       lineWidth: 0,
       show: true,
     });
-    expect(results[0]).to.have.property('points');
-    expect(results[0].points).to.eql({ show: false });
-    expect(results[0].data).to.eql([
+    expect(results[0]).toHaveProperty('points');
+    expect(results[0].points).toEqual({ show: false });
+    expect(results[0].data).toEqual([
       [1, 1],
       [2, 1.2],
     ]);
 
-    expect(results[1]).to.have.property('id', 'test:10-90:90');
-    expect(results[1]).to.have.property('color', 'rgb(255, 0, 0)');
-    expect(results[1]).to.have.property('label', 'Percentile of cpu (10)');
-    expect(results[1]).to.have.property('legend', false);
-    expect(results[1]).to.have.property('lines');
-    expect(results[1].lines).to.eql({
+    expect(results[1]).toHaveProperty('id', 'test:10-90:90');
+    expect(results[1]).toHaveProperty('color', 'rgb(255, 0, 0)');
+    expect(results[1]).toHaveProperty('label', 'Percentile of cpu (10)');
+    expect(results[1]).toHaveProperty('legend', false);
+    expect(results[1]).toHaveProperty('lines');
+    expect(results[1].lines).toEqual({
       fill: false,
       lineWidth: 0,
       show: true,
     });
-    expect(results[1]).to.have.property('points');
-    expect(results[1].points).to.eql({ show: false });
-    expect(results[1].data).to.eql([
+    expect(results[1]).toHaveProperty('points');
+    expect(results[1].points).toEqual({ show: false });
+    expect(results[1].data).toEqual([
       [1, 5],
       [2, 5.3],
     ]);
 
-    expect(results[2]).to.have.property('id', 'test:50');
-    expect(results[2]).to.have.property('color', 'rgb(255, 0, 0)');
-    expect(results[2]).to.have.property('label', 'Percentile of cpu (50)');
-    expect(results[2]).to.have.property('stack', false);
-    expect(results[2]).to.have.property('lines');
-    expect(results[2].lines).to.eql({
+    expect(results[2]).toHaveProperty('id', 'test:50');
+    expect(results[2]).toHaveProperty('color', 'rgb(255, 0, 0)');
+    expect(results[2]).toHaveProperty('label', 'Percentile of cpu (50)');
+    expect(results[2]).toHaveProperty('stack', false);
+    expect(results[2]).toHaveProperty('lines');
+    expect(results[2].lines).toEqual({
       fill: 0,
       lineWidth: 1,
       show: true,
       steps: false,
     });
-    expect(results[2]).to.have.property('bars');
-    expect(results[2].bars).to.eql({
+    expect(results[2]).toHaveProperty('bars');
+    expect(results[2].bars).toEqual({
       fill: 0,
       lineWidth: 1,
       show: false,
     });
-    expect(results[2]).to.have.property('points');
-    expect(results[2].points).to.eql({ show: true, lineWidth: 1, radius: 1 });
-    expect(results[2].data).to.eql([
+    expect(results[2]).toHaveProperty('points');
+    expect(results[2].points).toEqual({ show: true, lineWidth: 1, radius: 1 });
+    expect(results[2].data).toEqual([
       [1, 2.5],
       [2, 2.7],
     ]);

@@ -17,44 +17,43 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { getDefaultDecoration } from './get_default_decoration';
 
 describe('getDefaultDecoration', () => {
   describe('stack option', () => {
-    it('should set a stack option to none', () => {
+    test('should set a stack option to none', () => {
       const series = {
         id: 'test_id',
         stacked: 'none',
       };
-      expect(getDefaultDecoration(series)).to.have.property('stack', 'none');
+      expect(getDefaultDecoration(series)).toHaveProperty('stack', 'none');
     });
 
-    it('should set a stack option to stacked/percent', () => {
+    test('should set a stack option to stacked/percent', () => {
       const series = {
         stacked: 'stacked',
         id: 'test_id',
       };
 
-      expect(getDefaultDecoration(series)).to.have.property('stack', 'stacked');
+      expect(getDefaultDecoration(series)).toHaveProperty('stack', 'stacked');
 
       series.stacked = 'percent';
 
-      expect(getDefaultDecoration(series)).to.have.property('stack', 'percent');
+      expect(getDefaultDecoration(series)).toHaveProperty('stack', 'percent');
     });
 
-    it('should set a stack option to stacked_within_series', () => {
+    test('should set a stack option to stacked_within_series', () => {
       const series = {
         stacked: 'stacked_within_series',
         id: 'test_id',
       };
 
-      expect(getDefaultDecoration(series)).to.have.property('stack', 'stacked_within_series');
+      expect(getDefaultDecoration(series)).toHaveProperty('stack', 'stacked_within_series');
     });
   });
 
   describe('lines', () => {
-    it('return decoration for lines', () => {
+    test('return decoration for lines', () => {
       const series = {
         point_size: 10,
         chart_type: 'line',
@@ -62,29 +61,29 @@ describe('getDefaultDecoration', () => {
         fill: 1,
       };
       const result = getDefaultDecoration(series);
-      expect(result.lines).to.have.property('show', true);
-      expect(result.lines).to.have.property('fill', 1);
-      expect(result.lines).to.have.property('lineWidth', 10);
-      expect(result.points).to.have.property('show', true);
-      expect(result.points).to.have.property('radius', 1);
-      expect(result.points).to.have.property('lineWidth', 10);
-      expect(result.bars).to.have.property('show', false);
-      expect(result.bars).to.have.property('fill', 1);
-      expect(result.bars).to.have.property('lineWidth', 10);
+      expect(result.lines).toHaveProperty('show', true);
+      expect(result.lines).toHaveProperty('fill', 1);
+      expect(result.lines).toHaveProperty('lineWidth', 10);
+      expect(result.points).toHaveProperty('show', true);
+      expect(result.points).toHaveProperty('radius', 1);
+      expect(result.points).toHaveProperty('lineWidth', 10);
+      expect(result.bars).toHaveProperty('show', false);
+      expect(result.bars).toHaveProperty('fill', 1);
+      expect(result.bars).toHaveProperty('lineWidth', 10);
     });
 
-    it('return decoration for lines without points', () => {
+    test('return decoration for lines without points', () => {
       const series = {
         chart_type: 'line',
         line_width: 10,
         fill: 1,
       };
       const result = getDefaultDecoration(series);
-      expect(result.points).to.have.property('show', true);
-      expect(result.points).to.have.property('lineWidth', 10);
+      expect(result.points).toHaveProperty('show', true);
+      expect(result.points).toHaveProperty('lineWidth', 10);
     });
 
-    it('return decoration for lines with points set to zero (off)', () => {
+    test('return decoration for lines with points set to zero (off)', () => {
       const series = {
         chart_type: 'line',
         line_width: 10,
@@ -92,32 +91,32 @@ describe('getDefaultDecoration', () => {
         point_size: 0,
       };
       const result = getDefaultDecoration(series);
-      expect(result.points).to.have.property('show', false);
+      expect(result.points).toHaveProperty('show', false);
     });
 
-    it('return decoration for lines (off)', () => {
+    test('return decoration for lines (off)', () => {
       const series = {
         chart_type: 'line',
         line_width: 0,
       };
       const result = getDefaultDecoration(series);
-      expect(result.lines).to.have.property('show', false);
+      expect(result.lines).toHaveProperty('show', false);
     });
   });
 
   describe('bars', () => {
-    it('return decoration for bars', () => {
+    test('return decoration for bars', () => {
       const series = {
         chart_type: 'bar',
         line_width: 10,
         fill: 1,
       };
       const result = getDefaultDecoration(series);
-      expect(result.lines).to.have.property('show', false);
-      expect(result.points).to.have.property('show', false);
-      expect(result.bars).to.have.property('show', true);
-      expect(result.bars).to.have.property('fill', 1);
-      expect(result.bars).to.have.property('lineWidth', 10);
+      expect(result.lines).toHaveProperty('show', false);
+      expect(result.points).toHaveProperty('show', false);
+      expect(result.bars).toHaveProperty('show', true);
+      expect(result.bars).toHaveProperty('fill', 1);
+      expect(result.bars).toHaveProperty('lineWidth', 10);
     });
   });
 });

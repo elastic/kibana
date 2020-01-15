@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getBucketSize } from './get_bucket_size';
 
 describe('getBucketSize', () => {
   const req = {
@@ -30,39 +29,39 @@ describe('getBucketSize', () => {
     },
   };
 
-  it('returns auto calculated buckets', () => {
+  test('returns auto calculated buckets', () => {
     const result = getBucketSize(req, 'auto');
-    expect(result).to.have.property('bucketSize', 30);
-    expect(result).to.have.property('intervalString', '30s');
+    expect(result).toHaveProperty('bucketSize', 30);
+    expect(result).toHaveProperty('intervalString', '30s');
   });
 
-  it('returns overridden buckets (1s)', () => {
+  test('returns overridden buckets (1s)', () => {
     const result = getBucketSize(req, '1s');
-    expect(result).to.have.property('bucketSize', 1);
-    expect(result).to.have.property('intervalString', '1s');
+    expect(result).toHaveProperty('bucketSize', 1);
+    expect(result).toHaveProperty('intervalString', '1s');
   });
 
-  it('returns overridden buckets (10m)', () => {
+  test('returns overridden buckets (10m)', () => {
     const result = getBucketSize(req, '10m');
-    expect(result).to.have.property('bucketSize', 600);
-    expect(result).to.have.property('intervalString', '10m');
+    expect(result).toHaveProperty('bucketSize', 600);
+    expect(result).toHaveProperty('intervalString', '10m');
   });
 
-  it('returns overridden buckets (1d)', () => {
+  test('returns overridden buckets (1d)', () => {
     const result = getBucketSize(req, '1d');
-    expect(result).to.have.property('bucketSize', 86400);
-    expect(result).to.have.property('intervalString', '1d');
+    expect(result).toHaveProperty('bucketSize', 86400);
+    expect(result).toHaveProperty('intervalString', '1d');
   });
 
-  it('returns overridden buckets (>=2d)', () => {
+  test('returns overridden buckets (>=2d)', () => {
     const result = getBucketSize(req, '>=2d');
-    expect(result).to.have.property('bucketSize', 86400 * 2);
-    expect(result).to.have.property('intervalString', '2d');
+    expect(result).toHaveProperty('bucketSize', 86400 * 2);
+    expect(result).toHaveProperty('intervalString', '2d');
   });
 
-  it('returns overridden buckets (>=10s)', () => {
+  test('returns overridden buckets (>=10s)', () => {
     const result = getBucketSize(req, '>=10s');
-    expect(result).to.have.property('bucketSize', 30);
-    expect(result).to.have.property('intervalString', '30s');
+    expect(result).toHaveProperty('bucketSize', 30);
+    expect(result).toHaveProperty('intervalString', '30s');
   });
 });

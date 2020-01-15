@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { getBucketsPath } from '../../helpers/get_buckets_path';
+import { getBucketsPath } from './get_buckets_path';
 
 describe('getBucketsPath', () => {
   const metrics = [
@@ -33,43 +32,43 @@ describe('getBucketsPath', () => {
     { id: 9, type: 'max' },
   ];
 
-  it('return path for derivative', () => {
-    expect(getBucketsPath(1, metrics)).to.equal('1[normalized_value]');
+  test('return path for derivative', () => {
+    expect(getBucketsPath(1, metrics)).toEqual('1[normalized_value]');
   });
 
-  it('return path for percentile(50)', () => {
-    expect(getBucketsPath(2, metrics)).to.equal('2[50.0]');
+  test('return path for percentile(50)', () => {
+    expect(getBucketsPath(2, metrics)).toEqual('2[50.0]');
   });
 
-  it('return path for percentile(20.0)', () => {
-    expect(getBucketsPath(3, metrics)).to.equal('3[20.0]');
+  test('return path for percentile(20.0)', () => {
+    expect(getBucketsPath(3, metrics)).toEqual('3[20.0]');
   });
 
-  it('return path for percentile(10.0) with alt id', () => {
-    expect(getBucketsPath('3[10.0]', metrics)).to.equal('3[10.0]');
+  test('return path for percentile(10.0) with alt id', () => {
+    expect(getBucketsPath('3[10.0]', metrics)).toEqual('3[10.0]');
   });
 
-  it('return path for std_deviation(raw)', () => {
-    expect(getBucketsPath(4, metrics)).to.equal('4[std_deviation]');
+  test('return path for std_deviation(raw)', () => {
+    expect(getBucketsPath(4, metrics)).toEqual('4[std_deviation]');
   });
 
-  it('return path for std_deviation(upper)', () => {
-    expect(getBucketsPath(5, metrics)).to.equal('5[std_upper]');
+  test('return path for std_deviation(upper)', () => {
+    expect(getBucketsPath(5, metrics)).toEqual('5[std_upper]');
   });
 
-  it('return path for std_deviation(lower)', () => {
-    expect(getBucketsPath(6, metrics)).to.equal('6[std_lower]');
+  test('return path for std_deviation(lower)', () => {
+    expect(getBucketsPath(6, metrics)).toEqual('6[std_lower]');
   });
 
-  it('return path for sum_of_squares', () => {
-    expect(getBucketsPath(7, metrics)).to.equal('7[sum_of_squares]');
+  test('return path for sum_of_squares', () => {
+    expect(getBucketsPath(7, metrics)).toEqual('7[sum_of_squares]');
   });
 
-  it('return path for variance', () => {
-    expect(getBucketsPath(8, metrics)).to.equal('8[variance]');
+  test('return path for variance', () => {
+    expect(getBucketsPath(8, metrics)).toEqual('8[variance]');
   });
 
-  it('return path for basic metric', () => {
-    expect(getBucketsPath(9, metrics)).to.equal('9');
+  test('return path for basic metric', () => {
+    expect(getBucketsPath(9, metrics)).toEqual('9');
   });
 });

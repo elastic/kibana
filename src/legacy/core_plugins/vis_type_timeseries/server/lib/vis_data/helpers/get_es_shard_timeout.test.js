@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { getEsShardTimeout } from '../../helpers/get_es_shard_timeout';
+import { getEsShardTimeout } from './get_es_shard_timeout';
 
 describe('getEsShardTimeout', () => {
-  it('should return the elasticsearch.shardTimeout', async () => {
+  test('should return the elasticsearch.shardTimeout', async () => {
     const req = {
       getEsShardTimeout: async () => {
         return 12345;
@@ -30,6 +29,6 @@ describe('getEsShardTimeout', () => {
 
     const timeout = await getEsShardTimeout(req);
 
-    expect(timeout).to.equal(12345);
+    expect(timeout).toEqual(12345);
   });
 });

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { stdDeviationBands } from '../std_deviation_bands';
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { stdSibling } from './std_sibling';
 
-describe('stdDeviationBands(resp, panel, series)', () => {
+describe('stdSibling(resp, panel, series)', () => {
   let panel;
   let series;
   let resp;
@@ -40,37 +38,32 @@ describe('stdDeviationBands(resp, panel, series)', () => {
       split_mode: 'everything',
       metrics: [
         {
-          id: 'stddev',
-          mode: 'band',
-          type: 'std_deviation',
+          id: 'avgcpu',
+          type: 'avg',
           field: 'cpu',
+        },
+        {
+          id: 'sib',
+          type: 'std_deviation_bucket',
+          field: 'avgcpu',
         },
       ],
     };
     resp = {
       aggregations: {
         test: {
+          sib: {
+            std_deviation: 0.23,
+          },
           timeseries: {
             buckets: [
               {
                 key: 1,
-                stddev: {
-                  std_deviation: 1.2,
-                  std_deviation_bounds: {
-                    upper: 3.2,
-                    lower: 0.2,
-                  },
-                },
+                avgcpu: { value: 0.23 },
               },
               {
                 key: 2,
-                stddev: {
-                  std_deviation_bands: 1.5,
-                  std_deviation_bounds: {
-                    upper: 3.5,
-                    lower: 0.5,
-                  },
-                },
+                avgcpu: { value: 0.22 },
               },
             ],
           },
@@ -79,38 +72,37 @@ describe('stdDeviationBands(resp, panel, series)', () => {
     };
   });
 
-  it('calls next when finished', () => {
-    const next = sinon.spy();
-    stdDeviationBands(resp, panel, series)(next)([]);
-    expect(next.calledOnce).to.equal(true);
+  test('calls next when finished', () => {
+    const next = jest.fn();
+    stdSibling(resp, panel, series)(next)([]);
+    expect(next.mock.calls.length).toEqual(1);
   });
 
-  it('creates a series', () => {
+  test('calls next when std. deviation bands set', () => {
+    series.metrics[1].mode = 'band';
+    const next = jest.fn(results => results);
+    const results = stdSibling(resp, panel, series)(next)([]);
+    expect(next.mock.calls.length).toEqual(1);
+    expect(results).toHaveLength(0);
+  });
+
+  test('creates a series', () => {
     const next = results => results;
-    const results = stdDeviationBands(resp, panel, series)(next)([]);
-    expect(results).to.have.length(2);
+    const results = stdSibling(resp, panel, series)(next)([]);
+    expect(results).toHaveLength(1);
 
-    expect(results[0]).to.eql({
-      id: 'test:upper',
-      label: 'Std. Deviation of cpu',
+    expect(results[0]).toEqual({
+      id: 'test',
+      label: 'Overall Std. Deviation of Average of cpu',
       color: 'rgb(255, 0, 0)',
-      lines: { show: true, fill: 0.5, lineWidth: 0 },
-      points: { show: false },
-      fillBetween: 'test:lower',
+      stack: false,
+      seriesId: 'test',
+      lines: { show: true, fill: 0, lineWidth: 1, steps: false },
+      points: { show: true, radius: 1, lineWidth: 1 },
+      bars: { fill: 0, lineWidth: 1, show: false },
       data: [
-        [1, 3.2],
-        [2, 3.5],
-      ],
-    });
-
-    expect(results[1]).to.eql({
-      id: 'test:lower',
-      color: 'rgb(255, 0, 0)',
-      lines: { show: true, fill: false, lineWidth: 0 },
-      points: { show: false },
-      data: [
-        [1, 0.2],
-        [2, 0.5],
+        [1, 0.23],
+        [2, 0.23],
       ],
     });
   });

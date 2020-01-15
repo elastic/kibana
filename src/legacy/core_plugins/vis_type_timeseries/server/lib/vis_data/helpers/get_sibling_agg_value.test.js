@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
+import { getSiblingAggValue } from './get_sibling_agg_value';
 
 describe('getSiblingAggValue', () => {
   const row = {
@@ -32,23 +31,23 @@ describe('getSiblingAggValue', () => {
     },
   };
 
-  it('returns the value for std_deviation_bounds.upper', () => {
+  test('returns the value for std_deviation_bounds.upper', () => {
     const metric = { id: 'test', type: 'std_deviation_bucket', mode: 'upper' };
-    expect(getSiblingAggValue(row, metric)).to.equal(2);
+    expect(getSiblingAggValue(row, metric)).toEqual(2);
   });
 
-  it('returns the value for std_deviation_bounds.lower', () => {
+  test('returns the value for std_deviation_bounds.lower', () => {
     const metric = { id: 'test', type: 'std_deviation_bucket', mode: 'lower' };
-    expect(getSiblingAggValue(row, metric)).to.equal(1);
+    expect(getSiblingAggValue(row, metric)).toEqual(1);
   });
 
-  it('returns the value for std_deviation', () => {
+  test('returns the value for std_deviation', () => {
     const metric = { id: 'test', type: 'std_deviation_bucket', mode: 'raw' };
-    expect(getSiblingAggValue(row, metric)).to.equal(1.5);
+    expect(getSiblingAggValue(row, metric)).toEqual(1.5);
   });
 
-  it('returns the value for basic (max)', () => {
+  test('returns the value for basic (max)', () => {
     const metric = { id: 'test', type: 'max_bucket' };
-    expect(getSiblingAggValue(row, metric)).to.equal(3);
+    expect(getSiblingAggValue(row, metric)).toEqual(3);
   });
 });
