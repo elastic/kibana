@@ -17,7 +17,7 @@ import {
   IInterpreterRenderFunction,
   IInterpreterRenderHandlers,
 } from '../../../../../../src/plugins/expressions/public';
-import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
+import { FormatFactory } from '../../../../../../src/legacy/core_plugins/visualizations/public';
 import { VisualizationContainer } from '../visualization_container';
 
 export interface DatatableColumns {

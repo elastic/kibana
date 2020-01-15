@@ -21,8 +21,8 @@ import { last, findIndex, isNaN } from 'lodash';
 import React, { Component } from 'react';
 
 import { isColorDark } from '@elastic/eui';
-
-import { getHeatmapColors, getFormat, Vis } from '../legacy_imports';
+import { unserializeFieldFormat } from '../../../visualizations/public/np_ready/public/legacy/field_format_utils';
+import { getHeatmapColors, Vis } from '../legacy_imports';
 import { MetricVisValue } from './metric_vis_value';
 import { FieldFormat, ContentType } from '../../../../../plugins/data/public';
 import { Context } from '../metric_vis_fn';
@@ -123,13 +123,13 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
 
     if (dimensions.bucket) {
       bucketColumnId = table.columns[dimensions.bucket.accessor].id;
-      bucketFormatter = getFormat(dimensions.bucket.format);
+      bucketFormatter = unserializeFieldFormat(dimensions.bucket.format);
     }
 
     dimensions.metrics.forEach((metric: SchemaConfig) => {
       const columnIndex = metric.accessor;
       const column = table?.columns[columnIndex];
-      const formatter = getFormat(metric.format);
+      const formatter = unserializeFieldFormat(metric.format);
       table.rows.forEach((row, rowIndex) => {
         let title = column.name;
         let value: any = row[column.id];

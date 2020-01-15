@@ -18,7 +18,7 @@
  */
 
 import { toArray } from 'lodash';
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { unserializeFieldFormat } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy/field_format_utils';
 
 export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
   let slices;
@@ -43,7 +43,7 @@ export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
       buckets.forEach(bucket => {
         const bucketColumn = table.columns[bucket.accessor];
         const bucketValueColumn = table.columns[bucket.accessor + 1];
-        const bucketFormatter = getFormat(bucket.format);
+        const bucketFormatter = unserializeFieldFormat(bucket.format);
         const name = bucketFormatter.convert(row[bucketColumn.id]);
         const size = row[bucketValueColumn.id];
         names[name] = name;

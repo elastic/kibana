@@ -21,6 +21,8 @@ import { Plugin, CoreSetup, CoreStart } from '../../../../../core/public';
 import { SearchSource } from './search_source';
 import { defaultSearchStrategy } from './search_strategy';
 import { SearchStrategyProvider } from './search_strategy/types';
+import { esaggs } from './expressions/esaggs';
+import { ExpressionsSetup } from '../../../../../plugins/expressions/public';
 
 export interface SearchSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
@@ -29,14 +31,19 @@ export interface SearchStart {
   SearchSource: typeof SearchSource;
 }
 
+export interface SearchSetupDeps {
+  expressions: ExpressionsSetup;
+}
+
 /**
  * The contract provided here is a new platform shim for ui/courier.
  *
  * Once it has been refactored to work with new platform services,
  * it will move into the existing search service in src/plugins/data/public/search
  */
-export class SearchService implements Plugin<SearchSetup, SearchStart> {
-  public setup(core: CoreSetup): SearchSetup {
+export class SearchService implements Plugin<SearchSetup, SearchStart, SearchSetupDeps> {
+  public setup(core: CoreSetup, { expressions }: SearchSetupDeps): SearchSetup {
+    expressions.registerFunction(esaggs);
     return {};
   }
 

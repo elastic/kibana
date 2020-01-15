@@ -31,7 +31,7 @@ jest.mock('@elastic/eui', () => ({
   htmlIdGenerator: jest.fn().mockReturnValue(() => 'legendId'),
 }));
 
-jest.mock('../../../visualize/loader/pipeline_helpers/utilities', () => ({
+jest.mock('../../../../../core_plugins/data/common', () => ({
   getTableAggs: jest.fn(),
 }));
 jest.mock('../../../../../core_plugins/visualizations/public', () => ({

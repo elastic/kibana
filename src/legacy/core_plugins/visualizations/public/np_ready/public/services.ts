@@ -26,7 +26,11 @@ import {
 } from 'src/core/public';
 import { TypesStart } from './types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
-import { FilterManager, IndexPatternsContract } from '../../../../../../plugins/data/public';
+import {
+  FieldFormatsStart,
+  FilterManager,
+  IndexPatternsContract,
+} from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
@@ -53,4 +57,8 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 
 export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
   'UsageCollection'
+);
+
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
+  'FieldFormats'
 );

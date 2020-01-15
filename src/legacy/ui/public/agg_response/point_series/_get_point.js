@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
+import { unserializeFieldFormat } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy/field_format_utils';
 
 export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
   const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
@@ -74,7 +74,7 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
     const seriesArray = series.length ? series : [series];
     point.series = seriesArray
       .map(s => {
-        const fieldFormatter = getFormat(s.format);
+        const fieldFormatter = unserializeFieldFormat(s.format);
         return fieldFormatter.convert(row[s.accessor]);
       })
       .join(' - ');

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
+import { unserializeFieldFormat } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy/field_format_utils';
 
 /**
  * The LegacyResponseHandler is not registered as a response handler and can't be used
@@ -40,7 +40,7 @@ export const legacyResponseHandlerProvider = function() {
         if (split) {
           converted.direction = dimensions.splitRow ? 'row' : 'column';
           const splitColumnIndex = split[0].accessor;
-          const splitColumnFormatter = getFormat(split[0].format);
+          const splitColumnFormatter = unserializeFieldFormat(split[0].format);
           const splitColumn = table.columns[splitColumnIndex];
           const splitMap = {};
           let splitIndex = 0;

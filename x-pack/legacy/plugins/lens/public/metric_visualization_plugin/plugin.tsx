@@ -6,7 +6,10 @@
 
 import { npSetup } from 'ui/new_platform';
 import { CoreSetup } from 'src/core/public';
-import { FormatFactory, getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import {
+  unserializeFieldFormat,
+  FormatFactory,
+} from '../../../../../../src/legacy/core_plugins/visualizations/public';
 import { metricVisualization } from './metric_visualization';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { metricChart, getMetricChartRenderer } from './metric_expression';
@@ -43,7 +46,7 @@ export const metricVisualizationSetup = () =>
   plugin.setup(null, {
     expressions: npSetup.plugins.expressions,
     fieldFormat: {
-      formatFactory: getFormat,
+      formatFactory: unserializeFieldFormat,
     },
   });
 

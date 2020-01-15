@@ -22,7 +22,8 @@ import _ from 'lodash';
 
 import { dataLabel } from '../lib/_data_label';
 import { Dispatch } from '../lib/dispatch';
-import { Tooltip, getFormat } from '../../legacy_imports';
+import { Tooltip } from '../../legacy_imports';
+import { unserializeFieldFormat } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy/field_format_utils';
 
 /**
  * The Base Class for all visualizations.
@@ -42,7 +43,7 @@ export class Chart {
 
     const events = (this.events = new Dispatch(handler, deps.uiSettings));
 
-    const fieldFormatter = getFormat(this.handler.data.get('tooltipFormatter'));
+    const fieldFormatter = unserializeFieldFormat(this.handler.data.get('tooltipFormatter'));
     const tooltipFormatterProvider =
       this.handler.visConfig.get('type') === 'pie'
         ? deps.getHierarchicalTooltipFormatter()

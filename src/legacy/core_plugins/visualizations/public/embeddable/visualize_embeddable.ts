@@ -21,15 +21,15 @@ import _, { forEach } from 'lodash';
 import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/types';
 import { Vis } from 'ui/vis';
-import { queryGeohashBounds } from 'ui/visualize/loader/utils';
-import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
 import { ISearchSource } from 'ui/courier';
+import { queryGeohashBounds } from './query_geohash_bounds';
+import { buildPipeline } from '../np_ready/public/legacy/build_pipeline';
+import { getTableAggs } from '../np_ready/public/legacy/get_table_aggs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,

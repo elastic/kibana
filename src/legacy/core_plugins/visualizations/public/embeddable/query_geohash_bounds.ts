@@ -23,9 +23,10 @@ import { toastNotifications } from 'ui/notify';
 
 import { AggConfig } from 'ui/vis';
 import { timefilter } from 'ui/timefilter';
-import { Vis } from '../../../vis';
-import { SearchSource, ISearchSource } from '../../../courier';
-import { esFilters, Query } from '../../../../../../plugins/data/public';
+import { ISearchSource } from '../../../data/public';
+import { SearchSource } from '../../../data/public/search/search_source';
+import { Vis } from '../np_ready/public';
+import { esFilters, Query } from '../../../../../plugins/data/public';
 
 interface QueryGeohashBoundsParams {
   filters?: esFilters.Filter[];
@@ -93,7 +94,7 @@ export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsPar
       return get(esResp, 'aggregations.1.bounds');
     } catch (error) {
       toastNotifications.addDanger({
-        title: i18n.translate('common.ui.visualize.queryGeohashBounds.unableToGetBoundErrorTitle', {
+        title: i18n.translate('visualizations.queryGeohashBounds.unableToGetBoundErrorTitle', {
           defaultMessage: 'Unable to get bounds',
         }),
         text: `${error.message}`,

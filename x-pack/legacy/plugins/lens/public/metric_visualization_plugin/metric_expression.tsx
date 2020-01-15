@@ -6,7 +6,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import { FormatFactory } from '../../../../../../src/legacy/core_plugins/visualizations/public';
 import {
   ExpressionFunction,
   IInterpreterRenderFunction,

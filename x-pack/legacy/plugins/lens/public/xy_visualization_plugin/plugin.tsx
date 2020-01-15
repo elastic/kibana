@@ -8,7 +8,10 @@ import { npSetup } from 'ui/new_platform';
 import { CoreSetup, IUiSettingsClient } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import moment from 'moment-timezone';
-import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import {
+  FormatFactory,
+  unserializeFieldFormat,
+} from '../../../../../../src/legacy/core_plugins/visualizations/public';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
@@ -68,7 +71,7 @@ export const xyVisualizationSetup = () =>
   plugin.setup(null, {
     expressions: npSetup.plugins.expressions,
     fieldFormat: {
-      formatFactory: getFormat,
+      formatFactory: unserializeFieldFormat,
     },
     chrome,
   });

@@ -6,7 +6,10 @@
 
 import { npSetup } from 'ui/new_platform';
 import { CoreSetup } from 'src/core/public';
-import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
+import {
+  unserializeFieldFormat,
+  FormatFactory,
+} from '../../../../../../src/legacy/core_plugins/visualizations/public';
 import { datatableVisualization } from './visualization';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { datatable, datatableColumns, getDatatableRenderer } from './expression';
@@ -43,7 +46,7 @@ export const datatableVisualizationSetup = () =>
   plugin.setup(npSetup.core, {
     expressions: npSetup.plugins.expressions,
     fieldFormat: {
-      formatFactory: getFormat,
+      formatFactory: unserializeFieldFormat,
     },
   });
 export const datatableVisualizationStop = () => plugin.stop();

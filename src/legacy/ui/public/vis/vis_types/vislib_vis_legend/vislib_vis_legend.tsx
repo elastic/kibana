@@ -23,12 +23,14 @@ import { compact, uniq, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
-// @ts-ignore
-import { createFiltersFromEvent } from '../../../../../core_plugins/visualizations/public';
+import {
+  // @ts-ignore
+  createFiltersFromEvent,
+  getTableAggs,
+} from '../../../../../core_plugins/visualizations/public';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './vislib_vis_legend_item';
 import { getPieNames } from './pie_utils';
-import { getTableAggs } from '../../../visualize/loader/pipeline_helpers/utilities';
 
 export interface VisLegendProps {
   vis: any;

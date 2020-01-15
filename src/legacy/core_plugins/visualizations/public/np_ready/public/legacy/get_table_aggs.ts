@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-import { esaggs } from './esaggs';
+import { Vis } from '../vis';
+import { AggConfig, tabifyGetColumns } from '../../../legacy_imports';
 
-npSetup.plugins.expressions.registerFunction(esaggs);
+export const getTableAggs = (vis: Vis): AggConfig[] => {
+  if (!vis.aggs || !vis.aggs.getResponseAggs) {
+    return [];
+  }
+  const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
+  return columns.map(c => c.aggConfig);
+};

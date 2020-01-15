@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { injectZeros } from '../components/zero_injection/inject_zeros';
 import { orderXValues } from '../components/zero_injection/ordered_x_keys';
 import { labels } from '../components/labels/labels';
-import { getFormat } from '../../legacy_imports';
+import { unserializeFieldFormat } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy/field_format_utils';
 
 /**
  * Provides an API for pulling values off the data
@@ -54,8 +54,8 @@ export class Data {
           newData[key] = data[key];
         } else {
           newData[key] = data[key].map(seri => {
-            const converter = getFormat(seri.format);
-            const zConverter = getFormat(seri.zFormat);
+            const converter = unserializeFieldFormat(seri.format);
+            const zConverter = unserializeFieldFormat(seri.zFormat);
             return {
               id: seri.id,
               rawId: seri.rawId,
@@ -74,9 +74,9 @@ export class Data {
         }
       });
 
-      const xConverter = getFormat(newData.xAxisFormat);
-      const yConverter = getFormat(newData.yAxisFormat);
-      const zConverter = getFormat(newData.zAxisFormat);
+      const xConverter = unserializeFieldFormat(newData.xAxisFormat);
+      const yConverter = unserializeFieldFormat(newData.yAxisFormat);
+      const zConverter = unserializeFieldFormat(newData.zAxisFormat);
       newData.xAxisFormatter = val => xConverter.convert(val);
       newData.yAxisFormatter = val => yConverter.convert(val);
       newData.zAxisFormatter = val => zConverter.convert(val);

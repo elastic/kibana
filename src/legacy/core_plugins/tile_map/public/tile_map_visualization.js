@@ -22,7 +22,7 @@ import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { npStart } from 'ui/new_platform';
-import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
+import { unserializeFieldFormat } from '../../visualizations/public/np_ready/public/legacy/field_format_utils';
 
 export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
   const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
@@ -166,7 +166,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       const newParams = this._getMapsParams();
       const metricDimension = this._params.dimensions.metric;
       const metricLabel = metricDimension ? metricDimension.label : '';
-      const metricFormat = getFormat(metricDimension && metricDimension.format);
+      const metricFormat = unserializeFieldFormat(metricDimension && metricDimension.format);
       const boundTooltipFormatter = tooltipFormatter.bind(
         null,
         metricLabel,

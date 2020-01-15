@@ -24,6 +24,6 @@ export {
   IFieldFormatId,
   IFieldFormatMetaParams,
 } from './field_format';
-export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
+export * from './utils';
 export * from './converters';
 export * from './constants';
