@@ -71,7 +71,7 @@ export const toggleDetails = (
 };
 
 const SpanWithMargin = styled.span`
-  margin-right: 20px;
+  margin-right: 16px;
 `;
 
 export const PingListComponent = ({
