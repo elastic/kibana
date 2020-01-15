@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import RE2 from 're2';
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
@@ -51,7 +52,7 @@ export default new Chainable('label', {
     const config = args.byName;
     return alter(args, function(eachSeries) {
       if (config.regex) {
-        eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
+        eachSeries.label = eachSeries.label.replace(new RE2(config.regex), config.label);
       } else {
         eachSeries.label = config.label;
       }
