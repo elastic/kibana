@@ -48,18 +48,21 @@ export const MetricsExplorerKueryBar = ({ derivedIndexPattern, onSubmit, value }
     fields: derivedIndexPattern.fields.filter(field => isDisplayable(field)),
   };
 
+  const placeholder = i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
+    defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+  });
+
   return (
     <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
+          aria-label={placeholder}
           isLoadingSuggestions={isLoadingSuggestions}
           isValid={isValid}
           loadSuggestions={loadSuggestions}
           onChange={handleChange}
           onSubmit={onSubmit}
-          placeholder={i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
-            defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-          })}
+          placeholder={placeholder}
           suggestions={suggestions}
           value={draftQuery}
         />

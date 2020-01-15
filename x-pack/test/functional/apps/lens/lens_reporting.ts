@@ -12,6 +12,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'reporting']);
   const find = getService('find');
   const esArchiver = getService('esArchiver');
+  const listingTable = getService('listingTable');
 
   describe('lens reporting', () => {
     before(async () => {
@@ -24,7 +25,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not cause PDF reports to fail', async () => {
       await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.selectDashboard('Lens reportz');
+      await listingTable.clickItemLink('dashboard', 'Lens reportz');
       await PageObjects.reporting.openPdfReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
 

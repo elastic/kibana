@@ -52,6 +52,7 @@ exports[`ManagedTable component should render a page-full of items, with default
       },
     }
   }
+  tableLayout="fixed"
 />
 `;
 
@@ -99,5 +100,6 @@ exports[`ManagedTable component should render when specifying initial values 1`]
       },
     }
   }
+  tableLayout="fixed"
 />
 `;

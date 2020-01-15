@@ -16,7 +16,6 @@ import {
   StatusPanel,
 } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeSettingsContext } from '../contexts';
 import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../../../plugins/infra/public';
@@ -25,6 +24,7 @@ import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plu
 import { store } from '../state';
 import { setEsKueryString } from '../state/actions';
 import { PageHeader } from './page_header';
+import { UptimeThemeContext } from '../contexts/uptime_theme_context';
 
 interface OverviewPageProps {
   autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
@@ -48,7 +48,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
 `;
 
 export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
-  const { colors } = useContext(UptimeSettingsContext);
+  const { colors } = useContext(UptimeThemeContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const {

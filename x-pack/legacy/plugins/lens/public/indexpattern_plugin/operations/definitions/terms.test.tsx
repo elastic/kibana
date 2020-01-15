@@ -354,7 +354,7 @@ describe('terms', () => {
 
       expect(select.prop('value')).toEqual('alphabetical');
 
-      expect(select.prop('options').map(({ value }) => value)).toEqual([
+      expect(select.prop('options')!.map(({ value }) => value)).toEqual([
         'column$$$col2',
         'alphabetical',
       ]);
@@ -423,7 +423,7 @@ describe('terms', () => {
         .find(EuiSelect);
 
       expect(select.prop('value')).toEqual('asc');
-      expect(select.prop('options').map(({ value }) => value)).toEqual(['asc', 'desc']);
+      expect(select.prop('options')!.map(({ value }) => value)).toEqual(['asc', 'desc']);
     });
 
     it('should update state with the order direction value', () => {

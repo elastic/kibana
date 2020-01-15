@@ -1,68 +1,16 @@
 {
-  "rule_id": "90169566-2260-4824-b8e4-8615c3b4ed52",
-  "risk_score": 50,
   "description": "Linux: Hping Activity",
+  "enabled": false,
+  "from": "now-6m",
   "immutable": true,
   "interval": "5m",
-  "name": "Linux: Hping Activity",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: hping",
   "language": "kuery",
-  "filters": [
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.action",
-        "value": "process_started",
-        "params": {
-          "query": "process_started"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "process_started",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    },
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.dataset",
-        "value": "process",
-        "params": {
-          "query": "process"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.dataset": {
-            "query": "process",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    }
-  ],
-  "enabled": false,
+  "name": "Linux: Hping Activity",
+  "query": "process.name: hping  and event.action:executed",
+  "risk_score": 50,
+  "rule_id": "90169566-2260-4824-b8e4-8615c3b4ed52",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

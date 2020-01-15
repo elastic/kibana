@@ -32,6 +32,14 @@ When security is enabled, an SSL connection to Elasticsearch is required in orde
 
 When security is enabled, users who create alerts will need the `manage_api_key` cluster privilege. There is currently work in progress to remove this requirement.
 
+Note that the `manage_own_api_key` cluster privilege is not enough - it can be used to create API keys, but not invalidate them, and the alerting plugin currently both creates and invalidates APIs keys as part of it's processing.  When using only the `manage_own_api_key` privilege, you will see the following message logged in the server when the alerting plugin attempts to invalidate an API key:
+
+```
+[error][alerting][plugins] Failed to invalidate API Key: [security_exception] \
+    action [cluster:admin/xpack/security/api_key/invalidate] \
+    is unauthorized for user [user-name-here]
+```
+
 ## Alert types
 
 ### Methods

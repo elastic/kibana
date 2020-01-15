@@ -4,31 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React, {
-  useMemo,
-  useEffect,
-  useState,
-  useRef,
-  useCallback
-} from 'react';
-import { find, isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { EuiButton } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import { ElementDefinition } from 'cytoscape';
+import { find, isEqual } from 'lodash';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ServiceMapAPIResponse } from '../../../../server/lib/service_map/get_service_map';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useCallApmApi } from '../../../hooks/useCallApmApi';
+import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
 import { useLicense } from '../../../hooks/useLicense';
+import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
-import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
-import { useCallApmApi } from '../../../hooks/useCallApmApi';
-import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
-import { useLocation } from '../../../hooks/useLocation';
-import { LoadingOverlay } from './LoadingOverlay';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { getCytoscapeElements } from './get_cytoscape_elements';
+import { LoadingOverlay } from './LoadingOverlay';
+import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
+import { Popover } from './Popover';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -205,6 +206,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         style={cytoscapeDivStyle}
       >
         <Controls />
+        <Popover focusedServiceName={serviceName} />
       </Cytoscape>
     </LoadingOverlay>
   ) : (
