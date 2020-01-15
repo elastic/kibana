@@ -199,99 +199,93 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           render: ({ name, inProgress, isManagedPolicy }: SlmPolicy) => {
             return (
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
-                  <PolicyExecuteProvider>
-                    {executePolicyPrompt => {
-                      return (
-                        <EuiToolTip
-                          content={
-                            Boolean(inProgress)
-                              ? i18n.translate(
-                                  'xpack.snapshotRestore.policyList.table.actionExecuteDisabledTooltip',
-                                  { defaultMessage: 'Policy is running' }
-                                )
-                              : i18n.translate(
-                                  'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
-                                  { defaultMessage: 'Run now' }
-                                )
-                          }
-                        >
-                          <EuiButtonIcon
-                            aria-label={i18n.translate(
-                              'xpack.snapshotRestore.policyList.table.actionExecuteAriaLabel',
-                              {
-                                defaultMessage: `Run '{name}' immediately`,
-                                values: { name },
-                              }
-                            )}
-                            iconType="play"
-                            color="primary"
-                            data-test-subj="executePolicyButton"
-                            onClick={() => executePolicyPrompt(name, onPolicyExecuted)}
-                            disabled={Boolean(inProgress)}
-                          />
-                        </EuiToolTip>
-                      );
-                    }}
-                  </PolicyExecuteProvider>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.snapshotRestore.policyList.table.actionEditTooltip',
-                      { defaultMessage: 'Edit' }
-                    )}
-                  >
-                    <EuiButtonIcon
-                      aria-label={i18n.translate(
-                        'xpack.snapshotRestore.policyList.table.actionEditAriaLabel',
-                        {
-                          defaultMessage: `Edit policy '{name}'`,
-                          values: { name },
+                <PolicyExecuteProvider>
+                  {executePolicyPrompt => {
+                    return (
+                      <EuiToolTip
+                        content={
+                          Boolean(inProgress)
+                            ? i18n.translate(
+                                'xpack.snapshotRestore.policyList.table.actionExecuteDisabledTooltip',
+                                { defaultMessage: 'Policy is running' }
+                              )
+                            : i18n.translate(
+                                'xpack.snapshotRestore.policyList.table.actionExecuteTooltip',
+                                { defaultMessage: 'Run now' }
+                              )
                         }
-                      )}
-                      iconType="pencil"
-                      color="primary"
-                      href={linkToEditPolicy(name)}
-                      data-test-subj="editPolicyButton"
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <PolicyDeleteProvider>
-                    {deletePolicyPrompt => {
-                      const label = !isManagedPolicy
-                        ? i18n.translate(
-                            'xpack.snapshotRestore.policyList.table.actionDeleteTooltip',
-                            { defaultMessage: 'Delete' }
-                          )
-                        : i18n.translate(
-                            'xpack.snapshotRestore.policyList.table.deleteManagedPolicyTableActionTooltip',
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.snapshotRestore.policyList.table.actionExecuteAriaLabel',
                             {
-                              defaultMessage: 'You cannot delete a managed policy.',
+                              defaultMessage: `Run '{name}' immediately`,
+                              values: { name },
                             }
-                          );
-                      return (
-                        <EuiToolTip content={label}>
-                          <EuiButtonIcon
-                            aria-label={i18n.translate(
-                              'xpack.snapshotRestore.policyList.table.actionDeleteAriaLabel',
-                              {
-                                defaultMessage: `Delete policy '{name}'`,
-                                values: { name },
-                              }
-                            )}
-                            iconType="trash"
-                            color="danger"
-                            data-test-subj="deletePolicyButton"
-                            onClick={() => deletePolicyPrompt([name], onPolicyDeleted)}
-                            isDisabled={isManagedPolicy}
-                          />
-                        </EuiToolTip>
-                      );
-                    }}
-                  </PolicyDeleteProvider>
-                </EuiFlexItem>
+                          )}
+                          iconType="play"
+                          color="primary"
+                          data-test-subj="executePolicyButton"
+                          onClick={() => executePolicyPrompt(name, onPolicyExecuted)}
+                          disabled={Boolean(inProgress)}
+                        />
+                      </EuiToolTip>
+                    );
+                  }}
+                </PolicyExecuteProvider>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.snapshotRestore.policyList.table.actionEditTooltip',
+                    { defaultMessage: 'Edit' }
+                  )}
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.snapshotRestore.policyList.table.actionEditAriaLabel',
+                      {
+                        defaultMessage: `Edit policy '{name}'`,
+                        values: { name },
+                      }
+                    )}
+                    iconType="pencil"
+                    color="primary"
+                    href={linkToEditPolicy(name)}
+                    data-test-subj="editPolicyButton"
+                  />
+                </EuiToolTip>
+                <PolicyDeleteProvider>
+                  {deletePolicyPrompt => {
+                    const label = !isManagedPolicy
+                      ? i18n.translate(
+                          'xpack.snapshotRestore.policyList.table.actionDeleteTooltip',
+                          { defaultMessage: 'Delete' }
+                        )
+                      : i18n.translate(
+                          'xpack.snapshotRestore.policyList.table.deleteManagedPolicyTableActionTooltip',
+                          {
+                            defaultMessage: 'You cannot delete a managed policy.',
+                          }
+                        );
+                    return (
+                      <EuiToolTip content={label}>
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.snapshotRestore.policyList.table.actionDeleteAriaLabel',
+                            {
+                              defaultMessage: `Delete policy '{name}'`,
+                              values: { name },
+                            }
+                          )}
+                          iconType="trash"
+                          color="danger"
+                          data-test-subj="deletePolicyButton"
+                          onClick={() => deletePolicyPrompt([name], onPolicyDeleted)}
+                          isDisabled={isManagedPolicy}
+                        />
+                      </EuiToolTip>
+                    );
+                  }}
+                </PolicyDeleteProvider>
               </EuiFlexGroup>
             );
           },
