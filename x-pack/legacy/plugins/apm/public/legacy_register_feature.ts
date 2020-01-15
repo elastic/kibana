@@ -4,13 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from 'ui/new_platform';
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
+import { npSetup } from 'ui/new_platform';
 import { featureCatalogueEntry } from './new-platform/featureCatalogueEntry';
 
-const { core } = npStart;
-const apmUiEnabled = core.injectedMetadata.getInjectedVar('apmUiEnabled');
+const {
+  core,
+  plugins: { home }
+} = npSetup;
+const apmUiEnabled = core.injectedMetadata.getInjectedVar(
+  'apmUiEnabled'
+) as boolean;
 
 if (apmUiEnabled) {
-  FeatureCatalogueRegistryProvider.register(() => featureCatalogueEntry);
+  home.featureCatalogue.register(featureCatalogueEntry);
 }
+
+home.environment.update({
+  apmUi: apmUiEnabled
+});
