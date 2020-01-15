@@ -5,11 +5,11 @@
  */
 
 import React, { useContext } from 'react';
+import moment from 'moment';
 import styled from 'styled-components';
 import { EuiBadge, EuiText } from '@elastic/eui';
-import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../../contexts';
 import { MonitorLocation } from '../../../../common/runtime_types';
 
 const TimeStampSpan = styled.span`
@@ -47,7 +47,7 @@ interface StatusTag {
 export const LocationStatusTags = ({ locations }: Props) => {
   const {
     colors: { gray, danger },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
 
   const upLocations: StatusTag[] = [];
   const downLocations: StatusTag[] = [];
