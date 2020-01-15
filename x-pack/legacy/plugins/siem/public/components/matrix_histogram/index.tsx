@@ -178,7 +178,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
         >
           <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
-              {stackByOptions && (
+              {stackByOptions?.length > 1 && (
                 <EuiSelect
                   onChange={setSelectedChartOptionCallback}
                   options={stackByOptions}
