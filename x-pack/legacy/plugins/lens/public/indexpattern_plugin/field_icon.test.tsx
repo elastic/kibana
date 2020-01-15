@@ -19,35 +19,35 @@ describe('FieldIcon', () => {
     expect(shallow(<FieldIcon type="boolean" />)).toMatchInlineSnapshot(`
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--boolean"
-        color="#FAE181"
+        color="#D6BF57"
         type="invert"
       />
     `);
     expect(shallow(<FieldIcon type="date" />)).toMatchInlineSnapshot(`
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--date"
-        color="#F19F58"
+        color="#DA8B45"
         type="calendar"
       />
     `);
     expect(shallow(<FieldIcon type="number" />)).toMatchInlineSnapshot(`
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--number"
-        color="#5BBAA0"
+        color="#54B399"
         type="number"
       />
     `);
     expect(shallow(<FieldIcon type="string" />)).toMatchInlineSnapshot(`
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--string"
-        color="#EEAFCF"
+        color="#CA8EAE"
         type="string"
       />
     `);
     expect(shallow(<FieldIcon type="ip" />)).toMatchInlineSnapshot(`
       <EuiIcon
         className="lnsFieldListPanel__fieldIcon lnsFieldListPanel__fieldIcon--ip"
-        color="#B46F5F"
+        color="#AA6556"
         type="ip"
       />
     `);
