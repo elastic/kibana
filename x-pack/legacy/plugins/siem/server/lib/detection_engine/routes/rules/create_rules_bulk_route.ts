@@ -40,8 +40,10 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -74,6 +76,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             updated_at: updatedAt,
             references,
             timeline_id: timelineId,
+            timeline_title: timelineTitle,
             version,
           } = payloadRule;
           const ruleIdOrUuid = ruleId ?? uuid.v4();
@@ -112,6 +115,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
               outputIndex: finalIndex,
               savedId,
               timelineId,
+              timelineTitle,
               meta,
               filters,
               ruleId: ruleIdOrUuid,

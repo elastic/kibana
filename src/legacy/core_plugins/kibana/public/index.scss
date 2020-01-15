@@ -26,6 +26,9 @@
 // Management styles
 @import './management/index';
 
+// Local application mount wrapper styles
+@import 'local_application_service/index';
+
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
 @import './dashboard/index';

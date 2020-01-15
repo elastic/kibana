@@ -13,6 +13,7 @@ import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { getErrorMessage } from '../pages/analytics_management/hooks/use_create_analytics_form';
 import { SavedSearchQuery } from '../../contexts/kibana';
+import { SortDirection } from '../../components/ml_in_memory_table';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -39,6 +40,13 @@ interface ClassificationAnalysis {
   };
 }
 
+export interface LoadExploreDataArg {
+  field: string;
+  direction: SortDirection;
+  searchQuery: SavedSearchQuery;
+  requiresKeyword?: boolean;
+}
+
 export const SEARCH_SIZE = 1000;
 
 export const defaultSearchQuery = {
@@ -56,6 +64,23 @@ export enum INDEX_STATUS {
   LOADING,
   LOADED,
   ERROR,
+}
+
+export interface FieldSelectionItem {
+  name: string;
+  mappings_types: string[];
+  is_included: boolean;
+  is_required: boolean;
+  feature_type?: string;
+  reason?: string;
+}
+
+export interface DfAnalyticsExplainResponse {
+  field_selection: FieldSelectionItem[];
+  memory_estimation: {
+    expected_memory_without_disk: string;
+    expected_memory_with_disk: string;
+  };
 }
 
 export interface Eval {
@@ -165,7 +190,7 @@ export const getPredictedFieldName = (
   const defaultPredictionField = `${getDependentVar(analysis)}_prediction`;
   const predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
-  }${isClassificationAnalysis(analysis) && !forSort ? '.keyword' : ''}`;
+  }`;
   return predictedField;
 };
 
@@ -357,6 +382,7 @@ interface LoadEvalDataConfig {
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
   jobType: ANALYSIS_CONFIG_TYPE;
+  requiresKeyword?: boolean;
 }
 
 export const loadEvalData = async ({
@@ -368,6 +394,7 @@ export const loadEvalData = async ({
   searchQuery,
   ignoreDefaultQuery,
   jobType,
+  requiresKeyword,
 }: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -375,7 +402,7 @@ export const loadEvalData = async ({
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
 
-  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
+  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && requiresKeyword === true) {
     predictedField = `${predictedField}.keyword`;
   }
 

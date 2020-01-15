@@ -5,6 +5,7 @@
  */
 
 import { ServerInjectOptions } from 'hapi';
+import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../actions/server/types';
 import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
@@ -15,7 +16,7 @@ import {
   INTERNAL_RULE_ID_KEY,
   INTERNAL_IMMUTABLE_KEY,
 } from '../../../../../common/constants';
-import { RuleAlertType } from '../../rules/types';
+import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
 
 export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
@@ -52,6 +53,7 @@ export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
   timeline_id: 'timeline-id',
+  timeline_title: 'timeline-title',
 });
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
@@ -158,7 +160,7 @@ export const getPrivilegeRequest = (): ServerInjectOptions => ({
   url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
 });
 
-interface FindHit {
+export interface FindHit {
   page: number;
   perPage: number;
   total: number;
@@ -175,7 +177,7 @@ export const getFindResult = (): FindHit => ({
 export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
-  total: 0,
+  total: 1,
   data: [getResult()],
 });
 
@@ -271,6 +273,7 @@ export const getResult = (): RuleAlertType => ({
     outputIndex: '.siem-signals',
     savedId: 'some-id',
     timelineId: 'some-timeline-id',
+    timelineTitle: 'some-timeline-title',
     meta: { someMeta: 'someField' },
     filters: [
       {
@@ -380,4 +383,11 @@ export const getMockPrivileges = () => ({
   },
   application: {},
   isAuthenticated: false,
+});
+
+export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  page: 1,
+  per_page: 1,
+  total: 0,
+  saved_objects: [],
 });

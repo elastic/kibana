@@ -61,6 +61,7 @@ export const ColorPalette: FunctionComponent<Props> = ({
               key={color}
               onClick={() => !match && onChange(color)}
               className="canvasColorPalette__dot"
+              aria-label={tinycolor(color).toName() || color}
             >
               <ColorDot value={color}>{icon}</ColorDot>
             </EuiLink>
