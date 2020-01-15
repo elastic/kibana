@@ -111,8 +111,10 @@ def getTestFailuresMessage() {
     messages << """
 ---
 
-### Test Failures
+### [Test Failures](${env.BUILD_URL}testReport)
 <details><summary>${failure.fullDisplayName}</summary>
+
+[Link to Jenkins](${failure.url})
 
 ```
 ${failure.stdOut}
