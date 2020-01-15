@@ -4,7 +4,8 @@
 * <<configuring-kibana-shield>>
 * <<csp-strict-mode>>
 * <<enabling-ssl>>
-* <<load-balancing>>
+* <<load-balancing-es>>
+* <<load-balancing-kibana>>
 * <<high-availability>>
 * <<memory>>
 
@@ -18,7 +19,7 @@ While Kibana isn't terribly resource intensive, we still recommend running Kiban
 separate from  your Elasticsearch data or master nodes. To distribute Kibana
 traffic across the nodes in your Elasticsearch cluster, you can run Kibana
 and an Elasticsearch client node on the same machine. For more information, see
-<<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>.
+<<load-balancing-es, Load balancing across multiple Elasticsearch nodes>>.
 
 [float]
 [[configuring-kibana-shield]]
@@ -63,7 +64,7 @@ csp.strict: true
 See <<configuring-tls>>.
 
 [float]
-[[load-balancing]]
+[[load-balancing-es]]
 === Load Balancing Across Multiple Elasticsearch Nodes
 If you have multiple nodes in your Elasticsearch cluster, the easiest way to distribute Kibana requests
 across the nodes is to run an Elasticsearch _Coordinating only_ node on the same machine as Kibana.
@@ -111,8 +112,39 @@ elasticsearch.hosts: ["http://localhost:9200"]
 --------
 
 [float]
+[[load-balancing-kibana]]
+=== Load balancing across multiple Kibana instances
+To serve multiple Kibana installations behind a load balancer, you must change the configuration. See {kibana-ref}/settings.html[Configuring Kibana] for details on each setting.
+
+Settings unique across each Kibana instance:
+--------
+server.uuid
+server.name
+--------
+
+Settings unique across each host (for example, running multiple installations on the same virtual machine):
+--------
+logging.dest
+path.data
+pid.file
+server.port
+--------
+
+Settings that must be the same:
+--------
+xpack.security.encryptionKey //decrypting session cookies
+xpack.reporting.encryptionKey //decrypting reports stored in Elasticsearch
+--------
+
+Separate configuration files can be used from the command line by using the `-c` flag:
+--------
+bin/kibana -c config/instance1.yml
+bin/kibana -c config/instance2.yml
+--------
+
+[float]
 [[high-availability]]
-=== High Availability Across Multiple Elasticsearch Nodes
+=== High availability across multiple Elasticsearch nodes
 Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
 Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
 

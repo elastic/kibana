@@ -55,6 +55,7 @@
     - [Provide Legacy Platform API to the New platform plugin](#provide-legacy-platform-api-to-the-new-platform-plugin)
       - [On the server side](#on-the-server-side)
       - [On the client side](#on-the-client-side)
+    - [Updates an application navlink at runtime](#updates-an-app-navlink-at-runtime)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -1624,3 +1625,31 @@ class MyPlugin {
 It's not currently possible to use a similar pattern on the client-side.
 Because Legacy platform plugins heavily rely on global angular modules, which aren't available on the new platform.
 So you can utilize the same approach for only *stateless Angular components*, as long as they are not consumed by a New Platform application. When New Platform applications are on the page, no legacy code is executed, so the `registerLegacyAPI` function would not be called.
+
+### Updates an application navlink at runtime
+
+The application API now provides a way to updates some of a registered application's properties after registration.
+
+```typescript
+// inside your plugin's setup function
+export class MyPlugin implements Plugin {
+  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  setup({ application }) {
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      updater$: this.appUpdater,
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+  start() {
+     // later, when the navlink needs to be updated
+     appUpdater.next(() => {
+       navLinkStatus: AppNavLinkStatus.disabled,
+       tooltip: 'Application disabled',
+     })
+  }
+```

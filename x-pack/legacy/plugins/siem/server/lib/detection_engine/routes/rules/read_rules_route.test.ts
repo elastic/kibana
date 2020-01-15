@@ -13,20 +13,23 @@ import {
 
 import { readRulesRoute } from './read_rules_route';
 import { ServerInjectOptions } from 'hapi';
+import { ServerFacade } from '../../../../types';
+
 import {
   getFindResult,
   getResult,
   getReadRequest,
   getFindResultWithSingleHit,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('read_signals', () => {
-  let { server, alertsClient } = createMockServer();
+  let { server, alertsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient } = createMockServer());
-    readRulesRoute(server);
+    ({ server, alertsClient, savedObjectsClient } = createMockServer());
+    readRulesRoute((server as unknown) as ServerFacade);
   });
 
   afterEach(() => {
@@ -37,20 +40,21 @@ describe('read_signals', () => {
     test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { statusCode } = await server.inject(getReadRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      readRulesRoute(serverWithoutActionClient);
+      readRulesRoute((serverWithoutActionClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutActionClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      readRulesRoute(serverWithoutAlertClient);
+      readRulesRoute((serverWithoutAlertClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
@@ -59,7 +63,7 @@ describe('read_signals', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      readRulesRoute(serverWithoutActionOrAlertClient);
+      readRulesRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
@@ -70,6 +74,7 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const request: ServerInjectOptions = {
         method: 'GET',
         url: DETECTION_ENGINE_RULES_URL,

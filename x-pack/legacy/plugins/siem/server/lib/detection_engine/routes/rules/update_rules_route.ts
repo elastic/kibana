@@ -8,11 +8,12 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRules } from '../../rules/update_rules';
-import { UpdateRulesRequest } from '../../rules/types';
+import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createUpdateRulesRoute: Hapi.ServerRoute = {
   method: 'PUT',
@@ -59,8 +60,10 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
 
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
-
-    if (!alertsClient || !actionsClient) {
+    const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+      ? request.getSavedObjectsClient()
+      : null;
+    if (!alertsClient || !actionsClient || !savedObjectsClient) {
       return headers.response().code(404);
     }
 
@@ -97,7 +100,17 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
         version,
       });
       if (rule != null) {
-        return transformOrError(rule);
+        const ruleStatuses = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: rule.id,
+          searchFields: ['alertId'],
+        });
+        return transformOrError(rule, ruleStatuses.saved_objects[0]);
       } else {
         return getIdError({ id, ruleId });
       }
