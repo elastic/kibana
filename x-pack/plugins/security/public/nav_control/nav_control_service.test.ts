@@ -73,7 +73,7 @@ describe('SecurityNavControlService', () => {
               <div
                 aria-label="some-user"
                 class="euiAvatar euiAvatar--s euiAvatar--user"
-                style="background-image: none; background-color: rgb(231, 102, 76); color: rgb(0, 0, 0);"
+                style="background-image: none; background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
                 title="some-user"
               >
                 <span

@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import {
   IndexPatternMapping,
   LayerMapping,
@@ -12,6 +13,7 @@ import {
   LayerMappingDetails,
 } from './types';
 import * as i18n from './translations';
+const euiVisColorPalette = euiPaletteColorBlind();
 
 // Update field mappings to modify what fields will be returned to map tooltip
 const sourceFieldMappings: Record<string, string> = {
@@ -150,7 +152,7 @@ export const getSourceLayer = (
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#3185FC' },
+        options: { color: euiVisColorPalette[1] },
       },
       lineColor: {
         type: 'STATIC',
@@ -209,7 +211,7 @@ export const getDestinationLayer = (
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#DB1374' },
+        options: { color: euiVisColorPalette[2] },
       },
       lineColor: {
         type: 'STATIC',
@@ -278,7 +280,7 @@ export const getLineLayer = (
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#3185FC' },
+        options: { color: euiVisColorPalette[1] },
       },
       lineWidth: {
         type: 'DYNAMIC',
