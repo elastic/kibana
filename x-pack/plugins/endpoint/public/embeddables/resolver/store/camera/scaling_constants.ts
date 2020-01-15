@@ -15,6 +15,6 @@ export const minimum = 0.1;
 export const maximum = 6;
 
 /**
- * The curve of the zoom function growth rate. The exponential rate the speed of zoom increases at the higher the scale is
+ * The curve of the zoom function growth rate. The higher the scale factor is, the higher the zoom rate will be.
  */
 export const zoomCurveRate = 4;

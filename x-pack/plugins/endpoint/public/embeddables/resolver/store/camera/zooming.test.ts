@@ -54,7 +54,7 @@ describe('zooming', () => {
         })
       );
     });
-    describe('when the user zooms in by 0.1 scaling factor', () => {
+    describe('when the user zooms in all the way', () => {
       beforeEach(() => {
         const action: CameraAction = {
           type: 'userZoomed',
@@ -62,7 +62,7 @@ describe('zooming', () => {
         };
         store.dispatch(action);
       });
-      it('should zoom in a little bit', () => {
+      it('should zoom to maximum scale factor', () => {
         const actual = viewableBoundingBox(store.getState());
         expect(actual).toMatchInlineSnapshot(`
           Object {

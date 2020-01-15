@@ -14,7 +14,7 @@ import { scaleToZoom } from './scale_to_zoom';
 
 function initialState(): CameraState {
   return {
-    scalingFactor: scaleToZoom(1), // Defaulted to halfway zoomed
+    scalingFactor: scaleToZoom(1), // Defaulted to 1 to 1 scale
     rasterSize: [0, 0] as const,
     translationNotCountingCurrentPanning: [0, 0] as const,
     latestFocusedWorldCoordinates: null,
