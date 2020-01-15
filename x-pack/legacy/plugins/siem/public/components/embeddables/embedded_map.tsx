@@ -107,9 +107,9 @@ export const EmbeddedMapComponent = ({
   useEffect(() => {
     let isSubscribed = true;
     async function setupEmbeddable() {
-      // Ensure at least one `siem:defaultIndex` index pattern exists before trying to import
-      const matchingIndexPatterns = kibanaIndexPatterns.filter(ip =>
-        siemDefaultIndices.includes(ip.attributes.title)
+      // Ensure at least one `siem:defaultIndex` kibana index pattern exists before creating embeddable
+      const matchingIndexPatterns = kibanaIndexPatterns.filter(kip =>
+        siemDefaultIndices.some(sdi => new RegExp(kip.attributes.title).test(sdi))
       );
       if (matchingIndexPatterns.length === 0 && isSubscribed) {
         setIsLoading(false);
