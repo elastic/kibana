@@ -525,7 +525,7 @@ exports[`Storyshots components/Elements/ElementGrid with tags filter 1`] = `
             style={
               Object {
                 "backgroundColor": "#666666",
-                "color": "#FFFFFF",
+                "color": "#fff",
               }
             }
           >
@@ -605,7 +605,7 @@ exports[`Storyshots components/Elements/ElementGrid with text filter 1`] = `
             style={
               Object {
                 "backgroundColor": "#666666",
-                "color": "#FFFFFF",
+                "color": "#fff",
               }
             }
           >
@@ -685,7 +685,7 @@ exports[`Storyshots components/Elements/ElementGrid without controls 1`] = `
             style={
               Object {
                 "backgroundColor": "#666666",
-                "color": "#FFFFFF",
+                "color": "#fff",
               }
             }
           >
@@ -750,7 +750,7 @@ exports[`Storyshots components/Elements/ElementGrid without controls 1`] = `
             style={
               Object {
                 "backgroundColor": "#666666",
-                "color": "#FFFFFF",
+                "color": "#fff",
               }
             }
           >
@@ -815,7 +815,7 @@ exports[`Storyshots components/Elements/ElementGrid without controls 1`] = `
             style={
               Object {
                 "backgroundColor": "#666666",
-                "color": "#FFFFFF",
+                "color": "#fff",
               }
             }
           >
