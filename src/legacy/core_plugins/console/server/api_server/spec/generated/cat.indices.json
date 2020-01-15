@@ -5,8 +5,15 @@
       "bytes": [
         "b",
         "k",
+        "kb",
         "m",
-        "g"
+        "mb",
+        "g",
+        "gb",
+        "t",
+        "tb",
+        "p",
+        "pb"
       ],
       "local": "__flag__",
       "master_timeout": "",

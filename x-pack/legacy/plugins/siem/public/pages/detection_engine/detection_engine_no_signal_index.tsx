@@ -5,16 +5,18 @@
  */
 
 import React from 'react';
-import { documentationLinks } from 'ui/documentation_links';
+import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import * as i18n from './translations';
+
+const basePath = chrome.getBasePath();
 
 export const DetectionEngineNoIndex = React.memo(() => (
   <EmptyPage
     actionPrimaryIcon="documents"
     actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
-    actionPrimaryUrl={documentationLinks.siem}
+    actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
     actionPrimaryTarget="_blank"
     message={i18n.NO_INDEX_MSG_BODY}
     data-test-subj="no_index"

@@ -1,29 +1,22 @@
 {
-  "rule_id": "8e792144-39a6-4a63-9779-2f12719dc132",
-  "risk_score": 50,
   "description": "Powershell network connection",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Powershell network connection",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name:powershell.exe",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "event.action",
-        "value": "Network connection detected (rule: NetworkConnect)",
+        "negate": false,
         "params": {
           "query": "Network connection detected (rule: NetworkConnect)"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase",
+        "value": "Network connection detected (rule: NetworkConnect)"
       },
       "query": {
         "match": {
@@ -32,23 +25,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": true,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
         "key": "destination.ip",
-        "value": "169.254.169.254",
+        "negate": true,
         "params": {
           "query": "169.254.169.254"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+        "type": "phrase",
+        "value": "169.254.169.254"
       },
       "query": {
         "match": {
@@ -57,12 +50,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Powershell network connection",
+  "query": "process.name:powershell.exe",
+  "risk_score": 50,
+  "rule_id": "8e792144-39a6-4a63-9779-2f12719dc132",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

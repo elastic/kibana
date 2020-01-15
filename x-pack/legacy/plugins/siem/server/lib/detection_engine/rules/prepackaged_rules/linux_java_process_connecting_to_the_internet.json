@@ -1,29 +1,22 @@
 {
-  "rule_id": "7f65b8c5-27ed-4cf6-a088-3a20d2f84bf5",
-  "risk_score": 50,
   "description": "Linux: Java Process Connecting to the Internet",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Linux: Java Process Connecting to the Internet",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "not destination.ip: 10.0.0.0/8 and not 172.16.0.0/12",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "process.name",
-        "value": "java",
+        "negate": false,
         "params": {
           "query": "java"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase",
+        "value": "java"
       },
       "query": {
         "match": {
@@ -32,23 +25,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
         "key": "event.action",
-        "value": "socket_opened",
+        "negate": false,
         "params": {
           "query": "socket_opened"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+        "type": "phrase",
+        "value": "socket_opened"
       },
       "query": {
         "match": {
@@ -57,23 +50,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": true,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
         "key": "destination.ip",
-        "value": "127.0.0.1",
+        "negate": true,
         "params": {
           "query": "127.0.0.1"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index"
+        "type": "phrase",
+        "value": "127.0.0.1"
       },
       "query": {
         "match": {
@@ -82,23 +75,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": true,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[3].meta.index",
         "key": "destination.ip",
-        "value": "::1",
+        "negate": true,
         "params": {
           "query": "::1"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[3].meta.index"
+        "type": "phrase",
+        "value": "::1"
       },
       "query": {
         "match": {
@@ -107,12 +100,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Linux: Java Process Connecting to the Internet",
+  "query": "not destination.ip: 10.0.0.0/8 and not 172.16.0.0/12",
+  "risk_score": 50,
+  "rule_id": "7f65b8c5-27ed-4cf6-a088-3a20d2f84bf5",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

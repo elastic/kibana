@@ -113,7 +113,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiPanel data-test-subj="events-viewer-panel" grow={false}>
+    <EuiPanel data-test-subj="events-viewer-panel">
       <AutoSizer detectAnyWindowResize={true} content>
         {({ measureRef, content: { width = 0 } }) => (
           <>
