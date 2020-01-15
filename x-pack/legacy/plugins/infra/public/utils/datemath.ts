@@ -16,5 +16,5 @@ export function datemathToEpochMillis(value: string): number | null {
   if (!parsedValue || !parsedValue.isValid()) {
     return null;
   }
-  return parsedValue.unix() * 1000;
+  return parsedValue.valueOf();
 }
