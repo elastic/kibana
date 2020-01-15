@@ -17,9 +17,33 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-import { visualization as visualizationFunction } from './visualization_function';
-import { visualization as visualizationRenderer } from './visualization_renderer';
+import { i18n } from '@kbn/i18n';
+import { ExpressionFunction } from '../../common/types';
 
-npSetup.plugins.expressions.registerFunction(visualizationFunction);
-npSetup.plugins.expressions.registerRenderer(visualizationRenderer);
+interface Arguments {
+  name: string;
+}
+
+type Context = any;
+type ExpressionFunctionVar = ExpressionFunction<'var', Context, Arguments, any>;
+
+export const variable = (): ExpressionFunctionVar => ({
+  name: 'var',
+  help: i18n.translate('expressions.functions.var.help', {
+    defaultMessage: 'Updates kibana global context',
+  }),
+  args: {
+    name: {
+      types: ['string'],
+      aliases: ['_'],
+      required: true,
+      help: i18n.translate('expressions.functions.var.name.help', {
+        defaultMessage: 'Specify name of the variable',
+      }),
+    },
+  },
+  fn(context, args, handlers) {
+    const variables: Record<string, any> = handlers.variables;
+    return variables[args.name];
+  },
+});
