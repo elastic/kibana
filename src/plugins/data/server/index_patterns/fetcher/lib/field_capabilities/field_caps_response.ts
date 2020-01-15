@@ -187,6 +187,6 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
   });
 
   return kibanaFormattedCaps.filter(field => {
-    return !['object', 'nested'].includes(field.type);
+    return !['object'].includes(field.type);
   });
 }
