@@ -74,8 +74,6 @@ const createInternalSetupContractMock = () => {
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
-    adminClient$: new BehaviorSubject(createClusterClientMock()),
-    dataClient$: new BehaviorSubject(createClusterClientMock()),
   };
   setupContract.adminClient.asScoped.mockReturnValue(createScopedClusterClientMock());
   setupContract.dataClient.asScoped.mockReturnValue(createScopedClusterClientMock());
