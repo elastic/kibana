@@ -18,10 +18,14 @@ import * as i18n from '../translations';
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
-const eventsStackByOptions: MatrixHistogramOption[] = [
+export const eventsStackByOptions: MatrixHistogramOption[] = [
   {
     text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION,
     value: 'event.action',
+  },
+  {
+    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_DATASET,
+    value: 'event.dataset',
   },
 ];
 

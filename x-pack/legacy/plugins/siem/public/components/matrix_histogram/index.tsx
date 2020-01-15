@@ -9,7 +9,7 @@ import { ScaleType } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { EuiLoadingContent, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
@@ -39,6 +39,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   endDate,
   errorMessage,
   filterQuery,
+  headerChildren,
   hideHistogramIfEmpty = false,
   id,
   isAlertsHistogram,
@@ -66,12 +67,12 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
 }) => {
   const barchartConfigs = getBarchartConfigs({
     from: startDate,
+    legendPosition,
     to: endDate,
     onBrushEnd: updateDateRange,
     scaleType,
     yTickFormatter,
     showLegend,
-    legendPosition,
   });
   const [showInspect, setShowInspect] = useState(false);
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
@@ -90,6 +91,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
     defaultStackByOption
   );
+
+  const [titleWithStackByField, setTitle] = useState<string>('');
   const [subtitleWithCounts, setSubtitle] = useState<string>('');
   const [hideHistogram, setHideHistogram] = useState<boolean>(hideHistogramIfEmpty);
   const [barChartData, setBarChartData] = useState<ChartSeriesData[] | null>(null);
@@ -130,6 +133,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   );
 
   useEffect(() => {
+    if (title != null) setTitle(typeof title === 'function' ? title(selectedStackByOption) : title);
+
     if (subtitle != null)
       setSubtitle(typeof subtitle === 'function' ? subtitle(totalCount) : subtitle);
 
@@ -169,17 +174,22 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
       >
         <HeaderSection
           id={id}
-          title={title}
+          title={titleWithStackByField}
           subtitle={!loading && (totalCount >= 0 ? subtitleWithCounts : null)}
         >
-          {stackByOptions && (
-            <EuiSelect
-              onChange={setSelectedChartOptionCallback}
-              options={stackByOptions}
-              prepend={i18n.STACK_BY}
-              value={selectedStackByOption?.value}
-            />
-          )}
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              {stackByOptions && (
+                <EuiSelect
+                  onChange={setSelectedChartOptionCallback}
+                  options={stackByOptions}
+                  prepend={i18n.STACK_BY}
+                  value={selectedStackByOption?.value}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
+          </EuiFlexGroup>
         </HeaderSection>
         {loading ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
