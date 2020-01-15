@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Device Retrieving External IP Address Detected\" or rule.category: \"Device Retrieving External IP Address Detected\")",
   "risk_score": 50,
   "rule_id": "c7df9ecf-d6be-4ef8-9871-cb317dfff0b4",
-  "severity": "low",
+  "severity": "medium",
   "to": "now",
   "type": "query",
   "version": 1

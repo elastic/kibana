@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Misc Attack\" or rule.category: \"Misc Attack\")",
   "risk_score": 50,
   "rule_id": "83277123-749f-49da-ad3d-d59f35490db1",
-  "severity": "low",
+  "severity": "medium",
   "to": "now",
   "type": "query",
   "version": 1

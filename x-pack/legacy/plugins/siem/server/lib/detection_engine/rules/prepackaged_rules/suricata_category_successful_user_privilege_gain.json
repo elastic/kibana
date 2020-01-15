@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Successful User Privilege Gain\" or rule.category: \"Successful User Privilege Gain\")",
   "risk_score": 50,
   "rule_id": "f8ebd022-6e92-4b80-ac49-7ee011ba2ce0",
-  "severity": "low",
+  "severity": "high",
   "to": "now",
   "type": "query",
   "version": 1

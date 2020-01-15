@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Attempted Administrator Privilege Gain\" or rule.category: \"Attempted Administrator Privilege Gain\")",
   "risk_score": 50,
   "rule_id": "f840129e-9089-4f46-8af1-0745e8f54713",
-  "severity": "low",
+  "severity": "high",
   "to": "now",
   "type": "query",
   "version": 1

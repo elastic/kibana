@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Detection of a non-standard protocol or event\" or rule.category: \"Detection of a non-standard protocol or event\")",
   "risk_score": 50,
   "rule_id": "82f9f485-873b-4eeb-b231-052ab81e05b8",
-  "severity": "low",
+  "severity": "medium",
   "to": "now",
   "type": "query",
   "version": 1

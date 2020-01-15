@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Possible Social Engineering Attempted\" or rule.category: \"Possible Social Engineering Attempted\")",
   "risk_score": 50,
   "rule_id": "7d2d5a5f-f590-407d-933a-42adb1a7bcef",
-  "severity": "low",
+  "severity": "medium",
   "to": "now",
   "type": "query",
   "version": 1

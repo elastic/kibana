@@ -8,9 +8,9 @@
   "language": "kuery",
   "name": "Suricata Category - Denial of Service Attack",
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Detection of a Denial of Service Attack\" or rule.category: \"Detection of a Denial of Service Attack\")",
-  "risk_score": 50,
+  "risk_score": 100,
   "rule_id": "42a60eaa-fd20-479b-b6ca-bdb88d47b34b",
-  "severity": "low",
+  "severity": "high",
   "to": "now",
   "type": "query",
   "version": 1

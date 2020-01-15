@@ -8,9 +8,9 @@
   "language": "kuery",
   "name": "Suricata Category - Possibly Unwanted Program",
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Possibly Unwanted Program Detected\" or rule.category: \"Possibly Unwanted Program Detected\")",
-  "risk_score": 50,
+  "risk_score": 25,
   "rule_id": "1b9a31e8-fdfa-400e-aa4e-79a7f1a1da18",
-  "severity": "low",
+  "severity": "medium",
   "to": "now",
   "type": "query",
   "version": 1

@@ -8,7 +8,7 @@
   "language": "kuery",
   "name": "Suricata Category - Generic ICMP event",
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Generic ICMP event\" or rule.category: \"Generic ICMP event\")",
-  "risk_score": 50,
+  "risk_score": 25,
   "rule_id": "3309bffa-7c43-409a-acea-6631c1b077e5",
   "severity": "low",
   "to": "now",

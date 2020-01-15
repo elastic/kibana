@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"A system call was detected\" or rule.category: \"A system call was detected\")",
   "risk_score": 50,
   "rule_id": "44a5c55a-a34f-43c3-8f21-df502862aa9b",
-  "severity": "low",
+  "severity": "medium",
   "to": "now",
   "type": "query",
   "version": 1

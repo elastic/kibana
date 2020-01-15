@@ -8,7 +8,7 @@
   "language": "kuery",
   "name": "Suricata Category - Unknown Traffic",
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Unknown Traffic\" or rule.category: \"Unknown Traffic\")",
-  "risk_score": 50,
+  "risk_score": 25,
   "rule_id": "827ea90c-00c2-45f7-b873-dd060297b2d2",
   "severity": "low",
   "to": "now",

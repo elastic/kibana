@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"An attempted login using a suspicious username was detected\" or rule.category: \"An attempted login using a suspicious username was detected\")",
   "risk_score": 50,
   "rule_id": "a84cd36c-dd5a-4e86-a2ce-44556c21cef0",
-  "severity": "low",
+  "severity": "medium",
   "to": "now",
   "type": "query",
   "version": 1

@@ -10,7 +10,7 @@
   "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Executable code was detected\" or rule.category: \"Executable code was detected\")",
   "risk_score": 50,
   "rule_id": "4699296b-5127-475a-9d83-8434fcd18136",
-  "severity": "low",
+  "severity": "high",
   "to": "now",
   "type": "query",
   "version": 1
