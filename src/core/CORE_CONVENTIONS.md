@@ -33,7 +33,7 @@ area of Core API's and does not apply to internal types.
    prefixed with an 'I', to describe the public contract of the class.
    
    ```ts
-   // -- good (preferred) --
+   // -- good (alternative 1) --
    /**
     * @public
     * {@link UiSettingsClient}
@@ -47,9 +47,13 @@ area of Core API's and does not apply to internal types.
      public getSettings(): { return this.settings; }
    };
 
-   // -- good (alternative) --
-   export interface IUiSettingsClient {
+   // -- good (alternative 2) --
+      export interface IUiSettingsClient {
      /** Retrieve all settings */
+     public getSettings(): string;
+   }
+
+   export class UiSettingsClient implements IUiSettingsClient {
      public getSettings(): string;
    }
 
@@ -62,11 +66,32 @@ area of Core API's and does not apply to internal types.
    ```
 
    > Why? Classes' private members form part of their type signature making it
-   > impossible to mock a dependency typed as a `class`. Deriving the public
-   > contract from the class is preferred over a separate interface. It
-   > reduces the duplication of types and doc comments are: a) located with
-   > the source code, b) included in our generated docs and c) visible when
-   > hovering over the type in a code editor.
+   > impossible to mock a dependency typed as a `class`. 
+   >
+   > Until we can use ES private field support in Typescript 3.8
+   > https://github.com/elastic/kibana/issues/54906 we have two alternatives
+   > each with their own pro's and cons:
+   >
+   > #### Using a derived class (alternative 1)
+   > 
+   > Pro's:
+   > - TSDoc comments are located with the source code
+   > - The class acts as a single source of type information
+   >
+   > Con's:
+   > - "Go to definition" first takes you to where the type gets derived
+   >   requiring a second "Go to definition" to navigate to the type source.
+   >  
+   > #### Using a separate interface (alternative 2)
+   > Pro's:
+   > - Creates an explicit external API contract
+   > - "Go to definition" will take you directly to the type definition.
+   > 
+   > Con's:
+   > - TSDoc comments are located with the interface not next to the
+   >   implementation source code.
+   > - Creates duplicate type information between the interface and
+   >   implementation class.
 
 ## 2. API Structure and nesting
  - 2.1 Nest API methods into their own namespace only if we expect we will be
@@ -93,7 +118,7 @@ area of Core API's and does not apply to internal types.
 
 ## 3. Tests and mocks
  - 3.1 Declare Jest mocks with a temporary variable to ensure types are
-   correctly inferred
+   correctly inferred.
 
    ```ts
    // -- good --
