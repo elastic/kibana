@@ -4,16 +4,126 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeatureKibanaPrivileges, FeatureKibanaPrivilegesSet } from './feature_kibana_privileges';
+import {
+  FeatureKibanaPrivileges,
+  FeatureKibanaPrivilegesGroup,
+  SubFeatureKibanaPrivileges,
+} from './feature_kibana_privileges';
+
+export class Feature {
+  constructor(private readonly config: IFeature) {}
+
+  public get id() {
+    return this.config.id;
+  }
+
+  public get navLinkId() {
+    return this.config.navLinkId;
+  }
+
+  public get catalogue() {
+    return this.config.catalogue;
+  }
+
+  public get excludeFromBasePrivileges() {
+    return Boolean(this.config.excludeFromBasePrivileges);
+  }
+
+  public get reserved() {
+    return this.config.reserved;
+  }
+
+  public toRaw() {
+    return { ...this.config };
+  }
+
+  public *privilegeIterator({
+    augmentWithSubFeaturePrivileges = true,
+    predicate = () => true,
+  }: {
+    augmentWithSubFeaturePrivileges?: boolean;
+    predicate?: (privilege: FeatureKibanaPrivileges, feature: Feature) => boolean;
+  }): IterableIterator<FeatureKibanaPrivileges> {
+    if (!this.config.privileges) {
+      return [];
+    }
+
+    const allSubFeaturePrivileges = (
+      (augmentWithSubFeaturePrivileges && this.config.subFeatures) ||
+      []
+    )
+      .map(subFeature => subFeature.privilegeGroups.map(pg => pg.privileges))
+      .flat(2);
+
+    yield* this.config.privileges
+      .filter(privilege => (predicate ? predicate(privilege, this) : true))
+      .map(privilege => {
+        const subFeaturePrivsToMerge = allSubFeaturePrivileges.filter(
+          priv =>
+            priv.includeInPrimaryFeaturePrivilege === privilege.id ||
+            priv.includeInPrimaryFeaturePrivilege === 'read'
+        );
+
+        const subFeaturePrivileges: FeatureKibanaPrivileges = subFeaturePrivsToMerge.reduce(
+          (acc, addon) => {
+            return {
+              ...acc,
+              api: [...(acc.api || []), ...(addon.api || [])],
+              app: [...(acc.app || []), ...(addon.app || [])],
+              savedObject: {
+                all: [...acc.savedObject.all, ...addon.savedObject.all],
+                read: [...acc.savedObject.read, ...addon.savedObject.read],
+              },
+              ui: [...acc.ui, ...addon.ui],
+            };
+          },
+          ({
+            api: [],
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          } as unknown) as FeatureKibanaPrivileges
+        );
+
+        const mergedPrivilege: FeatureKibanaPrivileges = {
+          ...privilege,
+          api: privilege.api ? [...privilege.api, ...subFeaturePrivileges.api!] : undefined,
+          app: privilege.app ? [...privilege.app, ...subFeaturePrivileges.app!] : undefined,
+          ui: privilege.ui ? [...privilege.ui, ...subFeaturePrivileges.ui!] : [],
+          savedObject: {
+            all: [...privilege.savedObject.all, ...subFeaturePrivileges.savedObject.all],
+            read: [...privilege.savedObject.read, ...subFeaturePrivileges.savedObject.read],
+          },
+        };
+
+        return mergedPrivilege;
+      });
+  }
+
+  public *subFeaturesPrivilegeIterator(): IterableIterator<SubFeatureKibanaPrivileges> {
+    if (!this.config.subFeatures) {
+      return [];
+    }
+    for (const subFeature of this.config.subFeatures) {
+      yield* subFeature.privilegeGroups.map(pg => pg.privileges).flat(2);
+    }
+  }
+}
+
+export interface ISubFeature {
+  name: string;
+  privilegeGroups: FeatureKibanaPrivilegesGroup[];
+}
 
 /**
  * Interface for registering a feature.
  * Feature registration allows plugins to hide their applications with spaces,
  * and secure access when configured for security.
  */
-export interface Feature<
-  TPrivileges extends Partial<FeatureKibanaPrivilegesSet> = FeatureKibanaPrivilegesSet
-> {
+export interface IFeature {
   /**
    * Unique identifier for this feature.
    * This identifier is also used when generating UI Capabilities.
@@ -98,7 +208,9 @@ export interface Feature<
    * ```
    * @see FeatureKibanaPrivileges
    */
-  privileges: TPrivileges;
+  privileges?: FeatureKibanaPrivileges[];
+
+  subFeatures?: ISubFeature[];
 
   /**
    * Optional message to display on the Role Management screen when configuring permissions for this feature.
@@ -113,8 +225,3 @@ export interface Feature<
     description: string;
   };
 }
-
-export type FeatureWithAllOrReadPrivileges = Feature<{
-  all?: FeatureKibanaPrivileges;
-  read?: FeatureKibanaPrivileges;
-}>;

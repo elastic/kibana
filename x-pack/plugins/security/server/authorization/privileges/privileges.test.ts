@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../../features/server';
+import { IFeature } from '../../../../features/server';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 
@@ -12,7 +12,7 @@ const actions = new Actions('1.0.0-zeta1');
 
 describe('features', () => {
   test('actions defined at the feature cascade to the privileges', () => {
-    const features: Feature[] = [
+    const features: IFeature[] = [
       {
         id: 'foo-feature',
         name: 'Foo Feature',
@@ -74,7 +74,7 @@ describe('features', () => {
   });
 
   test('actions defined at the privilege take precedence', () => {
-    const features: Feature[] = [
+    const features: IFeature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -146,7 +146,7 @@ describe('features', () => {
   });
 
   test(`actions only specified at the privilege are alright too`, () => {
-    const features: Feature[] = [
+    const features: IFeature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -240,7 +240,7 @@ describe('features', () => {
   });
 
   test(`features with no privileges aren't listed`, () => {
-    const features: Feature[] = [
+    const features: IFeature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -277,7 +277,7 @@ describe('features', () => {
 ].forEach(({ group, expectManageSpaces, expectGetFeatures }) => {
   describe(`${group}`, () => {
     test('actions defined only at the feature are included in `all` and `read`', () => {
-      const features: Feature[] = [
+      const features: IFeature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -350,7 +350,7 @@ describe('features', () => {
     });
 
     test('actions defined in any feature privilege are included in `all`', () => {
-      const features: Feature[] = [
+      const features: IFeature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -507,7 +507,7 @@ describe('features', () => {
     });
 
     test('actions defined in a feature privilege with name `read` are included in `read`', () => {
-      const features: Feature[] = [
+      const features: IFeature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -599,7 +599,7 @@ describe('features', () => {
     });
 
     test('actions defined in a reserved privilege are not included in `all` or `read`', () => {
-      const features: Feature[] = [
+      const features: IFeature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -648,7 +648,7 @@ describe('features', () => {
     });
 
     test('actions defined in a feature with excludeFromBasePrivileges are not included in `all` or `read', () => {
-      const features: Feature[] = [
+      const features: IFeature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -722,7 +722,7 @@ describe('features', () => {
     });
 
     test('actions defined in an individual feature privilege with excludeFromBasePrivileges are not included in `all` or `read`', () => {
-      const features: Feature[] = [
+      const features: IFeature[] = [
         {
           id: 'foo',
           name: 'Foo Feature',
@@ -801,7 +801,7 @@ describe('features', () => {
 
 describe('reserved', () => {
   test('actions defined at the feature cascade to the privileges', () => {
-    const features: Feature[] = [
+    const features: IFeature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -846,7 +846,7 @@ describe('reserved', () => {
   });
 
   test('actions defined at the reservedPrivilege take precedence', () => {
-    const features: Feature[] = [
+    const features: IFeature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -894,7 +894,7 @@ describe('reserved', () => {
   });
 
   test(`actions only specified at the privilege are alright too`, () => {
-    const features: Feature[] = [
+    const features: IFeature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',
@@ -951,7 +951,7 @@ describe('reserved', () => {
   });
 
   test(`features with no reservedPrivileges aren't listed`, () => {
-    const features: Feature[] = [
+    const features: IFeature[] = [
       {
         id: 'foo',
         name: 'Foo Feature',

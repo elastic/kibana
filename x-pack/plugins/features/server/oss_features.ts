@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { Feature } from '../common/feature';
+import { IFeature } from '../common/feature';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
@@ -22,22 +22,93 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       navLinkId: 'kibana:discover',
       app: ['kibana'],
       catalogue: ['discover'],
-      privileges: {
-        all: {
+      privileges: [
+        {
+          id: 'all',
+          name: 'All',
           savedObject: {
-            all: ['search', 'url', 'query'],
+            all: ['search', 'query'],
             read: ['index-pattern'],
           },
-          ui: ['show', 'createShortUrl', 'save', 'saveQuery'],
+          ui: ['show', 'save', 'saveQuery'],
         },
-        read: {
+        {
+          id: 'read',
+          name: 'Read',
           savedObject: {
             all: [],
             read: ['index-pattern', 'search', 'query'],
           },
           ui: ['show'],
         },
-      },
+      ],
+      subFeatures: [
+        {
+          name: 'Short URLs',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'url_create',
+                  name: 'Create Short URLs',
+                  includeInPrimaryFeaturePrivilege: 'all',
+                  savedObject: {
+                    all: ['url'],
+                    read: [],
+                  },
+                  ui: ['createShortUrl'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Alerting',
+          privilegeGroups: [
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'alerting_readwrite',
+                  name: 'Read/Write',
+                  includeInPrimaryFeaturePrivilege: 'all',
+                  savedObject: {
+                    all: ['alerts'],
+                    read: [],
+                  },
+                  ui: ['createAlerts', 'readAlerts'],
+                },
+                {
+                  id: 'alerting_read',
+                  name: 'Read',
+                  includeInPrimaryFeaturePrivilege: 'read',
+                  savedObject: {
+                    all: [],
+                    read: ['read'],
+                  },
+                  ui: ['readAlerts'],
+                },
+              ],
+            },
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'alerting_mute',
+                  name: 'Mute Alerts',
+                  includeInPrimaryFeaturePrivilege: 'all',
+                  savedObject: {
+                    all: ['alerts'],
+                    read: [],
+                  },
+                  ui: ['muteAlerts'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       id: 'visualize',
@@ -230,27 +301,31 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
   ];
 };
 
-const timelionFeature: Feature = {
+const timelionFeature: IFeature = {
   id: 'timelion',
   name: 'Timelion',
   icon: 'timelionApp',
   navLinkId: 'timelion',
   app: ['timelion', 'kibana'],
   catalogue: ['timelion'],
-  privileges: {
-    all: {
+  privileges: [
+    {
+      id: 'all',
+      name: 'All',
       savedObject: {
         all: ['timelion-sheet'],
         read: ['index-pattern'],
       },
       ui: ['save'],
     },
-    read: {
+    {
+      id: 'read',
+      name: 'Read',
       savedObject: {
         all: [],
         read: ['index-pattern', 'timelion-sheet'],
       },
       ui: [],
     },
-  },
+  ],
 };

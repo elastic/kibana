@@ -8,7 +8,8 @@ import Joi from 'joi';
 
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { FeatureWithAllOrReadPrivileges } from '../common/feature';
+import { IFeature } from '../common/feature';
+import { FeatureKibanaPrivileges } from '../common';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
@@ -25,6 +26,8 @@ const managementSchema = Joi.object().pattern(
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 
 const privilegeSchema = Joi.object({
+  id: Joi.string(),
+  name: Joi.string(),
   excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
   catalogue: catalogueSchema,
@@ -41,6 +44,39 @@ const privilegeSchema = Joi.object({
   ui: Joi.array()
     .items(Joi.string().regex(uiCapabilitiesRegex))
     .required(),
+});
+
+const subFeaturePrivilegeSchema = Joi.object({
+  id: Joi.string(),
+  name: Joi.string(),
+  includeInPrimaryFeaturePrivilege: Joi.string().allow('all', 'read', 'none'),
+  excludeFromBasePrivileges: Joi.boolean(),
+  management: managementSchema,
+  catalogue: catalogueSchema,
+  api: Joi.array().items(Joi.string()),
+  app: Joi.array().items(Joi.string()),
+  savedObject: Joi.object({
+    all: Joi.array()
+      .items(Joi.string())
+      .required(),
+    read: Joi.array()
+      .items(Joi.string())
+      .required(),
+  }).required(),
+  ui: Joi.array()
+    .items(Joi.string().regex(uiCapabilitiesRegex))
+    .required(),
+});
+
+const subFeatureSchema = Joi.object({
+  name: Joi.string(),
+  privilegeGroups: Joi.array().items(
+    Joi.object({
+      name: Joi.string(),
+      groupType: Joi.string(),
+      privileges: Joi.array().items(subFeaturePrivilegeSchema),
+    })
+  ),
 });
 
 const schema = Joi.object({
@@ -61,10 +97,11 @@ const schema = Joi.object({
     .required(),
   management: managementSchema,
   catalogue: catalogueSchema,
-  privileges: Joi.object({
-    all: privilegeSchema,
-    read: privilegeSchema,
-  }).required(),
+  privileges: Joi.array()
+    .min(2)
+    .max(2)
+    .items(privilegeSchema),
+  subFeatures: Joi.array().items(subFeatureSchema),
   privilegesTooltip: Joi.string(),
   reserved: Joi.object({
     privilege: privilegeSchema.required(),
@@ -72,7 +109,7 @@ const schema = Joi.object({
   }),
 });
 
-export function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
+export function validateFeature(feature: IFeature) {
   const validateResult = Joi.validate(feature, schema);
   if (validateResult.error) {
     throw validateResult.error;
@@ -80,7 +117,7 @@ export function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { app = [], management = {}, catalogue = [] } = feature;
 
-  const privilegeEntries = [...Object.entries(feature.privileges)];
+  const privilegeEntries = [...Object.entries(feature.privileges || {})];
   if (feature.reserved) {
     privilegeEntries.push(['reserved', feature.reserved.privilege]);
   }
@@ -90,7 +127,10 @@ export function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
       throw new Error('Privilege definition may not be null or undefined');
     }
 
-    const unknownAppEntries = difference(privilegeDefinition.app || [], app);
+    // TODO
+    const def = privilegeDefinition as FeatureKibanaPrivileges;
+
+    const unknownAppEntries = difference(def.app || [], app);
     if (unknownAppEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
@@ -99,7 +139,7 @@ export function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
       );
     }
 
-    const unknownCatalogueEntries = difference(privilegeDefinition.catalogue || [], catalogue);
+    const unknownCatalogueEntries = difference(def.catalogue || [], catalogue);
     if (unknownCatalogueEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
@@ -108,26 +148,24 @@ export function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
       );
     }
 
-    Object.entries(privilegeDefinition.management || {}).forEach(
-      ([managementSectionId, managementEntry]) => {
-        if (!management[managementSectionId]) {
-          throw new Error(
-            `Feature privilege ${feature.id}.${privilegeId} has unknown management section: ${managementSectionId}`
-          );
-        }
-
-        const unknownSectionEntries = difference(managementEntry, management[managementSectionId]);
-
-        if (unknownSectionEntries.length > 0) {
-          throw new Error(
-            `Feature privilege ${
-              feature.id
-            }.${privilegeId} has unknown management entries for section ${managementSectionId}: ${unknownSectionEntries.join(
-              ', '
-            )}`
-          );
-        }
+    Object.entries(def.management || {}).forEach(([managementSectionId, managementEntry]) => {
+      if (!management[managementSectionId]) {
+        throw new Error(
+          `Feature privilege ${feature.id}.${privilegeId} has unknown management section: ${managementSectionId}`
+        );
       }
-    );
+
+      const unknownSectionEntries = difference(managementEntry, management[managementSectionId]);
+
+      if (unknownSectionEntries.length > 0) {
+        throw new Error(
+          `Feature privilege ${
+            feature.id
+          }.${privilegeId} has unknown management entries for section ${managementSectionId}: ${unknownSectionEntries.join(
+            ', '
+          )}`
+        );
+      }
+    });
   });
 }

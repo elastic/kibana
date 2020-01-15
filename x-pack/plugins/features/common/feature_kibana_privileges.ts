@@ -4,10 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface FeatureKibanaPrivilegesGroup {
+  name: string;
+  groupType: 'mutually_exclusive' | 'independent';
+  privileges: SubFeatureKibanaPrivileges[];
+}
+
+export interface SubFeatureKibanaPrivileges extends FeatureKibanaPrivileges {
+  includeInPrimaryFeaturePrivilege: 'all' | 'read' | 'none';
+}
+
 /**
  * Feature privilege definition
  */
 export interface FeatureKibanaPrivileges {
+  id: string;
+
+  name: string;
+
   /**
    * Whether or not this specific privilege should be excluded from the base privileges.
    */
@@ -123,5 +137,3 @@ export interface FeatureKibanaPrivileges {
    */
   ui: string[];
 }
-
-export type FeatureKibanaPrivilegesSet = Record<string, FeatureKibanaPrivileges>;

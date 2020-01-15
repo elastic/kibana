@@ -39,10 +39,12 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
     };
   }
 
-  Object.values(feature.privileges).forEach(privilege => {
+  for (const featurePrivilege of feature.privilegeIterator({
+    augmentWithSubFeaturePrivileges: true,
+  })) {
     UIFeatureCapabilities[feature.id] = {
       ...UIFeatureCapabilities[feature.id],
-      ...privilege.ui.reduce(
+      ...featurePrivilege.ui.reduce(
         (privilegeAcc, capability) => ({
           ...privilegeAcc,
           [capability]: true,
@@ -50,7 +52,7 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
         {}
       ),
     };
-  });
+  }
 
   return UIFeatureCapabilities;
 }
