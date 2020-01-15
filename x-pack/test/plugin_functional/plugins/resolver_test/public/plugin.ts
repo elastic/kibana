@@ -23,43 +23,35 @@ export class ResolverTestPlugin
       ResolverTestPluginSetupDependencies,
       ResolverTestPluginStartDependencies
     > {
-  private resolveEmbeddable!: (
-    value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
-  ) => void;
-  /**
-   * We register our application during the `setup` phase, but the embeddable
-   * plugin API is not available until the `start` phase. In order to access
-   * the embeddable API from our application, we pass a Promise to the application
-   * which we resolve during the `start` phase.
-   */
-  private embeddablePromise: Promise<IEmbeddable | undefined> = new Promise<
-    IEmbeddable | undefined
-  >(resolve => {
-    this.resolveEmbeddable = resolve;
-  });
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<ResolverTestPluginStartDependencies>) {
     core.application.register({
       id: 'resolver_test',
       title: i18n.translate('xpack.resolver_test.pluginTitle', {
         defaultMessage: 'Resolver Test',
       }),
       mount: async (_context, params) => {
+        let resolveEmbeddable: (
+          value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
+        ) => void;
+
+        const promise = new Promise<IEmbeddable | undefined>(resolve => {
+          resolveEmbeddable = resolve;
+        });
+
+        (async () => {
+          const [, { embeddable }] = await core.getStartServices();
+          const factory = embeddable.getEmbeddableFactory('resolver');
+          resolveEmbeddable!(factory.create({ id: 'test basic render' }));
+        })();
+
         const { renderApp } = await import('./applications/resolver_test');
         /**
          * Pass a promise which resolves to the Resolver embeddable.
          */
-        return renderApp(params, this.embeddablePromise);
+        return renderApp(params, promise);
       },
     });
   }
 
-  public start(...args: [unknown, { embeddable: IEmbeddableStart }]) {
-    const [, plugins] = args;
-    const factory = plugins.embeddable.getEmbeddableFactory('resolver');
-    /**
-     * Provide the Resolver embeddable to the application
-     */
-    this.resolveEmbeddable(factory.create({ id: 'test basic render' }));
-  }
-  public stop() {}
+  public start() {}
 }
