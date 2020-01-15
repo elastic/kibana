@@ -63,6 +63,7 @@ exports[`MonitorList component renders a no items message when no data is provid
       loading={false}
       noItemsMessage="No uptime monitors found"
       responsive={true}
+      tableLayout="fixed"
     />
     <EuiSpacer
       size="m"
@@ -216,6 +217,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
       loading={false}
       noItemsMessage="No uptime monitors found"
       responsive={true}
+      tableLayout="fixed"
     />
     <EuiSpacer
       size="m"

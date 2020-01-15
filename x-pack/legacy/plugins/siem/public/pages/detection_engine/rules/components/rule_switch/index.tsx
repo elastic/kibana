@@ -18,6 +18,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { enableRules } from '../../../../../containers/detection_engine/rules';
 import { enableRulesAction } from '../../all/actions';
 import { Action } from '../../all/reducer';
+import { useStateToaster } from '../../../../../components/toasters';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -50,12 +51,13 @@ export const RuleSwitchComponent = ({
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
   const [myEnabled, setMyEnabled] = useState(enabled ?? false);
+  const [, dispatchToaster] = useStateToaster();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
       if (dispatch != null) {
-        await enableRulesAction([id], event.target.checked!, dispatch);
+        await enableRulesAction([id], event.target.checked!, dispatch, dispatchToaster);
       } else {
         try {
           const updatedRules = await enableRules({
