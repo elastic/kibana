@@ -23,7 +23,7 @@ export interface IndexPatternField {
   enabled?: boolean;
   script?: string;
   lang?: string;
-  readFromDocValues?: boolean;
+  readFromDocValues: boolean;
 }
 
 export async function installIndexPatterns(
@@ -110,6 +110,7 @@ export const transformField = (field: Field): IndexPatternField => {
     searchable: getVal(field.searchable, true),
     aggregatable: getVal(field.aggregatable, true),
     doc_values: getVal(field.doc_values, true),
+    readFromDocValues: true,
   };
 
   // if type exists, check if it exists in the map
