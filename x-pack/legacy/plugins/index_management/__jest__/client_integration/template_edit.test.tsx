@@ -128,7 +128,8 @@ describe('<TemplateEdit />', () => {
       expect(nameInput.props().disabled).toEqual(true);
     });
 
-    describe('form payload', () => {
+    // TODO: Flakey test
+    describe.skip('form payload', () => {
       beforeEach(async () => {
         const { actions, component, find, form } = testBed;
 
