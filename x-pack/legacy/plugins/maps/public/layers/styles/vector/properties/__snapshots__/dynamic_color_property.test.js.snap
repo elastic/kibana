@@ -30,7 +30,7 @@ exports[`Should render categorical legend with breaks from default 1`] = `
             fillColor="none"
             isLinesOnly={false}
             isPointsOnly={true}
-            strokeColor="#5BBAA0"
+            strokeColor="#54B399"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
