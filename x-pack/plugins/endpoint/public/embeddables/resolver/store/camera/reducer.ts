@@ -10,52 +10,34 @@ import { userIsPanning, translation, projectionMatrix, inverseProjectionMatrix }
 import { clamp } from '../../lib/math';
 
 import { CameraState, ResolverAction } from '../../types';
+import { scaleToZoom } from './scale_to_zoom';
 
 function initialState(): CameraState {
   return {
-    scaling: [1, 1] as const,
+    scalingFactor: scaleToZoom(1), // Defaulted to 1 to 1 scale
     rasterSize: [0, 0] as const,
     translationNotCountingCurrentPanning: [0, 0] as const,
     latestFocusedWorldCoordinates: null,
   };
 }
 
-/**
- * The minimum allowed value for the camera scale. This is the least scale that we will ever render something at.
- */
-const minimumScale = 0.1;
-
-/**
- * The maximum allowed value for the camera scale. This is greatest scale that we will ever render something at.
- */
-const maximumScale = 6;
-
 export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   state = initialState(),
   action
 ) => {
-  if (action.type === 'userScaled') {
+  if (action.type === 'userSetZoomLevel') {
     /**
      * Handle the scale being explicitly set, for example by a 'reset zoom' feature, or by a range slider with exact scale values
      */
-    const [deltaX, deltaY] = action.payload;
+
     return {
       ...state,
-      scaling: [
-        clamp(deltaX, minimumScale, maximumScale),
-        clamp(deltaY, minimumScale, maximumScale),
-      ],
+      scalingFactor: clamp(action.payload, 0, 1),
     };
   } else if (action.type === 'userZoomed') {
-    /**
-     * When the user zooms we change the scale. Limit the change in scale so that we aren't liable for supporting crazy values (e.g. infinity or negative scale.)
-     */
-    const newScaleX = clamp(state.scaling[0] + action.payload, minimumScale, maximumScale);
-    const newScaleY = clamp(state.scaling[1] + action.payload, minimumScale, maximumScale);
-
     const stateWithNewScaling: CameraState = {
       ...state,
-      scaling: [newScaleX, newScaleY],
+      scalingFactor: clamp(state.scalingFactor + action.payload, 0, 1),
     };
 
     /**

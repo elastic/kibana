@@ -10,6 +10,7 @@ import { CameraState } from '../../types';
 import { cameraReducer } from './reducer';
 import { projectionMatrix } from './selectors';
 import { applyMatrix3 } from '../../lib/vector2';
+import { scaleToZoom } from './scale_to_zoom';
 
 describe('projectionMatrix', () => {
   let store: Store<CameraState, CameraAction>;
@@ -56,7 +57,7 @@ describe('projectionMatrix', () => {
     });
     describe('when the user has zoomed to 0.5', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userScaled', payload: [0.5, 0.5] };
+        const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(0.5) };
         store.dispatch(action);
       });
       it('should convert 0, 0 (center) in world space to 150, 100 (center)', () => {
@@ -92,7 +93,7 @@ describe('projectionMatrix', () => {
       describe('when the user has scaled to 2', () => {
         // the viewport will only cover half, or 150x100 instead of 300x200
         beforeEach(() => {
-          const action: CameraAction = { type: 'userScaled', payload: [2, 2] };
+          const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(2) };
           store.dispatch(action);
         });
         // we expect the viewport to be

@@ -95,7 +95,6 @@ const Resolver = styled(
 
     const handleWheel = useCallback(
       (event: WheelEvent) => {
-        // we use elementBoundingClientRect to interpret pixel deltas as a fraction of the element's height
         if (
           elementBoundingClientRect !== null &&
           event.ctrlKey &&
@@ -105,7 +104,9 @@ const Resolver = styled(
           event.preventDefault();
           dispatch({
             type: 'userZoomed',
-            payload: (-2 * event.deltaY) / elementBoundingClientRect.height,
+            // we use elementBoundingClientRect to interpret pixel deltas as a fraction of the element's height
+            // when pinch-zooming in on a mac, deltaY is a negative number but we want the payload to be positive
+            payload: event.deltaY / -elementBoundingClientRect.height,
           });
         }
       },
