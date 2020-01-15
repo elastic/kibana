@@ -25,6 +25,7 @@ const BadgeItem = styled.div`
   margin-bottom: 5px;
 `;
 
+// Set height so that it remains within panel, enough height to display 7 locations tags
 const TagContainer = styled.div`
   padding: 10px;
   max-height: 229px;
@@ -65,7 +66,7 @@ export const LocationStatusTags = ({ locations }: Props) => {
     return a.label > b.label ? 1 : b.label > a.label ? -1 : 0;
   });
 
-  moment.locale('en', {
+  moment.updateLocale('en', {
     relativeTime: {
       future: 'in %s',
       past: '%s ago',
