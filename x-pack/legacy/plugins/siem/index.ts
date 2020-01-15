@@ -29,7 +29,6 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SIGNALS_INDEX_KEY,
-  DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { initServerWithKibana } from './server/kibana.index';
@@ -105,20 +104,6 @@ export const siem = (kibana: any) => {
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage:
               '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
-          }),
-          category: ['siem'],
-          requiresPageReload: true,
-        },
-        // DEPRECATED: This should be removed once the front end is no longer using any parts of it.
-        // TODO: Remove this as soon as no code is left that is pulling data from it.
-        [DEFAULT_SIGNALS_INDEX_KEY]: {
-          name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
-            defaultMessage: 'Elasticsearch signals index',
-          }),
-          value: DEFAULT_SIGNALS_INDEX,
-          description: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexDescription', {
-            defaultMessage:
-              '<p>Elasticsearch signals index from which outputted signals will appear by default</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,
