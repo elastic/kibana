@@ -17,7 +17,6 @@ interface MonitorStatusBarProps {
   monitorLocations: any;
   dateStart: any;
   dateEnd: any;
-  refreshApp: any;
 }
 
 export const MonitorStatusDetailsComponent = ({
