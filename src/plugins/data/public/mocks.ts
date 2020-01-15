@@ -69,7 +69,16 @@ const createStartContract = (): Start => {
   const startContract = {
     autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
-    search: { search: jest.fn() },
+    search: {
+      search: jest.fn(),
+
+      __LEGACY: {
+        esClient: {
+          search: jest.fn(),
+          msearch: jest.fn(),
+        },
+      },
+    },
     fieldFormats: fieldFormatsMock as FieldFormatsStart,
     query: queryStartMock,
     ui: {

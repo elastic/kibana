@@ -85,7 +85,6 @@ import {
   getSearchService,
   getUiSettings,
   getInjectedMetadata,
-  getEsClient,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/data/public/services';
 
@@ -214,7 +213,7 @@ export class SearchSource {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
-      { searchService, config, esShardTimeout, es: getEsClient() }
+      { searchService, config, esShardTimeout, es: searchService.__LEGACY.esClient }
     );
 
     if (response.error) {

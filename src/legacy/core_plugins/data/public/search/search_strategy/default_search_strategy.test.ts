@@ -63,6 +63,12 @@ describe('defaultSearchStrategy', function() {
         esShardTimeout: 0,
         searchService: {
           search: newSearchMock,
+          __LEGACY: {
+            esClient: {
+              search: {},
+              msearch: {},
+            },
+          },
         },
         es: {
           msearch: msearchMock,

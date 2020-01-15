@@ -55,7 +55,3 @@ export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
 export const [getSearchService, setSearchService] = createGetterSetter<
   DataPublicPluginStart['search']
 >('Search');
-
-export const [getEsClient, setEsClient] = createGetterSetter<
-  DataPublicPluginStart['__LEGACY']['esClient']
->('EsClient');

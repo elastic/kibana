@@ -31,7 +31,6 @@ import {
   setUiSettings,
   setInjectedMetadata,
   setHttp,
-  setEsClient,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 
@@ -77,7 +76,6 @@ export class DataPlugin
     setFieldFormats(data.fieldFormats);
     setQueryService(data.query);
     setSearchService(data.search);
-    setEsClient(data.search.__LEGACY.esClient);
     setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
     setNotifications(core.notifications);

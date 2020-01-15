@@ -183,12 +183,6 @@ export const npStart = {
         IndexPatternSelect: mockComponent,
         SearchBar: mockComponent,
       },
-      __LEGACY: {
-        esClient: {
-          search: sinon.fake(),
-          msearch: sinon.fake(),
-        },
-      },
       query: {
         filterManager: {
           getFetches$: sinon.fake(),
@@ -240,6 +234,14 @@ export const npStart = {
             createFilter: sinon.fake(),
           },
           history: sinon.fake(),
+        },
+      },
+      search: {
+        __LEGACY: {
+          esClient: {
+            search: sinon.fake(),
+            msearch: sinon.fake(),
+          },
         },
       },
       fieldFormats: getFieldFormatsRegistry(mockCore),
