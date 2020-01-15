@@ -5,6 +5,7 @@
  */
 
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -299,7 +300,7 @@ export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
       [additionalActions, canUserCRUD, selectAll]
     );
 
-    if (loading) {
+    if (loading || isEmpty(signalsIndex)) {
       return (
         <EuiPanel>
           <HeaderSection title={i18n.SIGNALS_TABLE_TITLE} />
