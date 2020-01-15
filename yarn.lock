@@ -11397,15 +11397,24 @@ elastic-apm-node@^3.2.0:
     traceparent "^1.0.0"
     unicode-byte-truncate "^1.0.0"
 
-elasticsearch-browser@^16.5.0:
-  version "16.5.0"
-  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-16.5.0.tgz#d2efbbf8751bb563e91b74117a14b9211df5cfe9"
-  integrity sha512-F7npcrmMi3OgQ4fL+7sYLZp5Y9MS6WobVdCA18d9/Eef06x3+UzVE+pRaM71y4/i0N5rt/QrvmijHt25wz5SLw==
+elasticsearch-browser@^16.6.0:
+  version "16.6.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-16.6.0.tgz#ab9874e32cd50d1452f62e0c0f01906f600dc4b9"
+  integrity sha512-Z62Ye118mb7WywiE8xuXVCcaUd88NIGJdIrPH4nmchBoMkVNlTuakavnFwa75umIDhMQt3/GcO4ITlc7MaqLLg==
 
-elasticsearch@^16.4.0, elasticsearch@^16.5.0:
+elasticsearch@^16.4.0:
   version "16.5.0"
   resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.5.0.tgz#619a48040be25d345fdddf09fa6042a88c3974d6"
   integrity sha512-9YbmU2AtM/kQdmp96EI5nu2bjxowdarV6IsKmcS+jQowJ3mhG98J1DCVOtEKuFvsnNaLyKD3aPbCAmb72+WX3w==
+  dependencies:
+    agentkeepalive "^3.4.1"
+    chalk "^1.0.0"
+    lodash "^4.17.10"
+
+elasticsearch@^16.6.0:
+  version "16.6.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-16.6.0.tgz#ba6b6096269f205f6fcde4171424dcd67229febe"
+  integrity sha512-MhsdE2JaBJoV1EGzSkCqqhNGxafXJuhPr+eD3vbXmsk/QWhaiU12oyXF0VhjcL8+UlwTHv0CAUbyjtE1wqoIdw==
   dependencies:
     agentkeepalive "^3.4.1"
     chalk "^1.0.0"
