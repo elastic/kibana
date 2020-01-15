@@ -163,7 +163,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#FFFFFF",
+            "color": "#fff",
           }
         }
       >
@@ -182,7 +182,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#FFFFFF",
+            "color": "#fff",
           }
         }
       >
@@ -201,7 +201,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#FFFFFF",
+            "color": "#fff",
           }
         }
       >
@@ -220,7 +220,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#FFFFFF",
+            "color": "#fff",
           }
         }
       >
@@ -239,7 +239,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#FFFFFF",
+            "color": "#fff",
           }
         }
       >
@@ -258,7 +258,7 @@ exports[`Storyshots components/Elements/ElementCard with tags 1`] = `
         style={
           Object {
             "backgroundColor": "#666666",
-            "color": "#FFFFFF",
+            "color": "#fff",
           }
         }
       >

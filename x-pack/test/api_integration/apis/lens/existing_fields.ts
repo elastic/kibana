@@ -114,13 +114,13 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(
             `/api/lens/existing_fields/${encodeURIComponent(
-              'logstash-2015.09.22'
+              'logstash-*'
             )}?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}`
           )
           .set(COMMON_HEADERS)
           .expect(200);
 
-        expect(body.indexPatternTitle).to.eql('logstash-2015.09.22');
+        expect(body.indexPatternTitle).to.eql('logstash-*');
         expect(body.existingFieldNames.sort()).to.eql(fieldsWithData.sort());
       });
 

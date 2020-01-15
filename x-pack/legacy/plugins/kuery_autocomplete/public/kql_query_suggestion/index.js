@@ -25,7 +25,7 @@ function dedup(suggestions) {
 
 const getProviderByType = (type, args) => providers[type] && providers[type](args);
 
-export const setupKqlQuerySuggestionProvider = ({ uiSettings }) => ({
+export const setupKqlQuerySuggestionProvider = ({ uiSettings }, plugins) => ({
   indexPatterns,
   boolFilter,
   query,
@@ -50,6 +50,7 @@ export const setupKqlQuerySuggestionProvider = ({ uiSettings }) => ({
       config: uiSettings,
       indexPatterns,
       boolFilter,
+      plugins,
     })(cursorNode, signal)
   );
   return Promise.all(suggestionsByType).then(suggestionsByType =>

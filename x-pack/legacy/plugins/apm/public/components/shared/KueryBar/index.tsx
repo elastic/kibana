@@ -44,6 +44,10 @@ export function KueryBar() {
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
+  const { data } = useApmPluginContext().plugins;
+  const getQuerySuggestions = data.autocomplete.getQuerySuggestionProvider(
+    'kuery'
+  );
 
   let currentRequestCheck;
 
@@ -56,28 +60,6 @@ export function KueryBar() {
     defaults:
       'transaction.duration.us > 300000 AND http.response.status_code >= 400'
   };
-
-  const getSuggestions = (
-    query: string,
-    selectionStart: number,
-    indexPattern: IIndexPattern,
-    boolFilter: unknown,
-  ): Promise<autocomplete.QuerySuggestion[]> | undefined => {
-    const { data } = useApmPluginContext().plugins;
-    const getQuerySuggestions = data.autocomplete.getQuerySuggestionProvider(
-      'kuery'
-    );
-
-    if (getQuerySuggestions) {
-      return getQuerySuggestions({
-        indexPatterns: [indexPattern],
-        boolFilter,
-        query,
-        selectionStart,
-        selectionEnd: selectionStart
-      });
-    }
-  }
 
   const example = examples[processorEvent || 'defaults'];
 
@@ -93,15 +75,17 @@ export function KueryBar() {
     const currentRequest = uniqueId();
     currentRequestCheck = currentRequest;
 
-    const boolFilter = getBoolFilter(urlParams);
     try {
       const suggestions = (
-        await getSuggestions(
-          inputValue,
-          selectionStart,
-          indexPattern,
-          boolFilter
-        ) || []
+        (getQuerySuggestions &&
+          (await getQuerySuggestions({
+            indexPatterns: [indexPattern],
+            boolFilter: getBoolFilter(urlParams),
+            query: inputValue,
+            selectionStart,
+            selectionEnd: selectionStart
+          }))) ||
+        []
       )
         .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);

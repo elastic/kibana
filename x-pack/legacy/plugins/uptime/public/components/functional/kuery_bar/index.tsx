@@ -34,24 +34,6 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
-function getSuggestions(
-  query: string,
-  selectionStart: number,
-  apmIndexPattern: IIndexPattern,
-  autocompleteService: DataPublicPluginStart['autocomplete']
-): Promise<autocomplete.QuerySuggestion[]> | undefined {
-  const getQuerySuggestions = autocompleteService.getQuerySuggestionProvider('kuery');
-
-  if (getQuerySuggestions) {
-    return getQuerySuggestions({
-      query,
-      selectionStart,
-      selectionEnd: selectionStart,
-      indexPatterns: [apmIndexPattern],
-    });
-  }
-}
-
 interface Props {
   autocomplete: DataPublicPluginStart['autocomplete'];
 }
@@ -64,6 +46,7 @@ export function KueryBar({ autocomplete: autocompleteService }: Props) {
   const [indexPattern, setIndexPattern] = useState<any | undefined>(undefined);
   const [isLoadingIndexPattern, setIsLoadingIndexPattern] = useState<boolean>(true);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
+  const getQuerySuggestions = autocompleteService.getQuerySuggestionProvider('kuery');
   let currentRequestCheck: string;
 
   useIndexPattern((result: any) => setIndexPattern(toStaticIndexPattern(result)));
@@ -91,7 +74,14 @@ export function KueryBar({ autocomplete: autocompleteService }: Props) {
 
     try {
       const suggestions = (
-        (await getSuggestions(inputValue, selectionStart, indexPattern, autocompleteService)) || []
+        (getQuerySuggestions &&
+          (await getQuerySuggestions({
+            indexPatterns: [indexPattern],
+            query: inputValue,
+            selectionStart,
+            selectionEnd: selectionStart,
+          }))) ||
+        []
       )
         .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);

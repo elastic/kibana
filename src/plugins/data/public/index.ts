@@ -95,8 +95,4 @@ export {
 import { DataPublicPlugin } from './plugin';
 export { DataPublicPlugin as Plugin };
 
-/**
- * Static code to be shared externally
- * @public
- */
 export { autocomplete };

@@ -6,11 +6,10 @@
 
 import { flatten } from 'lodash';
 import { escapeQuotes } from './escape_kuery';
-import { npStart } from 'ui/new_platform';
 
 const type = 'value';
 
-export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
+export function getSuggestionsProvider({ indexPatterns, boolFilter }, plugins) {
   const allFields = flatten(
     indexPatterns.map(indexPattern => {
       return indexPattern.fields.map(field => ({
@@ -27,10 +26,9 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
     const fields = allFields.filter(field => field.name === fullFieldName);
     const query = `${prefix}${suffix}`.trim();
-    const { getFieldSuggestions } = npStart.plugins.data.autocomplete;
-
-    const suggestionsByField = fields.map(field => {
-      return getFieldSuggestions({
+    const { getFieldSuggestions } = plugins.data.autocomplete;
+    const suggestionsByField = fields.map(field =>
+      getFieldSuggestions({
         indexPattern: field.indexPattern,
         field,
         query,
@@ -41,8 +39,8 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
           typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`
         );
         return wrapAsSuggestions(start, end, query, quotedValues);
-      });
-    });
+      })
+    );
 
     return Promise.all(suggestionsByField).then(suggestions => flatten(suggestions));
   };
