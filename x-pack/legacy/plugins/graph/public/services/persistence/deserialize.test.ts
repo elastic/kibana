@@ -161,7 +161,7 @@ describe('deserialize', () => {
         },
         Object {
           "aggregatable": true,
-          "color": "#CE0060",
+          "color": "#D36086",
           "hopSize": 5,
           "icon": Object {
             "class": "fa-folder-open-o",
