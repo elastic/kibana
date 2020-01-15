@@ -5,7 +5,7 @@
  */
 
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { useRouteMatch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +14,6 @@ import { AppState } from '../state';
 import { selectSelectedMonitor } from '../state/selectors';
 import { getMonitorPageBreadcrumb, getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { UptimeSettingsContext } from '../contexts';
 import { getTitle } from '../lib/helper/get_title';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { MONITOR_ROUTE } from '../routes';
@@ -28,7 +27,6 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
   const monitorPage = useRouteMatch({
     path: MONITOR_ROUTE,
   });
-  const { refreshApp } = useContext(UptimeSettingsContext);
 
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useParams();
 
@@ -61,6 +59,10 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
     }
   }, [headerText, setBreadcrumbs, params, monitorPage]);
 
+  useEffect(() => {
+    document.title = getTitle();
+  }, []);
+
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -70,7 +72,7 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <UptimeDatePicker refreshApp={refreshApp} />
+          <UptimeDatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

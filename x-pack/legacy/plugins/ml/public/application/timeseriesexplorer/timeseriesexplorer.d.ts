@@ -10,6 +10,12 @@ import { FC } from 'react';
 declare const TimeSeriesExplorer: FC<{
   appStateHandler: (action: string, payload: any) => void;
   dateFormatTz: string;
-  globalState: any;
+  selectedJobIds: string[];
+  selectedDetectorIndex: number;
+  selectedEntities: any[];
+  selectedForecastId: string;
+  setGlobalState: (arg: any) => void;
+  tableInterval: string;
+  tableSeverity: number;
   timefilter: Timefilter;
 }>;

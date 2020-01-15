@@ -1,5 +1,8 @@
 {
   "ml.delete_data_frame_analytics": {
+    "url_params": {
+      "force": "__flag__"
+    },
     "methods": [
       "DELETE"
     ],
