@@ -13,9 +13,9 @@ When {security} is enabled on your cluster, each request that {kib} makes to {es
 needs to make to the {es} cluster. For this reason, you must configure credentials for the {kib} server to use for those requests.
 
 If {kib} has `elasticsearch.username` and `elasticsearch.password` configured, it will attempt to use these authenticate to {es} via the
-{ref}/configuring-native-realm.html[Native realm]. However, {kib} also supports mutual TLS authentication with {es} via a
-{ref}/configuring-pki-realm.html[Public Key Infrastructure (PKI) realm]. To do so, {es} needs to verify the signature on the {kib} client
-certificate, and it also needs to map the certificate's distinguished name (DN) to the appropriate `kibana_system` role.
+{ref}/native-realm.html[Native realm]. However, {kib} also supports mutual TLS authentication with {es} via a {ref}/pki-realm.html[Public
+Key Infrastructure (PKI) realm]. To do so, {es} needs to verify the signature on the {kib} client certificate, and it also needs to map the
+certificate's distinguished name (DN) to the appropriate `kibana_system` role.
 
 NOTE: Using a PKI realm is a gold feature. For a comparison of the Elastic license levels, see https://www.elastic.co/subscriptions[the
 subscription page].
@@ -57,7 +57,7 @@ openssl pkcs12 -in kibana-client.p12 -cacerts -nokeys -out ca.crt
 +
 --
 By default, {es} provides a Native realm. However, to support both a PKI realm (for {kib}) and a Native realm (for end users), you must
-configure each realms in `elasticsearch.yml`:
+configure each realm in `elasticsearch.yml`:
 
 [source,yaml]
 --------------------------------------------------------------------------------
@@ -85,11 +85,11 @@ xpack.security.http.ssl.client_authentication: "optional"
 . Use {kib} to create a <<role-mappings,role mapping>> for your new client certificate:
 +
 --
+This role mapping will assign the `kibana_system` role to any user that matches the included mapping rule, which is set to equal the client
+certificate's DN attribute:
+
 [role="screenshot"]
 image:user/security/images/mutual-tls-role-mapping.png["Role mapping for the {kib} client certificate"]
-
-This role mapping will assign the `kibana_system` role to any user that matches the included mapping rule, which is set to equal the client
-certificate's DN attribute.
 --
 
 . Configure {kib} to use the client certificate:
@@ -106,7 +106,7 @@ elasticsearch.ssl.keystore.password: "decryption password"
 
 The decryption password should match what you entered when prompted by the {es} certutil tool.
 
-You must also remove the `elasticsearch.username` and `elasticsearch.password` values from the configuration file, otherwise {kib} will
+You must also remove the `elasticsearch.username` and `elasticsearch.password` values from the configuration file. Otherwise, {kib} will
 attempt to use those to authenticate via the Native realm.
 
 TIP: Alternatively, {kib} also supports using a client certificate and private key in PEM format with the `elasticsearch.ssl.certificate`
