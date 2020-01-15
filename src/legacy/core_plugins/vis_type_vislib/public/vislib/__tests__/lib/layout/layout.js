@@ -18,18 +18,17 @@
  */
 
 import d3 from 'd3';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
+import $ from 'jquery';
 
 // Data
 import series from '../fixtures/mock_data/date_histogram/_series';
 import columns from '../fixtures/mock_data/date_histogram/_columns';
 import rows from '../fixtures/mock_data/date_histogram/_rows';
 import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
-import $ from 'jquery';
+
 import { Layout } from '../../../lib/layout/layout';
-import getFixturesVislibVisFixtureProvider from '../fixtures/_vis_fixture';
+import { getVis, getMockUiState } from '../fixtures/_vis_fixture';
 import { VisConfig } from '../../../lib/vis_config';
 
 const dateHistogramArray = [series, columns, rows, stackedSeries];
@@ -42,19 +41,13 @@ dateHistogramArray.forEach(function(data, i) {
     let numberOfCharts;
     let testLayout;
 
-    beforeEach(ngMock.module('kibana'));
-
-    beforeEach(function() {
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        vis = getVis();
-        persistedState = new ($injector.get('PersistedState'))();
-        vis.render(data, persistedState);
-        numberOfCharts = vis.handler.charts.length;
-      });
+    beforeEach(() => {
+      vis = getVis();
+      vis.render(data, getMockUiState());
+      numberOfCharts = vis.handler.charts.length;
     });
 
-    afterEach(function() {
+    afterEach(() => {
       vis.destroy();
     });
 

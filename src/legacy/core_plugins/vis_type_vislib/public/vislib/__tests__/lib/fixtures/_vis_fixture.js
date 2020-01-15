@@ -22,15 +22,6 @@ import $ from 'jquery';
 
 import { Vis } from '../../../vis';
 
-// TODO: remove legacy imports when/of converting tests to jest
-import {
-  setHierarchicalTooltipFormatter,
-  getHierarchicalTooltipFormatter,
-} from 'ui/vis/components/tooltip/_hierarchical_tooltip_formatter';
-import {
-  setPointSeriesTooltipFormatter,
-  getPointSeriesTooltipFormatter,
-} from 'ui/vis/components/tooltip/_pointseries_tooltip_formatter';
 import {
   vislibSeriesResponseHandlerProvider,
   vislibSlicesResponseHandlerProvider,
@@ -73,29 +64,33 @@ const getDeps = () => {
   return {
     uiSettings,
     vislibColor,
-    getHierarchicalTooltipFormatter,
-    getPointSeriesTooltipFormatter,
     vislibSeriesResponseHandlerProvider,
     vislibSlicesResponseHandlerProvider,
   };
 };
 
-export default function getVislibFixtures(Private) {
-  setHierarchicalTooltipFormatter(Private);
-  setPointSeriesTooltipFormatter(Private);
+export const getMockUiState = () => {
+  const map = new Map();
 
-  return function(visLibParams, element) {
-    return new Vis(
-      element || $visCanvas.new(),
-      _.defaults({}, visLibParams || {}, {
-        addTooltip: true,
-        addLegend: true,
-        defaultYExtents: false,
-        setYExtents: false,
-        yAxis: {},
-        type: 'histogram',
-      }),
-      getDeps()
-    );
-  };
+  return (() => ({
+    get: (...args) => map.get(...args),
+    set: (...args) => map.set(...args),
+    setSilent: (...args) => map.set(...args),
+    on: () => undefined,
+  }))();
+};
+
+export function getVis(visLibParams, element) {
+  return new Vis(
+    element || $visCanvas.new(),
+    _.defaults({}, visLibParams || {}, {
+      addTooltip: true,
+      addLegend: true,
+      defaultYExtents: false,
+      setYExtents: false,
+      yAxis: {},
+      type: 'histogram',
+    }),
+    getDeps()
+  );
 }
