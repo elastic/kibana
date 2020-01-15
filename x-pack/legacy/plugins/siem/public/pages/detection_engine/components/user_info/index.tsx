@@ -10,6 +10,7 @@ import React, { useEffect, useReducer, Dispatch, createContext, useContext } fro
 import { usePrivilegeUser } from '../../../../containers/detection_engine/signals/use_privilege_user';
 import { useSignalIndex } from '../../../../containers/detection_engine/signals/use_signal_index';
 import { useKibana } from '../../../../lib/kibana';
+import { useCreatePackagedRules } from '../../../../containers/detection_engine/rules/use_create_packaged_rules';
 
 export interface State {
   canUserCRUD: boolean | null;
@@ -36,33 +37,33 @@ const initialState: State = {
 export type Action =
   | { type: 'updateLoading'; loading: boolean }
   | {
-      type: 'updateHasManageApiKey';
-      hasManageApiKey: boolean | null;
-    }
+    type: 'updateHasManageApiKey';
+    hasManageApiKey: boolean | null;
+  }
   | {
-      type: 'updateHasIndexManage';
-      hasIndexManage: boolean | null;
-    }
+    type: 'updateHasIndexManage';
+    hasIndexManage: boolean | null;
+  }
   | {
-      type: 'updateHasIndexWrite';
-      hasIndexWrite: boolean | null;
-    }
+    type: 'updateHasIndexWrite';
+    hasIndexWrite: boolean | null;
+  }
   | {
-      type: 'updateIsSignalIndexExists';
-      isSignalIndexExists: boolean | null;
-    }
+    type: 'updateIsSignalIndexExists';
+    isSignalIndexExists: boolean | null;
+  }
   | {
-      type: 'updateIsAuthenticated';
-      isAuthenticated: boolean | null;
-    }
+    type: 'updateIsAuthenticated';
+    isAuthenticated: boolean | null;
+  }
   | {
-      type: 'updateCanUserCRUD';
-      canUserCRUD: boolean | null;
-    }
+    type: 'updateCanUserCRUD';
+    canUserCRUD: boolean | null;
+  }
   | {
-      type: 'updateSignalIndexName';
-      signalIndexName: string | null;
-    };
+    type: 'updateSignalIndexName';
+    signalIndexName: string | null;
+  };
 
 export const userInfoReducer = (state: State, action: Action): State => {
   switch (action.type) {
@@ -160,6 +161,14 @@ export const useUserInfo = (): State => {
     apiSignalIndexName,
     createSignalIndex,
   ] = useSignalIndex();
+
+  useCreatePackagedRules({
+    canUserCRUD,
+    hasIndexManage,
+    hasManageApiKey,
+    isAuthenticated,
+    isSignalIndexExists,
+  });
 
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean =
