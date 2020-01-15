@@ -26,6 +26,8 @@ import { IUiSettingsClient } from 'kibana/public';
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from './xaxis_formatter';
 import { Series } from './timelion_request_handler';
+import { tickFormatters } from './tick_formatters';
+import { generateTicksProvider } from './tick_generator';
 
 export interface Axis {
   delta?: number;
@@ -99,6 +101,19 @@ function buildSeriesData(chart: Series[], options: jquery.flot.plotOptions) {
         }
         if (srcVal == null) {
           return objVal;
+        }
+      });
+    }
+
+    if (options.yaxes) {
+      options.yaxes.forEach((yaxis: Axis) => {
+        if (yaxis && yaxis.units) {
+          const formatters = tickFormatters();
+          yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
+          const byteModes = ['bytes', 'bytes/s'];
+          if (byteModes.includes(yaxis.units.type)) {
+            yaxis.tickGenerator = generateTicksProvider();
+          }
         }
       });
     }

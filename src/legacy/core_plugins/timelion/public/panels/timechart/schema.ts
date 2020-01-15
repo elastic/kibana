@@ -25,8 +25,8 @@ import { timefilter } from 'ui/timefilter';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../../vis_type_timelion/common/lib';
+import { tickFormatters } from '../../../../vis_type_timelion/public/helpers/tick_formatters';
 import { TimelionVisualizationDependencies } from '../../plugin';
-import { tickFormatters } from '../../services/tick_formatters';
 import { xaxisFormatterProvider } from '../../../../vis_type_timelion/public/helpers/xaxis_formatter';
 import { generateTicksProvider } from '../../../../vis_type_timelion/public/helpers/tick_generator';
 
