@@ -105,13 +105,13 @@ export const dedupeFields = (fields: Fields) => {
 export const transformField = (field: Field): IndexPatternField => {
   const newField: IndexPatternField = {
     name: field.name,
-    count: field.count ? field.count : 0,
+    count: field.count ?? 0,
     scripted: false,
-    indexed: getVal(field.index, true),
-    analyzed: getVal(field.analyzed, false),
-    searchable: getVal(field.searchable, true),
-    aggregatable: getVal(field.aggregatable, true),
-    doc_values: getVal(field.doc_values, true),
+    indexed: field.index ?? true,
+    analyzed: field.analyzed ?? false,
+    searchable: field.searchable ?? true,
+    aggregatable: field.aggregatable ?? true,
+    doc_values: field.doc_values ?? true,
     readFromDocValues: true,
   };
 
@@ -129,13 +129,13 @@ export const transformField = (field: Field): IndexPatternField => {
   if (newField.type === 'binary') {
     newField.aggregatable = false;
     newField.analyzed = false;
-    newField.doc_values = getVal(field.doc_values, false);
+    newField.doc_values = field.doc_values ?? false;
     newField.indexed = false;
     newField.searchable = false;
   }
 
   if (field.type === 'object' && field.hasOwnProperty('enabled')) {
-    const enabled = getVal(field.enabled, true);
+    const enabled = field.enabled ?? true;
     newField.enabled = enabled;
     if (!enabled) {
       newField.aggregatable = false;
@@ -178,9 +178,6 @@ export const flattenFields = (fields: Fields): Fields =>
     return acc;
   }, []);
 
-const getVal = (prop: boolean | undefined, def: boolean): boolean => {
-  return prop !== undefined ? prop : def;
-};
 /* this should match https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/kibana/fields_transformer.go */
 interface TypeMap {
   [key: string]: string;
