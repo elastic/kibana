@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function kubernetesMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'kubernetes';
@@ -32,7 +36,7 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('kbn.server.tutorials.kubernetesMetrics.nameTitle', {
       defaultMessage: 'Kubernetes metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.kubernetesMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics from your Kubernetes installation.',
     }),
@@ -64,7 +68,7 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/kubernetes_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

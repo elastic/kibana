@@ -5,12 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../../../../../src/plugins/home/server/tutorials/instructions/tutorial_category';
 import { onPremInstructions } from './envs/on_prem';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import apmIndexPattern from './index_pattern.json';
 import { CloudSetup } from '../../../cloud/server';
-import { ArtifactsSchema } from '../../../../../src/plugins/home/server/services/tutorials';
+import { ArtifactsSchema, TutorialsCategory } from '../../../../../src/plugins/home/server';
 
 const apmIntro = i18n.translate('kbn.server.tutorials.apm.introduction', {
   defaultMessage: 'Collect in-depth performance metrics and errors from inside your applications.',
@@ -72,7 +71,7 @@ export const tutorialProvider = ({
     name: i18n.translate('kbn.server.tutorials.apm.specProvider.name', {
       defaultMessage: 'APM',
     }),
-    category: TUTORIAL_CATEGORY.OTHER,
+    category: TutorialsCategory.OTHER,
     shortDescription: apmIntro,
     longDescription: i18n.translate('kbn.server.tutorials.apm.specProvider.longDescription', {
       defaultMessage:

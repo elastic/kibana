@@ -18,11 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../../../../../plugins/home/server';
+import { Server } from '../../../../../server/kbn_server';
 
-export function emsBoundariesSpecProvider(server) {
-  function addBasePath(url) {
-    const basePath = server.config().get('server.basePath');
+export function emsBoundariesSpecProvider(server: Server) {
+  function addBasePath(url: string) {
+    const basePath: string = server.config().get('server.basePath');
     return `${basePath.length > 0 ? `${basePath}` : ''}${url}`;
   }
 
@@ -31,7 +32,7 @@ export function emsBoundariesSpecProvider(server) {
     name: i18n.translate('kbn.server.tutorials.ems.nameTitle', {
       defaultMessage: 'EMS Boundaries',
     }),
-    category: TUTORIAL_CATEGORY.OTHER,
+    category: TutorialsCategory.OTHER,
     shortDescription: i18n.translate('kbn.server.tutorials.ems.shortDescription', {
       defaultMessage: 'Administrative boundaries from Elastic Maps Service.',
     }),

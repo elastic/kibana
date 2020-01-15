@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'envoyproxy';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'envoyproxyLogs',
     name: i18n.translate('kbn.server.tutorials.envoyproxyLogs.nameTitle', {
       defaultMessage: 'Envoyproxy',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.envoyproxyLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from the Envoy proxy.',
     }),
@@ -46,7 +50,7 @@ It supports both standalone deployment and Envoy proxy deployment in Kubernetes.
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-envoyproxy.html',
       },
     }),
-    //euiIconType: 'logoCisco',
+    // euiIconType: 'logoCisco',
     artifacts: {
       dashboards: [],
       application: {

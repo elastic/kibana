@@ -372,7 +372,7 @@ export const createMetricbeatCloudInstructions = () => ({
   },
 });
 
-export function metricbeatEnableInstructions(moduleName) {
+export function metricbeatEnableInstructions(moduleName: string) {
   return {
     OSX: {
       title: i18n.translate('kbn.common.tutorials.metricbeatEnableInstructions.osxTitle', {
@@ -433,7 +433,7 @@ export function metricbeatEnableInstructions(moduleName) {
   };
 }
 
-export function metricbeatStatusCheck(moduleName) {
+export function metricbeatStatusCheck(moduleName: string) {
   return {
     title: i18n.translate('kbn.common.tutorials.metricbeatStatusCheck.title', {
       defaultMessage: 'Module status',
@@ -588,7 +588,7 @@ export function onPremCloudInstructions(moduleName: string) {
   };
 }
 
-export function cloudInstructions(moduleName) {
+export function cloudInstructions(moduleName: string) {
   const METRICBEAT_INSTRUCTIONS = createMetricbeatInstructions();
   const METRICBEAT_CLOUD_INSTRUCTIONS = createMetricbeatCloudInstructions();
 

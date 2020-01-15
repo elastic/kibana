@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function systemLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'system';
-  const platforms = ['OSX', 'DEB', 'RPM'];
+  const platforms = ['OSX', 'DEB', 'RPM'] as const;
   return {
     id: 'systemLogs',
     name: i18n.translate('kbn.server.tutorials.systemLogs.nameTitle', {
       defaultMessage: 'System logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.systemLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs written by the local Syslog server.',
     }),

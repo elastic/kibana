@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function envoyproxyMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'envoyproxy';
@@ -32,7 +36,7 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('kbn.server.tutorials.envoyproxyMetrics.nameTitle', {
       defaultMessage: 'Envoy Proxy metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.envoyproxyMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Envoy Proxy.',
     }),
@@ -53,7 +57,7 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
     },
     completionTimeMinutes: 10,
     // previewImagePath: '/plugins/kibana/home/tutorial_resources/envoyproxy_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

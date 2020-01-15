@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function redisLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'redis';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'redisLogs',
     name: i18n.translate('kbn.server.tutorials.redisLogs.nameTitle', {
       defaultMessage: 'Redis logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.redisLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by Redis.',
     }),

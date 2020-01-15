@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'etcd';
@@ -33,7 +37,7 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
       defaultMessage: 'Etcd metrics',
     }),
     isBeta: false,
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.etcdMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Etcd server.',
     }),
@@ -59,7 +63,7 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

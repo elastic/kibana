@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function elasticsearchLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'elasticsearch';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'elasticsearchLogs',
     name: i18n.translate('kbn.server.tutorials.elasticsearchLogs.nameTitle', {
       defaultMessage: 'Elasticsearch logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('kbn.server.tutorials.elasticsearchLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs created by Elasticsearch.',

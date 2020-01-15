@@ -18,12 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory, TutorialSchema } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'traefik';
@@ -32,7 +33,7 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('kbn.server.tutorials.traefikMetrics.nameTitle', {
       defaultMessage: 'Traefik metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.traefikMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Traefik.',
     }),
@@ -53,7 +54,7 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     // previewImagePath: '/plugins/kibana/home/tutorial_resources/traefik_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

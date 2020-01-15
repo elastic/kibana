@@ -61,7 +61,7 @@ const DISPLAY_MAP = {
  * @params {String} id - instruction variant id as defined from INSTRUCTION_VARIANT
  * @return {String} display name
  */
-export function getDisplayText(id) {
+export function getDisplayText(id: keyof typeof INSTRUCTION_VARIANT) {
   if (id in DISPLAY_MAP) {
     return DISPLAY_MAP[id];
   }

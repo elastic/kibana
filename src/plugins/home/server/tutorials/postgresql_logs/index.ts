@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'postgresql';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'postgresqlLogs',
     name: i18n.translate('kbn.server.tutorials.postgresqlLogs.nameTitle', {
       defaultMessage: 'PostgreSQL logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.postgresqlLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',
     }),

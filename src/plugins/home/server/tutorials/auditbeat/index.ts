@@ -18,21 +18,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/auditbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function auditbeatSpecProvider(context: TutorialContext): TutorialSchema {
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'auditbeat',
     name: i18n.translate('kbn.server.tutorials.auditbeat.nameTitle', {
       defaultMessage: 'Auditbeat',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.auditbeat.shortDescription', {
       defaultMessage: 'Collect audit data from your hosts.',
     }),

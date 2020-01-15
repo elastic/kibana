@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'apache';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'apacheLogs',
     name: i18n.translate('kbn.server.tutorials.apacheLogs.nameTitle', {
       defaultMessage: 'Apache logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.apacheLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',
     }),

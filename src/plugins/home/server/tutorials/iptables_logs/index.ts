@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'iptables';
-  const platforms = ['DEB', 'RPM'];
+  const platforms = ['DEB', 'RPM'] as const;
   return {
     id: 'iptablesLogs',
     name: i18n.translate('kbn.server.tutorials.iptablesLogs.nameTitle', {
       defaultMessage: 'Iptables / Ubiquiti',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.iptablesLogs.shortDescription', {
       defaultMessage: 'Collect and parse iptables and ip6tables logs or from Ubiqiti firewalls.',
     }),
@@ -48,7 +52,7 @@ number and the action performed on the traffic (allow/deny).. \
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iptables.html',
       },
     }),
-    //euiIconType: 'logoUbiquiti',
+    // euiIconType: 'logoUbiquiti',
     artifacts: {
       dashboards: [],
       application: {

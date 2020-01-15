@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'php_fpm';
@@ -32,7 +36,7 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('kbn.server.tutorials.phpFpmMetrics.nameTitle', {
       defaultMessage: 'PHP-FPM metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     isBeta: false,
     shortDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from PHP-FPM.',
@@ -48,7 +52,7 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
     euiIconType: 'logoPhp',
     artifacts: {
       dashboards: [
-        /*{
+        /* {
           id: 'TODO',
           linkLabel: 'PHP-FPM metrics dashboard',
           isOverview: true
@@ -59,8 +63,8 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    //previewImagePath: '/plugins/kibana/home/tutorial_resources/php_fpm_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    // previewImagePath: '/plugins/kibana/home/tutorial_resources/php_fpm_metrics/screenshot.png',
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

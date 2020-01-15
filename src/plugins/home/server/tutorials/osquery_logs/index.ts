@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'osquery';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'osqueryLogs',
     name: i18n.translate('kbn.server.tutorials.osqueryLogs.nameTitle', {
       defaultMessage: 'Osquery logs',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.osqueryLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by osqueryd.',
     }),

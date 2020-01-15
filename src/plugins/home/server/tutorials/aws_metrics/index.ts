@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'aws';
@@ -32,7 +36,7 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
     name: i18n.translate('kbn.server.tutorials.awsMetrics.nameTitle', {
       defaultMessage: 'AWS metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.awsMetrics.shortDescription', {
       defaultMessage:
         'Fetch monitoring metrics for EC2 instances from the AWS APIs and Cloudwatch.',
@@ -66,7 +70,7 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/aws_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

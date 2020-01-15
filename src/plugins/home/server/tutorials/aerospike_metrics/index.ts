@@ -18,12 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext, TutorialsCategory,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function aerospikeMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'aerospike';
@@ -33,7 +36,7 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
       defaultMessage: 'Aerospike metrics',
     }),
     isBeta: false,
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.aerospikeMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Aerospike server.',
     }),
@@ -59,7 +62,7 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
       },
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

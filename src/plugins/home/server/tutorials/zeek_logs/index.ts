@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'zeek';
-  const platforms = ['OSX', 'DEB', 'RPM'];
+  const platforms = ['OSX', 'DEB', 'RPM'] as const;
   return {
     id: 'zeekLogs',
     name: i18n.translate('kbn.server.tutorials.zeekLogs.nameTitle', {
       defaultMessage: 'Zeek logs',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.zeekLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Zeek/Bro.',
     }),
@@ -46,7 +50,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zeek.html',
       },
     }),
-    //TODO: euiIconType: 'logoZeek',
+    // TODO: euiIconType: 'logoZeek',
     artifacts: {
       dashboards: [
         {

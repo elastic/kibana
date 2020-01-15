@@ -42,7 +42,6 @@ import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { uwsgiMetricsSpecProvider } from './uwsgi_metrics';
 import { netflowSpecProvider } from './netflow';
 import { traefikLogsSpecProvider } from './traefik_logs';
-import { apmSpecProvider } from '../../../../../../x-pack/plugins/apm/server/apm';
 import { cephMetricsSpecProvider } from './ceph_metrics';
 import { aerospikeMetricsSpecProvider } from './aerospike_metrics';
 import { couchbaseMetricsSpecProvider } from './couchbase_metrics';
@@ -75,7 +74,6 @@ import { iptablesLogsSpecProvider } from './iptables_logs';
 import { ciscoLogsSpecProvider } from './cisco_logs';
 import { envoyproxyLogsSpecProvider } from './envoyproxy_logs';
 import { couchdbMetricsSpecProvider } from './couchdb_metrics';
-import { emsBoundariesSpecProvider } from './ems';
 import { consulMetricsSpecProvider } from './consul_metrics';
 import { cockroachdbMetricsSpecProvider } from './cockroachdb_metrics';
 import { traefikMetricsSpecProvider } from './traefik_metrics';
@@ -87,77 +85,73 @@ import { ibmmqLogsSpecProvider } from './ibmmq_logs';
 import { stanMetricsSpecProvider } from './stan_metrics';
 import { envoyproxyMetricsSpecProvider } from './envoyproxy_metrics';
 
-export function registerTutorials(server) {
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(systemMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(apacheLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(apacheMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(elasticsearchLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(iisLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(kafkaLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(logstashLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(nginxLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(nginxMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(mysqlLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(mysqlMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(mongodbMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(osqueryLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(phpfpmMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(postgresqlMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(postgresqlLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(rabbitmqMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(redisLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(redisMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(suricataLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(dockerMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(kubernetesMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(uwsgiMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(netflowSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(traefikLogsSpecProvider);
-  server.registerTutorial(apmSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(cephMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(aerospikeMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(couchbaseMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(dropwizardMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(
-    elasticsearchMetricsSpecProvider
-  );
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(etcdMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(haproxyMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(kafkaMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(kibanaMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(memcachedMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(muninMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(vSphereMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(windowsMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(windowsEventLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(golangMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(logstashMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(prometheusMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(zookeeperMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(uptimeMonitorsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(cloudwatchLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(awsMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(mssqlMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(natsMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(natsLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(zeekLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(corednsMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(corednsLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(auditbeatSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(iptablesLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(ciscoLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(envoyproxyLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(couchdbMetricsSpecProvider);
-  server.registerTutorial(emsBoundariesSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(consulMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(cockroachdbMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(traefikMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(awsLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(activemqMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(azureMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(ibmmqLogsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(stanMetricsSpecProvider);
-  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(envoyproxyMetricsSpecProvider);
-}
+export const builtInTutorials = [
+  systemLogsSpecProvider,
+  systemMetricsSpecProvider,
+  apacheLogsSpecProvider,
+  apacheMetricsSpecProvider,
+  elasticsearchLogsSpecProvider,
+  iisLogsSpecProvider,
+  kafkaLogsSpecProvider,
+  logstashLogsSpecProvider,
+  nginxLogsSpecProvider,
+  nginxMetricsSpecProvider,
+  mysqlLogsSpecProvider,
+  mysqlMetricsSpecProvider,
+  mongodbMetricsSpecProvider,
+  osqueryLogsSpecProvider,
+  phpfpmMetricsSpecProvider,
+  postgresqlMetricsSpecProvider,
+  postgresqlLogsSpecProvider,
+  rabbitmqMetricsSpecProvider,
+  redisLogsSpecProvider,
+  redisMetricsSpecProvider,
+  suricataLogsSpecProvider,
+  dockerMetricsSpecProvider,
+  kubernetesMetricsSpecProvider,
+  uwsgiMetricsSpecProvider,
+  netflowSpecProvider,
+  traefikLogsSpecProvider,
+  cephMetricsSpecProvider,
+  aerospikeMetricsSpecProvider,
+  couchbaseMetricsSpecProvider,
+  dropwizardMetricsSpecProvider,
+  elasticsearchMetricsSpecProvider,
+  etcdMetricsSpecProvider,
+  haproxyMetricsSpecProvider,
+  kafkaMetricsSpecProvider,
+  kibanaMetricsSpecProvider,
+  memcachedMetricsSpecProvider,
+  muninMetricsSpecProvider,
+  vSphereMetricsSpecProvider,
+  windowsMetricsSpecProvider,
+  windowsEventLogsSpecProvider,
+  golangMetricsSpecProvider,
+  logstashMetricsSpecProvider,
+  prometheusMetricsSpecProvider,
+  zookeeperMetricsSpecProvider,
+  uptimeMonitorsSpecProvider,
+  cloudwatchLogsSpecProvider,
+  awsMetricsSpecProvider,
+  mssqlMetricsSpecProvider,
+  natsMetricsSpecProvider,
+  natsLogsSpecProvider,
+  zeekLogsSpecProvider,
+  corednsMetricsSpecProvider,
+  corednsLogsSpecProvider,
+  auditbeatSpecProvider,
+  iptablesLogsSpecProvider,
+  ciscoLogsSpecProvider,
+  envoyproxyLogsSpecProvider,
+  couchdbMetricsSpecProvider,
+  consulMetricsSpecProvider,
+  cockroachdbMetricsSpecProvider,
+  traefikMetricsSpecProvider,
+  awsLogsSpecProvider,
+  activemqLogsSpecProvider,
+  activemqMetricsSpecProvider,
+  azureMetricsSpecProvider,
+  ibmmqLogsSpecProvider,
+  stanMetricsSpecProvider,
+  envoyproxyMetricsSpecProvider,
+];

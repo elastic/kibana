@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'traefik';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'traefikLogs',
     name: i18n.translate('kbn.server.tutorials.traefikLogs.nameTitle', {
       defaultMessage: 'Traefik logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.traefikLogs.shortDescription', {
       defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',
     }),
@@ -45,7 +49,7 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-traefik.html',
       },
     }),
-    //euiIconType: 'logoTraefik',
+    // euiIconType: 'logoTraefik',
     artifacts: {
       dashboards: [
         {

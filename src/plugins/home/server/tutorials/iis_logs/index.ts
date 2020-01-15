@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'iis';
-  const platforms = ['WINDOWS'];
+  const platforms = ['WINDOWS'] as const;
   return {
     id: 'iisLogs',
     name: i18n.translate('kbn.server.tutorials.iisLogs.nameTitle', {
       defaultMessage: 'IIS logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.iisLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the IIS HTTP server.',
     }),

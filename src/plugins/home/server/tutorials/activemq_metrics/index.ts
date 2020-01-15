@@ -18,12 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext, TutorialsCategory,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function activemqMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'activemq';
@@ -32,7 +35,7 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
     name: i18n.translate('kbn.server.tutorials.activemqMetrics.nameTitle', {
       defaultMessage: 'ActiveMQ metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.activemqMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from ActiveMQ instances.',
     }),
@@ -59,7 +62,7 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
       },
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

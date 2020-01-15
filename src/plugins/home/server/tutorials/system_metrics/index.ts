@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function systemMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'system';
@@ -32,7 +36,7 @@ export function systemMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('kbn.server.tutorials.systemMetrics.nameTitle', {
       defaultMessage: 'System metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.systemMetrics.shortDescription', {
       defaultMessage: 'Collect CPU, memory, network, and disk statistics from the host.',
     }),
@@ -64,7 +68,7 @@ It collects system wide statistics and statistics per process and filesystem. \
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/system_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

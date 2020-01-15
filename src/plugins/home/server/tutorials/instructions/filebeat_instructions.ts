@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from './instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
+import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export const createFilebeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -366,7 +367,7 @@ export const createFilebeatCloudInstructions = () => ({
   },
 });
 
-export function filebeatEnableInstructions(moduleName) {
+export function filebeatEnableInstructions(moduleName: string) {
   return {
     OSX: {
       title: i18n.translate('kbn.common.tutorials.filebeatEnableInstructions.osxTitle', {
@@ -424,7 +425,7 @@ export function filebeatEnableInstructions(moduleName) {
   };
 }
 
-export function filebeatStatusCheck(moduleName) {
+export function filebeatStatusCheck(moduleName: string) {
   return {
     title: i18n.translate('kbn.common.tutorials.filebeatStatusCheck.title', {
       defaultMessage: 'Module status',
@@ -457,7 +458,11 @@ export function filebeatStatusCheck(moduleName) {
   };
 }
 
-export function onPremInstructions(moduleName, platforms, context) {
+export function onPremInstructions(
+  moduleName: string,
+  platforms: readonly Platform[] = [],
+  context?: TutorialContext
+) {
   const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions(context);
 
   const variants = [];
@@ -470,7 +475,7 @@ export function onPremInstructions(moduleName, platforms, context) {
     instructions.push(FILEBEAT_INSTRUCTIONS.START[platform]);
     variants.push({
       id: INSTRUCTION_VARIANT[platform],
-      instructions: instructions,
+      instructions,
     });
   }
   return {
@@ -489,7 +494,7 @@ export function onPremInstructions(moduleName, platforms, context) {
   };
 }
 
-export function onPremCloudInstructions(moduleName, platforms) {
+export function onPremCloudInstructions(moduleName: string, platforms: readonly Platform[] = []) {
   const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions();
   const TRYCLOUD_OPTION1 = createTrycloudOption1();
   const TRYCLOUD_OPTION2 = createTrycloudOption2();
@@ -526,7 +531,7 @@ export function onPremCloudInstructions(moduleName, platforms) {
   };
 }
 
-export function cloudInstructions(moduleName, platforms) {
+export function cloudInstructions(moduleName: string, platforms: readonly Platform[] = []) {
   const FILEBEAT_INSTRUCTIONS = createFilebeatInstructions();
   const FILEBEAT_CLOUD_INSTRUCTIONS = createFilebeatCloudInstructions();
 

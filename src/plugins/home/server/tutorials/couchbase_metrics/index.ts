@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function couchbaseMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'couchbase';
@@ -33,7 +37,7 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
       defaultMessage: 'Couchbase metrics',
     }),
     isBeta: false,
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.couchbaseMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Couchbase.',
     }),
@@ -59,7 +63,7 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
       },
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

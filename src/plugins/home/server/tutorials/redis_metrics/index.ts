@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function redisMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'redis';
@@ -32,7 +36,7 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('kbn.server.tutorials.redisMetrics.nameTitle', {
       defaultMessage: 'Redis metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.redisMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Redis.',
     }),
@@ -64,7 +68,7 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/redis_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

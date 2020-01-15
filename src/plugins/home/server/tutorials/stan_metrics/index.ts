@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'stan';
@@ -32,7 +36,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('kbn.server.tutorials.stanMetrics.nameTitle', {
       defaultMessage: 'STAN metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.stanMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the STAN server.',
     }),
@@ -53,7 +57,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
     },
     completionTimeMinutes: 10,
     // previewImagePath: '/plugins/kibana/home/tutorial_resources/stan_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

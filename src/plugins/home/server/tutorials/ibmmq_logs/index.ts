@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'ibmmq';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'ibmmqLogs',
     name: i18n.translate('kbn.server.tutorials.ibmmqLogs.nameTitle', {
       defaultMessage: 'IBM MQ logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.ibmmqLogs.shortDescription', {
       defaultMessage: 'Collect IBM MQ logs with Filebeat.',
     }),

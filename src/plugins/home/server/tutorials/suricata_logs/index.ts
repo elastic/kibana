@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function suricataLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'suricata';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'suricataLogs',
     name: i18n.translate('kbn.server.tutorials.suricataLogs.nameTitle', {
       defaultMessage: 'Suricata logs',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.suricataLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by Suricata IDS/IPS/NSM.',
     }),
@@ -46,7 +50,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-suricata.html',
       },
     }),
-    //euiIconType: 'logoSuricata',
+    // euiIconType: 'logoSuricata',
     artifacts: {
       dashboards: [
         {

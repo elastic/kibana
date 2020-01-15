@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'coredns';
-  const platforms = ['OSX', 'DEB', 'RPM'];
+  const platforms = ['OSX', 'DEB', 'RPM'] as const;
   return {
     id: 'corednsLogs',
     name: i18n.translate('kbn.server.tutorials.corednsLogs.nameTitle', {
       defaultMessage: 'CoreDNS logs',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.corednsLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Coredns.',
     }),

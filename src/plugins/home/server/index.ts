@@ -24,3 +24,6 @@ import { PluginInitializerContext } from 'src/core/server';
 import { HomeServerPlugin } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);
+
+export { INSTRUCTION_VARIANT } from './tutorials/instructions/instruction_variant';
+export { ArtifactsSchema, TutorialsCategory } from './services/tutorials';

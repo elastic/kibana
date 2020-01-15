@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function prometheusMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'prometheus';
@@ -33,7 +37,7 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
       defaultMessage: 'Prometheus metrics',
     }),
     isBeta: false,
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.prometheusMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics from a Prometheus exporter.',
     }),
@@ -63,7 +67,7 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
       },
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

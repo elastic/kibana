@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from './instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
-import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export const createAuditbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -402,7 +402,7 @@ export function auditbeatStatusCheck() {
   };
 }
 
-export function onPremInstructions(platforms: string[], context?: TutorialContext) {
+export function onPremInstructions(platforms: readonly Platform[], context?: TutorialContext) {
   const AUDITBEAT_INSTRUCTIONS = createAuditbeatInstructions(context);
 
   const variants = [];
@@ -414,7 +414,7 @@ export function onPremInstructions(platforms: string[], context?: TutorialContex
     instructions.push(AUDITBEAT_INSTRUCTIONS.START[platform]);
     variants.push({
       id: INSTRUCTION_VARIANT[platform],
-      instructions: instructions,
+      instructions,
     });
   }
   return {
@@ -433,7 +433,7 @@ export function onPremInstructions(platforms: string[], context?: TutorialContex
   };
 }
 
-export function onPremCloudInstructions(platforms: string[]) {
+export function onPremCloudInstructions(platforms: readonly Platform[]) {
   const AUDITBEAT_INSTRUCTIONS = createAuditbeatInstructions();
   const TRYCLOUD_OPTION1 = createTrycloudOption1();
   const TRYCLOUD_OPTION2 = createTrycloudOption2();
@@ -469,7 +469,7 @@ export function onPremCloudInstructions(platforms: string[]) {
   };
 }
 
-export function cloudInstructions(platforms: string[]) {
+export function cloudInstructions(platforms: readonly Platform[]) {
   const AUDITBEAT_INSTRUCTIONS = createAuditbeatInstructions();
   const AUDITBEAT_CLOUD_INSTRUCTIONS = createAuditbeatCloudInstructions();
 

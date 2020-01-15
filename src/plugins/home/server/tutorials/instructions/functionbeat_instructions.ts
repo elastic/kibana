@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { INSTRUCTION_VARIANT } from './instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
+import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -349,7 +350,7 @@ export function functionbeatStatusCheck() {
   };
 }
 
-export function onPremInstructions(platforms, context) {
+export function onPremInstructions(platforms: Platform[], context?: TutorialContext) {
   const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions(context);
 
   return {

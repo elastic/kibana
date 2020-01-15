@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'coredns';
@@ -32,7 +36,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('kbn.server.tutorials.corednsMetrics.nameTitle', {
       defaultMessage: 'CoreDNS metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.corednsMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the CoreDNS server.',
     }),
@@ -59,7 +63,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/coredns_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function nginxMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'nginx';
@@ -32,7 +36,7 @@ export function nginxMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('kbn.server.tutorials.nginxMetrics.nameTitle', {
       defaultMessage: 'Nginx metrics',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.nginxMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Nginx HTTP server.',
     }),
@@ -69,7 +73,7 @@ which must be enabled in your Nginx installation. \
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/nginx_metrics/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, null, context),
+    onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
   };

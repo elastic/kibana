@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import { createOnPremInstructions } from './on_prem';
 import { createElasticCloudInstructions } from './elastic_cloud';
 import { createOnPremElasticCloudInstructions } from './on_prem_elastic_cloud';
@@ -28,7 +28,7 @@ export function netflowSpecProvider() {
   return {
     id: 'netflow',
     name: 'Netflow',
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.netflow.tutorialShortDescription', {
       defaultMessage: 'Collect Netflow records sent by a Netflow exporter.',
     }),
@@ -42,7 +42,7 @@ This module support Netflow Version 5 and 9. [Learn more]({linkUrl}).',
       },
     }),
     completionTimeMinutes: 10,
-    //previewImagePath: 'kibana-apache.png', TODO
+    // previewImagePath: 'kibana-apache.png', TODO
     onPrem: createOnPremInstructions(),
     elasticCloud: createElasticCloudInstructions(),
     onPremElasticCloud: createOnPremElasticCloudInstructions(),

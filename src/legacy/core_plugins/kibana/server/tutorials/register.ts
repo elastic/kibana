@@ -17,12 +17,11 @@
  * under the License.
  */
 
-export function registerTutorials(server) {
-  server.route({
-    path: '/api/kibana/home/tutorials_LP',
-    method: ['GET'],
-    handler: function(req) {
-      return server.getTutorials(req);
-    },
-  });
+import { emsBoundariesSpecProvider } from './ems';
+import { Server } from '../../../../server/kbn_server';
+
+export function registerTutorials(server: Server) {
+  server.newPlatform.setup.plugins.home.tutorials.registerTutorial(() =>
+    emsBoundariesSpecProvider(server)
+  );
 }

@@ -18,22 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'cisco';
-  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'ciscoLogs',
     name: i18n.translate('kbn.server.tutorials.ciscoLogs.nameTitle', {
       defaultMessage: 'Cisco',
     }),
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.ciscoLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from Cisco ASA firewalls.',
     }),
@@ -46,7 +50,7 @@ supports the "asa" fileset for Cisco ASA firewall logs received over syslog or r
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-cisco.html',
       },
     }),
-    //euiIconType: 'logoCisco',
+    // euiIconType: 'logoCisco',
     artifacts: {
       dashboards: [],
       application: {

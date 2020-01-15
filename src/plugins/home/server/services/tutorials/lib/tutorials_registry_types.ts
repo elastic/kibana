@@ -26,17 +26,30 @@ export enum TutorialsCategory {
   METRICS = 'metrics',
   OTHER = 'other',
 }
+export type Platform = 'WINDOWS' | 'OSX' | 'DEB' | 'RPM';
+
 export interface ParamTypes {
   NUMBER: string;
   STRING: string;
 }
+export interface Instruction {
+  title?: string;
+  textPre?: string;
+  commands?: string[];
+  textPost?: string;
+}
+export interface InstructionVariant {
+  id: string;
+  instructions: Instruction[];
+}
 export interface InstructionSetSchema {
-  readonly title: string;
+  readonly title?: string;
   readonly callOut?: {
     title: string;
-    message: string;
-    iconType: IconType;
+    message?: string;
+    iconType?: IconType;
   };
+  instructionVariants: InstructionVariant[];
 }
 export interface ParamsSchema {
   defaultValue: any;
@@ -69,10 +82,10 @@ export interface TutorialSchema {
   name: string;
   isBeta?: boolean;
   shortDescription: string;
-  euiIconType: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/icon;
+  euiIconType?: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/icon;
   longDescription: string;
   completionTimeMinutes?: number;
-  previewImagePath: string;
+  previewImagePath?: string;
 
   // kibana and elastic cluster running on prem
   onPrem: InstructionsSchema;
@@ -84,11 +97,11 @@ export interface TutorialSchema {
   onPremElasticCloud?: InstructionsSchema;
 
   // Elastic stack artifacts produced by product when it is setup and run.
-  artifacts: ArtifactsSchema;
+  artifacts?: ArtifactsSchema;
 
   // saved objects used by data module.
-  savedObjects: any[];
-  savedObjectsInstallMsg: string;
+  savedObjects?: any[];
+  savedObjectsInstallMsg?: string;
 }
 export interface TutorialContext {
   [key: string]: unknown;

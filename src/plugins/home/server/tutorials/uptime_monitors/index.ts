@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/heartbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
@@ -31,7 +35,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('kbn.server.tutorials.uptimeMonitors.nameTitle', {
       defaultMessage: 'Uptime Monitors',
     }),
-    category: TUTORIAL_CATEGORY.METRICS,
+    category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.uptimeMonitors.shortDescription', {
       defaultMessage: 'Monitor services for their availability',
     }),
@@ -62,7 +66,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/uptime_monitors/screenshot.png',
-    onPrem: onPremInstructions(null, null, null, context),
+    onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(),
     onPremElasticCloud: onPremCloudInstructions(),
   };

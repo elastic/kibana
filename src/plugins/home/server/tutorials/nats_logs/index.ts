@@ -18,24 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/filebeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'nats';
-  const geoipRequired = false;
-  const uaRequired = false;
-  const platforms = ['DEB', 'RPM'];
+  const platforms = ['DEB', 'RPM'] as const;
   return {
     id: 'natsLogs',
     name: i18n.translate('kbn.server.tutorials.natsLogs.nameTitle', {
       defaultMessage: 'NATS logs',
     }),
-    category: TUTORIAL_CATEGORY.LOGGING,
+    category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('kbn.server.tutorials.natsLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs created by Nats.',
@@ -68,7 +70,7 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/nats_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };

@@ -18,12 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TUTORIAL_CATEGORY } from '../instructions/tutorial_category';
+import { TutorialsCategory } from '../../services/tutorials';
 import {
   onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/winlogbeat_instructions';
+import {
+  TutorialContext,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function windowsEventLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
@@ -32,7 +36,7 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
       defaultMessage: 'Windows Event Log',
     }),
     isBeta: false,
-    category: TUTORIAL_CATEGORY.SIEM,
+    category: TutorialsCategory.SIEM,
     shortDescription: i18n.translate('kbn.server.tutorials.windowsEventLogs.shortDescription', {
       defaultMessage: 'Fetch logs from the Windows Event Log.',
     }),
@@ -58,7 +62,7 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
       },
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(null, null, null, context),
+    onPrem: onPremInstructions(context),
     elasticCloud: cloudInstructions(),
     onPremElasticCloud: onPremCloudInstructions(),
   };
