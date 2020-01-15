@@ -81,13 +81,10 @@ export class ValidationResults {
     if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
       this._results.push({
         valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
-        message: i18n.translate(
-          'xpack.ml.models.jobService.categorization.messages.medianLineLength',
-          {
-            defaultMessage: 'More than {percent}% of values are null',
-            values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
-          }
-        ),
+        message: i18n.translate('xpack.ml.models.jobService.categorization.messages.nullValues', {
+          defaultMessage: 'More than {percent}% of values are null',
+          values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
+        }),
       });
     }
   }
@@ -123,10 +120,13 @@ export class ValidationResults {
   public createFailureToTokenize(reason: string | undefined) {
     this._results.push({
       valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
-      message: i18n.translate('xpack.ml.models.jobService.categorization.messages.tooManyTokens', {
-        defaultMessage: 'It was not possible to tokenize a sample of field values. {reason}',
-        values: { reason: reason || '' },
-      }),
+      message: i18n.translate(
+        'xpack.ml.models.jobService.categorization.messages.failureToGetTokens',
+        {
+          defaultMessage: 'It was not possible to tokenize a sample of field values. {reason}',
+          values: { reason: reason || '' },
+        }
+      ),
     });
   }
 }
