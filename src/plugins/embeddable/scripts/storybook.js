@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-import { visualization as visualizationFunction } from './visualization_function';
-import { visualization as visualizationRenderer } from './visualization_renderer';
+import { join } from 'path';
 
-npSetup.plugins.expressions.registerFunction(visualizationFunction);
-npSetup.plugins.expressions.registerRenderer(visualizationRenderer);
+// eslint-disable-next-line
+require('@kbn/storybook').runStorybookCli({
+  name: 'embeddable',
+  storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.examples.tsx')],
+});

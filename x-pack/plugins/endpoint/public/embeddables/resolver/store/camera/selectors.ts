@@ -13,6 +13,7 @@ import {
   orthographicProjection,
   translationTransformation,
 } from '../../lib/transformation';
+import { maximum, minimum, zoomCurveRate } from './scaling_constants';
 
 interface ClippingPlanes {
   renderWidth: number;
@@ -43,8 +44,8 @@ export function viewableBoundingBox(state: CameraState): AABB {
 function clippingPlanes(state: CameraState): ClippingPlanes {
   const renderWidth = state.rasterSize[0];
   const renderHeight = state.rasterSize[1];
-  const clippingPlaneRight = renderWidth / 2 / state.scaling[0];
-  const clippingPlaneTop = renderHeight / 2 / state.scaling[1];
+  const clippingPlaneRight = renderWidth / 2 / scale(state)[0];
+  const clippingPlaneTop = renderHeight / 2 / scale(state)[1];
 
   return {
     renderWidth,
@@ -112,9 +113,9 @@ export function translation(state: CameraState): Vector2 {
     return add(
       state.translationNotCountingCurrentPanning,
       divide(subtract(state.panning.currentOffset, state.panning.origin), [
-        state.scaling[0],
+        scale(state)[0],
         // Invert `y` since the `.panning` vectors are in screen coordinates and therefore have backwards `y`
-        -state.scaling[1],
+        -scale(state)[1],
       ])
     );
   } else {
@@ -175,7 +176,11 @@ export const inverseProjectionMatrix: (state: CameraState) => Matrix3 = state =>
 /**
  * The scale by which world values are scaled when rendered.
  */
-export const scale = (state: CameraState): Vector2 => state.scaling;
+export const scale = (state: CameraState): Vector2 => {
+  const delta = maximum - minimum;
+  const value = Math.pow(state.scalingFactor, zoomCurveRate) * delta + minimum;
+  return [value, value];
+};
 
 /**
  * Whether or not the user is current panning the map.
