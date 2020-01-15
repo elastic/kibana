@@ -180,8 +180,7 @@ export class VisualizePlugin implements Plugin {
       visualizations,
     });
 
-    // Register this service with the saved object registry so it can be
-    // edited by the object editor.
+    // TODO: remove once savedobjectregistry is refactored
     savedObjectManagementRegistry.register({
       service: 'savedVisualizations',
       title: 'visualizations',
