@@ -18,14 +18,14 @@ import { getNestedProperty } from './object_utils';
 export type SetUrlState = (attribute: string | Dictionary<any>, value?: any) => void;
 export type UrlState = [Dictionary<any>, SetUrlState];
 
-const decodedParams = ['_a', '_g'];
+const decodedParams = new Set(['_a', '_g']);
 function getUrlState(search: string) {
   const urlState: Dictionary<any> = {};
   const parsedQueryString = queryString.parse(search);
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
-      if (decodedParams.includes(a)) {
+      if (decodedParams.has(a)) {
         urlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
       } else {
         urlState[a] = parsedQueryString[a];
