@@ -16,7 +16,8 @@ APIs to their New Platform equivalents.
     - [Accessing Services](#accessing-services)
   - [Chrome](#chrome)
     - [Updating an application navlink](#updating-application-navlink)
-  
+  - [Render HTML Content](#render-html-content)
+
 ## Configuration
 
 ### Declaring config schema
@@ -520,19 +521,56 @@ export class MyPlugin implements Plugin {
   }
 ```
 
+## Chromeless Applications
+
+In Kibana, a "chromeless" application is one where the primary Kibana UI components
+such as header or navigation can be hidden. In the legacy platform these were referred to
+as "hidden" applications. Chromeless applications are not displayed in the left
+navbar.
+
+To mark an application as chromeless, specify `chromeless: false` when registering your application
+to hide the chrome UI when the application is mounted:
+
+```ts
+application.register({
+  id: 'chromeless',
+  chromeless: true,
+  async mount(context, params) {
+    /* ... */
+  },
+});
+```
+
+If you wish to render your application at a route that does not follow the `/app/${appId}` pattern,
+this can be done via the `appRoute` property. Doing this currently requires you to register a server
+route where you can return a bootstrapped HTML page for your application bundle. Instructions on
+registering this server route is covered in the next section: [Render HTML Content](#render-html-content).
+
+```ts
+application.register({
+  id: 'chromeless',
+  appRoute: '/chromeless',
+  chromeless: true,
+  async mount(context, params) {
+    /* ... */
+  },
+});
+```
+
 ## Render HTML Content
 
 You can return a blank HTML page bootstrapped with the core application bundle from an HTTP route handler
-via the `rendering` context.
+via the `rendering` context. You may wish to do this if you are rendering a chromeless application with a
+custom application route or have other custom rendering needs.
 
 ```ts
 router.get(
-  { path: '/', validate: false },
+  { path: '/chromeless', validate: false },
   (context, request, response) => {
     const { http, rendering } = context.core;
 
     return response.ok({
-      body: await rendering.render(),
+      body: await rendering.render(), // generates an HTML document
       headers: {
         'content-security-policy': http.csp.header,
       },
@@ -541,7 +579,10 @@ router.get(
 );
 ```
 
-You can also specify to exclude user data from the bundle metadata:
+You can also specify to exclude user data from the bundle metadata. User data
+comprises all UI Settings that are *user provided*, then injected into the page.
+You may wish to exclude fetching this data if not authorized or to slim the page
+size.
 
 ```ts
 router.get(
@@ -556,15 +597,5 @@ router.get(
       },
     });
   }
-);
-router.get(
-  { path: '/', validate: false },
-  (context, request, response) =>
-    response.ok({
-      body: await context.core.rendering.render({ includeUserSettings: false }),
-      headers: {
-        'content-security-policy': context.core.http.csp.header,
-      },
-    })
 );
 ```
