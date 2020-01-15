@@ -26,16 +26,16 @@ export const monitoring = kibana =>
       const configs = [
         'monitoring.ui.enabled',
         'monitoring.kibana.collection.enabled',
-        'monitoring.max_bucket_size',
-        'monitoring.min_interval_seconds',
+        'monitoring.ui.max_bucket_size',
+        'monitoring.ui.min_interval_seconds',
         'kibana.index',
-        'monitoring.show_license_expiration',
+        'monitoring.ui.show_license_expiration',
         'monitoring.ui.container.elasticsearch.enabled',
         'monitoring.ui.container.logstash.enabled',
         'monitoring.tests.cloud_detector.enabled',
         'monitoring.kibana.collection.interval',
-        'monitoring.elasticsearch.hosts',
-        'monitoring.elasticsearch',
+        'monitoring.ui.elasticsearch.hosts',
+        'monitoring.ui.elasticsearch',
         'monitoring.xpack_api_polling_frequency_millis',
         'server.uuid',
         'server.name',
@@ -43,8 +43,8 @@ export const monitoring = kibana =>
         'server.port',
         'monitoring.cluster_alerts.email_notifications.enabled',
         'monitoring.cluster_alerts.email_notifications.email_address',
-        'monitoring.ccs.enabled',
-        'monitoring.elasticsearch.logFetchCount',
+        'monitoring.ui.ccs.enabled',
+        'monitoring.ui.elasticsearch.logFetchCount',
       ];
 
       const serverConfig = server.config();

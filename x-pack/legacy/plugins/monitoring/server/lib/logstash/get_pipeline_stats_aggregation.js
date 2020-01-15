@@ -171,7 +171,7 @@ export function getPipelineStatsAggregation(
     logstashIndexPattern,
     pipelineId,
     version,
-    config.get('monitoring.max_bucket_size'),
+    config.get('monitoring.ui.max_bucket_size'),
     callWithRequest,
     req
   );

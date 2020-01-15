@@ -118,10 +118,10 @@ export class Plugin {
     core.injectUiAppVars('monitoring', () => {
       const config = core.config();
       return {
-        maxBucketSize: config.get('monitoring.max_bucket_size'),
-        minIntervalSeconds: config.get('monitoring.min_interval_seconds'),
+        maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
+        minIntervalSeconds: config.get('monitoring.ui.min_interval_seconds'),
         kbnIndex: config.get('kibana.index'),
-        showLicenseExpiration: config.get('monitoring.show_license_expiration'),
+        showLicenseExpiration: config.get('monitoring.ui.show_license_expiration'),
         showCgroupMetricsElasticsearch: config.get('monitoring.ui.container.elasticsearch.enabled'),
         showCgroupMetricsLogstash: config.get('monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
       };
