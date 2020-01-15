@@ -17,12 +17,14 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart, legacyChrome } from './legacy_imports';
-import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
+import { LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import './saved_dashboard/saved_dashboard_register';
 import './dashboard_config';
+import { plugin } from './index';
 
 /**
  * Get dependencies relying on the global angular context.
@@ -37,7 +39,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 }
 
 (async () => {
-  const instance = new DashboardPlugin();
+  const instance = plugin({} as PluginInitializerContext);
   instance.setup(npSetup.core, {
     ...npSetup.plugins,
     __LEGACY: {

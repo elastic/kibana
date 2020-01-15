@@ -19,12 +19,7 @@
 import chrome from 'ui/chrome';
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
-import { DiscoverPlugin } from './plugin';
-
-// Core will be looking for this when loading our plugin in the new platform
-export const plugin = (context: PluginInitializerContext) => {
-  return new DiscoverPlugin();
-};
+import { plugin } from './index';
 
 // Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
 export const pluginInstance = plugin({} as PluginInitializerContext);

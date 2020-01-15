@@ -20,6 +20,7 @@
 import 'ui/collapsible_sidebar'; // used in default editor
 import 'ui/vis/editors/default/sidebar';
 
+import { PluginInitializerContext } from 'kibana/public';
 import {
   IPrivate,
   legacyChrome,
@@ -27,9 +28,10 @@ import {
   npStart,
   VisEditorTypesRegistryProvider,
 } from './legacy_imports';
-import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
+import { LegacyAngularInjectedDependencies } from './plugin';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
+import { plugin } from './index';
 
 /**
  * Get dependencies relying on the global angular context.
@@ -49,7 +51,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
 }
 
 (() => {
-  const instance = new VisualizePlugin();
+  const instance = plugin({} as PluginInitializerContext);
   instance.setup(npSetup.core, {
     ...npSetup.plugins,
     __LEGACY: {
