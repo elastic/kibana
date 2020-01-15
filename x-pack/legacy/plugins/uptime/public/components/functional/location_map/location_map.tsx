@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
 import { MonitorLocations } from '../../../../common/runtime_types';

@@ -79,7 +79,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   useEffect(() => {
     async function setupEmbeddable() {
       const mapState = {
-        layerList: getLayerList(upPoints, downPoints ?? [], colors),
+        layerList: getLayerList(upPoints, downPoints, colors),
         title: i18n.MAP_TITLE,
       };
       // @ts-ignore
@@ -87,7 +87,6 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
       setEmbeddable(embeddableObject);
     }
-
     setupEmbeddable();
 
     // we want this effect to execute exactly once after the component mounts
@@ -99,7 +98,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
     if (embeddable) {
       embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
     }
-  }, [embeddable, upPoints, downPoints, colors]);
+  }, [upPoints, downPoints, embeddable, colors]);
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
