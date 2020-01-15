@@ -67,7 +67,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('timefilter should be disabled', async () => {
       const isOff = await PageObjects.timePicker.isOff();
-      expect(isOff).to.be.eql(true);
+      expect(isOff).to.be(true);
     });
 
     // test to cover bug #54548 - add this visualization to a dashboard and filter
