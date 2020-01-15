@@ -163,7 +163,8 @@ export async function getServiceMapFromTraceIds({
                 }
 
                 /* if there is an outgoing span, create a new path */
-                if (event['span.type'] == 'external' || event['span.type'] == 'messaging') {
+                if (event['destination.address'] != null
+                  && event['destination.address'] != '') {
                   def outgoingLocation = getDestination(event);
                   def outgoingPath = new ArrayList(basePath);
                   outgoingPath.add(outgoingLocation);

@@ -7,6 +7,7 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 import {
+  MachineLearningAnomaliesTableProvider,
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
   MachineLearningCommonProvider,
@@ -17,6 +18,7 @@ import {
   MachineLearningDataVisualizerProvider,
   MachineLearningDataVisualizerIndexBasedProvider,
   MachineLearningJobManagementProvider,
+  MachineLearningJobSelectionProvider,
   MachineLearningJobSourceSelectionProvider,
   MachineLearningJobTableProvider,
   MachineLearningJobTypeSelectionProvider,
@@ -32,6 +34,7 @@ import {
 export function MachineLearningProvider(context: FtrProviderContext) {
   const common = MachineLearningCommonProvider(context);
 
+  const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
@@ -41,6 +44,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
+  const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
@@ -53,8 +57,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
 
   return {
+    anomaliesTable,
     anomalyExplorer,
     api,
+    common,
     customUrls,
     dataFrameAnalytics,
     dataFrameAnalyticsCreation,
@@ -62,6 +68,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizer,
     dataVisualizerIndexBased,
     jobManagement,
+    jobSelection,
     jobSourceSelection,
     jobTable,
     jobTypeSelection,

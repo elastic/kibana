@@ -58,7 +58,7 @@ interface Props {
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
-  prepend?: React.ReactNode;
+  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   persistedLog?: PersistedLog;
   bubbleSubmitEvent?: boolean;
   placeholder?: string;
