@@ -22,59 +22,61 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
-  executeCode: (payload: Record<string, unknown>) => Promise<any>;
+  executeCode: (payload: Request) => Promise<any>;
+}
+interface Request {
+  script: {
+    source: string;
+    params?: Record<string, unknown>;
+  };
+  context?: string;
+  context_setup?: {
+    document: Record<string, unknown>;
+    index: string;
+  };
 }
 interface Response {
   error?: { [key: string]: any };
   result?: string;
 }
 
-function parseJSON(text) {
+function parseJSON(text: string) {
   try {
     return JSON.parse(text);
   } catch (e) {
     return {};
   }
 }
-function getRequest(code: string, context: string, contextSetup: string) {
-  const params = parseJSON(contextSetup?.params);
-  if (context === 'painless_test' && contextSetup.params) {
-    return {
-      script: {
-        source: code,
-        params,
-      },
-    };
-  } else if (context === 'filter' || context === 'score') {
-    return {
-      script: {
-        source: code,
-        params,
-      },
-      context,
-      context_setup: {
-        index: contextSetup.index,
-        document: parseJSON(contextSetup.doc),
-      },
-    };
-  }
-
-  return {
+function getRequest(code: string, context: string, contextSetup: Record<string, string>) {
+  const request: Request = {
     script: {
       source: code,
     },
   };
+  if (context !== 'painless_test_without_params' && contextSetup.params) {
+    request.script.params = parseJSON(contextSetup?.params);
+  }
+  if (context === 'filter' || context === 'score') {
+    request.context = context;
+    request.context_setup = {
+      index: contextSetup.index,
+      document: parseJSON(contextSetup.doc),
+    };
+    return request;
+  }
+
+  return request;
 }
 
-function formatJson(text) {
+function formatJson(json: any) {
   try {
-    return JSON.stringify(text, null, 2);
+    return JSON.stringify(json, null, 2);
   } catch (e) {
-    return `Invalid JSON ${String(text)}`;
+    return `Invalid JSON ${String(json)}`;
   }
 }
 
-function getFromLocalStorage(key: key, defaultValue: any = '', parse = false) {
+function getFromLocalStorage(key: string, defaultValue: any = '', parse = false) {
   const value = localStorage.getItem(key);
   if (value && parse) {
     try {
@@ -90,16 +92,19 @@ function getFromLocalStorage(key: key, defaultValue: any = '', parse = false) {
 }
 
 const painlessContextOptions = [
-  { value: 'painless_test', text: 'Default - Execute as it is' },
+  { value: 'painless_test_without_params', text: 'Default - Execute as it is' },
+  { value: 'painless_test', text: 'Default - Execute with parameters' },
   { value: 'filter', text: 'Filter - Execute like inside a script query' },
   { value: 'score', text: 'Score - Execute like inside a script query' },
 ];
 
 export function PainlessPlayground({ executeCode }: Props) {
-  const [code, setCode] = useState(getFromLocalStorage('painlessPlaygroundCode', ''));
+  const [code, setCode] = useState(
+    getFromLocalStorage('painlessPlaygroundCode', 'return "Hello painless world!"')
+  );
   const [response, setResponse] = useState<Response>({});
   const [context, setContext] = useState(
-    getFromLocalStorage('painlessPlaygroundContext', 'painless_test')
+    getFromLocalStorage('painlessPlaygroundContext', 'painless_test_without_params')
   );
   const [contextSetup, setContextSetup] = useState(
     getFromLocalStorage('painlessPlaygroundContextSetup', {}, true)
@@ -120,6 +125,23 @@ export function PainlessPlayground({ executeCode }: Props) {
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiPageContent panelPaddingSize="none">
+          <CodeEditor
+            languageId="painless"
+            height={250}
+            value={code}
+            onChange={setCode}
+            options={{
+              fontSize: 12,
+              minimap: {
+                enabled: false,
+              },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+            }}
+          />
+        </EuiPageContent>
         <EuiPageContent>
           <EuiPageContentBody>
             <EuiForm data-test-subj="painlessPlayground">
@@ -135,106 +157,87 @@ export function PainlessPlayground({ executeCode }: Props) {
                 <EuiSelect
                   options={painlessContextOptions}
                   value={context}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContext(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setContext(e.target.value)}
                 />
               </EuiFormRow>
-              <EuiFormRow
-                label={
-                  <FormattedMessage id="xpack.painlessPlayground.codeLabel" defaultMessage="Code" />
-                }
-                fullWidth
-                data-test-subj="codeInput"
-              >
-                <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
-                  <CodeEditor
-                    languageId="painless"
-                    height={250}
-                    value={code}
-                    onChange={setCode}
-                    options={{
-                      fontSize: 12,
-                      minimap: {
-                        enabled: false,
-                      },
-                      scrollBeyondLastLine: false,
-                      wordWrap: 'on',
-                      wrappingIndent: 'indent',
-                    }}
-                  />
-                </div>
-              </EuiFormRow>
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.painlessPlayground.codeLabel"
-                    defaultMessage="Parameters (Enter JSON that's available as 'params' in the code)"
-                  />
-                }
-                fullWidth
-              >
-                <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
-                  <CodeEditor
-                    languageId="json"
-                    height={100}
-                    value={contextSetup.params}
-                    onChange={(value: string) => setContextSetup({ params: value })}
-                    options={{
-                      fontSize: 12,
-                      minimap: {
-                        enabled: false,
-                      },
-                      scrollBeyondLastLine: false,
-                      wordWrap: 'on',
-                      wrappingIndent: 'indent',
-                    }}
-                  />
-                </div>
-              </EuiFormRow>
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.painlessPlayground.indexLabel"
-                    defaultMessage="Index (The name of an index containing a mapping that is compatible with the document being indexed.)"
-                  />
-                }
-                fullWidth
-              >
-                <EuiFieldText
-                  value={contextSetup.index || ''}
-                  onChange={e =>
-                    setContextSetup(Object.assign({}, contextSetup, { index: e.target.value }))
+              {context !== 'painless_test_without_params' && (
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.painlessPlayground.codeLabel"
+                      defaultMessage="Parameters (Enter JSON that's available as 'params' in the code)"
+                    />
                   }
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.painlessPlayground.codeLabel"
-                    defaultMessage="Document (Enter document as JSON that's available as 'doc' in the code)"
-                  />
-                }
-                fullWidth
-              >
-                <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
-                  <CodeEditor
-                    languageId="json"
-                    height={100}
-                    value={contextSetup.document}
-                    onChange={(value: string) =>
-                      setContextSetup(Object.assign({}, contextSetup, { document: value }))
+                  fullWidth
+                >
+                  <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+                    <CodeEditor
+                      languageId="json"
+                      height={100}
+                      value={contextSetup.params}
+                      onChange={(value: string) => setContextSetup({ params: value })}
+                      options={{
+                        fontSize: 12,
+                        minimap: {
+                          enabled: false,
+                        },
+                        scrollBeyondLastLine: false,
+                        wordWrap: 'on',
+                        wrappingIndent: 'indent',
+                      }}
+                    />
+                  </div>
+                </EuiFormRow>
+              )}
+              {['filter', 'score'].indexOf(context) !== -1 && (
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.painlessPlayground.indexLabel"
+                      defaultMessage="Index (The name of an index containing a mapping that is compatible with the document being indexed.)"
+                    />
+                  }
+                  fullWidth
+                >
+                  <EuiFieldText
+                    value={contextSetup.index || ''}
+                    onChange={e =>
+                      setContextSetup(Object.assign({}, contextSetup, { index: e.target.value }))
                     }
-                    options={{
-                      fontSize: 12,
-                      minimap: {
-                        enabled: false,
-                      },
-                      scrollBeyondLastLine: false,
-                      wordWrap: 'on',
-                      wrappingIndent: 'indent',
-                    }}
                   />
-                </div>
-              </EuiFormRow>
+                </EuiFormRow>
+              )}
+              {['filter', 'score'].indexOf(context) !== -1 && (
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.painlessPlayground.codeLabel"
+                      defaultMessage="Document (Enter document as JSON that's available as 'doc' in the code)"
+                    />
+                  }
+                  fullWidth
+                >
+                  <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+                    <CodeEditor
+                      languageId="json"
+                      height={100}
+                      value={contextSetup.document}
+                      onChange={(value: string) =>
+                        setContextSetup(Object.assign({}, contextSetup, { document: value }))
+                      }
+                      options={{
+                        fontSize: 12,
+                        minimap: {
+                          enabled: false,
+                        },
+                        scrollBeyondLastLine: false,
+                        wordWrap: 'on',
+                        wrappingIndent: 'indent',
+                      }}
+                    />
+                  </div>
+                </EuiFormRow>
+              )}
               <EuiSpacer />
               <EuiButton
                 fill
