@@ -22,6 +22,8 @@ import { PartitionFieldsDefinition } from '../results_service/result_service_rx'
 import { annotations } from './annotations';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import { CombinedJob, JobId } from '../../jobs/new_job/common/job_creator/configs';
+import { CategorizationAnalyzer, CategoryFieldExample } from '../../../../common/types/categories';
+import { CATEGORY_EXAMPLES_VALID_STATUS } from '../../../../common/constants/new_job';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -66,6 +68,11 @@ export interface MlInfoResponse {
   };
   upgrade_mode: boolean;
   cloudId?: string;
+}
+
+interface FieldExampleCheck {
+  valid: CATEGORY_EXAMPLES_VALID_STATUS;
+  message: string;
 }
 
 export interface SuccessCardinality {
@@ -184,8 +191,13 @@ declare interface Ml {
       timeField: string | undefined,
       start: number,
       end: number,
-      analyzer: any
-    ): Promise<{ valid: number; examples: any[]; sampleSize: number }>;
+      analyzer: CategorizationAnalyzer
+    ): Promise<{
+      examples: CategoryFieldExample[];
+      sampleSize: number;
+      overallValidStatus: CATEGORY_EXAMPLES_VALID_STATUS;
+      validationChecks: FieldExampleCheck[];
+    }>;
     topCategories(
       jobId: string,
       count: number

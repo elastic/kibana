@@ -17,21 +17,21 @@ interface Props {
 }
 
 export const CategorizationView: FC<Props> = ({ isActive, setCanProceed }) => {
-  const [categoryFieldValid, setCategoryFieldValid] = useState(false);
+  const [categoryFieldPercentValid, setCategoryFieldPercentValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 
   useEffect(() => {
     if (typeof setCanProceed === 'function') {
-      setCanProceed(categoryFieldValid && settingsValid);
+      setCanProceed(categoryFieldPercentValid && settingsValid);
     }
-  }, [categoryFieldValid, settingsValid]);
+  }, [categoryFieldPercentValid, settingsValid]);
 
   return isActive === false ? (
     <CategorizationDetectorsSummary />
   ) : (
     <>
-      <CategorizationDetectors setIsValid={setCategoryFieldValid} />
-      {categoryFieldValid && (
+      <CategorizationDetectors setIsValid={setCategoryFieldPercentValid} />
+      {categoryFieldPercentValid && (
         <>
           <EuiHorizontalRule margin="l" />
           <CategorizationSettings setIsValid={setSettingsValid} />
