@@ -63,9 +63,9 @@ describe('Mappings configuration validator', () => {
     expect(errors).not.toBe(undefined);
     expect(errors!.length).toBe(3);
     expect(errors!).toEqual([
-      { code: 'ERR_CONFIG', configName: 'numeric_detection' },
-      { code: 'ERR_CONFIG', configName: 'dynamic_date_formats' },
       { code: 'ERR_CONFIG', configName: '_source' },
+      { code: 'ERR_CONFIG', configName: 'dynamic_date_formats' },
+      { code: 'ERR_CONFIG', configName: 'numeric_detection' },
     ]);
   });
 });
