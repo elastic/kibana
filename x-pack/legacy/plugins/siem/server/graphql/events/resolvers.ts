@@ -32,8 +32,8 @@ export interface EventsResolversDeps {
   events: Events;
 }
 
-type QueryEventsOverTimeResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.EventsHistogramResolver>,
+type MatrixHistogramResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.MatrixHistogramResolver>,
   QuerySourceResolver
 >;
 
@@ -44,7 +44,7 @@ export const createEventsResolvers = (
     Timeline: QueryTimelineResolver;
     TimelineDetails: QueryTimelineDetailsResolver;
     LastEventTime: QueryLastEventTimeResolver;
-    EventsHistogram: QueryEventsOverTimeResolver;
+    MatrixHistogram: MatrixHistogramResolver;
   };
 } => ({
   Source: {
@@ -71,11 +71,11 @@ export const createEventsResolvers = (
       };
       return libs.events.getLastEventTimeData(req, options);
     },
-    async EventsHistogram(source, args, { req }, info) {
+    async MatrixHistogram(source, args, { req }, info) {
       const options = {
         ...createOptions(source, args, info),
-        defaultIndex: args.defaultIndex,
         stackByField: args.stackByField,
+        histogramType: args.histogramType,
       };
       return libs.events.getEventsOverTime(req, options);
     },

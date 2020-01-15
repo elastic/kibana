@@ -23,7 +23,7 @@ import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
-import { Alerts } from './alerts';
+import { Alerts } from './matrix_histogram';
 
 export * from './hosts';
 

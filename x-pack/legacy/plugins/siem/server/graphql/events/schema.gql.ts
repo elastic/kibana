@@ -100,11 +100,5 @@ export const eventsSchema = gql`
       details: LastTimeDetails!
       defaultIndex: [String!]!
     ): LastEventTimeData!
-    EventsHistogram(
-      timerange: TimerangeInput!
-      filterQuery: String
-      defaultIndex: [String!]!
-      stackByField: String
-    ): EventsOverTimeData!
   }
 `;

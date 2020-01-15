@@ -15,9 +15,8 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { NetworkComponentQueryProps } from './types';
 import { networkModel } from '../../../store';
 
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
 import * as i18n from '../translations';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
@@ -55,14 +54,12 @@ export const DnsQueryTabBody = ({
   return (
     <>
       <MatrixHistogramContainer
-        dataKey={['NetworkDnsHistogram', 'matrixHistogramData']}
         defaultStackByOption={dnsStackByOptions[0]}
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_DNS_DATA}
         filterQuery={filterQuery}
+        histogramType={HistogramType.dns}
         id={HISTOGRAM_ID}
-        isDnsHistogram={true}
-        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
         sourceId="default"
         startDate={startDate}

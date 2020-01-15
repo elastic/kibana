@@ -10,9 +10,8 @@ import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 import * as i18n from '../translations';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
@@ -48,16 +47,12 @@ export const EventsQueryTabBody = ({
   return (
     <>
       <MatrixHistogramContainer
-        dataKey="EventsHistogram"
         defaultStackByOption={eventsStackByOptions[0]}
-        deleteQuery={deleteQuery}
         endDate={endDate}
-        isEventsHistogram={true}
         errorMessage={i18n.ERROR_FETCHING_EVENTS_DATA}
         filterQuery={filterQuery}
-        query={MatrixHistogramGqlQuery}
+        histogramType={HistogramType.events}
         setQuery={setQuery}
-        skip={skip}
         sourceId="default"
         stackByOptions={eventsStackByOptions}
         startDate={startDate}

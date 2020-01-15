@@ -18,8 +18,8 @@ import {
   NetworkHttpData,
   NetworkHttpEdges,
   NetworkTopNFlowEdges,
-  NetworkDsOverTimeData,
   MatrixOverTimeHistogramData,
+  NetworkDsOverTimeData,
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import {

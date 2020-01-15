@@ -30,8 +30,8 @@ type QueryDnsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-type QueryDnsHistogramResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.NetworkDnsHistogramResolver>,
+type QueryMatrixHistogramResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.MatrixHistogramResolver>,
   QuerySourceResolver
 >;
 export interface NetworkResolversDeps {
@@ -46,7 +46,7 @@ export const createNetworkResolvers = (
     NetworkTopCountries: QueryNetworkTopCountriesResolver;
     NetworkTopNFlow: QueryNetworkTopNFlowResolver;
     NetworkDns: QueryDnsResolver;
-    NetworkDnsHistogram: QueryDnsHistogramResolver;
+    MatrixHistogram: QueryMatrixHistogramResolver;
   };
 } => ({
   Source: {
@@ -84,10 +84,11 @@ export const createNetworkResolvers = (
       };
       return libs.network.getNetworkDns(req, options);
     },
-    async NetworkDnsHistogram(source, args, { req }, info) {
+    async MatrixHistogram(source, args, { req }, info) {
       const options = {
         ...createOptions(source, args, info),
         stackByField: args.stackByField,
+        histogramType: args.histogramType,
       };
       return libs.network.getNetworkDnsHistogramData(req, options);
     },

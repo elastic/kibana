@@ -15,10 +15,10 @@ import { hostsModel } from '../../../store/hosts';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
+  HistogramType,
 } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 import * as i18n from '../translations';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
@@ -68,18 +68,14 @@ export const AuthenticationsQueryTabBody = ({
   return (
     <>
       <MatrixHistogramContainer
-        isAuthenticationsHistogram={true}
-        dataKey="AuthenticationsHistogram"
         defaultStackByOption={authStackByOptions[0]}
-        deleteQuery={deleteQuery}
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA}
         filterQuery={filterQuery}
+        histogramType={HistogramType.authentications}
         id={ID}
         mapping={authMatrixDataMappingFields}
-        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
-        skip={skip}
         sourceId="default"
         startDate={startDate}
         stackByOptions={authStackByOptions}

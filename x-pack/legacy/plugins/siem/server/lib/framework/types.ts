@@ -131,8 +131,16 @@ export interface RequestBasicOptions {
   defaultIndex: string[];
 }
 
+enum HistogramType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  events = 'events',
+  alerts = 'alerts',
+}
+
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
-  stackByField?: Maybe<string>;
+  stackByField: Maybe<string>;
+  histogramType: HistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {

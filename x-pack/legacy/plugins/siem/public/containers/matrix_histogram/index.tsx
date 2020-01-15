@@ -12,36 +12,28 @@ import { connect } from 'react-redux';
 import { State, inputsSelectors, hostsModel, networkModel } from '../../store';
 import { QueryTemplateProps } from '../query_template';
 
-import { Maybe } from '../../graphql/types';
 import { MatrixHistogram } from '../../components/matrix_histogram';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
   GetTitle,
   GetSubTitle,
+  HistogramType,
 } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
 export interface OwnProps extends QueryTemplateProps {
-  dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
-  deleteQuery?: ({ id }: { id: string }) => void;
   errorMessage: string;
   headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
-  isAlertsHistogram?: boolean;
-  isAnomaliesHistogram?: boolean;
-  isAuthenticationsHistogram?: boolean;
+  histogramType: HistogramType;
   id: string;
-  isDnsHistogram?: boolean;
-  isEventsHistogram?: boolean;
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
-  query: Maybe<string>;
   setQuery: SetQuery;
   showLegend?: boolean;
-  sourceId: string;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
   title: string | GetTitle;

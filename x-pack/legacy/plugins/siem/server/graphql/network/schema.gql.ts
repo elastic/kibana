@@ -233,12 +233,6 @@ export const networkSchema = gql`
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkDnsData!
-    NetworkDnsHistogram(
-      filterQuery: String
-      defaultIndex: [String!]!
-      timerange: TimerangeInput!
-      stackByField: String
-    ): NetworkDsOverTimeData!
     NetworkHttp(
       id: String
       filterQuery: String

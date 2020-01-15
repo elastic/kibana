@@ -11,7 +11,7 @@ import { AlertsOverTimeData, MatrixOverTimeHistogramData } from '../../graphql/t
 import { inspectStringifyObject } from '../../utils/build_query';
 
 import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
-import { buildAlertsHistogramQuery } from './query.dsl';
+import { buildAlertsHistogramQuery } from './query_alerts.dsl.ts';
 
 import { AlertsAdapter, AlertsGroupData, AlertsBucket } from './types';
 import { TermAggregation } from '../types';

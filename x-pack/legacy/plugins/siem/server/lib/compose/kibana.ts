@@ -33,7 +33,7 @@ import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../unc
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
-import { Alerts, ElasticsearchAlertsAdapter } from '../alerts';
+import { Alerts, ElasticsearchAlertsAdapter } from '../matrix_histogram';
 
 export function compose(
   core: CoreSetup,

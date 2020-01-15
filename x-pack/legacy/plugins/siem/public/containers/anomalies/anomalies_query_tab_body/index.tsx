@@ -13,8 +13,7 @@ import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs'
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import { MatrixHistogramContainer } from '../../matrix_histogram';
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
-import { MatrixHistogramGqlQuery } from '../../matrix_histogram/index.gql_query';
+import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
 
 const ID = 'anomaliesOverTimeQuery';
 const anomaliesStackByOptions: MatrixHistogramOption[] = [
@@ -62,18 +61,14 @@ export const AnomaliesQueryTabBody = ({
   return (
     <>
       <MatrixHistogramContainer
-        isAnomaliesHistogram={true}
-        dataKey="AnomaliesHistogram"
         defaultStackByOption={anomaliesStackByOptions[0]}
-        deleteQuery={deleteQuery}
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_ANOMALIES_DATA}
         filterQuery={mergedFilterQuery}
         hideHistogramIfEmpty={true}
+        histogramType={HistogramType.anomalies}
         id={ID}
-        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
-        skip={skip}
         sourceId="default"
         stackByOptions={anomaliesStackByOptions}
         startDate={startDate}

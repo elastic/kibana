@@ -10,9 +10,8 @@ import { EuiSpacer } from '@elastic/eui';
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
-import { MatrixHistogramOption } from '../matrix_histogram/types';
+import { MatrixHistogramOption, HistogramType } from '../matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
-import { MatrixHistogramGqlQuery } from '../../containers/matrix_histogram/index.gql_query';
 const ID = 'alertsOverTimeQuery';
 export const alertsStackByOptions: MatrixHistogramOption[] = [
   {
@@ -24,7 +23,6 @@ export const alertsStackByOptions: MatrixHistogramOption[] = [
     value: 'event.module',
   },
 ];
-const dataKey = 'AlertsHistogram';
 
 export const AlertsView = ({
   deleteQuery,
@@ -53,15 +51,12 @@ export const AlertsView = ({
   return (
     <>
       <MatrixHistogramContainer
-        dataKey={dataKey}
-        deleteQuery={deleteQuery}
         defaultStackByOption={alertsStackByOptions[1]}
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_ALERTS_DATA}
         filterQuery={filterQuery}
+        histogramType={HistogramType.alerts}
         id={ID}
-        isAlertsHistogram={true}
-        query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
         skip={skip}
         sourceId="default"

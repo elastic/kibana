@@ -84,7 +84,7 @@ export const getCustomChartData = (
   if (mapping)
     return map((item: ChartSeriesData) => {
       const mapItem = get(item.key, mapping);
-      return { ...item, color: mapItem.color };
+      return { ...item, color: mapItem ? mapItem.color : undefined };
     }, formattedChartData);
   else return formattedChartData;
 };

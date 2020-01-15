@@ -18,7 +18,8 @@ export const alertsSchema = gql`
       filterQuery: String
       defaultIndex: [String!]!
       timerange: TimerangeInput!
-      stackByField: String
+      stackByField: String!
+      histogramType: String!
     ): AlertsOverTimeData!
   }
 `;

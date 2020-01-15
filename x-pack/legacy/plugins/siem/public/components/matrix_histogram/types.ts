@@ -48,27 +48,24 @@ export interface MatrixHistogramBasicProps {
   updateDateRange: UpdateDateRange;
 }
 
+export enum HistogramType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  events = 'events',
+  alerts = 'alerts',
+  dns = 'dns',
+}
+
 export interface MatrixHistogramQueryProps {
-  activePage?: number;
   dataKey: string;
   endDate: number;
   errorMessage: string;
   filterQuery?: ESQuery | string | undefined;
-  limit?: number;
-  query: DocumentNode;
-  sort?: NetworkDnsSortField;
   stackByField: string;
-  skip: boolean;
   startDate: number;
   title: string | GetTitle;
-  isAlertsHistogram?: boolean;
-  isAnomaliesHistogram?: boolean;
-  isAuthenticationsHistogram?: boolean;
-  isDnsHistogram?: boolean;
-  isEventsHistogram?: boolean;
   isInspected: boolean;
-  isPtrIncluded?: boolean;
-  pagination?: PaginationInputPaginated;
+  histogramType: HistogramType;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
@@ -95,32 +92,3 @@ export interface HistogramAggregation {
     buckets: GroupBucket[];
   };
 }
-
-export interface SignalsResponse {
-  took: number;
-  timeout: boolean;
-}
-
-export interface SignalSearchResponse<Hit = {}, Aggregations = {} | undefined>
-  extends SignalsResponse {
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
-  };
-  aggregations?: Aggregations;
-  hits: {
-    total: {
-      value: number;
-      relation: string;
-    };
-    hits: Hit[];
-  };
-}
-
-export type Return<Hit, Aggs> = [
-  boolean,
-  SignalSearchResponse<Hit, Aggs> | null,
-  React.Dispatch<SetStateAction<string>>
-];

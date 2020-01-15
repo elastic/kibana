@@ -15,8 +15,8 @@ type QueryAuthenticationsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-type QueryAuthenticationsOverTimeResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AuthenticationsHistogramResolver>,
+type QueryMatrixHistogramResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.MatrixHistogramResolver>,
   QuerySourceResolver
 >;
 
@@ -29,7 +29,7 @@ export const createAuthenticationsResolvers = (
 ): {
   Source: {
     Authentications: QueryAuthenticationsResolver;
-    AuthenticationsHistogram: QueryAuthenticationsOverTimeResolver;
+    MatrixHistogram: QueryMatrixHistogramResolver;
   };
 } => ({
   Source: {
@@ -37,11 +37,11 @@ export const createAuthenticationsResolvers = (
       const options = createOptionsPaginated(source, args, info);
       return libs.authentications.getAuthentications(req, options);
     },
-    async AuthenticationsHistogram(source, args, { req }, info) {
+    async MatrixHistogram(source, args, { req }, info) {
       const options = {
         ...createOptions(source, args, info),
-        defaultIndex: args.defaultIndex,
         stackByField: args.stackByField,
+        histogramType: args.histogramType,
       };
       return libs.authentications.getAuthenticationsOverTime(req, options);
     },

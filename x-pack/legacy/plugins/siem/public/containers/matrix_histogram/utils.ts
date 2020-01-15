@@ -16,6 +16,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { useApolloClient } from '../../utils/apollo_context';
 import { inputsModel } from '../../store';
+import { MatrixHistogramGqlQuery } from './index.gql_query';
 import { GetMatrixHistogramQuery } from '../../graphql/types';
 
 export const useQuery = <Hit, Aggs, TCache = object>({
@@ -23,13 +24,8 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   endDate,
   errorMessage,
   filterQuery,
-  isAlertsHistogram = false,
-  isAnomaliesHistogram = false,
-  isAuthenticationsHistogram = false,
-  isEventsHistogram = false,
-  isDnsHistogram = false,
+  histogramType,
   isInspected,
-  query,
   stackByField,
   startDate,
 }: MatrixHistogramQueryProps) => {
@@ -53,11 +49,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
     defaultIndex,
     inspect: isInspected,
     stackByField,
-    isAlertsHistogram,
-    isAnomaliesHistogram,
-    isAuthenticationsHistogram,
-    isDnsHistogram,
-    isEventsHistogram,
+    histogramType,
   };
 
   useEffect(() => {
@@ -70,7 +62,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       setLoading(true);
       return apolloClient
         .query<GetMatrixHistogramQuery.Query, GetMatrixHistogramQuery.Variables>({
-          query,
+          query: MatrixHistogramGqlQuery,
           fetchPolicy: 'cache-first',
           variables: matrixHistogramVariables,
           context: {
@@ -82,11 +74,8 @@ export const useQuery = <Hit, Aggs, TCache = object>({
         .then(
           result => {
             if (isSubscribed) {
-              const isDataKeyAnArray = Array.isArray(dataKey);
-              const rootDataKey = isDataKeyAnArray ? dataKey[0] : `${dataKey}`;
-              const histogramDataKey = isDataKeyAnArray ? dataKey[1] : `matrixHistogramData`;
-              const source = getOr({}, `data.source.${rootDataKey}`, result);
-              setData(getOr([], histogramDataKey, source));
+              const source = getOr({}, 'data.source.MatrixHistogram', result);
+              setData(getOr([], 'matrixHistogramData', source));
               setTotalCount(getOr(-1, 'totalCount', source));
               setInspect(getOr(null, 'inspect', source));
               setLoading(false);
@@ -111,16 +100,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [
-    defaultIndex,
-    query,
-    filterQuery,
-    isInspected,
-    isDnsHistogram,
-    stackByField,
-    startDate,
-    endDate,
-  ]);
+  }, [defaultIndex, filterQuery, isInspected, stackByField, startDate, endDate]);
 
   return { data, loading, inspect, totalCount, refetch };
 };
