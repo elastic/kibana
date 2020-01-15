@@ -1,29 +1,22 @@
 {
-  "rule_id": "a0b554d2-85ed-4998-ada3-4ca58b508b35",
-  "risk_score": 50,
   "description": "Command shell started by Internet Explorer",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Command shell started by Internet Explorer",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.parent.name:iexplore.exe",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "process.name",
-        "value": "cmd.exe",
+        "negate": false,
         "params": {
           "query": "cmd.exe"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase",
+        "value": "cmd.exe"
       },
       "query": {
         "match": {
@@ -32,23 +25,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
         "key": "event.action",
-        "value": "Process Create (rule: ProcessCreate)",
+        "negate": false,
         "params": {
           "query": "Process Create (rule: ProcessCreate)"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+        "type": "phrase",
+        "value": "Process Create (rule: ProcessCreate)"
       },
       "query": {
         "match": {
@@ -57,12 +50,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Command shell started by Internet Explorer",
+  "query": "process.parent.name:iexplore.exe",
+  "risk_score": 50,
+  "rule_id": "a0b554d2-85ed-4998-ada3-4ca58b508b35",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

@@ -12,5 +12,6 @@ set -e
 ./delete_all_actions.sh
 ./delete_all_alerts.sh
 ./delete_all_alert_tasks.sh
+./delete_all_statuses.sh
 ./delete_signal_index.sh
 ./post_signal_index.sh

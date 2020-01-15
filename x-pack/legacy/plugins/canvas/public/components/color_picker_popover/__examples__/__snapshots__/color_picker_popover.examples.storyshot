@@ -16,6 +16,7 @@ exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
       className="euiPopover__anchor"
     >
       <button
+        aria-label="Color Picker black"
         className="euiLink euiLink--primary"
         onClick={[Function]}
         style={
@@ -77,6 +78,7 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
     className="euiPopover__anchor"
   >
     <button
+      aria-label="Color Picker white"
       className="euiLink euiLink--primary"
       onClick={[Function]}
       style={
@@ -121,6 +123,7 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors, value missin
     className="euiPopover__anchor"
   >
     <button
+      aria-label="Color Picker #a1b2c3"
       className="euiLink euiLink--primary"
       onClick={[Function]}
       style={
@@ -165,6 +168,7 @@ exports[`Storyshots components/Color/ColorPickerPopover three colors 1`] = `
     className="euiPopover__anchor"
   >
     <button
+      aria-label="Color Picker white"
       className="euiLink euiLink--primary"
       onClick={[Function]}
       style={
