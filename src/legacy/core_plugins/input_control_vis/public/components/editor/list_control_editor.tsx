@@ -20,7 +20,7 @@
 import React, { PureComponent, ComponentType } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect, EuiSelectProps } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
@@ -51,7 +51,7 @@ interface ListControlEditorProps {
     value: ControlParamsOptions[T]
   ) => void;
   handleParentChange: (controlIndex: number, parent: string) => void;
-  parentCandidates: EuiSelectProps['options'];
+  parentCandidates: React.ComponentProps<typeof EuiSelect>['options'];
   deps: InputControlVisDependencies;
 }
 

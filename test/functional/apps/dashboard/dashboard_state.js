@@ -34,6 +34,7 @@ export default function({ getService, getPageObjects }) {
     'discover',
     'tileMap',
     'visChart',
+    'timePicker',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -58,7 +59,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
 
       await dashboardAddPanel.addVisualization(AREA_CHART_VIS_NAME);
       await PageObjects.dashboard.saveDashboard('Overridden colors');
@@ -83,7 +84,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.header.clickDiscover();
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -147,7 +148,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
 
       await dashboardAddPanel.addVisualization('Visualization TileMap');
       await PageObjects.dashboard.saveDashboard('No local edits');

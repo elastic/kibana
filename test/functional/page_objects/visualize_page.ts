@@ -44,15 +44,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async clickNewVisualization() {
-      // newItemButton button is only visible when there are items in the listing table is displayed.
-      let exists = await testSubjects.exists('newItemButton');
-      if (exists) {
-        return await testSubjects.click('newItemButton');
-      }
-
-      exists = await testSubjects.exists('createVisualizationPromptButton');
-      // no viz exist, click createVisualizationPromptButton to create new dashboard
-      return await this.createVisualizationPromptButton();
+      await listingTable.clickNewButton('createVisualizationPromptButton');
     }
 
     public async createVisualizationPromptButton() {
