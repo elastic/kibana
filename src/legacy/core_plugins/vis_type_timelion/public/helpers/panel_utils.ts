@@ -105,21 +105,21 @@ function buildSeriesData(chart: Series[], options: jquery.flot.plotOptions) {
       });
     }
 
-    if (options.yaxes) {
-      options.yaxes.forEach((yaxis: Axis) => {
-        if (yaxis && yaxis.units) {
-          const formatters = tickFormatters();
-          yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
-          const byteModes = ['bytes', 'bytes/s'];
-          if (byteModes.includes(yaxis.units.type)) {
-            yaxis.tickGenerator = generateTicksProvider();
-          }
-        }
-      });
-    }
-
     return newSeries;
   });
+
+  if (options.yaxes) {
+    options.yaxes.forEach((yaxis: Axis) => {
+      if (yaxis && yaxis.units) {
+        const formatters = tickFormatters();
+        yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
+        const byteModes = ['bytes', 'bytes/s'];
+        if (byteModes.includes(yaxis.units.type)) {
+          yaxis.tickGenerator = generateTicksProvider();
+        }
+      }
+    });
+  }
 
   return compact(seriesData);
 }
