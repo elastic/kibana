@@ -28,8 +28,6 @@ import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader } from '../results_loader';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 
-type CategorizationAnalyzerType = CategorizationAnalyzer | null; // TODO - this should not be null, change for 7.6
-
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
   private _createCountDetector: () => void = () => {};
@@ -41,8 +39,8 @@ export class CategorizationJobCreator extends JobCreator {
     CATEGORY_EXAMPLES_VALID_STATUS.INVALID;
   private _detectorType: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE =
     ML_JOB_AGGREGATION.COUNT;
-  private _categorizationAnalyzer: CategorizationAnalyzerType = null;
-  private _defaultCategorizationAnalyzer: CategorizationAnalyzerType;
+  private _categorizationAnalyzer: CategorizationAnalyzer = {};
+  private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
 
   constructor(
     indexPattern: IndexPattern,
@@ -54,7 +52,7 @@ export class CategorizationJobCreator extends JobCreator {
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
 
     const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
-    this._defaultCategorizationAnalyzer = anomalyDetectors.categorization_analyzer || null;
+    this._defaultCategorizationAnalyzer = anomalyDetectors.categorization_analyzer || {};
   }
 
   public setDefaultDetectorProperties(
@@ -138,13 +136,10 @@ export class CategorizationJobCreator extends JobCreator {
     return this._detectorType;
   }
 
-  public set categorizationAnalyzer(analyzer: CategorizationAnalyzerType) {
+  public set categorizationAnalyzer(analyzer: CategorizationAnalyzer) {
     this._categorizationAnalyzer = analyzer;
 
-    if (
-      analyzer === null ||
-      isEqual(this._categorizationAnalyzer, this._defaultCategorizationAnalyzer)
-    ) {
+    if (isEqual(this._categorizationAnalyzer, this._defaultCategorizationAnalyzer)) {
       delete this._job_config.analysis_config.categorization_analyzer;
     } else {
       this._job_config.analysis_config.categorization_analyzer = analyzer;

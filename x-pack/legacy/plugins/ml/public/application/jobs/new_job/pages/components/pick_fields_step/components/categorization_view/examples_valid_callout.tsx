@@ -16,12 +16,10 @@ import {
 import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
 import { CATEGORY_EXAMPLES_VALID_STATUS } from '../../../../../../../../../common/constants/new_job';
 
-type CategorizationAnalyzerType = CategorizationAnalyzer | null;
-
 interface Props {
   validationChecks: FieldExampleCheck[];
   overallValidStatus: CATEGORY_EXAMPLES_VALID_STATUS;
-  categorizationAnalyzer: CategorizationAnalyzerType;
+  categorizationAnalyzer: CategorizationAnalyzer;
 }
 
 export const ExamplesValidCallout: FC<Props> = ({
@@ -68,22 +66,15 @@ export const ExamplesValidCallout: FC<Props> = ({
   );
 };
 
-const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzerType }> = ({
+const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
   categorizationAnalyzer,
 }) => {
   let analyzer = '';
-  if (typeof categorizationAnalyzer === null) {
-    return null;
-  }
 
-  if (typeof categorizationAnalyzer === 'string') {
-    analyzer = categorizationAnalyzer;
-  } else {
-    if (categorizationAnalyzer?.tokenizer !== undefined) {
-      analyzer = categorizationAnalyzer?.tokenizer!;
-    } else if (categorizationAnalyzer?.analyzer !== undefined) {
-      analyzer = categorizationAnalyzer?.analyzer!;
-    }
+  if (categorizationAnalyzer?.tokenizer !== undefined) {
+    analyzer = categorizationAnalyzer?.tokenizer!;
+  } else if (categorizationAnalyzer?.analyzer !== undefined) {
+    analyzer = categorizationAnalyzer?.analyzer!;
   }
 
   return (
