@@ -27,6 +27,9 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
@@ -43,6 +46,8 @@ import {
 import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
+// @ts-ignore
+import { savedObjectManagementRegistry } from '../management/saved_object_registry';
 
 export interface LegacyAngularInjectedDependencies {
   legacyChrome: any;
@@ -155,16 +160,33 @@ export class VisualizePlugin implements Plugin {
   }
 
   public start(
-    { savedObjects: { client: savedObjectsClient } }: CoreStart,
+    core: CoreStart,
     { embeddables, navigation, data, share, visualizations }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,
       embeddables,
       navigation,
-      savedObjectsClient,
+      savedObjectsClient: core.savedObjects.client,
       share,
       visualizations,
     };
+
+    const savedVisualizations = createSavedVisLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      chrome: core.chrome,
+      overlays: core.overlays,
+      visualizations,
+    });
+
+    // Register this service with the saved object registry so it can be
+    // edited by the object editor.
+    savedObjectManagementRegistry.register({
+      service: 'savedVisualizations',
+      title: 'visualizations',
+    });
+
+    uiModules.get('app/visualize').service('savedVisualizations', () => savedVisualizations);
   }
 }
