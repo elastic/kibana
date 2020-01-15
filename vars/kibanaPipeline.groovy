@@ -189,7 +189,7 @@ def uploadCoverageArtifacts(prefix, pattern) {
 }
 
 def uploadCoverageStaticSite(timestamp) {
-  def uploadPrefix = "kibana-ci-artifacts/jobs/coverage/${timestamp}"
+  def uploadPrefix = "kibana-ci-artifacts/jobs/coverage/${BUILD_NUMBER}/${timestamp}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-coverage/**/*.png',
     'target/kibana-coverage/**/*.css',
