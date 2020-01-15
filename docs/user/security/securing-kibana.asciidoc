@@ -88,7 +88,7 @@ xpack.security.session.lifespan: "8h"
 
 . Optional: <<configuring-tls,Configure {kib} to encrypt communications>>. 
 
-. Optional: <<configuring-mutual-tls,Configure {kib} to authenticate to {es} with a client certificate>>. 
+. Optional: <<elasticsearch-mutual-tls,Configure {kib} to authenticate to {es} with a client certificate>>.
 
 . Restart {kib}.
 
