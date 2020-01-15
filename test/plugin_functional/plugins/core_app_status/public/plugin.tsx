@@ -26,7 +26,7 @@ import {
   CoreStart,
   AppMountParameters,
 } from 'kibana/public';
-import '../types';
+import './types';
 
 export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
