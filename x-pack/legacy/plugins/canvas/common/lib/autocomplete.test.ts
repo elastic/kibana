@@ -80,36 +80,36 @@ describe('autocomplete', () => {
         expression.length - 1
       ) as FunctionSuggestion[];
       expect(suggestions.length).toBe(functionSpecs.length);
-  
+
       expect(suggestions[0].fnDef.type).toBe('datatable');
       expect(suggestions[0].fnDef.context && suggestions[0].fnDef.context.types).toEqual([
         'datatable',
       ]);
-  
+
       const withReturnOnly = suggestions.findIndex(
         suggestion =>
           suggestion.fnDef.type === 'datatable' &&
           suggestion.fnDef.context &&
           !(suggestion.fnDef.context.types as string[]).includes('datatable')
       );
-  
+
       const withContextOnly = suggestions.findIndex(
         suggestion =>
           suggestion.fnDef.type !== 'datatable' &&
           suggestion.fnDef.context &&
           (suggestion.fnDef.context.types as string[]).includes('datatable')
       );
-  
+
       const withNeither = suggestions.findIndex(
         suggestion =>
           suggestion.fnDef.type !== 'datatable' &&
           (!suggestion.fnDef.context ||
             !(suggestion.fnDef.context.types as string[]).includes('datatable'))
       );
-  
+
       expect(suggestions[0].fnDef.type).toBe('datatable');
       expect(suggestions[0].fnDef.context?.types).toEqual(['datatable']);
-  
+
       expect(withReturnOnly).toBeLessThan(withContextOnly);
       expect(withContextOnly).toBeLessThan(withNeither);
     });
