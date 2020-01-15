@@ -504,7 +504,6 @@
     "common.ui.vis.editors.aggGroups.metricsText": "メトリック",
     "common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage": "「{schema}」集約は他のバケットの前に実行する必要があります！",
     "common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel": "変更されるごとにビジュアライゼーションを自動的に更新します",
-    "common.ui.vis.editors.sidebar.errorButtonAriaLabel": "ハイライトされたフィールドのエラーを解決する必要があります。",
     "common.ui.vis.editors.sidebar.errorButtonTooltip": "ハイライトされたフィールドのエラーを解決する必要があります。",
     "common.ui.vis.editors.sidebar.tabs.dataLabel": "データ",
     "common.ui.vis.editors.sidebar.tabs.optionsLabel": "オプション",

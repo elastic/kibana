@@ -504,7 +504,6 @@
     "common.ui.vis.editors.aggGroups.metricsText": "指标",
     "common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage": "“{schema}” 聚合必须在所有其他存储桶之前运行！",
     "common.ui.vis.editors.sidebar.autoApplyChangesAriaLabel": "每次更改时自动更新可视化",
-    "common.ui.vis.editors.sidebar.errorButtonAriaLabel": "需要解决突出显示的字段中的错误。",
     "common.ui.vis.editors.sidebar.errorButtonTooltip": "需要解决突出显示的字段中的错误。",
     "common.ui.vis.editors.sidebar.tabs.dataLabel": "数据",
     "common.ui.vis.editors.sidebar.tabs.optionsLabel": "选项",
