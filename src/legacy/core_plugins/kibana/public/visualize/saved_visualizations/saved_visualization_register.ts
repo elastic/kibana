@@ -21,14 +21,15 @@ import { npStart } from 'ui/new_platform';
 import { uiModules } from 'ui/modules';
 // @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import './saved_visualizations';
 import { createSavedVisLoader } from './saved_visualizations';
+import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 
 const services = {
   savedObjectsClient: npStart.core.savedObjects.client,
   indexPatterns: npStart.plugins.data.indexPatterns,
   chrome: npStart.core.chrome,
   overlays: npStart.core.overlays,
+  visualizations,
 };
 
 const savedObjectLoaderVisualize = createSavedVisLoader(services);

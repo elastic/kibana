@@ -74,4 +74,3 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
-export { VisualizeEmbeddableFactory } from '../../../visualizations/public/embeddable/visualize_embeddable_factory';

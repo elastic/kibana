@@ -108,6 +108,7 @@ export class VisualizePlugin implements Plugin {
           indexPatterns: data.indexPatterns,
           chrome: contextCore.chrome,
           overlays: contextCore.overlays,
+          visualizations,
         });
         const deps: VisualizeKibanaServices = {
           ...angularDependencies,

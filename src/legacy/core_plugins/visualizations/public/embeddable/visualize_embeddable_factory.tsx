@@ -17,21 +17,6 @@
  * under the License.
  */
 
-import 'uiExports/contextMenuActions';
-import 'uiExports/devTools';
-import 'uiExports/docViews';
-import 'uiExports/embeddableActions';
-import 'uiExports/fieldFormatEditors';
-import 'uiExports/fieldFormats';
-import 'uiExports/home';
-import 'uiExports/indexManagement';
-import 'uiExports/inspectorViews';
-import 'uiExports/savedObjectTypes';
-import 'uiExports/search';
-import 'uiExports/shareContextMenuExtensions';
-import 'uiExports/visTypes';
-import 'uiExports/visualize';
-
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
