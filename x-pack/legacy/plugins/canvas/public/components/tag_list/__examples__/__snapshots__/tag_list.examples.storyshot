@@ -9,7 +9,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#cc3b54",
-        "color": "#FFFFFF",
+        "color": "#fff",
       }
     }
   >
@@ -28,7 +28,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#5bc149",
-        "color": "#000000",
+        "color": "#000",
       }
     }
   >
@@ -47,7 +47,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#fbc545",
-        "color": "#000000",
+        "color": "#000",
       }
     }
   >
@@ -172,7 +172,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#cc3b54",
-        "color": "#FFFFFF",
+        "color": "#fff",
       }
     }
   >
@@ -191,7 +191,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#5bc149",
-        "color": "#000000",
+        "color": "#000",
       }
     }
   >
@@ -210,7 +210,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#fbc545",
-        "color": "#000000",
+        "color": "#000",
       }
     }
   >
@@ -229,7 +229,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#9b3067",
-        "color": "#FFFFFF",
+        "color": "#fff",
       }
     }
   >
@@ -248,7 +248,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#1819bd",
-        "color": "#FFFFFF",
+        "color": "#fff",
       }
     }
   >
@@ -267,7 +267,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#d41e93",
-        "color": "#FFFFFF",
+        "color": "#fff",
       }
     }
   >
@@ -286,7 +286,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#3486d2",
-        "color": "#000000",
+        "color": "#000",
       }
     }
   >
@@ -305,7 +305,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#b870d8",
-        "color": "#000000",
+        "color": "#000",
       }
     }
   >
@@ -324,7 +324,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#f4a4a7",
-        "color": "#000000",
+        "color": "#000",
       }
     }
   >
@@ -343,7 +343,7 @@ Array [
     style={
       Object {
         "backgroundColor": "#072d6d",
-        "color": "#FFFFFF",
+        "color": "#fff",
       }
     }
   >

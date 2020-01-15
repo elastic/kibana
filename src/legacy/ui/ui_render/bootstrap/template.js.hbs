@@ -13,7 +13,10 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
   window.onload = function () {
     var files = [
-      '{{dllBundlePath}}/vendors.bundle.dll.js',
+      '{{dllBundlePath}}/vendors_runtime.bundle.dll.js',
+      {{#each dllJsChunks}}
+        '{{this}}',
+      {{/each}}
       '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
       '{{regularBundlePath}}/commons.bundle.js',
       '{{regularBundlePath}}/{{appId}}.bundle.js'

@@ -48,6 +48,10 @@ function ColorRanges({
 
   const validateRange = useCallback(
     ({ from, to }, index) => {
+      if (!colorsRange[index]) {
+        return [false, false];
+      }
+
       const leftBound = index === 0 ? -Infinity : colorsRange[index - 1].to || 0;
       const isFromValid = from >= leftBound;
       const isToValid = to >= from;
