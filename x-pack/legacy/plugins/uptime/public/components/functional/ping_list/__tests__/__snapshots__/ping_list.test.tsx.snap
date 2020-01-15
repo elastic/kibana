@@ -45,10 +45,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 >
                   <EuiSelect
                     aria-label="Status"
-                    compressed={false}
-                    fullWidth={false}
-                    hasNoInitialSelection={false}
-                    isLoading={false}
                     onChange={[Function]}
                     options={
                       Array [
@@ -83,10 +79,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 >
                   <EuiSelect
                     aria-label="Location"
-                    compressed={false}
-                    fullWidth={false}
-                    hasNoInitialSelection={false}
-                    isLoading={false}
                     onChange={[Function]}
                     options={
                       Array [
@@ -121,7 +113,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "align": "center",
+            "align": "left",
             "field": "observer.geo.name",
             "name": "Location",
             "render": [Function],
@@ -384,6 +376,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
         }
       }
       responsive={true}
+      tableLayout="fixed"
     />
   </EuiPanel>
 </Fragment>

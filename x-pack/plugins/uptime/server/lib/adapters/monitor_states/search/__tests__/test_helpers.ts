@@ -9,7 +9,7 @@ import {
   CursorDirection,
   SortOrder,
 } from '../../../../../../../../legacy/plugins/uptime/common/graphql/types';
-import { QueryContext } from '../../elasticsearch_monitor_states_adapter';
+import { QueryContext } from '../query_context';
 
 export const prevPagination = (key: any): CursorPagination => {
   return {
@@ -26,14 +26,5 @@ export const nextPagination = (key: any): CursorPagination => {
   };
 };
 export const simpleQueryContext = (): QueryContext => {
-  return {
-    count: _query => new Promise(r => ({})),
-    search: _query => new Promise(r => ({})),
-    dateRangeEnd: '',
-    dateRangeStart: '',
-    filterClause: undefined,
-    pagination: nextPagination('something'),
-    size: 0,
-    statusFilter: '',
-  };
+  return new QueryContext(undefined, '', '', nextPagination('something'), undefined, 0, '');
 };

@@ -6,41 +6,34 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { State } from './types';
-import { VisualizationProps, OperationMetadata } from '../types';
+import { VisualizationLayerConfigProps, OperationMetadata } from '../types';
 import { NativeRenderer } from '../native_renderer';
 
 const isMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 
-export function MetricConfigPanel(props: VisualizationProps<State>) {
-  const { state, frame } = props;
-  const [datasource] = Object.values(frame.datasourceLayers);
-  const [layerId] = Object.keys(frame.datasourceLayers);
+export function MetricConfigPanel(props: VisualizationLayerConfigProps<State>) {
+  const { state, frame, layerId } = props;
+  const datasource = frame.datasourceLayers[layerId];
 
   return (
-    <EuiPanel className="lnsConfigPanel__panel" paddingSize="s">
-      <NativeRenderer render={datasource.renderLayerPanel} nativeProps={{ layerId }} />
-
-      <EuiSpacer size="s" />
-
-      <EuiFormRow
-        className="lnsConfigPanel__axis"
-        label={i18n.translate('xpack.lens.metric.valueLabel', {
-          defaultMessage: 'Value',
-        })}
-      >
-        <NativeRenderer
-          data-test-subj={'lns_metric_valueDimensionPanel'}
-          render={datasource.renderDimensionPanel}
-          nativeProps={{
-            layerId,
-            columnId: state.accessor,
-            dragDropContext: props.dragDropContext,
-            filterOperations: isMetric,
-          }}
-        />
-      </EuiFormRow>
-    </EuiPanel>
+    <EuiFormRow
+      className="lnsConfigPanel__axis"
+      label={i18n.translate('xpack.lens.metric.valueLabel', {
+        defaultMessage: 'Value',
+      })}
+    >
+      <NativeRenderer
+        data-test-subj={'lns_metric_valueDimensionPanel'}
+        render={datasource.renderDimensionPanel}
+        nativeProps={{
+          layerId,
+          columnId: state.accessor,
+          dragDropContext: props.dragDropContext,
+          filterOperations: isMetric,
+        }}
+      />
+    </EuiFormRow>
   );
 }

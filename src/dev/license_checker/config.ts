@@ -23,6 +23,7 @@ export const LICENSE_WHITELIST = [
   'Elastic-License',
   '(BSD-2-Clause OR MIT OR Apache-2.0)',
   '(BSD-2-Clause OR MIT)',
+  '(BSD-3-Clause AND Apache-2.0)',
   '(GPL-2.0 OR MIT)',
   '(MIT AND CC-BY-3.0)',
   '(MIT AND Zlib)',
