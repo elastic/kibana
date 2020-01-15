@@ -33,7 +33,6 @@ import { InspectButtonContainer } from '../inspect';
 export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   MatrixHistogramQueryProps> = ({
   activePage,
-
   dataKey,
   defaultStackByOption,
   endDate,
