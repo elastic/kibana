@@ -69,3 +69,31 @@ or because something is happening to the request that the Agent doesn't understa
 To resolve this, you'll need to head over to the relevant {apm-agents-ref}[Agent documentation].
 Specifically, view the Agent's supported technologies page.
 You can also use the Agent's public API to manually set a name for the transaction.
+
+==== Fields are not indexed or searchable
+
+In Elasticsearch, index templates are used to define settings and mappings that determine how fields should be analyzed.
+The recommended index template file for APM Server is installed by the APM Server packages.
+This template, by default, enables and disables indexing on certain fields.
+
+As an example, some agents store cookie values in `http.request.cookies`.
+Since `http.request` has disabled dynamic indexing, and `http.request.cookies` is not declared in a custom mapping,
+the values in `http.request.cookies` are not indexed and thus not searchable.
+
+There are two things you can do to ensure indexed searchable:
+
+1. Index your additional data as {apm-overview-ref}/metadata.html[labels].
+These are dynamic by default, which means they will get indexed and become searchable and aggregatable.
+
+2. Use the experimental {apm-server-ref}/configuration-template.html[`append_fields`] feature. As an example,
+adding the following to `apm-server.yml` will enable dynamic indexing for `http.request.cookies`:
+
+[source,yml]
+----
+setup.template.enabled: true
+setup.template.overwrite: true
+setup.template.append_fields:
+  - name: http.request.cookies
+    type: object
+    dynamic: true
+-----
