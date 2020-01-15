@@ -19,8 +19,6 @@
 import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'ui/saved_objects';
 // @ts-ignore
-import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
-// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { createSavedSheetClass } from './_saved_sheet';
 
@@ -48,14 +46,6 @@ savedSheetLoader.loaderProperties = {
   noun: 'Saved Sheets',
   nouns: 'saved sheets',
 };
-
-// Register this service with the saved object registry so it can be
-// edited by the object editor.
-savedObjectManagementRegistry.register({
-  id: 'savedSheets',
-  service: savedSheetLoader,
-  title: 'sheets',
-});
 
 // This is the only thing that gets injected into controllers
 module.service('savedSheets', () => savedSheetLoader);

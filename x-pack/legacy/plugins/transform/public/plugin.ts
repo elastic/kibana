@@ -15,7 +15,7 @@ import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
 import { uiMetricService } from './app/services/ui_metric';
-import { createSavedSearchesService } from '../../../../../src/legacy/core_plugins/kibana/public/discover/saved_searches';
+import { createSavedSearchesLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/saved_searches';
 
 const REACT_ROOT_ID = 'transformReactRoot';
 const KBN_MANAGEMENT_SECTION = 'elasticsearch/transform';
@@ -76,7 +76,7 @@ export class Plugin {
       template,
       controllerAs: 'transformController',
       controller: ($scope: any, $route: any, $http: ng.IHttpService) => {
-        const savedSearches = createSavedSearchesService({
+        const savedSearches = createSavedSearchesLoader({
           savedObjectsClient: core.savedObjects.client,
           indexPatterns: plugins.data.indexPatterns,
           chrome: core.chrome,

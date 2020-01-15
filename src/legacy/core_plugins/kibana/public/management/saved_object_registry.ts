@@ -23,7 +23,7 @@ import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'ui/saved_objects';
 import { createSavedVisLoader } from '../visualize';
 import { createSavedDashboardLoader } from '../dashboard';
-import { createSavedSearchesService } from '../discover';
+import { createSavedSearchesLoader } from '../discover';
 
 /**
  * This registry is used for the editing mode of Saved Searches, Visualizations,
@@ -72,6 +72,6 @@ savedObjectManagementRegistry.register({
 
 savedObjectManagementRegistry.register({
   id: 'savedSearches',
-  service: createSavedSearchesService(services),
+  service: createSavedSearchesLoader(services),
   title: 'searches',
 });

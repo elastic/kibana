@@ -36,4 +36,4 @@ export const setup = pluginInstance.setup(npSetup.core, {
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);
 
-export { createSavedSearchesService } from './saved_searches/saved_searches';
+export { createSavedSearchesLoader } from './saved_searches/saved_searches';

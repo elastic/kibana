@@ -33,7 +33,7 @@ import { extractReferences, injectReferences } from './saved_visualization_refer
 import { IIndexPattern } from '../../../../../../plugins/data/public';
 import { VisSavedObject } from '../legacy_imports';
 
-import { createSavedSearchesService } from '../../discover';
+import { createSavedSearchesLoader } from '../../discover';
 import { VisualizeConstants } from '..';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
@@ -56,7 +56,7 @@ async function _getLinkedSavedSearch(savedVis: VisSavedObject, services: any) {
     savedVis.savedSearch.destroy();
     delete savedVis.savedSearch;
   }
-  const savedSearches = createSavedSearchesService(services);
+  const savedSearches = createSavedSearchesLoader(services);
 
   if (linkedSearch) {
     savedVis.savedSearch = await savedSearches.get(savedVis.savedSearchId!);

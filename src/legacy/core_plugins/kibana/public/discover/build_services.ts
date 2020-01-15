@@ -30,7 +30,7 @@ import {
   IndexPatternsContract,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
-import { createSavedSearchesService } from './saved_searches';
+import { createSavedSearchesLoader } from './saved_searches';
 import { DiscoverStartPlugins } from './plugin';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
@@ -68,7 +68,7 @@ export async function buildServices(
     chrome: core.chrome,
     overlays: core.overlays,
   };
-  const savedObjectService = createSavedSearchesService(services);
+  const savedObjectService = createSavedSearchesLoader(services);
   return {
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,

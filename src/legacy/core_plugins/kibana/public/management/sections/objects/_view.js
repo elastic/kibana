@@ -28,13 +28,13 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from './lib/numeric';
 import { canViewInApp } from './lib/in_app_url';
 
 import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
+import { npStart } from '../../../../../../ui/public/new_platform';
 
 const location = 'SavedObject view';
 
@@ -49,19 +49,10 @@ uiModules
   .directive('kbnManagementObjectsView', function(kbnIndex, confirmModal) {
     return {
       restrict: 'E',
-      controller: function(
-        $scope,
-        $injector,
-        $routeParams,
-        $location,
-        $window,
-        $rootScope,
-        Private,
-        uiCapabilities
-      ) {
+      controller: function($scope, $routeParams, $location, $window, $rootScope, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = serviceObj.service;
-        const savedObjectsClient = Private(SavedObjectsClientProvider);
+        const savedObjectsClient = npStart.core.savedObjects.client;
 
         /**
          * Creates a field definition and pushes it to the memo stack. This function

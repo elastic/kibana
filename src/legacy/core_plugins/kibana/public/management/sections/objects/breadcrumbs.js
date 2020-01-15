@@ -36,7 +36,7 @@ export function getIndexBreadcrumbs() {
 
 export function getViewBreadcrumbs($routeParams) {
   const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
-  const service = serviceObj.service;
+  const { service } = serviceObj;
 
   return [
     ...getIndexBreadcrumbs(),
