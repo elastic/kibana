@@ -16,7 +16,7 @@ import { LOGGING_TAG } from '../../common/constants';
 
 export function exposeClient({ config, events, log, elasticsearchPlugin }) {
   const elasticsearchConfig = hasMonitoringCluster(config)
-    ? config.get('xpack.monitoring.elasticsearch')
+    ? config.get('monitoring.elasticsearch')
     : {};
   const cluster = elasticsearchPlugin.createCluster('monitoring', {
     ...elasticsearchConfig,
@@ -30,7 +30,7 @@ export function exposeClient({ config, events, log, elasticsearchPlugin }) {
 }
 
 export function hasMonitoringCluster(config) {
-  const hosts = config.get('xpack.monitoring.elasticsearch.hosts');
+  const hosts = config.get('monitoring.elasticsearch.hosts');
   return Boolean(hosts && hosts.length);
 }
 

@@ -11,11 +11,11 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_SETTINGS_TYPE } from '../../.
  * If so, get email from kibana.yml
  */
 export async function getDefaultAdminEmail(config) {
-  if (!config.get('xpack.monitoring.cluster_alerts.email_notifications.enabled')) {
+  if (!config.get('monitoring.cluster_alerts.email_notifications.enabled')) {
     return null;
   }
 
-  const emailAddressConfigKey = `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
+  const emailAddressConfigKey = `monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
   const configuredEmailAddress = config.get(emailAddressConfigKey);
 
   return configuredEmailAddress || null;

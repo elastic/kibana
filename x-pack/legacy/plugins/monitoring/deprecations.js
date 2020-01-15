@@ -15,8 +15,44 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
  * major version!
  * @return {Array} array of rename operations and callback function for rename logging
  */
-export const deprecations = () => {
+export const deprecations = ({ rename }) => {
   return [
+    rename('xpack.monitoring.ui.enabled', 'monitoring.ui.enabled'),
+    rename('xpack.monitoring.kibana.collection.enabled', 'monitoring.kibana.collection.enabled'),
+    rename('xpack.monitoring.max_bucket_size', 'monitoring.max_bucket_size'),
+    rename('xpack.monitoring.min_interval_seconds', 'monitoring.min_interval_seconds'),
+    rename('xpack.monitoring.show_license_expiration', 'monitoring.show_license_expiration'),
+    rename(
+      'xpack.monitoring.ui.container.elasticsearch.enabled',
+      'monitoring.ui.container.elasticsearch.enabled'
+    ),
+    rename(
+      'xpack.monitoring.ui.container.logstash.enabled',
+      'monitoring.ui.container.logstash.enabled'
+    ),
+    rename(
+      'xpack.monitoring.tests.cloud_detector.enabled',
+      'monitoring.tests.cloud_detector.enabled'
+    ),
+    rename('xpack.monitoring.kibana.collection.interval', 'monitoring.kibana.collection.interval'),
+    rename('xpack.monitoring.elasticsearch.hosts', 'monitoring.elasticsearch.hosts'),
+    rename(
+      'xpack.monitoring.xpack_api_polling_frequency_millis',
+      'monitoring.xpack_api_polling_frequency_millis'
+    ),
+    rename(
+      'xpack.monitoring.cluster_alerts.email_notifications.enabled',
+      'monitoring.cluster_alerts.email_notifications.enabled'
+    ),
+    rename(
+      'xpack.monitoring.cluster_alerts.email_notifications.email_address',
+      'monitoring.cluster_alerts.email_notifications.email_address'
+    ),
+    rename('xpack.monitoring.ccs.enabled', 'monitoring.ccs.enabled'),
+    rename(
+      'xpack.monitoring.elasticsearch.logFetchCount',
+      'monitoring.elasticsearch.logFetchCount'
+    ),
     (settings, log) => {
       const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
       const emailNotificationsEnabled =
