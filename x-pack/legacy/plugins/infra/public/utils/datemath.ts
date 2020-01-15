@@ -54,20 +54,29 @@ export function extendDatemath(
     let newAmount: number;
 
     switch (unit) {
+      // For small units, always double or halve the amount
       case 'ms':
       case 's':
         newAmount = mustIncreaseAmount ? parsedAmount * 2 : Math.floor(parsedAmount / 2);
         break;
+      // For minutes, increase or decrease in doubles or halves, depending on
+      // the amount of minutes
       case 'm':
         let ratio;
+        const MINUTES_LARGE = 10;
         if (mustIncreaseAmount) {
-          ratio = parsedAmount >= 10 ? 0.5 : 1;
+          ratio = parsedAmount >= MINUTES_LARGE ? 0.5 : 1;
           newAmount = parsedAmount + parsedAmount * ratio;
         } else {
           newAmount =
-            parsedAmount >= 10 ? Math.floor(parsedAmount / 1.5) : parsedAmount - parsedAmount * 0.5;
+            parsedAmount >= MINUTES_LARGE
+              ? Math.floor(parsedAmount / 1.5)
+              : parsedAmount - parsedAmount * 0.5;
         }
         break;
+
+      // For hours, increase or decrease half an hour for 1 hour. Otherwise
+      // increase full hours
       case 'h':
         if (parsedAmount === 1) {
           newAmount = mustIncreaseAmount ? 90 : 30;
@@ -76,37 +85,18 @@ export function extendDatemath(
           newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
         }
         break;
+
+      // For the rest of units, increase or decrease one smaller unit for
+      // amounts of 1. Otherwise increase or decrease the unit
       case 'd':
-        if (parsedAmount === 1) {
-          newAmount = mustIncreaseAmount ? 25 : 23;
-          newUnit = 'h';
-        } else {
-          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
-        }
-        break;
-
       case 'w':
-        if (parsedAmount === 1) {
-          newAmount = mustIncreaseAmount ? 8 : 6;
-          newUnit = 'd';
-        } else {
-          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
-        }
-        break;
-
       case 'M':
-        if (parsedAmount === 1) {
-          newAmount = mustIncreaseAmount ? 5 : 3;
-          newUnit = 'w';
-        } else {
-          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
-        }
-        break;
-
       case 'y':
         if (parsedAmount === 1) {
-          newAmount = mustIncreaseAmount ? 13 : 11;
-          newUnit = 'M';
+          newUnit = dateMath.unitsDesc[dateMath.unitsDesc.indexOf(unit) + 1];
+          newAmount = mustIncreaseAmount
+            ? convertDate(1, unit, newUnit) + 1
+            : convertDate(1, unit, newUnit) - 1;
         } else {
           newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
         }
