@@ -13,7 +13,7 @@ describe('get_existing_prepackaged_rules', () => {
 
   test('should throw an exception if a pre-packaged rule is not valid', () => {
     expect(() => getPrepackagedRules([{ not_valid_made_up_key: true }])).toThrow(
-      'name: "(rule_name unknown)", rule_id: "(rule_id unknown)" within the folder rules/prepackaged_rules is not a valid detection engine rule. Expect the system to not work with pre-packaged rules until this rule is fixed or the file is removed. Error is: child "description" fails because ["description" is required]'
+      'name: "(rule name unknown)", rule_id: "(rule rule_id unknown)" within the folder rules/prepackaged_rules is not a valid detection engine rule. Expect the system to not work with pre-packaged rules until this rule is fixed or the file is removed. Error is: child "description" fails because ["description" is required], Full rule contents are:\n{\n  "not_valid_made_up_key": true\n}'
     );
   });
 
