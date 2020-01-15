@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kfetch } from 'ui/kfetch';
-import { SearchError, getSearchErrorType } from '../../../../../../src/legacy/ui/public/courier';
+import { HttpSetup } from 'src/core/public';
+import {
+  SearchError,
+  getSearchErrorType,
+} from '../../../../../../src/legacy/core_plugins/data/public/search/search_strategy';
 
-function serializeFetchParams(searchRequests) {
+function serializeFetchParams(searchRequests: any) {
   return JSON.stringify(
-    searchRequests.map(searchRequestWithFetchParams => {
+    searchRequests.map((searchRequestWithFetchParams: any) => {
       const indexPattern =
         searchRequestWithFetchParams.index.title || searchRequestWithFetchParams.index;
       const {
@@ -17,7 +20,7 @@ function serializeFetchParams(searchRequests) {
       } = searchRequestWithFetchParams;
 
       const query = {
-        size: size,
+        size,
         aggregations: aggs,
         query: _query,
       };
@@ -30,8 +33,8 @@ function serializeFetchParams(searchRequests) {
 // Rollup search always returns 0 hits, but visualizations expect search responses
 // to return hits > 0, otherwise they do not render. We fake the number of hits here
 // by counting the number of aggregation buckets/values returned by rollup search.
-function shimHitsInFetchResponse(response) {
-  return response.map(result => {
+function shimHitsInFetchResponse(response: any) {
+  return response.map((result: any) => {
     const buckets = result.aggregations
       ? Object.keys(result.aggregations).reduce((allBuckets, agg) => {
           return allBuckets.concat(
@@ -51,17 +54,16 @@ function shimHitsInFetchResponse(response) {
   });
 }
 
-export const rollupSearchStrategy = {
+export const getRollupSearchStrategy = (fetch: HttpSetup['fetch']) => ({
   id: 'rollup',
 
-  search: ({ searchRequests, Promise }) => {
+  search: ({ searchRequests }: any) => {
     // Serialize the fetch params into a format suitable for the body of an ES query.
     const serializedFetchParams = serializeFetchParams(searchRequests);
 
     const controller = new AbortController();
-    const promise = kfetch({
+    const promise = fetch('../api/rollup/search', {
       signal: controller.signal,
-      pathname: '../api/rollup/search',
       method: 'POST',
       body: serializedFetchParams,
     });
@@ -79,7 +81,7 @@ export const rollupSearchStrategy = {
           title,
           message: `Rollup search error: ${message}`,
           path: url,
-          type: getSearchErrorType({ message }),
+          type: getSearchErrorType({ message }) || '',
         });
 
         return Promise.reject(searchError);
@@ -88,11 +90,11 @@ export const rollupSearchStrategy = {
     };
   },
 
-  isViable: indexPattern => {
+  isViable: (indexPattern: any) => {
     if (!indexPattern) {
       return false;
     }
 
     return indexPattern.type === 'rollup';
   },
-};
+});
