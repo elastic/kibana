@@ -16,6 +16,7 @@ export {
   OnFormUpdateArg,
   SerializerFunc,
   UseField,
+  UseArray,
   useForm,
   useFormContext,
   UseMultiFields,

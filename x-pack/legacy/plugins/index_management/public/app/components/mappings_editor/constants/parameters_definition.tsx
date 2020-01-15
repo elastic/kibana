@@ -896,4 +896,10 @@ export const PARAMETERS_DEFINITION = {
     },
     schema: Joi.string(),
   },
+  relations: {
+    fieldConfig: {
+      defaultValue: [] as any, // Needed for FieldParams typing
+    },
+    schema: Joi.object(),
+  },
 };

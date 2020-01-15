@@ -1,0 +1,11 @@
+
+.mappingsEditor__joinType__relationItem {
+  position: relative;
+  margin-bottom: $euiSizeS;
+
+  &__removeButton {
+    position: absolute;
+    right: 0;
+    top: $euiSizeS;
+  }
+}

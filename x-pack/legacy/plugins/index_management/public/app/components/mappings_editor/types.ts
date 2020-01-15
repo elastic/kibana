@@ -119,7 +119,8 @@ export type ParameterName =
   | 'points_only'
   | 'path'
   | 'dims'
-  | 'depth_limit';
+  | 'depth_limit'
+  | 'relations';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
