@@ -68,7 +68,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         sandbox.spy(shouldReadFieldFromDocValuesNS, 'shouldReadFieldFromDocValues');
         const fields = readFieldCapsResponse(esResponse);
         const conflictCount = fields.filter(f => f.type === 'conflict').length;
-        // +2 is for the object field which is filtered out of the final return value from readFieldCapsResponse
+        // +1 is for the object field which is filtered out of the final return value from readFieldCapsResponse
         sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 1);
       });
 
