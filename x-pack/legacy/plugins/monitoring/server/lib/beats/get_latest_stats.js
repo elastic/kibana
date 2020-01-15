@@ -71,7 +71,7 @@ export function getLatestStats(req, beatsIndexPattern, clusterUuid) {
       uuids: {
         terms: {
           field: 'beats_stats.beat.uuid',
-          size: config.get('xpack.monitoring.max_bucket_size'),
+          size: config.get('monitoring.ui.max_bucket_size'),
         },
       },
     },

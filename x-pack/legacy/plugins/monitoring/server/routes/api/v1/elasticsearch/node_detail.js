@@ -61,7 +61,7 @@ export function esNodeRoute(server) {
         metricSet = metricSetOverview;
         // set the cgroup option if needed
         const showCgroupMetricsElasticsearch = config.get(
-          'xpack.monitoring.ui.container.elasticsearch.enabled'
+          'monitoring.ui.container.elasticsearch.enabled'
         );
         const metricCpu = metricSet.find(m => m.name === 'node_cpu_metric');
         if (showCgroupMetricsElasticsearch) {
