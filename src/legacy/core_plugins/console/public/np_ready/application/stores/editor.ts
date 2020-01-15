@@ -21,22 +21,26 @@ import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
 import { DevToolsSettings } from '../../services';
+import { TextObject } from '../../../../common/text_object';
 
 export interface Store {
   ready: boolean;
   settings: DevToolsSettings;
+  currentTextObject: TextObject | null;
 }
 
 export const initialValue: Store = produce<Store>(
   {
     ready: false,
     settings: null as any,
+    currentTextObject: null,
   },
   identity
 );
 
 export type Action =
   | { type: 'setInputEditor'; payload: any }
+  | { type: 'setCurrentTextObject'; payload: any }
   | { type: 'updateSettings'; payload: DevToolsSettings };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
@@ -50,6 +54,11 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
 
     if (action.type === 'updateSettings') {
       draft.settings = action.payload;
+      return;
+    }
+
+    if (action.type === 'setCurrentTextObject') {
+      draft.currentTextObject = action.payload;
       return;
     }
 
