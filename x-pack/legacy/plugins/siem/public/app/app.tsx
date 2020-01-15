@@ -103,7 +103,7 @@ const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ core, plugins }) =>
       ...plugins,
     }}
   >
-    <StartApp {...compose()} />
+    <StartApp {...compose(core)} />
   </KibanaContextProvider>
 );
 
