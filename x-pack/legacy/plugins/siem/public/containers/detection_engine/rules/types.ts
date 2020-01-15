@@ -188,3 +188,5 @@ export interface RuleStatus {
   last_failure_message: string | null;
   last_success_message: string | null;
 }
+
+export type RuleStatusResponse = Record<string, RuleStatus[]>;

@@ -20,7 +20,7 @@ import {
   ImportRulesProps,
   ExportRulesProps,
   RuleError,
-  RuleStatus,
+  RuleStatusResponse,
   ImportRulesResponse,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
@@ -226,21 +226,20 @@ export const importRules = async ({
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_import?overwrite=${overwrite}`,
+  const response = await npStart.core.http.fetch<ImportRulesResponse>(
+    `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',
       credentials: 'same-origin',
-      headers: {
-        'kbn-xsrf': 'true',
-      },
+      query: { overwrite },
       body: formData,
+      asResponse: true,
       signal,
     }
   );
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -264,24 +263,20 @@ export const exportRules = async ({
       ? JSON.stringify({ objects: ruleIds.map(rule => ({ rule_id: rule })) })
       : undefined;
 
-  const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_export?exclude_export_details=${excludeExportDetails}&file_name=${encodeURIComponent(
-      filename
-    )}`,
-    {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
-      body,
-      signal,
-    }
-  );
+  const response = await npStart.core.http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    body,
+    query: {
+      exclude_export_details: excludeExportDetails,
+      file_name: filename,
+    },
+    signal,
+    asResponse: true,
+  });
 
-  await throwIfNotOk(response);
-  return response.blob();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**
@@ -297,22 +292,18 @@ export const getRuleStatusById = async ({
 }: {
   id: string;
   signal: AbortSignal;
-}): Promise<Record<string, RuleStatus[]>> => {
-  const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_STATUS}?ids=${encodeURIComponent(
-      JSON.stringify([id])
-    )}`,
+}): Promise<RuleStatusResponse> => {
+  const response = await npStart.core.http.fetch<RuleStatusResponse>(
+    DETECTION_ENGINE_RULES_STATUS,
     {
       method: 'GET',
       credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': 'true',
-      },
+      query: { ids: JSON.stringify([id]) },
       signal,
+      asResponse: true,
     }
   );
 
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
