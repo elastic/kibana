@@ -40,14 +40,6 @@ export class CategorizationExamplesLoader {
         validationChecks: [],
       };
     }
-    if (analyzer === null) {
-      return {
-        examples: [],
-        sampleSize: 0,
-        overallValidStatus: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
-        validationChecks: [],
-      }; // 7.6 remove this, it should not be null
-    }
 
     const resp = await ml.jobs.categorizationFieldExamples(
       this._indexPatternTitle,

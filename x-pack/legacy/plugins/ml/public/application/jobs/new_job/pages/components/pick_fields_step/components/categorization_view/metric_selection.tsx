@@ -36,7 +36,6 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
     JSON.stringify(jobCreator.categorizationAnalyzer)
   );
   const [fieldExamples, setFieldExamples] = useState<CategoryFieldExample[] | null>(null);
-  // const [examplesValid, setExamplesValid] = useState(0);
   const [overallValidStatus, setOverallValidStatus] = useState(
     CATEGORY_EXAMPLES_VALID_STATUS.INVALID
   );
