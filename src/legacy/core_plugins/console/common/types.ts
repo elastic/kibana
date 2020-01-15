@@ -17,38 +17,33 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { TextObject } from './text_object';
 
-export interface TopNavMenuItem {
+export interface IdObject {
   id: string;
-  label: string;
-  description: string;
-  onClick: () => void;
-  testId: string;
 }
 
-interface Props {
-  disabled?: boolean;
-  items: TopNavMenuItem[];
+export interface ObjectStorage<O extends IdObject> {
+  /**
+   * Creates a new object in the underlying persistance layer.
+   *
+   * @remarks Does not accept an ID, a new ID is generated and returned with the newly created object.
+   */
+  create(obj: Omit<O, 'id'>): Promise<O>;
+
+  /**
+   * This method should update specific object in the persistance layer.
+   */
+  update(obj: O): Promise<void>;
+
+  /**
+   * A function that will return all of the objects in the persistance layer.
+   *
+   * @remarks Unless an error is thrown this function should always return an array (empty if there are not objects present).
+   */
+  findAll(): Promise<O[]>;
 }
 
-export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
-  return (
-    <EuiTabs size="s">
-      {items.map((item, idx) => {
-        return (
-          <EuiTab
-            key={idx}
-            disabled={disabled}
-            onClick={item.onClick}
-            title={item.label}
-            data-test-subj={item.testId}
-          >
-            {item.label}
-          </EuiTab>
-        );
-      })}
-    </EuiTabs>
-  );
-};
+export interface ObjectStorageClient {
+  text: ObjectStorage<TextObject>;
+}
