@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from '../../../../types';
+import { GenerateCsvParams, SavedSearchGeneratorResult } from '../../types';
 import { createFlattenHit } from './flatten_hit';
 import { createFormatCsvValues } from './format_csv_values';
 import { createEscapeValue } from './escape_value';
@@ -11,7 +13,7 @@ import { createHitIterator } from './hit_iterator';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 
-export function createGenerateCsv(logger) {
+export function createGenerateCsv(logger: Logger) {
   const hitIterator = createHitIterator(logger);
 
   return async function generateCsv({
@@ -23,12 +25,13 @@ export function createGenerateCsv(logger) {
     callEndpoint,
     cancellationToken,
     settings,
-  }) {
+  }: GenerateCsvParams): Promise<SavedSearchGeneratorResult> {
     const escapeValue = createEscapeValue(settings.quoteValues);
     const builder = new MaxSizeStringBuilder(settings.maxSizeBytes);
     const header = `${fields.map(escapeValue).join(settings.separator)}\n`;
     if (!builder.tryAppend(header)) {
       return {
+        size: 0,
         content: '',
         maxSizeReached: true,
       };
@@ -48,6 +51,10 @@ export function createGenerateCsv(logger) {
     try {
       while (true) {
         const { done, value: hit } = await iterator.next();
+
+        if (!hit) {
+          break;
+        }
 
         if (done) {
           break;

@@ -5,12 +5,14 @@
  */
 
 import expect from '@kbn/expect';
-import { createFlattenHit } from '../flatten_hit';
+import { createFlattenHit } from './flatten_hit';
+
+type Hit = Record<string, any>;
 
 describe('flattenHit', function() {
-  let flattenHit;
-  let hit;
-  let metaFields;
+  let flattenHit: (hit: Hit) => Record<string, string>;
+  let hit: Hit;
+  let metaFields: string[];
 
   beforeEach(function() {
     const fields = [

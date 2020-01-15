@@ -18,13 +18,8 @@ import {
   CSV_FROM_SAVEDOBJECT_JOB_TYPE,
   PLUGIN_ID,
 } from '../../../common/constants';
-import {
-  CsvResultFromSearch,
-  JobParamsPanelCsv,
-  SearchPanel,
-  JobDocPayloadPanelCsv,
-  FakeRequest,
-} from '../types';
+import { CsvResultFromSearch } from '../../csv/types';
+import { JobParamsPanelCsv, SearchPanel, JobDocPayloadPanelCsv, FakeRequest } from '../types';
 import { createGenerateCsv } from './lib';
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<

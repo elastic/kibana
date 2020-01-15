@@ -9,9 +9,7 @@ import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../.
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { JobDocPayloadDiscoverCsv } from '../types';
-// @ts-ignore untyped module TODO
 import { createGenerateCsv } from './lib/generate_csv';
-// @ts-ignore untyped module TODO
 import { fieldFormatMapFactory } from './lib/field_format_map';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<

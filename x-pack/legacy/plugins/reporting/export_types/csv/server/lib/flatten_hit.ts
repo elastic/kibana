@@ -6,9 +6,17 @@
 
 import _ from 'lodash';
 
+type Hit = Record<string, any>;
+type FlattenHitFn = (hit: Hit) => Record<string, string>;
+type FlatHits = Record<string, string[]>;
+
 // TODO this logic should be re-used with Discover
-export function createFlattenHit(fields, metaFields, conflictedTypesFields) {
-  const flattenSource = (flat, obj, keyPrefix) => {
+export function createFlattenHit(
+  fields: string[],
+  metaFields: string[],
+  conflictedTypesFields: string[]
+): FlattenHitFn {
+  const flattenSource = (flat: FlatHits, obj: object, keyPrefix = '') => {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
     _.forOwn(obj, (val, key) => {
       key = keyPrefix + key;
@@ -31,17 +39,19 @@ export function createFlattenHit(fields, metaFields, conflictedTypesFields) {
     });
   };
 
-  const flattenMetaFields = (flat, hit) => {
+  const flattenMetaFields = (flat: Hit, hit: Hit) => {
     _.each(metaFields, meta => {
       if (meta === '_source') return;
       flat[meta] = hit[meta];
     });
   };
 
-  const flattenFields = (flat, hitFields) => {
+  const flattenFields = (flat: FlatHits, hitFields: string[]) => {
     _.forOwn(hitFields, (val, key) => {
-      if (key[0] === '_' && !_.contains(metaFields, key)) return;
-      flat[key] = _.isArray(val) && val.length === 1 ? val[0] : val;
+      if (key) {
+        if (key[0] === '_' && !_.contains(metaFields, key)) return;
+        flat[key] = _.isArray(val) && val.length === 1 ? val[0] : val;
+      }
     });
   };
 

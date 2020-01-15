@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { createEscapeValue } from '../escape_value';
+import { createEscapeValue } from './escape_value';
 
 describe('escapeValue', function() {
   describe('quoteValues is true', function() {
-    let escapeValue;
+    let escapeValue: (val: string) => string;
     beforeEach(function() {
       escapeValue = createEscapeValue(true);
     });
@@ -44,7 +44,7 @@ describe('escapeValue', function() {
   });
 
   describe('quoteValues is false', function() {
-    let escapeValue;
+    let escapeValue: (val: string) => string;
     beforeEach(function() {
       escapeValue = createEscapeValue(false);
     });

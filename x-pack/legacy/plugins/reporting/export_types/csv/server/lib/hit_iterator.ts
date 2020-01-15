@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SearchParams, SearchResponse } from 'elasticsearch';
 
+import { SearchParams, SearchResponse } from 'elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { CancellationToken, ScrollConfig, Logger } from '../../../../types';
 
