@@ -50,13 +50,13 @@ async function post(log, body) {
     await client.index({ index, body });
     log.verbose(`
 Sent:
-ES HOST: ${redacted}
+ES HOST (redacted): ${redacted}
 Index: ${index}
 ${pretty(body)}
 `);
   } catch (e) {
     const err = `
-ES HOST: \n\t${color(redacted)}
+ES HOST (redacted): \n\t${color(redacted)}
 INDEX: \n\t${color(index)}
 Partial orig err stack: \n\t${partial(e.stack)}
 BODY:\n${pretty(body)}
