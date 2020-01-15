@@ -54,7 +54,6 @@ export {
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 export {
   addSearchStrategy, // used externally by Rollups
-  getSearchErrorType, // used externally by Rollups
   hasSearchStategyForIndexPattern, // used externally by Discover
   isDefaultTypeIndexPattern, // used externally by Discover
   SearchError, // used externally by Visualizations & Rollups

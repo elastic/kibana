@@ -8,7 +8,7 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { aggTypeFilters } from 'ui/agg_types/filter';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_providers';
-import { addSearchStrategy } from 'ui/courier';
+import { addSearchStrategy } from '../../../../../src/legacy/core_plugins/data/public/search/search_strategy';
 import { RollupPlugin } from './plugin';
 import { setup as management } from '../../../../../src/legacy/core_plugins/management/public/legacy';
 import { addBadgeExtension, addToggleExtension } from '../../index_management/public';
