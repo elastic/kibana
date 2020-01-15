@@ -29,6 +29,15 @@ export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 
+/** This Kibana Advanced Setting enables the `Security news` feed widget */
+export const ENABLE_NEWS_FEED_SETTING = 'siem:enableNewsFeed';
+
+/** This Kibana Advanced Setting specifies the URL of the News feed widget */
+export const NEWS_FEED_URL_SETTING = 'siem:newsFeedUrl';
+
+/** The default value for News feed widget */
+export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/kibana'; // TODO: replace this with the real feed URL
+
 /**
  * Id for the signals alerting type
  */

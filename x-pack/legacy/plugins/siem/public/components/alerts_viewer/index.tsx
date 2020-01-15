@@ -14,9 +14,13 @@ import { MatrixHistogramOption } from '../matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
 import { MatrixHistogramGqlQuery } from '../../containers/matrix_histogram/index.gql_query';
 const ID = 'alertsOverTimeQuery';
-const alertsStackByOptions: MatrixHistogramOption[] = [
+export const alertsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.ALERTS_STACK_BY_MODULE,
+    text: i18n.CATEGORY,
+    value: 'event.category',
+  },
+  {
+    text: i18n.MODULE,
     value: 'event.module',
   },
 ];
@@ -51,7 +55,7 @@ export const AlertsView = ({
       <MatrixHistogramContainer
         dataKey={dataKey}
         deleteQuery={deleteQuery}
-        defaultStackByOption={alertsStackByOptions[0]}
+        defaultStackByOption={alertsStackByOptions[1]}
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_ALERTS_DATA}
         filterQuery={filterQuery}
