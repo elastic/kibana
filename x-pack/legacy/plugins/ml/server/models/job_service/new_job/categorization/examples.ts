@@ -5,126 +5,20 @@
  */
 
 import { chunk } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import {
-  CATEGORY_EXAMPLES_SAMPLE_SIZE,
-  CATEGORY_EXAMPLES_VALID_STATUS,
-  CATEGORY_EXAMPLES_ERROR_LIMIT,
-  CATEGORY_EXAMPLES_WARNING_LIMIT,
-} from '../../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/new_job';
 import {
   Token,
   CategorizationAnalyzer,
   CategoryFieldExample,
-  FieldExampleCheck,
 } from '../../../../../common/types/categories';
 import { callWithRequestType } from '../../../../../common/types/kibana';
-import { getMedianStringLength } from '../../../../../common/util/string_utils';
+import { ValidationResults } from './validation_results';
 
 const VALID_TOKEN_COUNT = 3;
 const CHUNK_SIZE = 100;
-const MEDIAN_LINE_LENGTH_LIMIT = 400;
-const NULL_COUNT_PERCENT_LIMIT = 0.75;
 
 export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
-  const validationChecks: FieldExampleCheck[] = [];
-
-  function createTokenCountResult(percentValid: number, sampleSize: number) {
-    let valid = CATEGORY_EXAMPLES_VALID_STATUS.VALID;
-    if (percentValid < CATEGORY_EXAMPLES_ERROR_LIMIT) {
-      valid = CATEGORY_EXAMPLES_VALID_STATUS.INVALID;
-    } else if (percentValid < CATEGORY_EXAMPLES_WARNING_LIMIT) {
-      valid = CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID;
-    }
-
-    validationChecks.push({
-      valid,
-      message: i18n.translate(
-        'xpack.ml.models.jobService.categorization.messages.tokenLengthValidation',
-        {
-          defaultMessage:
-            '{number} field {number, plural, zero {value} one {value} other {values}} analyzed, {percentage}% contain valid tokens.',
-          values: {
-            number: sampleSize,
-            percentage: Math.floor(percentValid * 100),
-          },
-        }
-      ),
-    });
-  }
-
-  function createMedianMessageLengthResult(examples: string[]) {
-    const median = getMedianStringLength(examples);
-
-    if (median > MEDIAN_LINE_LENGTH_LIMIT) {
-      validationChecks.push({
-        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
-        message: i18n.translate(
-          'xpack.ml.models.jobService.categorization.messages.medianLineLength',
-          {
-            defaultMessage:
-              'The median length for the values analysed is over {medianLimit} characters.',
-            values: { medianLimit: MEDIAN_LINE_LENGTH_LIMIT },
-          }
-        ),
-      });
-    }
-  }
-
-  function createNullValueResult(examples: Array<string | null | undefined>) {
-    const nullCount = examples.filter(e => e === null).length;
-
-    if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
-      validationChecks.push({
-        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
-        message: i18n.translate(
-          'xpack.ml.models.jobService.categorization.messages.medianLineLength',
-          {
-            defaultMessage: 'More than {percent}% of values are null',
-            values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
-          }
-        ),
-      });
-    }
-  }
-
-  function createTooManyTokensResult(error: any, sampleSize: number) {
-    // expecting error reason:
-    // The number of tokens produced by calling _analyze has exceeded the allowed maximum of [10000]. This limit can be set by changing the [index.analyze.max_token_count] index level setting.
-
-    const reason: string = error?.body?.error?.reason;
-    if (reason) {
-      const rxp = /exceeded the allowed maximum of \[(\d+?)\]/;
-      const match = rxp.exec(reason);
-      if (match?.length === 2) {
-        const tokenLimit = match[1];
-        validationChecks.push({
-          valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
-          message: i18n.translate(
-            'xpack.ml.models.jobService.categorization.messages.tooManyTokens',
-            {
-              defaultMessage:
-                'In a sample of {sampleSize}, more than {tokenLimit} tokens were found.',
-              values: { sampleSize, tokenLimit },
-            }
-          ),
-        });
-        return;
-      }
-      return;
-    }
-    createFailureToTokenize(reason);
-  }
-
-  function createFailureToTokenize(reason: string | undefined) {
-    validationChecks.push({
-      valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
-      message: i18n.translate('xpack.ml.models.jobService.categorization.messages.tooManyTokens', {
-        defaultMessage: 'It was not possible to tokenize a sample of field values. {reason}',
-        values: { reason: reason || '' },
-      }),
-    });
-  }
+  const validationResults = new ValidationResults();
 
   async function categorizationExamples(
     indexPatternTitle: string,
@@ -174,13 +68,13 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       (doc: any) => doc._source[categorizationFieldName]
     );
 
-    createNullValueResult(tempExamples);
+    validationResults.createNullValueResult(tempExamples);
 
     const allExamples = tempExamples.filter(
       (example: string | null | undefined) => example !== undefined && example !== null
     );
 
-    createMedianMessageLengthResult(allExamples);
+    validationResults.createMedianMessageLengthResult(allExamples);
 
     try {
       const examplesWithTokens = await getTokens(CHUNK_SIZE, allExamples, analyzer);
@@ -196,7 +90,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
         const examplesWithTokens = await getTokens(halfChunkSize, halfExamples, analyzer);
         return { examples: examplesWithTokens };
       } catch (error) {
-        createTooManyTokensResult(error, halfChunkSize);
+        validationResults.createTooManyTokensResult(error, halfChunkSize);
         return { examples: halfExamples.map((e, i) => ({ text: e, tokens: [] })) };
       }
     }
@@ -296,20 +190,11 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     const percentValid =
       sortedExamples.length === 0 ? 0 : validExamples.length / sortedExamples.length;
 
-    createTokenCountResult(percentValid, sampleSize);
-
-    let overallValidStatus = CATEGORY_EXAMPLES_VALID_STATUS.VALID;
-    if (validationChecks.some(c => c.valid === CATEGORY_EXAMPLES_VALID_STATUS.INVALID)) {
-      overallValidStatus = CATEGORY_EXAMPLES_VALID_STATUS.INVALID;
-    } else if (
-      validationChecks.some(c => c.valid === CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID)
-    ) {
-      overallValidStatus = CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID;
-    }
+    validationResults.createTokenCountResult(percentValid, sampleSize);
 
     return {
-      overallValidStatus,
-      validationChecks,
+      overallValidStatus: validationResults.overallResult,
+      validationChecks: validationResults.results,
       sampleSize,
       percentValid: sortedExamples.length === 0 ? 0 : validExamples.length / sortedExamples.length,
       examples,
