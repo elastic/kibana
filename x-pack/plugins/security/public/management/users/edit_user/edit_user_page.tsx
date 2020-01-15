@@ -32,6 +32,7 @@ import { NotificationsStart } from 'src/core/public';
 import { User, EditUser, Role } from '../../../../common/model';
 import { AuthenticationServiceSetup } from '../../../authentication';
 import { USERS_PATH } from '../../management_urls';
+import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
 import { UserValidator, UserValidationResult } from './validate_user';
 import { UserAPIClient } from '..';
@@ -39,6 +40,7 @@ import { UserAPIClient } from '..';
 interface Props {
   username?: string;
   apiClient: PublicMethodsOf<UserAPIClient>;
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   authc: AuthenticationServiceSetup;
   notifications: NotificationsStart;
 }
@@ -97,7 +99,7 @@ export class EditUserPage extends Component<Props, State> {
   }
 
   private async setCurrentUser() {
-    const { username, apiClient, notifications, authc } = this.props;
+    const { username, apiClient, rolesAPIClient, notifications, authc } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
       try {
@@ -120,7 +122,7 @@ export class EditUserPage extends Component<Props, State> {
 
     let roles: Role[] = [];
     try {
-      roles = await apiClient.getRoles();
+      roles = await rolesAPIClient.getRoles();
     } catch (err) {
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.security.management.users.editUser.errorLoadingRolesTitle', {

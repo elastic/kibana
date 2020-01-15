@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RoleMappingsManagementApp } from './role_mappings_management_app';
+export { roleMappingsManagementApp } from './role_mappings_management_app';

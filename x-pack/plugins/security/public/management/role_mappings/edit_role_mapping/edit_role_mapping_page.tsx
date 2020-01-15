@@ -78,6 +78,12 @@ export class EditRoleMappingPage extends Component<Props, State> {
     this.loadAppData();
   }
 
+  public async componentDidUpdate(prevProps: Props) {
+    if (prevProps.name !== this.props.name) {
+      await this.loadAppData();
+    }
+  }
+
   public render() {
     const { loadState } = this.state;
 

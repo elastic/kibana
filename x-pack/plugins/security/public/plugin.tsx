@@ -87,8 +87,7 @@ export class SecurityPlugin
       });
     }
 
-    // Home is an optional plugin, and if it's disabled we shouldn't try to fill feature catalog.
-    if (home) {
+    if (management && home) {
       home.featureCatalogue.register({
         id: 'security',
         title: i18n.translate('xpack.security.registerFeature.securitySettingsTitle', {
@@ -99,7 +98,7 @@ export class SecurityPlugin
             'Protect your data and easily manage who has access to what with users and roles.',
         }),
         icon: 'securityApp',
-        path: '/app/kibana#/management/security',
+        path: '/app/kibana#/management/security/users',
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
       });

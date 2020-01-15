@@ -5,4 +5,4 @@
  */
 
 export { UserAPIClient } from './user_api_client';
-export { UsersManagementApp } from './users_management_app';
+export { usersManagementApp } from './users_management_app';

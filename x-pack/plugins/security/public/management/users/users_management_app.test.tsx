@@ -12,7 +12,7 @@ jest.mock('./edit_user', () => ({
   EditUserPage: (props: any) => `User Edit Page: ${JSON.stringify(props)}`,
 }));
 
-import { UsersManagementApp } from './users_management_app';
+import { usersManagementApp } from './users_management_app';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { securityMock } from '../../mocks';
@@ -21,18 +21,20 @@ async function mountApp(basePath: string) {
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
 
-  const unmount = await UsersManagementApp.create({
-    authc: securityMock.createSetup().authc,
-    getStartServices: coreMock.createSetup().getStartServices as any,
-  }).mount({ basePath, element: container, setBreadcrumbs });
+  const unmount = await usersManagementApp
+    .create({
+      authc: securityMock.createSetup().authc,
+      getStartServices: coreMock.createSetup().getStartServices as any,
+    })
+    .mount({ basePath, element: container, setBreadcrumbs });
 
   return { unmount, container, setBreadcrumbs };
 }
 
-describe('UsersManagementApp', () => {
+describe('usersManagementApp', () => {
   it('create() returns proper management app descriptor', () => {
     expect(
-      UsersManagementApp.create({
+      usersManagementApp.create({
         authc: securityMock.createSetup().authc,
         getStartServices: coreMock.createSetup().getStartServices as any,
       })
@@ -78,7 +80,7 @@ describe('UsersManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"apiClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}}}
+        User Edit Page: {"authc":{},"apiClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}}}
       </div>
     `);
 
@@ -101,12 +103,29 @@ describe('UsersManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"apiClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"someUserName"}
+        User Edit Page: {"authc":{},"apiClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"someUserName"}
       </div>
     `);
 
     unmount();
 
     expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
+  it('mount() properly encodes user name in `edit user` page link in breadcrumbs', async () => {
+    const basePath = '/some-base-path/users';
+    const username = 'some 安全性 user';
+    window.location.hash = `${basePath}/edit/${username}`;
+
+    const { setBreadcrumbs } = await mountApp(basePath);
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: `#${basePath}`, text: 'Users' },
+      {
+        href: '#/some-base-path/users/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20user',
+        text: username,
+      },
+    ]);
   });
 });

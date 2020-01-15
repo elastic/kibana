@@ -12,7 +12,7 @@ jest.mock('./edit_role_mapping', () => ({
   EditRoleMappingPage: (props: any) => `Role Mapping Edit Page: ${JSON.stringify(props)}`,
 }));
 
-import { RoleMappingsManagementApp } from './role_mappings_management_app';
+import { roleMappingsManagementApp } from './role_mappings_management_app';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
@@ -20,17 +20,17 @@ async function mountApp(basePath: string) {
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
 
-  const unmount = await RoleMappingsManagementApp.create({
-    getStartServices: coreMock.createSetup().getStartServices as any,
-  }).mount({ basePath, element: container, setBreadcrumbs });
+  const unmount = await roleMappingsManagementApp
+    .create({ getStartServices: coreMock.createSetup().getStartServices as any })
+    .mount({ basePath, element: container, setBreadcrumbs });
 
   return { unmount, container, setBreadcrumbs };
 }
 
-describe('RoleMappingsManagementApp', () => {
+describe('roleMappingsManagementApp', () => {
   it('create() returns proper management app descriptor', () => {
     expect(
-      RoleMappingsManagementApp.create({
+      roleMappingsManagementApp.create({
         getStartServices: coreMock.createSetup().getStartServices as any,
       })
     ).toMatchInlineSnapshot(`
@@ -105,5 +105,23 @@ describe('RoleMappingsManagementApp', () => {
     unmount();
 
     expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
+  it('mount() properly encodes role mapping name in `edit role mapping` page link in breadcrumbs', async () => {
+    const basePath = '/some-base-path/role_mappings';
+    const roleMappingName = 'some 安全性 role mapping';
+    window.location.hash = `${basePath}/edit/${roleMappingName}`;
+
+    const { setBreadcrumbs } = await mountApp(basePath);
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: `#${basePath}`, text: 'Role Mappings' },
+      {
+        href:
+          '#/some-base-path/role_mappings/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20role%20mapping',
+        text: roleMappingName,
+      },
+    ]);
   });
 });

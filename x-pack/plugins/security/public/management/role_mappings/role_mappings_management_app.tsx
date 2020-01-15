@@ -21,7 +21,7 @@ interface CreateParams {
   getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
 }
 
-export const RoleMappingsManagementApp = Object.freeze({
+export const roleMappingsManagementApp = Object.freeze({
   id: 'role_mappings',
   create({ getStartServices }: CreateParams) {
     return {
@@ -60,7 +60,7 @@ export const RoleMappingsManagementApp = Object.freeze({
           setBreadcrumbs([
             ...roleMappingsBreadcrumbs,
             name
-              ? { text: name, href: `#${basePath}/edit/${name}` }
+              ? { text: name, href: `#${basePath}/edit/${encodeURIComponent(name)}` }
               : {
                   text: i18n.translate('xpack.security.roleMappings.createBreadcrumb', {
                     defaultMessage: 'Create',

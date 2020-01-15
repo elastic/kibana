@@ -12,6 +12,7 @@ import { CoreSetup } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { AuthenticationServiceSetup } from '../../authentication';
 import { PluginStartDependencies } from '../../plugin';
+import { RolesAPIClient } from '../roles';
 import { UserAPIClient } from './user_api_client';
 import { UsersGridPage } from './users_grid';
 import { EditUserPage } from './edit_user';
@@ -21,7 +22,7 @@ interface CreateParams {
   getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
 }
 
-export const UsersManagementApp = Object.freeze({
+export const usersManagementApp = Object.freeze({
   id: 'users',
   create({ authc, getStartServices }: CreateParams) {
     return {
@@ -49,7 +50,7 @@ export const UsersManagementApp = Object.freeze({
           setBreadcrumbs([
             ...usersBreadcrumbs,
             username
-              ? { text: username, href: `#${basePath}/edit/${username}` }
+              ? { text: username, href: `#${basePath}/edit/${encodeURIComponent(username)}` }
               : {
                   text: i18n.translate('xpack.security.users.createBreadcrumb', {
                     defaultMessage: 'Create',
@@ -61,6 +62,7 @@ export const UsersManagementApp = Object.freeze({
             <EditUserPage
               authc={authc}
               apiClient={userAPIClient}
+              rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
               username={username}
             />

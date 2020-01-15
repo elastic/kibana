@@ -14,7 +14,7 @@ jest.mock('./edit_role', () => ({
   EditRolePage: (props: any) => `Role Edit Page: ${JSON.stringify(props)}`,
 }));
 
-import { RolesManagementApp } from './roles_management_app';
+import { rolesManagementApp } from './roles_management_app';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
@@ -23,21 +23,23 @@ async function mountApp(basePath: string) {
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
 
-  const unmount = await RolesManagementApp.create({
-    license: licenseMock.create(),
-    fatalErrors,
-    getStartServices: jest.fn().mockResolvedValue([coreMock.createStart(), { data: {} }]),
-  }).mount({ basePath, element: container, setBreadcrumbs });
+  const unmount = await rolesManagementApp
+    .create({
+      license: licenseMock.create(),
+      fatalErrors,
+      getStartServices: jest.fn().mockResolvedValue([coreMock.createStart(), { data: {} }]),
+    })
+    .mount({ basePath, element: container, setBreadcrumbs });
 
   return { unmount, container, setBreadcrumbs };
 }
 
-describe('RolesManagementApp', () => {
+describe('rolesManagementApp', () => {
   it('create() returns proper management app descriptor', () => {
     const { fatalErrors, getStartServices } = coreMock.createSetup();
 
     expect(
-      RolesManagementApp.create({
+      rolesManagementApp.create({
         license: licenseMock.create(),
         fatalErrors,
         getStartServices: getStartServices as any,
@@ -137,5 +139,22 @@ describe('RolesManagementApp', () => {
     unmount();
 
     expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
+  it('mount() properly encodes role name in `edit role` page link in breadcrumbs', async () => {
+    const basePath = '/some-base-path/roles';
+    const roleName = 'some 安全性 role';
+    window.location.hash = `${basePath}/edit/${roleName}`;
+
+    const { setBreadcrumbs } = await mountApp(basePath);
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: `#${basePath}`, text: 'Roles' },
+      {
+        href: '#/some-base-path/roles/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20role',
+        text: roleName,
+      },
+    ]);
   });
 });

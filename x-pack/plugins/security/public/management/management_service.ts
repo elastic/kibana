@@ -15,10 +15,10 @@ import {
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticationServiceSetup } from '../authentication';
 import { PluginStartDependencies } from '../plugin';
-import { APIKeysManagementApp } from './api_keys';
-import { RoleMappingsManagementApp } from './role_mappings';
-import { RolesManagementApp } from './roles';
-import { UsersManagementApp } from './users';
+import { apiKeysManagementApp } from './api_keys';
+import { roleMappingsManagementApp } from './role_mappings';
+import { rolesManagementApp } from './roles';
+import { usersManagementApp } from './users';
 
 interface SetupParams {
   management: ManagementSetup;
@@ -48,12 +48,12 @@ export class ManagementService {
       euiIconType: 'securityApp',
     });
 
-    securitySection.registerApp(UsersManagementApp.create({ authc, getStartServices }));
+    securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
     securitySection.registerApp(
-      RolesManagementApp.create({ fatalErrors, license, getStartServices })
+      rolesManagementApp.create({ fatalErrors, license, getStartServices })
     );
-    securitySection.registerApp(APIKeysManagementApp.create({ getStartServices }));
-    securitySection.registerApp(RoleMappingsManagementApp.create({ getStartServices }));
+    securitySection.registerApp(apiKeysManagementApp.create({ getStartServices }));
+    securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
   }
 
   start({ management }: StartParams) {
@@ -61,11 +61,11 @@ export class ManagementService {
       const securitySection = management.sections.getSection('security')!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
-        [securitySection.getApp(UsersManagementApp.id)!, features.showLinks],
-        [securitySection.getApp(RolesManagementApp.id)!, features.showLinks],
-        [securitySection.getApp(APIKeysManagementApp.id)!, features.showLinks],
+        [securitySection.getApp(usersManagementApp.id)!, features.showLinks],
+        [securitySection.getApp(rolesManagementApp.id)!, features.showLinks],
+        [securitySection.getApp(apiKeysManagementApp.id)!, features.showLinks],
         [
-          securitySection.getApp(RoleMappingsManagementApp.id)!,
+          securitySection.getApp(roleMappingsManagementApp.id)!,
           features.showLinks && features.showRoleMappingsManagement,
         ],
       ];
@@ -92,19 +92,4 @@ export class ManagementService {
       this.licenseFeaturesSubscription = undefined;
     }
   }
-
-  // TODO: DO WE STILL NEED THIS?
-  /* private checkLicense({
-    management,
-    notifications,
-  }: Pick<StartParams, 'management' | 'notifications'>) {
-    const { showLinks, linksMessage } = this.license.getFeatures();
-    if (!showLinks) {
-      notifications.toasts.addDanger({ title: linksMessage });
-      management.sections.navigateToApp('management');
-      return false;
-    }
-
-    return true;
-  }*/
 }

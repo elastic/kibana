@@ -5,10 +5,9 @@
  */
 
 import { HttpStart } from 'src/core/public';
-import { Role, User, EditUser } from '../../../common/model';
+import { User, EditUser } from '../../../common/model';
 
 const usersUrl = '/internal/security/users';
-const rolesUrl = '/api/security/role';
 
 export class UserAPIClient {
   constructor(private readonly http: HttpStart) {}
@@ -29,14 +28,6 @@ export class UserAPIClient {
     await this.http.post(`${usersUrl}/${encodeURIComponent(user.username)}`, {
       body: JSON.stringify(user),
     });
-  }
-
-  public async getRoles() {
-    return await this.http.get<Role[]>(rolesUrl);
-  }
-
-  public async getRole(name: string) {
-    return await this.http.get<Role>(`${rolesUrl}/${encodeURIComponent(name)}`);
   }
 
   public async changePassword(username: string, password: string, currentPassword: string) {

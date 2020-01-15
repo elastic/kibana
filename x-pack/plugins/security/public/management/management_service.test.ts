@@ -8,14 +8,14 @@ import { BehaviorSubject } from 'rxjs';
 import { ManagementApp } from '../../../../../src/plugins/management/public';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { ManagementService } from './management_service';
-import { UsersManagementApp } from './users';
+import { usersManagementApp } from './users';
 
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { securityMock } from '../mocks';
-import { RolesManagementApp } from './roles';
-import { APIKeysManagementApp } from './api_keys';
-import { RoleMappingsManagementApp } from './role_mappings';
+import { rolesManagementApp } from './roles';
+import { apiKeysManagementApp } from './api_keys';
+import { roleMappingsManagementApp } from './role_mappings';
 
 describe('ManagementService', () => {
   describe('setup()', () => {
@@ -119,10 +119,10 @@ describe('ManagementService', () => {
         } as unknown) as jest.Mocked<ManagementApp>;
       };
       const mockApps = new Map<string, jest.Mocked<ManagementApp>>([
-        [UsersManagementApp.id, getMockedApp()],
-        [RolesManagementApp.id, getMockedApp()],
-        [APIKeysManagementApp.id, getMockedApp()],
-        [RoleMappingsManagementApp.id, getMockedApp()],
+        [usersManagementApp.id, getMockedApp()],
+        [rolesManagementApp.id, getMockedApp()],
+        [apiKeysManagementApp.id, getMockedApp()],
+        [roleMappingsManagementApp.id, getMockedApp()],
       ] as Array<[string, jest.Mocked<ManagementApp>]>);
 
       service.start({
@@ -165,7 +165,7 @@ describe('ManagementService', () => {
     it('disables only Role Mappings app if `showLinks` is `true`, but `showRoleMappingsManagement` is `false` at `start`', () => {
       const { mockApps } = startService({ showLinks: true, showRoleMappingsManagement: false });
       for (const [appId, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(appId !== RoleMappingsManagementApp.id);
+        expect(mockApp.enabled).toBe(appId !== roleMappingsManagementApp.id);
       }
     });
 
@@ -197,7 +197,7 @@ describe('ManagementService', () => {
       updateFeatures({ showLinks: true, showRoleMappingsManagement: false });
 
       for (const [appId, mockApp] of mockApps) {
-        expect(mockApp.enabled).toBe(appId !== RoleMappingsManagementApp.id);
+        expect(mockApp.enabled).toBe(appId !== roleMappingsManagementApp.id);
       }
     });
 

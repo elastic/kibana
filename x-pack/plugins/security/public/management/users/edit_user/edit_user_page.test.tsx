@@ -14,6 +14,7 @@ import { ReactWrapper } from 'enzyme';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
+import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
 
 const createUser = (username: string) => {
@@ -34,12 +35,12 @@ const createUser = (username: string) => {
   return user;
 };
 
-const buildClient = () => {
-  const apiClientMock = userAPIClientMock.create();
+const buildClients = () => {
+  const apiClient = userAPIClientMock.create();
+  apiClient.getUser.mockImplementation(async (username: string) => createUser(username));
 
-  apiClientMock.getUser.mockImplementation(async (username: string) => createUser(username));
-
-  apiClientMock.getRoles.mockImplementation(() => {
+  const rolesAPIClient = rolesAPIClientMock.create();
+  rolesAPIClient.getRoles.mockImplementation(() => {
     return Promise.resolve([
       {
         name: 'role 1',
@@ -62,7 +63,7 @@ const buildClient = () => {
     ] as Role[]);
   });
 
-  return apiClientMock;
+  return { apiClient, rolesAPIClient };
 };
 
 function buildSecuritySetup() {
@@ -83,12 +84,13 @@ function expectMissingSaveButton(wrapper: ReactWrapper<any, any>) {
 
 describe('EditUserPage', () => {
   it('allows reserved users to be viewed', async () => {
-    const apiClient = buildClient();
+    const { apiClient, rolesAPIClient } = buildClients();
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
       <EditUserPage
         username={'reserved_user'}
         apiClient={apiClient}
+        rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
       />
@@ -103,12 +105,13 @@ describe('EditUserPage', () => {
   });
 
   it('allows new users to be created', async () => {
-    const apiClient = buildClient();
+    const { apiClient, rolesAPIClient } = buildClients();
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
       <EditUserPage
         username={''}
         apiClient={apiClient}
+        rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
       />
@@ -123,12 +126,13 @@ describe('EditUserPage', () => {
   });
 
   it('allows existing users to be edited', async () => {
-    const apiClient = buildClient();
+    const { apiClient, rolesAPIClient } = buildClients();
     const securitySetup = buildSecuritySetup();
     const wrapper = mountWithIntl(
       <EditUserPage
         username={'existing_user'}
         apiClient={apiClient}
+        rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
       />

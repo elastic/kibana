@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { APIKeysManagementApp } from './api_keys_management_app';
+export { apiKeysManagementApp } from './api_keys_management_app';

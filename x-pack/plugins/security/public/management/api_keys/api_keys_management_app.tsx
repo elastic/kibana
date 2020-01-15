@@ -18,7 +18,7 @@ interface CreateParams {
   getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
 }
 
-export const APIKeysManagementApp = Object.freeze({
+export const apiKeysManagementApp = Object.freeze({
   id: 'api_keys',
   create({ getStartServices }: CreateParams) {
     return {

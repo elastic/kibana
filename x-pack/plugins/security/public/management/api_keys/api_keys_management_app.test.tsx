@@ -8,14 +8,14 @@ jest.mock('./api_keys_grid', () => ({
   APIKeysGridPage: (props: any) => `Page: ${JSON.stringify(props)}`,
 }));
 
-import { APIKeysManagementApp } from './api_keys_management_app';
+import { apiKeysManagementApp } from './api_keys_management_app';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 
-describe('APIKeysManagementApp', () => {
+describe('apiKeysManagementApp', () => {
   it('create() returns proper management app descriptor', () => {
     const { getStartServices } = coreMock.createSetup();
 
-    expect(APIKeysManagementApp.create({ getStartServices: getStartServices as any }))
+    expect(apiKeysManagementApp.create({ getStartServices: getStartServices as any }))
       .toMatchInlineSnapshot(`
       Object {
         "id": "api_keys",
@@ -31,13 +31,13 @@ describe('APIKeysManagementApp', () => {
     const container = document.createElement('div');
 
     const setBreadcrumbs = jest.fn();
-    const unmount = await APIKeysManagementApp.create({
-      getStartServices: getStartServices as any,
-    }).mount({
-      basePath: '/some-base-path',
-      element: container,
-      setBreadcrumbs,
-    });
+    const unmount = await apiKeysManagementApp
+      .create({ getStartServices: getStartServices as any })
+      .mount({
+        basePath: '/some-base-path',
+        element: container,
+        setBreadcrumbs,
+      });
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: '#/some-base-path', text: 'API Keys' }]);

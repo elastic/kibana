@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RolesManagementApp } from './roles_management_app';
+export { rolesManagementApp } from './roles_management_app';
 export { RolesAPIClient } from './roles_api_client';
