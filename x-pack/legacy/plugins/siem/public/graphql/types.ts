@@ -122,6 +122,8 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  eventType?: Maybe<string>;
+
   filters?: Maybe<FilterTimelineInput[]>;
 
   kqlMode?: Maybe<string>;
@@ -366,6 +368,8 @@ export type ToNumberArray = number[];
 export type ToDateArray = string[];
 
 export type ToBooleanArray = boolean[];
+
+export type ToAny = any;
 
 export type EsValue = any;
 
@@ -785,6 +789,8 @@ export interface Ecs {
 
   network?: Maybe<NetworkEcsField>;
 
+  signal?: Maybe<SignalField>;
+
   source?: Maybe<SourceEcsFields>;
 
   suricata?: Maybe<SuricataEcsFields>;
@@ -960,6 +966,74 @@ export interface NetworkEcsField {
   protocol?: Maybe<string[]>;
 
   transport?: Maybe<string[]>;
+}
+
+export interface SignalField {
+  rule?: Maybe<RuleField>;
+
+  original_time?: Maybe<string[]>;
+}
+
+export interface RuleField {
+  id?: Maybe<string[]>;
+
+  rule_id?: Maybe<string[]>;
+
+  false_positives: string[];
+
+  saved_id?: Maybe<string[]>;
+
+  timeline_id?: Maybe<string[]>;
+
+  timeline_title?: Maybe<string[]>;
+
+  max_signals?: Maybe<number[]>;
+
+  risk_score?: Maybe<string[]>;
+
+  output_index?: Maybe<string[]>;
+
+  description?: Maybe<string[]>;
+
+  from?: Maybe<string[]>;
+
+  immutable?: Maybe<boolean[]>;
+
+  index?: Maybe<string[]>;
+
+  interval?: Maybe<string[]>;
+
+  language?: Maybe<string[]>;
+
+  query?: Maybe<string[]>;
+
+  references?: Maybe<string[]>;
+
+  severity?: Maybe<string[]>;
+
+  tags?: Maybe<string[]>;
+
+  threats?: Maybe<ToAny>;
+
+  type?: Maybe<string[]>;
+
+  size?: Maybe<string[]>;
+
+  to?: Maybe<string[]>;
+
+  enabled?: Maybe<boolean[]>;
+
+  filters?: Maybe<ToAny>;
+
+  created_at?: Maybe<string[]>;
+
+  updated_at?: Maybe<string[]>;
+
+  created_by?: Maybe<string[]>;
+
+  updated_by?: Maybe<string[]>;
+
+  version?: Maybe<string[]>;
 }
 
 export interface SuricataEcsFields {
@@ -1847,6 +1921,8 @@ export interface TimelineResult {
   description?: Maybe<string>;
 
   eventIdToNoteIds?: Maybe<NoteResult[]>;
+
+  eventType?: Maybe<string>;
 
   favorite?: Maybe<FavoriteTimelineResult[]>;
 
@@ -4349,6 +4425,8 @@ export namespace GetTimelineQuery {
 
     geo: Maybe<__Geo>;
 
+    signal: Maybe<Signal>;
+
     suricata: Maybe<Suricata>;
 
     network: Maybe<Network>;
@@ -4666,6 +4744,40 @@ export namespace GetTimelineQuery {
     region_name: Maybe<string[]>;
 
     country_iso_code: Maybe<string[]>;
+  };
+
+  export type Signal = {
+    __typename?: 'SignalField';
+
+    original_time: Maybe<string[]>;
+
+    rule: Maybe<Rule>;
+  };
+
+  export type Rule = {
+    __typename?: 'RuleField';
+
+    id: Maybe<string[]>;
+
+    saved_id: Maybe<string[]>;
+
+    timeline_id: Maybe<string[]>;
+
+    timeline_title: Maybe<string[]>;
+
+    output_index: Maybe<string[]>;
+
+    from: Maybe<string[]>;
+
+    index: Maybe<string[]>;
+
+    language: Maybe<string[]>;
+
+    query: Maybe<string[]>;
+
+    to: Maybe<string[]>;
+
+    filters: Maybe<ToAny>;
   };
 
   export type Suricata = {
@@ -5069,6 +5181,8 @@ export namespace GetOneTimeline {
 
     description: Maybe<string>;
 
+    eventType: Maybe<string>;
+
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
     favorite: Maybe<Favorite[]>;
@@ -5386,6 +5500,8 @@ export namespace PersistTimelineMutation {
     dataProviders: Maybe<DataProviders[]>;
 
     description: Maybe<string>;
+
+    eventType: Maybe<string>;
 
     favorite: Maybe<Favorite[]>;
 
