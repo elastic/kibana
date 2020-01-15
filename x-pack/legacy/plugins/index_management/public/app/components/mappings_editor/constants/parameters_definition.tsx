@@ -100,11 +100,14 @@ const fielddataFrequencyFilterParam = {
       },
     },
   },
-  schema: t.partial({
-    min: t.number,
-    max: t.number,
-    min_segment_size: t.number,
-  }),
+  schema: t.intersection([
+    t.partial({
+      min: t.number,
+      max: t.number,
+      min_segment_size: t.number,
+    }),
+    t.brand(t.UnknownRecord, v => !Array.isArray(v)),
+  ]),
 };
 
 const analyzerValidations = [

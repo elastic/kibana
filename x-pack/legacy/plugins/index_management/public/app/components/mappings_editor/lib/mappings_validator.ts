@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { pick } from 'lodash';
 import * as t from 'io-ts';
 import { toArray } from 'fp-ts/lib/Set';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
@@ -206,11 +206,13 @@ export const mappingsConfigurationSchema = t.partial({
     includes: t.array(t.string),
     excludes: t.array(t.string),
   }),
-  _meta: t.object,
+  _meta: t.UnknownRecord,
   _routing: t.partial({
     required: t.boolean,
   }),
 });
+
+const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.props);
 
 const validateMappingsConfiguration = (
   mappingsConfiguration: any
@@ -218,7 +220,7 @@ const validateMappingsConfiguration = (
   // Array to keep track of invalid configuration parameters.
   const configurationRemoved: Set<string> = new Set();
 
-  const copyOfMappingsConfig = { ...mappingsConfiguration };
+  let copyOfMappingsConfig = { ...mappingsConfiguration };
   const result = mappingsConfigurationSchema.decode(mappingsConfiguration);
 
   if (isLeft(result)) {
@@ -233,10 +235,17 @@ const validateMappingsConfiguration = (
     });
   }
 
-  const errors: MappingsValidationError[] = toArray([])(configurationRemoved).map(configName => ({
-    code: 'ERR_CONFIG',
-    configName,
-  }));
+  copyOfMappingsConfig = pick(copyOfMappingsConfig, mappingsConfigurationSchemaKeys);
+
+  const errors: MappingsValidationError[] = toArray<{
+    code: 'ERR_CONFIG';
+    configName: string;
+  }>([])(configurationRemoved)
+    .map(configName => ({
+      code: 'ERR_CONFIG',
+      configName,
+    }))
+    .sort((a, b) => a.configName.localeCompare(b.configName));
 
   return { value: copyOfMappingsConfig, errors };
 };
