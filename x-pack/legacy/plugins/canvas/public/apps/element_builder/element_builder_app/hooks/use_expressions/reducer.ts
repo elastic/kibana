@@ -28,7 +28,7 @@ export const reducer = (prevState: State, action: ExpressionsAction) => {
     case ExpressionsActions.SET_RESULT: {
       const { result } = action.payload;
 
-      if (result.type === 'error' || result.type === 'null') {
+      if (!result || result.type === 'error' || result.type === 'null') {
         return {
           ...prevState,
           result: null,

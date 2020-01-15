@@ -14,13 +14,13 @@ import { useExpressions } from '../hooks';
 const LIMIT = 500;
 
 export const Output: FC = () => {
-  const { ast, result, expression } = useExpressions();
+  const { ast, result } = useExpressions();
   let render = null;
 
   if (ast && result) {
     render = (
       <ExpressionRendererComponent
-        expression={expression}
+        expression={ast}
         onRenderError={(element, error) => console.log(error)}
         extraHandlers={{
           // done: () => {},
@@ -34,12 +34,12 @@ export const Output: FC = () => {
   }
   return (
     <div>
-      <p>
+      {/* <p>
         <EuiCode language="json">{JSON.stringify(ast).substring(0, LIMIT)}</EuiCode>
       </p>
       <p>
         <EuiCode language="json">{JSON.stringify(result).substring(0, LIMIT)}</EuiCode>
-      </p>
+      </p> */}
       {render}
     </div>
   );

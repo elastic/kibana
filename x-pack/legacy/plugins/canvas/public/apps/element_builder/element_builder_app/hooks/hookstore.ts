@@ -20,6 +20,14 @@ export interface DispatchedAction<T, P> {
   payload: P;
 }
 
+export const createActionFactory = <ActionEnum>() => <T extends ActionEnum, P>(
+  type: T,
+  payload: P
+): DispatchedAction<T, P> => ({
+  type,
+  payload,
+});
+
 export const createStore = <State, Action>(
   initialState: State,
   reducer: Reducer<State, Action>
@@ -48,11 +56,3 @@ export const useStore = <State, Action>(store: Store<State, Action>) => {
 
   return { state, dispatch: store.dispatch };
 };
-
-export const createActionFactory = <ActionEnum>() => <T extends ActionEnum, P>(
-  type: T,
-  payload: P
-): DispatchedAction<T, P> => ({
-  type,
-  payload,
-});

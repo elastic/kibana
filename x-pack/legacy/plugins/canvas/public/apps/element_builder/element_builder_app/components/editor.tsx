@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 
 // @ts-ignore
 import { ExpressionInput } from '../../../../components/expression_input/expression_input';
@@ -14,16 +14,19 @@ import { useExpressions, useExpressionsActions } from '../hooks/use_expressions'
 
 export const Editor: FC = () => {
   const functionDefinitions = getFunctionDefinitions();
-  const { expression: value } = useExpressions();
+  const { expression: storeValue } = useExpressions();
   const { setExpression } = useExpressionsActions();
+  const [value, setValue] = useState(storeValue);
 
-  const onChange = (changedValue?: string) => {
-    console.log('new value', changedValue);
-    if (changedValue && changedValue !== value) {
-      console.log('setting!', changedValue, value);
-      setExpression(changedValue);
-    }
-  };
+  const onChange = (newValue?: string) => setValue(newValue || '');
+
+  useEffect(() => {
+    setExpression(value);
+  }, [value]);
+
+  useEffect(() => {
+    setValue(storeValue);
+  }, [storeValue]);
 
   return <ExpressionInput isCompact {...{ functionDefinitions, value, onChange }} />;
 };

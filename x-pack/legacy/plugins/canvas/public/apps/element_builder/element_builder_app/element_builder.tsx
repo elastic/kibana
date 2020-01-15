@@ -14,13 +14,10 @@ interface Props {
 }
 
 export const ElementBuilder: FC<Props> = ({ encodedExpression = '' }) => {
-  const { expression } = useExpressions();
   const { setExpression } = useExpressionsActions();
 
   useEffect(() => {
-    console.log('pfft', expression);
     if (encodedExpression) {
-      console.log('reading encode', encodedExpression);
       try {
         const decoded = atob(encodedExpression);
         setExpression(decoded);

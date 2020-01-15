@@ -42,7 +42,7 @@ export const useExpressionsActions = () => {
   useEffect(() => {
     dispatch(actions.setExpression(expression));
     try {
-      console.log('expression updated', expression);
+      console.log('deriving ast', expression);
       setAst(fromExpression(expression));
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -61,7 +61,7 @@ export const useExpressionsActions = () => {
 
     const runInterpreter = async () => {
       try {
-        console.log('ast', ast);
+        console.log('deriving result', ast);
         const resultValue = await interpretAst(ast);
         setResult(resultValue);
       } catch (e) {
@@ -78,8 +78,8 @@ export const useExpressionsActions = () => {
     if (!result) {
       return;
     }
-    console.log('result', result);
 
+    console.log('result', result);
     dispatch(actions.setExpressionResult(result));
   }, [result]);
 

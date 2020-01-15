@@ -8,7 +8,7 @@ import { npSetup } from 'ui/new_platform';
 import { Ast } from '@kbn/interpreter/target/common';
 
 // @ts-ignore
-import { renderFunctions } from '../../../../../canvas_plugin_src/renderers';
+import { renderFunctions } from './renderers';
 import {
   plugin,
   ExpressionInterpretWithHandlers,
