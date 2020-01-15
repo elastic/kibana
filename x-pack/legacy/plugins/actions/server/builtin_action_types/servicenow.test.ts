@@ -131,7 +131,7 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(actionType, { eventAction: 'ackynollage' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [comments]: expected value of type [string] but got [undefined]"`
+      `"error validating action params: [short_description]: expected value of type [string] but got [undefined]"`
     );
   });
 });
