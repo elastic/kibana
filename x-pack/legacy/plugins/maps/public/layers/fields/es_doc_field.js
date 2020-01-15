@@ -6,6 +6,7 @@
 
 import { AbstractField } from './field';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
+import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 
 export class ESDocField extends AbstractField {
   static type = 'ES_DOC';
@@ -29,7 +30,7 @@ export class ESDocField extends AbstractField {
     return true;
   }
 
-  async getFieldMetaRequest(/* config */) {
+  async getOrdinalFieldMetaRequest() {
     const field = await this._getField();
 
     if (field.type !== 'number' && field.type !== 'date') {
@@ -48,6 +49,31 @@ export class ESDocField extends AbstractField {
     return {
       [this._fieldName]: {
         extended_stats: extendedStats,
+      },
+    };
+  }
+
+  async getCategoricalFieldMetaRequest() {
+    const field = await this._getField();
+    if (field.type !== 'string') {
+      //UX does not support categorical styling for number/date fields
+      return null;
+    }
+
+    const topTerms = {
+      size: COLOR_PALETTE_MAX_SIZE - 1, //need additional color for the "other"-value
+    };
+    if (field.scripted) {
+      topTerms.script = {
+        source: field.script,
+        lang: field.lang,
+      };
+    } else {
+      topTerms.field = this._fieldName;
+    }
+    return {
+      [this._fieldName]: {
+        terms: topTerms,
       },
     };
   }

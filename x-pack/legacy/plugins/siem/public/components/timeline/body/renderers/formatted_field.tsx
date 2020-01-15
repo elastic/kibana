@@ -27,7 +27,7 @@ import {
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
-export const FormattedFieldValue = React.memo<{
+const FormattedFieldValueComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldFormat?: string;
@@ -35,7 +35,7 @@ export const FormattedFieldValue = React.memo<{
   fieldType: string;
   truncate?: boolean;
   value: string | number | undefined | null;
-}>(({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
+}> = ({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -126,6 +126,6 @@ export const FormattedFieldValue = React.memo<{
       </DefaultDraggable>
     );
   }
-});
+};
 
-FormattedFieldValue.displayName = 'FormattedFieldValue';
+export const FormattedFieldValue = React.memo(FormattedFieldValueComponent);

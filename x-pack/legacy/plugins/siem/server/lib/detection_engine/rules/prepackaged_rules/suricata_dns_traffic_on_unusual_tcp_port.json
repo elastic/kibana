@@ -1,17 +1,38 @@
 {
-  "rule_id": "deeae336-4ff7-4cf8-ae5b-18bce05da02e",
-  "risk_score": 50,
-  "description": "Suricata DNS Traffic on Unusual TCP Port",
+  "description": "Suricata DNS Traffic on Unusual Port (TCP or UDP)",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
   "immutable": true,
   "interval": "5m",
-  "name": "Suricata DNS Traffic on Unusual TCP Port",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "suricata.eve.alert.signature_id:2610013 and (event.module:suricata and event.kind:alert)",
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "Suricata DNS Traffic on Unusual Port",
+  "query": "event.module:suricata and event.kind:alert and (suricata.eve.alert.signature_id: (2610015 or 2610013) or rule.id: (2610015 or 2610013))",
+  "references": [
+    "https://github.com/travisbgreen/hunting-rules/blob/master/hunting.rules#L14-L16",
+    "This detects DNS traffic running on an unusual port. This could indicate an application that is misconfigured or attempting to bypass security controls."
+  ],
+  "risk_score": 50,
+  "rule_id": "deeae336-4ff7-4cf8-ae5b-18bce05da02e",
+  "severity": "low",
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "command and control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "techniques": [
+        {
+          "id": "T1065",
+          "name": "uncommonly used port",
+          "reference": "https://attack.mitre.org/techniques/T1065/"
+        }
+      ]
+    }
+  ],
+  "to": "now",
+  "type": "query",
   "version": 1
 }
