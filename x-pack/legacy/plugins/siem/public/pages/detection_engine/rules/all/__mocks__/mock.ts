@@ -99,6 +99,8 @@ export const mockTableData: TableData[] = [
       updated_by: 'elastic',
       version: 1,
     },
+    status: null,
+    statusDate: null,
     tags: [],
   },
   {
@@ -149,6 +151,8 @@ export const mockTableData: TableData[] = [
       updated_by: 'elastic',
       version: 1,
     },
+    status: null,
+    statusDate: null,
     tags: [],
   },
 ];
