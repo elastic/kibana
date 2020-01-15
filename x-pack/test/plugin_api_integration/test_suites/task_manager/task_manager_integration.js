@@ -346,27 +346,37 @@ export default function({ getService }) {
         expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
       });
 
-      // schedule multiple tasks that should clog Task Manager keeping
-      // it's workers constantly at capacity
+      // schedule multiple tasks that should force
+      // Task Manager to use up its worker capacity
+      // causing tasks to pile up
       await Promise.all(
-        _.times(50, () =>
+        _.times(50, index =>
           scheduleTask({
             taskType: 'sampleTask',
             schedule: { interval: `1s` },
-            params: {},
+            params: {
+              waitForEvent: index === 0 ? 'releaseFirstStalledTask' : 'releaseTheOthers',
+            },
           })
         )
       );
 
-      const runNowResult = await runTaskNow({
-        id: originalTask.id,
-      });
+      const [runNowResult] = await Promise.all([
+        // call runNow for our task
+        runTaskNow({
+          id: originalTask.id,
+        }),
+        // and release only one slot in our worker queue
+        releaseTasksWaitingForEventToComplete('releaseFirstStalledTask'),
+      ]);
       expect(runNowResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
         const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(2);
       });
+
+      await releaseTasksWaitingForEventToComplete('releaseTheOthers');
     });
 
     it('should return a task run error result when running a task now fails', async () => {
