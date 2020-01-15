@@ -10,17 +10,60 @@ import { FormattedRelative } from '@kbn/i18n/react';
 
 import { useDateFormat, useTimeZone } from '../../hooks';
 import { getOrEmptyTagFromValue } from '../empty_value';
+import { useUiSetting$ } from '../../lib/kibana';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
-export const PreferenceFormattedDate = React.memo<{ value: Date }>(({ value }) => {
-  const dateFormat = useDateFormat();
-  const timeZone = useTimeZone();
-
-  return <>{moment.tz(value, timeZone).format(dateFormat)}</>;
-});
+export const PreferenceFormattedDate = React.memo<{ dateFormat?: string; value: Date }>(
+  ({ value, dateFormat = useDateFormat() }) => (
+    <>{moment.tz(value, useTimeZone()).format(dateFormat)}</>
+  )
+);
 
 PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
+
+/**
+ * This function may be passed to `Array.find()` to locate the `P1DT`
+ * configuration (sub) setting, a string array that contains two entries
+ * like the following example: `['P1DT', 'YYYY-MM-DD']`.
+ */
+export const isP1DTFormatterSetting = (formatNameFormatterPair?: string[]) =>
+  Array.isArray(formatNameFormatterPair) &&
+  formatNameFormatterPair[0] === 'P1DT' &&
+  formatNameFormatterPair.length === 2;
+
+/**
+ * Renders a date in `P1DT` format, e.g. `YYYY-MM-DD`, as specified by
+ * the `P1DT1` entry in the `dateFormat:scaled` Kibana Advanced setting.
+ *
+ * If the `P1DT` format is not specified in the `dateFormat:scaled` setting,
+ * the fallback format `YYYY-MM-DD` will be applied
+ */
+export const PreferenceFormattedP1DTDate = React.memo<{ value: Date }>(({ value }) => {
+  /**
+   * A fallback "format name / formatter" 2-tuple for the `P1DT` formatter, which is
+   * one of many such pairs expected to be contained in the `dateFormat:scaled`
+   * Kibana advanced setting.
+   */
+  const FALLBACK_DATE_FORMAT_SCALED_P1DT = ['P1DT', 'YYYY-MM-DD'];
+
+  // Read the 'dateFormat:scaled' Kibana Advanced setting, which contains 2-tuple sub-settings:
+  const [scaledDateFormatPreference] = useUiSetting$<string[][]>('dateFormat:scaled');
+
+  // attempt to find the nested `['P1DT', 'formatString']` setting
+  const maybeP1DTFormatter = Array.isArray(scaledDateFormatPreference)
+    ? scaledDateFormatPreference.find(isP1DTFormatterSetting)
+    : null;
+
+  const p1dtFormat =
+    Array.isArray(maybeP1DTFormatter) && maybeP1DTFormatter.length === 2
+      ? maybeP1DTFormatter[1]
+      : FALLBACK_DATE_FORMAT_SCALED_P1DT[1];
+
+  return <PreferenceFormattedDate dateFormat={p1dtFormat} value={value} />;
+});
+
+PreferenceFormattedP1DTDate.displayName = 'PreferenceFormattedP1DTDate';
 
 /**
  * Renders the specified date value in a format determined by the user's preferences,

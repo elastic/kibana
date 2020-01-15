@@ -30,6 +30,7 @@ import { ColumnHeader } from '../column_headers/column_header';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
+import { getEventType } from '../helpers';
 import { StatefulEventChild } from './stateful_event_child';
 
 interface Props {
@@ -215,6 +216,8 @@ const StatefulEventComponent: React.FC<Props> = ({
                 <EventsTrGroup
                   className={STATEFUL_EVENT_CSS_CLASS_NAME}
                   data-test-subj="event"
+                  eventType={getEventType(event.ecs)}
+                  showLeftBorder={!isEventViewer}
                   ref={c => {
                     if (c != null) {
                       divElement.current = c;
@@ -232,6 +235,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                         columnHeaders={columnHeaders}
                         columnRenderers={columnRenderers}
                         data={event.data}
+                        ecsData={event.ecs}
                         eventIdToNoteIds={eventIdToNoteIds}
                         expanded={!!expanded[event._id]}
                         getNotesByIds={getNotesByIds}

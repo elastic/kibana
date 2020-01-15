@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
+import moment from 'moment';
 import {
   SIGNALS_ID,
   DEFAULT_MAX_SIGNALS,
@@ -17,6 +18,9 @@ import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition } from './types';
+import { getGapBetweenRuns } from './utils';
+import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
+import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
 
 export const signalRulesAlertType = ({
   logger,
@@ -57,7 +61,8 @@ export const signalRulesAlertType = ({
         version: schema.number({ defaultValue: 1 }),
       }),
     },
-    async executor({ alertId, services, params }) {
+    // fun fact: previousStartedAt is not actually a Date but a String of a date
+    async executor({ previousStartedAt, alertId, services, params }) {
       const {
         from,
         ruleId,
@@ -70,93 +75,234 @@ export const signalRulesAlertType = ({
         to,
         type,
       } = params;
-
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get('alert', alertId);
+      const ruleStatusSavedObjects = await services.savedObjectsClient.find<
+        IRuleSavedAttributesSavedObjectAttributes
+      >({
+        type: ruleStatusSavedObjectType,
+        perPage: 6, // 0th element is current status, 1-5 is last 5 failures.
+        sortField: 'statusDate',
+        sortOrder: 'desc',
+        search: `${alertId}`,
+        searchFields: ['alertId'],
+      });
+      let currentStatusSavedObject;
+      if (ruleStatusSavedObjects.saved_objects.length === 0) {
+        // create
+        const date = new Date().toISOString();
+        currentStatusSavedObject = await services.savedObjectsClient.create<
+          IRuleSavedAttributesSavedObjectAttributes
+        >(ruleStatusSavedObjectType, {
+          alertId, // do a search for this id.
+          statusDate: date,
+          status: 'executing',
+          lastFailureAt: null,
+          lastSuccessAt: null,
+          lastFailureMessage: null,
+          lastSuccessMessage: null,
+        });
+      } else {
+        // update 0th to executing.
+        currentStatusSavedObject = ruleStatusSavedObjects.saved_objects[0];
+        const sDate = new Date().toISOString();
+        currentStatusSavedObject.attributes.status = 'executing';
+        currentStatusSavedObject.attributes.statusDate = sDate;
+        await services.savedObjectsClient.update(
+          ruleStatusSavedObjectType,
+          currentStatusSavedObject.id,
+          {
+            ...currentStatusSavedObject.attributes,
+          }
+        );
+      }
+
       const name: string = savedObject.attributes.name;
       const tags: string[] = savedObject.attributes.tags;
 
       const createdBy: string = savedObject.attributes.createdBy;
       const updatedBy: string = savedObject.attributes.updatedBy;
-      const interval: string = savedObject.attributes.interval;
+      const interval: string = savedObject.attributes.schedule.interval;
       const enabled: boolean = savedObject.attributes.enabled;
-
+      const gap = getGapBetweenRuns({
+        previousStartedAt: previousStartedAt != null ? moment(previousStartedAt) : null, // TODO: Remove this once previousStartedAt is no longer a string
+        interval,
+        from,
+        to,
+      });
+      if (gap != null && gap.asMilliseconds() > 0) {
+        logger.warn(
+          `Signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`
+        );
+      }
       // set searchAfter page size to be the lesser of default page size or maxSignals.
       const searchAfterSize =
         DEFAULT_SEARCH_AFTER_PAGE_SIZE <= params.maxSignals
           ? DEFAULT_SEARCH_AFTER_PAGE_SIZE
           : params.maxSignals;
-
-      const inputIndex = await getInputIndex(services, version, index);
-      const esFilter = await getFilter({
-        type,
-        filters,
-        language,
-        query,
-        savedId,
-        services,
-        index: inputIndex,
-      });
-
-      const noReIndex = buildEventsSearchQuery({
-        index: inputIndex,
-        from,
-        to,
-        filter: esFilter,
-        size: searchAfterSize,
-        searchAfterSortId: undefined,
-      });
-
       try {
-        logger.debug(
-          `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-        );
-        logger.debug(
-          `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-        );
-        const noReIndexResult = await services.callCluster('search', noReIndex);
-        if (noReIndexResult.hits.total.value !== 0) {
-          logger.info(
-            `Found ${
-              noReIndexResult.hits.total.value
-            } signals from the indexes of "[${inputIndex.join(
-              ', '
-            )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
-          );
-        }
-
-        const bulkIndexResult = await searchAfterAndBulkCreate({
-          someResult: noReIndexResult,
-          ruleParams: params,
+        const inputIndex = await getInputIndex(services, version, index);
+        const esFilter = await getFilter({
+          type,
+          filters,
+          language,
+          query,
+          savedId,
           services,
-          logger,
-          id: alertId,
-          signalsIndex: outputIndex,
-          filter: esFilter,
-          name,
-          createdBy,
-          updatedBy,
-          interval,
-          enabled,
-          pageSize: searchAfterSize,
-          tags,
+          index: inputIndex,
         });
 
-        if (bulkIndexResult) {
+        const noReIndex = buildEventsSearchQuery({
+          index: inputIndex,
+          from,
+          to,
+          filter: esFilter,
+          size: searchAfterSize,
+          searchAfterSortId: undefined,
+        });
+
+        try {
           logger.debug(
-            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
-        } else {
+          logger.debug(
+            `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
+          const noReIndexResult = await services.callCluster('search', noReIndex);
+          if (noReIndexResult.hits.total.value !== 0) {
+            logger.info(
+              `Found ${
+                noReIndexResult.hits.total.value
+              } signals from the indexes of "[${inputIndex.join(
+                ', '
+              )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+            );
+          }
+
+          const bulkIndexResult = await searchAfterAndBulkCreate({
+            someResult: noReIndexResult,
+            ruleParams: params,
+            services,
+            logger,
+            id: alertId,
+            signalsIndex: outputIndex,
+            filter: esFilter,
+            name,
+            createdBy,
+            updatedBy,
+            interval,
+            enabled,
+            pageSize: searchAfterSize,
+            tags,
+          });
+
+          if (bulkIndexResult) {
+            logger.debug(
+              `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            );
+            const sDate = new Date().toISOString();
+            currentStatusSavedObject.attributes.status = 'succeeded';
+            currentStatusSavedObject.attributes.statusDate = sDate;
+            currentStatusSavedObject.attributes.lastSuccessAt = sDate;
+            currentStatusSavedObject.attributes.lastSuccessMessage = 'succeeded';
+            await services.savedObjectsClient.update(
+              ruleStatusSavedObjectType,
+              currentStatusSavedObject.id,
+              {
+                ...currentStatusSavedObject.attributes,
+              }
+            );
+          } else {
+            logger.error(
+              `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            );
+            const sDate = new Date().toISOString();
+            currentStatusSavedObject.attributes.status = 'failed';
+            currentStatusSavedObject.attributes.statusDate = sDate;
+            currentStatusSavedObject.attributes.lastFailureAt = sDate;
+            currentStatusSavedObject.attributes.lastFailureMessage = `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`;
+            // current status is failing
+            await services.savedObjectsClient.update(
+              ruleStatusSavedObjectType,
+              currentStatusSavedObject.id,
+              {
+                ...currentStatusSavedObject.attributes,
+              }
+            );
+            // create new status for historical purposes
+            await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
+              ...currentStatusSavedObject.attributes,
+            });
+
+            if (ruleStatusSavedObjects.saved_objects.length >= 6) {
+              // delete fifth status and prepare to insert a newer one.
+              const toDelete = ruleStatusSavedObjects.saved_objects.slice(5);
+              await toDelete.forEach(async item =>
+                services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
+              );
+            }
+          }
+        } catch (err) {
+          // TODO: Error handling and writing of errors into a signal that has error
+          // handling/conditions
           logger.error(
-            `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
+          const sDate = new Date().toISOString();
+          currentStatusSavedObject.attributes.status = 'failed';
+          currentStatusSavedObject.attributes.statusDate = sDate;
+          currentStatusSavedObject.attributes.lastFailureAt = sDate;
+          currentStatusSavedObject.attributes.lastFailureMessage = err.message;
+          // current status is failing
+          await services.savedObjectsClient.update(
+            ruleStatusSavedObjectType,
+            currentStatusSavedObject.id,
+            {
+              ...currentStatusSavedObject.attributes,
+            }
+          );
+          // create new status for historical purposes
+          await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
+            ...currentStatusSavedObject.attributes,
+          });
+
+          if (ruleStatusSavedObjects.saved_objects.length >= 6) {
+            // delete fifth status and prepare to insert a newer one.
+            const toDelete = ruleStatusSavedObjects.saved_objects.slice(5);
+            await toDelete.forEach(async item =>
+              services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
+            );
+          }
+        }
+      } catch (exception) {
+        logger.error(
+          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${exception.message}`
+        );
+        const sDate = new Date().toISOString();
+        currentStatusSavedObject.attributes.status = 'failed';
+        currentStatusSavedObject.attributes.statusDate = sDate;
+        currentStatusSavedObject.attributes.lastFailureAt = sDate;
+        currentStatusSavedObject.attributes.lastFailureMessage = exception.message;
+        // current status is failing
+        await services.savedObjectsClient.update(
+          ruleStatusSavedObjectType,
+          currentStatusSavedObject.id,
+          {
+            ...currentStatusSavedObject.attributes,
+          }
+        );
+        // create new status for historical purposes
+        await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
+          ...currentStatusSavedObject.attributes,
+        });
+
+        if (ruleStatusSavedObjects.saved_objects.length >= 6) {
+          // delete fifth status and prepare to insert a newer one.
+          const toDelete = ruleStatusSavedObjects.saved_objects.slice(5);
+          await toDelete.forEach(async item =>
+            services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
           );
         }
-      } catch (err) {
-        // TODO: Error handling and writing of errors into a signal that has error
-        // handling/conditions
-        logger.error(
-          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-        );
       }
     },
   };
