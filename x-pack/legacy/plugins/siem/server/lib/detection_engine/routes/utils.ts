@@ -161,7 +161,15 @@ export const callWithRequestFactory = (
   server: ServerFacade
 ) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  return <T, U>(endpoint: string, params: T, options?: U) => {
-    return callWithRequest(request, endpoint, params, options);
+  const acceptCompressionHeader = { 'Accept-Encoding': 'gzip, deflate' };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return <T extends any, U, V>(endpoint: string, params: T, options?: U) => {
+    return callWithRequest<V>(
+      request,
+      endpoint,
+      { ...params, headers: { ...params.headers, ...acceptCompressionHeader } },
+      options
+    );
   };
 };

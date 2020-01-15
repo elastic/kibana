@@ -59,6 +59,7 @@ export const buildEventsSearchQuery = ({
     },
   ];
   const searchQuery = {
+    headers: { 'Accept-Encoding': 'gzip, deflate' },
     allowNoIndices: true,
     index,
     size,

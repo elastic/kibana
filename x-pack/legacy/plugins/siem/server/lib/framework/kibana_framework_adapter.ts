@@ -57,6 +57,10 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
 
     return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
       ...params,
+      headers: {
+        ...params.headers,
+        'Accept-Encoding': 'gzip, deflate',
+      },
       ignore_throttled: !includeFrozen,
       ...(maxConcurrentShardRequests > 0
         ? { max_concurrent_shard_requests: maxConcurrentShardRequests }

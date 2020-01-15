@@ -95,6 +95,7 @@ export const singleBulkCreate = async ({
   ]);
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {
+    headers: { 'Accept-Encoding': 'gzip, deflate' },
     index: signalsIndex,
     refresh: false,
     body: bulkBody,
