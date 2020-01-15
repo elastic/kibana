@@ -7,12 +7,7 @@
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux';
 import { GlobalState } from '../store';
 
-interface StoreAction extends AnyAction {
-  payload: unknown[];
-  type: string;
-}
-
-interface QueuedAction<TAction = StoreAction> {
+interface QueuedAction<TAction = AnyAction> {
   /**
    * The Redux action that was dispatched
    */
@@ -30,9 +25,9 @@ interface IteratorInstance {
 
 type Saga = (storeContext: SagaContext) => Promise<void>;
 
-type StoreActionsAndState<TAction = StoreAction> = AsyncIterableIterator<QueuedAction<TAction>>;
+type StoreActionsAndState<TAction = AnyAction> = AsyncIterableIterator<QueuedAction<TAction>>;
 
-export interface SagaContext<TAction extends AnyAction = StoreAction> {
+export interface SagaContext<TAction extends AnyAction = AnyAction> {
   /**
    * A generator function that will `yield` `Promise`s that resolve with a `QueuedAction`
    */
@@ -116,7 +111,7 @@ export function createSagaMiddleware(saga: Saga): Middleware {
       });
       runSaga();
     }
-    return (next: Dispatch<StoreAction>) => (action: StoreAction) => {
+    return (next: Dispatch<AnyAction>) => (action: AnyAction) => {
       // Call the next dispatch method in the middleware chain.
       const returnValue = next(action);
 
