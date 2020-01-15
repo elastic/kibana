@@ -62,8 +62,257 @@ test('my test', async () => {
 ### Strategies for specific Core APIs
 
 #### HTTP Routes
+The HTTP API interface is another public contract of Kibana. Although not every Kibana endpoint is for external use. Evaluating the required level of test coverage for an HTTP resource, make your judgment based on the fact whether an endpoint is considered to be public or private. Public API is expected to have a higher level of test coverage.
+Public API tests should cover **observable behavior** of the system. Therefore they should be close to the real user interactions as much as possible. Ideally, to use HTTP requests to communicate with the Kibana server.
 
-_How to test route handlers_
+##### Integration tests
+Depending on the number of external dependencies, you can consider implementing several high-level integration tests. They would work as a set of [smoke tests](https://en.wikipedia.org/wiki/Smoke_testing_(software)) for the most important functionality.
+Subjects for tests:
+- authenticated / unauthenticated access to an endpoint.
+- endpoint validation (params, query, body).
+- main business logic.
+
+###### Functional Test Runner
+If your plugin leverages elasticsearch server to store data and supports additional configuration, you can utilize Functional Test Runner(FTR) to add integration tests. 
+FTR bootstraps the real elasticsearch instance and runs Kibana against it.
+Pros:
+- runs the whole Elastic stack
+- tests cross-plugin integration
+- emulates a real user interaction with the stack
+- allows adjusting config values
+Cons:
+- slow start
+- hard to debug
+- brittle tests
+
+Imagine that `myPlugin` provides a set of endpoints to store & retrieve user data:
+```ts
+router.post(
+  {
+    path: '/myPlugin/something',
+    validate: {
+      body: schema.object({
+        text: schema.string({ maxLength: 100 }),
+      }),
+    },
+  },
+  async (context, request, response) => {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const { id } = await savedObjectsClient.update('myPlugin-type', 'myPlugin', {
+      something: request.body.text,
+    });
+    return response.ok({ body: { id } });
+  }
+);
+
+router.get(
+  {
+    path: '/myPlugin/something/{id}',
+    validate: {
+      params: schema.object({
+        id: schema.string(),
+      }),
+    },
+  },
+  async (context, request, response) => {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const { attributes } = await savedObjectsClient.get('myPlugin-type', request.params.id);
+
+    return response.ok({
+      body: attributes.something,
+    });
+  }
+);
+```
+You can reuse existing [api_integration](/test/api_integration/config.js) setup by registering a test file within a [test loader](/test/api_integration/apis/index.js). More about the existing FTR setup in the [contribution guide](/CONTRIBUTING.md#running-specific-kibana-tests)
+
+The tests cover:
+- authenticated / non-authenticated user access (when applicable)
+```ts
+// TODO after https://github.com/elastic/kibana/pull/53208/
+```
+- request validation
+```ts
+export default function({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  describe('myPlugin', () => {
+    it('validate params before to store something', async () => {
+      const response = await supertest
+        .post('/myPlugin/something')
+        .set('content-type', 'application/json')
+        .send({ text: 'aaa'.repeat(100) })
+        .expect(400);
+
+      expect(response.body).to.have.property('message');
+    });
+  });
+```
+- the main logic of the plugin
+```ts
+export default function({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  describe('myPlugin', () => {
+    it('stores something', async () => {
+      const response = await supertest
+        .post('/myPlugin/something')
+        .set('content-type', 'application/json')
+        .send({ text: 'aaa' })
+        .expect(200);
+
+      expect(response.body).to.have.property('id');
+      expect(response.body.id).to.be.a('string');
+    });
+
+    it('retrieves something', async () => {
+      const { body } = await supertest
+        .post('/myPlugin/something')
+        .set('content-type', 'application/json')
+        .send({ text: 'bbb' })
+        .expect(200);
+
+      const response = await supertest.get(`/myPlugin/something/${body.id}`).expect(200);
+      expect(response.text).be('bbb');
+    });
+  });
+```
+
+##### TestUtils
+It can be utilized if your plugin doesn't interact with the elasticsearch server. Runs tests against real Kibana server instance.
+Pros:
+- runs the real Kibana instance
+- tests cross-plugin integration
+- emulates a real user interaction with the HTTP resources
+Cons:
+- faster than FTR because it doesn't run Elasticsearch instance, but still slow
+- hard to debug
+
+Given `myPlugin` plugin with an endpoint to format user-provided text:
+```ts
+router.get(
+  {
+    path: '/myPlugin/formatter',
+    validate: {
+      query: schema.object({
+        text: schema.string({ maxLength: 100 }),
+      }),
+    },
+  },
+  async (context, request, response) => {
+    const sanitizeString = deps.sanitizer.sanitize(request.query.text);
+    const formattedText = format(sanitizeString);
+    return response.ok({ body: formattedText });
+  }
+);
+```
+To have access to Kibana TestUtils, you should create `integration_tests` folder and import `test_utils` within a test file:
+```ts
+import * as kbnTestServer from 'src/test_utils/kbn_server';
+
+describe('myPlugin', () => {
+  describe('GET /myPlugin/formatter', () => {
+    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    beforeAll(async () => {
+      root = kbnTestServer.createRoot();
+      await root.setup();
+      await root.start();
+    }, 30000);
+
+    afterAll(async () => await root.shutdown());
+    it('validates given string', async () => {
+      const response = await kbnTestServer.request
+        .get(root, '/myPlugin/formatter')
+        .query({ text: 'input string'.repeat(100) })
+        .expect(400);
+
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('formats given string', async () => {
+      const response = await kbnTestServer.request
+        .get(root, '/myPlugin/formatter')
+        .query({ text: 'input string' })
+        .expect(200);
+
+      expect(response.text).toBe('...');
+    });
+  });
+});
+```
+
+##### Unit testing
+For cases when writing integration tests is hard and slow due to complex setup or the number of logic permutations, you can go with testing your models.
+Pros:
+- fast
+- easier to debug
+
+Cons:
+- doesn't test against real dependencies
+- doesn't cover integration with other plugins
+
+You can leverage existing unit-test infrastructure for this. Let's adopt an example with `/myPlugin/formatter` endpoint to make out controllers *thin* and isolating all the network layer dependencies.
+```ts
+class TextFormatter {
+  private static _format(string: string) {
+    if(condition) throw new MisformedTextError()
+    return ...
+  }
+
+  public static async format(string: string, sanitizer: Deps['sanitizer']) {
+    const sanitizeString = await sanitizer.sanitize(string);
+    return TextFormatter._format(sanitizeString);
+  }
+}
+router.get(
+  {
+    path: '/myPlugin/formatter',
+    validate: {
+      query: schema.object({
+        text: schema.string({ maxLength: 100 }),
+      }),
+    },
+  },
+  async (context, request, response) => {
+    try {
+      const formattedText = await TextFormatter.format(request.query.text, deps.sanitizer);
+      return response.ok({ body: result });
+    } catch(e){
+      if(e instanceof MisformedTextError) {
+        return response.badRequest({ body: e.message })
+      }
+      throw e;
+    }
+  }
+);
+```
+The main difference here that we extracted the logic in a model and passed dependencies explicitly.
+Now we can add `*.test.ts` file and use dependencies mocks to cover the functionality with a broader test suit that covers:
+- input permutations
+- input edge cases
+- expected exception
+- interaction with dependencies
+```ts
+describe('TextFormatter', () => {
+  describe('format()', () => {
+    const sanitizer = sanitizerMock.createSetup();
+    sanitizer.sanitize.mockImplementation((input: string) => `sanitizer result:${input}`);
+
+    it('formats text to a ... format', async () => {
+      expect(await TextFormatter.format('aaa', sanitizer)).toBe('...');
+    });
+
+    it('calls Sanitizer.sanitize with correct arguments', async () => {
+      await TextFormatter.format('aaa', sanitizer);
+      expect(sanitizer.sanitize).toHaveBeenCalledTimes(1);
+      expect(sanitizer.sanitize).toHaveBeenCalledWith('aaa');
+    });
+
+    it('throws MisformedTextError if passed string contains banned symbols', async () => {
+      await expect(TextFormatter.format('aaa', sanitizer)).rejects.toThrow(MisformedTextError);
+    });
+    // ... other tests
+  });
+});
+```
 
 ### Applications
 
