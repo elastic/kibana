@@ -18,13 +18,22 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const filterBar = getService('filterBar');
   const renderable = getService('renderable');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'dashboard', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'header',
+    'dashboard',
+    'timePicker',
+    'visEditor',
+    'visChart',
+  ]);
 
   describe('data table with index without time filter filters', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable w/o time filter';
@@ -39,21 +48,21 @@ export default function({ getService, getPageObjects }) {
         PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
       );
       log.debug('Bucket = Split Rows');
-      await PageObjects.visualize.clickBucket('Split rows');
+      await PageObjects.visEditor.clickBucket('Split rows');
       log.debug('Aggregation = Histogram');
-      await PageObjects.visualize.selectAggregation('Histogram');
+      await PageObjects.visEditor.selectAggregation('Histogram');
       log.debug('Field = bytes');
-      await PageObjects.visualize.selectField('bytes');
+      await PageObjects.visEditor.selectField('bytes');
       log.debug('Interval = 2000');
-      await PageObjects.visualize.setNumericInterval('2000');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.setInterval('2000', { type: 'numeric' });
+      await PageObjects.visEditor.clickGo();
     });
 
     it('should be able to save and load', async function() {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visChart.waitForVisualization();
     });
 
     it('timefilter should be disabled', async () => {
@@ -68,7 +77,7 @@ export default function({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization(vizName1);
 
       // hover and click on cell to filter
-      await PageObjects.visualize.filterOnTableCell(1, 2);
+      await PageObjects.visChart.filterOnTableCell('1', '2');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
