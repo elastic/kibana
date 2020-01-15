@@ -33,6 +33,15 @@ export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart>
 
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
+      id: 'app_status_start',
+      title: 'App Status Start Page',
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./application');
+        return renderApp('app_status_start', params);
+      },
+    });
+
+    core.application.register({
       id: 'app_status',
       title: 'App Status',
       euiIconType: 'snowflake',
@@ -40,15 +49,6 @@ export class CoreAppStatusPlugin implements Plugin<{}, CoreAppStatusPluginStart>
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         return renderApp('app_status', params);
-      },
-    });
-    core.application.register({
-      id: 'app_status_start',
-      title: 'App Status Start Page',
-      updater$: this.appUpdater,
-      async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
-        return renderApp('app_status_start', params);
       },
     });
 
