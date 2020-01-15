@@ -7,9 +7,6 @@
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
-import 'ui/autoload/all';
-// @ts-ignore: path dynamic for kibana
-import { uiModules } from 'ui/modules';
 
 import introspectionQueryResultData from '../../graphql/introspection.json';
 import { CoreStart } from '../../plugin';
