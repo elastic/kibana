@@ -17,11 +17,32 @@
  * under the License.
  */
 
-export * from './split_panel';
-export { SomethingWentWrongCallout } from './something_went_wrong_callout';
-export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
-export { ConsoleMenu } from './console_menu';
-export { WelcomePanel } from './welcome_panel';
-export { AutocompleteOptions, DevToolsSettingsModal } from './settings_modal';
-export { HelpPanel } from './help_panel';
-export { EditorContentSpinner } from './editor_content_spinner';
+export const textObjectTypeName = 'text-object';
+
+/**
+ * Describes the shape of persisted objects that contain information about the current text in the
+ * text editor.
+ */
+export interface TextObject {
+  /**
+   * An ID that uniquely identifies this object.
+   */
+  id: string;
+
+  /**
+   * UNIX timestamp of when the object was created.
+   */
+  createdAt: number;
+
+  /**
+   * UNIX timestamp of when the object was last updated.
+   */
+  updatedAt: number;
+
+  /**
+   * Text value input by the user.
+   *
+   * Used to re-populate a text editor buffer.
+   */
+  text: string;
+}
