@@ -10,9 +10,10 @@ import {
   CATEGORY_EXAMPLES_ERROR_LIMIT,
   CATEGORY_EXAMPLES_WARNING_LIMIT,
 } from '../../../../../common/constants/new_job';
-import { FieldExampleCheck } from '../../../../../common/types/categories';
+import { FieldExampleCheck, CategoryFieldExample } from '../../../../../common/types/categories';
 import { getMedianStringLength } from '../../../../../common/util/string_utils';
 
+const VALID_TOKEN_COUNT = 3;
 const MEDIAN_LINE_LENGTH_LIMIT = 400;
 const NULL_COUNT_PERCENT_LIMIT = 0.75;
 
@@ -33,7 +34,11 @@ export class ValidationResults {
     return CATEGORY_EXAMPLES_VALID_STATUS.VALID;
   }
 
-  public createTokenCountResult(percentValid: number, sampleSize: number) {
+  public createTokenCountResult(sortedExamples: CategoryFieldExample[], sampleSize: number) {
+    const validExamplesSize = sortedExamples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT)
+      .length;
+    const percentValid = sampleSize === 0 ? 0 : validExamplesSize / sampleSize;
+
     let valid = CATEGORY_EXAMPLES_VALID_STATUS.VALID;
     if (percentValid < CATEGORY_EXAMPLES_ERROR_LIMIT) {
       valid = CATEGORY_EXAMPLES_VALID_STATUS.INVALID;

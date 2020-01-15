@@ -14,7 +14,6 @@ import {
 import { callWithRequestType } from '../../../../../common/types/kibana';
 import { ValidationResults } from './validation_results';
 
-const VALID_TOKEN_COUNT = 3;
 const CHUNK_SIZE = 100;
 
 export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
@@ -168,34 +167,37 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       analyzer
     );
 
-    const sortedExamples = resp.examples
+    const { examples } = resp;
+    const sampleSize = examples.length;
+    validationResults.createTokenCountResult(examples, sampleSize);
+
+    // sort examples by number of tokens, keeping track of their original order
+    // with an origIndex property
+    const sortedExamples = examples
       .map((e, i) => ({ ...e, origIndex: i }))
       .sort((a, b) => b.tokens.length - a.tokens.length);
-    const validExamples = sortedExamples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT);
-    const sampleSize = sortedExamples.length;
 
+    // we only want 'size' (e.g. 5) number of examples,
+    // so loop through the sorted examples, taking 5 at evenly
+    // spread intervals
     const multiple = Math.floor(sampleSize / size) || sampleSize;
     const filteredExamples = [];
     let i = 0;
-    while (filteredExamples.length < size && i < sortedExamples.length) {
+    while (filteredExamples.length < size && i < sampleSize) {
       filteredExamples.push(sortedExamples[i]);
       i += multiple;
     }
-    const examples = filteredExamples
+
+    // sort back into original order and remove origIndex property
+    const processedExamples = filteredExamples
       .sort((a, b) => a.origIndex - b.origIndex)
       .map(e => ({ text: e.text, tokens: e.tokens }));
-
-    const percentValid =
-      sortedExamples.length === 0 ? 0 : validExamples.length / sortedExamples.length;
-
-    validationResults.createTokenCountResult(percentValid, sampleSize);
 
     return {
       overallValidStatus: validationResults.overallResult,
       validationChecks: validationResults.results,
       sampleSize,
-      percentValid: sortedExamples.length === 0 ? 0 : validExamples.length / sortedExamples.length,
-      examples,
+      examples: processedExamples,
     };
   }
 
