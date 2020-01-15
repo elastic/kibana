@@ -8,11 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { get } from 'lodash';
 import { formatMetric } from 'plugins/monitoring/lib/format_number';
-import {
-  ClusterItemContainer,
-  BytesPercentageUsage,
-  DisabledIfNoDataAndInSetupModeLink,
-} from './helpers';
+import { ClusterItemContainer, BytesUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -153,7 +149,7 @@ export function ApmPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="apmMemoryUsage">
-                <BytesPercentageUsage usedBytes={props.memRss} maxBytes={props.memTotal} />
+                <BytesUsage usedBytes={props.memRss} />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>

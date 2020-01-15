@@ -8,56 +8,96 @@
   // These styles should all be removed once the file data visualizer is using
   // the same field_data_card component as the index based data visualizer.
   height: 408px;
+  box-shadow: none;
+  border-color: $euiBorderColor;
 
+  // Note the names of these styles need to match the type of the field they are displaying.
   .boolean {
-    background-color: #e6c220;
+    color: $euiColorVis5;
+    border-color: $euiColorVis5;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis5, 0.5);
+    }
   }
 
   .date {
-    background-color: #f98510;
+    color: $euiColorVis7;
+    border-color: $euiColorVis7;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis7, 0.5);
+    }
   }
 
   .document_count {
-    background-color: #db1374;
+    color: $euiColorVis2;
+    border-color: $euiColorVis2;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis2, 0.5);
+    }
   }
 
   .geo_point {
-    background-color: #461a0a;
+    color: $euiColorVis8;
+    border-color: $euiColorVis8;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis8, 0.5);
+    }
   }
 
   .ip {
-    background-color: #490092;
+    color: $euiColorVis3;
+    border-color: $euiColorVis3;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis3, 0.5);
+    }
   }
 
   .keyword {
-    background-color: #00b3a4;
+    color: $euiColorVis0;
+    border-color: $euiColorVis0;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis0, 0.5);
+    }
   }
 
   .number {
-    background-color: #3185fc;
+    color: $euiColorVis1;
+    border-color: $euiColorVis1;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis1, 0.5);
+    }
   }
 
   .text {
-    background-color: #920000;
+    color: $euiColorVis9;
+    border-color: $euiColorVis9;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis9, 0.5);
+    }
   }
 
   .type-other,
   .unknown {
-    background-color: #bfa180;
+    color: $euiColorVis6;
+    border-color: $euiColorVis6;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis6, 0.5);
+    }
   }
 
   // Use euiPanel styling
   @include euiPanel($selector: '.card-contents');
 
-  .card-contents {
-    height: 378px;
-    line-height: 21px;
-    border-radius: 0px 0px $euiBorderRadius $euiBorderRadius;
-    overflow: hidden;
-  }
-
   .stats {
-    padding: 10px 10px 0px 10px;
     text-align: center;
   }
 

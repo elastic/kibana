@@ -40,8 +40,10 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 

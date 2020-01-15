@@ -26,7 +26,7 @@ interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   serviceName?: string;
-  style: CSSProperties;
+  style?: CSSProperties;
 }
 
 function useCytoscape(options: cytoscape.CytoscapeOptions) {
@@ -69,18 +69,41 @@ export function Cytoscape({
 
   // Set up cytoscape event handlers
   useEffect(() => {
-    if (cy) {
-      cy.on('data', event => {
+    const dataHandler: cytoscape.EventHandler = event => {
+      if (cy) {
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
+          cy.nodes().removeClass('primary');
           cy.getElementById(serviceName).addClass('primary');
         }
 
         if (event.cy.elements().length > 0) {
           cy.layout(cytoscapeOptions.layout as cytoscape.LayoutOptions).run();
         }
-      });
+      }
+    };
+    const mouseoverHandler: cytoscape.EventHandler = event => {
+      event.target.addClass('hover');
+      event.target.connectedEdges().addClass('nodeHover');
+    };
+    const mouseoutHandler: cytoscape.EventHandler = event => {
+      event.target.removeClass('hover');
+      event.target.connectedEdges().removeClass('nodeHover');
+    };
+
+    if (cy) {
+      cy.on('data', dataHandler);
+      cy.on('mouseover', 'edge, node', mouseoverHandler);
+      cy.on('mouseout', 'edge, node', mouseoutHandler);
     }
+
+    return () => {
+      if (cy) {
+        cy.removeListener('data', undefined, dataHandler);
+        cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
+        cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
+      }
+    };
   }, [cy, serviceName]);
 
   return (

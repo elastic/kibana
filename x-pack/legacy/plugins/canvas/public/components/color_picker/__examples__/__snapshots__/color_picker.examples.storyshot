@@ -10,6 +10,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
         className="item-grid-row"
       >
         <button
+          aria-label="white"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -36,6 +37,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="#666"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -62,6 +64,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="black"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -88,6 +91,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="#abc"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -114,6 +118,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="#def"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -140,6 +145,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="#abcdef"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -285,6 +291,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
       className="item-grid-row"
     >
       <button
+        aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -327,6 +334,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -353,6 +361,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -379,6 +388,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#abc"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -405,6 +415,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#def"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -431,6 +442,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#abcdef"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -559,6 +571,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       className="item-grid-row"
     >
       <button
+        aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -585,6 +598,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -611,6 +625,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -637,6 +652,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="#abc"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -663,6 +679,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="#def"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -689,6 +706,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="#abcdef"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -817,6 +835,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
       className="item-grid-row"
     >
       <button
+        aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -859,6 +878,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -885,6 +905,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={

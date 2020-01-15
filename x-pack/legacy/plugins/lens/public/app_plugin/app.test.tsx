@@ -80,6 +80,7 @@ describe('Lens App', () => {
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
+    addToDashboardMode?: boolean;
   }> {
     return ({
       editorFrame: createMockFrame(),
@@ -126,6 +127,7 @@ describe('Lens App', () => {
       docId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string) => void;
+      addToDashboardMode?: boolean;
     }>;
   }
 
@@ -306,6 +308,7 @@ describe('Lens App', () => {
         docId?: string;
         docStorage: SavedObjectStore;
         redirectTo: (id?: string) => void;
+        addToDashboardMode?: boolean;
       }>;
 
       beforeEach(() => {
@@ -344,14 +347,19 @@ describe('Lens App', () => {
 
       async function save({
         initialDocId,
+        addToDashboardMode,
         ...saveProps
       }: SaveProps & {
         initialDocId?: string;
+        addToDashboardMode?: boolean;
       }) {
         const args = {
           ...defaultArgs,
           docId: initialDocId,
         };
+        if (addToDashboardMode) {
+          args.addToDashboardMode = addToDashboardMode;
+        }
         args.editorFrame = frame;
         (args.docStorage.load as jest.Mock).mockResolvedValue({
           id: '1234',
@@ -542,6 +550,23 @@ describe('Lens App', () => {
         await waitForPromises();
 
         expect(getButton(instance).disableButton).toEqual(false);
+      });
+
+      it('saves new doc and redirects to dashboard', async () => {
+        const { args } = await save({
+          initialDocId: undefined,
+          addToDashboardMode: true,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          expression: 'kibana 3',
+          id: undefined,
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
       });
     });
   });

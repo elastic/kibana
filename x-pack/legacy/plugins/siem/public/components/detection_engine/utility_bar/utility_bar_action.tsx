@@ -45,7 +45,7 @@ export interface UtilityBarActionProps extends LinkIconProps {
 }
 
 export const UtilityBarAction = React.memo<UtilityBarActionProps>(
-  ({ children, color, href, iconSide, iconSize, iconType, onClick, popoverContent }) => (
+  ({ children, color, disabled, href, iconSide, iconSize, iconType, onClick, popoverContent }) => (
     <BarAction>
       {popoverContent ? (
         <Popover
@@ -60,6 +60,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       ) : (
         <LinkIcon
           color={color}
+          disabled={disabled}
           href={href}
           iconSide={iconSide}
           iconSize={iconSize}

@@ -5,7 +5,15 @@
  */
 
 import { getNestedProperty } from '../../util/object_utils';
-import { DataFrameAnalyticsConfig, getPredictedFieldName, getDependentVar } from './analytics';
+import {
+  DataFrameAnalyticsConfig,
+  getPredictedFieldName,
+  getDependentVar,
+  getPredictionFieldName,
+} from './analytics';
+import { Field } from '../../../../common/types/fields';
+import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
+import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;
@@ -19,7 +27,40 @@ export interface EsDoc extends Record<string, any> {
 export const MAX_COLUMNS = 20;
 export const DEFAULT_REGRESSION_COLUMNS = 8;
 
+export const BASIC_NUMERICAL_TYPES = new Set([
+  ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.INTEGER,
+  ES_FIELD_TYPES.SHORT,
+  ES_FIELD_TYPES.BYTE,
+]);
+
+export const EXTENDED_NUMERICAL_TYPES = new Set([
+  ES_FIELD_TYPES.DOUBLE,
+  ES_FIELD_TYPES.FLOAT,
+  ES_FIELD_TYPES.HALF_FLOAT,
+  ES_FIELD_TYPES.SCALED_FLOAT,
+]);
+
 const ML__ID_COPY = 'ml__id_copy';
+
+export const isKeywordAndTextType = (fieldName: string): boolean => {
+  const { fields } = newJobCapsService;
+
+  const fieldType = fields.find(field => field.name === fieldName)?.type;
+  let isBothTypes = false;
+
+  // If it's a keyword type - check if it has a corresponding text type
+  if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.KEYWORD) {
+    const field = newJobCapsService.getFieldById(fieldName.replace(/\.keyword$/, ''));
+    isBothTypes = field !== null && field.type === ES_FIELD_TYPES.TEXT;
+  } else if (fieldType !== undefined && fieldType === ES_FIELD_TYPES.TEXT) {
+    //   If text, check if has corresponding keyword type
+    const field = newJobCapsService.getFieldById(`${fieldName}.keyword`);
+    isBothTypes = field !== null && field.type === ES_FIELD_TYPES.KEYWORD;
+  }
+
+  return isBothTypes;
+};
 
 // Used to sort columns:
 // - string based columns are moved to the left
@@ -90,10 +131,10 @@ export const sortRegressionResultsFields = (
   if (b === predictedField) {
     return 1;
   }
-  if (a === dependentVariable) {
+  if (a === dependentVariable || a === dependentVariable.replace(/\.keyword$/, '')) {
     return -1;
   }
-  if (b === dependentVariable) {
+  if (b === dependentVariable || b === dependentVariable.replace(/\.keyword$/, '')) {
     return 1;
   }
 
@@ -200,6 +241,50 @@ export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFi
   return flatDocFields.filter(f => f !== ML__ID_COPY);
 }
 
+export const getDefaultFieldsFromJobCaps = (
+  fields: Field[],
+  jobConfig: DataFrameAnalyticsConfig
+): { selectedFields: Field[]; docFields: Field[] } => {
+  const fieldsObj = { selectedFields: [], docFields: [] };
+  if (fields.length === 0) {
+    return fieldsObj;
+  }
+
+  const dependentVariable = getDependentVar(jobConfig.analysis);
+  const type = newJobCapsService.getFieldById(dependentVariable)?.type;
+  const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
+  // default is 'ml'
+  const resultsField = jobConfig.dest.results_field;
+
+  const defaultPredictionField = `${dependentVariable}_prediction`;
+  const predictedField = `${resultsField}.${
+    predictionFieldName ? predictionFieldName : defaultPredictionField
+  }`;
+
+  const allFields: any = [
+    {
+      id: `${resultsField}.is_training`,
+      name: `${resultsField}.is_training`,
+      type: ES_FIELD_TYPES.BOOLEAN,
+    },
+    { id: predictedField, name: predictedField, type },
+    ...fields,
+  ].sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig));
+
+  let selectedFields = allFields
+    .slice(0, DEFAULT_REGRESSION_COLUMNS * 2)
+    .filter((field: any) => field.name === predictedField || !field.name.includes('.keyword'));
+
+  if (selectedFields.length > DEFAULT_REGRESSION_COLUMNS) {
+    selectedFields = selectedFields.slice(0, DEFAULT_REGRESSION_COLUMNS);
+  }
+
+  return {
+    selectedFields,
+    docFields: allFields,
+  };
+};
+
 export const getDefaultClassificationFields = (
   docs: EsDoc[],
   jobConfig: DataFrameAnalyticsConfig
@@ -290,13 +375,27 @@ export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string):
     .slice(0, MAX_COLUMNS);
 };
 
-export const toggleSelectedField = (
+export const toggleSelectedFieldSimple = (
   selectedFields: EsFieldName[],
   column: EsFieldName
 ): EsFieldName[] => {
   const index = selectedFields.indexOf(column);
+
   if (index === -1) {
     selectedFields.push(column);
+  } else {
+    selectedFields.splice(index, 1);
+  }
+  return selectedFields;
+};
+
+export const toggleSelectedField = (selectedFields: Field[], column: EsFieldName): Field[] => {
+  const index = selectedFields.map(field => field.name).indexOf(column);
+  if (index === -1) {
+    const columnField = newJobCapsService.getFieldById(column);
+    if (columnField !== null) {
+      selectedFields.push(columnField);
+    }
   } else {
     selectedFields.splice(index, 1);
   }

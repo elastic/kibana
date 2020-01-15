@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
+import { documentationLinks } from 'ui/documentation_links';
 
 export const HelpMenu = React.memo(() => {
   useEffect(() => {
@@ -15,6 +16,14 @@ export const HelpMenu = React.memo(() => {
         defaultMessage: 'SIEM',
       }),
       links: [
+        {
+          content: i18n.translate('xpack.siem.chrome.helpMenu.documentation', {
+            defaultMessage: 'SIEM documentation',
+          }),
+          href: documentationLinks.siem.guide,
+          iconType: 'documents',
+          linkType: 'custom',
+        },
         {
           linkType: 'discuss',
           href: 'https://discuss.elastic.co/c/siem',
