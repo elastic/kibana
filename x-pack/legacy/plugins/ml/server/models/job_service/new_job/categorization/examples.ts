@@ -121,8 +121,6 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
     const lengths = examples.map(e => e.length);
     const sumLengths = lengths.map((s => (a: number) => (s += a))(0));
 
-    // createMedianMessageLengthResult(lengths);
-
     const tokensPerExample: Token[][] = examples.map(e => []);
 
     tokens.forEach((t, i) => {
