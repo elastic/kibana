@@ -1,0 +1,17 @@
+{
+  "rule_id": "d17fe857-eb67-4843-ab63-bf4852e49396",
+  "risk_score": 50,
+  "description": "Summarize the number of times a host triggered a signature.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice Signatures::Signature_Summary",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"Signatures::Signature_Summary\" or rule.name: \"Signatures::Signature_Summary\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

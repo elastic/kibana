@@ -1,0 +1,17 @@
+{
+  "rule_id": "9616587f-6396-42d0-bd31-ef8dbd806210",
+  "risk_score": 50,
+  "description": "EQL - WMIC Command Lateral Movement",
+  "immutable": true,
+  "interval": "5m",
+  "name": "EQL - WMIC Command Lateral Movement",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "   event.action:\"Process Create (rule: ProcessCreate)\" and  process.name:\"wmic.exe\" and process.args:(\"/node\" or \"-node\") and process.args:(\"call\" or \"set\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -50,7 +50,7 @@ export function TransactionDetails() {
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['transactionResult'],
+      filterNames: ['transactionResult', 'serviceVersion'],
       projection: PROJECTION.TRANSACTIONS,
       params: {
         transactionName,

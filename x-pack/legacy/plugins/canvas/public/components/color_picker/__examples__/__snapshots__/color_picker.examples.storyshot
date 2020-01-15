@@ -10,6 +10,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
         className="item-grid-row"
       >
         <button
+          aria-label="white"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -36,6 +37,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="#666"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -62,6 +64,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="black"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -88,6 +91,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="#abc"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -114,6 +118,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="#def"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -140,6 +145,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           </div>
         </button>
         <button
+          aria-label="#abcdef"
           className="euiLink euiLink--primary canvasColorPalette__dot"
           onClick={[Function]}
           style={
@@ -220,10 +226,11 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           type="button"
         >
           <svg
-            aria-hidden="true"
+            aria-hidden={true}
             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
             height={16}
+            role="img"
             style={null}
             viewBox="0 0 16 16"
             width={16}
@@ -238,10 +245,11 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           type="button"
         >
           <svg
-            aria-hidden="true"
+            aria-hidden={true}
             className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
             focusable="false"
             height={16}
+            role="img"
             style={null}
             viewBox="0 0 16 16"
             width={16}
@@ -283,6 +291,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
       className="item-grid-row"
     >
       <button
+        aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -307,9 +316,11 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
             }
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
               focusable="false"
               height={16}
+              role="img"
               style={
                 Object {
                   "fill": "#333",
@@ -323,6 +334,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -349,6 +361,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -375,6 +388,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#abc"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -401,6 +415,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#def"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -427,6 +442,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#abcdef"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -511,10 +527,11 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -529,10 +546,11 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -553,6 +571,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       className="item-grid-row"
     >
       <button
+        aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -579,6 +598,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -605,6 +625,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -631,6 +652,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="#abc"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -657,6 +679,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="#def"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -683,6 +706,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         </div>
       </button>
       <button
+        aria-label="#abcdef"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -767,10 +791,11 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -785,10 +810,11 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -809,6 +835,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
       className="item-grid-row"
     >
       <button
+        aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -833,9 +860,11 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
             }
           >
             <svg
+              aria-hidden={true}
               className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
               focusable="false"
               height={16}
+              role="img"
               style={
                 Object {
                   "fill": "#333",
@@ -849,6 +878,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -875,6 +905,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         </div>
       </button>
       <button
+        aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
         onClick={[Function]}
         style={
@@ -959,10 +990,11 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}
@@ -977,10 +1009,11 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         type="button"
       >
         <svg
-          aria-hidden="true"
+          aria-hidden={true}
           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
           focusable="false"
           height={16}
+          role="img"
           style={null}
           viewBox="0 0 16 16"
           width={16}

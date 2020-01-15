@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('ui/new_platform');
 import { RemoteClusterForm } from '../../public/app/sections/components/remote_cluster_form';
 import { pageHelpers, setupEnvironment, nextTick } from './helpers';
 import { REMOTE_CLUSTER_EDIT, REMOTE_CLUSTER_EDIT_NAME } from './helpers/constants';

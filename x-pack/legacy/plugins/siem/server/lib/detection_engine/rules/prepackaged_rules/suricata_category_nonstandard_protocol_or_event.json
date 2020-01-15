@@ -1,0 +1,17 @@
+{
+  "rule_id": "82f9f485-873b-4eeb-b231-052ab81e05b8",
+  "risk_score": 50,
+  "description": "Suricata Category - Non-Standard Protocol or Event",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Non-Standard Protocol or Event",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Detection of a non-standard protocol or event\" or rule.category: \"Detection of a non-standard protocol or event\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

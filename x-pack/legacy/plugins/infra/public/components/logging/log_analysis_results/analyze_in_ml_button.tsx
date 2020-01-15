@@ -8,10 +8,9 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { encode } from 'rison-node';
-import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
 import url from 'url';
-
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 
 export const AnalyzeInMlButton: React.FunctionComponent<{
@@ -19,7 +18,11 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
   partition?: string;
   timeRange: TimeRange;
 }> = ({ jobId, partition, timeRange }) => {
-  const pathname = chrome.addBasePath('/app/ml');
+  const prependBasePath = useKibana().services.http?.basePath?.prepend;
+  if (!prependBasePath) {
+    return null;
+  }
+  const pathname = prependBasePath('/app/ml');
   const buttonLabel = (
     <FormattedMessage
       id="xpack.infra.logs.analysis.analyzeInMlButtonLabel"

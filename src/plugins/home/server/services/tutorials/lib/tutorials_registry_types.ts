@@ -94,17 +94,5 @@ export interface TutorialSchema {
   savedObjectsInstallMsg: string;
 }
 export type TutorialProvider = (context: { [key: string]: unknown }) => TutorialSchema;
-export type TutorialContextFactory = (
-  req: KibanaRequest<
-    Readonly<{
-      [x: string]: any;
-    }>,
-    Readonly<{
-      [x: string]: any;
-    }>,
-    Readonly<{
-      [x: string]: any;
-    }>
-  >
-) => { [key: string]: unknown };
+export type TutorialContextFactory = (req: KibanaRequest) => { [key: string]: unknown };
 export type ScopedTutorialContextFactory = (...args: any[]) => any;

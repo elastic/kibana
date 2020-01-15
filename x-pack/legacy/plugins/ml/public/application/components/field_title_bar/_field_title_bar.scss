@@ -1,9 +1,14 @@
 .ml-field-title-bar {
-  color: $euiColorEmptyShade;
-  @include euiFontSizeL;
+  @include euiFontSizeM;
+  font-family: Roboto Mono, serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: $euiFontSizeS;
+  border-radius: $euiBorderRadius $euiBorderRadius 0 0;
+  padding: $euiSizeXS;
+  margin: (-$euiSize) (-$euiSize) 0 (-$euiSize);
+  border-top: 3px solid;
   text-align: center;
-  border-radius: $euiBorderRadius $euiBorderRadius 0px 0px;
-  padding-bottom: $euiSizeXS/2;
 
   .field-type-icon {
     vertical-align: middle;
@@ -18,5 +23,6 @@
     padding-right: $euiSizeS;
     max-width: 290px; // SASSTODO: Calculate value
     display: inline-block;
+    margin-left: $euiSizeS;
   }
 }

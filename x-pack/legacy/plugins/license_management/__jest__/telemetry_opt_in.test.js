@@ -11,9 +11,7 @@ import {
 import { TelemetryOptIn } from '../public/np_ready/application/components/telemetry_opt_in';
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 
-jest.mock('ui/capabilities', () => ({
-  get: jest.fn(),
-}));
+jest.mock('ui/new_platform');
 
 setTelemetryEnabled(true);
 

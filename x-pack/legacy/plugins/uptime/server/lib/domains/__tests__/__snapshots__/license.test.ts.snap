@@ -2,6 +2,7 @@
 
 exports[`license check returns result for a valid license 1`] = `
 Object {
+  "message": "License is valid and active",
   "statusCode": 200,
 }
 `;

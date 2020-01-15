@@ -6,7 +6,7 @@
   "dependencies": {
     "chalk": "^2.4.2",
     "dedent": "^0.7.0",
-    "execa": "^3.4.0",
+    "execa": "^3.2.0",
     "getopts": "^2.2.4",
     "lodash.camelcase": "^4.3.0",
     "lodash.kebabcase": "^4.1.1",

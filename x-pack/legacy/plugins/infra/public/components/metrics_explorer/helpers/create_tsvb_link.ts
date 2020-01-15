@@ -8,10 +8,7 @@ import { encode } from 'rison-node';
 import uuid from 'uuid';
 import { set } from 'lodash';
 import { colorTransformer, MetricsExplorerColor } from '../../../../common/color_palette';
-import {
-  MetricsExplorerSeries,
-  MetricsExplorerAggregation,
-} from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
@@ -26,7 +23,7 @@ import { SourceQuery } from '../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
-  if (metric.aggregation === MetricsExplorerAggregation.rate) {
+  if (metric.aggregation === 'rate') {
     const metricId = uuid.v1();
     const positiveOnlyId = uuid.v1();
     const derivativeId = uuid.v1();
@@ -73,8 +70,7 @@ const mapMetricToSeries = (chartOptions: MetricsExplorerChartOptions) => (
     ),
     fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
     formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
-    value_template:
-      MetricsExplorerAggregation.rate === metric.aggregation ? '{{value}}/s' : '{{value}}',
+    value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
     id: uuid.v1(),
     line_width: 2,
     metrics: metricsExplorerMetricToTSVBMetric(metric),

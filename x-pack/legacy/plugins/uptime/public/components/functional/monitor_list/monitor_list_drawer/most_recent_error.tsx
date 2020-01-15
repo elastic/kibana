@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from '../monitor_page_link';
@@ -39,6 +39,7 @@ export const MostRecentError = ({ error, monitorId, timestamp }: MostRecentError
 
   return (
     <>
+      <EuiSpacer />
       <EuiText size="xs">
         <h3>
           {i18n.translate('xpack.uptime.monitorList.mostRecentError.title', {
@@ -48,6 +49,7 @@ export const MostRecentError = ({ error, monitorId, timestamp }: MostRecentError
           })}
         </h3>
       </EuiText>
+      <EuiSpacer size="s" />
       <MonitorPageLink monitorId={monitorId} linkParameters={linkParameters}>
         {error?.message}
       </MonitorPageLink>

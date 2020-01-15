@@ -13,7 +13,14 @@
       "alertTypeId": {
         "type": "keyword"
       },
-      "interval": {
+      "schedule": {
+        "properties": {
+          "interval": {
+            "type": "keyword"
+          }
+        }
+      },
+      "consumer": {
         "type": "keyword"
       },
       "actions": {
@@ -46,6 +53,9 @@
       },
       "updatedBy": {
         "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
       },
       "apiKey": {
         "type": "binary"

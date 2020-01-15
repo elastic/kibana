@@ -5,13 +5,12 @@
  */
 
 import { FC } from 'react';
-
-import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 declare const DataRecognizer: FC<{
   indexPattern: IndexPattern;
-  savedSearch?: SavedSearchSavedObject | null;
+  savedSearch: SavedSearchSavedObject | null;
   results: {
     count: number;
     onChange?: Function;

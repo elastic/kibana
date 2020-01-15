@@ -26,15 +26,11 @@ import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
 import { managementApi } from './server/routes/api/management';
-import { scriptsApi } from './server/routes/api/scripts';
-import { registerSuggestionsApi } from './server/routes/api/suggestions';
-import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
-import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
@@ -326,16 +322,12 @@ export default function(kibana) {
     init: async function(server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
       // routes
-      scriptsApi(server);
       importApi(server);
       exportApi(server);
       homeApi(server);
       managementApi(server);
-      registerSuggestionsApi(server);
-      registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
-      makeKQLUsageCollector(usageCollection, server);
       registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));

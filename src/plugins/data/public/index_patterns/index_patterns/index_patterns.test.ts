@@ -19,7 +19,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { IndexPatterns } from './index_patterns';
-import { SavedObjectsClientContract, IUiSettingsClient, HttpServiceBase } from 'kibana/public';
+import { SavedObjectsClientContract, IUiSettingsClient, HttpSetup } from 'kibana/public';
 
 jest.mock('./index_pattern', () => {
   class IndexPattern {
@@ -49,7 +49,7 @@ describe('IndexPatterns', () => {
   beforeEach(() => {
     const savedObjectsClient = {} as SavedObjectsClientContract;
     const uiSettings = {} as IUiSettingsClient;
-    const http = {} as HttpServiceBase;
+    const http = {} as HttpSetup;
 
     indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
   });

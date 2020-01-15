@@ -1,0 +1,186 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders ControlsTab 1`] = `
+<div>
+  <InjectIntl(ControlEditorUi)
+    controlIndex={0}
+    controlParams={
+      Object {
+        "fieldName": "keywordField",
+        "id": "1",
+        "indexPattern": "indexPattern1",
+        "label": "custom label",
+        "options": Object {
+          "multiselect": true,
+          "order": "desc",
+          "size": 5,
+          "type": "terms",
+        },
+        "parent": "parent",
+        "type": "list",
+      }
+    }
+    deps={
+      Object {
+        "core": Object {
+          "getStartServices": [MockFunction],
+          "injectedMetadata": Object {
+            "getInjectedVar": [MockFunction],
+          },
+        },
+        "data": Object {
+          "query": Object {
+            "filterManager": Object {
+              "fieldName": "myField",
+              "getAppFilters": [MockFunction],
+              "getGlobalFilters": [MockFunction],
+              "getIndexPattern": [Function],
+            },
+            "timefilter": Object {
+              "timefilter": Object {},
+            },
+          },
+        },
+      }
+    }
+    getIndexPattern={[Function]}
+    handleCheckboxOptionChange={[Function]}
+    handleFieldNameChange={[Function]}
+    handleIndexPatternChange={[Function]}
+    handleLabelChange={[Function]}
+    handleNumberOptionChange={[Function]}
+    handleParentChange={[Function]}
+    handleRemoveControl={[Function]}
+    key="1"
+    moveControl={[Function]}
+    parentCandidates={
+      Array [
+        Object {
+          "text": "numberField",
+          "value": "2",
+        },
+      ]
+    }
+  />
+  <InjectIntl(ControlEditorUi)
+    controlIndex={1}
+    controlParams={
+      Object {
+        "fieldName": "numberField",
+        "id": "2",
+        "indexPattern": "indexPattern1",
+        "label": "",
+        "options": Object {
+          "step": 1,
+        },
+        "parent": "parent",
+        "type": "range",
+      }
+    }
+    deps={
+      Object {
+        "core": Object {
+          "getStartServices": [MockFunction],
+          "injectedMetadata": Object {
+            "getInjectedVar": [MockFunction],
+          },
+        },
+        "data": Object {
+          "query": Object {
+            "filterManager": Object {
+              "fieldName": "myField",
+              "getAppFilters": [MockFunction],
+              "getGlobalFilters": [MockFunction],
+              "getIndexPattern": [Function],
+            },
+            "timefilter": Object {
+              "timefilter": Object {},
+            },
+          },
+        },
+      }
+    }
+    getIndexPattern={[Function]}
+    handleCheckboxOptionChange={[Function]}
+    handleFieldNameChange={[Function]}
+    handleIndexPatternChange={[Function]}
+    handleLabelChange={[Function]}
+    handleNumberOptionChange={[Function]}
+    handleParentChange={[Function]}
+    handleRemoveControl={[Function]}
+    key="2"
+    moveControl={[Function]}
+    parentCandidates={
+      Array [
+        Object {
+          "text": "custom label",
+          "value": "1",
+        },
+      ]
+    }
+  />
+  <EuiPanel
+    grow={false}
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          id="selectControlType"
+          labelType="label"
+        >
+          <EuiSelect
+            aria-label="Select control type"
+            data-test-subj="selectControlType"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "Range slider",
+                  "value": "range",
+                },
+                Object {
+                  "text": "Options list",
+                  "value": "list",
+                },
+              ]
+            }
+            value="list"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          id="addControl"
+          labelType="label"
+        >
+          <EuiButton
+            aria-label="Add control"
+            data-test-subj="inputControlEditorAddBtn"
+            fill={true}
+            iconType="plusInCircle"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Add"
+              id="inputControl.editor.controlsTab.addButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+</div>
+`;

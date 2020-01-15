@@ -37,6 +37,7 @@ export default async function({ readConfigFile }) {
       require.resolve('./test_suites/panel_actions'),
       require.resolve('./test_suites/embeddable_explorer'),
       require.resolve('./test_suites/core_plugins'),
+      require.resolve('./test_suites/management'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -57,11 +58,12 @@ export default async function({ readConfigFile }) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
+
+        // Required to load new platform plugins via `--plugin-path` flag.
+        '--env.name=development',
         ...plugins.map(
           pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
-        // Required to load new platform plugins via `--plugin-path` flag.
-        '--env.name=development',
       ],
     },
   };

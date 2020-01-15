@@ -5,14 +5,10 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
-import '../../../mock/ui_settings';
 import { TestProviders } from '../../../mock';
 import { UtilityBarAction } from './index';
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('UtilityBarAction', () => {
   test('it renders', () => {
@@ -22,7 +18,7 @@ describe('UtilityBarAction', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper.find('UtilityBarAction'))).toMatchSnapshot();
+    expect(wrapper.find('UtilityBarAction')).toMatchSnapshot();
   });
 
   test('it renders a popover', () => {

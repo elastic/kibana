@@ -74,9 +74,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 
@@ -190,9 +188,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 

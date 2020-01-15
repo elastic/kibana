@@ -1,0 +1,17 @@
+{
+  "rule_id": "e856918b-f26e-4893-84b9-3deb65046fb7",
+  "risk_score": 50,
+  "description": "Suricata Category - Web Application Attack",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Web Application Attack",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Web Application Attack\" or rule.category: \"Web Application Attack\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

@@ -14,7 +14,7 @@
     "kbn:watch": "node scripts/build --source-maps --watch"
   },
   "devDependencies": {
-    "@babel/cli": "^7.7.5",
+    "@babel/cli": "^7.5.5",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
     "typescript": "3.7.2"

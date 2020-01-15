@@ -1,0 +1,17 @@
+{
+  "rule_id": "d299379d-41de-4640-96b6-77aaa9adfa6f",
+  "risk_score": 50,
+  "description": "Suricata Category - Targeted Malicious Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Targeted Malicious Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Targeted Malicious Activity was Detected\" or rule.category: \"Targeted Malicious Activity was Detected\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

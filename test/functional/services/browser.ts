@@ -30,13 +30,7 @@ import { Browsers } from './remote/browsers';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const { driver, browserType, consoleLog$ } = await getService('__webdriver__').init();
-
-  consoleLog$.subscribe(({ message, level }) => {
-    log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
-      `browser[${level}] ${message}`
-    );
-  });
+  const { driver, browserType } = await getService('__webdriver__').init();
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
 

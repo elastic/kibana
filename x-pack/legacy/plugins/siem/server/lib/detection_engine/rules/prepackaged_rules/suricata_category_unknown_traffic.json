@@ -1,0 +1,17 @@
+{
+  "rule_id": "827ea90c-00c2-45f7-b873-dd060297b2d2",
+  "risk_score": 50,
+  "description": "Suricata Category - Unknown Traffic",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Suricata Category - Unknown Traffic",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: suricata and event.kind: alert and (suricata.eve.alert.category: \"Unknown Traffic\" or rule.category: \"Unknown Traffic\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

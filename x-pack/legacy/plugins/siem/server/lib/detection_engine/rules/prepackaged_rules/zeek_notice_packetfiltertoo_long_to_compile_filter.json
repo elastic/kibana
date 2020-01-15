@@ -1,0 +1,17 @@
+{
+  "rule_id": "71e93c42-7990-4233-a8a5-2631193df7db",
+  "risk_score": 50,
+  "description": "Generated when a notice takes too long to compile.",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Zeek Notice PacketFilter::Too_Long_To_Compile_Filter",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module: zeek and event.dataset: zeek.notice and (zeek.notice.note: \"PacketFilter::Too_Long_To_Compile_Filter\" or rule.name: \"PacketFilter::Too_Long_To_Compile_Filter\")",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false,
+  "version": 1
+}

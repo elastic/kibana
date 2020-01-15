@@ -17,12 +17,14 @@ import { UpdateSourceEditor } from './update_source_editor';
 import {
   ES_SEARCH,
   ES_GEO_FIELD_TYPE,
-  ES_SIZE_LIMIT,
+  DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
+  CATEGORICAL_DATA_TYPES,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
+import { loadIndexSettings } from './load_index_settings';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -120,6 +122,45 @@ export class ESSearchSource extends AbstractESSource {
         return this.createField({ fieldName: field.name });
       });
     } catch (error) {
+      return [];
+    }
+  }
+
+  async getCategoricalFields() {
+    try {
+      const indexPattern = await this.getIndexPattern();
+
+      const aggFields = [];
+      CATEGORICAL_DATA_TYPES.forEach(dataType => {
+        indexPattern.fields.getByType(dataType).forEach(field => {
+          if (field.aggregatable) {
+            aggFields.push(field);
+          }
+        });
+      });
+      return aggFields.map(field => {
+        return this.createField({ fieldName: field.name });
+      });
+    } catch (error) {
+      //error surfaces in the LayerTOC UI
+      return [];
+    }
+  }
+
+  async getFields() {
+    try {
+      const indexPattern = await this.getIndexPattern();
+      return indexPattern.fields
+        .filter(field => {
+          // Ensure fielddata is enabled for field.
+          // Search does not request _source
+          return field.aggregatable;
+        })
+        .map(field => {
+          return this.createField({ fieldName: field.name });
+        });
+    } catch (error) {
+      // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
     }
   }
@@ -249,8 +290,8 @@ export class ESSearchSource extends AbstractESSource {
       entitySplit: {
         terms: {
           field: topHitsSplitField,
-          size: ES_SIZE_LIMIT,
-          shard_size: ES_SIZE_LIMIT,
+          size: DEFAULT_MAX_BUCKETS_LIMIT,
+          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
         },
         aggs: {
           entityHits: {
@@ -272,7 +313,7 @@ export class ESSearchSource extends AbstractESSource {
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
     const totalEntities = _.get(resp, 'aggregations.totalEntities.value', 0);
     // can not compare entityBuckets.length to totalEntities because totalEntities is an approximate
-    const areEntitiesTrimmed = entityBuckets.length >= ES_SIZE_LIMIT;
+    const areEntitiesTrimmed = entityBuckets.length >= DEFAULT_MAX_BUCKETS_LIMIT;
     let areTopHitsTrimmed = false;
     entityBuckets.forEach(entityBucket => {
       const total = _.get(entityBucket, 'entityHits.hits.total', 0);
@@ -297,7 +338,7 @@ export class ESSearchSource extends AbstractESSource {
 
   // searchFilters.fieldNames contains geo field and any fields needed for styling features
   // Performs Elasticsearch search request being careful to pull back only required fields to minimize response size
-  async _getSearchHits(layerName, searchFilters, registerCancelCallback) {
+  async _getSearchHits(layerName, searchFilters, maxResultWindow, registerCancelCallback) {
     const initialSearchContext = {
       docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
     };
@@ -313,7 +354,7 @@ export class ESSearchSource extends AbstractESSource {
       );
       searchSource = await this._makeSearchSource(
         searchFilters,
-        ES_SIZE_LIMIT,
+        maxResultWindow,
         initialSearchContext
       );
       searchSource.setField('source', false); // do not need anything from _source
@@ -322,7 +363,7 @@ export class ESSearchSource extends AbstractESSource {
       // geo_shape fields do not support docvalue_fields yet, so still have to be pulled from _source
       searchSource = await this._makeSearchSource(
         searchFilters,
-        ES_SIZE_LIMIT,
+        maxResultWindow,
         initialSearchContext
       );
       // Setting "fields" instead of "source: { includes: []}"
@@ -364,11 +405,19 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+    const indexPattern = await this.getIndexPattern();
+
+    const indexSettings = await loadIndexSettings(indexPattern.title);
+
     const { hits, meta } = this._isTopHits()
       ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
-      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
+      : await this._getSearchHits(
+          layerName,
+          searchFilters,
+          indexSettings.maxResultWindow,
+          registerCancelCallback
+        );
 
-    const indexPattern = await this.getIndexPattern();
     const unusedMetaFields = indexPattern.metaFields.filter(metaField => {
       return !['_id', '_index'].includes(metaField);
     });

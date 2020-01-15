@@ -47,6 +47,7 @@ function help() {
        -i, --include          Include only specified projects. If left unspecified, it defaults to including all projects.
        --oss                  Do not include the x-pack when running command.
        --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
+       --no-cache             Disable the bootstrap cache
   `);
 }
 
@@ -65,7 +66,10 @@ export async function run(argv: string[]) {
       h: 'help',
       i: 'include',
     },
-    boolean: ['prefer-offline', 'frozen-lockfile'],
+    default: {
+      cache: true,
+    },
+    boolean: ['prefer-offline', 'frozen-lockfile', 'cache'],
   });
 
   const args = options._;

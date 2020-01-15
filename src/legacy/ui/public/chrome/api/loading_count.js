@@ -24,7 +24,7 @@ const newPlatformHttp = npSetup.core.http;
 
 export function initLoadingCountApi(chrome) {
   const manualCount$ = new Rx.BehaviorSubject(0);
-  newPlatformHttp.addLoadingCount(manualCount$);
+  newPlatformHttp.addLoadingCountSource(manualCount$);
 
   chrome.loadingCount = new (class ChromeLoadingCountApi {
     /**

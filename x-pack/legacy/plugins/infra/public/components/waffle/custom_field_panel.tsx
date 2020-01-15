@@ -6,12 +6,12 @@
 
 import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import React from 'react';
-import { FieldType } from 'ui/index_patterns';
+import { IFieldType } from 'src/plugins/data/public';
+
 interface Props {
   onSubmit: (field: string) => void;
-  fields: FieldType[];
+  fields: IFieldType[];
 }
 
 interface SelectedOption {

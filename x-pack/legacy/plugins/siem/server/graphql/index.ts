@@ -20,6 +20,7 @@ import { overviewSchema } from './overview';
 import { dateSchema } from './scalar_date';
 import { noteSchema } from './note';
 import { pinnedEventSchema } from './pinned_event';
+import { toAnySchema } from './scalar_to_any';
 import { toBooleanSchema } from './scalar_to_boolean_array';
 import { toDateSchema } from './scalar_to_date_array';
 import { toNumberSchema } from './scalar_to_number_array';
@@ -29,12 +30,15 @@ import { timelineSchema } from './timeline';
 import { tlsSchema } from './tls';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
+import { alertsSchema } from './alerts';
 export const schemas = [
+  alertsSchema,
   anomaliesSchema,
   authenticationsSchema,
   ecsSchema,
   eventsSchema,
   dateSchema,
+  toAnySchema,
   toNumberSchema,
   toDateSchema,
   toBooleanSchema,

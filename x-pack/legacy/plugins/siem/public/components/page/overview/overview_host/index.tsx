@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { HeaderSection } from '../../../header_section';
 import { manageQuery } from '../../../page/manage_query';
@@ -17,6 +17,7 @@ import {
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewHostStats } from '../overview_host_stats';
 import { getHostsUrl } from '../../../link_to';
+import { InspectButtonContainer } from '../../../inspect';
 
 export interface OwnProps {
   startDate: number;
@@ -36,15 +37,14 @@ export interface OwnProps {
 
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
 type OverviewHostProps = OwnProps;
-export const OverviewHost = React.memo<OverviewHostProps>(({ endDate, startDate, setQuery }) => {
-  const [isHover, setIsHover] = useState(false);
-  return (
-    <EuiFlexItem>
-      <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
+
+const OverviewHostComponent: React.FC<OverviewHostProps> = ({ endDate, startDate, setQuery }) => (
+  <EuiFlexItem>
+    <InspectButtonContainer>
+      <EuiPanel>
         <HeaderSection
           border
           id={OverviewHostQueryId}
-          showInspect={isHover}
           subtitle={
             <FormattedMessage
               id="xpack.siem.overview.hostsSubtitle"
@@ -73,8 +73,8 @@ export const OverviewHost = React.memo<OverviewHostProps>(({ endDate, startDate,
           )}
         </OverviewHostQuery>
       </EuiPanel>
-    </EuiFlexItem>
-  );
-});
+    </InspectButtonContainer>
+  </EuiFlexItem>
+);
 
-OverviewHost.displayName = 'OverviewHost';
+export const OverviewHost = React.memo(OverviewHostComponent);
