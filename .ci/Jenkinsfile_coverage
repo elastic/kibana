@@ -108,7 +108,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
               kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
 
-              kibanaPipeline.uploadCoverageStaticSite(new Date().format('yyyy-MM-dd_HHmmss'))
+              kibanaPipeline.uploadCoverageStaticSite(new Date().format('yyyy-MM-dd-HH-mma'))
             }
           }
         }
