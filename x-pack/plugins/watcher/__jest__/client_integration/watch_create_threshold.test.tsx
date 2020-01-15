@@ -48,8 +48,8 @@ const WATCH_VISUALIZE_DATA = {
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('../../public/np_ready/application/lib/api', () => ({
-  ...jest.requireActual('../../public/np_ready/application/lib/api'),
+jest.mock('../../public/application/lib/api', () => ({
+  ...jest.requireActual('../../public/application/lib/api'),
   loadIndexPatterns: async () => {
     const INDEX_PATTERNS = [
       { attributes: { title: 'index1' } },

@@ -12,7 +12,8 @@ import {
   TestBed,
   TestBedConfig,
   nextTick,
-} from 'test_utils/index';
+} from '../../../../../test_utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchList } from '../../../public/application/sections/watch_list/components/watch_list';
 import { ROUTES } from '../../../common/constants';
 import { withAppContext } from './app_context.mock';

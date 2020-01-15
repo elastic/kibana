@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString } from 'test_utils/index';
+import { getRandomString } from '../../../../test_utils';
 
 interface WatchHistory {
   startTime: string;

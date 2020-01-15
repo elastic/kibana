@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { registerTestBed, TestBed, TestBedConfig } from 'test_utils/index';
+import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
-import { ROUTES } from '../../../common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { registerRouter } from '../../../public/application/lib/navigation';
+import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './constants';
 import { withAppContext } from './app_context.mock';
 

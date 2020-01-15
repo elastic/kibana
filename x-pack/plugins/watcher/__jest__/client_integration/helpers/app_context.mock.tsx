@@ -13,25 +13,24 @@ import {
   notificationServiceMock,
   httpServiceMock,
 } from '../../../../../../src/core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppContextProvider } from '../../../public/application/app_context';
 
+class MockTimeBuckets {
+  setBounds(_domain: any) {
+    return {};
+  }
+  getInterval() {
+    return {
+      expression: {},
+    };
+  }
+}
 export const mockContextValue = {
   docLinks: docLinksServiceMock.createStartContract(),
   chrome: chromeServiceMock.createStartContract(),
-  legacy: {
-    TimeBuckets: class MockTimeBuckets {
-      setBounds(_domain: any) {
-        return {};
-      }
-      getInterval() {
-        return {
-          expression: {},
-        };
-      }
-    },
-    MANAGEMENT_BREADCRUMB: { text: 'test' },
-    licenseStatus: {},
-  },
+  MANAGEMENT_BREADCRUMB: { text: 'test' },
+  createTimeBuckets: () => new MockTimeBuckets(),
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
   euiUtils: {
