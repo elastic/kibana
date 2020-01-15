@@ -4,7 +4,7 @@
 
 ## AppBase.category property
 
-The category the app lives in Default categories defined in 
+The category definition of the product See [AppCategory](./kibana-plugin-public.appcategory.md) See DEFAULT\_APP\_CATEGORIES for more reference
 
 <b>Signature:</b>
 

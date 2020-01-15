@@ -4,6 +4,8 @@
 
 ## AppCategory.ariaLabel property
 
+If the visual label isn't appropriate for screen readers, can override it here
+
 <b>Signature:</b>
 
 ```typescript

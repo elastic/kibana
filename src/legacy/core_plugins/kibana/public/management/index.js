@@ -74,7 +74,7 @@ export function updateLandingPage(version) {
               <h1>
                 <FormattedMessage
                   id="kbn.management.landing.header"
-                  defaultMessage="Kibana {version} management"
+                  defaultMessage="Welcome to Stack Management {version}"
                   values={{ version }}
                 />
               </h1>
@@ -93,7 +93,7 @@ export function updateLandingPage(version) {
             <p>
               <FormattedMessage
                 id="kbn.management.landing.text"
-                defaultMessage="A full list of tools can be found in the left menu"
+                defaultMessage="A complete list of apps is in the menu on the left."
               />
             </p>
           </EuiText>

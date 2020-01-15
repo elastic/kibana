@@ -18,6 +18,11 @@
  */
 
 /** @public */
+
+/**
+ * A category definition for nav links to know where to sort them in the left hand nav
+ * @public
+ */
 export interface AppCategory {
   /**
    * Label used for cateogry name.

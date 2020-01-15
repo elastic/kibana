@@ -4,6 +4,8 @@
 
 ## AppCategory.order property
 
+The order that categories will be sorted in Prefer large steps between categories to allow for further editing (Default categories are in steps of 1000)
+
 <b>Signature:</b>
 
 ```typescript

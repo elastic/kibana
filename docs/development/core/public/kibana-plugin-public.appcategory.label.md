@@ -4,6 +4,8 @@
 
 ## AppCategory.label property
 
+Label used for cateogry name. Also used as aria-label if one isn't set.
+
 <b>Signature:</b>
 
 ```typescript

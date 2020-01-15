@@ -41,15 +41,11 @@ export interface AppBase {
     updater$?: Observable<AppUpdater>;
 }
 
-// @public (undocumented)
+// @public
 export interface AppCategory {
-    // (undocumented)
     ariaLabel?: string;
-    // (undocumented)
     euiIconType?: string;
-    // (undocumented)
     label: string;
-    // (undocumented)
     order?: number;
 }
 
@@ -435,7 +431,7 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         label: string;
         order: number;
     };
-    administration: {
+    management: {
         label: string;
         euiIconType: string;
     };
