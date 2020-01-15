@@ -97,7 +97,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   // update map layers based on points
   useEffect(() => {
     if (embeddable && (upPoints || downPoints)) {
-      embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
+      embeddable.setLayerList(getLayerList(upPoints ?? [], downPoints ?? [], colors));
     }
   }, [embeddable, upPoints, downPoints, colors]);
 
