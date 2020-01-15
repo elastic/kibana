@@ -16,26 +16,6 @@ export const config = Joi => {
 
   return Joi.object({
     enabled: Joi.boolean().default(true),
-    elasticsearch: Joi.object({
-      hosts: Joi.array()
-        .items(Joi.string().uri({ scheme: ['http', 'https'] }))
-        .single(), // if empty, use Kibana's connection config
-      username: Joi.string(),
-      password: Joi.string(),
-      ssl: Joi.object({
-        verificationMode: Joi.string()
-          .valid('none', 'certificate', 'full')
-          .default('full'),
-        certificateAuthorities: Joi.array()
-          .single()
-          .items(Joi.string()),
-        certificate: Joi.string(),
-        key: Joi.string(),
-        keyPassphrase: Joi.string(),
-        alwaysPresentCertificate: Joi.boolean().default(false),
-      }).default(),
-      apiVersion: Joi.string().default('master'),
-    }).default(),
     ui: Joi.object({
       enabled: Joi.boolean().default(true),
       ccs: Joi.object({
