@@ -189,11 +189,14 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         {registerChild => (
                           <>
                             <LogTextStreamLoadingItemView
-                              alignment="bottom"
+                              position="start"
                               isLoading={isLoadingMore}
                               hasMore={hasMoreBeforeStart}
+                              timestamp={
+                                items.length > 0 ? items[0].logEntry.cursor.time : undefined
+                              }
                               isStreaming={false}
-                              lastStreamingUpdate={null}
+                              // onExtendRange={(...args) => console.log('start.extendRange', args)}
                             />
                             {items.map((item, idx) => {
                               const currentTimestamp = item.logEntry.cursor.time;
@@ -237,12 +240,18 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                               );
                             })}
                             <LogTextStreamLoadingItemView
-                              alignment="top"
+                              position="end"
                               isLoading={isStreaming || isLoadingMore}
                               hasMore={hasMoreAfterEnd}
                               isStreaming={isStreaming}
-                              lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
-                              onLoadMore={this.handleLoadNewerItems}
+                              timestamp={
+                                items.length > 0
+                                  ? items[items.length - 1].logEntry.cursor.time
+                                  : undefined
+                              }
+                              // onExtendRange={(...args) => console.log('end.extendRange', args)}
+                              // onStreamStart={(...args) => console.log('end.streamStart', args)}
+                              // onLoadMore={this.handleLoadNewerItems}
                             />
                             {isScrollLocked && (
                               <LogTextStreamJumpToTail

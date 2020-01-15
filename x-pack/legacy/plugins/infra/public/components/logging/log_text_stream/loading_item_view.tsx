@@ -6,20 +6,34 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiLoadingSpinner,
+  EuiButton,
+} from '@elastic/eui';
+import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
 import * as React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
+import { LogTextSeparator } from './log_text_separator';
+
+type Position = 'start' | 'end';
 
 interface LogTextStreamLoadingItemViewProps {
-  alignment: 'top' | 'bottom';
+  position: Position;
+  /** topCursor.time || bottomCursor.time */
+  timestamp?: number;
+  /** startDate || endDate */
+  rangeEdge?: string;
   className?: string;
   hasMore: boolean;
   isLoading: boolean;
   isStreaming: boolean;
-  lastStreamingUpdate: Date | null;
-  onLoadMore?: () => void;
+  onExtendRange?: () => void;
+  onStreamStart?: () => void;
 }
 
 export class LogTextStreamLoadingItemView extends React.PureComponent<
@@ -28,122 +42,110 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
 > {
   public render() {
     const {
-      alignment,
+      position,
+      timestamp,
+      rangeEdge,
       className,
       hasMore,
       isLoading,
       isStreaming,
-      lastStreamingUpdate,
-      onLoadMore,
+      onExtendRange,
+      onStreamStart,
     } = this.props;
 
-    if (isStreaming) {
-      return (
-        <ProgressEntry alignment={alignment} className={className} color="primary" isLoading={true}>
-          <ProgressMessage>
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.infra.logs.streamingNewEntriesText"
-                defaultMessage="Streaming new entries"
-              />
-            </EuiText>
-          </ProgressMessage>
-          {lastStreamingUpdate ? (
-            <ProgressMessage>
-              <EuiText color="subdued">
-                <EuiIcon type="clock" />
-                <FormattedMessage
-                  id="xpack.infra.logs.lastStreamingUpdateText"
-                  defaultMessage=" last updated {lastUpdateTime}"
-                  values={{
-                    lastUpdateTime: (
-                      <FormattedRelative value={lastStreamingUpdate} updateInterval={1000} />
-                    ),
-                  }}
-                />
-              </EuiText>
-            </ProgressMessage>
-          ) : null}
-        </ProgressEntry>
-      );
-    } else if (isLoading) {
-      return (
-        <ProgressEntry alignment={alignment} className={className} color="subdued" isLoading={true}>
-          <ProgressMessage>
-            <FormattedMessage
-              id="xpack.infra.logs.loadingAdditionalEntriesText"
-              defaultMessage="Loading additional entries"
-            />
-          </ProgressMessage>
-        </ProgressEntry>
-      );
-    } else if (!hasMore) {
-      return (
-        <ProgressEntry
-          alignment={alignment}
-          className={className}
-          color="subdued"
-          isLoading={false}
-        >
-          <ProgressMessage>
-            <FormattedMessage
-              id="xpack.infra.logs.noAdditionalEntriesFoundText"
-              defaultMessage="No additional entries found"
-            />
-          </ProgressMessage>
-          {onLoadMore ? (
-            <EuiButtonEmpty size="xs" onClick={onLoadMore} iconType="refresh">
-              <FormattedMessage
-                id="xpack.infra.logs.loadAgainButtonLabel"
-                defaultMessage="Load again"
-              />
-            </EuiButtonEmpty>
-          ) : null}
-        </ProgressEntry>
-      );
-    } else {
-      return null;
-    }
+    const shouldShowCta = !hasMore && !isStreaming;
+
+    const extra = (
+      <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
+        {isLoading || isStreaming ? (
+          <ProgressSpinner />
+        ) : shouldShowCta ? (
+          <ProgressCta
+            position={position}
+            onStreamStart={onStreamStart}
+            onExtendRange={onExtendRange}
+            rangeEdge={rangeEdge}
+          />
+        ) : null}
+      </EuiFlexGroup>
+    );
+
+    return (
+      <ProgressEntryWrapper className={className} position={position}>
+        {position === 'start' ? <>{extra}</> : null}
+        <ProgressMessage timestamp={timestamp} />
+        {position === 'end' ? <>{extra}</> : null}
+      </ProgressEntryWrapper>
+    );
   }
 }
 
-interface ProgressEntryProps {
-  alignment: 'top' | 'bottom';
-  className?: string;
-  color: 'subdued' | 'primary';
-  isLoading: boolean;
-}
+const ProgressEntryWrapper = euiStyled.div<{ position: Position }>`
+  padding-left: ${props => props.theme.eui.euiSizeS};
+  padding-top: ${props =>
+    props.position === 'start' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
+  padding-bottom: ${props =>
+    props.position === 'end' ? props.theme.eui.euiSizeL : props.theme.eui.euiSizeM};
+`;
 
-const ProgressEntry: React.FC<ProgressEntryProps> = props => {
-  const { alignment, children, className, color, isLoading } = props;
-
-  // NOTE: styled-components seems to make all props in EuiProgress required, so this
-  // style attribute hacking replaces styled-components here for now until that can be fixed
-  // see: https://github.com/elastic/eui/issues/1655
-  const alignmentStyle =
-    alignment === 'top' ? { top: 0, bottom: 'initial' } : { top: 'initial', bottom: 0 };
-
+const ProgressMessage: React.FC<{ timestamp?: number }> = ({ timestamp }) => {
   return (
-    <ProgressEntryWrapper className={className}>
-      <EuiProgress
-        style={alignmentStyle}
-        color={color}
-        size="xs"
-        position="absolute"
-        {...(!isLoading ? { max: 1, value: 1 } : {})}
-      />
-      {children}
-    </ProgressEntryWrapper>
+    <LogTextSeparator>
+      <EuiTitle size="xxs">
+        {timestamp ? (
+          <FormattedMessage
+            id="xpack.infra.logs.showingEntriesUntilTimestamp"
+            defaultMessage="Showing entries until {timestamp}"
+            values={{ timestamp: <FormattedTime value={timestamp} /> }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.infra.logs.noAdditionalEntriesFoundText"
+            defaultMessage="No additional entries found"
+          />
+        )}
+      </EuiTitle>
+    </LogTextSeparator>
   );
 };
 
-const ProgressEntryWrapper = euiStyled.div`
-  align-items: center;
-  display: flex;
-  min-height: ${props => props.theme.eui.euiSizeXXL};
-  position: relative;
-`;
+const ProgressSpinner: React.FC = () => (
+  <>
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="l" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.infra.logs.loadingNewEntriesText"
+          defaultMessage="Loading new entries..."
+        />
+      </EuiText>
+    </EuiFlexItem>
+  </>
+);
 
-const ProgressMessage = euiStyled.div`
-  padding: 8px 16px;
-`;
+const ProgressCta: React.FC<Pick<
+  LogTextStreamLoadingItemViewProps,
+  'position' | 'rangeEdge' | 'onExtendRange' | 'onStreamStart'
+>> = ({ position, rangeEdge, onExtendRange, onStreamStart }) => {
+  if (rangeEdge === 'now' && position === 'end') {
+    return (
+      <EuiButton onClick={onStreamStart} size="s">
+        <FormattedMessage id="xpack.infra.logs.extendTimeframe" defaultMessage="Stream live" />
+      </EuiButton>
+    );
+  }
+
+  const iconType = position === 'start' ? 'arrowUp' : 'arrowDown';
+
+  return (
+    <EuiButton onClick={onExtendRange} iconType={iconType} size="s">
+      <FormattedMessage
+        id="xpack.infra.logs.extendTimeframe"
+        defaultMessage="Extend timeframe {amount} {unit}"
+        values={{ amount: 1, unit: 'hour' }}
+      />
+    </EuiButton>
+  );
+};
