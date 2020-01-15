@@ -41,7 +41,7 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
       (await npStart.plugins.data.autocomplete.getQuerySuggestions({
         language: 'kuery',
         indexPatterns: [indexPattern],
-        boolFilter: null,
+        boolFilter: [],
         query: kuery || '',
         selectionStart,
         selectionEnd: selectionStart,
