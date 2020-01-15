@@ -44,10 +44,6 @@ export const variable = (): ExpressionFunctionVar => ({
   },
   async fn(context, args, handlers) {
     const variables: Record<string, any> = handlers.variables;
-    if (!variables[args.name]) {
-      throw new Error(`Variable "${args.name}" does not exist`);
-    }
-
     return variables[args.name];
   },
 });
