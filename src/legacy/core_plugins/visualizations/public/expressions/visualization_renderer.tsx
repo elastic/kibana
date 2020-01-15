@@ -21,8 +21,8 @@ import chrome from 'ui/chrome';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
-import { Vis } from '../../../../ui/public/visualize/loader/vis';
-import { Visualization } from '../../../visualizations/public/np_ready/public/components';
+import { Vis } from './vis';
+import { Visualization } from '../np_ready/public/components';
 
 export const visualization = () => ({
   name: 'visualization',
