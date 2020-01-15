@@ -1519,6 +1519,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.3.tgz#94d38a35bd315efa7a6918b22695128fc40a885e"
   integrity sha512-0OyB9oztlYIq8F1LHjcNf+T089PKfYw78tgUY+q2dtox/jmb4xzFKtI9kv1hwAt5tcgBUTtUMK9kszpSh1UZaQ==
 
+"@elastic/package-registry@ssh://git@github.com:jfsiii/package-registry.git#ts-types":
+  version "0.2.0"
+  resolved "ssh://git@github.com:jfsiii/package-registry.git#71895694ff84dd56aba9a9055c02262dc3171935"
+
 "@elastic/request-crypto@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.0.2.tgz#bf27bf009227166f3eeb2b5193a108752335ebd3"

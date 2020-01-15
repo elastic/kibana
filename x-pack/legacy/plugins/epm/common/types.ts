@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  Package as RegistryPackage,
+  PackageDataSet as Dataset,
+  PackageImage as ScreenshotItem,
+  PackageRequirement as RequirementsByServiceName,
+} from '@elastic/package-registry';
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import {
@@ -12,6 +18,8 @@ import {
   SavedObjectReference,
 } from '../../../../../src/core/public';
 import { AssetType as IngestAssetType } from '../../ingest/common/types/domain_data';
+
+export { RegistryPackage, Dataset, ScreenshotItem, RequirementsByServiceName };
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -38,34 +46,6 @@ export enum AgentAssetType {
   input = 'input',
 }
 
-// from /package/{name}
-// type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
-// https://github.com/elastic/package-registry/blob/master/docs/api/package.json
-export interface RegistryPackage {
-  name: string;
-  title?: string;
-  version: string;
-  readme?: string;
-  description: string;
-  type: string;
-  categories: string[];
-  requirement: RequirementsByServiceName;
-  screenshots?: ScreenshotItem[];
-  icons?: string[];
-  assets?: string[];
-  internal?: boolean;
-  format_version: string;
-  datasets?: Dataset[];
-  download: string;
-  path: string;
-}
-
-export type RequirementVersion = string;
-export type RequirementVersionRange = string;
-export interface ServiceRequirements {
-  versions: RequirementVersionRange;
-}
-
 // Registry's response types
 // from /search
 // https://github.com/elastic/package-registry/blob/master/docs/api/search.json
@@ -75,11 +55,6 @@ export type RegistrySearchResult = Pick<
   RegistryPackage,
   'name' | 'title' | 'version' | 'description' | 'type' | 'icons' | 'internal' | 'download' | 'path'
 >;
-
-export interface ScreenshotItem {
-  src: string;
-  title?: string;
-}
 
 // from /categories
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json
@@ -91,7 +66,6 @@ export interface CategorySummaryItem {
   count: number;
 }
 
-export type RequirementsByServiceName = Record<ServiceName, ServiceRequirements>;
 export interface AssetParts {
   pkgkey: string;
   dataset?: string;
@@ -121,21 +95,6 @@ export type ElasticsearchAssetTypeToParts = Record<
   ElasticsearchAssetType,
   ElasticsearchAssetParts[]
 >;
-
-export interface Dataset {
-  title: string;
-  name: string;
-  release: string;
-  ingest_pipeline: string;
-  vars?: VarsEntry[];
-  type: string;
-  package: string;
-}
-
-export interface VarsEntry {
-  name: string;
-  default: string;
-}
 
 // some properties are optional in Registry responses but required in EPM
 // internal until we need them

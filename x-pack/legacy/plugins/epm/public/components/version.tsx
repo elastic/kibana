@@ -6,17 +6,10 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { RequirementVersion } from '../../common/types';
 
 const CodeText = styled.span`
   font-family: ${props => props.theme.eui.euiCodeFontFamily};
 `;
-export function Version({
-  className,
-  version,
-}: {
-  className?: string;
-  version: RequirementVersion;
-}) {
+export function Version({ className, version }: { className?: string; version?: string }) {
   return <CodeText className={className}>{version}</CodeText>;
 }
