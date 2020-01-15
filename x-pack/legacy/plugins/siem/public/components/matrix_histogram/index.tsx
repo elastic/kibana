@@ -26,7 +26,6 @@ import {
   HistogramAggregation,
   MatrixHistogramQueryProps,
 } from './types';
-import { generateTablePaginationOptions } from '../paginated_table/helpers';
 import { ChartSeriesData } from '../charts/common';
 import { InspectButtonContainer } from '../inspect';
 
@@ -44,12 +43,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   isAlertsHistogram,
   isAnomaliesHistogram,
   isAuthenticationsHistogram,
-  isDNSHistogram,
-  isEventsType,
-  isPtrIncluded,
+  isDnsHistogram,
+  isEventsHistogram,
   isInspected,
   legendPosition,
-  limit,
   mapping,
   query,
   scaleType = ScaleType.Time,
@@ -103,10 +100,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     },
     []
   );
-  const getPagination = () =>
-    activePage != null && limit != null
-      ? generateTablePaginationOptions(activePage, limit)
-      : undefined;
 
   const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
     {
@@ -117,16 +110,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
       query,
       skip,
       startDate,
-      sort,
       title,
       isAlertsHistogram,
       isAnomaliesHistogram,
       isAuthenticationsHistogram,
-      isDNSHistogram,
-      isEventsType,
+      isDnsHistogram,
+      isEventsHistogram,
       isInspected,
-      isPtrIncluded,
-      pagination: useMemo(() => getPagination(), [activePage, limit]),
       stackByField: selectedStackByOption.value,
     }
   );

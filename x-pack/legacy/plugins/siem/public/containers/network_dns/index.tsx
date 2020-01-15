@@ -57,7 +57,7 @@ interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
   dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
-  isDNSHistogram?: boolean;
+  isDnsHistogram?: boolean;
   query: DocumentNode;
   scaleType: ScaleType;
   setQuery: SetQuery;
@@ -104,7 +104,6 @@ export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
     const variables: GetNetworkDnsQuery.Variables = {
       defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
-      isDNSHistogram: false,
       inspect: isInspected,
       isPtrIncluded,
       pagination: generateTablePaginationOptions(activePage, limit),
