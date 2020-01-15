@@ -157,6 +157,9 @@ export class DashboardStateManager {
       this.changeListeners.forEach(listener => listener({ dirty: this.isDirty }));
     });
 
+    // make sure url ('_a') matches initial state
+    this.kbnUrlStateStorage.set(this.STATE_STORAGE_KEY, initialState, { replace: true });
+
     // setup state syncing utils. state container will be synched with url into `this.STATE_STORAGE_KEY` query param
     this.stateSyncRef = syncState<DashboardAppState>({
       storageKey: this.STATE_STORAGE_KEY,
