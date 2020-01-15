@@ -24,7 +24,7 @@ const stepScheduleDefaultValue = {
   enabled: true,
   interval: '5m',
   isNew: true,
-  from: '0m',
+  from: '1m',
 };
 
 const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
@@ -89,65 +89,65 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
       <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
     </StepContentWrapper>
   ) : (
-    <>
-      <StepContentWrapper addPadding={!isUpdateView}>
-        <Form form={form} data-test-subj="stepScheduleRule">
-          <UseField
-            path="interval"
-            component={ScheduleItem}
-            componentProps={{
-              idAria: 'detectionEngineStepScheduleRuleInterval',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-            }}
-          />
-          <UseField
-            path="from"
-            component={ScheduleItem}
-            componentProps={{
-              idAria: 'detectionEngineStepScheduleRuleFrom',
-              isDisabled: isLoading,
-              dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-              minimumValue: 1,
-            }}
-          />
-        </Form>
-      </StepContentWrapper>
+      <>
+        <StepContentWrapper addPadding={!isUpdateView}>
+          <Form form={form} data-test-subj="stepScheduleRule">
+            <UseField
+              path="interval"
+              component={ScheduleItem}
+              componentProps={{
+                idAria: 'detectionEngineStepScheduleRuleInterval',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+              }}
+            />
+            <UseField
+              path="from"
+              component={ScheduleItem}
+              componentProps={{
+                idAria: 'detectionEngineStepScheduleRuleFrom',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
+                minimumValue: 1,
+              }}
+            />
+          </Form>
+        </StepContentWrapper>
 
-      {!isUpdateView && (
-        <>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="xs"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill={false}
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                onClick={onSubmit.bind(null, false)}
-              >
-                {I18n.COMPLETE_WITHOUT_ACTIVATING}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                isDisabled={isLoading}
-                isLoading={isLoading}
-                onClick={onSubmit.bind(null, true)}
-              >
-                {I18n.COMPLETE_WITH_ACTIVATING}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
-    </>
-  );
+        {!isUpdateView && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="xs"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill={false}
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onClick={onSubmit.bind(null, false)}
+                >
+                  {I18n.COMPLETE_WITHOUT_ACTIVATING}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  isDisabled={isLoading}
+                  isLoading={isLoading}
+                  onClick={onSubmit.bind(null, true)}
+                >
+                  {I18n.COMPLETE_WITH_ACTIVATING}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </>
+    );
 };
 
 export const StepScheduleRule = memo(StepScheduleRuleComponent);

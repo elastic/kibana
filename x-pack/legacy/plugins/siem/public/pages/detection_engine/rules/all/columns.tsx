@@ -36,34 +36,34 @@ const getActions = (
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History
 ) => [
-    {
-      description: i18n.EDIT_RULE_SETTINGS,
-      icon: 'visControls',
-      name: i18n.EDIT_RULE_SETTINGS,
-      onClick: (rowItem: TableData) => editRuleAction(rowItem.sourceRule, history),
-      enabled: (rowItem: TableData) => !rowItem.sourceRule.immutable,
-    },
-    {
-      description: i18n.DUPLICATE_RULE,
-      icon: 'copy',
-      name: i18n.DUPLICATE_RULE,
-      onClick: (rowItem: TableData) =>
-        duplicateRuleAction(rowItem.sourceRule, dispatch, dispatchToaster),
-    },
-    {
-      description: i18n.EXPORT_RULE,
-      icon: 'exportAction',
-      name: i18n.EXPORT_RULE,
-      onClick: (rowItem: TableData) => exportRulesAction([rowItem.sourceRule], dispatch),
-      enabled: (rowItem: TableData) => !rowItem.immutable,
-    },
-    {
-      description: i18n.DELETE_RULE,
-      icon: 'trash',
-      name: i18n.DELETE_RULE,
-      onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, dispatchToaster),
-    },
-  ];
+  {
+    description: i18n.EDIT_RULE_SETTINGS,
+    icon: 'visControls',
+    name: i18n.EDIT_RULE_SETTINGS,
+    onClick: (rowItem: TableData) => editRuleAction(rowItem.sourceRule, history),
+    enabled: (rowItem: TableData) => !rowItem.sourceRule.immutable,
+  },
+  {
+    description: i18n.DUPLICATE_RULE,
+    icon: 'copy',
+    name: i18n.DUPLICATE_RULE,
+    onClick: (rowItem: TableData) =>
+      duplicateRuleAction(rowItem.sourceRule, dispatch, dispatchToaster),
+  },
+  {
+    description: i18n.EXPORT_RULE,
+    icon: 'exportAction',
+    name: i18n.EXPORT_RULE,
+    onClick: (rowItem: TableData) => exportRulesAction([rowItem.sourceRule], dispatch),
+    enabled: (rowItem: TableData) => !rowItem.immutable,
+  },
+  {
+    description: i18n.DELETE_RULE,
+    icon: 'trash',
+    name: i18n.DELETE_RULE,
+    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, dispatchToaster),
+  },
+];
 
 type RulesColumns = EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<TableData>;
 
@@ -102,8 +102,8 @@ export const getColumns = (
         return value == null ? (
           getEmptyTagValue()
         ) : (
-            <FormattedDate value={value} fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} />
-          );
+          <FormattedDate value={value} fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} />
+        );
       },
       sortable: true,
       truncateText: true,
@@ -117,12 +117,12 @@ export const getColumns = (
           value == null
             ? 'subdued'
             : value === 'succeeded'
-              ? 'success'
-              : value === 'failed'
-                ? 'danger'
-                : value === 'executing'
-                  ? 'warning'
-                  : 'subdued';
+            ? 'success'
+            : value === 'failed'
+            ? 'danger'
+            : value === 'executing'
+            ? 'warning'
+            : 'subdued';
         return (
           <>
             <EuiHealth color={color}>{value ?? getEmptyTagValue()}</EuiHealth>

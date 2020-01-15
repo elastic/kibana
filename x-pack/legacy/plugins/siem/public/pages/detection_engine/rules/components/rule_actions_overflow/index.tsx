@@ -60,40 +60,40 @@ const RuleActionsOverflowComponent = ({
     () =>
       rule != null
         ? [
-          <EuiContextMenuItem
-            key={i18nActions.DUPLICATE_RULE}
-            icon="exportAction"
-            disabled={userHasNoPermissions}
-            onClick={async () => {
-              setIsPopoverOpen(false);
-              await duplicateRuleAction(rule, noop, dispatchToaster);
-            }}
-          >
-            {i18nActions.DUPLICATE_RULE}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            key={i18nActions.EXPORT_RULE}
-            icon="indexEdit"
-            disabled={userHasNoPermissions || rule.immutable}
-            onClick={async () => {
-              setIsPopoverOpen(false);
-              setRulesToExport([rule]);
-            }}
-          >
-            {i18nActions.EXPORT_RULE}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            key={i18nActions.DELETE_RULE}
-            icon="trash"
-            disabled={userHasNoPermissions}
-            onClick={async () => {
-              setIsPopoverOpen(false);
-              await deleteRulesAction([rule.id], noop, dispatchToaster, onRuleDeletedCallback);
-            }}
-          >
-            {i18nActions.DELETE_RULE}
-          </EuiContextMenuItem>,
-        ]
+            <EuiContextMenuItem
+              key={i18nActions.DUPLICATE_RULE}
+              icon="exportAction"
+              disabled={userHasNoPermissions}
+              onClick={async () => {
+                setIsPopoverOpen(false);
+                await duplicateRuleAction(rule, noop, dispatchToaster);
+              }}
+            >
+              {i18nActions.DUPLICATE_RULE}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key={i18nActions.EXPORT_RULE}
+              icon="indexEdit"
+              disabled={userHasNoPermissions || rule.immutable}
+              onClick={async () => {
+                setIsPopoverOpen(false);
+                setRulesToExport([rule]);
+              }}
+            >
+              {i18nActions.EXPORT_RULE}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key={i18nActions.DELETE_RULE}
+              icon="trash"
+              disabled={userHasNoPermissions}
+              onClick={async () => {
+                setIsPopoverOpen(false);
+                await deleteRulesAction([rule.id], noop, dispatchToaster, onRuleDeletedCallback);
+              }}
+            >
+              {i18nActions.DELETE_RULE}
+            </EuiContextMenuItem>,
+          ]
         : [],
     [rule, userHasNoPermissions]
   );
