@@ -29,11 +29,8 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { PersistedState } from '../../persisted_state';
-
-import { start as visualizations } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
-
-const visTypes = visualizations.types;
+import { PersistedState } from '../../../../ui/public/persisted_state';
+import { getTypes } from '../np_ready/public/services';
 
 export class Vis extends EventEmitter {
   constructor(visState = { type: 'histogram' }) {
@@ -64,7 +61,7 @@ export class Vis extends EventEmitter {
     this.title = state.title || '';
     const type = state.type || this.type;
     if (_.isString(type)) {
-      this.type = visTypes.get(type);
+      this.type = getTypes().get(type);
       if (!this.type) {
         throw new Error(`Invalid type "${type}"`);
       }
