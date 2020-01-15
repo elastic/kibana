@@ -12,10 +12,10 @@ import {
   ExistsFilter,
   TermFilter,
   RangeFilter,
-  mergeBoolClauses,
+  matchesClauses,
 } from './query_clauses';
 
-describe('mergeBoolClauses', () => {
+describe('matchesClauses', () => {
   test('merges multiple types of Bool Clauses into one', () => {
     const TaskWithSchedule: ExistsFilter = {
       exists: { field: 'task.schedule' },
@@ -34,7 +34,7 @@ describe('mergeBoolClauses', () => {
     };
 
     expect(
-      mergeBoolClauses(
+      matchesClauses(
         mustBeAllOf(TaskWithSchedule),
         shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
           RunningTask,

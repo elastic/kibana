@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { merge, isArray } from 'lodash';
+import { merge } from 'lodash';
 
 /**
  * Terminology
@@ -189,18 +189,7 @@ export interface PinnedClause<T extends BoolClauseFilter> {
 export function matchesClauses<T extends BoolClauseFilter>(
   ...clauses: Array<BoolClauseWithAnyCondition<T>>
 ): BoolClauseWithAnyCondition<T> {
-  return merge({}, ...clauses, function(
-    existingBoolClause: Array<BoolClauseFiltering<T>>,
-    boolClauseOfSameType: Array<BoolClauseFiltering<T>>
-  ) {
-    // If we have two bool clauses of same type (FOR EXAMPLE
-    // two `must` clauses, we merge them, into one)
-    if (isArray(existingBoolClause)) {
-      return existingBoolClause.concat(boolClauseOfSameType);
-    }
-    // otherwise dont return anything and the default behaviour
-    // merges this clause into the final object
-  });
+  return merge({}, ...clauses);
 }
 
 export function shouldBeOneOf<T extends BoolClauseFilter>(
