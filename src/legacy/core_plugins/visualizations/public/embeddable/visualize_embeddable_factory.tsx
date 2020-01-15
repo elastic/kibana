@@ -45,7 +45,7 @@ import {
   getCapabilities,
   getHttp,
   getTypes,
-  getSavedObjectsClient,
+  getSavedObjects,
   getUsageCollector,
 } from '../np_ready/public/services';
 
@@ -175,7 +175,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       },
       getHttp().basePath.prepend,
       getUISettings(),
-      getSavedObjectsClient(),
+      getSavedObjects(),
       getUsageCollector()
     );
     return undefined;

@@ -35,8 +35,8 @@ export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilitie
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
 
-export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<SavedObjectsStart>(
-  'SavedObjectsClient'
+export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjects'
 );
 
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');

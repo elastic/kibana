@@ -27,9 +27,5 @@ import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
-export const setup = pluginInstance.setup(npSetup.core, {
-  expressions: npSetup.plugins.expressions,
-  embeddable: npSetup.plugins.embeddable,
-  usageCollection: npSetup.plugins.usageCollection,
-});
-export const start = pluginInstance.start(npStart.core, { data: npStart.plugins.data });
+export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

@@ -19,7 +19,7 @@
 
 import { VisSavedObject } from './visualize_embeddable';
 import { indexPatterns, IIndexPattern } from '../../../../../plugins/data/public';
-import { getUISettings, getSavedObjectsClient } from '../np_ready/public/services';
+import { getUISettings, getSavedObjects } from '../np_ready/public/services';
 
 export async function getIndexPattern(
   savedVis: VisSavedObject
@@ -28,7 +28,7 @@ export async function getIndexPattern(
     return savedVis.vis.indexPattern;
   }
 
-  const savedObjectsClient = getSavedObjectsClient().client;
+  const savedObjectsClient = getSavedObjects().client;
   const defaultIndex = getUISettings().get('defaultIndex');
 
   if (savedVis.vis.params.index_pattern) {

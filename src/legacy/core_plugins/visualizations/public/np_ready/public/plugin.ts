@@ -25,7 +25,7 @@ import {
   setCapabilities,
   setHttp,
   setIndexPatterns,
-  setSavedObjectsClient,
+  setSavedObjects,
   setUsageCollector,
 } from './services';
 import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
@@ -104,7 +104,7 @@ export class VisualizationsPlugin
     setTypes(types);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
-    setSavedObjectsClient(core.savedObjects);
+    setSavedObjects(core.savedObjects);
     setIndexPatterns(data.indexPatterns);
 
     return {
