@@ -6,6 +6,8 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+export const DEFAULT_MAX_WORKERS = 100;
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   /* The maximum number of times a task will be attempted before being abandoned as failed */
@@ -35,7 +37,7 @@ export const configSchema = schema.object({
   }),
   /* The maximum number of tasks that this Kibana instance will run simultaneously. */
   max_workers: schema.number({
-    defaultValue: 10,
+    defaultValue: DEFAULT_MAX_WORKERS,
     // disable the task manager rather than trying to specify it with 0 workers
     min: 1,
   }),

@@ -13,6 +13,8 @@ const {
   task: { properties: taskManagerIndexMapping },
 } = require('../../../../legacy/plugins/task_manager/server/mappings.json');
 
+const { DEFAULT_MAX_WORKERS } = require('../../../../plugins/task_manager/server/config.ts');
+
 export default function({ getService }) {
   const es = getService('legacyEs');
   const log = getService('log');
@@ -350,10 +352,10 @@ export default function({ getService }) {
       // Task Manager to use up its worker capacity
       // causing tasks to pile up
       await Promise.all(
-        _.times(50, index =>
+        _.times(DEFAULT_MAX_WORKERS, index =>
           scheduleTask({
             taskType: 'sampleTask',
-            schedule: { interval: `1s` },
+            schedule: { interval: `1m` },
             params: {
               waitForEvent: index === 0 ? 'releaseFirstStalledTask' : 'releaseTheOthers',
             },
@@ -361,15 +363,18 @@ export default function({ getService }) {
         )
       );
 
-      const [runNowResult] = await Promise.all([
-        // call runNow for our task
-        runTaskNow({
-          id: originalTask.id,
-        }),
-        // and release only one slot in our worker queue
-        releaseTasksWaitingForEventToComplete('releaseFirstStalledTask'),
-      ]);
-      expect(runNowResult).to.eql({ id: originalTask.id });
+      // call runNow for our task
+      console.log(`... runnning ${originalTask.id}`);
+      const runNowResult = runTaskNow({
+        id: originalTask.id,
+      });
+
+      // and release only one slot in our worker queue
+      console.log('... releasing one task capacity');
+      await releaseTasksWaitingForEventToComplete('releaseFirstStalledTask');
+
+      console.log(`... waiting for run result of ${originalTask.id}`);
+      expect(await runNowResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
         const task = await currentTask(originalTask.id);
