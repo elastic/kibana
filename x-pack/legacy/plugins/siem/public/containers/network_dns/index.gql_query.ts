@@ -8,14 +8,16 @@ import gql from 'graphql-tag';
 
 export const networkDnsQuery = gql`
   query GetNetworkDnsQuery(
-    $sourceId: ID!
-    $sort: NetworkDnsSortField!
-    $isPtrIncluded: Boolean!
-    $timerange: TimerangeInput!
-    $pagination: PaginationInputPaginated!
-    $filterQuery: String
     $defaultIndex: [String!]!
+    $filterQuery: String
     $inspect: Boolean!
+    $isDNSHistogram: Boolean!
+    $isPtrIncluded: Boolean!
+    $pagination: PaginationInputPaginated!
+    $sort: NetworkDnsSortField!
+    $sourceId: ID!
+    $stackByField: String
+    $timerange: TimerangeInput!
   ) {
     source(id: $sourceId) {
       id
@@ -26,9 +28,10 @@ export const networkDnsQuery = gql`
         pagination: $pagination
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
+        stackByField: $stackByField
       ) {
         totalCount
-        edges {
+        edges @skip(if: $isDNSHistogram) {
           node {
             _id
             dnsBytesIn
@@ -41,7 +44,7 @@ export const networkDnsQuery = gql`
             value
           }
         }
-        pageInfo {
+        pageInfo @skip(if: $isDNSHistogram) {
           activePage
           fakeTotalCount
           showMorePagesIndicator
@@ -50,7 +53,7 @@ export const networkDnsQuery = gql`
           dsl
           response
         }
-        histogram {
+        histogram @include(if: $isDNSHistogram) {
           x
           y
           g

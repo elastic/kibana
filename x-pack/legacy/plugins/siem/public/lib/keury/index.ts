@@ -17,7 +17,7 @@ import { KueryFilterQuery } from '../../store';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: IIndexPattern
+  indexPattern?: IIndexPattern
 ) => {
   try {
     return kueryExpression

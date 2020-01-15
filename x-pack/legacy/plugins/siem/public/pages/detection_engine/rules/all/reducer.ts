@@ -20,7 +20,7 @@ export interface State {
   filterOptions: FilterOptions;
   refreshToggle: boolean;
   tableData: TableData[];
-  exportPayload?: object[];
+  exportPayload?: Rule[];
 }
 
 export type Action =
@@ -28,7 +28,7 @@ export type Action =
   | { type: 'loading'; isLoading: boolean }
   | { type: 'deleteRules'; rules: Rule[] }
   | { type: 'duplicate'; rule: Rule }
-  | { type: 'setExportPayload'; exportPayload?: object[] }
+  | { type: 'setExportPayload'; exportPayload?: Rule[] }
   | { type: 'setSelected'; selectedItems: TableData[] }
   | { type: 'updateLoading'; ids: string[]; isLoading: boolean }
   | { type: 'updateRules'; rules: Rule[]; appendRuleId?: string; pagination?: PaginationOptions }
@@ -143,7 +143,7 @@ export const allRulesReducer = (state: State, action: Action): State => {
     case 'setExportPayload': {
       return {
         ...state,
-        exportPayload: action.exportPayload,
+        exportPayload: [...(action.exportPayload ?? [])],
       };
     }
     default:

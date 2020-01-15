@@ -82,10 +82,11 @@ describe('Dashboard URL Helper', () => {
       x: 'y',
       y: 'z',
     });
-    url = 'http://notDashboardUrl';
-    expect(getUrlVars(url)).toEqual({});
     url = 'http://localhost:5601/app/kibana#/dashboard/777182';
     expect(getUrlVars(url)).toEqual({});
+    url =
+      'http://localhost:5601/app/kibana#/dashboard/777182?title=Some%20Dashboard%20With%20Spaces';
+    expect(getUrlVars(url)).toEqual({ title: 'Some Dashboard With Spaces' });
   });
 
   it('getLensUrlFromDashboardAbsoluteUrl', () => {
