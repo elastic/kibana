@@ -20,6 +20,7 @@ describe('create_signals', () => {
       allowNoIndices: true,
       index: ['auditbeat-*'],
       size: 100,
+      headers: { 'Accept-Encoding': 'gzip, deflate' },
       ignoreUnavailable: true,
       body: {
         query: {
@@ -90,6 +91,7 @@ describe('create_signals', () => {
       allowNoIndices: true,
       index: ['auditbeat-*'],
       size: 100,
+      headers: { 'Accept-Encoding': 'gzip, deflate' },
       ignoreUnavailable: true,
       body: {
         query: {
@@ -161,6 +163,7 @@ describe('create_signals', () => {
       allowNoIndices: true,
       index: ['auditbeat-*'],
       size: 100,
+      headers: { 'Accept-Encoding': 'gzip, deflate' },
       ignoreUnavailable: true,
       body: {
         query: {
@@ -233,6 +236,7 @@ describe('create_signals', () => {
       allowNoIndices: true,
       index: ['auditbeat-*'],
       size: 100,
+      headers: { 'Accept-Encoding': 'gzip, deflate' },
       ignoreUnavailable: true,
       body: {
         query: {
