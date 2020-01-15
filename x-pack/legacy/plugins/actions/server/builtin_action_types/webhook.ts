@@ -56,7 +56,9 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.webhook',
-    name: 'webhook',
+    name: i18n.translate('xpack.actions.builtin.webhookTitle', {
+      defaultMessage: 'Webhook',
+    }),
     validate: {
       config: schema.object(configSchemaProps, {
         validate: curry(valdiateActionTypeConfig)(configurationUtilities),

@@ -16,6 +16,7 @@ import {
   caseSavedObjectMappings,
   caseCommentSavedObjectMappings,
 } from './lib/case/saved_object_mappings';
+import { ruleStatusSavedObjectMappings } from './lib/detection_engine/rules/saved_object_mappings';
 
 export { noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType };
 export const savedObjectMappings = {
@@ -24,4 +25,5 @@ export const savedObjectMappings = {
   ...pinnedEventSavedObjectMappings,
   ...caseSavedObjectMappings,
   ...caseCommentSavedObjectMappings,
+  ...ruleStatusSavedObjectMappings,
 };

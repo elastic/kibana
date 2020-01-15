@@ -5,3 +5,4 @@
  */
 
 export * from './location_map';
+export * from './location_status_tags';
