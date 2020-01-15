@@ -156,7 +156,7 @@ export const useGetWatchVisualizationData = (watchModel: BaseWatch, visualizeOpt
       watch: watchModel.upstreamJson,
       options: visualizeOptions.upstreamJson,
     }),
-    deserializer: ({ visualizeData }: { visualizeData: any }) => visualizeData,
+    deserializer: (data: { visualizeData: any }) => data?.visualizeData,
   });
 };
 
