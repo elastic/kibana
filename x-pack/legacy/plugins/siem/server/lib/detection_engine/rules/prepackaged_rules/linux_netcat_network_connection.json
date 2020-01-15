@@ -1,89 +1,12 @@
 {
   "description": "Linux: Netcat Network Connection",
   "enabled": false,
-  "filters": [
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-        "key": "event.action",
-        "negate": false,
-        "params": {
-          "query": "socket_opened"
-        },
-        "type": "phrase",
-        "value": "socket_opened"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "socket_opened",
-            "type": "phrase"
-          }
-        }
-      }
-    },
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
-        "key": "destination.ip",
-        "negate": true,
-        "params": {
-          "query": "127.0.0.1"
-        },
-        "type": "phrase",
-        "value": "127.0.0.1"
-      },
-      "query": {
-        "match": {
-          "destination.ip": {
-            "query": "127.0.0.1",
-            "type": "phrase"
-          }
-        }
-      }
-    },
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index",
-        "key": "destination.ip",
-        "negate": true,
-        "params": {
-          "query": "::1"
-        },
-        "type": "phrase",
-        "value": "::1"
-      },
-      "query": {
-        "match": {
-          "destination.ip": {
-            "query": "::1",
-            "type": "phrase"
-          }
-        }
-      }
-    }
-  ],
   "from": "now-6m",
   "immutable": true,
   "interval": "5m",
   "language": "kuery",
-  "name": "Linux: Netcat Network Connection",
-  "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional)",
+  "name": "Linux: Netcat Network Activity",
+  "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional) and event.action: (connected-to or bound-socket or socket_opened)",
   "risk_score": 50,
   "rule_id": "adb961e0-cb74-42a0-af9e-29fc41f88f5f",
   "severity": "low",

@@ -1,39 +1,12 @@
 {
   "description": "Windows whoami command activity",
   "enabled": false,
-  "filters": [
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-        "key": "event.action",
-        "negate": false,
-        "params": {
-          "query": "Process Create (rule: ProcessCreate)"
-        },
-        "type": "phrase",
-        "value": "Process Create (rule: ProcessCreate)"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "Process Create (rule: ProcessCreate)",
-            "type": "phrase"
-          }
-        }
-      }
-    }
-  ],
   "from": "now-6m",
   "immutable": true,
   "interval": "5m",
   "language": "kuery",
   "name": "Windows whoami command activity",
-  "query": "process.name:whoami.exe",
+  "query": "process.name:whoami.exe and event.code:1",
   "risk_score": 50,
   "rule_id": "ef862985-3f13-4262-a686-5f357bbb9bc2",
   "severity": "low",

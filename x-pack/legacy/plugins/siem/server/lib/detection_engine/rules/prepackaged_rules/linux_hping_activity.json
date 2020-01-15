@@ -1,64 +1,12 @@
 {
   "description": "Linux: Hping Activity",
   "enabled": false,
-  "filters": [
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-        "key": "event.action",
-        "negate": false,
-        "params": {
-          "query": "process_started"
-        },
-        "type": "phrase",
-        "value": "process_started"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "process_started",
-            "type": "phrase"
-          }
-        }
-      }
-    },
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
-        "key": "event.dataset",
-        "negate": false,
-        "params": {
-          "query": "process"
-        },
-        "type": "phrase",
-        "value": "process"
-      },
-      "query": {
-        "match": {
-          "event.dataset": {
-            "query": "process",
-            "type": "phrase"
-          }
-        }
-      }
-    }
-  ],
   "from": "now-6m",
   "immutable": true,
   "interval": "5m",
   "language": "kuery",
   "name": "Linux: Hping Activity",
-  "query": "process.name: hping",
+  "query": "process.name: hping  and event.action:executed",
   "risk_score": 50,
   "rule_id": "90169566-2260-4824-b8e4-8615c3b4ed52",
   "severity": "low",

@@ -1,39 +1,12 @@
 {
   "description": "Windows Netcat network activity",
   "enabled": false,
-  "filters": [
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-        "key": "event.action",
-        "negate": false,
-        "params": {
-          "query": "connected-to"
-        },
-        "type": "phrase",
-        "value": "connected-to"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "connected-to",
-            "type": "phrase"
-          }
-        }
-      }
-    }
-  ],
   "from": "now-6m",
   "immutable": true,
   "interval": "5m",
   "language": "kuery",
   "name": "Windows Netcat network activity",
-  "query": "process.name:ncat.exe",
+  "query": "process.name:ncat.exe and event.action:\"Network connection detected (rule: NetworkConnect)\"",
   "risk_score": 50,
   "rule_id": "ebdc4b6f-7fdb-4c21-bbd6-59e1ed11024a",
   "severity": "low",

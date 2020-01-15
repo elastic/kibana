@@ -1,39 +1,12 @@
 {
   "description": "Windows Netcat activity",
   "enabled": false,
-  "filters": [
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-        "key": "event.action",
-        "negate": false,
-        "params": {
-          "query": "Process Create (rule: ProcessCreate)"
-        },
-        "type": "phrase",
-        "value": "Process Create (rule: ProcessCreate)"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "Process Create (rule: ProcessCreate)",
-            "type": "phrase"
-          }
-        }
-      }
-    }
-  ],
   "from": "now-6m",
   "immutable": true,
   "interval": "5m",
   "language": "kuery",
   "name": "Windows Netcat activity",
-  "query": "process.name:ncat.exe",
+  "query": "process.name:ncat.exe and eventr.code:1",
   "risk_score": 50,
   "rule_id": "e2437364-0c89-4e65-a34b-782cfbb7690b",
   "severity": "low",

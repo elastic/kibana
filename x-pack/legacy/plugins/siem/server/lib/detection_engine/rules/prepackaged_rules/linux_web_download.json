@@ -1,39 +1,12 @@
 {
   "description": "Linux: Web Download",
   "enabled": false,
-  "filters": [
-    {
-      "$state": {
-        "store": "appState"
-      },
-      "meta": {
-        "alias": null,
-        "disabled": false,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-        "key": "event.action",
-        "negate": false,
-        "params": {
-          "query": "socket_opened"
-        },
-        "type": "phrase",
-        "value": "socket_opened"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "socket_opened",
-            "type": "phrase"
-          }
-        }
-      }
-    }
-  ],
   "from": "now-6m",
   "immutable": true,
   "interval": "5m",
   "language": "kuery",
   "name": "Linux: Web Download",
-  "query": "process.name: curl or wget",
+  "query": "process.name: (curl or wget) and event.action:executed",
   "risk_score": 50,
   "rule_id": "e8ec93a6-49d2-4467-8c12-81c435fcc519",
   "severity": "low",
