@@ -81,9 +81,5 @@ const selectHttpByType = (state: State, networkType: NetworkType) => {
 
 export const httpSelector = () => createSelector(selectHttpByType, httpQueries => httpQueries);
 
-// IP Details Selectors
-export const ipDetailsFlowTargetSelector = () =>
-  createSelector(selectNetworkDetails, network => network.flowTarget);
-
 export const usersSelector = () =>
   createSelector(selectNetworkDetails, network => network.queries.users);
