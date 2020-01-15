@@ -19,7 +19,7 @@ import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 export const SiemNavigationComponent = React.memo<
   SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState
 >(
-  ({ detailName, display, navTabs, pageName, pathName, search, tabName, urlState }) => {
+  ({ detailName, display, navTabs, pageName, pathName, search, tabName, urlState, flowTarget }) => {
     useEffect(() => {
       if (pathName) {
         setBreadcrumbs({
@@ -32,6 +32,7 @@ export const SiemNavigationComponent = React.memo<
           savedQuery: urlState.savedQuery,
           search,
           tabName,
+          flowTarget,
           timerange: urlState.timerange,
           timeline: urlState.timeline,
         });
