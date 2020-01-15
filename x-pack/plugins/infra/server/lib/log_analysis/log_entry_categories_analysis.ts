@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, RequestHandlerContext } from '../../../../../../../src/core/server';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { getJobId, logEntryCategoriesJobTypes } from '../../../common/log_analysis';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
