@@ -48,6 +48,7 @@ export function extendDatemath(
       return undefined;
     }
 
+    const mustIncreaseAmount = operator === '-' && direction === 'before';
     const parsedAmount = parseInt(amount, 10);
     let newUnit: Unit = unit as Unit;
     let newAmount: number;
@@ -55,14 +56,11 @@ export function extendDatemath(
     switch (unit) {
       case 'ms':
       case 's':
-        newAmount =
-          operator === '-' && direction === 'before'
-            ? parsedAmount * 2
-            : Math.floor(parsedAmount / 2);
+        newAmount = mustIncreaseAmount ? parsedAmount * 2 : Math.floor(parsedAmount / 2);
         break;
       case 'm':
         let ratio;
-        if (operator === '-' && direction === 'before') {
+        if (mustIncreaseAmount) {
           ratio = parsedAmount >= 10 ? 0.5 : 1;
           newAmount = parsedAmount + parsedAmount * ratio;
         } else {
@@ -72,50 +70,45 @@ export function extendDatemath(
         break;
       case 'h':
         if (parsedAmount === 1) {
-          newAmount = operator === '-' && direction === 'before' ? 90 : 30;
+          newAmount = mustIncreaseAmount ? 90 : 30;
           newUnit = 'm';
         } else {
-          newAmount =
-            operator === '-' && direction === 'before' ? parsedAmount + 1 : parsedAmount - 1;
+          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
         }
         break;
       case 'd':
         if (parsedAmount === 1) {
-          newAmount = operator === '-' && direction === 'before' ? 25 : 23;
+          newAmount = mustIncreaseAmount ? 25 : 23;
           newUnit = 'h';
         } else {
-          newAmount =
-            operator === '-' && direction === 'before' ? parsedAmount + 1 : parsedAmount - 1;
+          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
         }
         break;
 
       case 'w':
         if (parsedAmount === 1) {
-          newAmount = operator === '-' && direction === 'before' ? 8 : 6;
+          newAmount = mustIncreaseAmount ? 8 : 6;
           newUnit = 'd';
         } else {
-          newAmount =
-            operator === '-' && direction === 'before' ? parsedAmount + 1 : parsedAmount - 1;
+          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
         }
         break;
 
       case 'M':
         if (parsedAmount === 1) {
-          newAmount = operator === '-' && direction === 'before' ? 5 : 3;
+          newAmount = mustIncreaseAmount ? 5 : 3;
           newUnit = 'w';
         } else {
-          newAmount =
-            operator === '-' && direction === 'before' ? parsedAmount + 1 : parsedAmount - 1;
+          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
         }
         break;
 
       case 'y':
         if (parsedAmount === 1) {
-          newAmount = operator === '-' && direction === 'before' ? 13 : 11;
+          newAmount = mustIncreaseAmount ? 13 : 11;
           newUnit = 'M';
         } else {
-          newAmount =
-            operator === '-' && direction === 'before' ? parsedAmount + 1 : parsedAmount - 1;
+          newAmount = mustIncreaseAmount ? parsedAmount + 1 : parsedAmount - 1;
         }
         break;
 
