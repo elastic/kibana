@@ -610,16 +610,22 @@ export class DashboardAppController {
         // This is only necessary for new dashboards, which will default to Edit mode.
         updateViewMode(ViewMode.VIEW);
 
+        changeUrl(
+          dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
+        );
+
         // We need to do a hard reset of the timepicker. appState will not reload like
         // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
         // reload will cause it not to sync.
         if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-          dashboardStateManager.syncTimefilterWithDashboard(timefilter);
+          // have to use $evalAsync here until '_g' is migrated from $location to state sync utility ('history')
+          // When state sync utility changes url, angular's $location is missing it's own updates which happen during the same digest cycle
+          // temporary solution is to delay $location updates to next digest cycle
+          // unfortunately, these causes 2 browser history entries, but this is temporary and will be fixed after migrating '_g' to state_sync utilities
+          $scope.$evalAsync(() => {
+            dashboardStateManager.syncTimefilterWithDashboard(timefilter);
+          });
         }
-
-        changeUrl(
-          dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
-        );
       }
 
       confirmModal(
