@@ -17,73 +17,61 @@
  * under the License.
  */
 
-import $ from 'jquery';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
-import chrome from 'ui/chrome';
+export function pointSeriesTooltipFormatter() {
+  return function tooltipFormatter({ datum, data }) {
+    if (!datum) return '';
 
-import template from './_pointseries_tooltip.html';
+    const details = [];
 
-export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
-  const $tooltipScope = $rootScope.$new();
-  const $tooltip = $(template);
-  $compile($tooltip)($tooltipScope);
+    const currentSeries = data.series && data.series.find(serie => serie.rawId === datum.seriesId);
+    const addDetail = (label, value) => details.push({ label, value });
 
-  return function() {
-    return function tooltipFormatter(event) {
-      const data = event.data;
-      const datum = event.datum;
-      if (!datum) return '';
+    if (datum.extraMetrics) {
+      datum.extraMetrics.forEach(metric => {
+        addDetail(metric.label, metric.value);
+      });
+    }
 
-      const details = ($tooltipScope.details = []);
+    if (datum.x) {
+      addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));
+    }
+    if (datum.y) {
+      const value = datum.yScale ? datum.yScale * datum.y : datum.y;
+      addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
+    }
+    if (datum.z) {
+      addDetail(currentSeries.zLabel, currentSeries.zAxisFormatter(datum.z));
+    }
+    if (datum.series && datum.parent) {
+      const dimension = datum.parent;
+      addDetail(dimension.title, datum.series);
+    }
+    if (datum.tableRaw) {
+      addDetail(datum.tableRaw.title, datum.tableRaw.value);
+    }
 
-      const currentSeries =
-        data.series && data.series.find(serie => serie.rawId === datum.seriesId);
-      const addDetail = (label, value) => details.push({ label, value });
+    return renderToStaticMarkup(
+      <table>
+        <tbody>
+          {details.map((detail, index) => (
+            <tr key={index}>
+              <td className="visTooltip__label">
+                <div className="visTooltip__labelContainer">{detail.label}</div>
+              </td>
 
-      if (datum.extraMetrics) {
-        datum.extraMetrics.forEach(metric => {
-          addDetail(metric.label, metric.value);
-        });
-      }
-
-      if (datum.x) {
-        addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));
-      }
-      if (datum.y) {
-        const value = datum.yScale ? datum.yScale * datum.y : datum.y;
-        addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
-      }
-      if (datum.z) {
-        addDetail(currentSeries.zLabel, currentSeries.zAxisFormatter(datum.z));
-      }
-      if (datum.series && datum.parent) {
-        const dimension = datum.parent;
-        addDetail(dimension.title, datum.series);
-      }
-      if (datum.tableRaw) {
-        addDetail(datum.tableRaw.title, datum.tableRaw.value);
-      }
-
-      $tooltipScope.$apply();
-      return $tooltip[0].outerHTML;
-    };
+              <td className="visTooltip__value">
+                <div className="visTooltip__valueContainer">
+                  {detail.value}
+                  {detail.percent && <span> ({detail.percent})</span>}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
   };
 }
-
-let _tooltipFormatter;
-export const getPointSeriesTooltipFormatter = () => {
-  if (!_tooltipFormatter) {
-    throw new Error('tooltip formatter not initialized');
-  }
-  return _tooltipFormatter;
-};
-
-export const initializePointSeriesTooltipFormatter = async () => {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const Private = $injector.get('Private');
-  _tooltipFormatter = Private(PointSeriesTooltipFormatterProvider);
-};
-
-export const setPointSeriesTooltipFormatter = Private => {
-  _tooltipFormatter = Private(PointSeriesTooltipFormatterProvider);
-};

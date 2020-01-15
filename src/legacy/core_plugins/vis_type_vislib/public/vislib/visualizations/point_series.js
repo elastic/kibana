@@ -153,18 +153,10 @@ export class PointSeries extends Chart {
       .attr('class', 'endzone')
       .append('rect')
       .attr('class', 'zone')
-      .attr('x', function(d) {
-        return isHorizontal ? d.x : 0;
-      })
-      .attr('y', function(d) {
-        return isHorizontal ? 0 : d.x;
-      })
-      .attr('height', function(d) {
-        return isHorizontal ? height : d.w;
-      })
-      .attr('width', function(d) {
-        return isHorizontal ? d.w : width;
-      });
+      .attr('x', d => (isHorizontal ? d.x : 0))
+      .attr('y', d => (isHorizontal ? 0 : d.x))
+      .attr('height', d => (isHorizontal ? height : d.w))
+      .attr('width', d => (isHorizontal ? d.w : width));
 
     function callPlay(event) {
       const boundData = event.target.__data__;

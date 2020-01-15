@@ -76,9 +76,6 @@ export const createVislibVisController = (deps: KbnVislibVisTypesDependencies) =
           return resolve();
         }
 
-        await deps.initializeHierarchicalTooltipFormatter();
-        await deps.initializePointSeriesTooltipFormatter();
-
         this.vislibVis = new Vislib(this.chartEl, visParams, deps);
         this.vislibVis.on('brush', this.vis.API.events.brush);
         this.vislibVis.on('click', this.vis.API.events.filter);

@@ -17,66 +17,75 @@
  * under the License.
  */
 
+import React from 'react';
 import _ from 'lodash';
-import $ from 'jquery';
+import numeral from 'numeral';
+import { renderToStaticMarkup } from 'react-dom/server';
 
-import chrome from 'ui/chrome';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { collectBranch } from './_collect_branch';
-import numeral from 'numeral';
-import template from './_hierarchical_tooltip.html';
 
-export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce) {
-  const $tooltip = $(template);
-  const $tooltipScope = $rootScope.$new();
+export function hierarchicalTooltipFormatter(metricFieldFormatter) {
+  return function({ datum }) {
+    // Collect the current leaf and parents into an array of values
+    const rows = collectBranch(datum);
 
-  $compile($tooltip)($tooltipScope);
+    // Map those values to what the tooltipSource.rows format.
+    _.forEachRight(rows, function(row) {
+      row.spacer = _.escape(_.repeat('&nbsp;', row.depth));
 
-  return function(metricFieldFormatter) {
-    return function(event) {
-      const datum = event.datum;
+      let percent;
+      if (row.item.percentOfGroup != null) {
+        percent = row.item.percentOfGroup;
+      }
 
-      // Collect the current leaf and parents into an array of values
-      $tooltipScope.rows = collectBranch(datum);
+      row.metric = metricFieldFormatter ? metricFieldFormatter.convert(row.metric) : row.metric;
 
-      // Map those values to what the tooltipSource.rows format.
-      _.forEachRight($tooltipScope.rows, function(row) {
-        row.spacer = $sce.trustAsHtml(_.repeat('&nbsp;', row.depth));
+      if (percent != null) {
+        row.metric += ' (' + numeral(percent).format('0.[00]%') + ')';
+      }
 
-        let percent;
-        if (row.item.percentOfGroup != null) {
-          percent = row.item.percentOfGroup;
-        }
+      return row;
+    });
 
-        row.metric = metricFieldFormatter ? metricFieldFormatter.convert(row.metric) : row.metric;
+    return renderToStaticMarkup(
+      <table className="visTooltip__table">
+        <thead>
+          <tr className="eui-textLeft visTooltip__label">
+            <FormattedMessage
+              tagName="th"
+              scope="col"
+              id="common.ui.aggResponse.fieldLabel"
+              defaultMessage="field"
+            />
 
-        if (percent != null) {
-          row.metric += ' (' + numeral(percent).format('0.[00]%') + ')';
-        }
-
-        return row;
-      });
-
-      $tooltipScope.$apply();
-      return $tooltip[0].outerHTML;
-    };
+            <FormattedMessage
+              tagName="th"
+              scope="col"
+              id="common.ui.aggResponse.valueLabel"
+              defaultMessage="value"
+            />
+            <th scope="col">{/* {metricCol.label} */}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, index) => (
+            <tr className="visTooltip__value" key={index}>
+              <td>
+                <div className="visTooltip__labelContainer">
+                  <span ng-bind-html="row.spacer" />
+                  {row.field}
+                </div>
+              </td>
+              <td>
+                <div className="visTooltip__labelContainer">{row.bucket}</div>
+              </td>
+              <td>{row.metric}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
   };
 }
-
-let _tooltipFormatter;
-export const getHierarchicalTooltipFormatter = () => {
-  if (!_tooltipFormatter) {
-    throw new Error('tooltip formatter not initialized');
-  }
-  return _tooltipFormatter;
-};
-
-export const initializeHierarchicalTooltipFormatter = async () => {
-  const $injector = await chrome.dangerouslyGetActiveInjector();
-  const Private = $injector.get('Private');
-  _tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
-};
-
-export const setHierarchicalTooltipFormatter = Private => {
-  _tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
-};

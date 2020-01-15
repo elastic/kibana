@@ -217,7 +217,7 @@ Tooltip.prototype.render = function() {
           return content.id !== id;
         });
 
-        if (html) allContents.push({ id: id, html: html, order: order });
+        if (html) allContents.push({ id, html, order });
 
         const allHtml = _(allContents)
           .sortBy('order')
