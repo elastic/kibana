@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { licensePreRoutingFactory } from './license_pre_routing_factory';
+export const PLUGIN = {
+  ID: 'painless_playground',
+};
+
+export const ROUTES = {
+  API_ROOT: '/api/painless_playground',
+};

@@ -18,20 +18,21 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
-  service: any;
+  executeCode: (payload: Record<string, unknown>) => Promise<any>;
 }
 
 interface State {
   code: string;
   request?: string;
   response?: string;
-  responseObj: Record<string, any>;
+  responseObj: Record<string, any> | null;
 }
 export function PainlessPlayground(props: Props) {
   const [state, setState] = useState<State>({
     code: '',
     request: '',
     response: '',
+    responseObj: null,
   });
 
   const submit = async () => {
@@ -41,7 +42,7 @@ export function PainlessPlayground(props: Props) {
       },
     };
     try {
-      const response = await props.service.simulate(request);
+      const response = await props.executeCode(request);
       setState({
         code: state.code,
         request: JSON.stringify(request, null, 2),
@@ -112,7 +113,7 @@ export function PainlessPlayground(props: Props) {
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.painlessPlayground.outputLabel"
+                    id="xpack.painlessPlayground.responseLabel"
                     defaultMessage="Response"
                   />
                 }

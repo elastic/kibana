@@ -9,6 +9,21 @@ import { i18n } from '@kbn/i18n';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { npSetup, npStart } from 'ui/new_platform';
 import { registerPainless } from './register_painless';
+import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
+
+npSetup.plugins.home.featureCatalogue.register({
+  id: 'painless_playground',
+  title: i18n.translate('xpack.painlessPlayground.registryProviderTitle', {
+    defaultMessage: 'Painless Playground',
+  }),
+  description: i18n.translate('xpack.painlessPlayground.registryProviderDescription', {
+    defaultMessage: 'Simulate and debug painless code',
+  }),
+  icon: '',
+  path: '/app/kibana#/dev_tools/painless_playground',
+  showOnHomePage: false,
+  category: FeatureCatalogueCategory.ADMIN,
+});
 
 npSetup.plugins.dev_tools.register({
   order: 7,

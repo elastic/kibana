@@ -8,8 +8,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PainlessPlayground } from './components/painless_playground';
-import { PainlessPlaygroundService } from './services/painless_playground_service';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
+import { executeCode } from './lib/execute_code';
 
 export function renderApp(element: any, npStart: any) {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
@@ -18,7 +18,7 @@ export function renderApp(element: any, npStart: any) {
   render(
     <KibanaReactContextProvider>
       <I18nProvider>
-        <PainlessPlayground service={new PainlessPlaygroundService(npStart.core.http)} />
+        <PainlessPlayground executeCode={payload => executeCode(npStart.core.http, payload)} />
       </I18nProvider>
     </KibanaReactContextProvider>,
     element

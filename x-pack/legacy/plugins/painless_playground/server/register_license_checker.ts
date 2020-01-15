@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
-import { mirrorPluginStatus } from '../../../../../server/lib/mirror_plugin_status';
-import { checkLicense } from '../check_license';
-import { PLUGIN } from '../../../common/constants';
+import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
+import { checkLicense } from './lib/check_license';
+import { PLUGIN } from '../common/constants';
 
 export function registerLicenseChecker(server: any) {
   const xpackMainPlugin = server.plugins.xpack_main;

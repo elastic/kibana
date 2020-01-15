@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrapEsError } from '../../lib/error_wrappers';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { ServerFacade, RequestFacade } from '../../../types';
+import { licensePreRoutingFactory } from './lib/license_pre_routing_factory';
+import { RequestFacade, ServerFacade } from '../../reporting/types';
 
-export function registerPainlessPlaygroundSimulateRoute(server: ServerFacade) {
+export function registerSimulateRoute(server: ServerFacade) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({

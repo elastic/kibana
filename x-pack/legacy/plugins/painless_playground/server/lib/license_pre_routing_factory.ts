@@ -5,8 +5,8 @@
  */
 
 import Boom from 'boom';
-import { ServerFacade } from '../../../types';
-import { PLUGIN } from '../../../common/constants';
+import { PLUGIN } from '../../common/constants';
+import { ServerFacade } from '../../../index_management';
 
 export const licensePreRoutingFactory = (server: ServerFacade) => {
   const xpackMainPlugin = server.plugins.xpack_main;
