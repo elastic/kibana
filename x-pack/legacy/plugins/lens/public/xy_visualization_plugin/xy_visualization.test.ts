@@ -137,6 +137,54 @@ describe('xy_visualization', () => {
     });
   });
 
+  describe('#removeLayer', () => {
+    it('removes the specified layer', () => {
+      const prevState: State = {
+        ...exampleState(),
+        layers: [
+          ...exampleState().layers,
+          {
+            layerId: 'second',
+            seriesType: 'area',
+            splitAccessor: 'e',
+            xAccessor: 'f',
+            accessors: ['g', 'h'],
+          },
+        ],
+      };
+
+      expect(xyVisualization.removeLayer!(prevState, 'second')).toEqual(exampleState());
+    });
+  });
+
+  describe('#appendLayer', () => {
+    it('adds a layer', () => {
+      const layers = xyVisualization.appendLayer!(exampleState(), 'foo').layers;
+      expect(layers.length).toEqual(exampleState().layers.length + 1);
+      expect(layers[layers.length - 1]).toMatchObject({ layerId: 'foo' });
+    });
+  });
+
+  describe('#clearLayer', () => {
+    it('clears the specified layer', () => {
+      (generateId as jest.Mock).mockReturnValue('test_empty_id');
+      const layer = xyVisualization.clearLayer(exampleState(), 'first').layers[0];
+      expect(layer).toMatchObject({
+        accessors: ['test_empty_id'],
+        layerId: 'first',
+        seriesType: 'bar',
+        splitAccessor: 'test_empty_id',
+        xAccessor: 'test_empty_id',
+      });
+    });
+  });
+
+  describe('#getLayerIds', () => {
+    it('returns layerids', () => {
+      expect(xyVisualization.getLayerIds(exampleState())).toEqual(['first']);
+    });
+  });
+
   describe('#toExpression', () => {
     let mockDatasource: ReturnType<typeof createMockDatasource>;
     let frame: ReturnType<typeof createMockFramePublicAPI>;

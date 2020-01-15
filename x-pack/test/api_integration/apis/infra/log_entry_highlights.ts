@@ -110,7 +110,9 @@ export default function({ getService }: FtrProviderContext) {
           });
         });
 
-        it('highlights field columns', async () => {
+        // Skipped since it behaves differently in master and in the 7.X branch
+        // See https://github.com/elastic/kibana/issues/49959
+        it.skip('highlights field columns', async () => {
           const { body } = await supertest
             .post(LOG_ENTRIES_HIGHLIGHTS_PATH)
             .set(COMMON_HEADERS)
@@ -140,9 +142,7 @@ export default function({ getService }: FtrProviderContext) {
           entries.forEach(entry => {
             entry.columns.forEach(column => {
               if ('field' in column && 'highlights' in column && column.highlights.length > 0) {
-                // https://github.com/elastic/kibana/issues/49959
-                // expect(column.highlights).to.eql(['generate_test_data/simple_logs']);
-                expect(column.highlights).to.eql(['generate_test_data']);
+                expect(column.highlights).to.eql(['generate_test_data/simple_logs']);
               }
             });
           });

@@ -18,15 +18,35 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ConfigDeprecationProvider } from 'src/core/server';
+import { ServiceConfigDescriptor } from '../internal_types';
 
-export type UiSettingsConfigType = TypeOf<typeof config.schema>;
+const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
+  unused('enabled'),
+  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
+];
 
-export const config = {
+const configSchema = schema.object({
+  overrides: schema.object(
+    {
+      defaultRoute: schema.maybe(
+        schema.string({
+          validate(value) {
+            if (!value.startsWith('/')) {
+              return 'must start with a slash';
+            }
+          },
+        })
+      ),
+    },
+    { allowUnknowns: true }
+  ),
+});
+
+export type UiSettingsConfigType = TypeOf<typeof configSchema>;
+
+export const config: ServiceConfigDescriptor<UiSettingsConfigType> = {
   path: 'uiSettings',
-  schema: schema.object({
-    overrides: schema.object({}, { allowUnknowns: true }),
-    // Deprecation is implemented in LP.
-    // We define schema here not to fail on the validation step.
-    enabled: schema.maybe(schema.boolean()),
-  }),
+  schema: configSchema,
+  deprecations,
 };

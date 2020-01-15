@@ -41,7 +41,7 @@ const grammarRuleTranslations: Record<string, string> = {
 
 interface KQLSyntaxErrorData extends Error {
   found: string;
-  expected: KQLSyntaxErrorExpected[];
+  expected: KQLSyntaxErrorExpected[] | null;
   location: any;
 }
 
@@ -53,19 +53,22 @@ export class KQLSyntaxError extends Error {
   shortMessage: string;
 
   constructor(error: KQLSyntaxErrorData, expression: any) {
-    const translatedExpectations = error.expected.map(expected => {
-      return grammarRuleTranslations[expected.description] || expected.description;
-    });
+    let message = error.message;
+    if (error.expected) {
+      const translatedExpectations = error.expected.map(expected => {
+        return grammarRuleTranslations[expected.description] || expected.description;
+      });
 
-    const translatedExpectationText = translatedExpectations.join(', ');
+      const translatedExpectationText = translatedExpectations.join(', ');
 
-    const message = i18n.translate('data.common.esQuery.kql.errors.syntaxError', {
-      defaultMessage: 'Expected {expectedList} but {foundInput} found.',
-      values: {
-        expectedList: translatedExpectationText,
-        foundInput: error.found ? `"${error.found}"` : endOfInputText,
-      },
-    });
+      message = i18n.translate('data.common.esQuery.kql.errors.syntaxError', {
+        defaultMessage: 'Expected {expectedList} but {foundInput} found.',
+        values: {
+          expectedList: translatedExpectationText,
+          foundInput: error.found ? `"${error.found}"` : endOfInputText,
+        },
+      });
+    }
 
     const fullMessage = [message, expression, repeat('-', error.location.start.offset) + '^'].join(
       '\n'

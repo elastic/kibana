@@ -36,6 +36,9 @@
               "timeline_id": {
                 "type": "keyword"
               },
+              "timeline_title": {
+                "type": "keyword"
+              },
               "max_signals": {
                 "type": "keyword"
               },
@@ -47,9 +50,6 @@
               },
               "description": {
                 "type": "keyword"
-              },
-              "filter": {
-                "type": "object"
               },
               "from": {
                 "type": "keyword"

@@ -14,7 +14,6 @@ export interface Group {
 
 export interface CheckRecognizerProps {
   indexPatternName: string[];
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -30,7 +29,6 @@ export interface RecognizerModule {
 
 export interface GetModulesProps {
   moduleId?: string;
-  kbnVersion: string;
   signal: AbortSignal;
 }
 
@@ -97,7 +95,6 @@ export interface MlSetupArgs {
   jobIdErrorFilter: string[];
   groups: string[];
   prefix?: string;
-  kbnVersion: string;
 }
 
 /**

@@ -15,7 +15,7 @@ import {
 } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { KqlMode, TimelineModel } from './model';
+import { EventType, KqlMode, TimelineModel } from './model';
 import { TimelineNonEcsData } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
@@ -50,6 +50,7 @@ export const applyDeltaToColumnWidth = actionCreator<{
 
 export const createTimeline = actionCreator<{
   id: string;
+  dataProviders?: DataProvider[];
   dateRange?: {
     start: number;
     end: number;
@@ -241,3 +242,7 @@ export const setEventsDeleted = actionCreator<{
 export const clearEventsDeleted = actionCreator<{
   id: string;
 }>('CLEAR_TIMELINE_EVENTS_DELETED');
+
+export const updateEventType = actionCreator<{ id: string; eventType: EventType }>(
+  'UPDATE_EVENT_TYPE'
+);

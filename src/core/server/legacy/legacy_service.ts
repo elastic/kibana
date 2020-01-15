@@ -84,7 +84,7 @@ export class LegacyService implements CoreService {
   private settings?: LegacyVars;
 
   constructor(private readonly coreContext: CoreContext) {
-    const { logger, configService, env } = coreContext;
+    const { logger, configService } = coreContext;
 
     this.log = logger.get('legacy-service');
     this.devConfig$ = configService
@@ -93,7 +93,7 @@ export class LegacyService implements CoreService {
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
-    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
@@ -125,7 +125,11 @@ export class LegacyService implements CoreService {
       disabledPluginSpecs,
       uiExports,
       navLinks,
-    } = await findLegacyPluginSpecs(this.settings, this.coreContext.logger);
+    } = await findLegacyPluginSpecs(
+      this.settings,
+      this.coreContext.logger,
+      this.coreContext.env.packageInfo
+    );
 
     this.legacyPlugins = {
       pluginSpecs,
@@ -249,8 +253,8 @@ export class LegacyService implements CoreService {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
-        adminClient$: setupDeps.core.elasticsearch.adminClient$,
-        dataClient$: setupDeps.core.elasticsearch.dataClient$,
+        adminClient: setupDeps.core.elasticsearch.adminClient,
+        dataClient: setupDeps.core.elasticsearch.dataClient,
         createClient: setupDeps.core.elasticsearch.createClient,
       },
       http: {

@@ -13,6 +13,8 @@ import {
 
 import { updateRulesRoute } from './update_rules_route';
 import { ServerInjectOptions } from 'hapi';
+import { ServerFacade } from '../../../../types';
+
 import {
   getFindResult,
   getResult,
@@ -23,6 +25,7 @@ import {
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
+import { BulkError } from '../utils';
 
 describe('update_rules_bulk', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
@@ -30,7 +33,7 @@ describe('update_rules_bulk', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient } = createMockServer());
-    updateRulesBulkRoute(server);
+    updateRulesBulkRoute((server as unknown) as ServerFacade);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -58,22 +61,26 @@ describe('update_rules_bulk', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       const { payload } = await server.inject(getUpdateBulkRequest());
-      const parsed = JSON.parse(payload);
-      expect(parsed).toEqual([
-        { error: { message: 'rule_id: "rule-1" not found', statusCode: 404 }, id: 'rule-1' },
-      ]);
+      const parsed: BulkError[] = JSON.parse(payload);
+      const expected: BulkError[] = [
+        {
+          error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
+          rule_id: 'rule-1',
+        },
+      ];
+      expect(parsed).toEqual(expected);
     });
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      updateRulesRoute(serverWithoutActionClient);
+      updateRulesRoute((serverWithoutActionClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutActionClient.inject(getUpdateBulkRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      updateRulesRoute(serverWithoutAlertClient);
+      updateRulesRoute((serverWithoutAlertClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutAlertClient.inject(getUpdateBulkRequest());
       expect(statusCode).toBe(404);
     });
@@ -82,7 +89,7 @@ describe('update_rules_bulk', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      updateRulesRoute(serverWithoutActionOrAlertClient);
+      updateRulesRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getUpdateBulkRequest());
       expect(statusCode).toBe(404);
     });
@@ -125,10 +132,14 @@ describe('update_rules_bulk', () => {
         payload: [typicalPayload()],
       };
       const { payload } = await server.inject(request);
-      const parsed = JSON.parse(payload);
-      expect(parsed).toEqual([
-        { error: { message: 'rule_id: "rule-1" not found', statusCode: 404 }, id: 'rule-1' },
-      ]);
+      const parsed: BulkError[] = JSON.parse(payload);
+      const expected: BulkError[] = [
+        {
+          error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
+          rule_id: 'rule-1',
+        },
+      ];
+      expect(parsed).toEqual(expected);
     });
 
     test('returns 200 if type is query', async () => {
