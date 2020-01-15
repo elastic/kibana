@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { KibanaAssetType, DatasetType } from '../../../../common/types';
+import { KibanaAssetType } from '../../../../common/types';
 import { RegistryPackage, Dataset } from '../../../../common/types';
 import * as Registry from '../../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
@@ -26,27 +26,29 @@ export interface IndexPatternField {
   readFromDocValues: boolean;
 }
 
+enum IndexPatternType {
+  logs = 'logs',
+  metrics = 'metrics',
+}
+
 export async function installIndexPatterns(
   pkgkey: string,
   savedObjectsClient: SavedObjectsClientContract
 ) {
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
-  if (!registryPackageInfo.datasets) return;
-  const datasets = registryPackageInfo.datasets;
-  // separate logs and metrics datasets
-  const logsDatasets = datasets.filter(dataset => dataset.type === DatasetType.logs);
-  const metricsDatasets = datasets.filter(dataset => dataset.type === DatasetType.metrics);
-  await createIndexPattern({
-    datasetType: DatasetType.logs,
-    datasets: logsDatasets,
-    registryPackageInfo,
-    savedObjectsClient,
-  });
-  await createIndexPattern({
-    datasetType: DatasetType.metrics,
-    datasets: metricsDatasets,
-    registryPackageInfo,
-    savedObjectsClient,
+  const registryDatasets = registryPackageInfo.datasets;
+  if (!registryDatasets) return;
+
+  const indexPatternTypes = [IndexPatternType.logs, IndexPatternType.metrics];
+
+  indexPatternTypes.forEach(async indexPatternType => {
+    const datasets = registryDatasets.filter(dataset => dataset.type === indexPatternType);
+    await createIndexPattern({
+      datasetType: indexPatternType,
+      datasets,
+      registryPackageInfo,
+      savedObjectsClient,
+    });
   });
 }
 
