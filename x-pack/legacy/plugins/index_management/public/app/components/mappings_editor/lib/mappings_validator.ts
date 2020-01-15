@@ -5,6 +5,7 @@
  */
 import { pick } from 'lodash';
 import * as t from 'io-ts';
+import { ordString } from 'fp-ts/lib/Ord';
 import { toArray } from 'fp-ts/lib/Set';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
 import { ErrorReporter } from './error_reporter';
@@ -237,15 +238,12 @@ const validateMappingsConfiguration = (
 
   copyOfMappingsConfig = pick(copyOfMappingsConfig, mappingsConfigurationSchemaKeys);
 
-  const errors: MappingsValidationError[] = toArray<{
-    code: 'ERR_CONFIG';
-    configName: string;
-  }>([])(configurationRemoved)
+  const errors: MappingsValidationError[] = toArray<string>(ordString)(configurationRemoved)
     .map(configName => ({
       code: 'ERR_CONFIG',
       configName,
     }))
-    .sort((a, b) => a.configName.localeCompare(b.configName));
+    .sort((a, b) => a.configName.localeCompare(b.configName)) as MappingsValidationError[];
 
   return { value: copyOfMappingsConfig, errors };
 };

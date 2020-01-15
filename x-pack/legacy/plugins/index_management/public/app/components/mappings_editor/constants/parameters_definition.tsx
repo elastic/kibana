@@ -106,7 +106,7 @@ const fielddataFrequencyFilterParam = {
       max: t.number,
       min_segment_size: t.number,
     }),
-    t.brand(t.UnknownRecord, v => !Array.isArray(v)),
+    t.brand(t.UnknownRecord, (v: any): v is any => !Array.isArray(v), 'Array'),
   ]),
 };
 
