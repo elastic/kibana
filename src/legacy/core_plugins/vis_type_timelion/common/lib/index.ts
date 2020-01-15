@@ -18,4 +18,6 @@
  */
 
 export { calculateInterval } from './calculate_interval';
+export { toMS } from './to_milliseconds';
+
 export const DEFAULT_TIME_FORMAT = 'MMMM Do YYYY, HH:mm:ss.SSS';

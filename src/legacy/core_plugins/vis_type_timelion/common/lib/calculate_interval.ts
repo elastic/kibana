@@ -17,8 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
-import toMS from '../../../timelion/server/lib/to_milliseconds.js';
+import { toMS } from './to_milliseconds';
 
 // Totally cribbed this from Kibana 3.
 // I bet there's something similar in the Kibana 4 code. Somewhere. Somehow.
@@ -70,9 +69,11 @@ export function calculateInterval(
     return interval;
   }
 
-  const dateMathInterval = roundInterval((to - from) / size);
+  const dateMathInterval: string = roundInterval((to - from) / size);
+  const dateMathIntervalMs = toMS(dateMathInterval);
+  const minMs = toMS(min);
 
-  if (toMS(dateMathInterval) < toMS(min)) {
+  if (dateMathIntervalMs !== undefined && minMs !== undefined && dateMathIntervalMs < minMs) {
     return min;
   }
 
