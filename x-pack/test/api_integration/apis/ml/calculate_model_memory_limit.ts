@@ -14,6 +14,44 @@ const COMMON_HEADERS = {
 
 const testDataList = [
   {
+    testTitleSuffix: 'with 0 metrics, 0 influencers and no split field',
+    requestBody: {
+      indexPattern: 'ecommerce',
+      splitFieldName: '',
+      query: { bool: { must: [{ match_all: {} }], filter: [], must_not: [] } },
+      fieldNames: ['__ml_event_rate_count__'],
+      influencerNames: [],
+      timeFieldName: 'order_date',
+      earliestMs: 1560297859000,
+      latestMs: 1562975136000,
+    },
+    expected: {
+      responseCode: 400,
+      responseBody: {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: "[illegal_argument_exception] specified fields can't be null or empty",
+      },
+    },
+  },
+  {
+    testTitleSuffix: 'with 1 metrics and 1 influencers same as split field',
+    requestBody: {
+      indexPattern: 'ecommerce',
+      splitFieldName: 'geoip.city_name',
+      query: { bool: { must: [{ match_all: {} }], filter: [], must_not: [] } },
+      fieldNames: ['products.base_price'],
+      influencerNames: ['geoip.city_name'],
+      timeFieldName: 'order_date',
+      earliestMs: 1560297859000,
+      latestMs: 1562975136000,
+    },
+    expected: {
+      responseCode: 200,
+      responseBody: { modelMemoryLimit: '12MB' },
+    },
+  },
+  {
     testTitleSuffix: 'with 3 metrics, 3 influencers, split by city',
     requestBody: {
       indexPattern: 'ecommerce',
