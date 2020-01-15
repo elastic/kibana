@@ -18,7 +18,6 @@ import {
   NetworkHttpData,
   NetworkHttpEdges,
   NetworkTopNFlowEdges,
-  MatrixOverOrdinalHistogramData,
   NetworkDsOverTimeData,
   MatrixOverTimeHistogramData,
 } from '../../graphql/types';
