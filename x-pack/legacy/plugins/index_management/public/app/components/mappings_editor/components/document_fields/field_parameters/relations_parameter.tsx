@@ -135,14 +135,24 @@ export const RelationsParameter = () => (
     <UseArray path="relations">
       {({ items, addItem, removeItem }) => (
         <>
-          {items.map(({ id: relationId, path }) => (
+          {items.map(({ id: relationId, path, isNew }) => (
             <div key={relationId} className="mappingsEditor__joinType__relationItem">
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <UseField path={`${path}.parent`} config={parentConfig} />
+                  <UseField
+                    path={`${path}.parent`}
+                    config={parentConfig}
+                    // For newly created relations, we don't want to read
+                    // the default value from the form as... it is new! :)
+                    readDefaultValueOnForm={!isNew}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <UseField path={`${path}.children`} config={childConfig} />
+                  <UseField
+                    path={`${path}.children`}
+                    config={childConfig}
+                    readDefaultValueOnForm={!isNew}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiButtonIcon
