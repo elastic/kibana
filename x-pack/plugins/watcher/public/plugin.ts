@@ -23,35 +23,38 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         state === LICENSE_CHECK_STATE.Valid && license.getFeature(PLUGIN.ID).isAvailable;
 
       if (this.hasValidLicense) {
-        management.sections.getSection('elasticsearch')!.registerApp({
-          id: 'watcher',
-          title: 'Watcher',
-          mount: async ({ element }) => {
-            if (!this.hasValidLicense) {
-              return () => undefined;
-            }
-            const [core, plugins] = await getStartServices();
-            const { chrome, i18n, docLinks, savedObjects } = core;
-            const { eui_utils } = plugins as any;
-            const { boot } = await import('./application/boot');
+        const esSection = management.sections.getSection('elasticsearch');
+        if (esSection) {
+          esSection.registerApp({
+            id: 'watcher',
+            title: 'Watcher',
+            mount: async ({ element }) => {
+              if (!this.hasValidLicense) {
+                return () => undefined;
+              }
+              const [core, plugins] = await getStartServices();
+              const { chrome, i18n, docLinks, savedObjects } = core;
+              const { eui_utils } = plugins as any;
+              const { boot } = await import('./application/boot');
 
-            const createTimeBuckets = () => new TimeBuckets(uiSettings, data);
+              const createTimeBuckets = () => new TimeBuckets(uiSettings, data);
 
-            return boot({
-              element,
-              toasts: notifications.toasts,
-              http,
-              uiSettings,
-              docLinks,
-              chrome,
-              euiUtils: eui_utils,
-              savedObjects: savedObjects.client,
-              I18nContext: i18n.Context,
-              createTimeBuckets,
-              MANAGEMENT_BREADCRUMB,
-            });
-          },
-        });
+              return boot({
+                element,
+                toasts: notifications.toasts,
+                http,
+                uiSettings,
+                docLinks,
+                chrome,
+                euiUtils: eui_utils,
+                savedObjects: savedObjects.client,
+                I18nContext: i18n.Context,
+                createTimeBuckets,
+                MANAGEMENT_BREADCRUMB,
+              });
+            },
+          });
+        }
       }
 
       //     management.sections.getSection('elasticsearch/watcher').register('watches', {
