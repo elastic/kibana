@@ -25,7 +25,7 @@ export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.network.navigatio
 export const NAVIGATION_DNS_STACK_BY_DOMAIN = i18n.translate(
   'xpack.siem.hosts.navigation.dns.stackByDomain',
   {
-    defaultMessage: 'domain',
+    defaultMessage: 'Top domains by unique domains',
   }
 );
 

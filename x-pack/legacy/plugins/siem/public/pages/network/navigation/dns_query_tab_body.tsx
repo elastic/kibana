@@ -22,7 +22,6 @@ import { networkModel } from '../../../store';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { networkDnsQuery } from '../../../containers/network_dns/index.gql_query';
 import * as i18n from '../translations';
-import { useFormatBytes } from '../../../components/formatted_bytes';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
@@ -50,50 +49,47 @@ export const DnsQueryTabBody = ({
       }
     };
   }, [deleteQuery]);
-  const formatBytes = useFormatBytes();
 
   return (
-    <NetworkDnsQuery
-      endDate={endDate}
-      filterQuery={filterQuery}
-      skip={skip}
-      sourceId="default"
-      startDate={startDate}
-      type={type}
-    >
-      {({
-        totalCount,
-        loading,
-        networkDns,
-        pageInfo,
-        loadPage,
-        id,
-        inspect,
-        isInspected,
-        refetch,
-      }) => (
-        <>
-          <NetworkDnsHistogramQuery
-            dataKey={['NetworkDns', 'histogram']}
-            defaultStackByOption={dnsStackByOptions[0]}
-            endDate={endDate}
-            errorMessage={i18n.ERROR_FETCHING_DNS_DATA}
-            filterQuery={filterQuery}
-            isDNSHistogram={true}
-            limit={totalCount}
-            query={networkDnsQuery}
-            scaleType={ScaleType.Ordinal}
-            setQuery={setQuery}
-            sourceId="default"
-            startDate={startDate}
-            stackByOptions={dnsStackByOptions}
-            title={i18n.NAVIGATION_DNS_TITLE}
-            type={networkModel.NetworkType.page}
-            updateDateRange={updateDateRange}
-            yTickFormatter={formatBytes}
-            showLegend={false}
-          />
-          <EuiSpacer />
+    <>
+      <NetworkDnsHistogramQuery
+        dataKey={['NetworkDns', 'histogram']}
+        defaultStackByOption={dnsStackByOptions[0]}
+        endDate={endDate}
+        errorMessage={i18n.ERROR_FETCHING_DNS_DATA}
+        filterQuery={filterQuery}
+        isDNSHistogram={true}
+        query={networkDnsQuery}
+        scaleType={ScaleType.Ordinal}
+        setQuery={setQuery}
+        sourceId="default"
+        startDate={startDate}
+        stackByOptions={dnsStackByOptions}
+        title={i18n.NAVIGATION_DNS_TITLE}
+        type={networkModel.NetworkType.page}
+        updateDateRange={updateDateRange}
+        showLegend={false}
+      />
+      <EuiSpacer />
+      <NetworkDnsQuery
+        endDate={endDate}
+        filterQuery={filterQuery}
+        skip={skip}
+        sourceId="default"
+        startDate={startDate}
+        type={type}
+      >
+        {({
+          totalCount,
+          loading,
+          networkDns,
+          pageInfo,
+          loadPage,
+          id,
+          inspect,
+          isInspected,
+          refetch,
+        }) => (
           <NetworkDnsTableManage
             data={networkDns}
             fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
@@ -108,9 +104,9 @@ export const DnsQueryTabBody = ({
             totalCount={totalCount}
             type={type}
           />
-        </>
-      )}
-    </NetworkDnsQuery>
+        )}
+      </NetworkDnsQuery>
+    </>
   );
 };
 
