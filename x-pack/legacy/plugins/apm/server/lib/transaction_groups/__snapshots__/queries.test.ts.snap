@@ -4,7 +4,7 @@ exports[`transaction group queries fetches top traces 1`] = `
 Object {
   "body": Object {
     "aggs": Object {
-      "compositeTransactions": Object {
+      "transaction_groups": Object {
         "aggs": Object {
           "avg": Object {
             "avg": Object {
@@ -110,7 +110,7 @@ exports[`transaction group queries fetches top transactions 1`] = `
 Object {
   "body": Object {
     "aggs": Object {
-      "compositeTransactions": Object {
+      "transaction_groups": Object {
         "aggs": Object {
           "avg": Object {
             "avg": Object {

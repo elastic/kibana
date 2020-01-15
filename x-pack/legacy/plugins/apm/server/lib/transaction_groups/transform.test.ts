@@ -36,7 +36,7 @@ describe('transactionGroupsTransformer', () => {
 
     const response = ({
       aggregations: {
-        compositeTransactions: {
+        transaction_groups: {
           buckets: [bucket]
         }
       }
@@ -68,7 +68,7 @@ describe('transactionGroupsTransformer', () => {
 
     const response = ({
       aggregations: {
-        compositeTransactions: {
+        transaction_groups: {
           buckets: [getBucket(10), getBucket(20), getBucket(50)]
         }
       }

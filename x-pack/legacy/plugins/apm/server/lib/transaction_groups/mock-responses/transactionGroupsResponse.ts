@@ -12,7 +12,7 @@ export const transactionGroupsResponse = ({
   _shards: { total: 44, successful: 44, skipped: 0, failed: 0 },
   hits: { total: 131557, max_score: null, hits: [] },
   aggregations: {
-    compositeTransactions: {
+    transaction_groups: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [

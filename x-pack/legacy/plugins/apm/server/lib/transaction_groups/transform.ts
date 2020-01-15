@@ -28,7 +28,7 @@ function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
 const getBuckets = (response: ESResponse) => {
   if (response.aggregations) {
     return sortByOrder(
-      response.aggregations.compositeTransactions.buckets,
+      response.aggregations.transaction_groups.buckets,
       ['sum.value'],
       ['desc']
     );

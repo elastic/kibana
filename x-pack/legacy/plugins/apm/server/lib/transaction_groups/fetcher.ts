@@ -69,7 +69,7 @@ export function transactionGroupsFetcher(
         }
       },
       aggs: {
-        compositeTransactions: {
+        transaction_groups: {
           composite: {
             size: 10000,
             sources: [

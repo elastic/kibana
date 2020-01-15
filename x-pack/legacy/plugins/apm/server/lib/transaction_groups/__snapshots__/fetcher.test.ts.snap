@@ -6,7 +6,7 @@ Array [
     Object {
       "body": Object {
         "aggs": Object {
-          "compositeTransactions": Object {
+          "transaction_groups": Object {
             "aggs": Object {
               "avg": Object {
                 "avg": Object {
@@ -116,7 +116,7 @@ Array [
     Object {
       "body": Object {
         "aggs": Object {
-          "compositeTransactions": Object {
+          "transaction_groups": Object {
             "aggs": Object {
               "avg": Object {
                 "avg": Object {
