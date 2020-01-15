@@ -14,19 +14,6 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.network.pageTitle', {
   defaultMessage: 'Network',
 });
 
-export const EMPTY_TITLE = i18n.translate('xpack.siem.network.emptyTitle', {
-  defaultMessage:
-    'It looks like you don’t have any indices relevant to network in the SIEM application',
-});
-
-export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.network.emptyActionPrimary', {
-  defaultMessage: 'View setup instructions',
-});
-
-export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.network.emptyActionSecondary', {
-  defaultMessage: 'Go to documentation',
-});
-
 export const NAVIGATION_FLOWS_TITLE = i18n.translate('xpack.siem.network.navigation.flowsTitle', {
   defaultMessage: 'Flows',
 });

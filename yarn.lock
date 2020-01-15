@@ -1434,10 +1434,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@18.0.0":
-  version "18.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.0.0.tgz#b65607c87be63f9455630cab1ab2a365acd2a805"
-  integrity sha512-wFI6HwEmwnmctRiP5S3ScjJSqER+xmh7/3ur5BvPRYSaXm5vGJnj0bwqQD1GZ9jgfrrc7qy7f4ff3zbmuTBs3Q==
+"@elastic/eui@18.2.0":
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.2.0.tgz#db9c2af87b2bdd0af7a39802d31507139b543482"
+  integrity sha512-wZXFBzETsaMTw6VuqFu168NKiwXMI5MVT7SdTIRufCBrT6uhUpbx43ZiDCcg372RHXosunQaiD5eVm3aodO+Jg==
   dependencies:
     "@types/chroma-js" "^1.4.3"
     "@types/lodash" "^4.14.116"
@@ -2204,6 +2204,11 @@
     hat "0.0.3"
     lodash.isequal "^4.2.0"
     xtend "^4.0.1"
+
+"@mapbox/mapbox-gl-rtl-text@0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-rtl-text/-/mapbox-gl-rtl-text-0.2.3.tgz#a26ecfb3f0061456d93ee8570dd9587d226ea8bd"
+  integrity sha512-RaCYfnxULUUUxNwcUimV9C/o2295ktTyLEUzD/+VWkqXqvaVfFcZ5slytGzb2Sd/Jj4MlbxD0DCZbfa6CzcmMw==
 
 "@mapbox/mapbox-gl-supported@^1.4.0":
   version "1.4.0"
@@ -23703,6 +23708,13 @@ react-textarea-autosize@^7.1.0:
   dependencies:
     "@babel/runtime" "^7.1.2"
     prop-types "^15.6.0"
+
+react-tiny-virtual-list@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-tiny-virtual-list/-/react-tiny-virtual-list-2.2.0.tgz#eafb6fcf764e4ed41150ff9752cdaad8b35edf4a"
+  integrity sha512-MDiy2xyqfvkWrRiQNdHFdm36lfxmcLLKuYnUqcf9xIubML85cmYCgzBJrDsLNZ3uJQ5LEHH9BnxGKKSm8+C0Bw==
+  dependencies:
+    prop-types "^15.5.7"
 
 react-transition-group@^2.2.1:
   version "2.7.1"
