@@ -1,16 +1,6 @@
 {
-  "rule_id": "5d00c579-794c-4f64-be52-1ed8cae2b11e",
-  "risk_score": 50,
   "description": "(Search) Windows 10",
-  "immutable": true,
-  "interval": "5m",
-  "name": "(Search) Windows 10",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
       "$state": {
@@ -19,13 +9,13 @@
       "meta": {
         "alias": null,
         "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "agent.hostname",
         "negate": false,
         "params": {
           "query": "LAPTOP-CQNI37L2"
         },
-        "type": "phrase",
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase"
       },
       "query": {
         "match": {
@@ -37,16 +27,19 @@
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
         "alias": null,
-        "negate": false,
         "disabled": false,
-        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
         "key": "event.provider",
+        "negate": false,
         "params": {
           "query": "Microsoft-Windows-Sysmon"
         },
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+        "type": "phrase"
       },
       "query": {
         "match": {
@@ -55,12 +48,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "(Search) Windows 10",
+  "query": "",
+  "risk_score": 50,
+  "rule_id": "5d00c579-794c-4f64-be52-1ed8cae2b11e",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }
