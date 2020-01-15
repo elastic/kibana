@@ -208,7 +208,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
             <input
               className="euiFieldText"
               onChange={[Function]}
-              placeholder="strings.getCodePlaceholder()"
+              placeholder="Color code"
               type="text"
               value=""
             />
@@ -509,7 +509,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="strings.getCodePlaceholder()"
+            placeholder="Color code"
             type="text"
             value="#fff"
           />
@@ -773,7 +773,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="strings.getCodePlaceholder()"
+            placeholder="Color code"
             type="text"
             value="#a1b2c3"
           />
@@ -972,7 +972,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
           <input
             className="euiFieldText"
             onChange={[Function]}
-            placeholder="strings.getCodePlaceholder()"
+            placeholder="Color code"
             type="text"
             value="#fff"
           />
