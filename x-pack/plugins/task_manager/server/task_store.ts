@@ -302,7 +302,7 @@ export class TaskStore {
       seq_no_primary_term: true,
     });
 
-    return claimTasksById && claimTasksById.length ? docs : docs;
+    return docs;
   }
 
   /**
