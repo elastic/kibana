@@ -174,7 +174,6 @@ export class ExpressionInput extends React.Component<Props> {
           label: s.argDef.name,
           kind: monacoEditor.languages.CompletionItemKind.Variable,
           documentation: { value: getArgReferenceStr(s.argDef), isTrusted: true },
-          detail: s.argDef.help,
           insertText: s.text,
           command: {
             title: 'Trigger Suggestion Dialog',
@@ -203,7 +202,6 @@ export class ExpressionInput extends React.Component<Props> {
             value: getFunctionReferenceStr(s.fnDef),
             isTrusted: true,
           },
-          detail: s.fnDef.help,
           insertText: s.text,
           command: {
             title: 'Trigger Suggestion Dialog',
