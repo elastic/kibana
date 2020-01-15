@@ -15,7 +15,7 @@ import {
   FIELD_ORIGIN,
 } from '../../../common/constants';
 
-const AGG_DELIMITER = '_of_';
+export const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
   static METRIC_SCHEMA_CONFIG = {
@@ -51,6 +51,10 @@ export class AbstractESAggSource extends AbstractESSource {
           });
         })
       : [];
+  }
+
+  getFieldByName(name) {
+    return this.getMetricFieldForName(name);
   }
 
   createField({ fieldName, label }) {
