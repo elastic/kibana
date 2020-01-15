@@ -6,13 +6,13 @@
 
 import { CoreStart } from 'kibana/public';
 import { createSagaMiddleware, SagaContext } from '../lib';
-import { endpointsListSaga } from './endpoint_list';
+import { endpointListSaga } from './endpoint_list';
 
 export const appSagaFactory = (coreStart: CoreStart) => {
   return createSagaMiddleware(async (sagaContext: SagaContext) => {
     await Promise.all([
       // Concerns specific sagas here
-      endpointsListSaga(sagaContext, coreStart),
+      endpointListSaga(sagaContext, coreStart),
     ]);
   });
 };

@@ -6,5 +6,5 @@
 
 export { endpointListReducer } from './reducer';
 export { EndpointListAction } from './action';
-export { endpointsListSaga } from './saga';
+export { endpointListSaga } from './saga';
 export * from './types';

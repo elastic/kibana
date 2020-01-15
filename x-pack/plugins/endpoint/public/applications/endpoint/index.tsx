@@ -50,6 +50,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
           <Route
             path="/management"
             render={() => {
+              // FIXME: This is temporary. Will be removed in next PR for endpoint list
               store.dispatch({ type: 'userEnteredEndpointListPage' });
 
               return (
