@@ -24,6 +24,7 @@ import {
   CoreStart,
   IContextContainer,
   PluginOpaqueId,
+  PackageInfo,
 } from '../../../../core/public';
 
 import { ISearchAppMountContext } from './i_search_app_mount_context';
@@ -38,6 +39,7 @@ import {
 import { TStrategyTypes } from './strategy_types';
 import { esSearchService } from './es_search';
 import { ISearchGeneric } from './i_search';
+import { getEsClient } from './es_client';
 
 /**
  * Extends the AppMountContext so other plugins have access
@@ -51,6 +53,9 @@ declare module 'kibana/public' {
 
 export interface ISearchStart {
   search: ISearchGeneric;
+  __LEGACY: {
+    esClient: any;
+  };
 }
 
 /**
@@ -121,11 +126,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return api;
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, packageInfo: PackageInfo) {
     if (!this.search) {
       throw new Error('Search should always be defined');
     }
-    return { search: this.search };
+    return {
+      search: this.search,
+      __LEGACY: {
+        esClient: getEsClient(core.injectedMetadata, core.http, packageInfo, this.loadingCount$),
+      },
+    };
   }
 
   public stop() {}

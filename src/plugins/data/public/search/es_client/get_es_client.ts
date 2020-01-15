@@ -20,22 +20,60 @@
 // @ts-ignore
 import { default as es } from 'elasticsearch-browser/elasticsearch';
 import { CoreStart, PackageInfo } from 'kibana/public';
+import { BehaviorSubject } from 'rxjs';
 
 export function getEsClient(
   injectedMetadata: CoreStart['injectedMetadata'],
   http: CoreStart['http'],
-  packageInfo: PackageInfo
+  packageInfo: PackageInfo,
+  loadingCount$: BehaviorSubject<number>
 ) {
   const esRequestTimeout = injectedMetadata.getInjectedVar('esRequestTimeout') as number;
   const esApiVersion = injectedMetadata.getInjectedVar('esApiVersion') as string;
 
   // Use legacy es client for msearch.
-  return es.Client({
+  const client = es.Client({
     host: getEsUrl(http, packageInfo),
     log: 'info',
     requestTimeout: esRequestTimeout,
     apiVersion: esApiVersion,
   });
+
+  return {
+    search: wrapEsClientMethod(client, 'search', loadingCount$),
+    msearch: wrapEsClientMethod(client, 'msearch', loadingCount$),
+    create: wrapEsClientMethod(client, 'create', loadingCount$),
+  };
+}
+
+function wrapEsClientMethod(esClient: any, method: string, loadingCount$: BehaviorSubject<number>) {
+  return (args: any) => {
+    // esClient returns a promise, with an additional abort handler
+    // To tap into the abort handling, we have to override that abort handler.
+    const customPromiseThingy = esClient[method](args);
+    const { abort } = customPromiseThingy;
+    let resolved = false;
+
+    // Start LoadingIndicator
+    loadingCount$.next(loadingCount$.getValue() + 1);
+
+    // Stop LoadingIndicator when user aborts
+    customPromiseThingy.abort = () => {
+      abort();
+      if (!resolved) {
+        resolved = true;
+        loadingCount$.next(loadingCount$.getValue() - 1);
+      }
+    };
+
+    // Stop LoadingIndicator when promise finishes
+    customPromiseThingy.finally(() => {
+      resolved = true;
+      loadingCount$.next(loadingCount$.getValue() - 1);
+    });
+
+    return customPromiseThingy;
+  };
 }
 
 function getEsUrl(http: CoreStart['http'], packageInfo: PackageInfo) {

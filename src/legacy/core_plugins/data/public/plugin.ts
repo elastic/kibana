@@ -77,7 +77,7 @@ export class DataPlugin
     setFieldFormats(data.fieldFormats);
     setQueryService(data.query);
     setSearchService(data.search);
-    setEsClient(data.__LEGACY.esClient);
+    setEsClient(data.search.__LEGACY.esClient);
     setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
     setNotifications(core.notifications);
