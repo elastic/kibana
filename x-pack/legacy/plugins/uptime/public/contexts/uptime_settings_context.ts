@@ -9,6 +9,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { createContext } from 'react';
 import { UptimeAppColors } from '../uptime_app';
 import { CONTEXT_DEFAULTS } from '../../common/constants';
+import { CommonlyUsedRange } from '../components/functional/uptime_date_picker';
 
 export interface UMSettingsContextValues {
   absoluteStartDate: number;
@@ -23,7 +24,7 @@ export interface UMSettingsContextValues {
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
   refreshApp: () => void;
-  setHeadingText: (text: string) => void;
+  commonlyUsedRanges?: CommonlyUsedRange[];
 }
 
 const {
@@ -63,9 +64,6 @@ const defaultContext: UMSettingsContextValues = {
   isLogsAvailable: true,
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');
-  },
-  setHeadingText: () => {
-    throw new Error('setHeadingText was not initialized on UMSettingsContext.');
   },
 };
 
