@@ -45,9 +45,6 @@ export function KueryBar() {
   const { urlParams } = useUrlParams();
   const location = useLocation();
   const { data } = useApmPluginContext().plugins;
-  const getQuerySuggestions = data.autocomplete.getQuerySuggestionProvider(
-    'kuery'
-  );
 
   let currentRequestCheck;
 
@@ -77,15 +74,14 @@ export function KueryBar() {
 
     try {
       const suggestions = (
-        (getQuerySuggestions &&
-          (await getQuerySuggestions({
-            indexPatterns: [indexPattern],
-            boolFilter: getBoolFilter(urlParams),
-            query: inputValue,
-            selectionStart,
-            selectionEnd: selectionStart
-          }))) ||
-        []
+        (await data.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          indexPatterns: [indexPattern],
+          boolFilter: getBoolFilter(urlParams),
+          query: inputValue,
+          selectionStart,
+          selectionEnd: selectionStart
+        })) || []
       )
         .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);

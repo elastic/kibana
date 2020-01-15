@@ -46,7 +46,6 @@ export function KueryBar({ autocomplete: autocompleteService }: Props) {
   const [indexPattern, setIndexPattern] = useState<any | undefined>(undefined);
   const [isLoadingIndexPattern, setIsLoadingIndexPattern] = useState<boolean>(true);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
-  const getQuerySuggestions = autocompleteService.getQuerySuggestionProvider('kuery');
   let currentRequestCheck: string;
 
   useIndexPattern((result: any) => setIndexPattern(toStaticIndexPattern(result)));
@@ -74,14 +73,13 @@ export function KueryBar({ autocomplete: autocompleteService }: Props) {
 
     try {
       const suggestions = (
-        (getQuerySuggestions &&
-          (await getQuerySuggestions({
-            indexPatterns: [indexPattern],
-            query: inputValue,
-            selectionStart,
-            selectionEnd: selectionStart,
-          }))) ||
-        []
+        (await autocompleteService.getQuerySuggestions({
+          language: 'kuery',
+          indexPatterns: [indexPattern],
+          query: inputValue,
+          selectionStart,
+          selectionEnd: selectionStart,
+        })) || []
       )
         .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);

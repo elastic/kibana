@@ -21,9 +21,12 @@ import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
 
 export type QuerySuggestionType = 'field' | 'value' | 'operator' | 'conjunction' | 'recentSearch';
 
-export type QuerySuggestionsGet = (args: QuerySuggestionsGetArgs) => Promise<QuerySuggestion[]>;
+export type QuerySuggestionsGet = (
+  args: QuerySuggestionsGetArgs
+) => Promise<QuerySuggestion[]> | undefined;
 
 interface QuerySuggestionsGetArgs {
+  language: string;
   indexPatterns: IIndexPattern[];
   query: string;
   selectionStart: number;

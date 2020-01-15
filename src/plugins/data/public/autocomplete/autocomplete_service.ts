@@ -34,8 +34,16 @@ export class AutocompleteService {
     }
   };
 
-  private getQuerySuggestionProvider = (language: string) =>
-    this.querySuggestionProviders.get(language);
+  private getQuerySuggestions: QuerySuggestionsGet = args => {
+    const { language } = args;
+    const provider = this.querySuggestionProviders.get(language);
+
+    if (provider) {
+      return provider(args);
+    }
+  };
+
+  private hasQuerySuggestions = (language: string) => this.querySuggestionProviders.has(language);
 
   /** @public **/
   public setup(core: CoreSetup) {
@@ -46,14 +54,15 @@ export class AutocompleteService {
 
       /** @obsolete **/
       /** please use "getProvider" only from the start contract **/
-      getQuerySuggestionProvider: this.getQuerySuggestionProvider,
+      getQuerySuggestions: this.getQuerySuggestions,
     };
   }
 
   /** @public **/
   public start() {
     return {
-      getQuerySuggestionProvider: this.getQuerySuggestionProvider,
+      getQuerySuggestions: this.getQuerySuggestions,
+      hasQuerySuggestions: this.hasQuerySuggestions,
       getFieldSuggestions: this.getFieldSuggestions!,
     };
   }

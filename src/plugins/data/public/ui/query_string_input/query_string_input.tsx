@@ -141,12 +141,10 @@ export class QueryStringInputUI extends Component<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const getQuerySuggestions = this.services.data.autocomplete.getQuerySuggestionProvider(
-      language
-    );
+    const hasQuerySuggestions = this.services.data.autocomplete.hasQuerySuggestions(language);
 
     if (
-      !getQuerySuggestions ||
+      !hasQuerySuggestions ||
       !Array.isArray(this.state.indexPatterns) ||
       compact(this.state.indexPatterns).length === 0
     ) {
@@ -163,13 +161,16 @@ export class QueryStringInputUI extends Component<Props, State> {
     try {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
-      const suggestions = await getQuerySuggestions({
-        indexPatterns,
-        query: queryString,
-        selectionStart,
-        selectionEnd,
-        signal: this.abortController.signal,
-      });
+      const suggestions =
+        (await this.services.data.autocomplete.getQuerySuggestions({
+          language,
+          indexPatterns,
+          query: queryString,
+          selectionStart,
+          selectionEnd,
+          signal: this.abortController.signal,
+        })) || [];
+
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error

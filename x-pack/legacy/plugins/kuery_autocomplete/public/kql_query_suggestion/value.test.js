@@ -6,15 +6,11 @@
 
 import { getSuggestionsProvider } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
+import { npStart } from 'ui/new_platform';
 
-describe('Kuery value suggestions', function() {
-  let indexPatterns;
-  let getSuggestions;
-  let plugins;
-
-  beforeEach(() => {
-    indexPatterns = [indexPatternResponse];
-    plugins = {
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
       data: {
         autocomplete: {
           getFieldSuggestions: jest.fn(({ field }) => {
@@ -32,8 +28,17 @@ describe('Kuery value suggestions', function() {
           }),
         },
       },
-    };
-    getSuggestions = getSuggestionsProvider({ indexPatterns }, plugins);
+    },
+  },
+}));
+
+describe('Kuery value suggestions', function() {
+  let indexPatterns;
+  let getSuggestions;
+
+  beforeEach(() => {
+    indexPatterns = [indexPatternResponse];
+    getSuggestions = getSuggestionsProvider({ indexPatterns });
     jest.clearAllMocks();
   });
 
@@ -49,7 +54,7 @@ describe('Kuery value suggestions', function() {
     const suggestions = await getSuggestions({ fieldName, prefix, suffix });
     expect(suggestions.map(({ text }) => text)).toEqual([]);
 
-    expect(plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(0);
+    expect(npStart.plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(0);
   });
 
   test('should format suggestions', async () => {
@@ -84,7 +89,7 @@ describe('Kuery value suggestions', function() {
       const suggestions = await getSuggestions({ fieldName: 'ssl', prefix: '', suffix: '' });
 
       expect(suggestions.map(({ text }) => text)).toEqual(['true ', 'false ']);
-      expect(plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(1);
+      expect(npStart.plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(1);
     });
 
     test('should filter out boolean suggestions', async () => {
@@ -101,8 +106,8 @@ describe('Kuery value suggestions', function() {
 
       await getSuggestions({ fieldName: 'machine.os.raw', prefix, suffix });
 
-      expect(plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(1);
-      expect(plugins.data.autocomplete.getFieldSuggestions).toBeCalledWith(
+      expect(npStart.plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(1);
+      expect(npStart.plugins.data.autocomplete.getFieldSuggestions).toBeCalledWith(
         expect.objectContaining({
           field: expect.any(Object),
           query: prefix + suffix,

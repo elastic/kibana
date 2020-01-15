@@ -51,7 +51,7 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
         savedQueries: {},
       },
       autocomplete: {
-        getQuerySuggestionProvider: () => undefined,
+        getQuerySuggestions: () => undefined,
       },
     },
   };

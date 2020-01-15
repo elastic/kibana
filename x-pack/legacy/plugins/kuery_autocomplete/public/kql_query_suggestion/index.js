@@ -23,9 +23,9 @@ function dedup(suggestions) {
   return uniq(suggestions, ({ type, text, start, end }) => [type, text, start, end].join('|'));
 }
 
-const getProviderByType = (type, args) => providers[type] && providers[type](args);
+const getProviderByType = (type, args) => providers[type](args);
 
-export const setupKqlQuerySuggestionProvider = ({ uiSettings }, plugins) => ({
+export const setupKqlQuerySuggestionProvider = ({ uiSettings }) => ({
   indexPatterns,
   boolFilter,
   query,
@@ -50,7 +50,6 @@ export const setupKqlQuerySuggestionProvider = ({ uiSettings }, plugins) => ({
       config: uiSettings,
       indexPatterns,
       boolFilter,
-      plugins,
     })(cursorNode, signal)
   );
   return Promise.all(suggestionsByType).then(suggestionsByType =>

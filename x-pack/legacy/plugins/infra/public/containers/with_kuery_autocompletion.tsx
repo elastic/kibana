@@ -9,9 +9,6 @@ import { npStart } from 'ui/new_platform';
 import { autocomplete, IIndexPattern } from 'src/plugins/data/public';
 import { RendererFunction } from '../utils/typed_react';
 
-const getQuerySuggestionProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getQuerySuggestionProvider(language);
-
 interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
@@ -56,9 +53,10 @@ export class WithKueryAutocompletion extends React.Component<
     maxSuggestions?: number
   ) => {
     const { indexPattern } = this.props;
-    const getQuerySuggestions = getQuerySuggestionProvider('kuery');
+    const language = 'kuery';
+    const hasQuerySuggestions = npStart.plugins.data.autocomplete.hasQuerySuggestions(language);
 
-    if (!getQuerySuggestions) {
+    if (!hasQuerySuggestions) {
       return;
     }
 
@@ -70,13 +68,15 @@ export class WithKueryAutocompletion extends React.Component<
       suggestions: [],
     });
 
-    const suggestions = await getQuerySuggestions({
-      query: expression,
-      selectionStart: cursorPosition,
-      selectionEnd: cursorPosition,
-      indexPatterns: [indexPattern],
-      boolFilter: [],
-    });
+    const suggestions =
+      (await npStart.plugins.data.autocomplete.getQuerySuggestions({
+        language,
+        query: expression,
+        selectionStart: cursorPosition,
+        selectionEnd: cursorPosition,
+        indexPatterns: [indexPattern],
+        boolFilter: [],
+      })) || [];
 
     this.setState(state =>
       state.currentRequest &&

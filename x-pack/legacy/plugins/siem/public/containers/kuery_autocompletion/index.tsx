@@ -37,11 +37,9 @@ export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>
       cursorPosition: number,
       maxSuggestions?: number
     ) => {
-      const getQuerySuggestions = kibana.services.data.autocomplete.getQuerySuggestionProvider(
-        'kuery'
-      );
+      const language = 'kuery';
 
-      if (!getQuerySuggestions) {
+      if (!kibana.services.data.autocomplete.hasQuerySuggestions(language)) {
         return;
       }
 
@@ -54,18 +52,22 @@ export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>
         cursorPosition,
       });
       setSuggestions([]);
-      const newSuggestions = await getQuerySuggestions({
-        indexPatterns: [indexPattern],
-        boolFilter: [],
-        query: expression,
-        selectionStart: cursorPosition,
-        selectionEnd: cursorPosition,
-      });
+
       if (
         futureRequest &&
         futureRequest.expression !== (currentRequest && currentRequest.expression) &&
         futureRequest.cursorPosition !== (currentRequest && currentRequest.cursorPosition)
       ) {
+        const newSuggestions =
+          (await kibana.services.data.autocomplete.getQuerySuggestions({
+            language: 'kuery',
+            indexPatterns: [indexPattern],
+            boolFilter: [],
+            query: expression,
+            selectionStart: cursorPosition,
+            selectionEnd: cursorPosition,
+          })) || [];
+
         setCurrentRequest(null);
         setSuggestions(maxSuggestions ? newSuggestions.slice(0, maxSuggestions) : newSuggestions);
       }

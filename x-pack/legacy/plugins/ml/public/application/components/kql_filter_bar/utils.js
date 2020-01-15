@@ -6,17 +6,9 @@
 import { npStart } from 'ui/new_platform';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
-const getQuerySuggestionProvider = language =>
-  npStart.plugins.data.autocomplete.getQuerySuggestionProvider(language);
-
-export async function getSuggestions(query, selectionStart, indexPattern, boolFilter) {
-  const getQuerySuggestions = getQuerySuggestionProvider('kuery');
-
-  if (!getQuerySuggestions) {
-    return [];
-  }
-
-  return getQuerySuggestions({
+export function getSuggestions(query, selectionStart, indexPattern, boolFilter) {
+  return npStart.plugins.data.autocomplete.getQuerySuggestions({
+    language: 'kuery',
     indexPatterns: [indexPattern],
     boolFilter,
     query,

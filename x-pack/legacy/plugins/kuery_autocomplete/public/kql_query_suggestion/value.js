@@ -6,10 +6,11 @@
 
 import { flatten } from 'lodash';
 import { escapeQuotes } from './escape_kuery';
+import { npStart } from 'ui/new_platform';
 
 const type = 'value';
 
-export function getSuggestionsProvider({ indexPatterns, boolFilter }, plugins) {
+export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
   const allFields = flatten(
     indexPatterns.map(indexPattern => {
       return indexPattern.fields.map(field => ({
@@ -26,7 +27,8 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }, plugins) {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
     const fields = allFields.filter(field => field.name === fullFieldName);
     const query = `${prefix}${suffix}`.trim();
-    const { getFieldSuggestions } = plugins.data.autocomplete;
+    const { getFieldSuggestions } = npStart.plugins.data.autocomplete;
+
     const suggestionsByField = fields.map(field =>
       getFieldSuggestions({
         indexPattern: field.indexPattern,
