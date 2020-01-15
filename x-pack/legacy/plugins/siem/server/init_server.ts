@@ -19,6 +19,7 @@ import { createNoteResolvers } from './graphql/note';
 import { createPinnedEventResolvers } from './graphql/pinned_event';
 import { createOverviewResolvers } from './graphql/overview';
 import { createScalarDateResolvers } from './graphql/scalar_date';
+import { createScalarToAnyValueResolvers } from './graphql/scalar_to_any';
 import { createScalarToBooleanArrayValueResolvers } from './graphql/scalar_to_boolean_array';
 import { createScalarToDateArrayValueResolvers } from './graphql/scalar_to_date_array';
 import { createScalarToNumberArrayValueResolvers } from './graphql/scalar_to_number_array';
@@ -50,6 +51,7 @@ export const initServer = (libs: AppBackendLibs) => {
       createNetworkResolvers(libs) as IResolvers,
       createScalarDateResolvers() as IResolvers,
       createScalarToDateArrayValueResolvers() as IResolvers,
+      createScalarToAnyValueResolvers() as IResolvers,
       createScalarToBooleanArrayValueResolvers() as IResolvers,
       createScalarToNumberArrayValueResolvers() as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
