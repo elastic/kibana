@@ -10,6 +10,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceMap } from '../lib/service_map/get_service_map';
+import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
 
 export const serviceMapRoute = createRoute(() => ({
   path: '/api/apm/service-map',
@@ -30,5 +31,37 @@ export const serviceMapRoute = createRoute(() => ({
       query: { serviceName, environment, after }
     } = context.params;
     return getServiceMap({ setup, serviceName, environment, after });
+  }
+}));
+
+export const serviceMapServiceNodeRoute = createRoute(() => ({
+  path: `/api/apm/service-map/service/{serviceName}`,
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.partial({
+        environment: t.string
+      })
+    ])
+  },
+  handler: async ({ context, request }) => {
+    if (!context.config['xpack.apm.serviceMapEnabled']) {
+      throw Boom.notFound();
+    }
+    const setup = await setupRequest(context, request);
+
+    const {
+      query: { environment },
+      path: { serviceName }
+    } = context.params;
+
+    return getServiceMapServiceNodeInfo({
+      setup,
+      serviceName,
+      environment
+    });
   }
 }));
