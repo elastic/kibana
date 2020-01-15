@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { CancellationToken } from '../../../../../common/cancellation_token';
-import { Logger, ScrollConfig } from '../../../../../types';
-import { createHitIterator } from '../hit_iterator';
+import { CancellationToken } from '../../../../common/cancellation_token';
+import { Logger, ScrollConfig } from '../../../../types';
+import { createHitIterator } from './hit_iterator';
 
 const mockLogger = {
   error: new Function(),
@@ -57,13 +56,13 @@ describe('hitIterator', function() {
       if (iterationDone) {
         break;
       }
-      expect(hit).to.be('you found me');
+      expect(hit).toBe('you found me');
     }
 
-    expect(mockCallEndpoint.callCount).to.be(13);
-    expect(debugLogStub.callCount).to.be(13);
-    expect(warnLogStub.callCount).to.be(0);
-    expect(errorLogStub.callCount).to.be(0);
+    expect(mockCallEndpoint.callCount).toBe(13);
+    expect(debugLogStub.callCount).toBe(13);
+    expect(warnLogStub.callCount).toBe(0);
+    expect(errorLogStub.callCount).toBe(0);
   });
 
   it('stops searches after cancellation', async () => {
@@ -85,15 +84,15 @@ describe('hitIterator', function() {
       if (iterationDone) {
         break;
       }
-      expect(hit).to.be('you found me');
+      expect(hit).toBe('you found me');
     }
 
-    expect(mockCallEndpoint.callCount).to.be(3);
-    expect(debugLogStub.callCount).to.be(3);
-    expect(warnLogStub.callCount).to.be(1);
-    expect(errorLogStub.callCount).to.be(0);
+    expect(mockCallEndpoint.callCount).toBe(3);
+    expect(debugLogStub.callCount).toBe(3);
+    expect(warnLogStub.callCount).toBe(1);
+    expect(errorLogStub.callCount).toBe(0);
 
-    expect(warnLogStub.firstCall.lastArg).to.be(
+    expect(warnLogStub.firstCall.lastArg).toBe(
       'Any remaining scrolling searches have been cancelled by the cancellation token.'
     );
   });
@@ -118,19 +117,52 @@ describe('hitIterator', function() {
         if (iterationDone) {
           break;
         }
-        expect(hit).to.be('you found me');
+        expect(hit).toBe('you found me');
       }
     } catch (err) {
-      expect(err).to.eql(
-        new Error('Expected _scroll_id in the following Elasticsearch response: {"status":404}')
+      expect(err).toMatchInlineSnapshot(
+        `[Error: Expected hits in the following Elasticsearch response: {"status":404}]`
       );
       errorThrown = true;
     }
 
-    expect(mockCallEndpoint.callCount).to.be(4);
-    expect(debugLogStub.callCount).to.be(4);
-    expect(warnLogStub.callCount).to.be(0);
-    expect(errorLogStub.callCount).to.be(1);
-    expect(errorThrown).to.be(true);
+    expect(mockCallEndpoint.callCount).toBe(4);
+    expect(debugLogStub.callCount).toBe(4);
+    expect(warnLogStub.callCount).toBe(0);
+    expect(errorLogStub.callCount).toBe(1);
+    expect(errorThrown).toBe(true);
+  });
+
+  it('handles finished search', async () => {
+    // Setup
+    mockCallEndpoint.onCall(2).resolves({ hits: { total: 0, hits: [] } });
+
+    // Begin
+    const hitIterator = createHitIterator(mockLogger);
+    const iterator = hitIterator(
+      mockConfig,
+      mockCallEndpoint,
+      mockSearchRequest,
+      realCancellationToken
+    );
+
+    let errorThrown = false;
+    try {
+      while (true) {
+        const { done: iterationDone, value: hit } = await iterator.next();
+        if (iterationDone) {
+          break;
+        }
+        expect(hit).toBe('you found me');
+      }
+    } catch (err) {
+      errorThrown = true;
+    }
+
+    expect(mockCallEndpoint.callCount).toBe(4);
+    expect(debugLogStub.callCount).toBe(4);
+    expect(warnLogStub.callCount).toBe(0);
+    expect(errorLogStub.callCount).toBe(0);
+    expect(errorThrown).toBe(false);
   });
 });

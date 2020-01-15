@@ -3,18 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SearchParams, SearchResponse } from 'elasticsearch';
 
+import { get } from 'lodash';
+import { SearchParams, SearchResponse } from 'elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { CancellationToken, ScrollConfig, Logger } from '../../../../types';
 
-async function parseResponse(request: SearchResponse<any>) {
+interface Hit {
+  _source: any;
+  fields?: any;
+  highlight?: any;
+  inner_hits?: any;
+  matched_queries?: string[] | undefined;
+  sort?: string[] | undefined;
+}
+
+interface ParsedResponse {
+  scrollId: string | undefined;
+  hits: Hit[] | undefined;
+}
+
+async function parseResponse(request: Promise<SearchResponse<any>>): Promise<ParsedResponse> {
   const response = await request;
-  if (!response || !response._scroll_id) {
+  if (!response) {
     throw new Error(
-      i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedScrollIdErrorMessage', {
-        defaultMessage: 'Expected {scrollId} in the following Elasticsearch response: {response}',
-        values: { response: JSON.stringify(response), scrollId: '_scroll_id' },
+      i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.invalidResponse', {
+        defaultMessage: 'Invalid Elasticsearch response! {response}',
+        values: { response },
       })
     );
   }
@@ -30,7 +45,7 @@ async function parseResponse(request: SearchResponse<any>) {
 
   return {
     scrollId: response._scroll_id,
-    hits: response.hits.hits,
+    hits: get(response, 'hits.hits', []),
   };
 }
 
@@ -40,7 +55,7 @@ export function createHitIterator(logger: Logger) {
     callEndpoint: Function,
     searchRequest: SearchParams,
     cancellationToken: CancellationToken
-  ) {
+  ): AsyncGenerator<Hit> {
     logger.debug('executing search request');
     function search(index: string | boolean | string[] | undefined, body: object) {
       return parseResponse(
