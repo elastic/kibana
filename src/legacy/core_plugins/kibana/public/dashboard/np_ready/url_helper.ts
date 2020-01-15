@@ -25,11 +25,9 @@ import { DashboardConstants } from './dashboard_constants';
  */
 export function getUrlVars(url: string): Record<string, string> {
   const vars: Record<string, string> = {};
-  // @ts-ignore
-  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(_, key, value) {
-    // @ts-ignore
+  for (const [, key, value] of url.matchAll(/[?&]+([^=&]+)=([^&]*)/gi)) {
     vars[key] = decodeURIComponent(value);
-  });
+  }
   return vars;
 }
 
