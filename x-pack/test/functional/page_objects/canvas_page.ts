@@ -31,6 +31,14 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
       await testSubjects.findAll('canvasWorkpadPage > canvasWorkpadPageElementContent');
     },
 
+    async fillOutCustomElementForm(name: string, description: string) {
+      // Fill out the custom element form and submit it
+      await testSubjects.setValue('canvasCustomElementForm-name', name);
+      await testSubjects.setValue('canvasCustomElementForm-description', description);
+
+      await testSubjects.click('canvasCustomElementForm-submit');
+    },
+
     async expectCreateWorkpadButtonEnabled() {
       const button = await testSubjects.find('create-workpad-button', 20000);
       const disabledAttr = await button.getAttribute('disabled');
@@ -41,6 +49,10 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
       const button = await testSubjects.find('create-workpad-button', 20000);
       const disabledAttr = await button.getAttribute('disabled');
       expect(disabledAttr).to.be('true');
+    },
+
+    async openAddElementModal() {
+      await testSubjects.click('add-element-button');
     },
 
     async expectAddElementButton() {
