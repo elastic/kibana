@@ -26,8 +26,16 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import '../flot';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
-import { buildSeriesData, buildOptions, SERIES_ID_ATTR, colors } from '../helpers/panel_utils';
+import {
+  buildSeriesData,
+  buildOptions,
+  SERIES_ID_ATTR,
+  colors,
+  Axis,
+} from '../helpers/panel_utils';
 import { Series, Sheet } from '../helpers/timelion_request_handler';
+import { tickFormatters } from '../helpers/tick_formatters';
+import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
 
 export interface PanelProps {
@@ -182,6 +190,20 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
           grid
         );
         const updatedSeries = buildSeriesData(chartValue, options);
+
+        if (options.yaxes) {
+          options.yaxes.forEach((yaxis: Axis) => {
+            if (yaxis && yaxis.units) {
+              const formatters = tickFormatters();
+              yaxis.tickFormatter = formatters[yaxis.units.type as keyof typeof formatters];
+              const byteModes = ['bytes', 'bytes/s'];
+              if (byteModes.includes(yaxis.units.type)) {
+                yaxis.tickGenerator = generateTicksProvider();
+              }
+            }
+          });
+        }
+
         const newPlot = $.plot(canvasElem, updatedSeries, options);
         setPlot(newPlot);
         renderComplete();
