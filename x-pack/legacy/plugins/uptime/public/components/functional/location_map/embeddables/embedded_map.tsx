@@ -18,8 +18,8 @@ import { getLayerList } from './map_config';
 import { UptimeThemeContext } from '../../../../contexts';
 
 export interface EmbeddedMapProps {
-  upPoints: LocationPoint[] | null;
-  downPoints: LocationPoint[] | null;
+  upPoints: LocationPoint[];
+  downPoints: LocationPoint[];
 }
 
 export interface LocationPoint {
@@ -79,7 +79,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   useEffect(() => {
     async function setupEmbeddable() {
       const mapState = {
-        layerList: getLayerList(upPoints ?? [], downPoints ?? [], colors),
+        layerList: getLayerList(upPoints, downPoints ?? [], colors),
         title: i18n.MAP_TITLE,
       };
       // @ts-ignore
@@ -96,8 +96,8 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
   // update map layers based on points
   useEffect(() => {
-    if (embeddable && (upPoints || downPoints)) {
-      embeddable.setLayerList(getLayerList(upPoints ?? [], downPoints ?? [], colors));
+    if (embeddable) {
+      embeddable.setLayerList(getLayerList(upPoints, downPoints, colors));
     }
   }, [embeddable, upPoints, downPoints, colors]);
 

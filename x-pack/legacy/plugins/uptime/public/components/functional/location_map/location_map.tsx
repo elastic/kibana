@@ -53,10 +53,7 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
         <EuiFlexItem grow={true}>
           {isGeoInfoMissing && <LocationMissingWarning />}
           <MapPanel>
-            <EmbeddedMap
-              upPoints={upPoints.length > 0 ? upPoints : null}
-              downPoints={downPoints.length > 0 ? downPoints : null}
-            />
+            <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
           </MapPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
