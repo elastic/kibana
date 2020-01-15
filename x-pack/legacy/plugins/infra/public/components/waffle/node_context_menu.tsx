@@ -107,7 +107,7 @@ export const NodeContextMenu = ({
       sections={[
         {
           title: i18n.translate('xpack.infra.nodeContextMenu.title', {
-            defaultMessage: `${inventoryModel.singularDisplayName} details`,
+            defaultMessage: '{inventoryName} details',
             values: { inventoryName: inventoryModel.singularDisplayName },
           }),
           description: i18n.translate('xpack.infra.nodeContextMenu.description', {
