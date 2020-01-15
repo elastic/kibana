@@ -28,7 +28,7 @@ export class RenderingPlugin implements Plugin {
       title: 'Rendering',
       appRoute: '/render',
       async mount(context, { element }) {
-        render(<h2>Rendering Service</h2>, element);
+        render(<h1 data-test-subj="renderingHeader">rendering service</h1>, element);
 
         return () => unmountComponentAtNode(element);
       },

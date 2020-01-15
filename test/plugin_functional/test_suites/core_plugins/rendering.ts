@@ -26,6 +26,7 @@ import { PluginFunctionalProviderContext } from '../../services';
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   function navigate(path: string) {
@@ -46,40 +47,81 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
   }
 
-  async function loadingScreenNotShown() {
-    expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+  async function init() {
+    const loading = await testSubjects.find('kbnLoadingMessage', 5000);
+
+    return () => find.waitForElementStale(loading);
   }
 
   describe('rendering service', () => {
     it('renders "core" application', async () => {
       await navigate('/render/core');
 
-      await loadingScreenNotShown();
-      expect(await getLegacyMode()).to.be(false);
-      expect(await getUserSettings()).to.not.be.empty();
+      const [loaded, legacyMode, userSettings] = await Promise.all([
+        init(),
+        getLegacyMode(),
+        getUserSettings(),
+      ]);
+
+      expect(legacyMode).to.be(false);
+      expect(userSettings).to.not.be.empty();
+
+      await loaded();
+
+      expect(await testSubjects.exists('renderingHeader')).to.be(true);
     });
 
     it('renders "core" application without user settings', async () => {
       await navigate('/render/core?includeUserSettings=false');
 
-      await loadingScreenNotShown();
-      expect(await getUserSettings()).to.be.empty();
+      const [loaded, legacyMode, userSettings] = await Promise.all([
+        init(),
+        getLegacyMode(),
+        getUserSettings(),
+      ]);
+
+      expect(legacyMode).to.be(false);
+      expect(userSettings).to.be.empty();
+
+      await loaded();
+
+      expect(await testSubjects.exists('renderingHeader')).to.be(true);
     });
 
     it('renders "legacy" application', async () => {
       await navigate('/render/core_plugin_legacy');
 
-      await loadingScreenNotShown();
-      expect(await getLegacyMode()).to.be(true);
-      expect(await getUserSettings()).to.not.be.empty();
+      const [loaded, legacyMode, userSettings] = await Promise.all([
+        init(),
+        getLegacyMode(),
+        getUserSettings(),
+      ]);
+
+      expect(legacyMode).to.be(true);
+      expect(userSettings).to.not.be.empty();
+
+      await loaded();
+
+      expect(await testSubjects.exists('coreLegacyCompatH1')).to.be(true);
+      expect(await testSubjects.exists('renderingHeader')).to.be(false);
     });
 
     it('renders "legacy" application without user settings', async () => {
       await navigate('/render/core_plugin_legacy?includeUserSettings=false');
 
-      await loadingScreenNotShown();
-      expect(await getLegacyMode()).to.be(true);
-      expect(await getUserSettings()).to.be.empty();
+      const [loaded, legacyMode, userSettings] = await Promise.all([
+        init(),
+        getLegacyMode(),
+        getUserSettings(),
+      ]);
+
+      expect(legacyMode).to.be(true);
+      expect(userSettings).to.be.empty();
+
+      await loaded();
+
+      expect(await testSubjects.exists('coreLegacyCompatH1')).to.be(true);
+      expect(await testSubjects.exists('renderingHeader')).to.be(false);
     });
   });
 }
