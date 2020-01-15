@@ -912,6 +912,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
         defaultMessage: 'Underline',
       }),
+    getFontColorLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
+        defaultMessage: 'Font Color',
+      }),
   },
   TimePicker: {
     getApplyButtonLabel: () =>
@@ -1007,7 +1011,11 @@ export const ComponentStrings = {
     getUSLetterButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.USLetterButtonLabel', {
         defaultMessage: 'US Letter',
-        description: 'This is referring to the dimentions of U.S. standard letter paper.',
+        description: 'This is referring to the dimensions of U.S. standard letter paper.',
+      }),
+    getBackgroundColorLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.backgroundColorLabel', {
+        defaultMessage: 'Background color',
       }),
   },
   WorkpadCreate: {

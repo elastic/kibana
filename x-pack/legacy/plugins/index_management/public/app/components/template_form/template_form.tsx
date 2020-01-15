@@ -33,7 +33,7 @@ interface Props {
 }
 
 interface ValidationState {
-  [key: number]: { isValid: boolean };
+  [key: number]: { isValid: boolean | undefined };
 }
 
 const defaultValidation = { isValid: true };
@@ -74,7 +74,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     stepsDataGetters.current[currentStep] = stepDataGetter;
   };
 
-  const onStepValidityChange = (isValid: boolean) => {
+  const onStepValidityChange = (isValid: boolean | undefined) => {
     setValidation(prev => ({
       ...prev,
       [currentStep]: {
@@ -169,6 +169,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
 
       <EuiForm data-test-subj="templateForm">
         <CurrentStepComponent
+          key={currentStep}
           template={template.current}
           setDataGetter={setStepDataGetter}
           updateCurrentStep={updateCurrentStep}
@@ -198,7 +199,7 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
                     iconType="arrowRight"
                     onClick={onNext}
                     iconSide="right"
-                    disabled={!isStepValid}
+                    disabled={isStepValid === false}
                     data-test-subj="nextButton"
                   >
                     <FormattedMessage

@@ -32,7 +32,7 @@ import {
   InterpolationModes,
   getConfigCollections,
 } from './utils/collections';
-import { palettes } from '@elastic/eui/lib/services';
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { vislibVisController } from './controller';
 
@@ -118,7 +118,7 @@ export const lineDefinition = {
         value: 10,
         width: 1,
         style: ThresholdLineStyles.FULL,
-        color: palettes.euiPaletteColorBlind.colors[9],
+        color: euiPaletteColorBlind()[9],
       },
     },
   },

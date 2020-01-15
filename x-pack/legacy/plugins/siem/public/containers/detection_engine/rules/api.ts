@@ -19,12 +19,14 @@ import {
   ImportRulesProps,
   ExportRulesProps,
   RuleError,
+  RuleStatus,
   ImportRulesResponse,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
+  DETECTION_ENGINE_RULES_STATUS,
 } from '../../../../common/constants';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 
@@ -189,7 +191,7 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
       },
       body: JSON.stringify({
         ...rule,
-        name: `${rule.name} [Duplicate]`,
+        name: `${rule.name} [${i18n.DUPLICATE}]`,
         created_at: undefined,
         created_by: undefined,
         id: undefined,
@@ -198,6 +200,10 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
         updated_by: undefined,
         enabled: rule.enabled,
         immutable: false,
+        last_success_at: undefined,
+        last_success_message: undefined,
+        status: undefined,
+        status_date: undefined,
       }),
     })
   );
@@ -301,4 +307,37 @@ export const exportRules = async ({
 
   await throwIfNotOk(response);
   return response.blob();
+};
+
+/**
+ * Get Rule Status provided Rule ID
+ *
+ * @param id string of Rule ID's (not rule_id)
+ *
+ * @throws An error if response is not OK
+ */
+export const getRuleStatusById = async ({
+  id,
+  signal,
+}: {
+  id: string;
+  signal: AbortSignal;
+}): Promise<Record<string, RuleStatus[]>> => {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_STATUS}?ids=${encodeURIComponent(
+      JSON.stringify([id])
+    )}`,
+    {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+      },
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response);
+  return response.json();
 };
