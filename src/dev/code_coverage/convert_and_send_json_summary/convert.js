@@ -35,7 +35,7 @@ export default ({ coveragePath }, log) => {
   return fromEventPattern(_ => objStream.on('node', '!.*', _)).pipe(
     map(statsAndPath),
     map(addCoveragePath),
-    map(coverageType),
+    map(testRunner),
     map(truncate),
     map(timeStamp),
     map(distro),
@@ -93,7 +93,7 @@ function distro(obj) {
     distro,
   };
 }
-function coverageType(obj) {
+function testRunner(obj) {
   const { coveragePath } = obj;
 
   let coverageType = 'OTHER';
