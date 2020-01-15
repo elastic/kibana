@@ -22,9 +22,12 @@ import _ from 'lodash';
 
 import { dataLabel } from '../lib/_data_label';
 import { Dispatch } from '../lib/dispatch';
-import { Tooltip, getFormat } from '../../legacy_imports';
-import { hierarchicalTooltipFormatter } from '../../../../../ui/public/vis/components/tooltip/_hierarchical_tooltip_formatter';
-import { pointSeriesTooltipFormatter } from '../../../../../ui/public/vis/components/tooltip/_pointseries_tooltip_formatter';
+import { getFormat } from '../../legacy_imports';
+import {
+  Tooltip,
+  hierarchicalTooltipFormatter,
+  pointSeriesTooltipFormatter,
+} from '../components/tooltip';
 
 /**
  * The Base Class for all visualizations.

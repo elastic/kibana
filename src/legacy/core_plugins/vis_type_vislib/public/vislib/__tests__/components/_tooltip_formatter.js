@@ -20,7 +20,8 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
-import { pointSeriesTooltipFormatter } from '../_pointseries_tooltip_formatter';
+
+import { pointSeriesTooltipFormatter } from '../../components/tooltip';
 
 describe('tooltipFormatter', function() {
   const tooltipFormatter = pointSeriesTooltipFormatter();

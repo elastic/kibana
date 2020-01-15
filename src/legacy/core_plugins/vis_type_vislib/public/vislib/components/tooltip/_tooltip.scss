@@ -28,7 +28,7 @@
 }
 
 .visTooltip__header {
-  margin: 0 0 $euiSizeS 0;
+  margin: 0 0 $euiSizeS;
   padding: $euiSizeXS $euiSizeS;
   display: flex;
   align-items: center;
@@ -41,6 +41,7 @@
     margin-top: $euiSizeS;
   }
 }
+
 .visTooltip__labelContainer,
 .visTooltip__valueContainer {
   overflow-wrap: break-word;

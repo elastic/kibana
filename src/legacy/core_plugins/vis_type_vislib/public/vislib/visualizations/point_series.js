@@ -21,7 +21,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 
-import { Tooltip } from '../../legacy_imports';
+import { Tooltip } from '../components/tooltip';
 import { Chart } from './_chart';
 import { TimeMarker } from './time_marker';
 import { seriesTypes } from './point_series/series_types';

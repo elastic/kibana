@@ -25,8 +25,6 @@ export { AggConfig, Vis, VisParams } from 'ui/vis';
 export { AggType } from 'ui/agg_types';
 export { CUSTOM_LEGEND_VIS_TYPES, VisLegend } from 'ui/vis/vis_types/vislib_vis_legend';
 // @ts-ignore
-export { Tooltip } from 'ui/vis/components/tooltip';
-// @ts-ignore
 export { SimpleEmitter } from 'ui/utils/simple_emitter';
 // @ts-ignore
 export { Binder } from 'ui/binder';
