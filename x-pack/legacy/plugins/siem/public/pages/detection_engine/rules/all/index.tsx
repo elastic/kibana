@@ -31,7 +31,7 @@ import { getBatchItems } from './batch_actions';
 import { EuiBasicTableOnChange, TableData } from '../types';
 import { allRulesReducer, State } from './reducer';
 import * as i18n from '../translations';
-import { JSONDownloader } from '../components/json_downloader';
+import { RuleDownloader } from '../components/rule_downloader';
 import { useStateToaster } from '../../../../components/toasters';
 
 const initialState: State = {
@@ -85,10 +85,10 @@ export const AllRules = React.memo<{
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
       <EuiContextMenuPanel
-        items={getBatchItems(selectedItems, dispatch, dispatchToaster, closePopover)}
+        items={getBatchItems(selectedItems, dispatch, dispatchToaster, history, closePopover)}
       />
     ),
-    [selectedItems, dispatch, dispatchToaster]
+    [selectedItems, dispatch, dispatchToaster, history]
   );
 
   const tableOnChangeCallback = useCallback(
@@ -150,9 +150,9 @@ export const AllRules = React.memo<{
 
   return (
     <>
-      <JSONDownloader
+      <RuleDownloader
         filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-        payload={exportPayload}
+        rules={exportPayload}
         onExportComplete={exportCount => {
           dispatchToaster({
             type: 'addToaster',

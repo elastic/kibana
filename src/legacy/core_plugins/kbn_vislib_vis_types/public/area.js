@@ -33,7 +33,7 @@ import {
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { palettes } from '@elastic/eui/lib/services';
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { vislibVisController } from './controller';
 
 export const areaDefinition = {
@@ -117,7 +117,7 @@ export const areaDefinition = {
         value: 10,
         width: 1,
         style: ThresholdLineStyles.FULL,
-        color: palettes.euiPaletteColorBlind.colors[9],
+        color: euiPaletteColorBlind()[9],
       },
       labels: {},
     },

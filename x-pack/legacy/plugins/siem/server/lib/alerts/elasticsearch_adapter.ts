@@ -10,7 +10,7 @@ import { AlertsOverTimeData, MatrixOverTimeHistogramData } from '../../graphql/t
 
 import { inspectStringifyObject } from '../../utils/build_query';
 
-import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 import { buildAlertsHistogramQuery } from './query.dsl';
 
 import { AlertsAdapter, AlertsGroupData, AlertsBucket } from './types';
@@ -22,7 +22,7 @@ export class ElasticsearchAlertsAdapter implements AlertsAdapter {
 
   public async getAlertsHistogramData(
     request: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<AlertsOverTimeData> {
     const dsl = buildAlertsHistogramQuery(options);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
@@ -31,14 +31,14 @@ export class ElasticsearchAlertsAdapter implements AlertsAdapter {
       dsl
     );
     const totalCount = getOr(0, 'hits.total.value', response);
-    const alertsOverTimeByModule = getOr([], 'aggregations.alertsByModuleGroup.buckets', response);
+    const matrixHistogramData = getOr([], 'aggregations.alertsByModuleGroup.buckets', response);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
     return {
       inspect,
-      alertsOverTimeByModule: getAlertsOverTimeByModule(alertsOverTimeByModule),
+      matrixHistogramData: getAlertsOverTimeByModule(matrixHistogramData),
       totalCount,
     };
   }
