@@ -5,7 +5,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiSpacer,
+  EuiTextAlign,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -44,8 +51,7 @@ export const relationsSerializer = (field: Field): Field => {
   const relationsSerialized = relations.reduce(
     (acc, item) => ({
       ...acc,
-      [item.parent]: item.children,
-      // [item.parent]: item.children.length === 1 ? item.children[0] : item.children,
+      [item.parent]: item.children.length === 1 ? item.children[0] : item.children,
     }),
     {} as RelationsES
   );
@@ -68,8 +74,7 @@ export const relationsDeserializer = (field: Field): Field => {
   const relations = field.relations as RelationsES;
   const relationsDeserialized = Object.entries(relations).map(([parent, children]) => ({
     parent,
-    children,
-    // children: typeof children === 'string' ? [children] : children,
+    children: typeof children === 'string' ? [children] : children,
   }));
 
   return {
@@ -129,46 +134,91 @@ export const RelationsParameter = () => (
     //   }),
     //   href: documentationService.getNormsLink(),
     // }}
-    // formFieldPath="norms"
     withToggle={false}
   >
     <UseArray path="relations">
-      {({ items, addItem, removeItem }) => (
+      {({ items, addItem: addRelationItem, removeItem: removeRelationItem }) => (
         <>
-          {items.map(({ id: relationId, path, isNew }) => (
-            <div key={relationId} className="mappingsEditor__joinType__relationItem">
+          {items.map(({ id: relationId, path: relationPath, isNew: relationIsNew }) => (
+            <div key={relationId}>
               <EuiFlexGroup>
                 <EuiFlexItem>
+                  {/* By adding ".parent" to the path, we are saying that we want an **object**
+                  to be created for each array item, with a "parent" property */}
                   <UseField
-                    path={`${path}.parent`}
+                    path={`${relationPath}.parent`}
                     config={parentConfig}
                     // For newly created relations, we don't want to read
                     // the default value from the form as... it is new! :)
-                    readDefaultValueOnForm={!isNew}
+                    readDefaultValueOnForm={!relationIsNew}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <UseField
-                    path={`${path}.children`}
-                    config={childConfig}
-                    readDefaultValueOnForm={!isNew}
-                  />
+                  {/* // Extra div to get out of flex flow */}
+                  <div>
+                    {/* Nested array under the "children" property of the relation (array) item */}
+                    <UseArray path={`${relationPath}.children`}>
+                      {({
+                        items: childrenItems,
+                        addItem: addChildItem,
+                        removeItem: removeChildItem,
+                      }) => (
+                        <>
+                          {/* Extra div to be able to target css :last-child */}
+                          <div>
+                            {childrenItems.map(
+                              ({ id: childId, path: childPath, isNew: isChildNew }, index) => (
+                                <div key={childId} className="mappingsEditor__dynamicItem">
+                                  <UseField
+                                    path={childPath}
+                                    config={childConfig}
+                                    readDefaultValueOnForm={!isChildNew}
+                                  />
+
+                                  <EuiButtonIcon
+                                    className="mappingsEditor__dynamicItem__removeButton"
+                                    color="danger"
+                                    onClick={() => removeChildItem(childId)}
+                                    iconType="cross"
+                                    aria-label={i18n.translate(
+                                      'xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel',
+                                      {
+                                        defaultMessage: 'Remove child',
+                                      }
+                                    )}
+                                  />
+                                </div>
+                              )
+                            )}
+                          </div>
+                          <EuiSpacer size="s" />
+                          <EuiTextAlign textAlign="right">
+                            <EuiButtonEmpty
+                              onClick={addChildItem}
+                              data-test-subj="addChildRelationButton"
+                              size="xs"
+                            >
+                              {i18n.translate(
+                                'xpack.idxMgmt.mappingsEditor.joinType.addChildRelationButtonLabel',
+                                {
+                                  defaultMessage: 'Add child',
+                                }
+                              )}
+                            </EuiButtonEmpty>
+                          </EuiTextAlign>
+                        </>
+                      )}
+                    </UseArray>
+                  </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiButtonIcon
-                className="mappingsEditor__joinType__relationItem__removeButton"
-                color="danger"
-                onClick={() => removeItem(relationId)}
-                iconType="cross"
-                aria-label="Next"
-              />
             </div>
           ))}
 
           <EuiSpacer size="s" />
 
           <EuiButtonEmpty
-            onClick={addItem}
+            onClick={addRelationItem}
             iconType="plusInCircleFilled"
             data-test-subj="addRelationButton"
           >

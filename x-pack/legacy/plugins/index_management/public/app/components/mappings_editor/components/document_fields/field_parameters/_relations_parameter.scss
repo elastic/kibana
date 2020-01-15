@@ -1,11 +1,15 @@
 
-.mappingsEditor__joinType__relationItem {
+.mappingsEditor__dynamicItem {
   position: relative;
-  margin-bottom: $euiSizeS;
+  margin-bottom: $euiSize;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 
   &__removeButton {
     position: absolute;
     right: 0;
-    top: $euiSizeS;
+    top: 0;
   }
 }
