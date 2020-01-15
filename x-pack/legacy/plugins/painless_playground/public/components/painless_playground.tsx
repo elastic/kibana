@@ -13,6 +13,8 @@ import {
   EuiPageContentBody,
   EuiSpacer,
   EuiFormRow,
+  EuiTabbedContent,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
@@ -20,48 +22,39 @@ import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 interface Props {
   executeCode: (payload: Record<string, unknown>) => Promise<any>;
 }
-
-interface State {
-  code: string;
-  request?: string;
-  response?: string;
-  responseObj: Record<string, any> | null;
+interface Response {
+  error?: { [key: string]: any };
+  result?: string;
 }
-export function PainlessPlayground(props: Props) {
-  const [state, setState] = useState<State>({
-    code: '',
-    request: '',
-    response: '',
-    responseObj: null,
-  });
+function getRequest(code: string) {
+  return {
+    script: {
+      source: code,
+    },
+  };
+}
+
+function formatJson(text) {
+  try {
+    return JSON.stringify(text, null, 2);
+  } catch (e) {
+    return `Invalid JSON ${String(text)}`;
+  }
+}
+
+export function PainlessPlayground({ executeCode }: Props) {
+  const [code, setCode] = useState('');
+  const [response, setResponse] = useState<Response>({});
 
   const submit = async () => {
-    const request = {
-      script: {
-        source: state.code,
-      },
-    };
     try {
-      const response = await props.executeCode(request);
-      setState({
-        code: state.code,
-        request: JSON.stringify(request, null, 2),
-        response: JSON.stringify(response, null, 2),
-        responseObj: response,
-      });
+      const res = await executeCode(getRequest(code));
+      setResponse(res);
     } catch (e) {
-      setState({
-        code: state.code,
-        response: JSON.stringify(e, null, 2),
-        request: JSON.stringify(request, null, 2),
-        responseObj: e,
-      });
+      setResponse(e);
     }
   };
 
-  const onSimulateClick = () => {
-    submit();
-  };
   return (
     <EuiPage>
       <EuiPageBody>
@@ -82,8 +75,8 @@ export function PainlessPlayground(props: Props) {
                   <CodeEditor
                     languageId="painless"
                     height={250}
-                    value={state.code}
-                    onChange={code => setState({ code })}
+                    value={code}
+                    onChange={setCode}
                     options={{
                       fontSize: 12,
                       minimap: {
@@ -99,8 +92,8 @@ export function PainlessPlayground(props: Props) {
               <EuiSpacer />
               <EuiButton
                 fill
-                onClick={onSimulateClick}
-                isDisabled={state.code.trim() === ''}
+                onClick={submit}
+                isDisabled={code.trim() === ''}
                 data-test-subj="btnSimulate"
               >
                 <FormattedMessage
@@ -109,62 +102,40 @@ export function PainlessPlayground(props: Props) {
                 />
               </EuiButton>
               <EuiSpacer />
-
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.painlessPlayground.responseLabel"
-                    defaultMessage="Response"
-                  />
-                }
-                fullWidth
-                data-test-subj="response"
-              >
-                <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
-                  {state.responseObject?.body?.error ? (
-                    <div>{state.responseObject?.body?.error}</div>
-                  ) : (
-                    <CodeEditor
-                      languageId="json"
-                      height={100}
-                      value={state.response || ''}
-                      options={{
-                        fontSize: 12,
-                        minimap: {
-                          enabled: false,
-                        },
-                      }}
-                    />
-                  )}
-                </div>
-              </EuiFormRow>
-              {state.request && (
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.painlessPlayground.outputLabel"
-                      defaultMessage="Request"
-                    />
-                  }
-                  fullWidth
-                  data-test-subj="request"
-                >
-                  <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
-                    <CodeEditor
-                      languageId="json"
-                      height={100}
-                      value={'POST /_scripts/painless/_execute\n' + state.request}
-                      options={{
-                        fontSize: 12,
-                        minimap: {
-                          enabled: false,
-                        },
-                      }}
-                    />
-                  </div>
-                </EuiFormRow>
-              )}
             </EuiForm>
+            {response.error || response.result ? (
+              <EuiTabbedContent
+                tabs={[
+                  {
+                    id: 'output',
+                    name: 'Output',
+                    content: (
+                      <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                        {response?.result ? response?.result : formatJson(response?.error)}
+                      </EuiCodeBlock>
+                    ),
+                  },
+                  {
+                    id: 'response',
+                    name: 'Request',
+                    content: (
+                      <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                        {'POST _scripts/painless/_execute\n' + formatJson(getRequest(code))}
+                      </EuiCodeBlock>
+                    ),
+                  },
+                  {
+                    id: 'request',
+                    name: 'Response',
+                    content: (
+                      <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                        {formatJson(response)}
+                      </EuiCodeBlock>
+                    ),
+                  },
+                ]}
+              />
+            ) : null}
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
