@@ -5,6 +5,7 @@
  */
 
 import { ServerInjectOptions } from 'hapi';
+import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../actions/server/types';
 import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
@@ -15,7 +16,7 @@ import {
   INTERNAL_RULE_ID_KEY,
   INTERNAL_IMMUTABLE_KEY,
 } from '../../../../../common/constants';
-import { RuleAlertType } from '../../rules/types';
+import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
 
 export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
@@ -382,4 +383,11 @@ export const getMockPrivileges = () => ({
   },
   application: {},
   isAuthenticated: false,
+});
+
+export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  page: 1,
+  per_page: 1,
+  total: 0,
+  saved_objects: [],
 });

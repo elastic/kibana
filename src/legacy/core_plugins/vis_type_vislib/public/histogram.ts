@@ -20,6 +20,8 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { palettes } from '@elastic/eui/lib/services';
+// @ts-ignore
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 
 import { Schemas, AggGroupNames } from './legacy_imports';
 
@@ -123,7 +125,7 @@ export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependen
         value: 10,
         width: 1,
         style: ThresholdLineStyles.FULL,
-        color: palettes.euiPaletteColorBlind.colors[9],
+        color: euiPaletteColorBlind()[9],
       },
     },
   },

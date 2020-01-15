@@ -48,11 +48,9 @@ exports[`PipelineEditor component includes required error message for falsy pipe
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputId"
           fullWidth={true}
           isInvalid={true}
-          isLoading={false}
           name="pipelineId"
           onBlur={[Function]}
           onChange={[Function]}
@@ -75,10 +73,8 @@ exports[`PipelineEditor component includes required error message for falsy pipe
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -175,11 +171,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -211,11 +203,7 @@ Default value: 1024mb (1g)"
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -355,11 +343,9 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputId"
           fullWidth={true}
           isInvalid={true}
-          isLoading={false}
           name="pipelineId"
           onBlur={[Function]}
           onChange={[Function]}
@@ -382,10 +368,8 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -482,11 +466,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -518,11 +498,7 @@ Default value: 1024mb (1g)"
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -662,11 +638,9 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputId"
           fullWidth={true}
           isInvalid={true}
-          isLoading={false}
           name="pipelineId"
           onBlur={[Function]}
           onChange={[Function]}
@@ -689,10 +663,8 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -789,11 +761,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -825,11 +793,7 @@ Default value: 1024mb (1g)"
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -965,10 +929,8 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -1065,11 +1027,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1101,11 +1059,7 @@ Default value: 1024mb (1g)"
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1256,11 +1210,9 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputId"
           fullWidth={true}
           isInvalid={false}
-          isLoading={false}
           name="pipelineId"
           onBlur={[Function]}
           onChange={[Function]}
@@ -1283,10 +1235,8 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -1383,11 +1333,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1419,11 +1365,7 @@ Default value: 1024mb (1g)"
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1559,10 +1501,8 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           data-test-subj="inputDescription"
           fullWidth={true}
-          isLoading={false}
           name="pipelineDescription"
           onChange={[Function]}
           value="pipeline description"
@@ -1659,11 +1599,7 @@ Default value: 50ms"
 Default value: memory"
         >
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -1695,11 +1631,7 @@ Default value: 1024mb (1g)"
         </FlexItemSetting>
         <FlexItemSetting>
           <EuiSelect
-            compressed={false}
             data-test-subj="selectQueueMaxBytesUnits"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [

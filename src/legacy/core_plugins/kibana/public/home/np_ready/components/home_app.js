@@ -28,22 +28,19 @@ import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom'
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../../kibana_services';
-// TODO This is going to be refactored soon
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npSetup } from 'ui/new_platform';
 export function HomeApp({ directories }) {
   const {
     getInjected,
     savedObjectsClient,
     getBasePath,
     addBasePath,
+    environment,
     telemetryOptInProvider: { setOptInNoticeSeen, getOptIn },
   } = getServices();
-  const { cloud } = npSetup.plugins;
-  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
+  const isCloudEnabled = environment.cloud;
+  const mlEnabled = environment.ml;
+  const apmUiEnabled = environment.apmUi;
 
-  const apmUiEnabled = getInjected('apmUiEnabled', true);
-  const mlEnabled = getInjected('mlEnabled', false);
   const defaultAppId = getInjected('kbnDefaultAppId', 'discover');
 
   const renderTutorialDirectory = props => {

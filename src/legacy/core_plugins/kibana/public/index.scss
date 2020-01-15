@@ -21,13 +21,15 @@
 
 // Visualize styles
 @import './visualize/index';
-@import './visualize_embeddable/index';
 // Has to come after visualize because of some
 // bad cascading in the Editor layout
 @import 'src/legacy/ui/public/vis/index';
 
 // Management styles
 @import './management/index';
+
+// Local application mount wrapper styles
+@import 'local_application_service/index';
 
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS

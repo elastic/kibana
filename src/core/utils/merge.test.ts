@@ -61,4 +61,15 @@ describe('merge', () => {
     expect(merge({ a: 0 }, {}, {})).toEqual({ a: 0 });
     expect(merge({ a: 0 }, { a: 1 }, {})).toEqual({ a: 1 });
   });
+
+  test(`doesn't pollute prototypes`, () => {
+    merge({}, JSON.parse('{ "__proto__": { "foo": "bar" } }'));
+    merge({}, JSON.parse('{ "constructor": { "prototype": { "foo": "bar" } } }'));
+    merge(
+      {},
+      JSON.parse('{ "__proto__": { "foo": "bar" } }'),
+      JSON.parse('{ "constructor": { "prototype": { "foo": "bar" } } }')
+    );
+    expect(({} as any).foo).toBe(undefined);
+  });
 });

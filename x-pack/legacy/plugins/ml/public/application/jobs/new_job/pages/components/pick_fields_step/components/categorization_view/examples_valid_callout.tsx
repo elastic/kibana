@@ -12,8 +12,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CategorizationAnalyzer } from '../../../../../../../services/ml_server_info';
 import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
 import {
-  NUMBER_OF_CATEGORY_EXAMPLES,
-  CATEGORY_EXAMPLES_MULTIPLIER,
   CATEGORY_EXAMPLES_ERROR_LIMIT,
   CATEGORY_EXAMPLES_WARNING_LIMIT,
 } from '../../../../../../../../../common/constants/new_job';
@@ -22,11 +20,16 @@ type CategorizationAnalyzerType = CategorizationAnalyzer | null;
 
 interface Props {
   examplesValid: number;
+  sampleSize: number;
   categorizationAnalyzer: CategorizationAnalyzerType;
 }
 
-export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationAnalyzer }) => {
-  const percentageText = <PercentageText examplesValid={examplesValid} />;
+export const ExamplesValidCallout: FC<Props> = ({
+  examplesValid,
+  categorizationAnalyzer,
+  sampleSize,
+}) => {
+  const percentageText = <PercentageText examplesValid={examplesValid} sampleSize={sampleSize} />;
   const analyzerUsed = <AnalyzerUsed categorizationAnalyzer={categorizationAnalyzer} />;
 
   let color: EuiCallOutProps['color'] = 'success';
@@ -64,13 +67,16 @@ export const ExamplesValidCallout: FC<Props> = ({ examplesValid, categorizationA
   );
 };
 
-const PercentageText: FC<{ examplesValid: number }> = ({ examplesValid }) => (
+const PercentageText: FC<{ examplesValid: number; sampleSize: number }> = ({
+  examplesValid,
+  sampleSize,
+}) => (
   <div>
     <FormattedMessage
       id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldPercentage"
-      defaultMessage="{number} field values analyzed, {percentage}% contain valid tokens."
+      defaultMessage="{number} field {number, plural, zero {value} one {value} other {values}} analyzed, {percentage}% contain valid tokens."
       values={{
-        number: NUMBER_OF_CATEGORY_EXAMPLES * CATEGORY_EXAMPLES_MULTIPLIER,
+        number: sampleSize,
         percentage: Math.floor(examplesValid * 100),
       }}
     />
