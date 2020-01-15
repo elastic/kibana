@@ -8,6 +8,9 @@ import { Legacy } from 'kibana';
 import { ServerFacade } from '../../types';
 
 export function getUserFactory(server: ServerFacade) {
+  /*
+   * Legacy.Request because this is called from routing middleware
+   */
   return async (request: Legacy.Request) => {
     if (!server.plugins.security) {
       return null;
