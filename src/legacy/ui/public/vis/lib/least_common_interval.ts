@@ -18,7 +18,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { leastCommonMultiple } from '../../utils/math';
+import { leastCommonMultiple } from './least_common_multiple';
 import { parseEsInterval } from '../../../../core_plugins/data/public';
 
 /**

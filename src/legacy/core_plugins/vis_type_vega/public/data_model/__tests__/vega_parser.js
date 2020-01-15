@@ -53,7 +53,7 @@ describe(`VegaParser._setDefaultColors`, () => {
     test({}, true, {
       config: {
         range: { category: { scheme: 'elastic' } },
-        mark: { color: '#00B3A4' },
+        mark: { color: '#54B399' },
       },
     })
   );
@@ -63,15 +63,15 @@ describe(`VegaParser._setDefaultColors`, () => {
     test({}, false, {
       config: {
         range: { category: { scheme: 'elastic' } },
-        arc: { fill: '#00B3A4' },
-        area: { fill: '#00B3A4' },
-        line: { stroke: '#00B3A4' },
-        path: { stroke: '#00B3A4' },
-        rect: { fill: '#00B3A4' },
-        rule: { stroke: '#00B3A4' },
-        shape: { stroke: '#00B3A4' },
-        symbol: { fill: '#00B3A4' },
-        trail: { fill: '#00B3A4' },
+        arc: { fill: '#54B399' },
+        area: { fill: '#54B399' },
+        line: { stroke: '#54B399' },
+        path: { stroke: '#54B399' },
+        rect: { fill: '#54B399' },
+        rule: { stroke: '#54B399' },
+        shape: { stroke: '#54B399' },
+        symbol: { fill: '#54B399' },
+        trail: { fill: '#54B399' },
       },
     })
   );

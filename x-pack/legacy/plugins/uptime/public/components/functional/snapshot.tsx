@@ -43,7 +43,7 @@ interface StoreProps {
 
 /**
  * Contains functions that will dispatch actions used
- * for this component's lifecyclel
+ * for this component's life cycle
  */
 interface DispatchProps {
   loadSnapshotCount: typeof fetchSnapshotCount;

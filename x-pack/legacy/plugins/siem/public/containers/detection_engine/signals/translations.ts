@@ -12,3 +12,24 @@ export const SIGNAL_FETCH_FAILURE = i18n.translate(
     defaultMessage: 'Failed to query signals',
   }
 );
+
+export const PRIVILEGE_FETCH_FAILURE = i18n.translate(
+  'xpack.siem.containers.detectionEngine.signals.errorFetchingSignalsDescription',
+  {
+    defaultMessage: 'Failed to query signals',
+  }
+);
+
+export const SIGNAL_GET_NAME_FAILURE = i18n.translate(
+  'xpack.siem.containers.detectionEngine.signals.errorGetSignalDescription',
+  {
+    defaultMessage: 'Failed to get signal index name',
+  }
+);
+
+export const SIGNAL_POST_FAILURE = i18n.translate(
+  'xpack.siem.containers.detectionEngine.signals.errorPostSignalDescription',
+  {
+    defaultMessage: 'Failed to create signal index',
+  }
+);

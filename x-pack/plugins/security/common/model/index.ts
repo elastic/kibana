@@ -12,3 +12,10 @@ export { FeaturesPrivileges } from './features_privileges';
 export { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
 export { Role, RoleIndexPrivilege, RoleKibanaPrivilege } from './role';
 export { KibanaPrivileges } from './kibana_privileges';
+export {
+  InlineRoleTemplate,
+  StoredRoleTemplate,
+  InvalidRoleTemplate,
+  RoleTemplate,
+  RoleMapping,
+} from './role_mapping';

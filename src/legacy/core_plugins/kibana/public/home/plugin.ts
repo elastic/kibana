@@ -22,8 +22,12 @@ import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'ki
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
-import { FeatureCatalogueEntry } from '../../../../../plugins/home/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
+import {
+  Environment,
+  FeatureCatalogueEntry,
+  HomePublicPluginStart,
+} from '../../../../../plugins/home/public';
 
 export interface LegacyAngularInjectedDependencies {
   telemetryOptInProvider: any;
@@ -32,6 +36,7 @@ export interface LegacyAngularInjectedDependencies {
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
+  home: HomePublicPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -59,6 +64,7 @@ export interface HomePluginSetupDependencies {
 export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
+  private environment: Environment | null = null;
 
   setup(
     core: CoreSetup,
@@ -88,6 +94,7 @@ export class HomePlugin implements Plugin {
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
+          environment: this.environment!,
           ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
@@ -96,8 +103,8 @@ export class HomePlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, { data }: HomePluginStartDependencies) {
-    // TODO is this really the right way? I though the app context would give us those
+  start(core: CoreStart, { data, home }: HomePluginStartDependencies) {
+    this.environment = home.environment.get();
     this.dataStart = data;
     this.savedObjectsClient = core.savedObjects.client;
   }
