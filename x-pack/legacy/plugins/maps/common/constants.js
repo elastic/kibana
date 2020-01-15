@@ -140,3 +140,12 @@ export const LAYER_STYLE_TYPE = {
   VECTOR: 'VECTOR',
   HEATMAP: 'HEATMAP',
 };
+
+export const COLOR_MAP_TYPE = {
+  CATEGORICAL: 'CATEGORICAL',
+  ORDINAL: 'ORDINAL',
+};
+
+export const COLOR_PALETTE_MAX_SIZE = 10;
+
+export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];

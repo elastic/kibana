@@ -31,7 +31,7 @@ function getIsEnableToggleLabel(styleName) {
   }
 }
 
-export class FieldMetaOptionsPopover extends Component {
+export class OrdinalFieldMetaOptionsPopover extends Component {
   state = {
     isPopoverOpen: false,
   };
