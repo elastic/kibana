@@ -27,7 +27,7 @@ const XPACK = 'x-pack';
 
 export default ({ coveragePath }, log) => {
   const objStream = jsonStream(coveragePath).on('done', () =>
-    log.debug(`Done streaming from \n\t${coveragePath}`)
+    log.debug(`### Done streaming from \n\t${coveragePath}`)
   );
 
   const addCoveragePath = addPath.bind(null, coveragePath);
@@ -39,28 +39,12 @@ export default ({ coveragePath }, log) => {
     map(truncate),
     map(timeStamp),
     map(distro),
-    map(massage),
-    map(enrich),
+    map(buildId),
     map(last)
     // debug stream
     // tap(x => console.log(`\n### x\n\t${JSON.stringify(x, null, 2)}`)),
   );
 };
-// TODO: This fn is quick and dirty, fixup later
-function massage(obj) {
-  Object.keys(obj).forEach(key => {
-    if (typeof obj[key] === 'object') {
-      const o = obj[key];
-      Object.keys(o).forEach(k => {
-        if (o[k] === 'Unknown') {
-          o[k] = 0;
-        }
-      });
-    }
-    // console.log(obj[key])
-  });
-  return obj;
-}
 function statsAndPath(...xs) {
   const [coveredFilePath] = xs[0][1];
   const [stats] = xs[0];
@@ -141,7 +125,7 @@ function last(obj) {
   }
   return obj;
 }
-function enrich(obj) {
+function buildId(obj) {
   const { env } = process;
   if (env.BUILD_ID) {
     obj.BUILD_ID = env.BUILD_ID;
