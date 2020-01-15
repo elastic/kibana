@@ -16,13 +16,11 @@ import {
 import { getLayerList } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
-  const fly = getFlyoutDisplay(state);
-  console.log(fly);
   return {
     isReadOnly: getIsReadOnly(state),
     isLayerTOCOpen: getIsLayerTOCOpen(state),
     layerList: getLayerList(state),
-    isAddButtonActive: fly === FLYOUT_STATE.NONE,
+    isAddButtonActive: getFlyoutDisplay(state) === FLYOUT_STATE.NONE,
   };
 }
 
