@@ -186,7 +186,7 @@ export interface PinnedClause<T extends BoolClauseFilter> {
   organic: BoolClauseWithAnyCondition<T>;
 }
 
-export function mergeBoolClauses<T extends BoolClauseFilter>(
+export function matchesClauses<T extends BoolClauseFilter>(
   ...clauses: Array<BoolClauseWithAnyCondition<T>>
 ): BoolClauseWithAnyCondition<T> {
   return merge({}, ...clauses, function(

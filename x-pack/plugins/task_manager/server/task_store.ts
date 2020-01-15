@@ -41,7 +41,7 @@ import {
   TermFilter,
   RangeFilter,
   asPinnedQuery,
-  mergeBoolClauses,
+  matchesAllClauses,
 } from './queries/query_clauses';
 
 import {
@@ -254,7 +254,7 @@ export class TaskStore {
 
     const { updated } = await this.updateByQuery(
       asUpdateByQuery({
-        query: mergeBoolClauses(
+        query: matchesAllClauses(
           mustBeAllOf(
             claimTasksById && claimTasksById.length
               ? asPinnedQuery(claimTasksById, queryForScheduledTasks)

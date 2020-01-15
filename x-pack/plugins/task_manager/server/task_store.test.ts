@@ -16,7 +16,7 @@ import {
   TaskStatus,
   TaskLifecycleResult,
 } from './task';
-import { StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
+import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
 import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
 import {
   SavedObjectsSerializer,
@@ -175,7 +175,7 @@ describe('TaskStore', () => {
   });
 
   describe('fetch', () => {
-    async function testFetch(opts?: FetchOpts, hits: any[] = []) {
+    async function testFetch(opts?: SearchOpts, hits: any[] = []) {
       const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
       const store = new TaskStore({
         index: 'tasky',
