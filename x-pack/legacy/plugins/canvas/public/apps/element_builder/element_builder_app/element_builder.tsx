@@ -20,10 +20,10 @@ export const ElementBuilder: FC<Props> = ({ encodedExpression = '' }) => {
   useEffect(() => {
     console.log('pfft', expression);
     if (encodedExpression) {
-      // console.log('reading encode', encodedExpression);
+      console.log('reading encode', encodedExpression);
       try {
         const decoded = atob(encodedExpression);
-        // setExpression(decoded);
+        setExpression(decoded);
       } catch (e) {
         // no-op
       }

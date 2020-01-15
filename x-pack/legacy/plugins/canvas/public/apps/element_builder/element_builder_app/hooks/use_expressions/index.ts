@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, Dispatch, useState, SetStateAction } from 'react';
+import { useEffect, useState } from 'react';
 import { Ast, fromExpression } from '@kbn/interpreter/target/common';
 
 import { getInterpretAst } from '../../lib/interpreter';
 import { getFunctionDefinitions } from '../../lib/functions';
-import { hookstore } from '../hookstore';
+import { createStore, useStore } from '../hookstore';
 import { reducer } from './reducer';
-import { actions as expressionsActions } from './actions';
+import { actions } from './actions';
 
 export interface State {
   expression: string;
@@ -25,14 +25,15 @@ const initialState: State = {
   result: null,
 };
 
-const [useReadHook, useActionHook] = hookstore(initialState, expressionsActions, reducer);
+const store = createStore(initialState, reducer);
 
-export const useExpressions = useReadHook;
+export const useExpressions = () => {
+  const { state } = useStore(store);
+  return state;
+};
 
-export const useExpressionsActions: () => {
-  setExpression: Dispatch<SetStateAction<string>>;
-} = () => {
-  const [dispatch, actions] = useActionHook();
+export const useExpressionsActions = () => {
+  const { state, dispatch } = useStore(store);
   const interpretAst = getInterpretAst(getFunctionDefinitions());
   const [expression, setExpression] = useState('');
   const [ast, setAst] = useState<Ast | null>(null);
@@ -82,5 +83,5 @@ export const useExpressionsActions: () => {
     dispatch(actions.setExpressionResult(result));
   }, [result]);
 
-  return { setExpression };
+  return { state, setExpression };
 };
