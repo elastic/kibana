@@ -75,7 +75,7 @@ function validateSecrets(
 export type ParamsType = TypeOf<typeof ParamsSchema>;
 
 const ParamsSchema = schema.object({
-  comments: schema.string(),
+  comments: schema.maybe(schema.string()),
   short_description: schema.string(),
 });
 
@@ -112,7 +112,6 @@ async function serviceNowExecutor(
   const config = execOptions.config as ConfigType;
   const secrets = execOptions.secrets as SecretsType;
   const params = execOptions.params as ParamsType;
-
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -131,7 +130,7 @@ async function serviceNowExecutor(
       serviceMessage: err.message,
     };
   }
-  if (response.status === 201) {
+  if (response.status === 200 || response.status === 201 || response.status === 204) {
     return {
       status: 'ok',
       actionId,

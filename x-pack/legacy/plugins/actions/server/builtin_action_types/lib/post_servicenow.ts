@@ -16,7 +16,7 @@ interface PostServiceNowOptions {
   secrets: SecretsType;
 }
 
-// post an event to pagerduty
+// post an event to serviceNow
 export async function postServiceNow(options: PostServiceNowOptions): Promise<AxiosResponse> {
   const { apiUrl, data, headers, secrets } = options;
   const axiosOptions = {
