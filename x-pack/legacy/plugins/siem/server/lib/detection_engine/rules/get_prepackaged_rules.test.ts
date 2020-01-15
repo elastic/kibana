@@ -5,10 +5,31 @@
  */
 
 import { getPrepackagedRules } from './get_prepackaged_rules';
+import { RuleAlertParamsRest } from '../types';
+import { isEmpty } from 'lodash/fp';
 
 describe('get_existing_prepackaged_rules', () => {
   test('should not throw any errors with the existing checked in pre-packaged rules', () => {
     expect(() => getPrepackagedRules()).not.toThrow();
+  });
+
+  test('no rule should have the same rule_id as another rule_id', () => {
+    const prePacakgedRules = getPrepackagedRules();
+    let existingRuleIds: RuleAlertParamsRest[] = [];
+    prePacakgedRules.forEach(rule => {
+      const foundDuplicate = existingRuleIds.reduce((accum, existingRule) => {
+        if (existingRule.rule_id === rule.rule_id) {
+          return `Found duplicate rule_id of ${rule.rule_id} between these two rule names of "${rule.name}" and "${existingRule.name}"`;
+        } else {
+          return accum;
+        }
+      }, '');
+      if (!isEmpty(foundDuplicate)) {
+        expect(foundDuplicate).toEqual('');
+      } else {
+        existingRuleIds = [...existingRuleIds, rule];
+      }
+    });
   });
 
   test('should throw an exception if a pre-packaged rule is not valid', () => {
