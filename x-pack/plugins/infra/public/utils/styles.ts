@@ -25,7 +25,7 @@ export const switchProp = Object.assign(
     if (typeof propValue === 'undefined') {
       return;
     }
-    return options instanceof Map ? options.get(propValue) : get(propValue, options);
+    return options instanceof Map ? options.get(propValue) : get(options, propValue);
   },
   {
     default: Symbol('default'),

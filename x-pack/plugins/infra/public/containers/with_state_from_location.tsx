@@ -46,7 +46,7 @@ export const withStateFromLocation = <StateInLocation extends {}>({
 
       public render() {
         const { location } = this.props;
-        const otherProps = omit(['location', 'history', 'match', 'staticContext'], this.props);
+        const otherProps = omit(this.props, ['location', 'history', 'match', 'staticContext']);
 
         const stateFromLocation = mapLocationToState(location);
 

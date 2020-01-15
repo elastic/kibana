@@ -49,7 +49,7 @@ export const asChildFunctionRenderer = <InjectedProps extends {}, OwnProps>(
       }
 
       private getRendererArgs = () =>
-        omit(['children', 'initializeOnMount', 'resetOnUnmount'], this.props) as Pick<
+        omit(this.props, ['children', 'initializeOnMount', 'resetOnUnmount']) as Pick<
           ChildFunctionRendererProps<InjectedProps>,
           keyof InjectedProps
         >;
