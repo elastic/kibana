@@ -34,5 +34,6 @@ exports[`FeatureTable can render without spaces 1`] = `
   }
   items={Array []}
   responsive={false}
+  tableLayout="fixed"
 />
 `;

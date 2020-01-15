@@ -108,6 +108,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
               idAria: 'detectionEngineStepScheduleRuleFrom',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
+              minimumValue: 1,
             }}
           />
         </Form>

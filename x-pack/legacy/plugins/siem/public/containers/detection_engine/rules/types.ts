@@ -78,8 +78,12 @@ export const RuleSchema = t.intersection([
     updated_by: t.string,
   }),
   t.partial({
+    last_failure_at: t.string,
+    last_failure_message: t.string,
     output_index: t.string,
     saved_id: t.string,
+    status: t.string,
+    status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
     version: t.number,
@@ -174,4 +178,14 @@ export interface ExportRulesProps {
   filename?: string;
   excludeExportDetails?: boolean;
   signal: AbortSignal;
+}
+
+export interface RuleStatus {
+  alert_id: string;
+  status_date: string;
+  status: string;
+  last_failure_at: string | null;
+  last_success_at: string | null;
+  last_failure_message: string | null;
+  last_success_message: string | null;
 }
