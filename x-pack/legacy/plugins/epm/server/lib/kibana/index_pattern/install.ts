@@ -8,20 +8,22 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { KibanaAssetType, DatasetType } from '../../../../common/types';
 import { RegistryPackage, Dataset } from '../../../../common/types';
 import * as Registry from '../../../registry';
-import { loadFieldsFromYaml } from '../../fields/field';
+import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 
-export interface Field {
+export interface IndexPatternField {
   name: string;
-  type: string;
-  required?: boolean;
-  description?: string;
-  fields?: Field[];
-}
-
-interface IndexPatternField extends Field {
+  type?: string;
+  count: number;
+  scripted: boolean;
+  indexed: boolean;
+  analyzed: boolean;
   searchable: boolean;
   aggregatable: boolean;
-  readFromDocValues: boolean;
+  doc_values: boolean;
+  enabled?: boolean;
+  script?: string;
+  lang?: string;
+  readFromDocValues?: boolean;
 }
 
 export async function installIndexPatterns(
@@ -80,14 +82,14 @@ const createIndexPattern = async ({
  * dedupes fields, flattens fields, dedupes the previously nested fields, transform with necessary
  * Kibana index pattern properties
  */
-const makeKibanaIndexPatternFields = (fields: Field[]): IndexPatternField[] => {
+const makeKibanaIndexPatternFields = (fields: Fields): IndexPatternField[] => {
   const dedupedFields = dedupFields(fields);
   const flattenedFields = flattenFields(dedupedFields);
   const transformedFields = flattenedFields.map(transformField);
   return transformedFields;
 };
 
-export const dedupFields = (fields: Field[]) => {
+export const dedupFields = (fields: Fields) => {
   const uniqueObj = fields.reduce<{ [name: string]: Field }>((acc, field) => {
     if (!acc[field.name]) {
       acc[field.name] = field;
@@ -99,20 +101,60 @@ export const dedupFields = (fields: Field[]) => {
 };
 
 export const transformField = (field: Field): IndexPatternField => {
-  const newField = { ...field };
+  const newField: IndexPatternField = {
+    name: field.name,
+    count: field.count ? field.count : 0,
+    scripted: false,
+    indexed: getVal(field.index, true),
+    analyzed: getVal(field.analyzed, false),
+    searchable: getVal(field.searchable, true),
+    aggregatable: getVal(field.aggregatable, true),
+    doc_values: getVal(field.doc_values, true),
+  };
 
-  // map this type to field type
-  if (typeMap[field.type]) {
-    newField.type = typeMap[field.type];
+  // if type exists, check if it exists in the map
+  if (field.type) {
+    // if no type match type is not set (undefined)
+    if (typeMap[field.type]) {
+      newField.type = typeMap[field.type];
+    }
+    // if type isn't set, default to string
+  } else {
+    newField.type = 'string';
   }
 
-  // add some temp values
-  return {
-    searchable: false,
-    aggregatable: false,
-    readFromDocValues: true,
-    ...newField,
-  };
+  if (newField.type === 'binary') {
+    newField.aggregatable = false;
+    newField.analyzed = false;
+    newField.doc_values = getVal(field.doc_values, false);
+    newField.indexed = false;
+    newField.searchable = false;
+  }
+
+  if (field.type === 'object' && field.hasOwnProperty('enabled')) {
+    const enabled = getVal(field.enabled, true);
+    newField.enabled = enabled;
+    if (!enabled) {
+      newField.aggregatable = false;
+      newField.analyzed = false;
+      newField.doc_values = false;
+      newField.indexed = false;
+      newField.searchable = false;
+    }
+  }
+
+  if (field.type === 'text') {
+    newField.aggregatable = false;
+  }
+
+  if (field.hasOwnProperty('script')) {
+    newField.scripted = true;
+    newField.script = field.script;
+    newField.lang = 'painless';
+    newField.doc_values = false;
+  }
+
+  return newField;
 };
 
 /**
@@ -120,7 +162,7 @@ export const transformField = (field: Field): IndexPatternField => {
  *
  * flattens fields and renames them with a path of the parent names
  */
-export const flattenFields = (fields: Field[]): Field[] =>
+export const flattenFields = (fields: Fields): Fields =>
   fields.reduce<Field[]>((acc, field) => {
     if (field.fields?.length) {
       const flattenedFields = flattenFields(field.fields);
@@ -133,6 +175,9 @@ export const flattenFields = (fields: Field[]): Field[] =>
     return acc;
   }, []);
 
+const getVal = (prop: boolean | undefined, def: boolean): boolean => {
+  return prop !== undefined ? prop : def;
+};
 /* this should match https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/kibana/fields_transformer.go */
 interface TypeMap {
   [key: string]: string;

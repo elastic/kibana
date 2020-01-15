@@ -11,13 +11,22 @@ import { getAssetsData } from '../../packages/assets';
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39
 export interface Field {
   name: string;
-  type: string;
+  type?: string;
+  count?: number;
+  index?: boolean;
+  analyzed?: boolean;
   required?: boolean;
   description?: string;
-  fields: Field[];
+  fields?: Fields;
+  searchable?: boolean;
+  aggregatable?: boolean;
+  doc_values?: boolean;
+  enabled?: boolean;
+  readFromDocValues?: boolean;
+  script?: string;
 }
 
-type Fields = Field[];
+export type Fields = Field[];
 
 /**
  * ProcessFields takes the given fields read from yaml and expands it.
@@ -53,8 +62,9 @@ export function processFields(fields: Fields) {
       };
       // Replace the old field in the array
       fields[key] = newField;
-
-      processFields(newField.fields);
+      if (newField.fields) {
+        processFields(newField.fields);
+      }
     }
   });
 }
