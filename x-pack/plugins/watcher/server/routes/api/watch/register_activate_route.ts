@@ -10,6 +10,7 @@ import { get } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchStatus } from '../../../models/watch_status/index';
 
@@ -60,6 +61,6 @@ export function registerActivateRoute(deps: RouteDependencies) {
         }),
       },
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

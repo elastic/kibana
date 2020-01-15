@@ -11,6 +11,7 @@ import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
 
@@ -80,6 +81,6 @@ export function registerListRoute(deps: RouteDependencies) {
       path: '/api/watcher/watches',
       validate: false,
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

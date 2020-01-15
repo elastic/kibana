@@ -9,6 +9,7 @@ import { RequestHandler } from 'kibana/server';
 import { get } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
@@ -72,6 +73,6 @@ export function registerExecuteRoute(deps: RouteDependencies) {
         }),
       },
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

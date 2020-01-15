@@ -11,6 +11,7 @@ import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchHistoryItem } from '../../models/watch_history_item/index';
 
@@ -71,6 +72,6 @@ export function registerLoadHistoryRoute(deps: RouteDependencies) {
         }),
       },
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

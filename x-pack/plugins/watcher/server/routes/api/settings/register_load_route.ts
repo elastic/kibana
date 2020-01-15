@@ -9,6 +9,7 @@ import { isEsError } from '../../../lib/is_es_error';
 // @ts-ignore
 import { Settings } from '../../../models/settings/index';
 import { RouteDependencies } from '../../../types';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchClusterSettings(client: IClusterClient) {
   return client.callAsInternalUser('cluster.getSettings', {
@@ -37,6 +38,6 @@ export function registerLoadRoute(deps: RouteDependencies) {
       path: '/api/watcher/settings',
       validate: false,
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

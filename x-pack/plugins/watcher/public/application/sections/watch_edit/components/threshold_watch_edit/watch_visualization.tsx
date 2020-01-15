@@ -86,7 +86,7 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 };
 
 export const WatchVisualization = () => {
-  const { TimeBuckets, euiUtils, uiSettings, data } = useAppContext();
+  const { createTimeBuckets, euiUtils, uiSettings } = useAppContext();
   const { watch } = useContext(WatchContext);
   const chartsTheme = euiUtils.useChartsTheme();
   const {
@@ -106,7 +106,7 @@ export const WatchVisualization = () => {
   } = watch;
 
   const domain = getDomain(watch);
-  const timeBuckets = new TimeBuckets(uiSettings, data);
+  const timeBuckets = createTimeBuckets();
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
   const visualizeOptions = new VisualizeOptions({
@@ -203,7 +203,7 @@ export const WatchVisualization = () => {
     const dateFormatter = (d: number) => {
       return moment(d)
         .tz(timezone)
-        .format(getTimeBuckets(watch, new TimeBuckets(uiSettings, data)).getScaledDateFormat());
+        .format(getTimeBuckets(watch, createTimeBuckets()).getScaledDateFormat());
     };
     const aggLabel = aggTypes[watch.aggType].text;
     return (

@@ -10,29 +10,22 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from 'kibana/server';
-import { PLUGIN } from '../../../common/constants';
-import { LICENSE_STATUS_VALID } from '../../../../../legacy/common/constants/license_status';
-import { ServerShim } from '../../types';
+import { RouteDependencies } from '../../types';
 
 export const licensePreRoutingFactory = (
-  server: ServerShim,
-  handler: RequestHandler<any, any, any>
-): RequestHandler<any, any, any> => {
-  const xpackMainPlugin = server.plugins.xpack_main;
-
-  // License checking and enable/disable logic
-  return function licensePreRouting(
+  { getLicenseStatus }: RouteDependencies,
+  handler: RequestHandler
+) => {
+  return function licenseCheck(
     ctx: RequestHandlerContext,
     request: KibanaRequest,
     response: KibanaResponseFactory
   ) {
-    const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
-    const { status } = licenseCheckResults;
-
-    if (status !== LICENSE_STATUS_VALID) {
+    const licenseStatus = getLicenseStatus();
+    if (!licenseStatus.hasRequired) {
       return response.customError({
         body: {
-          message: licenseCheckResults.messsage,
+          message: licenseStatus.message || '',
         },
         statusCode: 403,
       });

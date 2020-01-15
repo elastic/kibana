@@ -27,7 +27,6 @@ import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
 import { AppContextProvider } from './app_context';
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -35,14 +34,13 @@ const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { c
 });
 
 export interface AppDeps {
-  data: DataPublicPluginSetup;
   chrome: ChromeStart;
   docLinks: DocLinksStart;
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   euiUtils: any;
-  TimeBuckets: any;
+  createTimeBuckets: () => any;
   MANAGEMENT_BREADCRUMB: any;
 }
 

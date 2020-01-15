@@ -23,6 +23,12 @@ export interface ServerShim {
 
 export interface RouteDependencies {
   router: IRouter;
+  getLicenseStatus: () => LicenseStatus;
   elasticsearchService: ElasticsearchServiceSetup;
   elasticsearch: IClusterClient;
+}
+
+export interface LicenseStatus {
+  hasRequired: boolean;
+  message?: string;
 }

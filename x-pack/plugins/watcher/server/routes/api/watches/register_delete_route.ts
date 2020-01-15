@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { RouteDependencies } from '../../../types';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function deleteWatches(callWithRequest: any, watchIds: string[]) {
   const deletePromises = watchIds.map(watchId => {
@@ -57,6 +58,6 @@ export function registerDeleteRoute(deps: RouteDependencies) {
         }),
       },
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

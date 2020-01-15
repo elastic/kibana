@@ -5,7 +5,7 @@
  */
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { PLUGIN } from '../common/constants';
-import { Dependencies, RouteDependencies } from './types';
+import { Dependencies, LicenseStatus, RouteDependencies } from './types';
 import { LICENSE_CHECK_STATE } from '../../licensing/server';
 
 import { registerSettingsRoutes } from './routes/api/settings';
@@ -19,44 +19,51 @@ import { registerLoadHistoryRoute } from './routes/api/register_load_history_rou
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   log: Logger;
 
+  private licenseStatus: LicenseStatus = {
+    hasRequired: false,
+  };
+
   constructor(ctx: PluginInitializerContext) {
-    this.log = ctx.logger.get(PLUGIN.ID);
+    this.log = ctx.logger.get();
   }
 
   async setup(
     { http, elasticsearch: elasticsearchService }: CoreSetup,
     { licensing }: Dependencies
   ) {
+    const elasticsearch = await elasticsearchService.adminClient;
+    const router = http.createRouter();
+    const routeDependencies: RouteDependencies = {
+      elasticsearch,
+      elasticsearchService,
+      router,
+      getLicenseStatus: () => this.licenseStatus,
+    };
+
+    registerListFieldsRoute(routeDependencies);
+    registerLoadHistoryRoute(routeDependencies);
+    registerIndicesRoutes(routeDependencies);
+    registerLicenseRoutes(routeDependencies);
+    registerSettingsRoutes(routeDependencies);
+    registerWatchesRoutes(routeDependencies);
+    registerWatchRoutes(routeDependencies);
+
     licensing.license$.subscribe(async license => {
       const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
       const hasMinimumLicense = state === LICENSE_CHECK_STATE.Valid;
       if (hasMinimumLicense && license.getFeature(PLUGIN.ID)) {
-        try {
-          const elasticsearch = await elasticsearchService.adminClient;
-          const router = http.createRouter();
-          const routeDependencies: RouteDependencies = {
-            elasticsearch,
-            elasticsearchService,
-            router,
-          };
-
-          registerListFieldsRoute(routeDependencies);
-          registerLoadHistoryRoute(routeDependencies);
-          registerIndicesRoutes(routeDependencies);
-          registerLicenseRoutes(routeDependencies);
-          registerSettingsRoutes(routeDependencies);
-          registerWatchesRoutes(routeDependencies);
-          registerWatchRoutes(routeDependencies);
-        } catch (e) {
-          // TODO: Get back  to testing why the server side crashes on license updates
-          // eslint-disable-next-line
-          console.log('here', e);
-          throw e;
-        }
+        this.log.info('Enabling Watcher plugin.');
+        this.licenseStatus = {
+          hasRequired: true,
+        };
       } else {
         if (message) {
           this.log.info(message);
         }
+        this.licenseStatus = {
+          hasRequired: false,
+          message,
+        };
       }
     });
   }

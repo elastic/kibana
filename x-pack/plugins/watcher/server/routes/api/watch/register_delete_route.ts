@@ -9,6 +9,7 @@ import { RequestHandler } from 'kibana/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function deleteWatch(callWithRequest: any, watchId: string) {
   return callWithRequest('watcher.deleteWatch', {
@@ -46,6 +47,6 @@ export function registerDeleteRoute(deps: RouteDependencies) {
         }),
       },
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

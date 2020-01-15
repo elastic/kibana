@@ -12,6 +12,7 @@ import { isEsError } from '../../../../lib/is_es_error';
 // @ts-ignore
 import { WatchStatus } from '../../../../models/watch_status/index';
 import { RouteDependencies } from '../../../../types';
+import { licensePreRoutingFactory } from '../../../../lib/license_pre_routing_factory';
 
 function acknowledgeAction(callWithRequest: any, watchId: string, actionId: string) {
   return callWithRequest('watcher.ackWatch', {
@@ -59,6 +60,6 @@ export function registerAcknowledgeRoute(deps: RouteDependencies) {
         }),
       },
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

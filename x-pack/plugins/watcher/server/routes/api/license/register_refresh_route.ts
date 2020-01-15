@@ -6,7 +6,7 @@
 
 import { RequestHandler } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
-
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 /*
 In order for the client to have the most up-to-date snapshot of the current license,
 it needs to make a round-trip to the kibana server. This refresh endpoint is provided
@@ -23,6 +23,6 @@ export function registerRefreshRoute(deps: RouteDependencies) {
       path: '/api/watcher/license/refresh',
       validate: false,
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }

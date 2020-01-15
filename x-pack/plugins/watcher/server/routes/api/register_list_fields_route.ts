@@ -10,6 +10,7 @@ import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { RouteDependencies } from '../../types';
 
 function fetchFields(callWithRequest: any, indexes: string[]) {
@@ -59,6 +60,6 @@ export function registerListFieldsRoute(deps: RouteDependencies) {
         }),
       },
     },
-    handler
+    licensePreRoutingFactory(deps, handler)
   );
 }
