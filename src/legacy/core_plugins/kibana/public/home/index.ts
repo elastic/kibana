@@ -73,6 +73,6 @@ let copiedLegacyCatalogue = false;
     },
   });
   instance.start(npStart.core, {
-    data: npStart.plugins.data,
+    ...npStart.plugins,
   });
 })();

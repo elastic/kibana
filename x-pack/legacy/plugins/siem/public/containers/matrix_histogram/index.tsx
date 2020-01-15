@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Position } from '@elastic/charts';
 import React from 'react';
 import { compose } from 'redux';
 
@@ -16,6 +17,7 @@ import { MatrixHistogram } from '../../components/matrix_histogram';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
+  GetTitle,
   GetSubTitle,
 } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
@@ -30,15 +32,17 @@ export interface OwnProps extends QueryTemplateProps {
   deleteQuery?: ({ id }: { id: string }) => void;
   isEventsType?: boolean;
   errorMessage: string;
+  headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
   id: string;
+  legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   query: Maybe<string>;
   setQuery: SetQuery;
   sourceId: string;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
-  title: string;
+  title: string | GetTitle;
   type: hostsModel.HostsType | networkModel.NetworkType;
   updateDateRange: UpdateDateRange;
 }

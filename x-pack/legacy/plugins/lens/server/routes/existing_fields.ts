@@ -204,8 +204,27 @@ async function fetchIndexPatternStats({
   toDate?: string;
   fields: Field[];
 }) {
-  if (!timeFieldName || !fromDate || !toDate) {
-    return [];
+  let query;
+
+  if (timeFieldName && fromDate && toDate) {
+    query = {
+      bool: {
+        filter: [
+          {
+            range: {
+              [timeFieldName]: {
+                gte: fromDate,
+                lte: toDate,
+              },
+            },
+          },
+        ],
+      },
+    };
+  } else {
+    query = {
+      match_all: {},
+    };
   }
   const viableFields = fields.filter(
     f => !f.isScript && !f.isAlias && !metaFields.includes(f.name)
@@ -217,20 +236,7 @@ async function fetchIndexPatternStats({
     body: {
       size: SAMPLE_SIZE,
       _source: viableFields.map(f => f.name),
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                [timeFieldName]: {
-                  gte: fromDate,
-                  lte: toDate,
-                },
-              },
-            },
-          ],
-        },
-      },
+      query,
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {
