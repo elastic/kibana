@@ -32,15 +32,32 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+// eslint-disable-next-line
+import { PulseChannel } from 'src/core/server/pulse/channel';
 import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
-export const NewsfeedFlyout = () => {
+interface Props {
+  notificationsChannel: PulseChannel;
+}
+
+export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
+  if (newsFetchResult && newsFetchResult.feedItems.length) {
+    notificationsChannel.sendPulse(
+      newsFetchResult.feedItems.map(feedItem => {
+        return {
+          hash: feedItem.hash,
+          status: 'seen',
+          seenOn: Date.now(),
+        };
+      })
+    );
+  }
 
   return (
     <EuiFlyout

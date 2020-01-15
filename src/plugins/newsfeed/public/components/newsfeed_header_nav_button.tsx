@@ -20,6 +20,8 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
+// eslint-disable-next-line
+import { PulseChannel, PulseInstruction } from 'src/core/server/pulse/channel';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../../types';
 
@@ -33,12 +35,30 @@ export type NewsfeedApiFetchResult = Rx.Observable<void | FetchResult | null>;
 
 export interface Props {
   apiFetchResult: NewsfeedApiFetchResult;
+  notificationsChannel: PulseChannel;
 }
 
-export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
+export const NewsfeedNavButton = ({ apiFetchResult, notificationsChannel }: Props) => {
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
+
+  // Pulse notifications
+  const notificationsInstructions$ = notificationsChannel.instructions$();
+  useEffect(() => {
+    function handleStatusChange(pulseInstruction: PulseInstruction) {
+      // console.log('pulseInstruction::', pulseInstruction);
+      // if (pulseInstruction) {
+      //   setShowBadge(fetchResult.hasNew);
+      // }
+      // setNewsFetchResult(fetchResult);
+    }
+
+    const subscription = notificationsInstructions$.subscribe(instruction =>
+      handleStatusChange(instruction)
+    );
+    return () => subscription.unsubscribe();
+  }, [notificationsInstructions$]);
 
   useEffect(() => {
     function handleStatusChange(fetchResult: FetchResult | void | null) {
@@ -75,7 +95,7 @@ export const NewsfeedNavButton = ({ apiFetchResult }: Props) => {
             </EuiNotificationBadge>
           ) : null}
         </EuiHeaderSectionItemButton>
-        {flyoutVisible ? <NewsfeedFlyout /> : null}
+        {flyoutVisible ? <NewsfeedFlyout notificationsChannel={notificationsChannel} /> : null}
       </Fragment>
     </NewsfeedContext.Provider>
   );
