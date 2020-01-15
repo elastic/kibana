@@ -139,7 +139,7 @@ export const PingListComponent = ({
       ),
     },
     {
-      align: 'center',
+      align: 'left',
       field: 'observer.geo.name',
       name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
         defaultMessage: 'Location',

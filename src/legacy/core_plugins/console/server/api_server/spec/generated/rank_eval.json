@@ -8,6 +8,10 @@
         "closed",
         "none",
         "all"
+      ],
+      "search_type": [
+        "query_then_fetch",
+        "dfs_query_then_fetch"
       ]
     },
     "methods": [
