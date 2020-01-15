@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
-import { environmentServiceMock } from './services/environment/environment.mock';
-
-export const registryMock = featureCatalogueRegistryMock.create();
-export const environmentMock = environmentServiceMock.create();
-jest.doMock('./services', () => ({
-  FeatureCatalogueRegistry: jest.fn(() => registryMock),
-  EnvironmentService: jest.fn(() => environmentMock),
-}));
+export {
+  EnvironmentService,
+  Environment,
+  EnvironmentServiceSetup,
+  EnvironmentServiceStart,
+} from './environment';
