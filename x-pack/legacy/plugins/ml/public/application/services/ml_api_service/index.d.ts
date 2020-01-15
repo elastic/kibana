@@ -185,7 +185,7 @@ declare interface Ml {
       start: number,
       end: number,
       analyzer: any
-    ): Promise<{ valid: number; examples: any[] }>;
+    ): Promise<{ valid: number; examples: any[]; sampleSize: number }>;
     topCategories(
       jobId: string,
       count: number

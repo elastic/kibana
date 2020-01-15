@@ -1,0 +1,17 @@
+{
+  "description": "405 Response (Method Not Allowed)",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "405 Response (Method Not Allowed)",
+  "query": "http.response.status_code:405",
+  "risk_score": 50,
+  "rule_id": "75ee75d8-c180-481c-ba88-ee50129a6aef",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}
