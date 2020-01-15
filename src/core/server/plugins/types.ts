@@ -123,6 +123,10 @@ export interface PluginManifest {
   /**
    * Root {@link ConfigPath | configuration path} used by the plugin, defaults
    * to "id" in snake_case format.
+   *
+   * @example
+   * id: myPlugin
+   * configPath: my_plugin
    */
   readonly configPath: ConfigPath;
 

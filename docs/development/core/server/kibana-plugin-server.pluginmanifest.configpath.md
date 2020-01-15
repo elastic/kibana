@@ -11,3 +11,8 @@ Root [configuration path](./kibana-plugin-server.configpath.md) used by the plug
 ```typescript
 readonly configPath: ConfigPath;
 ```
+
+## Example
+
+id: myPlugin configPath: my\_plugin
+
