@@ -7,7 +7,7 @@ import path from 'path';
 import { readFileSync } from 'fs';
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
-import { flattenFields, dedupFields, transformField } from './install';
+import { flattenFields, dedupeFields, transformField } from './install';
 import { Fields } from '../../fields/field';
 
 // Add our own serialiser to just do JSON.stringify
@@ -34,8 +34,8 @@ describe('creating index patterns from yaml fields', () => {
   });
 
   test('dedupFields function remove duplicated fields when parsing multiple files', () => {
-    const deduped = dedupFields(fields);
-    expect(deduped).toMatchSnapshot('dedupFields');
+    const deduped = dedupeFields(fields);
+    expect(deduped).toMatchSnapshot('dedupeFields');
   });
 
   test('transformField maps field types to kibana index pattern data types', () => {

@@ -85,13 +85,13 @@ const createIndexPattern = async ({
  * Kibana index pattern properties
  */
 const makeKibanaIndexPatternFields = (fields: Fields): IndexPatternField[] => {
-  const dedupedFields = dedupFields(fields);
+  const dedupedFields = dedupeFields(fields);
   const flattenedFields = flattenFields(dedupedFields);
   const transformedFields = flattenedFields.map(transformField);
   return transformedFields;
 };
 
-export const dedupFields = (fields: Fields) => {
+export const dedupeFields = (fields: Fields) => {
   const uniqueObj = fields.reduce<{ [name: string]: Field }>((acc, field) => {
     if (!acc[field.name]) {
       acc[field.name] = field;
