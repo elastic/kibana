@@ -6,7 +6,6 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { FlowTarget } from '../../graphql/types';
 import { networkModel } from '../model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/network');
@@ -24,7 +23,3 @@ export const setIpDetailsTablesActivePageToZero = actionCreator(
 export const setNetworkTablesActivePageToZero = actionCreator(
   'SET_NETWORK_TABLES_ACTIVE_PAGE_TO_ZERO'
 );
-
-export const updateIpDetailsFlowTarget = actionCreator<{
-  flowTarget: FlowTarget;
-}>('UPDATE_IP_DETAILS_TARGET');

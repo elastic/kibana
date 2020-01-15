@@ -29,7 +29,7 @@ import {
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
-import { FeatureCatalogueEntry } from '../../../../../plugins/home/public';
+import { Environment, FeatureCatalogueEntry } from '../../../../../plugins/home/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
@@ -61,6 +61,7 @@ export interface HomeKibanaServices {
   shouldShowTelemetryOptIn: boolean;
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
+  environment: Environment;
 }
 
 let services: HomeKibanaServices | null = null;

@@ -9,7 +9,7 @@ import React, { Fragment, useContext, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MonitorCharts, PingList } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeSettingsContext } from '../contexts';
+import { UptimeRefreshContext, UptimeThemeContext } from '../contexts';
 import { useUptimeTelemetry, useUrlParams, UptimePage } from '../hooks';
 import { useTrackPageview } from '../../../infra/public';
 import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
@@ -25,7 +25,8 @@ export const MonitorPage = ({ setBreadcrumbs }: MonitorPageProps) => {
   monitorId = atob(monitorId || '');
 
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
-  const { colors, refreshApp } = useContext(UptimeSettingsContext);
+  const { colors } = useContext(UptimeThemeContext);
+  const { refreshApp } = useContext(UptimeRefreshContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;

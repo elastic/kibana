@@ -5,12 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ResolverEmbeddable } from './';
 import {
   EmbeddableFactory,
-  EmbeddableInput,
   IContainer,
+  EmbeddableInput,
 } from '../../../../../../src/plugins/embeddable/public';
+import { ResolverEmbeddable } from './embeddable';
 
 export class ResolverEmbeddableFactory extends EmbeddableFactory {
   public readonly type = 'resolver';
@@ -20,7 +20,7 @@ export class ResolverEmbeddableFactory extends EmbeddableFactory {
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
-    return new ResolverEmbeddable(initialInput, parent);
+    return new ResolverEmbeddable(initialInput, {}, parent);
   }
 
   public getDisplayName() {

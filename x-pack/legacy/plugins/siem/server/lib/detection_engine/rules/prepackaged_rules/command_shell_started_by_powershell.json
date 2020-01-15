@@ -1,29 +1,22 @@
 {
-  "rule_id": "ab4bbfa5-4127-40bf-852f-bdc6afdb2a06",
-  "risk_score": 50,
   "description": "Command shell started by Powershell",
-  "immutable": true,
-  "interval": "5m",
-  "name": "Command shell started by Powershell",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.parent.name:powershell.exe",
-  "language": "kuery",
+  "enabled": false,
   "filters": [
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
         "key": "process.name",
-        "value": "cmd.exe",
+        "negate": false,
         "params": {
           "query": "cmd.exe"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+        "type": "phrase",
+        "value": "cmd.exe"
       },
       "query": {
         "match": {
@@ -32,23 +25,23 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     },
     {
+      "$state": {
+        "store": "appState"
+      },
       "meta": {
-        "negate": false,
-        "type": "phrase",
+        "alias": null,
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index",
         "key": "event.action",
-        "value": "Process Create (rule: ProcessCreate)",
+        "negate": false,
         "params": {
           "query": "Process Create (rule: ProcessCreate)"
         },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+        "type": "phrase",
+        "value": "Process Create (rule: ProcessCreate)"
       },
       "query": {
         "match": {
@@ -57,12 +50,19 @@
             "type": "phrase"
           }
         }
-      },
-      "$state": {
-        "store": "appState"
       }
     }
   ],
-  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Command shell started by Powershell",
+  "query": "process.parent.name:powershell.exe",
+  "risk_score": 50,
+  "rule_id": "ab4bbfa5-4127-40bf-852f-bdc6afdb2a06",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

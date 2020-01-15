@@ -25,6 +25,7 @@ export interface EuiBasicTableOnChange {
 
 export interface TableData {
   id: string;
+  immutable: boolean;
   rule_id: string;
   rule: {
     href: string;
@@ -42,6 +43,8 @@ export interface TableData {
   activate: boolean;
   isLoading: boolean;
   sourceRule: Rule;
+  status?: string | null;
+  statusDate?: string | null;
 }
 
 export enum RuleStep {

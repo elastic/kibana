@@ -6,6 +6,7 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { mlMessageBarService } from '../../../../../../../components/messagebar';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -32,6 +33,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   );
   const [fieldExamples, setFieldExamples] = useState<CategoryExample[] | null>(null);
   const [examplesValid, setExamplesValid] = useState(0);
+  const [sampleSize, setSampleSize] = useState(0);
 
   const [categorizationFieldName, setCategorizationFieldName] = useState(
     jobCreator.categorizationFieldName
@@ -69,10 +71,20 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   async function loadFieldExamples() {
     if (categorizationFieldName !== null) {
       setLoadingData(true);
-      const { valid, examples } = await jobCreator.loadCategorizationFieldExamples();
-      setFieldExamples(examples);
-      setExamplesValid(valid);
-      setLoadingData(false);
+      try {
+        const {
+          valid,
+          examples,
+          sampleSize: tempSampleSize,
+        } = await jobCreator.loadCategorizationFieldExamples();
+        setFieldExamples(examples);
+        setExamplesValid(valid);
+        setLoadingData(false);
+        setSampleSize(tempSampleSize);
+      } catch (error) {
+        setLoadingData(false);
+        mlMessageBarService.notify.error(error);
+      }
     } else {
       setFieldExamples(null);
       setExamplesValid(0);
@@ -97,6 +109,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
       {fieldExamples !== null && loadingData === false && (
         <>
           <ExamplesValidCallout
+            sampleSize={sampleSize}
             examplesValid={examplesValid}
             categorizationAnalyzer={jobCreator.categorizationAnalyzer}
           />
