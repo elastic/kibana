@@ -101,9 +101,6 @@ export const LICENSE_OVERRIDES = {
   // TODO can be removed if the PR#9 is accepted on the source
   'pause-stream@0.0.11': ['MIT'],
 
-  // TODO can be removed once we upgrade past or equal pdf-image@2.0.1
-  'pdf-image@1.1.0': ['MIT'],
-
   // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
   'walk@2.3.9': ['MIT'],
 };

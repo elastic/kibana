@@ -1398,13 +1398,14 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@elastic/ems-client@1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-1.0.5.tgz#e2c10816c5eebdf128590170d8f09fcc693db50b"
-  integrity sha512-J+jDjtpHfGnbsgdhuA1zp/JoZftCpx6/h/4bP5ik+2Ysa30sAHIpHs0D3921R75O9WDNs6SHVnV/oqdJKL/HCg==
+"@elastic/ems-client@7.6.0":
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.6.0.tgz#ca548aba1a1f5170a1892de129b537b5248c74be"
+  integrity sha512-oBtLH24qIgTaMhlSske49FTd35Y0nv+PlZCZaHkBhOH+ScsTDL3LO2lbIcSmcYQod43Ly34v/xwJvFCTxojVEQ==
   dependencies:
     lodash "^4.17.15"
     node-fetch "^1.7.3"
+    semver "^6.3.0"
 
 "@elastic/eslint-plugin-eui@0.0.2":
   version "0.0.2"
@@ -1433,10 +1434,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@18.0.0":
-  version "18.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.0.0.tgz#b65607c87be63f9455630cab1ab2a365acd2a805"
-  integrity sha512-wFI6HwEmwnmctRiP5S3ScjJSqER+xmh7/3ur5BvPRYSaXm5vGJnj0bwqQD1GZ9jgfrrc7qy7f4ff3zbmuTBs3Q==
+"@elastic/eui@18.2.0":
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.2.0.tgz#db9c2af87b2bdd0af7a39802d31507139b543482"
+  integrity sha512-wZXFBzETsaMTw6VuqFu168NKiwXMI5MVT7SdTIRufCBrT6uhUpbx43ZiDCcg372RHXosunQaiD5eVm3aodO+Jg==
   dependencies:
     "@types/chroma-js" "^1.4.3"
     "@types/lodash" "^4.14.116"
@@ -2203,6 +2204,11 @@
     hat "0.0.3"
     lodash.isequal "^4.2.0"
     xtend "^4.0.1"
+
+"@mapbox/mapbox-gl-rtl-text@0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@mapbox/mapbox-gl-rtl-text/-/mapbox-gl-rtl-text-0.2.3.tgz#a26ecfb3f0061456d93ee8570dd9587d226ea8bd"
+  integrity sha512-RaCYfnxULUUUxNwcUimV9C/o2295ktTyLEUzD/+VWkqXqvaVfFcZ5slytGzb2Sd/Jj4MlbxD0DCZbfa6CzcmMw==
 
 "@mapbox/mapbox-gl-supported@^1.4.0":
   version "1.4.0"
@@ -4074,6 +4080,16 @@
   integrity sha512-sD/QEn45h+CH0OAhCn6/9COlihZ94bzpP58QzYYCL3tOFta/WBhuvMoyLP8khJLfwQBx1PT70HP/1GnDws9YXQ==
   dependencies:
     "@types/react" "*"
+    redux "^4.0.0"
+
+"@types/react-redux@^7.1.0":
+  version "7.1.5"
+  resolved "https://registry.yarnpkg.com/@types/react-redux/-/react-redux-7.1.5.tgz#c7a528d538969250347aa53c52241051cf886bd3"
+  integrity sha512-ZoNGQMDxh5ENY7PzU7MVonxDzS1l/EWiy8nUhDqxFqUZn4ovboCyvk4Djf68x6COb7vhGTKjyjxHxtFdAA5sUA==
+  dependencies:
+    "@types/hoist-non-react-statics" "^3.3.0"
+    "@types/react" "*"
+    hoist-non-react-statics "^3.3.0"
     redux "^4.0.0"
 
 "@types/react-resize-detector@^4.0.1":
@@ -11293,7 +11309,7 @@ es6-promise-pool@^2.5.0:
   resolved "https://registry.yarnpkg.com/es6-promise-pool/-/es6-promise-pool-2.5.0.tgz#147c612b36b47f105027f9d2bf54a598a99d9ccb"
   integrity sha1-FHxhKza0fxBQJ/nSv1SlmKmdnMs=
 
-es6-promise@^4.0.3, es6-promise@~4.2.4:
+es6-promise@^4.0.3:
   version "4.2.4"
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.4.tgz#dc4221c2b16518760bd8c39a52d8f356fc00ed29"
   integrity sha512-/NdNZVJg+uZgtm9eS3O6lrOLYmQag2DjdEXuPaHlZ6RuVqgqaVZfgYCepEIKsLqwdQArOPtC3XzRLqGGfT8KQQ==
@@ -20183,11 +20199,6 @@ node-dir@^0.1.10:
   dependencies:
     minimatch "^3.0.2"
 
-node-ensure@^0.0.0:
-  version "0.0.0"
-  resolved "https://registry.yarnpkg.com/node-ensure/-/node-ensure-0.0.0.tgz#ecae764150de99861ec5c810fd5d096b183932a7"
-  integrity sha1-7K52QVDemYYexcgQ/V0Jaxg5Mqc=
-
 node-environment-flags@1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/node-environment-flags/-/node-environment-flags-1.0.5.tgz#fa930275f5bf5dae188d6192b24b4c8bbac3d76a"
@@ -21784,21 +21795,6 @@ pbkdf2@^3.0.3:
     ripemd160 "^2.0.1"
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
-
-pdf-image@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/pdf-image/-/pdf-image-2.0.0.tgz#f134296876c3d5aacb6bb5805ad15d0a46775fd5"
-  integrity sha512-RyB8f/Khw8wZt2xXGWtQu/5ZyKl4pzNSi9/dnYNJOuGnxRiZvmUVmz6xmG6Xts53k8ZZaOBjDwoT4jjAVzIoPQ==
-  dependencies:
-    es6-promise "~4.2.4"
-
-pdfjs-dist@^2.0.943:
-  version "2.0.943"
-  resolved "https://registry.yarnpkg.com/pdfjs-dist/-/pdfjs-dist-2.0.943.tgz#32fb9a2d863df5a1d89521a0b3cd900c16e7edde"
-  integrity sha512-iLhNcm4XceTHRaSU5o22ZGCm4YpuW5+rf4+BJFH/feBhMQLbCGBry+Jet8Q419QDI4qgARaIQzXuiNrsNWS8Yw==
-  dependencies:
-    node-ensure "^0.0.0"
-    worker-loader "^2.0.0"
 
 pdfkit@>=0.8.1, pdfkit@^0.11.0:
   version "0.11.0"
@@ -23693,6 +23689,13 @@ react-textarea-autosize@^7.1.0:
     "@babel/runtime" "^7.1.2"
     prop-types "^15.6.0"
 
+react-tiny-virtual-list@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-tiny-virtual-list/-/react-tiny-virtual-list-2.2.0.tgz#eafb6fcf764e4ed41150ff9752cdaad8b35edf4a"
+  integrity sha512-MDiy2xyqfvkWrRiQNdHFdm36lfxmcLLKuYnUqcf9xIubML85cmYCgzBJrDsLNZ3uJQ5LEHH9BnxGKKSm8+C0Bw==
+  dependencies:
+    prop-types "^15.5.7"
+
 react-transition-group@^2.2.1:
   version "2.7.1"
   resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-2.7.1.tgz#1fe6d54e811e8f9dfd329aa836b39d9cd16587cb"
@@ -25333,7 +25336,7 @@ schema-utils@^0.3.0:
   dependencies:
     ajv "^5.0.0"
 
-schema-utils@^0.4.0, schema-utils@^0.4.5:
+schema-utils@^0.4.5:
   version "0.4.7"
   resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-0.4.7.tgz#ba74f597d2be2ea880131746ee17d0a093c68187"
   integrity sha512-v/iwU6wvwGK8HbU9yi3/nhGzP0yGSuhQMzL6ySiec1FSrZZDkhm4noOSWzrNFo/jEc+SJY6jRTwuwbSXJPDUnQ==
@@ -30370,14 +30373,6 @@ worker-farm@^1.7.0:
   integrity sha512-rvw3QTZc8lAxyVrqcSGVm5yP/IJ2UcB3U0graE3LCFoZ0Yn2x4EoVSqJKdB/T5M+FLcRPjz4TDacRf3OCfNUzw==
   dependencies:
     errno "~0.1.7"
-
-worker-loader@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/worker-loader/-/worker-loader-2.0.0.tgz#45fda3ef76aca815771a89107399ee4119b430ac"
-  integrity sha512-tnvNp4K3KQOpfRnD20m8xltE3eWh89Ye+5oj7wXEEHKac1P4oZ6p9oTj8/8ExqoSBnk9nu5Pr4nKfQ1hn2APJw==
-  dependencies:
-    loader-utils "^1.0.0"
-    schema-utils "^0.4.0"
 
 worker-rpc@^0.1.0:
   version "0.1.1"
