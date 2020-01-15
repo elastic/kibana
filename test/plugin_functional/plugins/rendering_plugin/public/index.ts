@@ -20,4 +20,4 @@
 import { PluginInitializer } from 'kibana/public';
 import { RenderingPlugin } from './plugin';
 
-export const plugin: PluginInitializer = () => new RenderingPlugin();
+export const plugin: PluginInitializer<void, void> = () => new RenderingPlugin();
