@@ -18,15 +18,11 @@
  */
 
 import expect from '@kbn/expect';
-import { getValType } from '../get_val_type';
+import { getValType } from './get_val_type';
 
 describe('Settings', function() {
   describe('Advanced', function() {
     describe('getValType(def, val)', function() {
-      it('should be a function', function() {
-        expect(getValType).to.be.a(Function);
-      });
-
       it('should return the explicitly defined type of a setting', function() {
         expect(getValType({ type: 'string' })).to.be('string');
         expect(getValType({ type: 'json' })).to.be('json');

@@ -54,6 +54,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Setting } from '../../types';
+import { StringValidation, ImageValidation } from '../../types';
 // import { UiSettingsParams } from '../../../../../../../../../core/server/ui_settings';
 
 import { isDefaultValue } from '../../lib';
@@ -211,9 +212,9 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     let isInvalid = false;
     let error = null;
 
-    if (validation && validation.regex) {
-      if (!validation.regex.test(newUnsavedValue.toString())) {
-        error = validation.message;
+    if (validation && (validation as StringValidation).regex) {
+      if (!(validation as StringValidation).regex.test(newUnsavedValue.toString())) {
+        error = (validation as StringValidation).message;
         isInvalid = true;
       }
     }
@@ -250,7 +251,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
 
     const file = files[0];
-    const { maxSize } = this.props.setting.validation;
+    const { maxSize } = this.props.setting.validation as ImageValidation;
     try {
       let base64Image = '';
       if (file instanceof File) {
@@ -607,7 +608,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
             <EuiBadge
               color="warning"
               onClick={() => {
-                window.open(links.management[setting.deprecation.docLinksKey], '_blank');
+                window.open(links.management[setting.deprecation!.docLinksKey], '_blank');
               }}
               onClickAriaLabel={i18n.translate(
                 'kbn.management.settings.field.deprecationClickAreaLabel',

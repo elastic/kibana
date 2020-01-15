@@ -20,17 +20,24 @@
 import { UiSettingsType } from '../../../../../../../core/server/ui_settings';
 import { SavedObjectAttribute } from '../../../../../../../core/server/saved_objects/types';
 
-interface Validation {
+export interface StringValidation {
   regex: RegExp;
   message: string;
+}
+
+export interface ImageValidation {
+  maxSize: {
+    length: number;
+    description: string;
+  };
 }
 export interface Setting {
   displayName: string;
   name: string;
   value: SavedObjectAttribute;
   description: string;
-  options: string[]; // array of stringa,
-  optionLabels: Record<string, string>;
+  options?: string[]; // array of stringa,
+  optionLabels?: Record<string, string>;
   requiresPageReload: boolean;
   type: UiSettingsType;
   category: string[];
@@ -39,8 +46,10 @@ export interface Setting {
   isOverridden: boolean;
   defVal: SavedObjectAttribute;
   isCustom: boolean;
-  validation: Validation;
-  /*
-      readOnly
-  */
+  validation?: StringValidation | ImageValidation;
+  readOnly: boolean;
+  deprecation?: {
+    message: string;
+    docLinksKey: string;
+  };
 }

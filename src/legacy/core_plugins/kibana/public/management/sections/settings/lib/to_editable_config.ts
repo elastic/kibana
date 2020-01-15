@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { UiSettingsParams, UserProvidedValues, StringValidation } from 'src/core/server/types';
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
 import { DEFAULT_CATEGORY } from './default_category';
-import { Setting } from '../types';
+// import { SavedObjectAttribute } from '../../../../core/server/saved_objects/types';
+import { SavedObjectAttribute } from '../../../../../../../../core/server/saved_objects/types';
 
 /**
  * @param {object} advanced setting definition object
@@ -28,7 +30,20 @@ import { Setting } from '../types';
  * @param {object} current value of setting
  * @returns {object} the editable config object
  */
-export function toEditableConfig({ def, name, value, isCustom, isOverridden }: Setting) {
+export function toEditableConfig({
+  def,
+  name,
+  value,
+  isCustom,
+  isOverridden,
+}: {
+  def: UiSettingsParams & UserProvidedValues<any>;
+  name: string;
+  // value: UserProvidedValues<any>;
+  value: SavedObjectAttribute;
+  isCustom: boolean;
+  isOverridden: boolean;
+}) {
   if (!def) {
     def = {};
   }
@@ -46,10 +61,10 @@ export function toEditableConfig({ def, name, value, isCustom, isOverridden }: S
     description: def.description,
     deprecation: def.deprecation,
     validation:
-      def.validation && def.validation.regexString
+      def.validation && (def.validation as StringValidation).regexString
         ? {
-            regex: new RegExp(def.validation.regexString),
-            message: def.validation.message,
+            regex: new RegExp((def.validation as StringValidation).regexString),
+            message: (def.validation as StringValidation).message,
           }
         : def.validation,
     options: def.options,

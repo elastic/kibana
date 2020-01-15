@@ -19,7 +19,7 @@
 
 import { FunctionComponent } from 'react';
 
-const registry: { [key: string]: any } = {};
+const registry: { [key: string]: FunctionComponent } = {};
 type Id = string;
 
 /**
@@ -59,9 +59,7 @@ export function registerSettingsComponent(
 
   // Setting a display name if one does not already exist.
   // This enhances the snapshots, as well as the debugging experience.
-  // @ts-ignore
   if (!component.displayName) {
-    // @ts-ignore
     component.displayName = id;
   }
 

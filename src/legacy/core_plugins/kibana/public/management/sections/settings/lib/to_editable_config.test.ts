@@ -17,8 +17,25 @@
  * under the License.
  */
 
+import { UiSettingsParams, UserProvidedValues, StringValidation } from 'src/core/server/types';
 import expect from '@kbn/expect';
-import { toEditableConfig } from '../to_editable_config';
+import { toEditableConfig } from './to_editable_config';
+
+const defDefault = {
+  isOverridden: true,
+};
+
+function invoke({
+  def = defDefault,
+  name = 'woah',
+  value = 'forreal',
+}: {
+  def?: UiSettingsParams & UserProvidedValues; // todo
+  name?: string;
+  value?: any;
+}) {
+  return toEditableConfig({ def, name, value, isCustom: def === false, isOverridden: true });
+}
 
 describe('Settings', function() {
   describe('Advanced', function() {
@@ -38,12 +55,12 @@ describe('Settings', function() {
       });
 
       describe('when given a setting definition object', function() {
-        let def;
+        let def: UiSettingsParams & UserProvidedValues;
         beforeEach(function() {
           def = {
             value: 'the original',
             description: 'the one and only',
-            options: 'all the options',
+            options: ['all the options'],
           };
         });
 
@@ -65,7 +82,7 @@ describe('Settings', function() {
 
         describe('that contains a type', function() {
           it('sets that type', function() {
-            def.type = 'something';
+            def.type = 'string';
             expect(invoke({ def }).type).to.equal(def.type);
           });
         });
@@ -84,37 +101,35 @@ describe('Settings', function() {
               message: 'must start with "foo"',
             };
             const result = invoke({ def });
-            expect(result.validation.regex).to.be.a(RegExp);
-            expect(result.validation.message).to.equal('must start with "foo"');
+            expect((result.validation as StringValidation).regexString).to.be.a(RegExp);
+            expect((result.validation as StringValidation).message).to.equal(
+              'must start with "foo"'
+            );
           });
         });
       });
 
       describe('when not given a setting definition object', function() {
         it('is marked as custom', function() {
-          expect(invoke().isCustom).to.be(true);
+          expect(invoke({}).isCustom).to.be(true);
         });
 
         it('sets defVal to undefined', function() {
-          expect(invoke().defVal).to.be(undefined);
+          expect(invoke({}).defVal).to.be(undefined);
         });
 
         it('sets description to undefined', function() {
-          expect(invoke().description).to.be(undefined);
+          expect(invoke({}).description).to.be(undefined);
         });
 
         it('sets options to undefined', function() {
-          expect(invoke().options).to.be(undefined);
+          expect(invoke({}).options).to.be(undefined);
         });
 
         it('sets validation to undefined', function() {
-          expect(invoke().validation).to.be(undefined);
+          expect(invoke({}).validation).to.be(undefined);
         });
       });
     });
   });
 });
-
-function invoke({ def = false, name = 'woah', value = 'forreal' } = {}) {
-  return toEditableConfig({ def, name, value, isCustom: def === false });
-}

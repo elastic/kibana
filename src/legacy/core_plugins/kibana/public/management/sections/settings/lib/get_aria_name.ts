@@ -26,8 +26,8 @@ import { words } from 'lodash';
  *
  * Example: 'xPack:fooBar:foo_bar_baz' -> 'x pack foo bar foo bar baz'
  */
-export function getAriaName(name: string) {
-  return words(name)
+export function getAriaName(name?: string | null) {
+  return words(name || '')
     .map(word => word.toLowerCase())
     .join(' ');
 }

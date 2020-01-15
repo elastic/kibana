@@ -24,7 +24,7 @@
  */
 
 // todo
-export function getValType(def: any, value: any): string {
+export function getValType(def: any, value?: any): string {
   if (def.type) {
     return def.type;
   }

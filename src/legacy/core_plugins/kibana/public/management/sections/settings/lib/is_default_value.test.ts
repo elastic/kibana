@@ -18,7 +18,8 @@
  */
 
 import expect from '@kbn/expect';
-import { isDefaultValue } from '../is_default_value';
+import { isDefaultValue } from './is_default_value';
+import { UiSettingsType } from '../../../../../../../../core/server/types';
 
 describe('Settings', function() {
   describe('Advanced', function() {
@@ -32,6 +33,18 @@ describe('Settings', function() {
           isCustom: false,
           value: 'value',
           defVal: 'defaultValue',
+          displayName: 'displayName',
+          name: 'name',
+          ariaName: 'ariaName',
+          description: 'description',
+          requiresPageReload: false,
+          type: 'string' as UiSettingsType,
+          isOverridden: false,
+          readOnly: false,
+          options: [],
+          optionLabels: { option: 'label' },
+          category: ['category'],
+          validation: { regex: /regexString/, message: 'validation description' },
         };
 
         describe('that is custom', function() {

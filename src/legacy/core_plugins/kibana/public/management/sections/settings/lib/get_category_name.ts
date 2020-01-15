@@ -51,6 +51,6 @@ const names: { [key: string]: string } = {
   }),
 };
 
-export function getCategoryName(category: string) {
+export function getCategoryName(category?: string) {
   return category ? names[category] || upperFirst(category) : '';
 }

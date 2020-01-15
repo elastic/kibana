@@ -19,48 +19,44 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { UiSettingsType } from '../../../../../../../../../core/server/ui_settings';
 
 import { AdvancedSettingsVoiceAnnouncement } from './advanced_settings_voice_announcement';
 
 const settingPartial = {
   name: 'name',
   isOverridden: false,
-  type: 'string',
+  type: 'string' as UiSettingsType,
   value: 'value',
-
   defVal: 'defVal',
   optionLabels: { label: 'label' },
   description: 'description',
   displayName: 'displayName',
   isCustom: false,
   requiresPageReload: false,
-  options: {
-    maxSize: [1, 2, 3],
-  },
+  options: [],
   validation: { regex: /a/, message: 'message' },
+  category: ['category'],
+  readOnly: false,
 };
 
 const testProps = {
   nothing: {
     query: '',
     filteredSettings: [
-      [
-        {
-          ariaName: 'General',
-          ...settingPartial,
-        },
-      ],
+      {
+        ariaName: 'General',
+        ...settingPartial,
+      },
     ],
   },
   searchResult: {
     query: 'dark theme',
     filteredSettings: [
-      [
-        {
-          ariaName: 'General',
-          ...settingPartial,
-        },
-      ],
+      {
+        ariaName: 'General',
+        ...settingPartial,
+      },
     ],
   },
 };
@@ -70,7 +66,7 @@ describe('Advanced Settings: Voice Announcement', () => {
     const { query, filteredSettings } = testProps.nothing;
 
     const component = shallow(
-      <AdvancedSettingsVoiceAnnouncement queryText={query} settings={filteredSettings} />
+      <AdvancedSettingsVoiceAnnouncement queryText={query} settings={{ filteredSettings }} />
     );
 
     expect(component).toMatchSnapshot();
@@ -80,7 +76,7 @@ describe('Advanced Settings: Voice Announcement', () => {
     const { query, filteredSettings } = testProps.searchResult;
 
     const component = shallow(
-      <AdvancedSettingsVoiceAnnouncement queryText={query} settings={filteredSettings} />
+      <AdvancedSettingsVoiceAnnouncement queryText={query} settings={{ filteredSettings }} />
     );
 
     expect(component).toMatchSnapshot();

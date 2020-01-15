@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { UiSettingsType } from '../../../../../../../../../core/server/types';
 
 import { Form } from './form';
 
@@ -28,6 +29,17 @@ jest.mock('../field', () => ({
   },
 }));
 
+const defaults = {
+  requiresPageReload: false,
+  readOnly: false,
+  value: 'value',
+  description: 'description',
+  isOverridden: false,
+  type: 'string' as UiSettingsType,
+  isCustom: false,
+  defVal: 'defVal',
+};
+
 const settings = {
   dashboard: [
     {
@@ -35,6 +47,7 @@ const settings = {
       ariaName: 'dashboard test setting',
       displayName: 'Dashboard test setting',
       category: ['dashboard'],
+      ...defaults,
     },
   ],
   general: [
@@ -44,6 +57,7 @@ const settings = {
       displayName: 'Test date',
       description: 'bar',
       category: ['general'],
+      ...defaults,
     },
     {
       name: 'setting:test',
@@ -51,6 +65,7 @@ const settings = {
       displayName: 'Test setting',
       description: 'foo',
       category: ['general'],
+      ...defaults,
     },
   ],
   'x-pack': [
@@ -60,6 +75,7 @@ const settings = {
       displayName: 'X-Pack test setting',
       category: ['x-pack'],
       description: 'bar',
+      ...defaults,
     },
   ],
 };
@@ -69,8 +85,8 @@ const categoryCounts = {
   dashboard: 1,
   'x-pack': 10,
 };
-const save = () => {};
-const clear = () => {};
+const save = (key: string, value: any) => Promise.resolve();
+const clear = (key: string) => Promise.resolve();
 const clearQuery = () => {};
 
 describe('Form', () => {
