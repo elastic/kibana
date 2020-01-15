@@ -37,9 +37,9 @@ import {
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
-  ExistsBoolClause,
-  TermBoolClause,
-  RangeBoolClause,
+  ExistsFilter,
+  TermFilter,
+  RangeFilter,
   asPinnedQuery,
   mergeBoolClauses,
 } from './queries/query_clauses';
@@ -52,7 +52,7 @@ import {
   TaskWithSchedule,
   taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
-  claimedTasks,
+  tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
 
 export interface StoreOpts {
@@ -246,7 +246,7 @@ export class TaskStore {
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
       // Either task has a schedule or the attempts < the maximum configured
-      shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
+      shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
         TaskWithSchedule,
         ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
           taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
@@ -291,7 +291,7 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<ConcreteTaskInstance[]> {
-    const claimedTasksQuery = claimedTasks(this.taskManagerId);
+    const claimedTasksQuery = tasksClaimedByOwner(this.taskManagerId);
     const { docs } = await this.search({
       query:
         claimTasksById && claimTasksById.length

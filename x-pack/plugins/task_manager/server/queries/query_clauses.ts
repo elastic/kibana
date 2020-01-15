@@ -5,38 +5,149 @@
  */
 import { merge, isArray } from 'lodash';
 
-export interface TermBoolClause {
+/**
+ * Terminology
+ * ===========
+ * The terms for the differenct clauses in an Elasticsearch query can be confusing, here are some
+ * clarifications that might help you understand the Typescript types we use here.
+ *
+ * Given the following Query:
+ * {
+ *   "query": { (1)
+ *      "bool": { (2)
+ *        "must":
+ *          [
+ * (3)        { "term" : { "tag" : "wow" } },
+ *            { "term" : { "tag" : "elasticsearch" } },
+ *            {
+ *              "must" : { "term" : { "user" : "kimchy" } }
+ *            }
+ *          ]
+ *       }
+ *    }
+ * }
+ *
+ * These are referred to as:
+ *  (1). BoolClause / BoolClauseWithAnyCondition
+ *  (2). BoolCondition / AnyBoolCondition
+ *  (3). BoolClauseFilter
+ *
+ */
+
+export interface TermFilter {
   term: { [field: string]: string | string[] };
 }
-export interface RangeBoolClause {
+export interface RangeFilter {
   range: {
     [field: string]: { lte: string | number } | { lt: string | number } | { gt: string | number };
   };
 }
-export interface ExistsBoolClause {
+export interface ExistsFilter {
   exists: { field: string };
 }
 
-type BoolClauseFilters<T> = BoolClause<T> | PinnedQuery<T> | T;
-export interface ShouldClause<T> {
-  should: Array<BoolClauseFilters<T>>;
-}
-export interface MustClause<T> {
-  must: Array<BoolClauseFilters<T>>;
-}
-export interface MustNotClause<T> {
-  must_not: Array<BoolClauseFilters<T>>;
-}
-export interface FilterClause<T> {
-  filter: Array<BoolClauseFilters<T>>;
-}
-export interface BoolClause<T> {
-  bool: MustClause<T> | ShouldClause<T> | MustNotClause<T> | FilterClause<T>;
+type BoolClauseFilter = TermFilter | RangeFilter | ExistsFilter;
+type BoolClauseFiltering<T extends BoolClauseFilter> =
+  | BoolClauseWithAnyCondition<T>
+  | PinnedQuery<T>
+  | T;
+
+enum Conditions {
+  Should = 'should',
+  Must = 'must',
+  MustNot = 'must_not',
+  Filter = 'filter',
 }
 
-export interface BoolClauses<T> {
-  bool: Partial<MustClause<T> & ShouldClause<T> & MustNotClause<T> & FilterClause<T>>;
+/**
+ * Describe a specific BoolClause Condition with a BoolClauseFilter on it, such as:
+ * ```
+ * {
+ *  must : [
+ *    T, ...
+ *  ]
+ * }
+ * ```
+ */
+type BoolCondition<C extends Conditions, T extends BoolClauseFilter> = {
+  [c in C]: Array<BoolClauseFiltering<T>>;
+};
+
+/**
+ * Describe a Bool clause with a specific Condition, such as:
+ * ```
+ * {
+ *  // described by BoolClause
+ *  bool: {
+ *    // described by BoolCondition
+ *    must: [
+ *      T, ...
+ *    ]
+ *  }
+ * }
+ * ```
+ */
+interface BoolClause<C extends Conditions, T extends BoolClauseFilter> {
+  bool: BoolCondition<C, T>;
 }
+
+/**
+ * Describe a Bool clause with mixed Conditions, such as:
+ * ```
+ * {
+ *  // described by BoolClause<...>
+ *  bool: {
+ *    // described by BoolCondition<Conditions.Must, ...>
+ *    must : {
+ *      ...
+ *    },
+ *    // described by BoolCondition<Conditions.Should, ...>
+ *    should : {
+ *      ...
+ *    }
+ *  }
+ * }
+ * ```
+ */
+type AnyBoolCondition<T extends BoolClauseFilter> = {
+  [Condition in Conditions]?: Array<BoolClauseFiltering<T>>;
+};
+
+/**
+ * Describe a Bool Condition with any Condition on it, so it can handle both:
+ * ```
+ * {
+ *  bool: {
+ *    must : {
+ *      ...
+ *    }
+ *  }
+ * }
+ * ```
+ *
+ * and:
+ *
+ * ```
+ * {
+ *  bool: {
+ *    must_not : {
+ *      ...
+ *    }
+ *  }
+ * }
+ * ```
+ */
+export interface BoolClauseWithAnyCondition<T extends BoolClauseFilter> {
+  bool: AnyBoolCondition<T>;
+}
+
+/**
+ * Describe the various Bool Clause Conditions we support, as specified in the Conditions enum
+ */
+export type ShouldCondition<T extends BoolClauseFilter> = BoolClause<Conditions.Should, T>;
+export type MustCondition<T extends BoolClauseFilter> = BoolClause<Conditions.Must, T>;
+export type MustNotCondition<T extends BoolClauseFilter> = BoolClause<Conditions.MustNot, T>;
+export type FilterCondition<T extends BoolClauseFilter> = BoolClause<Conditions.Filter, T>;
 
 export interface SortClause {
   _script: {
@@ -59,26 +170,28 @@ export interface ScriptClause {
   };
 }
 
-export interface UpdateByQuery<T> {
-  query: PinnedQuery<T> | BoolClause<T> | BoolClauses<T>;
+export interface UpdateByQuery<T extends BoolClauseFilter> {
+  query: PinnedQuery<T> | BoolClauseWithAnyCondition<T>;
   sort: SortOptions;
   seq_no_primary_term: true;
   script: ScriptClause;
 }
 
-export interface PinnedQuery<T> {
+export interface PinnedQuery<T extends BoolClauseFilter> {
   pinned: PinnedClause<T>;
 }
 
-export interface PinnedClause<T> {
+export interface PinnedClause<T extends BoolClauseFilter> {
   ids: string[];
-  organic: BoolClause<T>;
+  organic: BoolClauseWithAnyCondition<T>;
 }
 
-export function mergeBoolClauses<T>(...clauses: Array<BoolClause<T>>): BoolClauses<T> {
+export function mergeBoolClauses<T extends BoolClauseFilter>(
+  ...clauses: Array<BoolClauseWithAnyCondition<T>>
+): BoolClauseWithAnyCondition<T> {
   return merge({}, ...clauses, function(
-    existingBoolClause: Array<BoolClauseFilters<T>>,
-    boolClauseOfSameType: Array<BoolClauseFilters<T>>
+    existingBoolClause: Array<BoolClauseFiltering<T>>,
+    boolClauseOfSameType: Array<BoolClauseFiltering<T>>
   ) {
     // If we have two bool clauses of same type (FOR EXAMPLE
     // two `must` clauses, we merge them, into one)
@@ -90,11 +203,9 @@ export function mergeBoolClauses<T>(...clauses: Array<BoolClause<T>>): BoolClaus
   });
 }
 
-export function shouldBeOneOf<T>(
-  ...should: Array<BoolClauseFilters<T>>
-): {
-  bool: ShouldClause<T>;
-} {
+export function shouldBeOneOf<T extends BoolClauseFilter>(
+  ...should: Array<BoolClauseFiltering<T>>
+): ShouldCondition<T> {
   return {
     bool: {
       should,
@@ -102,11 +213,9 @@ export function shouldBeOneOf<T>(
   };
 }
 
-export function mustBeAllOf<T>(
-  ...must: Array<BoolClauseFilters<T>>
-): {
-  bool: MustClause<T>;
-} {
+export function mustBeAllOf<T extends BoolClauseFilter>(
+  ...must: Array<BoolClauseFiltering<T>>
+): MustCondition<T> {
   return {
     bool: {
       must,
@@ -114,11 +223,9 @@ export function mustBeAllOf<T>(
   };
 }
 
-export function filterDownBy<T>(
-  ...filter: Array<BoolClauseFilters<T>>
-): {
-  bool: FilterClause<T>;
-} {
+export function filterDownBy<T extends BoolClauseFilter>(
+  ...filter: Array<BoolClauseFiltering<T>>
+): FilterCondition<T> {
   return {
     bool: {
       filter,
@@ -126,7 +233,7 @@ export function filterDownBy<T>(
   };
 }
 
-export function asPinnedQuery<T>(
+export function asPinnedQuery<T extends BoolClauseFilter>(
   ids: PinnedClause<T>['ids'],
   organic: PinnedClause<T>['organic']
 ): PinnedQuery<T> {
@@ -138,7 +245,7 @@ export function asPinnedQuery<T>(
   };
 }
 
-export function asUpdateByQuery<T>({
+export function asUpdateByQuery<T extends BoolClauseFilter>({
   query,
   update,
   sort,

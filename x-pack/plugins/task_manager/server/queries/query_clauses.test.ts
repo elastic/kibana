@@ -6,28 +6,28 @@
 
 import _ from 'lodash';
 import {
-  BoolClause,
+  MustCondition,
   shouldBeOneOf,
   mustBeAllOf,
-  ExistsBoolClause,
-  TermBoolClause,
-  RangeBoolClause,
+  ExistsFilter,
+  TermFilter,
+  RangeFilter,
   mergeBoolClauses,
 } from './query_clauses';
 
 describe('mergeBoolClauses', () => {
   test('merges multiple types of Bool Clauses into one', () => {
-    const TaskWithSchedule: ExistsBoolClause = {
+    const TaskWithSchedule: ExistsFilter = {
       exists: { field: 'task.schedule' },
     };
 
-    const IdleTaskWithExpiredRunAt: BoolClause<TermBoolClause | RangeBoolClause> = {
+    const IdleTaskWithExpiredRunAt: MustCondition<TermFilter | RangeFilter> = {
       bool: {
         must: [{ term: { 'task.status': 'idle' } }, { range: { 'task.runAt': { lte: 'now' } } }],
       },
     };
 
-    const RunningTask: BoolClause<TermBoolClause> = {
+    const RunningTask: MustCondition<TermFilter> = {
       bool: {
         must: [{ term: { 'task.status': 'running' } }],
       },
@@ -36,7 +36,7 @@ describe('mergeBoolClauses', () => {
     expect(
       mergeBoolClauses(
         mustBeAllOf(TaskWithSchedule),
-        shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
+        shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
           RunningTask,
           IdleTaskWithExpiredRunAt
         )

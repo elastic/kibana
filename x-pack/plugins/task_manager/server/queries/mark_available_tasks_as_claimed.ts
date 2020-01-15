@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  BoolClause,
   SortClause,
   ScriptClause,
-  ExistsBoolClause,
-  TermBoolClause,
-  RangeBoolClause,
+  ExistsFilter,
+  TermFilter,
+  RangeFilter,
   mustBeAllOf,
+  MustCondition,
+  MustNotCondition,
 } from './query_clauses';
 
-export const TaskWithSchedule: ExistsBoolClause = {
+export const TaskWithSchedule: ExistsFilter = {
   exists: { field: 'task.schedule' },
 };
 export function taskWithLessThanMaxAttempts(
   type: string,
   maxAttempts: number
-): BoolClause<TermBoolClause | RangeBoolClause> {
+): MustCondition<TermFilter | RangeFilter> {
   return {
     bool: {
       must: [
@@ -36,7 +37,7 @@ export function taskWithLessThanMaxAttempts(
   };
 }
 
-export function claimedTasks(taskManagerId: string) {
+export function tasksClaimedByOwner(taskManagerId: string) {
   return mustBeAllOf(
     {
       term: {
@@ -47,13 +48,13 @@ export function claimedTasks(taskManagerId: string) {
   );
 }
 
-export const IdleTaskWithExpiredRunAt: BoolClause<TermBoolClause | RangeBoolClause> = {
+export const IdleTaskWithExpiredRunAt: MustCondition<TermFilter | RangeFilter> = {
   bool: {
     must: [{ term: { 'task.status': 'idle' } }, { range: { 'task.runAt': { lte: 'now' } } }],
   },
 };
 
-export const InactiveTasks: BoolClause<TermBoolClause | RangeBoolClause> = {
+export const InactiveTasks: MustNotCondition<TermFilter | RangeFilter> = {
   bool: {
     must_not: [
       {
@@ -66,9 +67,7 @@ export const InactiveTasks: BoolClause<TermBoolClause | RangeBoolClause> = {
   },
 };
 
-export const RunningOrClaimingTaskWithExpiredRetryAt: BoolClause<
-  TermBoolClause | RangeBoolClause
-> = {
+export const RunningOrClaimingTaskWithExpiredRetryAt: MustCondition<TermFilter | RangeFilter> = {
   bool: {
     must: [
       {
