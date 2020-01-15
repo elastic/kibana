@@ -1434,10 +1434,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@18.0.0":
-  version "18.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.0.0.tgz#b65607c87be63f9455630cab1ab2a365acd2a805"
-  integrity sha512-wFI6HwEmwnmctRiP5S3ScjJSqER+xmh7/3ur5BvPRYSaXm5vGJnj0bwqQD1GZ9jgfrrc7qy7f4ff3zbmuTBs3Q==
+"@elastic/eui@18.2.0":
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.2.0.tgz#db9c2af87b2bdd0af7a39802d31507139b543482"
+  integrity sha512-wZXFBzETsaMTw6VuqFu168NKiwXMI5MVT7SdTIRufCBrT6uhUpbx43ZiDCcg372RHXosunQaiD5eVm3aodO+Jg==
   dependencies:
     "@types/chroma-js" "^1.4.3"
     "@types/lodash" "^4.14.116"

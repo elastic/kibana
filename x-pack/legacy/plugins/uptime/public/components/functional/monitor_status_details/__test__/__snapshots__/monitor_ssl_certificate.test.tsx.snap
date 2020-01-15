@@ -11,7 +11,8 @@ Array [
   >
     SSL certificate expires 
     <span
-      class="euiBadge euiBadge--iconLeft euiBadge--default"
+      class="euiBadge euiBadge--iconLeft"
+      style="background-color:#d3dae6;color:#000"
     >
       <span
         class="euiBadge__content"
