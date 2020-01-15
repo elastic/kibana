@@ -1,0 +1,38 @@
+{
+  "description": "Suricata Double Encoded Characters in a URI",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Suricata Double Encoded Characters in a URI",
+  "query": "event.module:suricata and event.kind:alert and (suricata.eve.alert.signature_id: (2610090 or 2610092 or 2610093 or 2610094 or 2610095) or rule.id: (2610090 or 2610092 or 2610093 or 2610094 or 2610095))",
+  "references": [
+    "https://github.com/travisbgreen/hunting-rules/blob/master/hunting.rules",
+    "This group of signatures detects double encoding of characters in an HTTP request. This is not something you should see on a typical network and could indicate an attempt to exploit the web application or bypass detections."
+  ],
+  "risk_score": 25,
+  "rule_id": "8aedfe6f-9219-463b-808b-91e7ea8ea5e8",
+  "severity": "low",
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "initial access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "techniques": [
+        {
+          "id": "T1190",
+          "name": "exploit public-facing application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

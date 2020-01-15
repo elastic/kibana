@@ -22,7 +22,6 @@ import {
   AlertType,
   IntervalSchedule,
 } from './types';
-import { TaskManagerStartContract } from './shim';
 import { validateAlertTypeParams } from './lib';
 import {
   InvalidateAPIKeyParams,
@@ -30,6 +29,7 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../../plugins/security/server';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
+import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =

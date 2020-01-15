@@ -213,12 +213,16 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return links.length;
     }
 
+    async isSetViewPopoverOpen() {
+      return await testSubjects.exists('mapSetViewForm', { timeout: 500 });
+    }
+
     async openSetViewPopover() {
-      const isOpen = await testSubjects.exists('mapSetViewForm');
+      const isOpen = await this.isSetViewPopoverOpen();
       if (!isOpen) {
         await retry.try(async () => {
           await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          const isOpenAfterClick = await this.isSetViewPopoverOpen();
           if (!isOpenAfterClick) {
             throw new Error('set view popover not opened');
           }
@@ -227,11 +231,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async closeSetViewPopover() {
-      const isOpen = await testSubjects.exists('mapSetViewForm');
+      const isOpen = await this.isSetViewPopoverOpen();
       if (isOpen) {
         await retry.try(async () => {
           await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          const isOpenAfterClick = await this.isSetViewPopoverOpen();
           if (isOpenAfterClick) {
             throw new Error('set view popover not closed');
           }

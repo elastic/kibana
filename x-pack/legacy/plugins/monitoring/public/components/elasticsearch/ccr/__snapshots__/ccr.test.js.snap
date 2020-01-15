@@ -131,6 +131,7 @@ exports[`Ccr that it renders normally 1`] = `
               },
             }
           }
+          tableLayout="fixed"
         />
       </EuiPageContentBody>
     </EuiPageContent>

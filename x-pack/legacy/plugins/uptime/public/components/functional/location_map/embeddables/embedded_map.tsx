@@ -15,7 +15,7 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
 
 import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
-import { UptimeSettingsContext } from '../../../../contexts';
+import { UptimeThemeContext } from '../../../../contexts';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];
@@ -46,7 +46,7 @@ const EmbeddedPanel = styled.div`
 `;
 
 export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
-  const { colors } = useContext(UptimeSettingsContext);
+  const { colors } = useContext(UptimeThemeContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
   const factory = start.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
