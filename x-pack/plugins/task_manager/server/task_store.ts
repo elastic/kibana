@@ -73,10 +73,6 @@ export interface SearchOpts {
   search_after?: any[];
 }
 
-export interface FetchOpts extends SearchOpts {
-  sort?: object[];
-}
-
 export interface UpdateByQuerySearchOpts extends SearchOpts {
   script?: object;
 }
@@ -179,14 +175,16 @@ export class TaskStore {
   }
 
   /**
-   * Fetches a paginatable list of scheduled tasks.
+   * Fetches a list of scheduled tasks with default sorting.
    *
    * @param opts - The query options used to filter tasks
    */
-  public async fetch(opts: FetchOpts = {}): Promise<FetchResult> {
+  public async fetch({ sort = [{ 'task.runAt': 'asc' }], ...opts }: SearchOpts = {}): Promise<
+    FetchResult
+  > {
     return this.search({
-      sort: opts.sort || [{ 'task.runAt': 'asc' }],
-      query: opts.query,
+      ...opts,
+      sort,
     });
   }
 

@@ -6,7 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const DEFAULT_MAX_WORKERS = 100;
+export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 
 export const configSchema = schema.object({

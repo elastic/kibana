@@ -16,7 +16,7 @@ import {
   TaskStatus,
   TaskLifecycleResult,
 } from './task';
-import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
+import { StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
 import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
 import {
   SavedObjectsSerializer,
