@@ -50,7 +50,7 @@ export const variableSet = (): ExpressionFunctionVarSet => ({
       }),
     },
   },
-  async fn(context, args, handlers) {
+  fn(context, args, handlers) {
     const variables: Record<string, any> = handlers.variables;
     variables[args.name] = args.value === undefined ? context : args.value;
     return context;

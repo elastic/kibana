@@ -42,7 +42,7 @@ export const variable = (): ExpressionFunctionVar => ({
       }),
     },
   },
-  async fn(context, args, handlers) {
+  fn(context, args, handlers) {
     const variables: Record<string, any> = handlers.variables;
     return variables[args.name];
   },
