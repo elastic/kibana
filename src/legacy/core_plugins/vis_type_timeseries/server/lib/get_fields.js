@@ -30,7 +30,7 @@ export async function getFields(req) {
 
   const fields = (
     await searchStrategy.getFieldsForWildcard(req, indexPatternString, capabilities)
-  ).filter(field => field.aggregatable && !field.subType?.nested);
+  ).filter(field => field.aggregatable);
 
   return uniq(fields, field => field.name);
 }
