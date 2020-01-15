@@ -30,7 +30,7 @@ export const Description: FC<Props> = memo(({ children, isOptional }) => {
           ) : (
             <FormattedMessage
               id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationField.description"
-              defaultMessage="Specifies which field will be categorized. Using text data types is recommended."
+              defaultMessage="Specifies which field will be categorized. Using text data types is recommended. Categorization works best on machine written log messages, typically logging written by a developer for the purpose of system troubleshooting."
             />
           )}
         </>

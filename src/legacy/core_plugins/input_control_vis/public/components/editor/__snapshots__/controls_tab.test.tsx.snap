@@ -135,11 +135,7 @@ exports[`renders ControlsTab 1`] = `
         >
           <EuiSelect
             aria-label="Select control type"
-            compressed={false}
             data-test-subj="selectControlType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
