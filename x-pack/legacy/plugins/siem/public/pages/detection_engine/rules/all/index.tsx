@@ -85,10 +85,10 @@ export const AllRules = React.memo<{
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => (
       <EuiContextMenuPanel
-        items={getBatchItems(selectedItems, dispatch, dispatchToaster, closePopover)}
+        items={getBatchItems(selectedItems, dispatch, dispatchToaster, history, closePopover)}
       />
     ),
-    [selectedItems, dispatch, dispatchToaster]
+    [selectedItems, dispatch, dispatchToaster, history]
   );
 
   const tableOnChangeCallback = useCallback(

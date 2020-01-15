@@ -228,7 +228,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               <div
                 class="c2"
               >
-                Islamabad
+                Berlin
               </div>
             </div>
           </span>
@@ -243,7 +243,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            5s ago
+            5d ago
           </div>
         </div>
       </span>
@@ -267,7 +267,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
               <div
                 class="c2"
               >
-                Berlin
+                Islamabad
               </div>
             </div>
           </span>
@@ -282,7 +282,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
           <div
             class="euiTextColor euiTextColor--subdued"
           >
-            5d ago
+            5s ago
           </div>
         </div>
       </span>
