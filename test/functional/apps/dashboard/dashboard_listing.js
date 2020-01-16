@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
+  const listingTable = getService('listingTable');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -41,7 +42,8 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.dashboard.saveDashboard(dashboardName);
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+        const countOfDashboards = await listingTable.searchAndGetItemsCount(
+          'dashboard',
           dashboardName
         );
         expect(countOfDashboards).to.equal(1);
@@ -53,7 +55,8 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('is not shown when there are no dashboards shown during a search', async function() {
-        const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+        const countOfDashboards = await listingTable.searchAndGetItemsCount(
+          'dashboard',
           'gobeldeguck'
         );
         expect(countOfDashboards).to.equal(0);
@@ -65,9 +68,9 @@ export default function({ getService, getPageObjects }) {
 
     describe('delete', function() {
       it('default confirm action is cancel', async function() {
-        await PageObjects.dashboard.searchForDashboardWithName(dashboardName);
-        await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
-        await PageObjects.dashboard.clickDeleteSelectedDashboards();
+        await listingTable.searchForItemWithName(dashboardName);
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
 
         await PageObjects.common.expectConfirmModalOpenState(true);
 
@@ -75,19 +78,21 @@ export default function({ getService, getPageObjects }) {
 
         await PageObjects.common.expectConfirmModalOpenState(false);
 
-        const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+        const countOfDashboards = await listingTable.searchAndGetItemsCount(
+          'dashboard',
           dashboardName
         );
         expect(countOfDashboards).to.equal(1);
       });
 
       it('succeeds on confirmation press', async function() {
-        await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
-        await PageObjects.dashboard.clickDeleteSelectedDashboards();
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
 
         await PageObjects.common.clickConfirmOnModal();
 
-        const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+        const countOfDashboards = await listingTable.searchAndGetItemsCount(
+          'dashboard',
           dashboardName
         );
         expect(countOfDashboards).to.equal(0);
@@ -96,44 +101,45 @@ export default function({ getService, getPageObjects }) {
 
     describe('search', function() {
       before(async () => {
-        await PageObjects.dashboard.clearSearchValue();
+        await listingTable.clearSearchFilter();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.saveDashboard('Two Words');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
       it('matches on the first word', async function() {
-        await PageObjects.dashboard.searchForDashboardWithName('Two');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        await listingTable.searchForItemWithName('Two');
+        const countOfDashboards = await listingTable.getItemsCount('dashboard');
         expect(countOfDashboards).to.equal(1);
       });
 
       it('matches the second word', async function() {
-        await PageObjects.dashboard.searchForDashboardWithName('Words');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        await listingTable.searchForItemWithName('Words');
+        const countOfDashboards = await listingTable.getItemsCount('dashboard');
         expect(countOfDashboards).to.equal(1);
       });
 
       it('matches the second word prefix', async function() {
-        await PageObjects.dashboard.searchForDashboardWithName('Wor');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        await listingTable.searchForItemWithName('Wor');
+        const countOfDashboards = await listingTable.getItemsCount('dashboard');
         expect(countOfDashboards).to.equal(1);
       });
 
       it('does not match mid word', async function() {
-        await PageObjects.dashboard.searchForDashboardWithName('ords');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        await listingTable.searchForItemWithName('ords');
+        const countOfDashboards = await listingTable.getItemsCount('dashboard');
         expect(countOfDashboards).to.equal(0);
       });
 
       it('is case insensitive', async function() {
-        await PageObjects.dashboard.searchForDashboardWithName('two words');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        await listingTable.searchForItemWithName('two words');
+        const countOfDashboards = await listingTable.getItemsCount('dashboard');
         expect(countOfDashboards).to.equal(1);
       });
 
       it('is using AND operator', async function() {
-        await PageObjects.dashboard.searchForDashboardWithName('three words');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        await listingTable.searchForItemWithName('three words');
+        const countOfDashboards = await listingTable.getItemsCount('dashboard');
         expect(countOfDashboards).to.equal(0);
       });
     });
@@ -176,7 +182,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('preloads search filter bar when there is no match', async function() {
-        const searchFilter = await PageObjects.dashboard.getSearchFilterValue();
+        const searchFilter = await listingTable.getSearchFilterValue();
         expect(searchFilter).to.equal('"nodashboardsnamedme"');
       });
 
@@ -196,7 +202,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('preloads search filter bar when there is more than one match', async function() {
-        const searchFilter = await PageObjects.dashboard.getSearchFilterValue();
+        const searchFilter = await listingTable.getSearchFilterValue();
         expect(searchFilter).to.equal('"two words"');
       });
 

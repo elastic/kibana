@@ -7,10 +7,10 @@
 
 By default, the Monitoring application is enabled, but data collection
 is disabled.  When you first start {kib} monitoring, you are prompted to
-enable data collection. If you are using {security}, you must be 
+enable data collection. If you are using {security}, you must be
 signed in as a user with the `cluster:manage` privilege to enable
 data collection. The built-in `superuser` role has this privilege and the
-built-in `elastic` user has this role. 
+built-in `elastic` user has this role.
 
 You can adjust how monitoring data is
 collected from {kib} and displayed in {kib} by configuring settings in the
@@ -134,3 +134,11 @@ For {es} clusters that are running in containers, this setting changes the
 statistics. It also adds the calculated Cgroup CPU utilization to the
 *Node Overview* page instead of the overall operating system's CPU
 utilization. Defaults to `false`.
+
+`xpack.monitoring.ui.container.logstash.enabled`::
+
+For {ls} nodes that are running in containers, this setting
+changes the {ls} *Node Listing* to display the CPU utilization
+based on the reported Cgroup statistics. It also adds the
+calculated Cgroup CPU utilization to the {ls} node detail
+pages instead of the overall operating system’s CPU utilization. Defaults to `false`.

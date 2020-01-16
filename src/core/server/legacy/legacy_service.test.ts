@@ -424,7 +424,7 @@ describe('#discoverPlugins()', () => {
 
     await legacyService.discoverPlugins();
     expect(findLegacyPluginSpecs).toHaveBeenCalledTimes(1);
-    expect(findLegacyPluginSpecs).toHaveBeenCalledWith(expect.any(Object), logger);
+    expect(findLegacyPluginSpecs).toHaveBeenCalledWith(expect.any(Object), logger, env.packageInfo);
   });
 
   it(`register legacy plugin's deprecation providers`, async () => {
