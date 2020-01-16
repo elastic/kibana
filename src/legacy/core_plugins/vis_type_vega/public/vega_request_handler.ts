@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getSearchService } from 'src/plugins/data/public/services';
+import { getSearchService } from '../../../../plugins/data/public/services';
 import { esFilters, esQuery, TimeRange, Query } from '../../../../plugins/data/public';
 
 // @ts-ignore

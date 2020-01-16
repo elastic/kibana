@@ -48,9 +48,6 @@ import { getEsClient, LegacyApiCaller } from './es_client';
 declare module 'kibana/public' {
   interface AppMountContext {
     search?: ISearchAppMountContext;
-    __LEGACY: {
-      esClient: LegacyApiCaller;
-    };
   }
 }
 
