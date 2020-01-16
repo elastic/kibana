@@ -30,20 +30,23 @@ export const SubFeatureForm = (props: Props) => {
     </EuiFlexGroup>
   );
 
-  function renderPrivilegeGroup(privilegeGroup: FeatureKibanaPrivilegesGroup) {
+  function renderPrivilegeGroup(privilegeGroup: FeatureKibanaPrivilegesGroup, index: number) {
     switch (privilegeGroup.groupType) {
       case 'independent':
-        return renderIndependentPrivilegeGroup(privilegeGroup);
+        return renderIndependentPrivilegeGroup(privilegeGroup, index);
       case 'mutually_exclusive':
-        return renderMutuallyExclusivePrivilegeGroup(privilegeGroup);
+        return renderMutuallyExclusivePrivilegeGroup(privilegeGroup, index);
       default:
         throw new Error(`Unsupported privilege group type: ${privilegeGroup.groupType}`);
     }
   }
 
-  function renderIndependentPrivilegeGroup(privilegeGroup: FeatureKibanaPrivilegesGroup) {
+  function renderIndependentPrivilegeGroup(
+    privilegeGroup: FeatureKibanaPrivilegesGroup,
+    index: number
+  ) {
     return (
-      <div>
+      <div key={index}>
         {privilegeGroup.privileges.map(privilege => {
           const isSelected = props.privilegeExplanations.isGranted(props.featureId, privilege.id);
           const isInherited = props.privilegeExplanations.isInherited(
@@ -72,7 +75,10 @@ export const SubFeatureForm = (props: Props) => {
       </div>
     );
   }
-  function renderMutuallyExclusivePrivilegeGroup(privilegeGroup: FeatureKibanaPrivilegesGroup) {
+  function renderMutuallyExclusivePrivilegeGroup(
+    privilegeGroup: FeatureKibanaPrivilegesGroup,
+    index: number
+  ) {
     const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
       props.privilegeExplanations.isGranted(props.featureId, p.id)
     );
@@ -90,15 +96,17 @@ export const SubFeatureForm = (props: Props) => {
       {
         id: NO_PRIVILEGE_VALUE,
         label: 'None',
+        isDisabled: isInherited,
       },
     ].flat();
 
     return (
       <EuiButtonGroup
+        key={index}
         buttonSize="compressed"
         options={options}
         idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
-        isDisabled={props.disabled || isInherited}
+        isDisabled={props.disabled}
         onChange={selectedPrivilegeId => {
           // Deselect all privileges which belong to this mutually-exclusive group
           const privilegesWithoutGroupEntries = props.selectedPrivileges.filter(

@@ -7,8 +7,8 @@
 import { EuiComboBox, EuiComboBoxOptionProps, EuiHealth, EuiHighlight } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
+import { getSpaceColor } from 'plugins/spaces/space_avatar';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { getSpaceColor } from '../../../../../../../../../spaces/public/lib/space_attributes';
 
 const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {
   if (!space) {

@@ -15,7 +15,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
-import { getSpaceColor } from '../../../../../../../../../spaces/public/lib/space_attributes';
+import { getSpaceColor } from 'plugins/spaces/space_avatar';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import {
   FeaturesPrivileges,
