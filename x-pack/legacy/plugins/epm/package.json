@@ -5,7 +5,7 @@
     "private": true,
     "license": "Elastic-License",
     "dependencies": {
-      "@elastic/package-registry": "ssh://git@github.com:jfsiii/package-registry.git#ts-types",
+      "@elastic/package-registry": "jfsiii/package-registry.git#ts-types",
       "react-markdown": "^4.2.2"
     }
   }
