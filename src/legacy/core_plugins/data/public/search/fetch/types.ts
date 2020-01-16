@@ -36,11 +36,6 @@ export interface FetchOptions {
 }
 
 export interface FetchHandlers {
-  /*
-   * Old ApiCaller for msearch
-   * @deprecated
-   */
-  es: ApiCaller;
   searchService: ISearchStart;
   config: IUiSettingsClient;
   esShardTimeout: number;

@@ -213,7 +213,7 @@ export class SearchSource {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
-      { searchService, config, esShardTimeout, es: searchService.__LEGACY.esClient }
+      { searchService, config, esShardTimeout }
     );
 
     if (response.error) {

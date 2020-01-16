@@ -39,7 +39,13 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
 };
 
 // @deprecated
-function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
+function msearch({
+  searchRequests,
+  searchService,
+  config,
+  esShardTimeout,
+}: SearchStrategySearchParams) {
+  const es = searchService.__LEGACY.esClient;
   const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
     const inlineHeader = {
       index: index.title || index,
@@ -65,13 +71,19 @@ function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategyS
   };
 }
 
-function search({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
+function search({
+  searchRequests,
+  searchService,
+  config,
+  esShardTimeout,
+}: SearchStrategySearchParams) {
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, esShardTimeout);
+  const es = searchService.__LEGACY.esClient;
   const promises = searchRequests.map(({ index, body }) => {
     const searching = es.search({ index: index.title || index, body, ...searchParams });
     abortController.signal.addEventListener('abort', searching.abort);
-    return searching.catch(({ response }) => JSON.parse(response));
+    return searching.catch(({ response }: any) => JSON.parse(response));
     /*
      * Once #44302 is resolved, replace the old implementation with this one -
      * const params = {
