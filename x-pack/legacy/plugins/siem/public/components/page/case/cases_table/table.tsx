@@ -60,10 +60,6 @@ export const CasesPaginatedTableComponent = React.memo(
 
     const onChange = useCallback(
       (criteria: Criteria) => {
-        console.log('SORT', {
-          criteria: criteria.sort,
-          sort,
-        })
         if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
           updateCaseTable({
             tableType,
@@ -78,6 +74,8 @@ export const CasesPaginatedTableComponent = React.memo(
       },
       [tableType, sort.direction, updateCaseTable]
     );
+
+    const sorting = { field: `attributes.${sort.field}`, direction: sort.direction };
 
     return (
       <PaginatedTable
@@ -95,7 +93,7 @@ export const CasesPaginatedTableComponent = React.memo(
         onChange={onChange}
         pageOfItems={cases.saved_objects}
         showMorePagesIndicator={false}
-        sorting={sort}
+        sorting={sorting}
         totalCount={cases.total}
         updateActivePage={updateActivePage}
         updateLimitPagination={updateLimitPagination}

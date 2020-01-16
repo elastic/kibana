@@ -38,14 +38,13 @@ export class Case {
       sortOrder: sort != null ? sort.direction : undefined,
     };
 
-    console.log('getCases return')
     return this.getAllSavedCase(request, options);
   }
 
   private async getSavedCase(request: FrameworkRequest, caseId: string) {
     const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObject = await savedObjectsClient.get(caseSavedObjectType, caseId);
-    // console.log(
+    //
     //   'SAVED CASE!!!',
     //   JSON.stringify({
     //     caseSavedObjectType,
@@ -58,10 +57,8 @@ export class Case {
   }
 
   private async getAllSavedCase(request: FrameworkRequest, options: SavedObjectsFindOptions) {
-    console.log('getAllSavedCase start', options)
     const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObjects = await savedObjectsClient.find(options);
-    console.log('getAllSavedCase return')
     return {
       ...savedObjects,
       saved_objects: savedObjects.saved_objects.map(savedObject =>

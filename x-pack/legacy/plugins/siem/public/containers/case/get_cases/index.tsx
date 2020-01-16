@@ -9,11 +9,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import React from 'react';
 import { Query } from 'react-apollo';
-import {
-  GetCasesQuery,
-  CasesSavedObjects,
-  SortCase,
-} from '../../../graphql/types';
+import { GetCasesQuery, CasesSavedObjects, SortCase } from '../../../graphql/types';
 import { inputsModel, State } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
@@ -52,7 +48,6 @@ class CasesComponentQuery extends QueryTemplatePaginated<
 > {
   public render() {
     const { activePage, children, limit, search, skip, sort } = this.props;
-    console.log('Did we update?!?1', this.props);
     return (
       <Query<GetCasesQuery.Query, GetCasesQuery.Variables>
         fetchPolicy={getDefaultFetchPolicy()}
