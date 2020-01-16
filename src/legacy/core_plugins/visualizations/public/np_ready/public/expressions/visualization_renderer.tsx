@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { legacyChrome } from '../../../legacy_imports';
 // @ts-ignore
 import { Vis } from './vis';
-import { Visualization } from '../np_ready/public/components';
+import { Visualization } from '../components';
 
 export const visualization = () => ({
   name: 'visualization',
@@ -31,7 +31,7 @@ export const visualization = () => ({
   render: async (domNode: HTMLElement, config: any, handlers: any) => {
     const { visData, visConfig, params } = config;
     const visType = config.visType || visConfig.type;
-    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const $injector = await legacyChrome.dangerouslyGetActiveInjector();
     const $rootScope = $injector.get('$rootScope') as any;
 
     if (handlers.vis) {
