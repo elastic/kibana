@@ -69,7 +69,8 @@
     "build:types": "tsc --p tsconfig.types.json",
     "core:acceptApiChanges": "node scripts/check_core_api_changes.js --accept",
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
-    "spec_to_console": "node scripts/spec_to_console"
+    "spec_to_console": "node scripts/spec_to_console",
+    "storybook": "node scripts/storybook"
   },
   "repository": {
     "type": "git",
@@ -454,10 +455,13 @@
     "postcss-url": "^8.0.0",
     "prettier": "^1.19.1",
     "proxyquire": "1.8.0",
+    "react-popper-tooltip": "^2.10.1",
+    "react-textarea-autosize": "^7.1.2",
     "regenerate": "^1.4.0",
     "sass-lint": "^1.12.1",
     "selenium-webdriver": "^4.0.0-alpha.5",
     "simple-git": "1.116.0",
+    "simplebar-react": "^2.1.0",
     "sinon": "^7.4.2",
     "strip-ansi": "^3.0.1",
     "supertest": "^3.1.0",
