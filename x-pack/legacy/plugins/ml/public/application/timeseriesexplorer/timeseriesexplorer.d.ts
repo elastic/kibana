@@ -12,8 +12,11 @@ import { getDateFormatTz, TimeRangeBounds } from '../explorer/explorer_utils';
 
 declare const TimeSeriesExplorer: FC<{
   appStateHandler: (action: string, payload: any) => void;
+  autoZoomDuration?: number;
   bounds?: TimeRangeBounds;
   dateFormatTz: string;
+  jobsWithTimeRange: any[];
+  lastRefresh: number;
   selectedJobIds: string[];
   selectedDetectorIndex: number;
   selectedEntities: any[];
@@ -21,5 +24,5 @@ declare const TimeSeriesExplorer: FC<{
   setGlobalState: (arg: any) => void;
   tableInterval: string;
   tableSeverity: number;
-  timefilter: Timefilter;
+  zoom?: { from: string; to: string };
 }>;

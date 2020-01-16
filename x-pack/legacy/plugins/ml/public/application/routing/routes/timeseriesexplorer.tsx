@@ -145,7 +145,10 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
     : +appState?.mlTimeSeriesExplorer?.detectorIndex || 0;
   const selectedEntities = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.forecastId;
-  const zoom = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
+  const zoom: {
+    from: string;
+    to: string;
+  } = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
 
   const selectedJob = selectedJobIds && mlJobService.getJob(selectedJobIds[0]);
 
