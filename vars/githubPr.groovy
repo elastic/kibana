@@ -133,7 +133,7 @@ ${failure.stdOut}
 }
 
 def getNextCommentMessage(previousCommentInfo = [:]) {
-  info = previousCommentInfo ?: [:]
+  def info = previousCommentInfo ?: [:]
   info.builds = previousCommentInfo.builds ?: []
 
   def messages = []
@@ -185,7 +185,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
 
   return messages
     .findAll { !!it } // No blank strings
-    .collect { it.stripIndent().trim() }
+    .collect { it.stripIndent().trim() } // This just allows us to indent various strings above, but leaves them un-indented in the comment
     .join("\n\n")
 }
 
