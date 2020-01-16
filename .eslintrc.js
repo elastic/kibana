@@ -262,6 +262,7 @@ module.exports = {
                   'src/core/server/**/*',
                   '(src|x-pack)/plugins/*/server/**/*',
                   'examples/**/server/**/*',
+                  'joi',
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',
