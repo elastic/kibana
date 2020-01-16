@@ -6,6 +6,7 @@
 
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
+import { QueryString } from 'ui/utils/query_string';
 // @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
@@ -24,7 +25,7 @@ interface PdfUrlData {
   createPdfPayload: { jobParams: string };
 }
 
-export function getPdfUrl(
+function getPdfUrlParts(
   { id, name: title, width, height }: CanvasWorkpad,
   { pageCount }: PageCount
 ): PdfUrlData {
@@ -66,7 +67,16 @@ export function getPdfUrl(
   };
 }
 
+export function getPdfUrl(...args: Arguments): string {
+  const urlParts = getPdfUrlParts(...args);
+
+  return `${urlParts.createPdfUri}?${QueryString.param(
+    'jobParams',
+    urlParts.createPdfPayload.jobParams
+  )}`;
+}
+
 export function createPdf(...args: Arguments) {
-  const { createPdfUri, createPdfPayload } = getPdfUrl(...args);
+  const { createPdfUri, createPdfPayload } = getPdfUrlParts(...args);
   return fetch.post(createPdfUri, createPdfPayload);
 }
