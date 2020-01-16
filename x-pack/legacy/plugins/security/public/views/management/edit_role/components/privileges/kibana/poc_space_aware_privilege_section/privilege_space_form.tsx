@@ -27,13 +27,8 @@ import React, { Component, Fragment } from 'react';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { KibanaPrivileges } from '../../../../../../../../../../../plugins/security/common/model/poc_kibana_privileges';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../../../../plugins/features/public';
+import { IFeature } from '../../../../../../../../../../../plugins/features/common';
 import { Role } from '../../../../../../../../common/model';
-import {
-  AllowedPrivilege,
-  PrivilegeExplanation,
-} from '../../../../../../../lib/kibana_privilege_calculator';
-import { hasAssignedFeaturePrivileges } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { FeatureTable } from '../poc_feature_table';
@@ -43,7 +38,7 @@ interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
   privilegeCalculator: POCPrivilegeCalculator;
-  features: Feature[];
+  features: IFeature[];
   spaces: Space[];
   editingIndex: number;
   onChange: (role: Role) => void;
@@ -467,39 +462,23 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private getDisplayedBasePrivilege = () => {
-    const effectiveBasePrivilege = this.props.privilegeCalculator.getEffectiveBasePrivilege(
+    const baseExplanation = this.props.privilegeCalculator.explainEffectiveBasePrivilege(
       this.state.role,
       this.state.editingIndex
     );
 
-    // if (this.canCustomizeFeaturePrivileges(explanation, allowedPrivileges)) {
-    if (true) {
-      const form = this.state.role.kibana[this.state.editingIndex];
+    // If undefined base: Custom
+    // If inherited base:
+    // Custom
+    // If directly assigned base:
+    // if customizing or has customizations: Custom
+    // else assigned
 
-      if (
-        hasAssignedFeaturePrivileges(form) ||
-        form.base.length === 0 ||
-        this.state.isCustomizingFeaturePrivileges
-      ) {
-        return `basePrivilege_${CUSTOM_PRIVILEGE_VALUE}`;
-      }
+    if (baseExplanation?.isDirectlyAssigned() && !this.state.isCustomizingFeaturePrivileges) {
+      return `basePrivilege_${baseExplanation.privilege.id}`;
     }
 
-    return effectiveBasePrivilege ? `basePrivilege_${effectiveBasePrivilege.id}` : undefined;
-  };
-
-  private canCustomizeFeaturePrivileges = (
-    basePrivilegeExplanation: PrivilegeExplanation,
-    allowedPrivileges: AllowedPrivilege
-  ) => {
-    if (basePrivilegeExplanation.isDirectlyAssigned) {
-      return true;
-    }
-
-    const featureEntries = Object.values(allowedPrivileges.feature);
-    return featureEntries.some(entry => {
-      return entry != null && (entry.canUnassign || entry.privileges.length > 1);
-    });
+    return `basePrivilege_${CUSTOM_PRIVILEGE_VALUE}`;
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {

@@ -51,6 +51,7 @@ export const FeatureTableExpandedRow = ({
         return (
           <EuiFlexItem key={subFeature.name}>
             <SubFeatureForm
+              featureId={feature.id}
               subFeature={subFeature}
               onChange={updatedPrivileges => onChange(id, updatedPrivileges)}
               selectedPrivileges={selectedPrivileges}

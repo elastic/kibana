@@ -225,6 +225,12 @@ export class FeatureTable extends Component<Props, State> {
             featureId
           );
 
+          const featurePrivilegeExplanations = this.props.privilegeCalculator.explainEffectiveFeaturePrivileges(
+            this.props.role,
+            this.props.spacesIndex,
+            featureId
+          );
+
           const selectedPrivilege = effectiveFeaturePrivileges.find(afp =>
             record.feature.privileges?.find(featurePriv => afp.id === featurePriv.id)
           );

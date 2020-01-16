@@ -22,7 +22,14 @@ export class PrivilegeExplanation {
   }
 
   public isDirectlyAssigned() {
-    return this.isGranted() && !this.isInherited();
+    return (
+      this.calculation.global.some(gp => gp.equals(this.privilege)) ||
+      this.calculation.space.some(sp => sp.equals(this.privilege))
+    );
+  }
+
+  public canUnassign() {
+    return !this.isInherited();
   }
 
   public isInherited() {

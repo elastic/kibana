@@ -6,6 +6,7 @@
 import _ from 'lodash';
 import { ScopedPrivilege } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/scoped_privilege';
 import { PrivilegeExplanation } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/privilege_explanation';
+import { FeaturePrivilegesExplanations } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/feature_privileges_explanations';
 import { Privilege } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/privilege_instance';
 import { KibanaPrivileges } from '../../../../../../plugins/security/common/model/poc_kibana_privileges';
 import { Role } from '../../../common/model';
@@ -42,17 +43,54 @@ export class POCPrivilegeCalculator {
     return effectiveBasePrivilege;
   }
 
+  public explainEffectiveBasePrivilege(role: Role, privilegeIndex: number) {
+    const basePrivilege = this.getEffectiveBasePrivilege(role, privilegeIndex);
+    if (!basePrivilege) {
+      return;
+    }
+
+    const privilegeSet = role.kibana[privilegeIndex];
+    const isGlobalPrivilege = this.isGlobalPrivilege(privilegeSet);
+
+    const globalPrivilegeRoleEntry = isGlobalPrivilege
+      ? privilegeSet
+      : this._locateGlobalPrivilege(role);
+
+    const globalPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(
+      globalPrivilegeRoleEntry ? [globalPrivilegeRoleEntry] : []
+    );
+
+    const spacePrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([
+      privilegeSet,
+    ]);
+
+    const globalGrantingPrivileges = globalPrivileges
+      .getPrivilegesGranting(basePrivilege)
+      .map(gp => new ScopedPrivilege('global', gp));
+
+    const grantingPrivileges = isGlobalPrivilege
+      ? []
+      : spacePrivileges
+          .getPrivilegesGranting(basePrivilege)
+          .map(gp => new ScopedPrivilege('space', gp));
+
+    return new PrivilegeExplanation(
+      new ScopedPrivilege(isGlobalPrivilege ? 'global' : 'space', basePrivilege),
+      {
+        global: globalGrantingPrivileges,
+        space: isGlobalPrivilege ? [] : grantingPrivileges,
+      }
+    );
+  }
+
   public getEffectiveFeaturePrivileges(role: Role, privilegeIndex: number, featureId: string) {
     const entries = this._collectRelevantEntries(role, privilegeIndex);
     const collection = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(entries);
 
-    console.group(`getEffectiveFeaturePrivileges(${featureId})`);
     const fp = this.kibanaPrivileges.getFeaturePrivileges(featureId).filter(privilege => {
-      const { hasAllRequested, missing } = collection.grantsPrivilege(privilege);
-      console.log({ featureId, privilege, hasAllRequested, missing });
+      const { hasAllRequested } = collection.grantsPrivilege(privilege);
       return hasAllRequested;
     });
-    console.groupEnd();
     return fp;
   }
 
@@ -65,52 +103,38 @@ export class POCPrivilegeCalculator {
         ...assignedFeaturePrivileges.map(afp => ({ type: 'feature' as Privilege['type'], id: afp }))
       );
 
-    console.group(`getInheritedFeaturePrivileges(${featureId})`);
     const fp = this.kibanaPrivileges.getFeaturePrivileges(featureId).filter(privilege => {
-      const { hasAllRequested, missing } = collection.grantsPrivilege(privilege);
-      console.log({ featureId, privilege, hasAllRequested, missing });
+      const { hasAllRequested } = collection.grantsPrivilege(privilege);
       return hasAllRequested;
     });
-    console.groupEnd();
     return fp;
   }
 
   public explainAllEffectiveFeaturePrivileges(
     role: Role,
     privilegeIndex: number
-  ): { [featureId: string]: { [privilegeId: string]: PrivilegeExplanation } } {
+  ): FeaturePrivilegesExplanations {
     const featurePrivileges = this.kibanaPrivileges.getAllFeaturePrivileges();
 
-    const result: ReturnType<POCPrivilegeCalculator['explainAllEffectiveFeaturePrivileges']> = {};
+    const results: FeaturePrivilegesExplanations[] = Object.keys(featurePrivileges).map(featureId =>
+      this.explainEffectiveFeaturePrivileges(role, privilegeIndex, featureId)
+    );
 
-    for (const featurePrivilegeEntry of featurePrivileges.entries()) {
-      const [featureId, privileges] = featurePrivilegeEntry;
-      result[featureId] = {};
-      for (const featurePrivilege of privileges) {
-        const [privilegeId] = featurePrivilege;
-        result[featureId][privilegeId] = this.explainEffectiveFeaturePrivilege(
-          role,
-          privilegeIndex,
-          featureId,
-          privilegeId
-        );
-      }
-    }
-    return result;
+    return FeaturePrivilegesExplanations.compose(results);
   }
 
   public explainEffectiveFeaturePrivileges(
     role: Role,
     privilegeIndex: number,
     featureId: string
-  ): { [privilegeId: string]: PrivilegeExplanation } {
+  ): FeaturePrivilegesExplanations {
     const featurePrivileges = this.kibanaPrivileges.getFeaturePrivileges(featureId);
 
-    const result: ReturnType<POCPrivilegeCalculator['explainEffectiveFeaturePrivileges']> = {};
+    const results: { [privilegeId: string]: PrivilegeExplanation } = {};
 
     for (const featurePrivilege of featurePrivileges) {
       const privilegeId = featurePrivilege.id;
-      result[privilegeId] = this.explainEffectiveFeaturePrivilege(
+      results[privilegeId] = this.explainEffectiveFeaturePrivilege(
         role,
         privilegeIndex,
         featureId,
@@ -118,7 +142,7 @@ export class POCPrivilegeCalculator {
       );
     }
 
-    return result;
+    return new FeaturePrivilegesExplanations({ [featureId]: results });
   }
 
   public explainEffectiveFeaturePrivilege(

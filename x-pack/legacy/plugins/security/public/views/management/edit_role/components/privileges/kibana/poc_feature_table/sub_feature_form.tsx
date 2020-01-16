@@ -6,15 +6,16 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
-import { PrivilegeExplanation } from '../../../../../../../../../../../plugins/security/common/model/poc_kibana_privileges/privilege_explanation';
+import { FeaturePrivilegesExplanations } from '../../../../../../../../../../../plugins/security/common/model/poc_kibana_privileges/feature_privileges_explanations';
 import { FeatureKibanaPrivilegesGroup } from '../../../../../../../../../../../plugins/features/common/feature_kibana_privileges';
 import { ISubFeature } from '../../../../../../../../../../../plugins/features/common';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 
 interface Props {
+  featureId: string;
   subFeature: ISubFeature;
   selectedPrivileges: string[];
-  privilegeExplanations: { [privilegeId: string]: PrivilegeExplanation };
+  privilegeExplanations: FeaturePrivilegesExplanations;
   onChange: (selectedPrivileges: string[]) => void;
   disabled?: boolean;
 }
@@ -44,8 +45,11 @@ export const SubFeatureForm = (props: Props) => {
     return (
       <div>
         {privilegeGroup.privileges.map(privilege => {
-          const isSelected = props.privilegeExplanations[privilege.id].isGranted();
-          const isInherited = props.privilegeExplanations[privilege.id].isInherited();
+          const isSelected = props.privilegeExplanations.isGranted(props.featureId, privilege.id);
+          const isInherited = props.privilegeExplanations.isInherited(
+            props.featureId,
+            privilege.id
+          );
           return (
             <EuiCheckbox
               key={privilege.id}
@@ -70,11 +74,11 @@ export const SubFeatureForm = (props: Props) => {
   }
   function renderMutuallyExclusivePrivilegeGroup(privilegeGroup: FeatureKibanaPrivilegesGroup) {
     const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
-      props.privilegeExplanations[p.id].isGranted()
+      props.privilegeExplanations.isGranted(props.featureId, p.id)
     );
     const isInherited =
       firstSelectedPrivilege &&
-      props.privilegeExplanations[firstSelectedPrivilege.id].isInherited();
+      props.privilegeExplanations.isInherited(props.featureId, firstSelectedPrivilege.id);
 
     const options = [
       privilegeGroup.privileges.map(privilege => {

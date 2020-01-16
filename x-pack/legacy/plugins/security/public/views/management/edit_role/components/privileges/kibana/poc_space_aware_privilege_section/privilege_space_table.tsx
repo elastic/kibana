@@ -22,10 +22,7 @@ import {
   Role,
   RoleKibanaPrivilege,
 } from '../../../../../../../../common/model';
-import {
-  isGlobalPrivilegeDefinition,
-  hasAssignedFeaturePrivileges,
-} from '../../../../../../../lib/privilege_utils';
+import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
@@ -185,14 +182,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           // TODO: Reserved
 
           // TODO: rename explainAll.....
-          const explanation = privilegeCalculator.explainAllEffectiveFeaturePrivileges(
+          const explanations = privilegeCalculator.explainAllEffectiveFeaturePrivileges(
             this.props.role,
             record.spacesIndex
           );
-
-          const flattenedExplanations = Object.values(explanation)
-            .map(ex => Object.values(ex))
-            .flat();
 
           // if (effectivePrivilege.reserved != null && effectivePrivilege.reserved.length > 0) {
           //   return <PrivilegeDisplay privilege={effectivePrivilege.reserved} />;
@@ -205,11 +198,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
               <PrivilegeDisplay privilege={basePrivilege ? basePrivilege.id : NO_PRIVILEGE_VALUE} />
             );
           } else {
-            const hasNonSupersededCustomizations = flattenedExplanations.find(
-              ex => ex.privilege.type === 'feature' && ex.isDirectlyAssigned()
+            const hasNonSupersededCustomizations = explanations.exists(
+              (featureId, privilegeId, explanation) =>
+                explanation.privilege.type === 'feature' && explanation.isDirectlyAssigned()
             );
-
-            console.log({ hasNonSupersededCustomizations });
 
             const showCustom = hasNonSupersededCustomizations;
 
