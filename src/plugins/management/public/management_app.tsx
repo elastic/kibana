@@ -58,7 +58,8 @@ export class ManagementApp {
           const [coreStart] = await getStartServices();
           coreStart.chrome.setBreadcrumbs([
             {
-              text: i18n.translate('stackManagement.breadcrumb', {
+              text: i18n.translate('management.breadcrumb', {
+                // todo
                 defaultMessage: 'Stack Management',
               }),
               href: '#/management',
