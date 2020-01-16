@@ -87,7 +87,7 @@ export interface ReportingRequestPre {
   management: {
     jobTypes: any;
   };
-  user: any;
+  user: any; // TODO import AuthenticatedUser from security/server
 }
 
 export interface RequestFacade {
