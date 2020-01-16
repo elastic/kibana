@@ -7,21 +7,28 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { KibanaAssetType } from '../../../../common/types';
 import { RegistryPackage, Dataset } from '../../../../common/types';
-import { loadFieldsFromYaml } from '../../elasticsearch/template/install';
 import * as Registry from '../../../registry';
+import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 
-export interface Field {
+export interface IndexPatternField {
   name: string;
-  type: string;
-  required?: boolean;
-  description?: string;
-  fields?: Field[];
-}
-
-interface IndexPatternField extends Field {
+  type?: string;
+  count: number;
+  scripted: boolean;
+  indexed: boolean;
+  analyzed: boolean;
   searchable: boolean;
   aggregatable: boolean;
+  doc_values: boolean;
+  enabled?: boolean;
+  script?: string;
+  lang?: string;
   readFromDocValues: boolean;
+}
+
+enum IndexPatternType {
+  logs = 'logs',
+  metrics = 'metrics',
 }
 
 export async function installIndexPatterns(
@@ -29,22 +36,19 @@ export async function installIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract
 ) {
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
-  if (!registryPackageInfo.datasets) return;
-  const datasets = registryPackageInfo.datasets;
-  // separate logs and metrics datasets
-  const logsDatasets = datasets.filter(dataset => dataset.type === 'logs');
-  const metricsDatasets = datasets.filter(dataset => dataset.type === 'metric');
-  await createIndexPattern({
-    datasetType: 'logs',
-    datasets: logsDatasets,
-    registryPackageInfo,
-    savedObjectsClient,
-  });
-  await createIndexPattern({
-    datasetType: 'metrics',
-    datasets: metricsDatasets,
-    registryPackageInfo,
-    savedObjectsClient,
+  const registryDatasets = registryPackageInfo.datasets;
+  if (!registryDatasets) return;
+
+  const indexPatternTypes = [IndexPatternType.logs, IndexPatternType.metrics];
+
+  indexPatternTypes.forEach(async indexPatternType => {
+    const datasets = registryDatasets.filter(dataset => dataset.type === indexPatternType);
+    await createIndexPattern({
+      datasetType: indexPatternType,
+      datasets,
+      registryPackageInfo,
+      savedObjectsClient,
+    });
   });
 }
 
@@ -80,14 +84,14 @@ const createIndexPattern = async ({
  * dedupes fields, flattens fields, dedupes the previously nested fields, transform with necessary
  * Kibana index pattern properties
  */
-const makeKibanaIndexPatternFields = (fields: Field[]): IndexPatternField[] => {
-  const dedupedFields = dedupFields(fields);
+const makeKibanaIndexPatternFields = (fields: Fields): IndexPatternField[] => {
+  const dedupedFields = dedupeFields(fields);
   const flattenedFields = flattenFields(dedupedFields);
   const transformedFields = flattenedFields.map(transformField);
   return transformedFields;
 };
 
-export const dedupFields = (fields: Field[]) => {
+export const dedupeFields = (fields: Fields) => {
   const uniqueObj = fields.reduce<{ [name: string]: Field }>((acc, field) => {
     if (!acc[field.name]) {
       acc[field.name] = field;
@@ -99,20 +103,61 @@ export const dedupFields = (fields: Field[]) => {
 };
 
 export const transformField = (field: Field): IndexPatternField => {
-  const newField = { ...field };
+  const newField: IndexPatternField = {
+    name: field.name,
+    count: field.count ?? 0,
+    scripted: false,
+    indexed: field.index ?? true,
+    analyzed: field.analyzed ?? false,
+    searchable: field.searchable ?? true,
+    aggregatable: field.aggregatable ?? true,
+    doc_values: field.doc_values ?? true,
+    readFromDocValues: true,
+  };
 
-  // map this type to field type
-  if (typeMap[field.type]) {
-    newField.type = typeMap[field.type];
+  // if type exists, check if it exists in the map
+  if (field.type) {
+    // if no type match type is not set (undefined)
+    if (typeMap[field.type]) {
+      newField.type = typeMap[field.type];
+    }
+    // if type isn't set, default to string
+  } else {
+    newField.type = 'string';
   }
 
-  // add some temp values
-  return {
-    searchable: false,
-    aggregatable: false,
-    readFromDocValues: true,
-    ...newField,
-  };
+  if (newField.type === 'binary') {
+    newField.aggregatable = false;
+    newField.analyzed = false;
+    newField.doc_values = field.doc_values ?? false;
+    newField.indexed = false;
+    newField.searchable = false;
+  }
+
+  if (field.type === 'object' && field.hasOwnProperty('enabled')) {
+    const enabled = field.enabled ?? true;
+    newField.enabled = enabled;
+    if (!enabled) {
+      newField.aggregatable = false;
+      newField.analyzed = false;
+      newField.doc_values = false;
+      newField.indexed = false;
+      newField.searchable = false;
+    }
+  }
+
+  if (field.type === 'text') {
+    newField.aggregatable = false;
+  }
+
+  if (field.hasOwnProperty('script')) {
+    newField.scripted = true;
+    newField.script = field.script;
+    newField.lang = 'painless';
+    newField.doc_values = false;
+  }
+
+  return newField;
 };
 
 /**
@@ -120,7 +165,7 @@ export const transformField = (field: Field): IndexPatternField => {
  *
  * flattens fields and renames them with a path of the parent names
  */
-export const flattenFields = (fields: Field[]): Field[] =>
+export const flattenFields = (fields: Fields): Fields =>
   fields.reduce<Field[]>((acc, field) => {
     if (field.fields?.length) {
       const flattenedFields = flattenFields(field.fields);

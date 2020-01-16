@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`dedupFields function remove duplicated fields when parsing multiple files: dedupFields 1`] = `
+exports[`creating index patterns from yaml fields dedupFields function remove duplicated fields when parsing multiple files: dedupeFields 1`] = `
 [
   {
     "name": "@timestamp",
@@ -251,7 +251,7 @@ exports[`dedupFields function remove duplicated fields when parsing multiple fil
 ]
 `;
 
-exports[`flattenFields function recursively flattens nested fields and renames name property with path: flattenFields 1`] = `
+exports[`creating index patterns from yaml fields flattenFields function recursively flattens nested fields and renames name property with path: flattenFields 1`] = `
 [
   {
     "name": "@timestamp",
