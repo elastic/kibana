@@ -216,6 +216,9 @@ export {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UserProvidedValues,
+  ImageValidation,
+  DeprecationSettings,
+  StringValidation,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
