@@ -8,6 +8,7 @@ import { drag, drop } from '../drag_n_drop/helpers';
 import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../hosts/selectors';
 import {
   CLOSE_TIMELINE_BTN,
+  CREATE_NEW_TIMELINE,
   SEARCH_OR_FILTER_CONTAINER,
   CREATE_NEW_TIMELINE,
   SERVER_SIDE_EVENT_COUNT,
@@ -33,7 +34,6 @@ export const dragFromAllHostsToTimeline = () => {
   cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
     .first()
     .then(host => drag(host));
-
   cy.get(TIMELINE_DATA_PROVIDERS).then(dataProvidersDropArea => drop(dataProvidersDropArea));
 };
 
