@@ -4,19 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Store } from 'redux';
-import { CameraAction } from './action';
-import { CameraState, Vector2 } from '../../types';
-
-type CameraStore = Store<CameraState, CameraAction>;
-
-/**
- * Dispatches a 'userScaled' action.
- */
-export function userScaled(store: CameraStore, scalingValue: [number, number]): void {
-  const action: CameraAction = { type: 'userScaled', payload: scalingValue };
-  store.dispatch(action);
-}
+import { Vector2 } from '../../types';
 
 /**
  * Used to assert that two Vector2s are close to each other (accounting for round-off errors.)
