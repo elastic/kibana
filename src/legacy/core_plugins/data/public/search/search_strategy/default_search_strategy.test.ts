@@ -46,6 +46,7 @@ const newSearchMock = jest.fn().mockReturnValue({
 describe('defaultSearchStrategy', function() {
   describe('search', function() {
     let searchArgs: MockedKeys<Omit<SearchStrategySearchParams, 'config'>>;
+    let es: any;
 
     beforeEach(() => {
       msearchMockResponse.abort.mockClear();
@@ -70,17 +71,15 @@ describe('defaultSearchStrategy', function() {
             },
           },
         },
-        es: {
-          msearch: msearchMock,
-          search: searchMock,
-        },
       };
+
+      es = searchArgs.searchService.__LEGACY.esClient;
     });
 
     test('does not send max_concurrent_shard_requests by default', async () => {
       const config = getConfigStub({ 'courier:batchSearches': true });
       await search({ ...searchArgs, config });
-      expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(undefined);
+      expect(es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(undefined);
     });
 
     test('allows configuration of max_concurrent_shard_requests', async () => {
@@ -89,13 +88,13 @@ describe('defaultSearchStrategy', function() {
         'courier:maxConcurrentShardRequests': 42,
       });
       await search({ ...searchArgs, config });
-      expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(42);
+      expect(es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(42);
     });
 
     test('should set rest_total_hits_as_int to true on a request', async () => {
       const config = getConfigStub({ 'courier:batchSearches': true });
       await search({ ...searchArgs, config });
-      expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
+      expect(es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
     });
 
     test('should set ignore_throttled=false when including frozen indices', async () => {
@@ -104,7 +103,7 @@ describe('defaultSearchStrategy', function() {
         'search:includeFrozen': true,
       });
       await search({ ...searchArgs, config });
-      expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
+      expect(es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
     });
 
     test('should properly call abort with msearch', () => {

@@ -69,8 +69,6 @@
  *    `appSearchSource`.
  */
 
-// @ts-ignore
-import { default as es } from 'elasticsearch-browser/elasticsearch';
 import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
@@ -87,8 +85,6 @@ import {
   getInjectedMetadata,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/data/public/services';
-
-// TODO: While moving to NP, replace with initializerContext
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -198,9 +194,6 @@ export class SearchSource {
    * @async
    */
   async fetch(options: FetchOptions = {}) {
-    const searchService = getSearchService();
-    const config = getUiSettings();
-
     await this.requestIsStarting(options);
 
     const searchRequest = await this.flatten();
@@ -213,7 +206,11 @@ export class SearchSource {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
-      { searchService, config, esShardTimeout }
+      {
+        searchService: getSearchService(),
+        config: getUiSettings(),
+        esShardTimeout,
+      }
     );
 
     if (response.error) {
