@@ -637,7 +637,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
            * Justification for dangerouslySetInnerHTML:
            * Setting description may contain formatting and links to documentation.
            */
-          dangerouslySetInnerHTML={{ __html: setting.description }} // eslint-disable-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: setting.description || '' }} // eslint-disable-line react/no-danger
         />
       );
     }

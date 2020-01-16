@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { registerDefaultComponents, PAGE_TITLE_COMPONENT } from './default_component_registry';
 import { getSettingsComponent, registerSettingsComponent } from './component_registry';
 import { PageTitle } from './page_title';
@@ -34,7 +35,7 @@ describe('default_component_registry', () => {
   });
 
   it('should not override components if they are already registered', () => {
-    const newComponent = {};
+    const newComponent = () => <div />;
     registerSettingsComponent(PAGE_TITLE_COMPONENT, newComponent, true);
     registerDefaultComponents();
 

@@ -35,7 +35,7 @@ export interface Setting {
   displayName: string;
   name: string;
   value: SavedObjectAttribute;
-  description: string;
+  description?: string;
   options?: string[]; // array of stringa,
   optionLabels?: Record<string, string>;
   requiresPageReload: boolean;
@@ -47,7 +47,7 @@ export interface Setting {
   defVal: SavedObjectAttribute;
   isCustom: boolean;
   validation?: StringValidation | ImageValidation;
-  readOnly: boolean;
+  readOnly?: boolean;
   deprecation?: {
     message: string;
     docLinksKey: string;

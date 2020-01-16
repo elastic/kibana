@@ -47,7 +47,7 @@ interface AdvancedSettingsProps {
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
-  query: { text: string };
+  query: { text: string } | string;
   filteredSettings: Record<string, Setting[]>;
 }
 

@@ -31,6 +31,7 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
   UiSettingsParams,
+  UiSettingsType,
 } from './types';
 import { mapToObject } from '../../utils/';
 
@@ -79,7 +80,7 @@ export class UiSettingsService
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return (savedObjectsClient: SavedObjectsClientContract) =>
       new UiSettingsClient({
-        type: 'config',
+        type: 'config' as UiSettingsType,
         id: version,
         buildNum,
         savedObjectsClient,

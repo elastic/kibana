@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { UiSettingsParams, UserProvidedValues, StringValidation } from 'src/core/server/types';
+import {
+  UiSettingsParams,
+  UserProvidedValues,
+  StringValidation,
+  UiSettingsType,
+} from 'src/core/server/types';
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
 import { DEFAULT_CATEGORY } from './default_category';
@@ -57,7 +62,7 @@ export function toEditableConfig({
     isOverridden,
     readonly: !!def.readonly,
     defVal: def.value,
-    type: getValType(def, value),
+    type: getValType(def, value) as UiSettingsType,
     description: def.description,
     deprecation: def.deprecation,
     validation:

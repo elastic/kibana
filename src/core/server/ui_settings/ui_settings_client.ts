@@ -22,11 +22,11 @@ import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
-import { IUiSettingsClient, UiSettingsParams } from './types';
+import { IUiSettingsClient, UiSettingsParams, UiSettingsType } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
 
 export interface UiSettingsServiceOptions {
-  type: string;
+  type: UiSettingsType;
   id: string;
   buildNum: number;
   savedObjectsClient: SavedObjectsClientContract;
