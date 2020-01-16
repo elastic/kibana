@@ -5,25 +5,15 @@
  */
 
 import { Legacy } from 'kibana';
-import { Plugin } from './plugin';
-import { shim } from './shim';
-import { ActionsPlugin } from './types';
+import { PluginStartContract } from '../../../../plugins/actions/server';
+
+export function getActionsPlugin(server: Legacy.Server): PluginStartContract | undefined {
+  return server?.newPlatform?.start?.plugins?.actions as PluginStartContract;
+}
 
 export async function init(server: Legacy.Server) {
-  const { initializerContext, coreSetup, coreStart, pluginsSetup, pluginsStart } = shim(server);
-
-  const plugin = new Plugin(initializerContext);
-
-  const setupContract = await plugin.setup(coreSetup, pluginsSetup);
-  const startContract = plugin.start(coreStart, pluginsStart);
-
   server.decorate('request', 'getActionsClient', function() {
-    return startContract.getActionsClientWithRequest(this);
+    const actions = getActionsPlugin(server);
+    return actions?.getActionsClientWithRequest(this);
   });
-
-  const exposedFunctions: ActionsPlugin = {
-    setup: setupContract,
-    start: startContract,
-  };
-  server.expose(exposedFunctions);
 }

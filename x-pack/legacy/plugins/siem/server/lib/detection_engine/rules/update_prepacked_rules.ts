@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsClient } from '../../../../../actions';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { AlertsClient } from '../../../../../alerting';
 import { updateRules } from './update_rules';
 import { RuleAlertParamsRest } from '../types';

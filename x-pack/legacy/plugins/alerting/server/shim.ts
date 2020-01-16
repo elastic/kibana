@@ -28,7 +28,7 @@ import {
   ActionsPlugin,
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
-} from '../../actions';
+} from '../../../../plugins/actions/server';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 
 // Extend PluginProperties to indicate which plugins are guaranteed to exist
@@ -117,7 +117,7 @@ export function shim(
   const pluginsSetup: AlertingPluginsSetup = {
     security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
     taskManager: getTaskManagerSetup(server)!,
-    actions: server.plugins.actions.setup,
+    actions: newPlatform.setup.plugins.actions as ActionsPluginSetupContract,
     xpack_main: server.plugins.xpack_main,
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
@@ -126,7 +126,7 @@ export function shim(
 
   const pluginsStart: AlertingPluginsStart = {
     security: newPlatform.setup.plugins.security as SecurityPluginStartContract | undefined,
-    actions: server.plugins.actions.start,
+    actions: newPlatform.start.plugins.actions as ActionsPluginStartContract,
     // TODO: Currently a function because it's an optional dependency that
     // initializes after this function is called
     spaces: () => server.plugins.spaces,

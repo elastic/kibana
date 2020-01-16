@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions, AlertType } from '../../../../../../legacy/plugins/alerting';
-import { ActionTypeExecutorOptions, ActionType } from '../../../../../../legacy/plugins/actions';
+import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {

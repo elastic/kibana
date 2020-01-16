@@ -9,7 +9,8 @@ import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { savedObjectsClientMock } from '../../../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
-import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { actionsClientMock } from '../../../../../../../../plugins/actions/server/actions_client.mock';
 
 const defaultConfig = {
   'kibana.index': '.kibana',

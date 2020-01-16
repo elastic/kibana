@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Hapi from 'hapi';
-import { ActionType } from '../../../../../../legacy/plugins/actions';
+import { ActionType } from '../../../../../../plugins/actions/server';
 
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';

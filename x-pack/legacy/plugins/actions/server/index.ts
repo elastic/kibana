@@ -4,7 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { init } from './init';
-export { ActionsPlugin, ActionTypeExecutorOptions, ActionType } from './types';
-export { ActionsClient } from './actions_client';
-export { PluginSetupContract, PluginStartContract } from './plugin';
+import { Legacy } from 'kibana';
+import { init } from './init';
+import mappings from './mappings.json';
+
+export function actions(kibana: any) {
+  return new kibana.Plugin({
+    id: 'actions',
+    configPrefix: 'xpack.actions',
+    require: ['kibana', 'elasticsearch'],
+    isEnabled(config: Legacy.KibanaConfig) {
+      return (
+        config.get('xpack.encryptedSavedObjects.enabled') === true &&
+        config.get('xpack.actions.enabled') === true &&
+        config.get('xpack.task_manager.enabled') === true
+      );
+    },
+    init,
+    uiExports: {
+      mappings,
+    },
+  });
+}

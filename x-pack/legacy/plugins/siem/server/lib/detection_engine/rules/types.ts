@@ -10,7 +10,7 @@ import { Readable } from 'stream';
 import { SavedObject, SavedObjectAttributes, SavedObjectsFindResponse } from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
-import { ActionsClient } from '../../../../../actions/server/actions_client';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 import { RequestFacade } from '../../../types';
 import { Alert } from '../../../../../alerting/server/types';
