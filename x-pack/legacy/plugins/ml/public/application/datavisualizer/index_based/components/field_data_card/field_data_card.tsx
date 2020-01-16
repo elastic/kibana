@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import React, { FC } from 'react';
 
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
@@ -30,11 +31,7 @@ export interface FieldDataCardProps {
 }
 
 export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
-  const { fieldName, loading, type, existsInDocs, stats } = config;
-
-  if (stats === undefined) {
-    return null;
-  }
+  const { fieldName, loading, type, existsInDocs } = config;
 
   function getCardContent() {
     if (existsInDocs === false) {
@@ -73,13 +70,15 @@ export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
   }
 
   return (
-    <div data-test-subj={`mlFieldDataCard ${fieldName} ${type}`}>
-      <div className="mlFieldDataCard">
-        <FieldTitleBar card={config} />
-        <div className="mlFieldDataCard__content">
-          {loading === true ? <LoadingIndicator /> : getCardContent()}
-        </div>
+    <EuiPanel
+      data-test-subj={`mlFieldDataCard ${fieldName} ${type}`}
+      className="mlFieldDataCard"
+      hasShadow={false}
+    >
+      <FieldTitleBar card={config} />
+      <div className="mlFieldDataCard__content">
+        {loading === true ? <LoadingIndicator /> : getCardContent()}
       </div>
-    </div>
+    </EuiPanel>
   );
 };

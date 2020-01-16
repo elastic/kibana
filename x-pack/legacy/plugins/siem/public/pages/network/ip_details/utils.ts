@@ -36,7 +36,9 @@ export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): 
       ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
-        href: `${getIPDetailsUrl(params.detailName)}${search && search[1] ? search[1] : ''}`,
+        href: `${getIPDetailsUrl(params.detailName, params.flowTarget)}${
+          search && search[1] ? search[1] : ''
+        }`,
       },
     ];
   }

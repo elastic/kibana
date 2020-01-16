@@ -4,35 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import * as i18n from './translations';
 import { AnomaliesQueryTabBodyProps } from './types';
-import { manageQuery } from '../../../components/page/manage_query';
-import { AnomaliesOverTimeHistogram } from '../../../components/anomalies_over_time';
-import { AnomaliesOverTimeQuery } from '../anomalies_over_time';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
+import { MatrixHistogramContainer } from '../../matrix_histogram';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramGqlQuery } from '../../matrix_histogram/index.gql_query';
 
-const AnomaliesOverTimeManage = manageQuery(AnomaliesOverTimeHistogram);
+const ID = 'anomaliesOverTimeQuery';
+const anomaliesStackByOptions: MatrixHistogramOption[] = [
+  {
+    text: i18n.ANOMALIES_STACK_BY_JOB_ID,
+    value: 'job_id',
+  },
+];
 
 export const AnomaliesQueryTabBody = ({
+  deleteQuery,
   endDate,
+  setQuery,
   skip,
   startDate,
   type,
   narrowDateRange,
   filterQuery,
   anomaliesFilterQuery,
-  setQuery,
-  hideHistogramIfEmpty,
   updateDateRange = () => {},
   AnomaliesTableComponent,
   flowTarget,
   ip,
 }: AnomaliesQueryTabBodyProps) => {
-  const [siemJobsLoading, siemJobs] = useSiemJobs(true);
+  const [, siemJobs] = useSiemJobs(true);
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
   const mergedFilterQuery = getAnomaliesFilterQuery(
@@ -44,39 +51,37 @@ export const AnomaliesQueryTabBody = ({
     ip
   );
 
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
+
   return (
     <>
-      <AnomaliesOverTimeQuery
+      <MatrixHistogramContainer
+        isAnomaliesHistogram={true}
+        dataKey="AnomaliesHistogram"
+        defaultStackByOption={anomaliesStackByOptions[0]}
+        deleteQuery={deleteQuery}
         endDate={endDate}
+        errorMessage={i18n.ERROR_FETCHING_ANOMALIES_DATA}
         filterQuery={mergedFilterQuery}
+        hideHistogramIfEmpty={true}
+        id={ID}
+        query={MatrixHistogramGqlQuery}
+        setQuery={setQuery}
+        skip={skip}
         sourceId="default"
+        stackByOptions={anomaliesStackByOptions}
         startDate={startDate}
+        title={i18n.ANOMALIES_TITLE}
         type={type}
-      >
-        {({ anomaliesOverTime, loading, id, inspect, refetch, totalCount }) => {
-          if (hideHistogramIfEmpty && !anomaliesOverTime.length) {
-            return <div />;
-          }
-
-          return (
-            <>
-              <AnomaliesOverTimeManage
-                data={anomaliesOverTime!}
-                endDate={endDate}
-                id={id}
-                inspect={inspect}
-                loading={siemJobsLoading || loading}
-                refetch={refetch}
-                setQuery={setQuery}
-                startDate={startDate}
-                totalCount={totalCount}
-                updateDateRange={updateDateRange}
-              />
-              <EuiSpacer />
-            </>
-          );
-        }}
-      </AnomaliesOverTimeQuery>
+        updateDateRange={updateDateRange}
+      />
+      <EuiSpacer />
       <AnomaliesTableComponent
         startDate={startDate}
         endDate={endDate}
