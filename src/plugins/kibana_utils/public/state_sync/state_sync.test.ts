@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BaseStateContainer, createStateContainer } from '../state_containers';
+import { BaseState, BaseStateContainer, createStateContainer } from '../state_containers';
 import {
   defaultState,
   pureTransitions,
@@ -89,7 +89,7 @@ describe('state_sync', () => {
       // initial sync of storage to state is not happening
       expect(container.getState()).toEqual(defaultState);
 
-      const storageState2 = [{ id: 1, text: 'todo', completed: true }];
+      const storageState2 = { todos: [{ id: 1, text: 'todo', completed: true }] };
       (testStateStorage.get as jest.Mock).mockImplementation(() => storageState2);
       storageChange$.next(storageState2);
 
@@ -124,7 +124,7 @@ describe('state_sync', () => {
       start();
 
       const originalState = container.getState();
-      const storageState = [...originalState];
+      const storageState = { ...originalState };
       (testStateStorage.get as jest.Mock).mockImplementation(() => storageState);
       storageChange$.next(storageState);
 
@@ -134,7 +134,7 @@ describe('state_sync', () => {
     });
 
     it('storage change to null should notify state', () => {
-      container.set([{ completed: false, id: 1, text: 'changed' }]);
+      container.set({ todos: [{ completed: false, id: 1, text: 'changed' }] });
       const { stop, start } = syncStates([
         {
           stateContainer: withDefaultState(container, defaultState),
@@ -189,8 +189,8 @@ describe('state_sync', () => {
       ]);
       start();
 
-      const newStateFromUrl = [{ completed: false, id: 1, text: 'changed' }];
-      history.replace('/#?_s=!((completed:!f,id:1,text:changed))');
+      const newStateFromUrl = { todos: [{ completed: false, id: 1, text: 'changed' }] };
+      history.replace('/#?_s=(todos:!((completed:!f,id:1,text:changed)))');
 
       expect(container.getState()).toEqual(newStateFromUrl);
       expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual(newStateFromUrl);
@@ -220,7 +220,7 @@ describe('state_sync', () => {
       expect(history.length).toBe(startHistoryLength + 1);
 
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_s=!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3'))"`
+        `"/#?_s=(todos:!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3')))"`
       );
 
       stop();
@@ -248,14 +248,14 @@ describe('state_sync', () => {
 
       expect(history.length).toBe(startHistoryLength + 1);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_s=!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3'))"`
+        `"/#?_s=(todos:!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3')))"`
       );
 
       await tick();
 
       expect(history.length).toBe(startHistoryLength + 1);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_s=!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3'))"`
+        `"/#?_s=(todos:!((completed:!t,id:0,text:'Learning%20state%20containers'),(completed:!t,id:2,text:'2'),(completed:!t,id:3,text:'3')))"`
       );
 
       stop();
@@ -294,7 +294,7 @@ describe('state_sync', () => {
   });
 });
 
-function withDefaultState<State>(
+function withDefaultState<State extends BaseState>(
   stateContainer: BaseStateContainer<State>,
   // eslint-disable-next-line no-shadow
   defaultState: State
@@ -302,7 +302,10 @@ function withDefaultState<State>(
   return {
     ...stateContainer,
     set: (state: State | null) => {
-      stateContainer.set(state || defaultState);
+      stateContainer.set({
+        ...defaultState,
+        ...state,
+      });
     },
   };
 }

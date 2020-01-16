@@ -39,4 +39,8 @@ export class StaticColorProperty extends StaticStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'text-color', this._options.color);
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
   }
+
+  syncLabelBorderColorWithMb(mbLayerId, mbMap) {
+    mbMap.setPaintProperty(mbLayerId, 'text-halo-color', this._options.color);
+  }
 }

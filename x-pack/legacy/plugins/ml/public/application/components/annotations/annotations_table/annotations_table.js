@@ -42,7 +42,11 @@ import {
   isTimeSeriesViewJob,
 } from '../../../../../common/util/job_utils';
 
-import { annotation$, annotationsRefresh$ } from '../../../services/annotations_service';
+import {
+  annotation$,
+  annotationsRefresh$,
+  annotationsRefreshed,
+} from '../../../services/annotations_service';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -136,7 +140,7 @@ const AnnotationsTable = injectI18n(
         this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() =>
           this.getAnnotations()
         );
-        annotationsRefresh$.next(true);
+        annotationsRefreshed();
       }
     }
 
@@ -150,7 +154,7 @@ const AnnotationsTable = injectI18n(
         this.state.isLoading === false &&
         this.state.jobId !== this.props.jobs[0].job_id
       ) {
-        annotationsRefresh$.next(true);
+        annotationsRefreshed();
         this.previousJobId = this.props.jobs[0].job_id;
       }
     }

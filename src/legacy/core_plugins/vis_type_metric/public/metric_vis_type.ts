@@ -23,13 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 
 import { AggGroupNames } from 'ui/vis/editors/default';
-import { colorSchemas, ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { colorSchemas, ColorSchemas } from 'ui/color_maps';
 
 // @ts-ignore
 import { MetricVisComponent } from './components/metric_vis_controller';
 
 import { MetricVisOptions } from './components/metric_vis_options';
-import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
+import { ColorModes } from '../../vis_type_vislib/public/utils/collections';
 
 export const metricVisDefinition = {
   name: 'metric',
