@@ -35,6 +35,8 @@ export function formatValues([key, value]) {
     case 'established_model_memory':
     case 'input_bytes':
     case 'model_bytes':
+    case 'model_bytes_exceeded':
+    case 'model_bytes_memory_limit':
       value = formatData(value);
       break;
 
@@ -53,6 +55,9 @@ export function formatValues([key, value]) {
     case 'total_over_field_count':
     case 'total_partition_field_count':
     case 'bucket_allocation_failures_count':
+    case 'search_count':
+    case 'average_search_time_per_bucket_ms':
+    case 'exponential_average_search_time_per_hour_ms':
       value = toLocaleString(value);
       break;
 
