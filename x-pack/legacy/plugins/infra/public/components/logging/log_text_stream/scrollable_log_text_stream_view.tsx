@@ -56,6 +56,9 @@ interface ScrollableLogTextStreamViewProps {
   setFlyoutVisibility: (visible: boolean) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
+  startDate: string;
+  endDate: string;
+  updateDateRange: (range: { startDate?: string; endDate?: string }) => void;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -134,6 +137,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       lastLoadedTime,
       scale,
       wrap,
+      startDate,
+      endDate,
+      updateDateRange,
     } = this.props;
     const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
@@ -196,7 +202,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 items.length > 0 ? items[0].logEntry.cursor.time : undefined
                               }
                               isStreaming={false}
-                              // onExtendRange={(...args) => console.log('start.extendRange', args)}
+                              rangeEdge={startDate}
+                              onExtendRange={newDate => updateDateRange({ startDate: newDate })}
                             />
                             {items.map((item, idx) => {
                               const currentTimestamp = item.logEntry.cursor.time;
@@ -249,7 +256,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                   ? items[items.length - 1].logEntry.cursor.time
                                   : undefined
                               }
-                              // onExtendRange={(...args) => console.log('end.extendRange', args)}
+                              rangeEdge={endDate}
+                              onExtendRange={newDate => updateDateRange({ endDate: newDate })}
                               // onStreamStart={(...args) => console.log('end.streamStart', args)}
                               // onLoadMore={this.handleLoadNewerItems}
                             />

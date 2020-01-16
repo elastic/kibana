@@ -19,6 +19,7 @@ import * as React from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogTextSeparator } from './log_text_separator';
+import { extendDatemath } from '../../../utils/datemath';
 
 type Position = 'start' | 'end';
 
@@ -32,7 +33,7 @@ interface LogTextStreamLoadingItemViewProps {
   hasMore: boolean;
   isLoading: boolean;
   isStreaming: boolean;
-  onExtendRange?: () => void;
+  onExtendRange?: (newDate: string) => void;
   onStreamStart?: () => void;
 }
 
@@ -139,12 +140,30 @@ const ProgressCta: React.FC<Pick<
 
   const iconType = position === 'start' ? 'arrowUp' : 'arrowDown';
 
+  if (!rangeEdge) {
+    return null;
+  }
+
+  const extendedRange = extendDatemath(rangeEdge, position === 'start' ? 'before' : 'after');
+
+  if (!extendedRange || extendedRange.value === 'now') {
+    return null;
+  }
+
   return (
-    <EuiButton onClick={onExtendRange} iconType={iconType} size="s">
+    <EuiButton
+      onClick={() => {
+        if (typeof onExtendRange === 'function') {
+          onExtendRange(extendedRange.value);
+        }
+      }}
+      iconType={iconType}
+      size="s"
+    >
       <FormattedMessage
         id="xpack.infra.logs.extendTimeframe"
         defaultMessage="Extend timeframe {amount} {unit}"
-        values={{ amount: 1, unit: 'hour' }}
+        values={{ amount: extendedRange.diffAmount, unit: extendedRange.diffUnit }}
       />
     </EuiButton>
   );

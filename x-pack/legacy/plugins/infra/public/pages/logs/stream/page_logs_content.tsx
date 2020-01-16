@@ -51,6 +51,9 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     reportVisiblePositions,
     jumpToTargetPosition,
     stopLiveStreaming,
+    startDate,
+    endDate,
+    updateDateRange,
   } = useContext(LogPositionState.Context);
   return (
     <>
@@ -104,6 +107,9 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               setFlyoutVisibility={setFlyoutVisibility}
               highlightedItem={surroundingLogsId ? surroundingLogsId : null}
               currentHighlightKey={currentHighlightKey}
+              startDate={startDate}
+              endDate={endDate}
+              updateDateRange={updateDateRange}
             />
           )}
         </WithStreamItems>
