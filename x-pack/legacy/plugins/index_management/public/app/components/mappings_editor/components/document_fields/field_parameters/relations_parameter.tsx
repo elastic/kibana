@@ -137,97 +137,118 @@ export const RelationsParameter = () => (
     withToggle={false}
   >
     <UseArray path="relations">
-      {({ items, addItem: addRelationItem, removeItem: removeRelationItem }) => (
-        <>
-          {items.map(({ id: relationId, path: relationPath, isNew: relationIsNew }) => (
-            <div key={relationId}>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  {/* By adding ".parent" to the path, we are saying that we want an **object**
+      {({ items: relationItems, addItem: addRelationItem, removeItem: removeRelationItem }) => {
+        const totalRelations = relationItems.length;
+        return (
+          <>
+            {relationItems.map(({ id: relationId, path: relationPath, isNew: relationIsNew }) => {
+              return (
+                <div key={relationId}>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      {/* By adding ".parent" to the path, we are saying that we want an **object**
                   to be created for each array item, with a "parent" property */}
-                  <UseField
-                    path={`${relationPath}.parent`}
-                    config={parentConfig}
-                    // For newly created relations, we don't want to read
-                    // the default value from the form as... it is new! :)
-                    readDefaultValueOnForm={!relationIsNew}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {/* // Extra div to get out of flex flow */}
-                  <div>
-                    {/* Nested array under the "children" property of the relation (array) item */}
-                    <UseArray path={`${relationPath}.children`}>
-                      {({
-                        items: childrenItems,
-                        addItem: addChildItem,
-                        removeItem: removeChildItem,
-                      }) => (
-                        <>
-                          {/* Extra div to be able to target css :last-child */}
-                          <div>
-                            {childrenItems.map(
-                              ({ id: childId, path: childPath, isNew: isChildNew }, index) => (
-                                <div key={childId} className="mappingsEditor__dynamicItem">
-                                  <UseField
-                                    path={childPath}
-                                    config={childConfig}
-                                    readDefaultValueOnForm={!isChildNew}
-                                  />
+                      <UseField
+                        path={`${relationPath}.parent`}
+                        config={parentConfig}
+                        // For newly created relations, we don't want to read
+                        // the default value from the form as... it is new! :)
+                        readDefaultValueOnForm={!relationIsNew}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      {/* Extra div to get out of flex flow */}
+                      <div>
+                        {/* Nested array under the "children" property of the relation (array) item */}
+                        <UseArray path={`${relationPath}.children`}>
+                          {({
+                            items: childrenItems,
+                            addItem: addChildItem,
+                            removeItem: removeChildItem,
+                          }) => {
+                            const totalChildren = childrenItems.length;
+                            return (
+                              <>
+                                {/* Extra div to be able to target css :last-child */}
+                                <div>
+                                  {childrenItems.map(
+                                    ({ id: childId, path: childPath, isNew: isChildNew }) => {
+                                      return (
+                                        <div
+                                          key={`${relationId}-${childId}`}
+                                          className="mappingsEditor__dynamicItem"
+                                        >
+                                          <>
+                                            <UseField
+                                              path={childPath}
+                                              config={childConfig}
+                                              readDefaultValueOnForm={!relationIsNew && !isChildNew}
+                                            />
 
-                                  <EuiButtonIcon
-                                    className="mappingsEditor__dynamicItem__removeButton"
-                                    color="danger"
-                                    onClick={() => removeChildItem(childId)}
-                                    iconType="cross"
-                                    aria-label={i18n.translate(
-                                      'xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel',
+                                            {totalRelations === 1 && totalChildren === 1 ? null : (
+                                              <EuiButtonIcon
+                                                className="mappingsEditor__dynamicItem__removeButton"
+                                                color="danger"
+                                                onClick={() =>
+                                                  totalChildren === 1
+                                                    ? removeRelationItem(relationId)
+                                                    : removeChildItem(childId)
+                                                }
+                                                iconType="cross"
+                                                aria-label={i18n.translate(
+                                                  'xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel',
+                                                  {
+                                                    defaultMessage: 'Remove child',
+                                                  }
+                                                )}
+                                              />
+                                            )}
+                                          </>
+                                        </div>
+                                      );
+                                    }
+                                  )}
+                                </div>
+                                <EuiSpacer size="s" />
+                                <EuiTextAlign textAlign="right">
+                                  <EuiButtonEmpty
+                                    onClick={addChildItem}
+                                    data-test-subj="addChildRelationButton"
+                                    size="xs"
+                                  >
+                                    {i18n.translate(
+                                      'xpack.idxMgmt.mappingsEditor.joinType.addChildRelationButtonLabel',
                                       {
-                                        defaultMessage: 'Remove child',
+                                        defaultMessage: 'Add child',
                                       }
                                     )}
-                                  />
-                                </div>
-                              )
-                            )}
-                          </div>
-                          <EuiSpacer size="s" />
-                          <EuiTextAlign textAlign="right">
-                            <EuiButtonEmpty
-                              onClick={addChildItem}
-                              data-test-subj="addChildRelationButton"
-                              size="xs"
-                            >
-                              {i18n.translate(
-                                'xpack.idxMgmt.mappingsEditor.joinType.addChildRelationButtonLabel',
-                                {
-                                  defaultMessage: 'Add child',
-                                }
-                              )}
-                            </EuiButtonEmpty>
-                          </EuiTextAlign>
-                        </>
-                      )}
-                    </UseArray>
-                  </div>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          ))}
-
-          <EuiSpacer size="s" />
-
-          <EuiButtonEmpty
-            onClick={addRelationItem}
-            iconType="plusInCircleFilled"
-            data-test-subj="addRelationButton"
-          >
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel', {
-              defaultMessage: 'Add relation',
+                                  </EuiButtonEmpty>
+                                </EuiTextAlign>
+                              </>
+                            );
+                          }}
+                        </UseArray>
+                      </div>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              );
             })}
-          </EuiButtonEmpty>
-        </>
-      )}
+
+            <EuiSpacer size="s" />
+
+            <EuiButtonEmpty
+              onClick={addRelationItem}
+              iconType="plusInCircleFilled"
+              data-test-subj="addRelationButton"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel', {
+                defaultMessage: 'Add relation',
+              })}
+            </EuiButtonEmpty>
+          </>
+        );
+      }}
     </UseArray>
   </EditFieldFormRow>
 );
