@@ -71,6 +71,12 @@ export async function startApp(
     </KibanaContextProvider>
   );
 
+  // Ensure the element we're handed from application mounting takes up
+  // the full size it can, so that our inner application styles work as
+  // expected.
+  element.style.height = '100%';
+  element.style.display = 'flex';
+
   ReactDOM.render(<App />, element);
 
   return () => {
