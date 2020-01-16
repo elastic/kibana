@@ -179,7 +179,7 @@ export const RelationsParameter = () => {
                   <EuiSpacer />
                 </>
               )}
-              {relationItems.map(({ id: relationId, path: relationPath, isNew: relationIsNew }) => {
+              {relationItems.map(({ id: relationId, path: relationPath, isNew: isNewRelation }) => {
                 return (
                   <div key={relationId}>
                     <EuiFlexGroup>
@@ -191,14 +191,17 @@ export const RelationsParameter = () => {
                           config={parentConfig}
                           // For newly created relations, we don't want to read
                           // the default value from the form as... it is new! :)
-                          readDefaultValueOnForm={!relationIsNew}
+                          readDefaultValueOnForm={!isNewRelation}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         {/* Extra div to get out of flex flow */}
                         <div>
                           {/* Nested array under the "children" property of the relation (array) item */}
-                          <UseArray path={`${relationPath}.children`}>
+                          <UseArray
+                            path={`${relationPath}.children`}
+                            readDefaultValueOnForm={!isNewRelation}
+                          >
                             {({
                               items: childrenItems,
                               addItem: addChildItem,
@@ -210,7 +213,7 @@ export const RelationsParameter = () => {
                                   {/* Extra div to be able to target css :last-child */}
                                   <div>
                                     {childrenItems.map(
-                                      ({ id: childId, path: childPath, isNew: isChildNew }) => {
+                                      ({ id: childId, path: childPath, isNew: isNewChild }) => {
                                         return (
                                           <div
                                             key={`${relationId}-${childId}`}
@@ -221,7 +224,7 @@ export const RelationsParameter = () => {
                                                 path={childPath}
                                                 config={childConfig}
                                                 readDefaultValueOnForm={
-                                                  !relationIsNew && !isChildNew
+                                                  !isNewRelation && !isNewChild
                                                 }
                                               />
 
