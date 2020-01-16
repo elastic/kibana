@@ -30,6 +30,9 @@ class MockSource {
   getSupportedShapeTypes() {
     return this._supportedShapeTypes;
   }
+  getFieldByName(fieldName) {
+    return new MockField({ fieldName });
+  }
   createField({ fieldName }) {
     return new MockField({ fieldName });
   }
