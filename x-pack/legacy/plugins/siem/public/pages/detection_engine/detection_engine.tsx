@@ -4,27 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiButton, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
-
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+
+import { Query } from '../../../../../../../src/plugins/data/common/query';
+import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
+
+import { GlobalTime } from '../../containers/global_time';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { AlertsTable } from '../../components/alerts_viewer/alerts_table';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
-import { GlobalTime } from '../../containers/global_time';
-import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { SpyRoute } from '../../utils/route/spy_routes';
-
-import { Query } from '../../../../../../../src/plugins/data/common/query';
-import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
 import { State } from '../../store';
 import { inputsSelectors } from '../../store/inputs';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { SpyRoute } from '../../utils/route/spy_routes';
 import { InputsModelId } from '../../store/inputs/constants';
 import { InputsRange } from '../../store/inputs/model';
+import { AlertsByCategory } from '../overview/alerts_by_category';
 import { useSignalInfo } from './components/signals_info';
 import { SignalsTable } from './components/signals';
 import { NoWriteSignalsCallOut } from './components/no_write_signals_callout';
@@ -35,6 +38,12 @@ import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
+import { DETECTION_ENGINE_PAGE_NAME } from '../../components/link_to/redirect_to_detection_engine';
+
+export enum DetectionEngineTab {
+  signal = 'signal',
+  alert = 'alert',
+}
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -51,8 +60,23 @@ export interface DispatchProps {
 
 type DetectionEngineComponentProps = ReduxProps & DispatchProps;
 
+const detectionsTabs = [
+  {
+    id: DetectionEngineTab.signal,
+    name: i18n.SIGNAL,
+    disabled: false,
+  },
+  {
+    id: DetectionEngineTab.alert,
+    name: i18n.ALERT,
+    disabled: false,
+  },
+];
+
 const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
   ({ filters, query, setAbsoluteRangeDatePicker }) => {
+    const { tabName = DetectionEngineTab.signal } = useParams();
+    const [selectedTab, setSelectedTab] = useState(tabName);
     const {
       loading,
       isSignalIndexExists,
@@ -87,6 +111,31 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
         </WrapperPage>
       );
     }
+
+    useEffect(() => {
+      if (selectedTab !== tabName) {
+        setSelectedTab(tabName);
+      }
+    }, [selectedTab, setSelectedTab, tabName]);
+
+    const tabs = useMemo(
+      () => (
+        <EuiTabs>
+          {detectionsTabs.map(tab => (
+            <EuiTab
+              isSelected={tab.id === selectedTab}
+              disabled={tab.disabled}
+              key={tab.name}
+              href={`#/${DETECTION_ENGINE_PAGE_NAME}/${tab.id}`}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ),
+      [detectionsTabs, selectedTab]
+    );
+
     return (
       <>
         {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
@@ -117,26 +166,49 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                   </HeaderPage>
 
                   <GlobalTime>
-                    {({ to, from }) => (
+                    {({ to, from, deleteQuery, setQuery }) => (
                       <>
-                        <SignalsHistogramPanel
-                          filters={filters}
-                          from={from}
-                          loadingInitial={loading}
-                          query={query}
-                          stackByOptions={signalsHistogramOptions}
-                          to={to}
-                          updateDateRange={updateDateRangeCallback}
-                        />
+                        {tabs}
                         <EuiSpacer />
-                        <SignalsTable
-                          loading={loading}
-                          hasIndexWrite={hasIndexWrite ?? false}
-                          canUserCRUD={canUserCRUD ?? false}
-                          from={from}
-                          signalsIndex={signalIndexName ?? ''}
-                          to={to}
-                        />
+                        {selectedTab === DetectionEngineTab.signal && (
+                          <>
+                            <SignalsHistogramPanel
+                              filters={filters}
+                              from={from}
+                              loadingInitial={loading}
+                              query={query}
+                              stackByOptions={signalsHistogramOptions}
+                              to={to}
+                              updateDateRange={updateDateRangeCallback}
+                            />
+                            <EuiSpacer size="l" />
+                            <SignalsTable
+                              loading={loading}
+                              hasIndexWrite={hasIndexWrite ?? false}
+                              canUserCRUD={canUserCRUD ?? false}
+                              from={from}
+                              signalsIndex={signalIndexName ?? ''}
+                              to={to}
+                            />
+                          </>
+                        )}
+                        {selectedTab === DetectionEngineTab.alert && (
+                          <>
+                            <AlertsByCategory
+                              deleteQuery={deleteQuery}
+                              filters={filters}
+                              from={from}
+                              hideHeaderChildren={true}
+                              indexPattern={indexPattern}
+                              query={query}
+                              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
+                              setQuery={setQuery}
+                              to={to}
+                            />
+                            <EuiSpacer size="l" />
+                            <AlertsTable endDate={to} startDate={from} />
+                          </>
+                        )}
                       </>
                     )}
                   </GlobalTime>

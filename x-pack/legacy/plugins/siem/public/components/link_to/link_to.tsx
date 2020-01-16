@@ -20,6 +20,7 @@ import { RedirectToHostsPage, RedirectToHostDetailsPage } from './redirect_to_ho
 import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
 import { RedirectToTimelinesPage } from './redirect_to_timelines';
+import { DetectionEngineTab } from '../../pages/detection_engine/detection_engine';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -60,7 +61,7 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     <Route
       component={RedirectToDetectionEnginePage}
       exact
-      path={`${match.url}/:pageName(${SiemPageName.detectionEngine})`}
+      path={`${match.url}/:pageName(${SiemPageName.detectionEngine})/:tabName(${DetectionEngineTab.alert}|${DetectionEngineTab.signal})`}
       strict
     />
     <Route

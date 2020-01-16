@@ -22,8 +22,12 @@ export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
   defaultMessage: 'Signals',
 });
 
+export const ALERT = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
+  defaultMessage: 'Third-party alerts',
+});
+
 export const BUTTON_MANAGE_RULES = i18n.translate('xpack.siem.detectionEngine.buttonManageRules', {
-  defaultMessage: 'Manage rules',
+  defaultMessage: 'Manage signal detection rules',
 });
 
 export const PANEL_SUBTITLE_SHOWING = i18n.translate(

@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiHealth,
   EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -187,17 +188,20 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
         : 'subdued';
 
     const tabs = useMemo(
-      () =>
-        ruleDetailTabs.map(tab => (
-          <EuiTab
-            onClick={() => setRuleDetailTab(tab.id)}
-            isSelected={tab.id === ruleDetailTab}
-            disabled={tab.disabled}
-            key={tab.name}
-          >
-            {tab.name}
-          </EuiTab>
-        )),
+      () => (
+        <EuiTabs>
+          {ruleDetailTabs.map(tab => (
+            <EuiTab
+              onClick={() => setRuleDetailTab(tab.id)}
+              isSelected={tab.id === ruleDetailTab}
+              disabled={tab.disabled}
+              key={tab.name}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ),
       [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
     );
     const ruleError = useMemo(

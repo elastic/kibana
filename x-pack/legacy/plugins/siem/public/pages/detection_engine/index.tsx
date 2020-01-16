@@ -8,7 +8,7 @@ import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { CreateRuleComponent } from './rules/create';
-import { DetectionEngine } from './detection_engine';
+import { DetectionEngine, DetectionEngineTab } from './detection_engine';
 import { EditRuleComponent } from './rules/edit';
 import { RuleDetails } from './rules/details';
 import { RulesComponent } from './rules';
@@ -21,7 +21,11 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 export const DetectionEngineContainer = React.memo<Props>(() => (
   <ManageUserInfo>
     <Switch>
-      <Route exact path={detectionEnginePath} strict>
+      <Route
+        exact
+        path={`${detectionEnginePath}/:tabName(${DetectionEngineTab.signal}|${DetectionEngineTab.alert})`}
+        strict
+      >
         <DetectionEngine />
       </Route>
       <Route exact path={`${detectionEnginePath}/rules`}>
@@ -30,7 +34,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
       <Route exact path={`${detectionEnginePath}/rules/create`}>
         <CreateRuleComponent />
       </Route>
-      <Route exact path={`${detectionEnginePath}/rules/id/:ruleId`}>
+      <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/`}>
         <RuleDetails />
       </Route>
       <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
@@ -39,7 +43,10 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
       <Route
         path="/detection-engine/"
         render={({ location: { search = '' } }) => (
-          <Redirect from="/detection-engine/" to={`/detection-engine${search}`} />
+          <Redirect
+            from="/detection-engine/"
+            to={`/detection-engine/${DetectionEngineTab.signal}${search}`}
+          />
         )}
       />
     </Switch>

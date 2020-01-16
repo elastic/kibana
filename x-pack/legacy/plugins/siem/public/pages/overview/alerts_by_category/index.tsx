@@ -16,7 +16,7 @@ import {
   UNIT,
 } from '../../../components/alerts_viewer/translations';
 import { alertsStackByOptions } from '../../../components/alerts_viewer';
-import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
+import { getDetectionEngineAlertUrl } from '../../../components/link_to/redirect_to_detection_engine';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
@@ -25,7 +25,7 @@ import { convertToBuildEsQuery } from '../../../lib/keury';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import { esQuery } from '../../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
-import { HostsTableType, HostsType } from '../../../store/hosts/model';
+import { HostsType } from '../../../store/hosts/model';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 
 import * as i18n from '../translations';
@@ -39,6 +39,7 @@ interface Props {
   deleteQuery?: ({ id }: { id: string }) => void;
   filters?: esFilters.Filter[];
   from: number;
+  hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   query?: Query;
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
@@ -60,6 +61,7 @@ export const AlertsByCategory = React.memo<Props>(
     deleteQuery,
     filters = NO_FILTERS,
     from,
+    hideHeaderChildren = false,
     indexPattern,
     query = DEFAULT_QUERY,
     setAbsoluteRangeDatePicker,
@@ -76,9 +78,7 @@ export const AlertsByCategory = React.memo<Props>(
     );
     const alertsCountViewAlertsButton = useMemo(
       () => (
-        <ViewAlertsButton href={getTabsOnHostsUrl(HostsTableType.alerts)}>
-          {i18n.VIEW_ALERTS}
-        </ViewAlertsButton>
+        <ViewAlertsButton href={getDetectionEngineAlertUrl()}>{i18n.VIEW_ALERTS}</ViewAlertsButton>
       ),
       []
     );
@@ -106,7 +106,7 @@ export const AlertsByCategory = React.memo<Props>(
           queries: [query],
           filters,
         })}
-        headerChildren={alertsCountViewAlertsButton}
+        headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
         id={ID}
         isAlertsHistogram={true}
         legendPosition={'right'}
