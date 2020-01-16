@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { useFormContext } from '../form_context';
 
@@ -53,6 +53,7 @@ export interface ArrayItem {
  * Look at the README.md for some examples.
  */
 export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
+  const didMountRef = useRef(false);
   const form = useFormContext();
   const defaultValues = form.getFieldDefaultValue(path) as any[];
   const uniqueId = useRef(0);
@@ -98,6 +99,14 @@ export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
       return updatePaths(updatedItems);
     });
   };
+
+  useEffect(() => {
+    if (didMountRef.current) {
+      setItems(updatePaths(items));
+    } else {
+      didMountRef.current = true;
+    }
+  }, [path]);
 
   return children({ items, addItem, removeItem });
 };
