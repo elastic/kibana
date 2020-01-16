@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { PainlessPlayground } from './components/painless_playground';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 import { executeCode } from './lib/execute_code';
@@ -17,9 +16,7 @@ export function renderApp(element: any, npStart: any) {
   });
   render(
     <KibanaReactContextProvider>
-      <I18nProvider>
-        <PainlessPlayground executeCode={payload => executeCode(npStart.core.http, payload)} />
-      </I18nProvider>
+      <PainlessPlayground executeCode={payload => executeCode(npStart.core.http, payload)} />
     </KibanaReactContextProvider>,
     element
   );

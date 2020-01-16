@@ -3,28 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { ServerRoute } from 'hapi';
 import { licensePreRoutingFactory } from './lib/license_pre_routing_factory';
-import { RequestFacade, ServerFacade } from '../../reporting/types';
+import { Legacy } from '../../../../../kibana';
 
-export function registerSimulateRoute(server: ServerFacade) {
+export function registerExecuteRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/painless_playground/execute',
     method: 'POST',
-    handler: (request: RequestFacade) => {
+    handler: (request: Legacy.Request) => {
       const cluster = server.plugins.elasticsearch.getCluster('data');
       return cluster
         .callWithRequest(request, 'scriptsPainlessExecute', {
           body: request.payload,
         })
-        .catch((e: Error) => {
+        .catch((e: any) => {
           return e.body;
         });
     },
     config: {
       pre: [licensePreRouting],
     },
-  });
+  } as ServerRoute);
 }

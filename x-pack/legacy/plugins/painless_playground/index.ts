@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 
 import { registerLicenseChecker } from './server/register_license_checker';
-import { registerSimulateRoute } from './server/register_simulate_route';
+import { registerExecuteRoute } from './server/register_execute_route';
 
 export const painlessPlayground = (kibana: any) =>
   new kibana.Plugin({
@@ -26,6 +26,6 @@ export const painlessPlayground = (kibana: any) =>
     },
     init: (server: any) => {
       registerLicenseChecker(server);
-      registerSimulateRoute(server);
+      registerExecuteRoute(server);
     },
   });
