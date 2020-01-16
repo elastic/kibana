@@ -42,7 +42,7 @@ const createStartContractMock = () => {
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
     getScopedClient: jest.fn(),
-    setClientFactory: jest.fn(),
+    setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
@@ -55,7 +55,7 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
-const createsavedObjectsServiceMock = () => {
+const createSavedObjectsServiceMock = () => {
   const mocked: jest.Mocked<SavedObjectsServiceContract> = {
     setup: jest.fn(),
     start: jest.fn(),
@@ -69,7 +69,7 @@ const createsavedObjectsServiceMock = () => {
 };
 
 export const savedObjectsServiceMock = {
-  create: createsavedObjectsServiceMock,
+  create: createSavedObjectsServiceMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

@@ -273,7 +273,7 @@ export class LegacyService implements CoreService {
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
       savedObjects: {
-        setClientFactory: setupDeps.core.savedObjects.setClientFactory,
+        setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         createInternalRepository: setupDeps.core.savedObjects.createInternalRepository,
         createScopedRepository: setupDeps.core.savedObjects.createScopedRepository,

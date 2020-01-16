@@ -37,7 +37,7 @@ import { KibanaRequest } from '../http';
 import { SavedObjectsClientContract } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
-  SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '..';
@@ -83,7 +83,9 @@ export interface SavedObjectsServiceSetup {
    * Set a default factory for creating Saved Objects clients. Only one client
    * factory can be set, subsequent calls to this method will fail.
    */
-  setClientFactory: (customClientFactory: SavedObjectsClientFactory<KibanaRequest>) => void;
+  setClientFactoryProvider: (
+    clientFactoryProvider: SavedObjectsClientFactoryProvider<KibanaRequest>
+  ) => void;
 
   /**
    * Add a client wrapper with the given priority.
@@ -122,6 +124,25 @@ export interface SavedObjectsServiceSetup {
    * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
    * method or the {@link RequestHandlerContext | route handler context}
    * instead.
+   */
+  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+}
+
+/**
+ * TODO documentation
+ *
+ * @public
+ */
+export interface SavedObjectsRepositoryFactory {
+  /**
+   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
+   * uses the credentials from the passed in request to authenticate with
+   * Elasticsearch.
+   */
+  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  /**
+   * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
+   * uses the internal Kibana user for authenticating with Elasticsearch.
    */
   createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
 }
@@ -235,7 +256,7 @@ export class SavedObjectsService
       ),
     }));
 
-    const createSORepository = (callCluster: APICaller, extraTypes: string[] = []) => {
+    const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
         migrator,
         savedObjectSchemas,
@@ -246,21 +267,29 @@ export class SavedObjectsService
       );
     };
 
+    const repositoryFactory: SavedObjectsRepositoryFactory = {
+      createInternalRepository: (extraTypes?: string[]) =>
+        createRepository(adminClient.callAsInternalUser, extraTypes),
+      createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
+        createRepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+    };
+
     this.clientProvider = new SavedObjectsClientProvider<KibanaRequest>({
       defaultClientFactory({ request }) {
-        const repository = createSORepository(adminClient.asScoped(request).callAsCurrentUser);
+        const repository = repositoryFactory.createScopedRepository(request);
         return new SavedObjectsClient(repository);
       },
     });
 
     return {
       getScopedClient: this.clientProvider.getClient.bind(this.clientProvider),
-      setClientFactory: this.clientProvider.setClientFactory.bind(this.clientProvider),
+      setClientFactoryProvider: provider => {
+        const factory = provider(repositoryFactory);
+        this.clientProvider!.setClientFactory(factory);
+      },
       addClientWrapper: this.clientProvider.addClientWrapperFactory.bind(this.clientProvider),
-      createInternalRepository: (extraTypes?: string[]) =>
-        createSORepository(adminClient.callAsInternalUser, extraTypes),
-      createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
-        createSORepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+      createInternalRepository: repositoryFactory.createInternalRepository,
+      createScopedRepository: repositoryFactory.createScopedRepository,
     };
   }
 

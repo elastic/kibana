@@ -18,6 +18,7 @@
  */
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
+import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
@@ -45,6 +46,15 @@ export type SavedObjectsClientFactory<Request = unknown> = ({
 }: {
   request: Request;
 }) => SavedObjectsClientContract;
+
+/**
+ * TODO: doc + export
+ *
+ * @public
+ */
+export type SavedObjectsClientFactoryProvider<Request = unknown> = (
+  repositoryFactory: SavedObjectsRepositoryFactory
+) => SavedObjectsClientFactory<Request>;
 
 /**
  * Options to control the creation of the Saved Objects Client.
