@@ -17,21 +17,14 @@
  * under the License.
  */
 
-import Url from 'url';
-
-import React, { Component, createRef } from 'react';
-import * as Rx from 'rxjs';
-
 import {
   // TODO: add type annotations
   EuiHeader,
-  EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
   EuiHorizontalRule,
   EuiIcon,
-  EuiImage,
   // @ts-ignore
   EuiNavDrawer,
   // @ts-ignore
@@ -39,165 +32,30 @@ import {
   // @ts-ignore
   EuiShowFor,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-
 import { groupBy, sortBy } from 'lodash';
+import React, { Component, createRef } from 'react';
+import * as Rx from 'rxjs';
+import {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeNavControl,
+  ChromeNavLink,
+  ChromeRecentlyAccessedHistoryItem,
+} from '../..';
+import { AppCategory } from '../../../../types';
+import { InternalApplicationStart } from '../../../application/types';
+import { HttpStart } from '../../../http';
+import { ChromeHelpExtension } from '../../chrome_service';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
-import { AppCategory } from '../../../../types';
+import { RecentLinks, NavLink, HeaderLogo, euiNavLink } from './header_bits';
 
-import {
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeNavLink,
-  ChromeRecentlyAccessedHistoryItem,
-  ChromeNavControl,
-} from '../..';
-import { HttpStart } from '../../../http';
-import { ChromeHelpExtension } from '../../chrome_service';
-import { InternalApplicationStart } from '../../../application/types';
-import { CoreStart } from '../../../';
-
-// Providing a buffer between the limit and the cut off index
-// protects from truncating just the last couple (6) characters
-const TRUNCATE_LIMIT: number = 64;
-const TRUNCATE_AT: number = 58;
-
-/**
- * @param {string} url - a relative or root relative url.  If a relative path is given then the
- * absolute url returned will depend on the current page where this function is called from. For example
- * if you are on page "http://www.mysite.com/shopping/kids" and you pass this function "adults", you would get
- * back "http://www.mysite.com/shopping/adults".  If you passed this function a root relative path, or one that
- * starts with a "/", for example "/account/cart", you would get back "http://www.mysite.com/account/cart".
- * @return {string} the relative url transformed into an absolute url
- */
-function relativeToAbsolute(url: string) {
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
-
-function euiRecentItem(
-  navLinks: ChromeNavLink[],
-  recentlyAccessed: ChromeRecentlyAccessedHistoryItem,
-  basePath: HttpStart['basePath']
-) {
-  const href = relativeToAbsolute(basePath.prepend(recentlyAccessed.link));
-  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase || nl.baseUrl));
-  let titleAndAriaLabel = recentlyAccessed.label;
-
-  if (navLink) {
-    titleAndAriaLabel = i18n.translate('core.ui.recentLinks.linkItem.screenReaderLabel', {
-      defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
-      values: {
-        recentlyAccessedItemLinklabel: recentlyAccessed.label,
-        pageType: navLink.title,
-      },
-    });
-  }
-
-  return {
-    href,
-    label: truncateRecentItemLabel(recentlyAccessed.label),
-    title: titleAndAriaLabel,
-    'aria-label': titleAndAriaLabel,
-    euiIconType: navLink?.euiIconType,
-  };
-}
-
-function euiNavLink(
-  navLink: ChromeNavLink,
-  legacyMode: boolean,
-  currentAppId: string | undefined,
-  basePath: HttpStart['basePath'],
-  navigateToApp: CoreStart['application']['navigateToApp']
-) {
-  const {
-    legacy,
-    url,
-    active,
-    baseUrl,
-    id,
-    title,
-    disabled,
-    euiIconType,
-    icon,
-    category,
-    order,
-    tooltip,
-  } = navLink;
-  let href = navLink.baseUrl;
-
-  if (legacy) {
-    href = url && !active ? url : baseUrl;
-  }
-
-  return {
-    category,
-    key: id,
-    label: tooltip ?? title,
-    href, // Use href and onClick to support "open in new tab" and SPA navigation in the same link
-    onClick(event: MouseEvent) {
-      if (
-        !legacyMode && // ignore when in legacy mode
-        !legacy && // ignore links to legacy apps
-        !event.defaultPrevented && // onClick prevented default
-        event.button === 0 && // ignore everything but left clicks
-        !isModifiedEvent(event) // ignore clicks with modifier keys
-      ) {
-        event.preventDefault();
-        navigateToApp(navLink.id);
-      }
-    },
-    // Legacy apps use `active` property, NP apps should match the current app
-    isActive: active || currentAppId === id,
-    isDisabled: disabled,
-    iconType: euiIconType,
-    icon: !euiIconType && icon ? renderLinkIcon(basePath.prepend(`/${icon}`)) : undefined,
-    order,
-    'data-test-subj': 'navDrawerAppsMenuLink',
-  };
-}
-
-function renderLinkIcon(url: string) {
-  return <EuiImage size="s" alt="" aria-hidden={true} url={url} />;
-}
-
-function isModifiedEvent(event: MouseEvent) {
-  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-}
-
-function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
-  let current = element;
-  while (current) {
-    if (current.tagName === 'A') {
-      return current as HTMLAnchorElement;
-    }
-
-    if (!current.parentElement || current.parentElement === document.body) {
-      return undefined;
-    }
-
-    current = current.parentElement;
-  }
-}
-
-function truncateRecentItemLabel(label: string): string {
-  if (label.length > TRUNCATE_LIMIT) {
-    label = `${label.substring(0, TRUNCATE_AT)}…`;
-  }
-
-  return label;
-}
-
-export type HeaderProps = Pick<Props, Exclude<keyof Props, 'intl'>>;
 export type NavSetting = 'grouped' | 'individual';
 
-interface Props {
+interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
   appTitle$: Rx.Observable<string>;
@@ -214,25 +72,22 @@ interface Props {
   legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
-  intl: InjectedIntl;
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
   navSetting$: Rx.Observable<NavSetting>;
   onIsLockedUpdate?: (isLocked: boolean) => void;
 }
 
-type ExtendedRecentlyAccessedHistoryItem = ReturnType<typeof euiRecentItem>;
-type NavLink = ReturnType<typeof euiNavLink>;
-
 interface State {
   appTitle: string;
   isVisible: boolean;
-  navLinks: NavLink[];
-  recentlyAccessed: ExtendedRecentlyAccessedHistoryItem[];
+  navLinks: ChromeNavLink[];
+  recentlyAccessed: ChromeRecentlyAccessedHistoryItem[];
   forceNavigation: boolean;
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
   navSetting: NavSetting;
+  currentAppId: string | undefined;
 }
 
 function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
@@ -255,11 +110,11 @@ function getOrderedCategories(
   );
 }
 
-class HeaderUI extends Component<Props, State> {
+export class Header extends Component<HeaderProps, State> {
   private subscription?: Rx.Subscription;
   private navDrawerRef = createRef<EuiNavDrawer>();
 
-  constructor(props: Props) {
+  constructor(props: HeaderProps) {
     super(props);
 
     this.state = {
@@ -271,6 +126,7 @@ class HeaderUI extends Component<Props, State> {
       navControlsLeft: [],
       navControlsRight: [],
       navSetting: 'grouped',
+      currentAppId: '',
     };
   }
 
@@ -301,23 +157,12 @@ class HeaderUI extends Component<Props, State> {
           appTitle,
           isVisible,
           forceNavigation,
-          navLinks: navLinks
-            .filter(navLink => !navLink.hidden)
-            .map(navLink =>
-              euiNavLink(
-                navLink,
-                this.props.legacyMode,
-                currentAppId,
-                this.props.basePath,
-                this.props.application.navigateToApp
-              )
-            ),
-          recentlyAccessed: recentlyAccessed.map(ra =>
-            euiRecentItem(navLinks, ra, this.props.basePath)
-          ),
+          navLinks: navLinks.filter(navLink => !navLink.hidden),
+          recentlyAccessed,
           navControlsLeft,
           navControlsRight,
           navSetting,
+          currentAppId,
         });
       },
     });
@@ -327,21 +172,6 @@ class HeaderUI extends Component<Props, State> {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  }
-
-  public renderLogo() {
-    const { homeHref } = this.props;
-    return (
-      <EuiHeaderLogo
-        data-test-subj="logo"
-        iconType="logoKibana"
-        onClick={this.onNavClick}
-        href={homeHref}
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
-          defaultMessage: 'Go to home page',
-        })}
-      />
-    );
   }
 
   public renderMenuTrigger() {
@@ -357,72 +187,15 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
-  public renderRecentLinks() {
-    return (
-      <EuiNavDrawerGroup
-        listItems={[
-          {
-            label: i18n.translate('core.ui.chrome.sideGlobalNav.viewRecentItemsLabel', {
-              defaultMessage: 'Recently viewed',
-            }),
-            iconType: 'clock',
-            isDisabled: !(this.state.recentlyAccessed.length > 0),
-            flyoutMenu: {
-              title: i18n.translate('core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle', {
-                defaultMessage: 'Recent items',
-              }),
-              listItems: this.state.recentlyAccessed.map(item => ({
-                label: truncateRecentItemLabel(item.label),
-                title: item.title,
-                'aria-label': item.title,
-                href: item.href,
-                iconType: item.euiIconType,
-              })),
-            },
-          },
-        ]}
-        aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
-          defaultMessage: 'Recently viewed links, navigation',
-        })}
-      />
-    );
-  }
-
-  public renderNavLinks() {
+  public renderNavLinks(navLinks: NavLink[]) {
     const disableGroupedNavSetting = this.state.navSetting === 'individual';
-    const groupedNavLinks = groupBy(this.state.navLinks, link => link?.category?.label);
+    const groupedNavLinks = groupBy(navLinks, link => link?.category?.label);
     const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
     const { Management: management, ...mainCategories } = allCategorizedLinks;
     const categoryDictionary = getAllCategories(allCategorizedLinks);
     const orderedCategories = getOrderedCategories(mainCategories, categoryDictionary);
     const showUngroupedNav =
-      disableGroupedNavSetting ||
-      this.state.navLinks.length < 7 ||
-      Object.keys(mainCategories).length === 1;
-
-    if (showUngroupedNav) {
-      return (
-        <EuiNavDrawer
-          ref={this.navDrawerRef}
-          data-test-subj="navDrawer"
-          isLocked={this.props.isLocked}
-          onIsLockedUpdate={this.props.onIsLockedUpdate}
-          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
-            defaultMessage: 'Primary',
-          })}
-        >
-          {this.renderRecentLinks()}
-          <EuiHorizontalRule margin="none" />
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerAppsMenu"
-            listItems={this.state.navLinks}
-            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-              defaultMessage: 'Primary navigation links',
-            })}
-          />
-        </EuiNavDrawer>
-      );
-    }
+      disableGroupedNavSetting || navLinks.length < 7 || Object.keys(mainCategories).length === 1;
 
     return (
       <EuiNavDrawer
@@ -434,63 +207,79 @@ class HeaderUI extends Component<Props, State> {
           defaultMessage: 'Primary',
         })}
       >
-        {this.renderRecentLinks()}
+        {RecentLinks({
+          recentlyAccessedItems: this.state.recentlyAccessed,
+          navLinks: this.state.navLinks,
+          basePath: this.props.basePath,
+        })}
         <EuiHorizontalRule margin="none" />
-        <EuiNavDrawerGroup
-          data-test-subj="navDrawerAppsMenu"
-          aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-            defaultMessage: 'Primary navigation links',
-          })}
-          listItems={[
-            ...orderedCategories.map(categoryName => {
-              const category = categoryDictionary[categoryName]!;
-              const links = mainCategories[categoryName];
+        {showUngroupedNav ? (
+          <EuiNavDrawerGroup
+            data-test-subj="navDrawerAppsMenu"
+            listItems={navLinks}
+            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+              defaultMessage: 'Primary navigation links',
+            })}
+          />
+        ) : (
+          <>
+            <EuiNavDrawerGroup
+              data-test-subj="navDrawerAppsMenu"
+              aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+                defaultMessage: 'Primary navigation links',
+              })}
+              listItems={[
+                ...orderedCategories.map(categoryName => {
+                  const category = categoryDictionary[categoryName]!;
+                  const links = mainCategories[categoryName];
 
-              if (links.length === 1) {
-                return {
-                  ...links[0],
-                  label: category.label,
-                  iconType: category.euiIconType || links[0].iconType,
-                };
-              }
+                  if (links.length === 1) {
+                    return {
+                      ...links[0],
+                      label: category.label,
+                      iconType: category.euiIconType || links[0].iconType,
+                    };
+                  }
 
-              return {
-                'data-test-subj': 'navDrawerCategory',
-                iconType: category.euiIconType,
-                label: category.label,
-                flyoutMenu: {
-                  title: category.label,
-                  listItems: sortBy(links, 'order').map(link => {
-                    link['data-test-subj'] = 'navDrawerFlyoutLink';
-                    return link;
-                  }),
-                },
-              };
-            }),
-            ...sortBy(unknowns, 'order'),
-          ]}
-        />
-        <EuiHorizontalRule margin="none" />
-        <EuiNavDrawerGroup
-          data-test-subj="navDrawerManagementMenu"
-          aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
-            defaultMessage: 'Management navigation links',
-          })}
-          listItems={[
-            {
-              label: categoryDictionary.Management!.label,
-              iconType: categoryDictionary.Management!.euiIconType,
-              'data-test-subj': 'navDrawerCategory',
-              flyoutMenu: {
-                title: categoryDictionary.Management!.label,
-                listItems: sortBy(management, 'order').map(link => {
-                  link['data-test-subj'] = 'navDrawerFlyoutLink';
-                  return link;
+                  return {
+                    'data-test-subj': 'navDrawerCategory',
+                    iconType: category.euiIconType,
+                    label: category.label,
+                    flyoutMenu: {
+                      title: category.label,
+                      listItems: sortBy(links, 'order').map(link => {
+                        link['data-test-subj'] = 'navDrawerFlyoutLink';
+                        return link;
+                      }),
+                    },
+                  };
                 }),
-              },
-            },
-          ]}
-        />
+                ...sortBy(unknowns, 'order'),
+              ]}
+            />
+            <EuiHorizontalRule margin="none" />
+            <EuiNavDrawerGroup
+              data-test-subj="navDrawerManagementMenu"
+              aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
+                defaultMessage: 'Management navigation links',
+              })}
+              listItems={[
+                {
+                  label: categoryDictionary.Management!.label,
+                  iconType: categoryDictionary.Management!.euiIconType,
+                  'data-test-subj': 'navDrawerCategory',
+                  flyoutMenu: {
+                    title: categoryDictionary.Management!.label,
+                    listItems: sortBy(management, 'order').map(link => {
+                      link['data-test-subj'] = 'navDrawerFlyoutLink';
+                      return link;
+                    }),
+                  },
+                },
+              ]}
+            />
+          </>
+        )}
       </EuiNavDrawer>
     );
   }
@@ -505,6 +294,15 @@ class HeaderUI extends Component<Props, State> {
       kibanaDocLink,
       kibanaVersion,
     } = this.props;
+    const navLinks = this.state.navLinks.map(link =>
+      euiNavLink(
+        link,
+        this.props.legacyMode,
+        this.state.currentAppId,
+        this.props.basePath,
+        this.props.application.navigateToApp
+      )
+    );
 
     if (!isVisible) {
       return null;
@@ -518,7 +316,13 @@ class HeaderUI extends Component<Props, State> {
               <EuiHeaderSectionItem border="right">{this.renderMenuTrigger()}</EuiHeaderSectionItem>
             </EuiShowFor>
 
-            <EuiHeaderSectionItem border="right">{this.renderLogo()}</EuiHeaderSectionItem>
+            <EuiHeaderSectionItem border="right">
+              <HeaderLogo
+                href={this.props.homeHref}
+                forceNavigation={this.state.forceNavigation}
+                navLinks={navLinks}
+              />
+            </EuiHeaderSectionItem>
 
             <HeaderNavControls side="left" navControls={navControlsLeft} />
           </EuiHeaderSection>
@@ -543,51 +347,8 @@ class HeaderUI extends Component<Props, State> {
           </EuiHeaderSection>
         </EuiHeader>
 
-        {this.renderNavLinks()}
+        {this.renderNavLinks(navLinks)}
       </header>
     );
   }
-
-  private onNavClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    const anchor = findClosestAnchor((event as any).nativeEvent.target);
-    if (!anchor) {
-      return;
-    }
-
-    const navLink = this.state.navLinks.find(item => item.href === anchor.href);
-    if (navLink && navLink.isDisabled) {
-      event.preventDefault();
-      return;
-    }
-
-    if (
-      !this.state.forceNavigation ||
-      event.isDefaultPrevented() ||
-      event.altKey ||
-      event.metaKey ||
-      event.ctrlKey
-    ) {
-      return;
-    }
-
-    const toParsed = Url.parse(anchor.href);
-    const fromParsed = Url.parse(document.location.href);
-    const sameProto = toParsed.protocol === fromParsed.protocol;
-    const sameHost = toParsed.host === fromParsed.host;
-    const samePath = toParsed.path === fromParsed.path;
-
-    if (sameProto && sameHost && samePath) {
-      if (toParsed.hash) {
-        document.location.reload();
-      }
-
-      // event.preventDefault() keeps the browser from seeing the new url as an update
-      // and even setting window.location does not mimic that behavior, so instead
-      // we use stopPropagation() to prevent angular from seeing the click and
-      // starting a digest cycle/attempting to handle it in the router.
-      event.stopPropagation();
-    }
-  };
 }
-
-export const Header = injectI18n(HeaderUI);
