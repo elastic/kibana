@@ -36,4 +36,9 @@ export const ACTION_STATES: { [key: string]: string } = {
   CONFIG_ERROR: i18n.translate('xpack.watcher.constants.actionStates.configErrorStateText', {
     defaultMessage: 'Config error',
   }),
+
+  // Action status is unknown; we should never end up in this state
+  UNKNOWN: i18n.translate('xpack.watcher.constants.actionStates.unknownStateText', {
+    defaultMessage: 'Unknown',
+  }),
 };
