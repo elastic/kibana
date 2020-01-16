@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n/react';
 import * as React from 'react';
+import { Unit } from '@elastic/datemath';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogTextSeparator } from './log_text_separator';
@@ -146,7 +147,7 @@ const ProgressCta: React.FC<Pick<
 
   const extendedRange = extendDatemath(rangeEdge, position === 'start' ? 'before' : 'after');
 
-  if (!extendedRange || extendedRange.value === 'now') {
+  if (!extendedRange || !('diffUnit' in extendedRange)) {
     return null;
   }
 
@@ -160,11 +161,78 @@ const ProgressCta: React.FC<Pick<
       iconType={iconType}
       size="s"
     >
-      <FormattedMessage
-        id="xpack.infra.logs.extendTimeframe"
-        defaultMessage="Extend timeframe {amount} {unit}"
-        values={{ amount: extendedRange.diffAmount, unit: extendedRange.diffUnit }}
-      />
+      <ProgressExtendMessage amount={extendedRange.diffAmount} unit={extendedRange.diffUnit} />
     </EuiButton>
   );
+};
+
+const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amount, unit }) => {
+  switch (unit) {
+    case 'ms':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.extendTimeframe"
+          defaultMessage="Extend timeframe {amount} milliseconds"
+          values={{ amount }}
+        />
+      );
+    case 's':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.extendTimeframe"
+          defaultMessage="Extend timeframe {amount} seconds"
+          values={{ amount }}
+        />
+      );
+    case 'm':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.extendTimeframe"
+          defaultMessage="Extend timeframe {amount} minutes"
+          values={{ amount }}
+        />
+      );
+    case 'h':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.extendTimeframe"
+          defaultMessage="Extend timeframe {amount} hours"
+          values={{ amount }}
+        />
+      );
+    case 'd':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.extendTimeframe"
+          defaultMessage="Extend timeframe {amount} days"
+          values={{ amount }}
+        />
+      );
+    case 'w':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.extendTimeframe"
+          defaultMessage="Extend timeframe {amount} weeks"
+          values={{ amount }}
+        />
+      );
+    case 'M':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.extendTimeframe"
+          defaultMessage="Extend timeframe {amount} months"
+          values={{ amount }}
+        />
+      );
+    case 'y':
+      return (
+        <FormattedMessage
+          id="xpack.infra.logs.extendTimeframe"
+          defaultMessage="Extend timeframe {amount} years"
+          values={{ amount }}
+        />
+      );
+    default:
+      throw new TypeError('Unhandled unit: ' + unit);
+  }
 };

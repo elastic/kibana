@@ -67,12 +67,12 @@ export function extendDatemath(
         const MINUTES_LARGE = 10;
         if (mustIncreaseAmount) {
           ratio = parsedAmount >= MINUTES_LARGE ? 0.5 : 1;
-          newAmount = parsedAmount + parsedAmount * ratio;
+          newAmount = parsedAmount + Math.floor(parsedAmount * ratio);
         } else {
           newAmount =
             parsedAmount >= MINUTES_LARGE
               ? Math.floor(parsedAmount / 1.5)
-              : parsedAmount - parsedAmount * 0.5;
+              : parsedAmount - Math.floor(parsedAmount * 0.5);
         }
         break;
 
