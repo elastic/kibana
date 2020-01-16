@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment-timezone';
+import { Legacy } from 'kibana';
 import { getLicenseExpiration } from './license_expiration';
 import {
   ALERT_TYPE_LICENSE_EXPIRATION,
@@ -68,6 +69,28 @@ const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
 };
 
 describe('getLicenseExpiration', () => {
+  // interface MockServer extends Legacy.Server {
+  //   newPlatform: {
+  //     __internals: {
+  //       uiSettings: {
+  //         asScopedToClient: () => { get: Promise<string> };
+  //       };
+  //     };
+  //   };
+  // }
+
+  const emailAddress = 'foo@foo.com';
+  const server: jest.Mocked<Partial<Legacy.Server>> = {
+    newPlatform: {
+      __internals: {
+        uiSettings: {
+          asScopedToClient: (): any => ({
+            get: () => new Promise(resolve => resolve(emailAddress)),
+          }),
+        },
+      },
+    },
+  };
   const getMonitoringCluster: () => void = jest.fn();
   const logger: Logger = {
     warn: jest.fn(),
@@ -87,13 +110,13 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should have the right id and actionGroups', () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
     expect(alert.id).toBe(ALERT_TYPE_LICENSE_EXPIRATION);
     expect(alert.actionGroups).toEqual(['default']);
   });
 
   it('should return the state if no license is provided', async () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
 
     const services: MockServices | AlertServices = {
       callCluster: jest.fn(),
@@ -113,7 +136,18 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should log a warning if no email is provided', async () => {
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
+    const customServer: jest.Mock<Legacy.Server> = {
+      newPlatform: {
+        __internals: {
+          uiSettings: {
+            asScopedToClient: () => ({
+              get: () => null,
+            }),
+          },
+        },
+      },
+    };
+    const alert = getLicenseExpiration(customServer, getMonitoringCluster, getLogger, ccrEnabled);
 
     const services = {
       callCluster: jest.fn(
@@ -164,8 +198,7 @@ describe('getLicenseExpiration', () => {
       }
     );
 
-    const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -235,8 +268,7 @@ describe('getLicenseExpiration', () => {
         return instance;
       }
     );
-    const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -312,8 +344,7 @@ describe('getLicenseExpiration', () => {
         return instance;
       }
     );
-    const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -377,8 +408,7 @@ describe('getLicenseExpiration', () => {
         return instance;
       }
     );
-    const emailAddress = 'foo@foo.com';
-    const alert = getLicenseExpiration(getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(

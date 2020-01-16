@@ -16,7 +16,6 @@ import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
 import {
   CODE_PATH_ALL,
-  MONITORING_CONFIG_SAVED_OBJECT_ID,
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
 } from '../../../../common/constants';
 
@@ -37,7 +36,7 @@ uiRoutes.when('/overview', {
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
       const showLicenseExpiration = $injector.get('showLicenseExpiration');
-      const savedObjectsClient = chrome.getSavedObjectsClient();
+      const config = $injector.get('config');
 
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
@@ -70,12 +69,8 @@ uiRoutes.when('/overview', {
             return;
           }
 
-          const monitoringConfig = await savedObjectsClient.get(
-            'config',
-            MONITORING_CONFIG_SAVED_OBJECT_ID
-          );
           const emailAddress =
-            monitoringConfig.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) ||
+            config.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) ||
             chrome.getInjected('monitoringLegacyEmailAddress') ||
             '';
 

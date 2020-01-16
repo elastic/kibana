@@ -6,6 +6,7 @@
 
 import moment from 'moment-timezone';
 import { get } from 'lodash';
+import { Legacy } from 'kibana';
 import { Logger } from 'src/core/server';
 import { ALERT_TYPE_LICENSE_EXPIRATION, INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertType } from '../../../alerting';
@@ -27,6 +28,7 @@ import { executeActions, getUiMessage } from '../lib/alerts/license_expiration.l
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export const getLicenseExpiration = (
+  server: Legacy.Server,
   getMonitoringCluster: any,
   getLogger: (contexts: string[]) => Logger,
   ccsEnabled: boolean
@@ -76,7 +78,10 @@ export const getLicenseExpiration = (
         return state;
       }
 
-      const emailAddress = await fetchDefaultEmailAddress(services.savedObjectsClient);
+      const uiSettings = server.newPlatform.__internals.uiSettings.asScopedToClient(
+        services.savedObjectsClient
+      );
+      const emailAddress = await fetchDefaultEmailAddress(uiSettings);
       if (!emailAddress) {
         // TODO: we can do more here
         logger.warn(

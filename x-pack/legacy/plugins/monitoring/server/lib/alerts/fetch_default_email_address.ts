@@ -3,23 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { get } from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
-import {
-  MONITORING_CONFIG_SAVED_OBJECT_ID,
-  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-} from '../../../common/constants';
+import { IUiSettingsClient } from 'src/core/server';
+import { MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS } from '../../../common/constants';
 
 export async function fetchDefaultEmailAddress(
-  savedObjectsClient: SavedObjectsClientContract
+  uiSettingsClient: IUiSettingsClient
 ): Promise<string> {
-  const monitoringConfig = await savedObjectsClient.get(
-    'config',
-    MONITORING_CONFIG_SAVED_OBJECT_ID
-  );
-  const emailAddress = get(
-    monitoringConfig,
-    `attributes.${MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS}`
-  ) as string;
-  return emailAddress;
+  return await uiSettingsClient.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS);
 }

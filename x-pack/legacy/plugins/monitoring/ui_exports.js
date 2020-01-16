@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
+import { MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS } from './common/constants';
 
 /**
  * Configuration of dependency objects for the UI, which are needed for the
@@ -35,6 +36,18 @@ export const getUiExports = () => ({
         'xpack.monitoring.cluster_alerts.email_notifications.email_address'
       ),
     };
+  },
+  uiSettingDefaults: {
+    [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: {
+      name: i18n.translate('xpack.monitoring.alertingEmailAddress.name', {
+        defaultMessage: 'Alerting email address',
+      }),
+      value: '',
+      description: i18n.translate('xpack.monitoring.alertingEmailAddress.description', {
+        defaultMessage: `The default email address to receive alerts from Stack Monitoring`,
+      }),
+      category: ['monitoring'],
+    },
   },
   hacks: ['plugins/monitoring/hacks/toggle_app_link_in_nav'],
   home: ['plugins/monitoring/register_feature'],

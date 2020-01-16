@@ -158,6 +158,7 @@ export class Plugin {
       }
       plugins.alerting.setup.registerType(
         getLicenseExpiration(
+          core._hapi,
           getMonitoringCluster,
           getLogger,
           config.get('xpack.monitoring.ccs.enabled')

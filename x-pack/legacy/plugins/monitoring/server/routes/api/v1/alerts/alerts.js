@@ -8,7 +8,6 @@ import Joi from 'joi';
 import { isFunction } from 'lodash';
 import {
   ALERT_TYPE_LICENSE_EXPIRATION,
-  MONITORING_CONFIG_SAVED_OBJECT_ID,
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
 } from '../../../../../common/constants';
 import { getDateFormat } from '../../../../lib/get_date_format';
@@ -62,21 +61,8 @@ async function createAlerts(req, alertsClient, { selectedEmailActionId }) {
   return createdAlerts;
 }
 
-async function saveEmailAddress(emailAddress, savedObjectsClient) {
-  try {
-    await savedObjectsClient.get('config', MONITORING_CONFIG_SAVED_OBJECT_ID);
-  } catch (err) {
-    await savedObjectsClient.create(
-      'config',
-      { [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress },
-      { id: MONITORING_CONFIG_SAVED_OBJECT_ID }
-    );
-    return;
-  }
-
-  await savedObjectsClient.update('config', MONITORING_CONFIG_SAVED_OBJECT_ID, {
-    [MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS]: emailAddress,
-  });
+async function saveEmailAddress(emailAddress, uiSettingsService) {
+  await uiSettingsService.set(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS, emailAddress);
 }
 
 export function createKibanaAlertsRoute(server) {
@@ -94,16 +80,13 @@ export function createKibanaAlertsRoute(server) {
     async handler(req, headers) {
       const { emailAddress, selectedEmailActionId } = req.payload;
       const alertsClient = isFunction(req.getAlertsClient) ? req.getAlertsClient() : null;
-      const savedObjectsClient = isFunction(req.getSavedObjectsClient)
-        ? req.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+      if (!alertsClient) {
         return headers.response().code(404);
       }
 
       const [alerts, emailResponse] = await Promise.all([
         createAlerts(req, alertsClient, { ...req.params, selectedEmailActionId }),
-        saveEmailAddress(emailAddress, savedObjectsClient),
+        saveEmailAddress(emailAddress, req.getUiSettingsService()),
       ]);
 
       return { alerts, emailResponse };
