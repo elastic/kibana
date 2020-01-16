@@ -25,6 +25,7 @@ import {
 } from '../../../../common';
 import { Field } from '../../../../../../../common/types/fields';
 import { LoadExploreDataArg } from '../../../../common/analytics';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 
 export type TableItem = Record<string, any>;
 
@@ -41,7 +42,8 @@ export const useExploreData = (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   selectedFields: Field[],
   setSelectedFields: React.Dispatch<React.SetStateAction<Field[]>>,
-  setDocFields: React.Dispatch<React.SetStateAction<Field[]>>
+  setDocFields: React.Dispatch<React.SetStateAction<Field[]>>,
+  setDepVarType: React.Dispatch<React.SetStateAction<ES_FIELD_TYPES | undefined>>
 ): UseExploreDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
@@ -53,11 +55,13 @@ export const useExploreData = (
     const { fields } = newJobCapsService;
 
     if (selectedFields.length === 0 && jobConfig !== undefined) {
-      const { selectedFields: defaultSelected, docFields } = getDefaultFieldsFromJobCaps(
-        fields,
-        jobConfig
-      );
+      const {
+        selectedFields: defaultSelected,
+        docFields,
+        depVarType,
+      } = getDefaultFieldsFromJobCaps(fields, jobConfig);
 
+      setDepVarType(depVarType);
       setSelectedFields(defaultSelected);
       setDocFields(docFields);
     }

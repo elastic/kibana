@@ -6,13 +6,17 @@
 
 import { drag, drop } from '../../lib/drag_n_drop/helpers';
 import { populateTimeline } from '../../lib/fields_browser/helpers';
-import { toggleFirstTimelineEventDetails } from '../../lib/timeline/helpers';
+import { createNewTimeline, toggleFirstTimelineEventDetails } from '../../lib/timeline/helpers';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
 describe('toggle column in timeline', () => {
-  beforeEach(() => {
+  before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
+  });
+
+  afterEach(() => {
+    createNewTimeline();
   });
 
   const timestampField = '@timestamp';
