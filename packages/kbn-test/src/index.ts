@@ -17,8 +17,15 @@
  * under the License.
  */
 
-// @ts-ignore not typed yet
-export { runTestsCli, startServersCli } from './functional_tests/cli';
+import {
+  runTestsCli,
+  processRunTestsCliOptions,
+  startServersCli,
+  processStartServersCliOptions,
+  // @ts-ignore not typed yet
+} from './functional_tests/cli';
+
+export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
 // @ts-ignore not typed yet
 export { runTests, startServers } from './functional_tests/tasks';
