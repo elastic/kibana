@@ -6,7 +6,12 @@
 
 import { VectorStyle } from './vector_style';
 import { SYMBOLIZE_AS_CIRCLE, DEFAULT_ICON_SIZE } from './vector_constants';
-import { COLOR_GRADIENTS, DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../color_utils';
+import {
+  COLOR_GRADIENTS,
+  COLOR_PALETTES,
+  DEFAULT_FILL_COLORS,
+  DEFAULT_LINE_COLORS,
+} from '../color_utils';
 import chrome from 'ui/chrome';
 
 const DEFAULT_ICON = 'airfield';
@@ -136,6 +141,7 @@ export function getDefaultDynamicProperties() {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
+        colorCategory: COLOR_PALETTES[0].value,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
@@ -146,7 +152,7 @@ export function getDefaultDynamicProperties() {
     [VECTOR_STYLES.LINE_COLOR]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
-        color: COLOR_GRADIENTS[0].value,
+        color: undefined,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
@@ -198,6 +204,7 @@ export function getDefaultDynamicProperties() {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
+        colorCategory: COLOR_PALETTES[0].value,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
@@ -221,6 +228,7 @@ export function getDefaultDynamicProperties() {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         color: COLOR_GRADIENTS[0].value,
+        colorCategory: COLOR_PALETTES[0].value,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,

@@ -43,6 +43,8 @@ export interface TableData {
   activate: boolean;
   isLoading: boolean;
   sourceRule: Rule;
+  status?: string | null;
+  statusDate?: string | null;
 }
 
 export enum RuleStep {

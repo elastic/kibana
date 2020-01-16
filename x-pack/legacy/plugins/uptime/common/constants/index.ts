@@ -11,3 +11,4 @@ export { INDEX_NAMES } from './index_names';
 export * from './capabilities';
 export { PLUGIN } from './plugin';
 export { QUERY, STATES } from './query';
+export * from './constants';

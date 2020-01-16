@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { palettes, EuiIcon } from '@elastic/eui';
+import { euiPaletteColorBlind, EuiIcon } from '@elastic/eui';
 import { IconSize } from '@elastic/eui/src/components/icon/icon';
 
 interface IconMapEntry {
@@ -36,6 +36,7 @@ interface FieldIconProps {
     | 'number'
     | '_source'
     | 'string'
+    | 'nested'
     | string;
   label?: string;
   size?: IconSize;
@@ -43,7 +44,7 @@ interface FieldIconProps {
   className?: string;
 }
 
-const { colors } = palettes.euiPaletteColorBlind;
+const colors = euiPaletteColorBlind();
 
 // defaultIcon => a unknown datatype
 const defaultIcon = { icon: 'questionInCircle', color: colors[0] };
@@ -61,6 +62,7 @@ export const typeToEuiIconMap: Partial<Record<string, IconMapEntry>> = {
   number: { icon: 'number', color: colors[0] },
   _source: { icon: 'editorCodeBlock', color: colors[3] },
   string: { icon: 'string', color: colors[4] },
+  nested: { icon: 'nested', color: colors[2] },
 };
 
 /**

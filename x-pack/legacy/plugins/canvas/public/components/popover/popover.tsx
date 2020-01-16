@@ -5,25 +5,23 @@
  */
 
 /* eslint react/no-did-mount-set-state: 0, react/forbid-elements: 0 */
-import React, { ReactNode, ReactElement, Component, MouseEvent } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiToolTip, ToolTipPositions, EuiPopover, PropsOf } from '@elastic/eui';
+import { EuiPopover, EuiToolTip } from '@elastic/eui';
 
-export interface PopoverChildrenProps {
-  closePopover: () => void;
-}
-
-type EuiPopoverProps = PropsOf<EuiPopover>;
-interface Props extends Omit<EuiPopoverProps, 'button' | 'isOpen' | 'closePopover' | 'container'> {
+interface Props {
+  button: (handleClick: React.MouseEventHandler<HTMLButtonElement>) => React.ReactElement;
+  tooltipPosition?: 'top' | 'bottom' | 'left' | 'right';
+  children: (arg: { closePopover: () => void }) => React.ReactNode;
   isOpen?: boolean;
   ownFocus?: boolean;
-
-  button: (handleClick: (ev: MouseEvent) => void) => ReactElement<any>;
-
-  children: (props: PopoverChildrenProps) => ReactNode;
-
-  tooltip: string;
-  tooltipPosition: ToolTipPositions;
+  tooltip?: string;
+  panelClassName?: string;
+  anchorClassName?: string;
+  anchorPosition?: string;
+  panelPaddingSize?: 'none' | 's' | 'm' | 'l';
+  id?: string;
+  className?: string;
 }
 
 interface State {
@@ -47,8 +45,8 @@ export class Popover extends Component<Props, State> {
     tooltipPosition: 'top',
   };
 
-  state = {
-    isPopoverOpen: false,
+  state: State = {
+    isPopoverOpen: !!this.props.isOpen,
   };
 
   componentDidMount() {
@@ -58,7 +56,7 @@ export class Popover extends Component<Props, State> {
   }
 
   handleClick = () => {
-    this.setState(state => ({
+    this.setState((state: any) => ({
       isPopoverOpen: !state.isPopoverOpen,
     }));
   };
@@ -72,9 +70,9 @@ export class Popover extends Component<Props, State> {
   render() {
     const { button, children, tooltip, tooltipPosition, ...rest } = this.props;
 
-    const wrappedButton = (handleClick: (ev: MouseEvent) => void) => {
+    const wrappedButton = (handleClick: any) => {
       // wrap button in tooltip, if tooltip text is provided
-      if (!this.state.isPopoverOpen && tooltip.length) {
+      if (!this.state.isPopoverOpen && tooltip && tooltip.length) {
         return (
           <EuiToolTip position={tooltipPosition} content={tooltip}>
             {button(handleClick)}
@@ -86,17 +84,18 @@ export class Popover extends Component<Props, State> {
     };
 
     const appWrapper = document.querySelector('.app-wrapper');
+    const EuiPopoverAny = (EuiPopover as any) as React.FC<any>;
 
     return (
-      <EuiPopover
+      <EuiPopoverAny
         {...rest}
         button={wrappedButton(this.handleClick)}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
-        container={appWrapper as HTMLElement}
+        container={appWrapper}
       >
         {children({ closePopover: this.closePopover })}
-      </EuiPopover>
+      </EuiPopoverAny>
     );
   }
 }

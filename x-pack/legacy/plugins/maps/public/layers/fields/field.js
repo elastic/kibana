@@ -45,7 +45,11 @@ export class AbstractField {
     return false;
   }
 
-  async getFieldMetaRequest(/* config */) {
+  async getOrdinalFieldMetaRequest(/* config */) {
+    return null;
+  }
+
+  async getCategoricalFieldMetaRequest() {
     return null;
   }
 }
