@@ -20,13 +20,11 @@
 import _ from 'lodash';
 import { filter, map } from 'rxjs/operators';
 // eslint-disable-next-line
-import { split } from '../../../../../plugins/bfetch/public/streaming';
-import { BfetchPublicApi } from '../../../../../plugins/bfetch/public';
-import { defer } from '../../../../../plugins/kibana_utils/public';
-import { FUNCTIONS_URL } from './consts';
+import { split, BfetchPublicContract } from '../../bfetch/public';
+import { defer } from '../../kibana_utils/public';
 
 export interface Options {
-  fetchStreaming: BfetchPublicApi['fetchStreaming'];
+  fetchStreaming: BfetchPublicContract['fetchStreaming'];
   serialize: any;
   ms?: number;
 }
@@ -111,9 +109,9 @@ export function batchedFetch({ fetchStreaming, serialize, ms = 10 }: Options) {
  * Runs the specified batch of functions on the server, then resolves
  * the related promises.
  */
-async function processBatch(fetchStreaming: BfetchPublicApi['fetchStreaming'], batch: Batch) {
-  const { stream, promise } = fetchStreaming({
-    url: FUNCTIONS_URL,
+async function processBatch(fetchStreaming: BfetchPublicContract['fetchStreaming'], batch: Batch) {
+  const { stream } = fetchStreaming({
+    url: `/api/interpreter/fns`,
     body: JSON.stringify({
       functions: Object.values(batch).map(({ request }) => request),
     }),
@@ -137,7 +135,7 @@ async function processBatch(fetchStreaming: BfetchPublicApi['fetchStreaming'], b
     });
 
   try {
-    await promise;
+    await stream.toPromise();
   } catch (error) {
     Object.values(batch).forEach(({ future }) => {
       future.reject(error);

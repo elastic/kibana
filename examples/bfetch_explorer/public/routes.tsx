@@ -17,8 +17,43 @@
  * under the License.
  */
 
-import { registerServerFunctions } from './server_functions';
+import React from 'react';
+import { PageDoubleIntegers } from './containers/app/pages/page_double_integers';
+import { PageCountUntil } from './containers/app/pages/page_count_until';
 
-export function routes(server: any) {
-  registerServerFunctions(server);
+interface RouteSectionDef {
+  title: string;
+  id: string;
+  items: RouteDef[];
 }
+
+interface RouteDef {
+  title: string;
+  id: string;
+  component: React.ReactNode;
+}
+
+export const routes: RouteSectionDef[] = [
+  {
+    title: 'fetchStreaming',
+    id: 'fetchStreaming',
+    items: [
+      {
+        title: 'Count until',
+        id: 'count-until',
+        component: <PageCountUntil />,
+      },
+    ],
+  },
+  {
+    title: 'batchedFunction',
+    id: 'batchedFunction',
+    items: [
+      {
+        title: 'Double integers',
+        id: 'double-integers',
+        component: <PageDoubleIntegers />,
+      },
+    ],
+  },
+];
