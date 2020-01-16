@@ -18,7 +18,7 @@
  */
 
 export { Vis, VisParams } from 'ui/vis';
-export { vislibColorMaps, colorSchemas, ColorSchemas } from 'ui/vislib/components/color/colormaps';
+export { vislibColorMaps, colorSchemas, ColorSchemas } from 'ui/color_maps';
 // @ts-ignore
 export { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
