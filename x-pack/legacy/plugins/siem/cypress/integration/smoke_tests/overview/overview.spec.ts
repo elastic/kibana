@@ -6,7 +6,13 @@
 
 import { OVERVIEW_PAGE } from '../../lib/urls';
 import { clearFetch, stubApi } from '../../lib/fixtures/helpers';
-import { HOST_STATS, NETWORK_STATS, STAT_AUDITD } from '../../lib/overview/selectors';
+import {
+  HOST_STATS,
+  NETWORK_STATS,
+  OVERVIEW_HOST_STATS,
+  OVERVIEW_NETWORK_STATS,
+  STAT_AUDITD,
+} from '../../lib/overview/selectors';
 import { loginAndWaitForPage } from '../../lib/util/helpers';
 
 describe('Overview Page', () => {
@@ -17,6 +23,14 @@ describe('Overview Page', () => {
   });
 
   it('Host and Network stats render with correct values', () => {
+    cy.get(OVERVIEW_HOST_STATS)
+      .find('button')
+      .invoke('click');
+
+    cy.get(OVERVIEW_NETWORK_STATS)
+      .find('button')
+      .invoke('click');
+
     cy.get(STAT_AUDITD.domId);
 
     HOST_STATS.forEach(stat => {

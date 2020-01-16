@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { FieldStatsCard } from './field_stats_card';
 import { getFieldNames } from './get_field_names';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
@@ -29,9 +30,13 @@ export class FieldsStats extends Component {
   render() {
     return (
       <div className="fields-stats">
-        {this.state.fields.map(f => (
-          <FieldStatsCard field={f} key={f.name} />
-        ))}
+        <EuiFlexGrid gutterSize="m">
+          {this.state.fields.map(f => (
+            <EuiFlexItem key={f.name} style={{ minWidth: '360px' }}>
+              <FieldStatsCard field={f} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
       </div>
     );
   }
