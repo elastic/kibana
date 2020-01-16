@@ -33,15 +33,15 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
   const moduleName = 'aws';
   return {
     id: 'awsMetrics',
-    name: i18n.translate('kbn.server.tutorials.awsMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.awsMetrics.nameTitle', {
       defaultMessage: 'AWS metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.awsMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.awsMetrics.shortDescription', {
       defaultMessage:
         'Fetch monitoring metrics for EC2 instances from the AWS APIs and Cloudwatch.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.awsMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.awsMetrics.longDescription', {
       defaultMessage:
         'The `aws` Metricbeat module fetches monitoring metrics from the AWS APIs and Cloudwatch. \
 [Learn more]({learnMoreLink}).',
@@ -55,12 +55,9 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
       dashboards: [
         {
           id: 'c5846400-f7fb-11e8-af03-c999c9dea608-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.awsMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'AWS metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.awsMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'AWS metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

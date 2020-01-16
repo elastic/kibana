@@ -34,14 +34,14 @@ export function redisLogsSpecProvider(context: TutorialContext): TutorialSchema 
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'redisLogs',
-    name: i18n.translate('kbn.server.tutorials.redisLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.redisLogs.nameTitle', {
       defaultMessage: 'Redis logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.redisLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.redisLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by Redis.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.redisLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.redisLogs.longDescription', {
       defaultMessage:
         'The `redis` Filebeat module parses error and slow logs created by Redis. \
 For Redis to write error logs, make sure the `logfile` option, from the \
@@ -60,12 +60,9 @@ Note that the `slowlog` fileset is experimental. \
       dashboards: [
         {
           id: '7fea2930-478e-11e7-b1f0-cb29bac6bf8b-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.redisLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Redis logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.redisLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Redis logs dashboard',
+          }),
           isOverview: true,
         },
       ],

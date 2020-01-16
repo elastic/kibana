@@ -38,7 +38,7 @@ export function createElasticCloudInstructions(cloudSetup?: CloudSetup) {
 function getApmServerInstructionSet(cloudSetup?: CloudSetup) {
   const cloudId = cloudSetup?.cloudId;
   return {
-    title: i18n.translate('kbn.server.tutorials.apm.apmServer.title', {
+    title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
       defaultMessage: 'APM Server',
     }),
     instructionVariants: [
@@ -47,7 +47,7 @@ function getApmServerInstructionSet(cloudSetup?: CloudSetup) {
         instructions: [
           {
             title: 'Enable the APM Server in the ESS console',
-            textPre: i18n.translate('kbn.server.tutorials.apm.elasticCloud.textPre', {
+            textPre: i18n.translate('xpack.apm.tutorial.elasticCloud.textPre', {
               defaultMessage:
                 'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments?q={cloudId}) and enable APM in the deployment settings. Once enabled, refresh this page.',
               values: { cloudId },
@@ -64,7 +64,7 @@ function getApmAgentInstructionSet(cloudSetup?: CloudSetup) {
   const secretToken = cloudSetup?.apm.secretToken;
 
   return {
-    title: i18n.translate('kbn.server.tutorials.apm.elasticCloudInstructions.title', {
+    title: i18n.translate('xpack.apm.tutorial.elasticCloudInstructions.title', {
       defaultMessage: 'APM Agents',
     }),
     instructionVariants: [

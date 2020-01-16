@@ -34,14 +34,14 @@ export function mysqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'mysqlLogs',
-    name: i18n.translate('kbn.server.tutorials.mysqlLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.mysqlLogs.nameTitle', {
       defaultMessage: 'MySQL logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.mysqlLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.mysqlLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by MySQL.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.mysqlLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.mysqlLogs.longDescription', {
       defaultMessage:
         'The `mysql` Filebeat module parses error and slow logs created by MySQL. \
 [Learn more]({learnMoreLink}).',
@@ -54,12 +54,9 @@ export function mysqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
       dashboards: [
         {
           id: 'Filebeat-MySQL-Dashboard-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.mysqlLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'MySQL logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.mysqlLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'MySQL logs dashboard',
+          }),
           isOverview: true,
         },
       ],

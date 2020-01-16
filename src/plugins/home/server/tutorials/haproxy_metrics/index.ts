@@ -33,15 +33,15 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
   const moduleName = 'haproxy';
   return {
     id: 'haproxyMetrics',
-    name: i18n.translate('kbn.server.tutorials.haproxyMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.haproxyMetrics.nameTitle', {
       defaultMessage: 'HAProxy metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.haproxyMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.haproxyMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the HAProxy server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.haproxyMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.haproxyMetrics.longDescription', {
       defaultMessage:
         'The `haproxy` Metricbeat module fetches internal metrics from HAProxy. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function haproxyMetricsSpecProvider(context: TutorialContext): TutorialSc
     euiIconType: 'logoHAproxy',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.haproxyMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.haproxyMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

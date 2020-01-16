@@ -33,14 +33,14 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
   const moduleName = 'coredns';
   return {
     id: 'corednsMetrics',
-    name: i18n.translate('kbn.server.tutorials.corednsMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.corednsMetrics.nameTitle', {
       defaultMessage: 'CoreDNS metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.corednsMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.corednsMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the CoreDNS server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.corednsMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.corednsMetrics.longDescription', {
       defaultMessage:
         'The `coredns` Metricbeat module fetches monitoring metrics from CoreDNS. \
 [Learn more]({learnMoreLink}).',
@@ -51,7 +51,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
     euiIconType: '/plugins/kibana/home/tutorial_resources/logos/coredns.svg',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.corednsMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.corednsMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

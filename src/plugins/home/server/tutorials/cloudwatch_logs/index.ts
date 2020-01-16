@@ -32,14 +32,14 @@ import {
 export function cloudwatchLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'cloudwatchLogs',
-    name: i18n.translate('kbn.server.tutorials.cloudwatchLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.cloudwatchLogs.nameTitle', {
       defaultMessage: 'AWS Cloudwatch logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.cloudwatchLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.cloudwatchLogs.shortDescription', {
       defaultMessage: 'Collect Cloudwatch logs with Functionbeat.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.cloudwatchLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.cloudwatchLogs.longDescription', {
       defaultMessage:
         'Collect Cloudwatch logs by deploying Functionbeat to run as \
         an AWS Lambda function. \

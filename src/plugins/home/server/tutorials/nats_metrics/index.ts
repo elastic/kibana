@@ -33,14 +33,14 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
   const moduleName = 'nats';
   return {
     id: 'natsMetrics',
-    name: i18n.translate('kbn.server.tutorials.natsMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.natsMetrics.nameTitle', {
       defaultMessage: 'NATS metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.natsMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.natsMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the Nats server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.natsMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.natsMetrics.longDescription', {
       defaultMessage:
         'The `nats` Metricbeat module fetches monitoring metrics from Nats. \
 [Learn more]({learnMoreLink}).',
@@ -53,12 +53,9 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
       dashboards: [
         {
           id: 'Metricbeat-Nats-Dashboard-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.natsMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'NATS metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.natsMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'NATS metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

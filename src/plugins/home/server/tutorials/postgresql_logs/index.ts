@@ -34,14 +34,14 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'postgresqlLogs',
-    name: i18n.translate('kbn.server.tutorials.postgresqlLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.postgresqlLogs.nameTitle', {
       defaultMessage: 'PostgreSQL logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.postgresqlLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.postgresqlLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by PostgreSQL.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.postgresqlLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.postgresqlLogs.longDescription', {
       defaultMessage:
         'The `postgresql` Filebeat module parses error and slow logs created by PostgreSQL. \
 [Learn more]({learnMoreLink}).',
@@ -55,7 +55,7 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
         {
           id: '158be870-87f4-11e7-ad9c-db80de0bf8d3-ecs',
           linkLabel: i18n.translate(
-            'kbn.server.tutorials.postgresqlLogs.artifacts.dashboards.linkLabel',
+            'home.tutorials.postgresqlLogs.artifacts.dashboards.linkLabel',
             {
               defaultMessage: 'PostgreSQL logs dashboard',
             }

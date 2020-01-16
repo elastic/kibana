@@ -31,7 +31,7 @@ export function createOnPremInstructions() {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.server.tutorials.netflow.onPremInstructions.title', {
+        title: i18n.translate('home.tutorials.netflow.onPremInstructions.title', {
           defaultMessage: 'Getting Started',
         }),
         instructionVariants: [

@@ -33,15 +33,15 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
   const moduleName = 'prometheus';
   return {
     id: moduleName + 'Metrics',
-    name: i18n.translate('kbn.server.tutorials.prometheusMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.prometheusMetrics.nameTitle', {
       defaultMessage: 'Prometheus metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.prometheusMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.prometheusMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics from a Prometheus exporter.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.prometheusMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.prometheusMetrics.longDescription', {
       defaultMessage:
         'The `{moduleName}` Metricbeat module fetches metrics from Prometheus endpoint. \
 [Learn more]({learnMoreLink}).',
@@ -53,12 +53,9 @@ export function prometheusMetricsSpecProvider(context: TutorialContext): Tutoria
     euiIconType: 'logoPrometheus',
     artifacts: {
       application: {
-        label: i18n.translate(
-          'kbn.server.tutorials.prometheusMetrics.artifacts.application.label',
-          {
-            defaultMessage: 'Discover',
-          }
-        ),
+        label: i18n.translate('home.tutorials.prometheusMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover',
       },
       dashboards: [],

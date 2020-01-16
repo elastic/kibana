@@ -33,15 +33,15 @@ export function windowsMetricsSpecProvider(context: TutorialContext): TutorialSc
   const moduleName = 'windows';
   return {
     id: 'windowsMetrics',
-    name: i18n.translate('kbn.server.tutorials.windowsMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.windowsMetrics.nameTitle', {
       defaultMessage: 'Windows metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.windowsMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.windowsMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Windows.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.windowsMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.windowsMetrics.longDescription', {
       defaultMessage:
         'The `windows` Metricbeat module fetches internal metrics from Windows. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function windowsMetricsSpecProvider(context: TutorialContext): TutorialSc
     euiIconType: 'logoWindows',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.windowsMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.windowsMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

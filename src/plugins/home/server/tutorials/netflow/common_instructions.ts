@@ -25,51 +25,39 @@ export function createCommonNetflowInstructions() {
       ON_PREM: {
         OSX: [
           {
-            title: i18n.translate('kbn.server.tutorials.netflow.common.config.onPrem.osxTitle', {
+            title: i18n.translate('home.tutorials.netflow.common.config.onPrem.osxTitle', {
               defaultMessage: 'Edit the configuration',
             }),
-            textPre: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPrem.osxTextPre',
-              {
-                defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
-                values: {
-                  logstashConfigPath: '`config/logstash.yml`',
-                },
-              }
-            ),
+            textPre: i18n.translate('home.tutorials.netflow.common.config.onPrem.osxTextPre', {
+              defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
+              values: {
+                logstashConfigPath: '`config/logstash.yml`',
+              },
+            }),
             commands: ['modules:', '  - name: netflow', '    var.input.udp.port: <udp_port>'],
-            textPost: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPrem.osxTextPost',
-              {
-                defaultMessage:
-                  'Where {udpPort} is the UDP port on which Logstash will receive Netflow data.',
-                values: {
-                  udpPort: '`<udp_port>`',
-                },
-              }
-            ),
+            textPost: i18n.translate('home.tutorials.netflow.common.config.onPrem.osxTextPost', {
+              defaultMessage:
+                'Where {udpPort} is the UDP port on which Logstash will receive Netflow data.',
+              values: {
+                udpPort: '`<udp_port>`',
+              },
+            }),
           },
         ],
         WINDOWS: [
           {
-            title: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPrem.windowsTitle',
-              {
-                defaultMessage: 'Edit the configuration',
-              }
-            ),
-            textPre: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPrem.windowsTextPre',
-              {
-                defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
-                values: {
-                  logstashConfigPath: '`config\\logstash.yml`',
-                },
-              }
-            ),
+            title: i18n.translate('home.tutorials.netflow.common.config.onPrem.windowsTitle', {
+              defaultMessage: 'Edit the configuration',
+            }),
+            textPre: i18n.translate('home.tutorials.netflow.common.config.onPrem.windowsTextPre', {
+              defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
+              values: {
+                logstashConfigPath: '`config\\logstash.yml`',
+              },
+            }),
             commands: ['modules:', '  - name: netflow', '    var.input.udp.port: <udp_port>'],
             textPost: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPrem.windowsTextPost',
+              'home.tutorials.netflow.common.config.onPrem.windowsTextPost',
               {
                 defaultMessage:
                   'Where {udpPort} is the UDP port on which Logstash will receive Netflow data.',
@@ -85,13 +73,13 @@ export function createCommonNetflowInstructions() {
         OSX: [
           {
             title: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.osxTitle',
+              'home.tutorials.netflow.common.config.onPremElasticCloud.osxTitle',
               {
                 defaultMessage: 'Edit the configuration',
               }
             ),
             textPre: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.osxTextPre',
+              'home.tutorials.netflow.common.config.onPremElasticCloud.osxTextPre',
               {
                 defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
                 values: {
@@ -108,7 +96,7 @@ export function createCommonNetflowInstructions() {
               '    var.elasticsearch.password: <password>',
             ],
             textPost: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.osxTextPost',
+              'home.tutorials.netflow.common.config.onPremElasticCloud.osxTextPost',
               {
                 defaultMessage:
                   'Where {udpPort} is the UDP port on which Logstash will receive Netflow data, \
@@ -127,13 +115,13 @@ export function createCommonNetflowInstructions() {
         WINDOWS: [
           {
             title: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.windowsTitle',
+              'home.tutorials.netflow.common.config.onPremElasticCloud.windowsTitle',
               {
                 defaultMessage: 'Edit the configuration',
               }
             ),
             textPre: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.windowsTextPre',
+              'home.tutorials.netflow.common.config.onPremElasticCloud.windowsTextPre',
               {
                 defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
                 values: {
@@ -150,7 +138,7 @@ export function createCommonNetflowInstructions() {
               '    var.elasticsearch.password: <password>',
             ],
             textPost: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.onPremElasticCloud.windowsTextPost',
+              'home.tutorials.netflow.common.config.onPremElasticCloud.windowsTextPost',
               {
                 defaultMessage:
                   'Where {udpPort} is the UDP port on which Logstash will receive Netflow data, \
@@ -170,14 +158,11 @@ export function createCommonNetflowInstructions() {
       ELASTIC_CLOUD: {
         OSX: [
           {
-            title: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.elasticCloud.osxTitle',
-              {
-                defaultMessage: 'Edit the configuration',
-              }
-            ),
+            title: i18n.translate('home.tutorials.netflow.common.config.elasticCloud.osxTitle', {
+              defaultMessage: 'Edit the configuration',
+            }),
             textPre: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.elasticCloud.osxTextPre',
+              'home.tutorials.netflow.common.config.elasticCloud.osxTextPre',
               {
                 defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
                 values: {
@@ -194,7 +179,7 @@ export function createCommonNetflowInstructions() {
               '    var.input.udp.port: <udp_port>',
             ],
             textPost: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.elasticCloud.osxTextPost',
+              'home.tutorials.netflow.common.config.elasticCloud.osxTextPost',
               {
                 defaultMessage:
                   'Where {udpPort} is the UDP port on which Logstash will receive Netflow data and \
@@ -211,13 +196,13 @@ export function createCommonNetflowInstructions() {
         WINDOWS: [
           {
             title: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.elasticCloud.windowsTitle',
+              'home.tutorials.netflow.common.config.elasticCloud.windowsTitle',
               {
                 defaultMessage: 'Edit the configuration',
               }
             ),
             textPre: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.elasticCloud.windowsTextPre',
+              'home.tutorials.netflow.common.config.elasticCloud.windowsTextPre',
               {
                 defaultMessage: 'Modify {logstashConfigPath} to set the configuration parameters:',
                 values: {
@@ -234,7 +219,7 @@ export function createCommonNetflowInstructions() {
               '    var.input.udp.port: <udp_port>',
             ],
             textPost: i18n.translate(
-              'kbn.server.tutorials.netflow.common.config.elasticCloud.windowsTextPost',
+              'home.tutorials.netflow.common.config.elasticCloud.windowsTextPost',
               {
                 defaultMessage:
                   'Where {udpPort} is the UDP port on which Logstash will receive Netflow data and \
@@ -253,14 +238,14 @@ export function createCommonNetflowInstructions() {
     SETUP: {
       OSX: [
         {
-          title: i18n.translate('kbn.server.tutorials.netflow.common.setup.osxTitle', {
+          title: i18n.translate('home.tutorials.netflow.common.setup.osxTitle', {
             defaultMessage: 'Run the Netflow module',
           }),
-          textPre: i18n.translate('kbn.server.tutorials.netflow.common.setup.osxTextPre', {
+          textPre: i18n.translate('home.tutorials.netflow.common.setup.osxTextPre', {
             defaultMessage: 'Run:',
           }),
           commands: ['./bin/logstash --modules netflow --setup'],
-          textPost: i18n.translate('kbn.server.tutorials.netflow.common.setup.osxTextPost', {
+          textPost: i18n.translate('home.tutorials.netflow.common.setup.osxTextPost', {
             defaultMessage:
               'The {setupOption} option creates a {netflowPrefix} index pattern in Elasticsearch and imports \
   Kibana dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',
@@ -273,14 +258,14 @@ export function createCommonNetflowInstructions() {
       ],
       WINDOWS: [
         {
-          title: i18n.translate('kbn.server.tutorials.netflow.common.setup.windowsTitle', {
+          title: i18n.translate('home.tutorials.netflow.common.setup.windowsTitle', {
             defaultMessage: 'Run the Netflow module',
           }),
-          textPre: i18n.translate('kbn.server.tutorials.netflow.common.setup.windowsTextPre', {
+          textPre: i18n.translate('home.tutorials.netflow.common.setup.windowsTextPre', {
             defaultMessage: 'Run:',
           }),
           commands: ['bin\\logstash --modules netflow --setup'],
-          textPost: i18n.translate('kbn.server.tutorials.netflow.common.setup.windowsTextPost', {
+          textPost: i18n.translate('home.tutorials.netflow.common.setup.windowsTextPost', {
             defaultMessage:
               'The {setupOption} option creates a {netflowPrefix} index pattern in Elasticsearch and imports \
   Kibana dashboards and visualizations. Omit this option for subsequent runs to avoid overwriting existing dashboards.',

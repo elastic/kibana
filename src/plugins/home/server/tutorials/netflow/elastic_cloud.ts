@@ -31,7 +31,7 @@ export function createElasticCloudInstructions() {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.server.tutorials.netflow.elasticCloudInstructions.title', {
+        title: i18n.translate('home.tutorials.netflow.elasticCloudInstructions.title', {
           defaultMessage: 'Getting Started',
         }),
         instructionVariants: [

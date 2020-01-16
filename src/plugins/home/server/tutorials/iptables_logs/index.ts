@@ -34,14 +34,14 @@ export function iptablesLogsSpecProvider(context: TutorialContext): TutorialSche
   const platforms = ['DEB', 'RPM'] as const;
   return {
     id: 'iptablesLogs',
-    name: i18n.translate('kbn.server.tutorials.iptablesLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.iptablesLogs.nameTitle', {
       defaultMessage: 'Iptables / Ubiquiti',
     }),
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.iptablesLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.iptablesLogs.shortDescription', {
       defaultMessage: 'Collect and parse iptables and ip6tables logs or from Ubiqiti firewalls.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.iptablesLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.iptablesLogs.longDescription', {
       defaultMessage:
         'This is a module for iptables and ip6tables logs. It parses logs \
 received over the network via syslog or from a file. Also, it understands the \
@@ -57,7 +57,7 @@ number and the action performed on the traffic (allow/deny).. \
       dashboards: [],
       application: {
         path: '/app/siem',
-        label: i18n.translate('kbn.server.tutorials.iptablesLogs.artifacts.dashboards.linkLabel', {
+        label: i18n.translate('home.tutorials.iptablesLogs.artifacts.dashboards.linkLabel', {
           defaultMessage: 'SIEM App',
         }),
       },

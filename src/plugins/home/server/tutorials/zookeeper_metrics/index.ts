@@ -33,15 +33,15 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
   const moduleName = 'zookeeper';
   return {
     id: moduleName + 'Metrics',
-    name: i18n.translate('kbn.server.tutorials.zookeeperMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.zookeeperMetrics.nameTitle', {
       defaultMessage: 'Zookeeper metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.zookeeperMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.zookeeperMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from a Zookeeper server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.zookeeperMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.zookeeperMetrics.longDescription', {
       defaultMessage:
         'The `{moduleName}` Metricbeat module fetches internal metrics from a Zookeeper server. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
     }),
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.zookeeperMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.zookeeperMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

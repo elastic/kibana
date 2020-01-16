@@ -33,14 +33,14 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
   const moduleName = 'activemq';
   return {
     id: 'activemqMetrics',
-    name: i18n.translate('kbn.server.tutorials.activemqMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.activemqMetrics.nameTitle', {
       defaultMessage: 'ActiveMQ metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.activemqMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.activemqMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from ActiveMQ instances.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.activemqMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.activemqMetrics.longDescription', {
       defaultMessage:
         'The `activemq` Metricbeat module fetches monitoring metrics from ActiveMQ instances \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
     isBeta: true,
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.corednsMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.corednsMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

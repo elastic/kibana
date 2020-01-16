@@ -33,15 +33,15 @@ export function logstashMetricsSpecProvider(context: TutorialContext): TutorialS
   const moduleName = 'logstash';
   return {
     id: moduleName + 'Metrics',
-    name: i18n.translate('kbn.server.tutorials.logstashMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.logstashMetrics.nameTitle', {
       defaultMessage: 'Logstash metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.logstashMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from a Logstash server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.logstashMetrics.longDescription', {
       defaultMessage:
         'The `{moduleName}` Metricbeat module fetches internal metrics from a Logstash server. \
 [Learn more]({learnMoreLink}).',
@@ -53,7 +53,7 @@ export function logstashMetricsSpecProvider(context: TutorialContext): TutorialS
     euiIconType: 'logoLogstash',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.logstashMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.logstashMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

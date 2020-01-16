@@ -33,15 +33,15 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
   const moduleName = 'aerospike';
   return {
     id: 'aerospikeMetrics',
-    name: i18n.translate('kbn.server.tutorials.aerospikeMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.aerospikeMetrics.nameTitle', {
       defaultMessage: 'Aerospike metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.aerospikeMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.aerospikeMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Aerospike server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.aerospikeMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.aerospikeMetrics.longDescription', {
       defaultMessage:
         'The `aerospike` Metricbeat module fetches internal metrics from Aerospike. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function aerospikeMetricsSpecProvider(context: TutorialContext): Tutorial
     euiIconType: 'logoAerospike',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.aerospikeMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.aerospikeMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

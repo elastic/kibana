@@ -33,15 +33,15 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
   const moduleName = 'ceph';
   return {
     id: 'cephMetrics',
-    name: i18n.translate('kbn.server.tutorials.cephMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.cephMetrics.nameTitle', {
       defaultMessage: 'Ceph metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.cephMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.cephMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Ceph server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.cephMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.cephMetrics.longDescription', {
       defaultMessage:
         'The `ceph` Metricbeat module fetches internal metrics from Ceph. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
     euiIconType: 'logoCeph',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.cephMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.cephMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

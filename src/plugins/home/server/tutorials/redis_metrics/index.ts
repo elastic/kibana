@@ -33,14 +33,14 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
   const moduleName = 'redis';
   return {
     id: 'redisMetrics',
-    name: i18n.translate('kbn.server.tutorials.redisMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.redisMetrics.nameTitle', {
       defaultMessage: 'Redis metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.redisMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.redisMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Redis.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.redisMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.redisMetrics.longDescription', {
       defaultMessage:
         'The `redis` Metricbeat module fetches internal metrics from the Redis server. \
 [Learn more]({learnMoreLink}).',
@@ -53,12 +53,9 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
       dashboards: [
         {
           id: 'AV4YjZ5pux-M-tCAunxK-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.redisMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Redis metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.redisMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Redis metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

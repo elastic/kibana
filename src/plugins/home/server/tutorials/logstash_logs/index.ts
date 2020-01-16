@@ -34,14 +34,14 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'logstashLogs',
-    name: i18n.translate('kbn.server.tutorials.logstashLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.logstashLogs.nameTitle', {
       defaultMessage: 'Logstash logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.logstashLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.logstashLogs.shortDescription', {
       defaultMessage: 'Collect and parse debug and slow logs created by Logstash itself.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.logstashLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.logstashLogs.longDescription', {
       defaultMessage:
         'The `logstash` Filebeat module parses debug and slow logs created by Logstash itself. \
 [Learn more]({learnMoreLink}).',
@@ -54,12 +54,9 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
       dashboards: [
         {
           id: 'Filebeat-Logstash-Log-Dashboard-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.logstashLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Logstash logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.logstashLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Logstash logs dashboard',
+          }),
           isOverview: true,
         },
       ],

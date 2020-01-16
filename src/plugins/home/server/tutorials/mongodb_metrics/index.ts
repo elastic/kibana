@@ -33,14 +33,14 @@ export function mongodbMetricsSpecProvider(context: TutorialContext): TutorialSc
   const moduleName = 'mongodb';
   return {
     id: 'mongodbMetrics',
-    name: i18n.translate('kbn.server.tutorials.mongodbMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.mongodbMetrics.nameTitle', {
       defaultMessage: 'MongoDB metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.mongodbMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.mongodbMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from MongoDB.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.mongodbMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.mongodbMetrics.longDescription', {
       defaultMessage:
         'The `mongodb` Metricbeat module fetches internal metrics from the MongoDB server. \
 [Learn more]({learnMoreLink}).',
@@ -54,7 +54,7 @@ export function mongodbMetricsSpecProvider(context: TutorialContext): TutorialSc
         {
           id: 'Metricbeat-MongoDB-ecs',
           linkLabel: i18n.translate(
-            'kbn.server.tutorials.mongodbMetrics.artifacts.dashboards.linkLabel',
+            'home.tutorials.mongodbMetrics.artifacts.dashboards.linkLabel',
             {
               defaultMessage: 'MongoDB metrics dashboard',
             }

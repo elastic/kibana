@@ -33,14 +33,14 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
   const moduleName = 'vsphere';
   return {
     id: 'vsphereMetrics',
-    name: i18n.translate('kbn.server.tutorials.vsphereMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.vsphereMetrics.nameTitle', {
       defaultMessage: 'vSphere metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.vsphereMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.vsphereMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from vSphere.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.vsphereMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.vsphereMetrics.longDescription', {
       defaultMessage:
         'The `vsphere` Metricbeat module fetches internal metrics from a vSphere cluster. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
     isBeta: true,
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.vsphereMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.vsphereMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

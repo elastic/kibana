@@ -34,14 +34,14 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'activemqLogs',
-    name: i18n.translate('kbn.server.tutorials.activemqLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.activemqLogs.nameTitle', {
       defaultMessage: 'ActiveMQ logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.activemqLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.activemqLogs.shortDescription', {
       defaultMessage: 'Collect ActiveMQ logs with Filebeat.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.activemqLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.activemqLogs.longDescription', {
       defaultMessage: 'Collect ActiveMQ logs with Filebeat. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -53,12 +53,9 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
       dashboards: [
         {
           id: '26434790-1464-11ea-8fd8-030a13064883',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.activemqLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'ActiveMQ Application Events',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.activemqLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'ActiveMQ Application Events',
+          }),
           isOverview: true,
         },
       ],

@@ -33,14 +33,14 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
   const moduleName = 'apache';
   return {
     id: 'apacheMetrics',
-    name: i18n.translate('kbn.server.tutorials.apacheMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.apacheMetrics.nameTitle', {
       defaultMessage: 'Apache metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.apacheMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.apacheMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Apache 2 HTTP server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.apacheMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.apacheMetrics.longDescription', {
       defaultMessage:
         'The `apache` Metricbeat module fetches internal metrics from the Apache 2 HTTP server. \
 [Learn more]({learnMoreLink}).',
@@ -53,12 +53,9 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
       dashboards: [
         {
           id: 'Metricbeat-Apache-HTTPD-server-status-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.apacheMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Apache metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.apacheMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Apache metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

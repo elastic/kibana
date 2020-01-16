@@ -23,11 +23,11 @@ export const createLogstashInstructions = () => ({
   INSTALL: {
     OSX: [
       {
-        title: i18n.translate('kbn.common.tutorials.logstashInstructions.install.java.osxTitle', {
+        title: i18n.translate('home.tutorials.common.logstashInstructions.install.java.osxTitle', {
           defaultMessage: 'Download and install the Java Runtime Environment',
         }),
         textPre: i18n.translate(
-          'kbn.common.tutorials.logstashInstructions.install.java.osxTextPre',
+          'home.tutorials.common.logstashInstructions.install.java.osxTextPre',
           {
             defaultMessage: 'Follow the installation instructions [here]({link}).',
             values: {
@@ -38,13 +38,13 @@ export const createLogstashInstructions = () => ({
       },
       {
         title: i18n.translate(
-          'kbn.common.tutorials.logstashInstructions.install.logstash.osxTitle',
+          'home.tutorials.common.logstashInstructions.install.logstash.osxTitle',
           {
             defaultMessage: 'Download and install Logstash',
           }
         ),
         textPre: i18n.translate(
-          'kbn.common.tutorials.logstashInstructions.install.logstash.osxTextPre',
+          'home.tutorials.common.logstashInstructions.install.logstash.osxTextPre',
           {
             defaultMessage: 'First time using Logstash?  See the [Getting Started Guide]({link}).',
             values: {
@@ -62,13 +62,13 @@ export const createLogstashInstructions = () => ({
     WINDOWS: [
       {
         title: i18n.translate(
-          'kbn.common.tutorials.logstashInstructions.install.java.windowsTitle',
+          'home.tutorials.common.logstashInstructions.install.java.windowsTitle',
           {
             defaultMessage: 'Download and install the Java Runtime Environment',
           }
         ),
         textPre: i18n.translate(
-          'kbn.common.tutorials.logstashInstructions.install.java.windowsTextPre',
+          'home.tutorials.common.logstashInstructions.install.java.windowsTextPre',
           {
             defaultMessage: 'Follow the installation instructions [here]({link}).',
             values: {
@@ -80,13 +80,13 @@ export const createLogstashInstructions = () => ({
       },
       {
         title: i18n.translate(
-          'kbn.common.tutorials.logstashInstructions.install.logstash.windowsTitle',
+          'home.tutorials.common.logstashInstructions.install.logstash.windowsTitle',
           {
             defaultMessage: 'Download and install Logstash',
           }
         ),
         textPre: i18n.translate(
-          'kbn.common.tutorials.logstashInstructions.install.logstash.windowsTextPre',
+          'home.tutorials.common.logstashInstructions.install.logstash.windowsTextPre',
           {
             defaultMessage:
               'First time using Logstash?  See the [Getting Started Guide]({logstashLink}).\n\

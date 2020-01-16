@@ -34,14 +34,14 @@ export function kafkaLogsSpecProvider(context: TutorialContext): TutorialSchema 
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'kafkaLogs',
-    name: i18n.translate('kbn.server.tutorials.kafkaLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.kafkaLogs.nameTitle', {
       defaultMessage: 'Kafka logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.kafkaLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.kafkaLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs created by Kafka.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.kafkaLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.kafkaLogs.longDescription', {
       defaultMessage:
         'The `kafka` Filebeat module parses logs created by Kafka. \
 [Learn more]({learnMoreLink}).',
@@ -54,12 +54,9 @@ export function kafkaLogsSpecProvider(context: TutorialContext): TutorialSchema 
       dashboards: [
         {
           id: '943caca0-87ee-11e7-ad9c-db80de0bf8d3-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.kafkaLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Kafka logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.kafkaLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Kafka logs dashboard',
+          }),
           isOverview: true,
         },
       ],

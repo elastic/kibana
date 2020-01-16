@@ -33,15 +33,15 @@ export function kibanaMetricsSpecProvider(context: TutorialContext): TutorialSch
   const moduleName = 'kibana';
   return {
     id: 'kibanaMetrics',
-    name: i18n.translate('kbn.server.tutorials.kibanaMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.kibanaMetrics.nameTitle', {
       defaultMessage: 'Kibana metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.kibanaMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Kibana.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.kibanaMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.kibanaMetrics.longDescription', {
       defaultMessage:
         'The `kibana` Metricbeat module fetches internal metrics from Kibana. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function kibanaMetricsSpecProvider(context: TutorialContext): TutorialSch
     euiIconType: 'logoKibana',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.kibanaMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.kibanaMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

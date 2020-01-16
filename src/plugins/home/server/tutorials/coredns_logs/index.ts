@@ -34,14 +34,14 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
   const platforms = ['OSX', 'DEB', 'RPM'] as const;
   return {
     id: 'corednsLogs',
-    name: i18n.translate('kbn.server.tutorials.corednsLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.corednsLogs.nameTitle', {
       defaultMessage: 'CoreDNS logs',
     }),
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.corednsLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.corednsLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Coredns.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.corednsLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.corednsLogs.longDescription', {
       defaultMessage:
         'The `coredns` Filebeat module collects the logs from \
 [CoreDNS](https://coredns.io/manual/toc/). \
@@ -55,12 +55,9 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
       dashboards: [
         {
           id: '53aa1f70-443e-11e9-8548-ab7fbe04f038',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.corednsLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'CoreDNS logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.corednsLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'CoreDNS logs dashboard',
+          }),
           isOverview: true,
         },
       ],

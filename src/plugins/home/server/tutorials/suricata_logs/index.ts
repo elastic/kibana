@@ -34,14 +34,14 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'suricataLogs',
-    name: i18n.translate('kbn.server.tutorials.suricataLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.suricataLogs.nameTitle', {
       defaultMessage: 'Suricata logs',
     }),
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.suricataLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.suricataLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by Suricata IDS/IPS/NSM.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.suricataLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.suricataLogs.longDescription', {
       defaultMessage:
         'The `suricata` Filebeat module collects the logs from the \
 [Suricata Eve JSON output](https://suricata.readthedocs.io/en/latest/output/eve/eve-json-format.html). \
@@ -55,12 +55,9 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
       dashboards: [
         {
           id: '69f5ae20-eb02-11e7-8f04-51231daa5b05',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.suricataLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Suricata logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.suricataLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Suricata logs dashboard',
+          }),
           isOverview: true,
         },
       ],

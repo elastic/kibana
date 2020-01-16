@@ -33,15 +33,15 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
   const moduleName = 'php_fpm';
   return {
     id: 'phpfpmMetrics',
-    name: i18n.translate('kbn.server.tutorials.phpFpmMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.phpFpmMetrics.nameTitle', {
       defaultMessage: 'PHP-FPM metrics',
     }),
     category: TutorialsCategory.METRICS,
     isBeta: false,
-    shortDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.phpFpmMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from PHP-FPM.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.phpFpmMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.phpFpmMetrics.longDescription', {
       defaultMessage:
         'The `php_fpm` Metricbeat module fetches internal metrics from the PHP-FPM server. \
 [Learn more]({learnMoreLink}).',

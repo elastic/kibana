@@ -33,15 +33,15 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
   const moduleName = 'postgresql';
   return {
     id: 'postgresqlMetrics',
-    name: i18n.translate('kbn.server.tutorials.postgresqlMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.postgresqlMetrics.nameTitle', {
       defaultMessage: 'PostgreSQL metrics',
     }),
     category: TutorialsCategory.METRICS,
     isBeta: false,
-    shortDescription: i18n.translate('kbn.server.tutorials.postgresqlMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.postgresqlMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from PostgreSQL.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.postgresqlMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.postgresqlMetrics.longDescription', {
       defaultMessage:
         'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server. \
 [Learn more]({learnMoreLink}).',

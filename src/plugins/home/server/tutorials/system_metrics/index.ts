@@ -33,14 +33,14 @@ export function systemMetricsSpecProvider(context: TutorialContext): TutorialSch
   const moduleName = 'system';
   return {
     id: 'systemMetrics',
-    name: i18n.translate('kbn.server.tutorials.systemMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.systemMetrics.nameTitle', {
       defaultMessage: 'System metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.systemMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.systemMetrics.shortDescription', {
       defaultMessage: 'Collect CPU, memory, network, and disk statistics from the host.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.systemMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.systemMetrics.longDescription', {
       defaultMessage:
         'The `system` Metricbeat module collects CPU, memory, network, and disk statistics from the host. \
 It collects system wide statistics and statistics per process and filesystem. \
@@ -53,12 +53,9 @@ It collects system wide statistics and statistics per process and filesystem. \
       dashboards: [
         {
           id: 'Metricbeat-system-overview-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.systemMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'System metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.systemMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'System metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

@@ -34,14 +34,14 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const platforms = ['WINDOWS'] as const;
   return {
     id: 'iisLogs',
-    name: i18n.translate('kbn.server.tutorials.iisLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.iisLogs.nameTitle', {
       defaultMessage: 'IIS logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.iisLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.iisLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the IIS HTTP server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.iisLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.iisLogs.longDescription', {
       defaultMessage:
         'The `iis` Filebeat module parses access and error logs created by the IIS HTTP server. \
 [Learn more]({learnMoreLink}).',
@@ -54,7 +54,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
       dashboards: [
         {
           id: '4278ad30-fe16-11e7-a3b0-d13028918f9f-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.iisLogs.artifacts.dashboards.linkLabel', {
+          linkLabel: i18n.translate('home.tutorials.iisLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'IIS logs dashboard',
           }),
           isOverview: true,

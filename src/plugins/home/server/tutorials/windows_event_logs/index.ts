@@ -32,15 +32,15 @@ import {
 export function windowsEventLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'windowsEventLogs',
-    name: i18n.translate('kbn.server.tutorials.windowsEventLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.windowsEventLogs.nameTitle', {
       defaultMessage: 'Windows Event Log',
     }),
     isBeta: false,
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.windowsEventLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.windowsEventLogs.shortDescription', {
       defaultMessage: 'Fetch logs from the Windows Event Log.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.windowsEventLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.windowsEventLogs.longDescription', {
       defaultMessage:
         'Use Winlogbeat to collect the logs from the Windows Event Log. \
 [Learn more]({learnMoreLink}).',
@@ -51,7 +51,7 @@ export function windowsEventLogsSpecProvider(context: TutorialContext): Tutorial
     euiIconType: 'logoWindows',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.windowsEventLogs.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.windowsEventLogs.artifacts.application.label', {
           defaultMessage: 'SIEM App',
         }),
         path: '/app/siem',

@@ -33,14 +33,14 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
   const moduleName = 'consul';
   return {
     id: 'consulMetrics',
-    name: i18n.translate('kbn.server.tutorials.consulMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.consulMetrics.nameTitle', {
       defaultMessage: 'Consul metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.consulMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.consulMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the Consul server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.consulMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.consulMetrics.longDescription', {
       defaultMessage:
         'The `consul` Metricbeat module fetches monitoring metrics from Consul. \
 [Learn more]({learnMoreLink}).',
@@ -53,12 +53,9 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
       dashboards: [
         {
           id: '496910f0-b952-11e9-a579-f5c0a5d81340',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.consulMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Consul metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.consulMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Consul metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

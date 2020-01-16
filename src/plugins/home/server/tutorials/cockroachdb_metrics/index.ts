@@ -33,14 +33,14 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
   const moduleName = 'cockroachdb';
   return {
     id: 'cockroachdbMetrics',
-    name: i18n.translate('kbn.server.tutorials.cockroachdbMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.cockroachdbMetrics.nameTitle', {
       defaultMessage: 'CockroachDB metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.cockroachdbMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.cockroachdbMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the CockroachDB server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.cockroachdbMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.cockroachdbMetrics.longDescription', {
       defaultMessage:
         'The `cockroachdb` Metricbeat module fetches monitoring metrics from CockroachDB. \
 [Learn more]({learnMoreLink}).',
@@ -54,7 +54,7 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
         {
           id: 'e3ba0c30-9766-11e9-9eea-6f554992ec1f',
           linkLabel: i18n.translate(
-            'kbn.server.tutorials.cockroachdbMetrics.artifacts.dashboards.linkLabel',
+            'home.tutorials.cockroachdbMetrics.artifacts.dashboards.linkLabel',
             {
               defaultMessage: 'CockroachDB metrics dashboard',
             }

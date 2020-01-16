@@ -34,14 +34,14 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'apacheLogs',
-    name: i18n.translate('kbn.server.tutorials.apacheLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.apacheLogs.nameTitle', {
       defaultMessage: 'Apache logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.apacheLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.apacheLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the Apache HTTP server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.apacheLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.apacheLogs.longDescription', {
       defaultMessage:
         'The apache Filebeat module parses access and error logs created by the Apache HTTP server. \
 [Learn more]({learnMoreLink}).',
@@ -54,12 +54,9 @@ export function apacheLogsSpecProvider(context: TutorialContext): TutorialSchema
       dashboards: [
         {
           id: 'Filebeat-Apache-Dashboard-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.apacheLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Apache logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.apacheLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Apache logs dashboard',
+          }),
           isOverview: true,
         },
       ],

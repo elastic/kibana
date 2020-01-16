@@ -34,14 +34,14 @@ export function awsLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'awsLogs',
-    name: i18n.translate('kbn.server.tutorials.awsLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.awsLogs.nameTitle', {
       defaultMessage: 'AWS S3 based logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.awsLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.awsLogs.shortDescription', {
       defaultMessage: 'Collect AWS logs from S3 bucket with Filebeat.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.awsLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.awsLogs.longDescription', {
       defaultMessage:
         'Collect AWS logs by exporting them to an S3 bucket which is configured with SQS notification. \
 [Learn more]({learnMoreLink}).',
@@ -54,7 +54,7 @@ export function awsLogsSpecProvider(context: TutorialContext): TutorialSchema {
       dashboards: [
         {
           id: '4746e000-bacd-11e9-9f70-1f7bda85a5eb',
-          linkLabel: i18n.translate('kbn.server.tutorials.awsLogs.artifacts.dashboards.linkLabel', {
+          linkLabel: i18n.translate('home.tutorials.awsLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'AWS S3 server access log dashboard',
           }),
           isOverview: true,

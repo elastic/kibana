@@ -26,11 +26,11 @@ import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry
 export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.install.windowsTitle', {
+      title: i18n.translate('home.tutorials.common.winlogbeatInstructions.install.windowsTitle', {
         defaultMessage: 'Download and install Winlogbeat',
       }),
       textPre: i18n.translate(
-        'kbn.common.tutorials.winlogbeatInstructions.install.windowsTextPre',
+        'home.tutorials.common.winlogbeatInstructions.install.windowsTextPre',
         {
           defaultMessage:
             'First time using Winlogbeat? See the [Getting Started Guide]({winlogbeatLink}).\n\
@@ -50,7 +50,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
       ),
       commands: ['cd "C:\\Program Files\\Winlogbeat"', '.\\install-service-winlogbeat.ps1'],
       textPost: i18n.translate(
-        'kbn.common.tutorials.winlogbeatInstructions.install.windowsTextPost',
+        'home.tutorials.common.winlogbeatInstructions.install.windowsTextPost',
         {
           defaultMessage:
             'Modify the settings under `output.elasticsearch` in the {path} file to point to your Elasticsearch installation.',
@@ -61,10 +61,10 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
   },
   START: {
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.start.windowsTitle', {
+      title: i18n.translate('home.tutorials.common.winlogbeatInstructions.start.windowsTitle', {
         defaultMessage: 'Start Winlogbeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.start.windowsTextPre', {
+      textPre: i18n.translate('home.tutorials.common.winlogbeatInstructions.start.windowsTextPre', {
         defaultMessage:
           'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
@@ -73,15 +73,18 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
   },
   CONFIG: {
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.config.windowsTitle', {
+      title: i18n.translate('home.tutorials.common.winlogbeatInstructions.config.windowsTitle', {
         defaultMessage: 'Edit the configuration',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.winlogbeatInstructions.config.windowsTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`',
-        },
-      }),
+      textPre: i18n.translate(
+        'home.tutorials.common.winlogbeatInstructions.config.windowsTextPre',
+        {
+          defaultMessage: 'Modify {path} to set the connection information:',
+          values: {
+            path: '`C:\\Program Files\\Winlogbeat\\winlogbeat.yml`',
+          },
+        }
+      ),
       commands: [
         'output.elasticsearch:',
         '  hosts: ["<es_url>"]',
@@ -92,7 +95,7 @@ export const createWinlogbeatInstructions = (context?: TutorialContext) => ({
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
-        'kbn.common.tutorials.winlogbeatInstructions.config.windowsTextPost',
+        'home.tutorials.common.winlogbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
             'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -112,13 +115,13 @@ export const createWinlogbeatCloudInstructions = () => ({
   CONFIG: {
     WINDOWS: {
       title: i18n.translate(
-        'kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTitle',
+        'home.tutorials.common.winlogbeatCloudInstructions.config.windowsTitle',
         {
           defaultMessage: 'Edit the configuration',
         }
       ),
       textPre: i18n.translate(
-        'kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTextPre',
+        'home.tutorials.common.winlogbeatCloudInstructions.config.windowsTextPre',
         {
           defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
           values: {
@@ -128,7 +131,7 @@ export const createWinlogbeatCloudInstructions = () => ({
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
       textPost: i18n.translate(
-        'kbn.common.tutorials.winlogbeatCloudInstructions.config.windowsTextPost',
+        'home.tutorials.common.winlogbeatCloudInstructions.config.windowsTextPost',
         {
           defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
           values: { passwordTemplate: '`<password>`' },
@@ -140,19 +143,19 @@ export const createWinlogbeatCloudInstructions = () => ({
 
 export function winlogbeatStatusCheck() {
   return {
-    title: i18n.translate('kbn.common.tutorials.winlogbeatStatusCheck.title', {
+    title: i18n.translate('home.tutorials.common.winlogbeatStatusCheck.title', {
       defaultMessage: 'Module status',
     }),
-    text: i18n.translate('kbn.common.tutorials.winlogbeatStatusCheck.text', {
+    text: i18n.translate('home.tutorials.common.winlogbeatStatusCheck.text', {
       defaultMessage: 'Check that data is received from Winlogbeat',
     }),
-    btnLabel: i18n.translate('kbn.common.tutorials.winlogbeatStatusCheck.buttonLabel', {
+    btnLabel: i18n.translate('home.tutorials.common.winlogbeatStatusCheck.buttonLabel', {
       defaultMessage: 'Check data',
     }),
-    success: i18n.translate('kbn.common.tutorials.winlogbeatStatusCheck.successText', {
+    success: i18n.translate('home.tutorials.common.winlogbeatStatusCheck.successText', {
       defaultMessage: 'Data successfully received',
     }),
-    error: i18n.translate('kbn.common.tutorials.winlogbeatStatusCheck.errorText', {
+    error: i18n.translate('home.tutorials.common.winlogbeatStatusCheck.errorText', {
       defaultMessage: 'No data has been received yet',
     }),
     esHitsCheck: {
@@ -177,7 +180,7 @@ export function onPremInstructions(context?: TutorialContext) {
     instructionSets: [
       {
         title: i18n.translate(
-          'kbn.common.tutorials.winlogbeat.premInstructions.gettingStarted.title',
+          'home.tutorials.common.winlogbeat.premInstructions.gettingStarted.title',
           {
             defaultMessage: 'Getting Started',
           }
@@ -207,7 +210,7 @@ export function onPremCloudInstructions() {
     instructionSets: [
       {
         title: i18n.translate(
-          'kbn.common.tutorials.winlogbeat.premCloudInstructions.gettingStarted.title',
+          'home.tutorials.common.winlogbeat.premCloudInstructions.gettingStarted.title',
           {
             defaultMessage: 'Getting Started',
           }
@@ -238,7 +241,7 @@ export function cloudInstructions() {
     instructionSets: [
       {
         title: i18n.translate(
-          'kbn.common.tutorials.winlogbeat.cloudInstructions.gettingStarted.title',
+          'home.tutorials.common.winlogbeat.cloudInstructions.gettingStarted.title',
           {
             defaultMessage: 'Getting Started',
           }

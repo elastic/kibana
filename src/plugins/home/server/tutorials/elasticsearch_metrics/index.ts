@@ -33,15 +33,15 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
   const moduleName = 'elasticsearch';
   return {
     id: 'elasticsearchMetrics',
-    name: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.elasticsearchMetrics.nameTitle', {
       defaultMessage: 'Elasticsearch metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.elasticsearchMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Elasticsearch.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.elasticsearchMetrics.longDescription', {
       defaultMessage:
         'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch. \
 [Learn more]({learnMoreLink}).',
@@ -52,12 +52,9 @@ export function elasticsearchMetricsSpecProvider(context: TutorialContext): Tuto
     euiIconType: 'logoElasticsearch',
     artifacts: {
       application: {
-        label: i18n.translate(
-          'kbn.server.tutorials.elasticsearchMetrics.artifacts.application.label',
-          {
-            defaultMessage: 'Discover',
-          }
-        ),
+        label: i18n.translate('home.tutorials.elasticsearchMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover',
       },
       dashboards: [],

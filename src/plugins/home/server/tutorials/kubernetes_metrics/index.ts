@@ -33,14 +33,14 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
   const moduleName = 'kubernetes';
   return {
     id: 'kubernetesMetrics',
-    name: i18n.translate('kbn.server.tutorials.kubernetesMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.kubernetesMetrics.nameTitle', {
       defaultMessage: 'Kubernetes metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.kubernetesMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.kubernetesMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics from your Kubernetes installation.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.kubernetesMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.kubernetesMetrics.longDescription', {
       defaultMessage:
         'The `kubernetes` Metricbeat module fetches metrics from the Kubernetes APIs. \
 [Learn more]({learnMoreLink}).',
@@ -54,7 +54,7 @@ export function kubernetesMetricsSpecProvider(context: TutorialContext): Tutoria
         {
           id: 'AV4RGUqo5NkDleZmzKuZ-ecs',
           linkLabel: i18n.translate(
-            'kbn.server.tutorials.kubernetesMetrics.artifacts.dashboards.linkLabel',
+            'home.tutorials.kubernetesMetrics.artifacts.dashboards.linkLabel',
             {
               defaultMessage: 'Kubernetes metrics dashboard',
             }

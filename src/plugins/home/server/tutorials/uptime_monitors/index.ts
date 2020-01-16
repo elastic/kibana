@@ -32,14 +32,14 @@ import {
 export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'uptimeMonitors',
-    name: i18n.translate('kbn.server.tutorials.uptimeMonitors.nameTitle', {
+    name: i18n.translate('home.tutorials.uptimeMonitors.nameTitle', {
       defaultMessage: 'Uptime Monitors',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.uptimeMonitors.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.uptimeMonitors.shortDescription', {
       defaultMessage: 'Monitor services for their availability',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.uptimeMonitors.longDescription', {
+    longDescription: i18n.translate('home.tutorials.uptimeMonitors.longDescription', {
       defaultMessage:
         'Monitor services for their availability with active probing. \
         Given a list of URLs, Heartbeat asks the simple question: Are you alive? \
@@ -53,12 +53,9 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
       dashboards: [],
       application: {
         path: '/app/uptime',
-        label: i18n.translate(
-          'kbn.server.tutorials.uptimeMonitors.artifacts.dashboards.linkLabel',
-          {
-            defaultMessage: 'Uptime App',
-          }
-        ),
+        label: i18n.translate('home.tutorials.uptimeMonitors.artifacts.dashboards.linkLabel', {
+          defaultMessage: 'Uptime App',
+        }),
       },
       exportedFields: {
         documentationUrl: '{config.docs.beats.heartbeat}/exported-fields.html',

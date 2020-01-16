@@ -34,15 +34,15 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'elasticsearchLogs',
-    name: i18n.translate('kbn.server.tutorials.elasticsearchLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.elasticsearchLogs.nameTitle', {
       defaultMessage: 'Elasticsearch logs',
     }),
     category: TutorialsCategory.LOGGING,
     isBeta: true,
-    shortDescription: i18n.translate('kbn.server.tutorials.elasticsearchLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.elasticsearchLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs created by Elasticsearch.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.elasticsearchLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.elasticsearchLogs.longDescription', {
       defaultMessage:
         'The `elasticsearch` Filebeat module parses logs created by Elasticsearch. \
 [Learn more]({learnMoreLink}).',
@@ -53,12 +53,9 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
     euiIconType: 'logoElasticsearch',
     artifacts: {
       application: {
-        label: i18n.translate(
-          'kbn.server.tutorials.elasticsearchLogs.artifacts.application.label',
-          {
-            defaultMessage: 'Discover',
-          }
-        ),
+        label: i18n.translate('home.tutorials.elasticsearchLogs.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover',
       },
       dashboards: [],

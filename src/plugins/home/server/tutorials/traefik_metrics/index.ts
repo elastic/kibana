@@ -30,14 +30,14 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
   const moduleName = 'traefik';
   return {
     id: 'traefikMetrics',
-    name: i18n.translate('kbn.server.tutorials.traefikMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.traefikMetrics.nameTitle', {
       defaultMessage: 'Traefik metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.traefikMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.traefikMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Traefik.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.traefikMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.traefikMetrics.longDescription', {
       defaultMessage:
         'The `traefik` Metricbeat module fetches monitoring metrics from Traefik. \
 [Learn more]({learnMoreLink}).',

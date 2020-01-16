@@ -26,10 +26,10 @@ import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorial
 export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
     OSX: {
-      title: i18n.translate('kbn.common.tutorials.functionbeatInstructions.install.osxTitle', {
+      title: i18n.translate('home.tutorials.common.functionbeatInstructions.install.osxTitle', {
         defaultMessage: 'Download and install Functionbeat',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.functionbeatInstructions.install.osxTextPre', {
+      textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.install.osxTextPre', {
         defaultMessage: 'First time using Functionbeat? See the [Getting Started Guide]({link}).',
         values: { link: '{config.docs.beats.functionbeat}/functionbeat-getting-started.html' },
       }),
@@ -40,11 +40,11 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
       ],
     },
     LINUX: {
-      title: i18n.translate('kbn.common.tutorials.functionbeatInstructions.install.linuxTitle', {
+      title: i18n.translate('home.tutorials.common.functionbeatInstructions.install.linuxTitle', {
         defaultMessage: 'Download and install Functionbeat',
       }),
       textPre: i18n.translate(
-        'kbn.common.tutorials.functionbeatInstructions.install.linuxTextPre',
+        'home.tutorials.common.functionbeatInstructions.install.linuxTextPre',
         {
           defaultMessage: 'First time using Functionbeat? See the [Getting Started Guide]({link}).',
           values: { link: '{config.docs.beats.functionbeat}/functionbeat-getting-started.html' },
@@ -57,11 +57,11 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
       ],
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.functionbeatInstructions.install.windowsTitle', {
+      title: i18n.translate('home.tutorials.common.functionbeatInstructions.install.windowsTitle', {
         defaultMessage: 'Download and install Functionbeat',
       }),
       textPre: i18n.translate(
-        'kbn.common.tutorials.functionbeatInstructions.install.windowsTextPre',
+        'home.tutorials.common.functionbeatInstructions.install.windowsTextPre',
         {
           defaultMessage:
             'First time using Functionbeat? See the [Getting Started Guide]({functionbeatLink}).\n\
@@ -84,10 +84,10 @@ export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
   },
   DEPLOY: {
     OSX_LINUX: {
-      title: i18n.translate('kbn.common.tutorials.functionbeatInstructions.deploy.osxTitle', {
+      title: i18n.translate('home.tutorials.common.functionbeatInstructions.deploy.osxTitle', {
         defaultMessage: 'Deploy Functionbeat to AWS Lambda',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.functionbeatInstructions.deploy.osxTextPre', {
+      textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.deploy.osxTextPre', {
         defaultMessage:
           'This installs Functionbeat as a Lambda function.\
 The `setup` command checks the Elasticsearch configuration and loads the \
@@ -96,11 +96,11 @@ Kibana index pattern. It is normally safe to omit this command.',
       commands: ['./functionbeat setup', './functionbeat deploy fn-cloudwatch-logs'],
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.functionbeatInstructions.deploy.windowsTitle', {
+      title: i18n.translate('home.tutorials.common.functionbeatInstructions.deploy.windowsTitle', {
         defaultMessage: 'Deploy Functionbeat to AWS Lambda',
       }),
       textPre: i18n.translate(
-        'kbn.common.tutorials.functionbeatInstructions.deploy.windowsTextPre',
+        'home.tutorials.common.functionbeatInstructions.deploy.windowsTextPre',
         {
           defaultMessage:
             'This installs Functionbeat as a Lambda function.\
@@ -113,10 +113,10 @@ Kibana index pattern. It is normally safe to omit this command.',
   },
   CONFIG: {
     OSX_LINUX: {
-      title: i18n.translate('kbn.common.tutorials.functionbeatInstructions.config.osxTitle', {
+      title: i18n.translate('home.tutorials.common.functionbeatInstructions.config.osxTitle', {
         defaultMessage: 'Configure the Elastic cluster',
       }),
-      textPre: i18n.translate('kbn.common.tutorials.functionbeatInstructions.config.osxTextPre', {
+      textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.config.osxTextPre', {
         defaultMessage: 'Modify {path} to set the connection information:',
         values: {
           path: '`functionbeat.yml`',
@@ -131,23 +131,26 @@ Kibana index pattern. It is normally safe to omit this command.',
         '  host: "<kibana_url>"',
         getSpaceIdForBeatsTutorial(context),
       ],
-      textPost: i18n.translate('kbn.common.tutorials.functionbeatInstructions.config.osxTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
+      textPost: i18n.translate(
+        'home.tutorials.common.functionbeatInstructions.config.osxTextPost',
+        {
+          defaultMessage:
+            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
 and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
+          values: {
+            passwordTemplate: '`<password>`',
+            esUrlTemplate: '`<es_url>`',
+            kibanaUrlTemplate: '`<kibana_url>`',
+          },
+        }
+      ),
     },
     WINDOWS: {
-      title: i18n.translate('kbn.common.tutorials.functionbeatInstructions.config.windowsTitle', {
+      title: i18n.translate('home.tutorials.common.functionbeatInstructions.config.windowsTitle', {
         defaultMessage: 'Edit the configuration',
       }),
       textPre: i18n.translate(
-        'kbn.common.tutorials.functionbeatInstructions.config.windowsTextPre',
+        'home.tutorials.common.functionbeatInstructions.config.windowsTextPre',
         {
           defaultMessage: 'Modify {path} to set the connection information:',
           values: {
@@ -165,7 +168,7 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
         getSpaceIdForBeatsTutorial(context),
       ],
       textPost: i18n.translate(
-        'kbn.common.tutorials.functionbeatInstructions.config.windowsTextPost',
+        'home.tutorials.common.functionbeatInstructions.config.windowsTextPost',
         {
           defaultMessage:
             'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
@@ -184,11 +187,11 @@ and {kibanaUrlTemplate} is the URL of Kibana.',
 export const createFunctionbeatCloudInstructions = () => ({
   CONFIG: {
     OSX_LINUX: {
-      title: i18n.translate('kbn.common.tutorials.functionbeatCloudInstructions.config.osxTitle', {
+      title: i18n.translate('home.tutorials.common.functionbeatCloudInstructions.config.osxTitle', {
         defaultMessage: 'Edit the configuration',
       }),
       textPre: i18n.translate(
-        'kbn.common.tutorials.functionbeatCloudInstructions.config.osxTextPre',
+        'home.tutorials.common.functionbeatCloudInstructions.config.osxTextPre',
         {
           defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
           values: {
@@ -198,7 +201,7 @@ export const createFunctionbeatCloudInstructions = () => ({
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
       textPost: i18n.translate(
-        'kbn.common.tutorials.functionbeatCloudInstructions.config.osxTextPost',
+        'home.tutorials.common.functionbeatCloudInstructions.config.osxTextPost',
         {
           defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
           values: { passwordTemplate: '`<password>`' },
@@ -207,13 +210,13 @@ export const createFunctionbeatCloudInstructions = () => ({
     },
     WINDOWS: {
       title: i18n.translate(
-        'kbn.common.tutorials.functionbeatCloudInstructions.config.windowsTitle',
+        'home.tutorials.common.functionbeatCloudInstructions.config.windowsTitle',
         {
           defaultMessage: 'Edit the configuration',
         }
       ),
       textPre: i18n.translate(
-        'kbn.common.tutorials.functionbeatCloudInstructions.config.windowsTextPre',
+        'home.tutorials.common.functionbeatCloudInstructions.config.windowsTextPre',
         {
           defaultMessage: 'Modify {path} to set the connection information for Elastic Cloud:',
           values: {
@@ -223,7 +226,7 @@ export const createFunctionbeatCloudInstructions = () => ({
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
       textPost: i18n.translate(
-        'kbn.common.tutorials.functionbeatCloudInstructions.config.windowsTextPost',
+        'home.tutorials.common.functionbeatCloudInstructions.config.windowsTextPost',
         {
           defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
           values: { passwordTemplate: '`<password>`' },
@@ -235,7 +238,7 @@ export const createFunctionbeatCloudInstructions = () => ({
 
 export function functionbeatEnableInstructions() {
   const defaultTitle = i18n.translate(
-    'kbn.common.tutorials.functionbeatEnableOnPremInstructions.defaultTitle',
+    'home.tutorials.common.functionbeatEnableOnPremInstructions.defaultTitle',
     {
       defaultMessage: 'Configure the Cloudwatch log group',
     }
@@ -250,7 +253,7 @@ export function functionbeatEnableInstructions() {
     'functionbeat.provider.aws.deploy_bucket: <unique-bucket-name>',
   ];
   const defaultTextPost = i18n.translate(
-    'kbn.common.tutorials.functionbeatEnableOnPremInstructions.defaultTextPost',
+    'home.tutorials.common.functionbeatEnableOnPremInstructions.defaultTextPost',
     {
       defaultMessage:
         'Where `<cloudwatch-log-group>` is the name of the log group you want to ingest, \
@@ -262,7 +265,7 @@ Functionbeat deploy.',
     OSX_LINUX: {
       title: defaultTitle,
       textPre: i18n.translate(
-        'kbn.common.tutorials.functionbeatEnableOnPremInstructionsOSXLinux.textPre',
+        'home.tutorials.common.functionbeatEnableOnPremInstructionsOSXLinux.textPre',
         {
           defaultMessage: 'Modify the settings in the `functionbeat.yml` file.',
         }
@@ -273,7 +276,7 @@ Functionbeat deploy.',
     WINDOWS: {
       title: defaultTitle,
       textPre: i18n.translate(
-        'kbn.common.tutorials.functionbeatEnableOnPremInstructionsWindows.textPre',
+        'home.tutorials.common.functionbeatEnableOnPremInstructionsWindows.textPre',
         {
           defaultMessage: 'Modify the settings in the {path} file.',
           values: {
@@ -288,13 +291,13 @@ Functionbeat deploy.',
 }
 
 export function functionbeatAWSInstructions() {
-  const defaultTitle = i18n.translate('kbn.common.tutorials.functionbeatAWSInstructions.title', {
+  const defaultTitle = i18n.translate('home.tutorials.common.functionbeatAWSInstructions.title', {
     defaultMessage: 'Set AWS credentials',
   });
-  const defaultPre = i18n.translate('kbn.common.tutorials.functionbeatAWSInstructions.textPre', {
+  const defaultPre = i18n.translate('home.tutorials.common.functionbeatAWSInstructions.textPre', {
     defaultMessage: 'Set your AWS account credentials in the environment:',
   });
-  const defaultPost = i18n.translate('kbn.common.tutorials.functionbeatAWSInstructions.textPost', {
+  const defaultPost = i18n.translate('home.tutorials.common.functionbeatAWSInstructions.textPost', {
     defaultMessage:
       'Where `<your-access-key>` and `<your-secret-access-key>` are your account credentials and \
 `us-east-1` is the desired region.',
@@ -326,19 +329,19 @@ export function functionbeatAWSInstructions() {
 
 export function functionbeatStatusCheck() {
   return {
-    title: i18n.translate('kbn.common.tutorials.functionbeatStatusCheck.title', {
+    title: i18n.translate('home.tutorials.common.functionbeatStatusCheck.title', {
       defaultMessage: 'Functionbeat status',
     }),
-    text: i18n.translate('kbn.common.tutorials.functionbeatStatusCheck.text', {
+    text: i18n.translate('home.tutorials.common.functionbeatStatusCheck.text', {
       defaultMessage: 'Check that data is received from Functionbeat',
     }),
-    btnLabel: i18n.translate('kbn.common.tutorials.functionbeatStatusCheck.buttonLabel', {
+    btnLabel: i18n.translate('home.tutorials.common.functionbeatStatusCheck.buttonLabel', {
       defaultMessage: 'Check data',
     }),
-    success: i18n.translate('kbn.common.tutorials.functionbeatStatusCheck.successText', {
+    success: i18n.translate('home.tutorials.common.functionbeatStatusCheck.successText', {
       defaultMessage: 'Data successfully received from Functionbeat',
     }),
-    error: i18n.translate('kbn.common.tutorials.functionbeatStatusCheck.errorText', {
+    error: i18n.translate('home.tutorials.common.functionbeatStatusCheck.errorText', {
       defaultMessage: 'No data has been received from Functionbeat yet',
     }),
     esHitsCheck: {
@@ -357,7 +360,7 @@ export function onPremInstructions(platforms: Platform[], context?: TutorialCont
     instructionSets: [
       {
         title: i18n.translate(
-          'kbn.common.tutorials.functionbeat.premInstructions.gettingStarted.title',
+          'home.tutorials.common.functionbeat.premInstructions.gettingStarted.title',
           {
             defaultMessage: 'Getting Started',
           }
@@ -409,7 +412,7 @@ export function onPremCloudInstructions() {
     instructionSets: [
       {
         title: i18n.translate(
-          'kbn.common.tutorials.functionbeat.premCloudInstructions.gettingStarted.title',
+          'home.tutorials.common.functionbeat.premCloudInstructions.gettingStarted.title',
           {
             defaultMessage: 'Getting Started',
           }
@@ -466,7 +469,7 @@ export function cloudInstructions() {
     instructionSets: [
       {
         title: i18n.translate(
-          'kbn.common.tutorials.functionbeat.cloudInstructions.gettingStarted.title',
+          'home.tutorials.common.functionbeat.cloudInstructions.gettingStarted.title',
           {
             defaultMessage: 'Getting Started',
           }

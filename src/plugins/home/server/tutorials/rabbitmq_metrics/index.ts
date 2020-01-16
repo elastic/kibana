@@ -33,14 +33,14 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
   const moduleName = 'rabbitmq';
   return {
     id: 'rabbitmqMetrics',
-    name: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.rabbitmqMetrics.nameTitle', {
       defaultMessage: 'RabbitMQ metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.rabbitmqMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the RabbitMQ server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.rabbitmqMetrics.longDescription', {
       defaultMessage:
         'The `rabbitmq` Metricbeat module fetches internal metrics from the RabbitMQ server. \
 [Learn more]({learnMoreLink}).',
@@ -55,7 +55,7 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
         {
           id: 'AV4YobKIge1VCbKU_qVo-ecs',
           linkLabel: i18n.translate(
-            'kbn.server.tutorials.rabbitmqMetrics.artifacts.dashboards.linkLabel',
+            'home.tutorials.rabbitmqMetrics.artifacts.dashboards.linkLabel',
             {
               defaultMessage: 'RabbitMQ metrics dashboard',
             }

@@ -29,10 +29,10 @@ export function netflowSpecProvider() {
     id: 'netflow',
     name: 'Netflow',
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.netflow.tutorialShortDescription', {
+    shortDescription: i18n.translate('home.tutorials.netflow.tutorialShortDescription', {
       defaultMessage: 'Collect Netflow records sent by a Netflow exporter.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.netflow.tutorialLongDescription', {
+    longDescription: i18n.translate('home.tutorials.netflow.tutorialLongDescription', {
       defaultMessage:
         'The Logstash Netflow module collects and parses network flow data, \
 indexes the events into Elasticsearch, and installs a suite of Kibana dashboards. \

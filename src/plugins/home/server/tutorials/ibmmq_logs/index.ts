@@ -34,14 +34,14 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'ibmmqLogs',
-    name: i18n.translate('kbn.server.tutorials.ibmmqLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.ibmmqLogs.nameTitle', {
       defaultMessage: 'IBM MQ logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.ibmmqLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.ibmmqLogs.shortDescription', {
       defaultMessage: 'Collect IBM MQ logs with Filebeat.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.ibmmqLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.ibmmqLogs.longDescription', {
       defaultMessage: 'Collect IBM MQ logs with Filebeat. \
 [Learn more]({learnMoreLink}).',
       values: {
@@ -53,12 +53,9 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
       dashboards: [
         {
           id: 'ba1d8830-7c7b-11e9-9645-e37efaf5baff',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.ibmmqLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'IBM MQ Events',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.ibmmqLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'IBM MQ Events',
+          }),
           isOverview: true,
         },
       ],

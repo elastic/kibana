@@ -33,14 +33,14 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
   const moduleName = 'stan';
   return {
     id: 'stanMetrics',
-    name: i18n.translate('kbn.server.tutorials.stanMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.stanMetrics.nameTitle', {
       defaultMessage: 'STAN metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.stanMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.stanMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the STAN server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.stanMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.stanMetrics.longDescription', {
       defaultMessage:
         'The `stan` Metricbeat module fetches monitoring metrics from STAN. \
 [Learn more]({learnMoreLink}).',

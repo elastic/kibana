@@ -33,15 +33,15 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
   const moduleName = 'golang';
   return {
     id: moduleName + 'Metrics',
-    name: i18n.translate('kbn.server.tutorials.golangMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.golangMetrics.nameTitle', {
       defaultMessage: 'Golang metrics',
     }),
     isBeta: true,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.golangMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.golangMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from a Golang app.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.golangMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.golangMetrics.longDescription', {
       defaultMessage:
         'The `{moduleName}` Metricbeat module fetches internal metrics from a Golang app. \
 [Learn more]({learnMoreLink}).',
@@ -55,12 +55,9 @@ export function golangMetricsSpecProvider(context: TutorialContext): TutorialSch
       dashboards: [
         {
           id: 'f2dc7320-f519-11e6-a3c9-9d1f7c42b045-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.golangMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Golang metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.golangMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Golang metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

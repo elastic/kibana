@@ -33,14 +33,14 @@ export function auditbeatSpecProvider(context: TutorialContext): TutorialSchema 
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'auditbeat',
-    name: i18n.translate('kbn.server.tutorials.auditbeat.nameTitle', {
+    name: i18n.translate('home.tutorials.auditbeat.nameTitle', {
       defaultMessage: 'Auditbeat',
     }),
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.auditbeat.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.auditbeat.shortDescription', {
       defaultMessage: 'Collect audit data from your hosts.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.auditbeat.longDescription', {
+    longDescription: i18n.translate('home.tutorials.auditbeat.longDescription', {
       defaultMessage:
         'Use Auditbeat to collect auditing data from your hosts. These include \
 processes, users, logins, sockets information, file accesses, and more. \
@@ -54,7 +54,7 @@ processes, users, logins, sockets information, file accesses, and more. \
       dashboards: [],
       application: {
         path: '/app/siem',
-        label: i18n.translate('kbn.server.tutorials.auditbeat.artifacts.dashboards.linkLabel', {
+        label: i18n.translate('home.tutorials.auditbeat.artifacts.dashboards.linkLabel', {
           defaultMessage: 'SIEM App',
         }),
       },

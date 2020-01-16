@@ -33,15 +33,15 @@ export function dropwizardMetricsSpecProvider(context: TutorialContext): Tutoria
   const moduleName = 'dropwizard';
   return {
     id: 'dropwizardMetrics',
-    name: i18n.translate('kbn.server.tutorials.dropwizardMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.dropwizardMetrics.nameTitle', {
       defaultMessage: 'Dropwizard metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.dropwizardMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.dropwizardMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Dropwizard Java application.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.dropwizardMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.dropwizardMetrics.longDescription', {
       defaultMessage:
         'The `dropwizard` Metricbeat module fetches internal metrics from Dropwizard Java Application. \
 [Learn more]({learnMoreLink}).',
@@ -52,12 +52,9 @@ export function dropwizardMetricsSpecProvider(context: TutorialContext): Tutoria
     euiIconType: 'logoDropwizard',
     artifacts: {
       application: {
-        label: i18n.translate(
-          'kbn.server.tutorials.dropwizardMetrics.artifacts.application.label',
-          {
-            defaultMessage: 'Discover',
-          }
-        ),
+        label: i18n.translate('home.tutorials.dropwizardMetrics.artifacts.application.label', {
+          defaultMessage: 'Discover',
+        }),
         path: '/app/kibana#/discover',
       },
       dashboards: [],

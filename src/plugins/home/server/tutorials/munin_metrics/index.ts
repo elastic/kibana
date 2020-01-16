@@ -33,15 +33,15 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
   const moduleName = 'munin';
   return {
     id: 'muninMetrics',
-    name: i18n.translate('kbn.server.tutorials.muninMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.muninMetrics.nameTitle', {
       defaultMessage: 'Munin metrics',
     }),
     isBeta: true,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.muninMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.muninMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Munin server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.muninMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.muninMetrics.longDescription', {
       defaultMessage:
         'The `munin` Metricbeat module fetches internal metrics from Munin. \
 [Learn more]({learnMoreLink}).',
@@ -51,7 +51,7 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
     }),
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.muninMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.muninMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

@@ -33,15 +33,15 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
   const moduleName = 'azure';
   return {
     id: 'azureMetrics',
-    name: i18n.translate('kbn.server.tutorials.azureMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.azureMetrics.nameTitle', {
       defaultMessage: 'Azure metrics',
     }),
     isBeta: true,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.azureMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.azureMetrics.shortDescription', {
       defaultMessage: 'Fetch Azure Monitor metrics.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.azureMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.azureMetrics.longDescription', {
       defaultMessage:
         'The `azure` Metricbeat module fetches Azure Monitor metrics. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
     euiIconType: 'logoAzure',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.azureMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.azureMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

@@ -33,14 +33,14 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
   const moduleName = 'envoyproxy';
   return {
     id: 'envoyproxyMetrics',
-    name: i18n.translate('kbn.server.tutorials.envoyproxyMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.envoyproxyMetrics.nameTitle', {
       defaultMessage: 'Envoy Proxy metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.envoyproxyMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.envoyproxyMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Envoy Proxy.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.envoyproxyMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.envoyproxyMetrics.longDescription', {
       defaultMessage:
         'The `envoyproxy` Metricbeat module fetches monitoring metrics from Envoy Proxy. \
 [Learn more]({learnMoreLink}).',

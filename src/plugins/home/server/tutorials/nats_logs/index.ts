@@ -34,15 +34,15 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const platforms = ['DEB', 'RPM'] as const;
   return {
     id: 'natsLogs',
-    name: i18n.translate('kbn.server.tutorials.natsLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.natsLogs.nameTitle', {
       defaultMessage: 'NATS logs',
     }),
     category: TutorialsCategory.LOGGING,
     isBeta: true,
-    shortDescription: i18n.translate('kbn.server.tutorials.natsLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.natsLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs created by Nats.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.natsLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.natsLogs.longDescription', {
       defaultMessage:
         'The `nats` Filebeat module parses logs created by Nats. \
 [Learn more]({learnMoreLink}).',
@@ -55,12 +55,9 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
       dashboards: [
         {
           id: 'Filebeat-nats-overview-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.natsLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'NATS logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.natsLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'NATS logs dashboard',
+          }),
           isOverview: true,
         },
       ],

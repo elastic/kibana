@@ -34,14 +34,14 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const platforms = ['OSX', 'DEB', 'RPM'] as const;
   return {
     id: 'zeekLogs',
-    name: i18n.translate('kbn.server.tutorials.zeekLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.zeekLogs.nameTitle', {
       defaultMessage: 'Zeek logs',
     }),
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.zeekLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.zeekLogs.shortDescription', {
       defaultMessage: 'Collect the logs created by Zeek/Bro.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.zeekLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.zeekLogs.longDescription', {
       defaultMessage:
         'The `zeek` Filebeat module collects the logs from \
 [Zeek](https://www.zeek.org//documentation/index.html). \
@@ -55,12 +55,9 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
       dashboards: [
         {
           id: '7cbb5410-3700-11e9-aa6d-ff445a78330c',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.zeekLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Zeek logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.zeekLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Zeek logs dashboard',
+          }),
           isOverview: true,
         },
       ],

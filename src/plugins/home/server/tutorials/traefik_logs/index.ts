@@ -34,14 +34,14 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'traefikLogs',
-    name: i18n.translate('kbn.server.tutorials.traefikLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.traefikLogs.nameTitle', {
       defaultMessage: 'Traefik logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.traefikLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.traefikLogs.shortDescription', {
       defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.traefikLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.traefikLogs.longDescription', {
       defaultMessage:
         'The `traefik` Filebeat module parses access logs created by Traefik. \
 [Learn more]({learnMoreLink}).',
@@ -54,12 +54,9 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
       dashboards: [
         {
           id: 'Filebeat-Traefik-Dashboard-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.traefikLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Traefik logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.traefikLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Traefik logs dashboard',
+          }),
           isOverview: true,
         },
       ],

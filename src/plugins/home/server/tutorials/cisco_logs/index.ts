@@ -34,14 +34,14 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'ciscoLogs',
-    name: i18n.translate('kbn.server.tutorials.ciscoLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.ciscoLogs.nameTitle', {
       defaultMessage: 'Cisco',
     }),
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.ciscoLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.ciscoLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from Cisco ASA firewalls.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.ciscoLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.ciscoLogs.longDescription', {
       defaultMessage:
         'This is a module for Cisco network device’s logs. Currently \
 supports the "asa" fileset for Cisco ASA firewall logs received over syslog or read from a file. \
@@ -55,7 +55,7 @@ supports the "asa" fileset for Cisco ASA firewall logs received over syslog or r
       dashboards: [],
       application: {
         path: '/app/siem',
-        label: i18n.translate('kbn.server.tutorials.ciscoLogs.artifacts.dashboards.linkLabel', {
+        label: i18n.translate('home.tutorials.ciscoLogs.artifacts.dashboards.linkLabel', {
           defaultMessage: 'SIEM App',
         }),
       },

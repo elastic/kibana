@@ -33,15 +33,15 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
   const moduleName = 'kafka';
   return {
     id: 'kafkaMetrics',
-    name: i18n.translate('kbn.server.tutorials.kafkaMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.kafkaMetrics.nameTitle', {
       defaultMessage: 'Kafka metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.kafkaMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.kafkaMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Kafka server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.kafkaMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.kafkaMetrics.longDescription', {
       defaultMessage:
         'The `kafka` Metricbeat module fetches internal metrics from Kafka. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
     euiIconType: 'logoKafka',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.kafkaMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.kafkaMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

@@ -34,14 +34,14 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'nginxLogs',
-    name: i18n.translate('kbn.server.tutorials.nginxLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.nginxLogs.nameTitle', {
       defaultMessage: 'Nginx logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.nginxLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.nginxLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the Nginx HTTP server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.nginxLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.nginxLogs.longDescription', {
       defaultMessage:
         'The `nginx` Filebeat module parses access and error logs created by the Nginx HTTP server. \
 [Learn more]({learnMoreLink}).',
@@ -54,12 +54,9 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
       dashboards: [
         {
           id: '55a9e6e0-a29e-11e7-928f-5dbe6f6f5519-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.nginxLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Nginx logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.nginxLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Nginx logs dashboard',
+          }),
           isOverview: true,
         },
       ],

@@ -34,14 +34,14 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'osqueryLogs',
-    name: i18n.translate('kbn.server.tutorials.osqueryLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.osqueryLogs.nameTitle', {
       defaultMessage: 'Osquery logs',
     }),
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.osqueryLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.osqueryLogs.shortDescription', {
       defaultMessage: 'Collect the result logs created by osqueryd.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.osqueryLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.osqueryLogs.longDescription', {
       defaultMessage:
         'The `osquery` Filebeat module collects the JSON result logs collected by `osqueryd`. \
 [Learn more]({learnMoreLink}).',
@@ -54,12 +54,9 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
       dashboards: [
         {
           id: '69f5ae20-eb02-11e7-8f04-51231daa5b05-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.osqueryLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Osquery logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.osqueryLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Osquery logs dashboard',
+          }),
           isOverview: true,
         },
       ],

@@ -33,15 +33,15 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
   const moduleName = 'couchbase';
   return {
     id: 'couchbaseMetrics',
-    name: i18n.translate('kbn.server.tutorials.couchbaseMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.couchbaseMetrics.nameTitle', {
       defaultMessage: 'Couchbase metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.couchbaseMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.couchbaseMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Couchbase.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.couchbaseMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.couchbaseMetrics.longDescription', {
       defaultMessage:
         'The `couchbase` Metricbeat module fetches internal metrics from Couchbase. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function couchbaseMetricsSpecProvider(context: TutorialContext): Tutorial
     euiIconType: 'logoCouchbase',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.couchbaseMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.couchbaseMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

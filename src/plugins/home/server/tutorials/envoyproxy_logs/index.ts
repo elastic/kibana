@@ -34,14 +34,14 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'envoyproxyLogs',
-    name: i18n.translate('kbn.server.tutorials.envoyproxyLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.envoyproxyLogs.nameTitle', {
       defaultMessage: 'Envoyproxy',
     }),
     category: TutorialsCategory.SIEM,
-    shortDescription: i18n.translate('kbn.server.tutorials.envoyproxyLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.envoyproxyLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from the Envoy proxy.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.envoyproxyLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.envoyproxyLogs.longDescription', {
       defaultMessage:
         'This is a filebeat module for [Envoy proxy access log](https://www.envoyproxy.io/docs/envoy/v1.10.0/configuration/access_log). \
 It supports both standalone deployment and Envoy proxy deployment in Kubernetes. \
@@ -55,12 +55,9 @@ It supports both standalone deployment and Envoy proxy deployment in Kubernetes.
       dashboards: [],
       application: {
         path: '/app/siem',
-        label: i18n.translate(
-          'kbn.server.tutorials.envoyproxyLogs.artifacts.dashboards.linkLabel',
-          {
-            defaultMessage: 'SIEM App',
-          }
-        ),
+        label: i18n.translate('home.tutorials.envoyproxyLogs.artifacts.dashboards.linkLabel', {
+          defaultMessage: 'SIEM App',
+        }),
       },
       exportedFields: {
         documentationUrl: '{config.docs.beats.filebeat}/exported-fields-envoyproxy.html',

@@ -34,14 +34,14 @@ export function systemLogsSpecProvider(context: TutorialContext): TutorialSchema
   const platforms = ['OSX', 'DEB', 'RPM'] as const;
   return {
     id: 'systemLogs',
-    name: i18n.translate('kbn.server.tutorials.systemLogs.nameTitle', {
+    name: i18n.translate('home.tutorials.systemLogs.nameTitle', {
       defaultMessage: 'System logs',
     }),
     category: TutorialsCategory.LOGGING,
-    shortDescription: i18n.translate('kbn.server.tutorials.systemLogs.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.systemLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs written by the local Syslog server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.systemLogs.longDescription', {
+    longDescription: i18n.translate('home.tutorials.systemLogs.longDescription', {
       defaultMessage:
         'The `system` Filebeat module collects and parses logs created by the system logging service of common \
 Unix/Linux based distributions. This module is not available on Windows. \
@@ -54,12 +54,9 @@ Unix/Linux based distributions. This module is not available on Windows. \
       dashboards: [
         {
           id: 'Filebeat-syslog-dashboard-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.systemLogs.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'System logs dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.systemLogs.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'System logs dashboard',
+          }),
           isOverview: true,
         },
       ],

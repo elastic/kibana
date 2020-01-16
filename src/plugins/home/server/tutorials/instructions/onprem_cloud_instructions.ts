@@ -20,10 +20,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const createTrycloudOption1 = () => ({
-  title: i18n.translate('kbn.common.tutorials.premCloudInstructions.option1.title', {
+  title: i18n.translate('home.tutorials.common.premCloudInstructions.option1.title', {
     defaultMessage: 'Option 1: Try in Elastic Cloud',
   }),
-  textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option1.textPre', {
+  textPre: i18n.translate('home.tutorials.common.premCloudInstructions.option1.textPre', {
     defaultMessage:
       'Go to [Elastic Cloud]({link}). Register if you \
 do not already have an account. Free 14-day trial available.\n\n\
@@ -41,10 +41,10 @@ To create a cluster, in Elastic Cloud console:\n\
 });
 
 export const createTrycloudOption2 = () => ({
-  title: i18n.translate('kbn.common.tutorials.premCloudInstructions.option2.title', {
+  title: i18n.translate('home.tutorials.common.premCloudInstructions.option2.title', {
     defaultMessage: 'Option 2: Connect local Kibana to a Cloud instance',
   }),
-  textPre: i18n.translate('kbn.common.tutorials.premCloudInstructions.option2.textPre', {
+  textPre: i18n.translate('home.tutorials.common.premCloudInstructions.option2.textPre', {
     defaultMessage:
       'If you are running this Kibana instance against a hosted Elasticsearch instance, \
 proceed with manual setup.\n\n\

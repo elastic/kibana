@@ -33,15 +33,15 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
   const moduleName = 'etcd';
   return {
     id: 'etcdMetrics',
-    name: i18n.translate('kbn.server.tutorials.etcdMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.etcdMetrics.nameTitle', {
       defaultMessage: 'Etcd metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.etcdMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.etcdMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Etcd server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.etcdMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.etcdMetrics.longDescription', {
       defaultMessage:
         'The `etcd` Metricbeat module fetches internal metrics from Etcd. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function etcdMetricsSpecProvider(context: TutorialContext): TutorialSchem
     euiIconType: 'logoEtcd',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.etcdMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.etcdMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

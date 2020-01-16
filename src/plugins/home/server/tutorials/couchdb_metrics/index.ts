@@ -33,14 +33,14 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
   const moduleName = 'couchdb';
   return {
     id: 'couchdbMetrics',
-    name: i18n.translate('kbn.server.tutorials.couchdbMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.couchdbMetrics.nameTitle', {
       defaultMessage: 'CouchDB metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.couchdbMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.couchdbMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from the CouchdB server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.couchdbMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.couchdbMetrics.longDescription', {
       defaultMessage:
         'The `couchdb` Metricbeat module fetches monitoring metrics from CouchDB. \
 [Learn more]({learnMoreLink}).',
@@ -54,7 +54,7 @@ export function couchdbMetricsSpecProvider(context: TutorialContext): TutorialSc
         {
           id: '496910f0-b952-11e9-a579-f5c0a5d81340',
           linkLabel: i18n.translate(
-            'kbn.server.tutorials.couchdbMetrics.artifacts.dashboards.linkLabel',
+            'home.tutorials.couchdbMetrics.artifacts.dashboards.linkLabel',
             {
               defaultMessage: 'CouchDB metrics dashboard',
             }

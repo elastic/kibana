@@ -47,14 +47,14 @@ export function onPremInstructions({
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.server.tutorials.apm.apmServer.title', {
+        title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
           defaultMessage: 'APM Server',
         }),
         callOut: {
-          title: i18n.translate('kbn.server.tutorials.apm.apmServer.callOut.title', {
+          title: i18n.translate('xpack.apm.tutorial.apmServer.callOut.title', {
             defaultMessage: 'Important: Updating to 7.0 or higher',
           }),
-          message: i18n.translate('kbn.server.tutorials.apm.apmServer.callOut.message', {
+          message: i18n.translate('xpack.apm.tutorial.apmServer.callOut.message', {
             defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
             You can also migrate your 6.x data with the migration assistant found in Kibana's management section.`,
           }),
@@ -79,20 +79,20 @@ export function onPremInstructions({
           },
         ],
         statusCheck: {
-          title: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.title', {
+          title: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.title', {
             defaultMessage: 'APM Server status',
           }),
-          text: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.text', {
+          text: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.text', {
             defaultMessage:
               'Make sure APM Server is running before you start implementing the APM agents.',
           }),
-          btnLabel: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.btnLabel', {
+          btnLabel: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.btnLabel', {
             defaultMessage: 'Check APM Server status',
           }),
-          success: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.successMessage', {
+          success: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.successMessage', {
             defaultMessage: 'You have correctly setup APM Server',
           }),
-          error: i18n.translate('kbn.server.tutorials.apm.apmServer.statusCheck.errorMessage', {
+          error: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.errorMessage', {
             defaultMessage:
               'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
           }),
@@ -110,7 +110,7 @@ export function onPremInstructions({
         },
       },
       {
-        title: i18n.translate('kbn.server.tutorials.apm.apmAgents.title', {
+        title: i18n.translate('xpack.apm.tutorial.apmAgents.title', {
           defaultMessage: 'APM Agents',
         }),
         instructionVariants: [
@@ -152,20 +152,20 @@ export function onPremInstructions({
           },
         ],
         statusCheck: {
-          title: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.title', {
+          title: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.title', {
             defaultMessage: 'Agent status',
           }),
-          text: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.text', {
+          text: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.text', {
             defaultMessage:
               'Make sure your application is running and the agents are sending data.',
           }),
-          btnLabel: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.btnLabel', {
+          btnLabel: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.btnLabel', {
             defaultMessage: 'Check agent status',
           }),
-          success: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.successMessage', {
+          success: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.successMessage', {
             defaultMessage: 'Data successfully received from one or more agents',
           }),
-          error: i18n.translate('kbn.server.tutorials.apm.apmAgents.statusCheck.errorMessage', {
+          error: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.errorMessage', {
             defaultMessage: 'No data has been received from agents yet',
           }),
           esHitsCheck: {

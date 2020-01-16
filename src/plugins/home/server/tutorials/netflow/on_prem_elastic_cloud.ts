@@ -37,7 +37,7 @@ export function createOnPremElasticCloudInstructions() {
   return {
     instructionSets: [
       {
-        title: i18n.translate('kbn.server.tutorials.netflow.onPremElasticCloudInstructions.title', {
+        title: i18n.translate('home.tutorials.netflow.onPremElasticCloudInstructions.title', {
           defaultMessage: 'Getting Started',
         }),
         instructionVariants: [

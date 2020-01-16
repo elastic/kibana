@@ -33,15 +33,15 @@ export function memcachedMetricsSpecProvider(context: TutorialContext): Tutorial
   const moduleName = 'memcached';
   return {
     id: 'memcachedMetrics',
-    name: i18n.translate('kbn.server.tutorials.memcachedMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.memcachedMetrics.nameTitle', {
       defaultMessage: 'Memcached metrics',
     }),
     isBeta: false,
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.memcachedMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Memcached server.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.memcachedMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.memcachedMetrics.longDescription', {
       defaultMessage:
         'The `memcached` Metricbeat module fetches internal metrics from Memcached. \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function memcachedMetricsSpecProvider(context: TutorialContext): Tutorial
     euiIconType: 'logoMemcached',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.memcachedMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.memcachedMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

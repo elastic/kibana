@@ -16,14 +16,14 @@ export function emsBoundariesSpecProvider({
 }) {
   return () => ({
     id: 'emsBoundaries',
-    name: i18n.translate('kbn.server.tutorials.ems.nameTitle', {
+    name: i18n.translate('xpack.maps.tutorials.ems.nameTitle', {
       defaultMessage: 'EMS Boundaries',
     }),
     category: TutorialsCategory.OTHER,
-    shortDescription: i18n.translate('kbn.server.tutorials.ems.shortDescription', {
+    shortDescription: i18n.translate('xpack.maps.tutorials.ems.shortDescription', {
       defaultMessage: 'Administrative boundaries from Elastic Maps Service.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.ems.longDescription', {
+    longDescription: i18n.translate('xpack.maps.tutorials.ems.longDescription', {
       defaultMessage:
         '[Elastic Maps Service (EMS)](https://www.elastic.co/elastic-maps-service) \
 hosts tile layers and vector shapes of administrative boundaries. \
@@ -40,10 +40,10 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
               id: 'EMS',
               instructions: [
                 {
-                  title: i18n.translate('kbn.server.tutorials.ems.downloadStepTitle', {
+                  title: i18n.translate('xpack.maps.tutorials.ems.downloadStepTitle', {
                     defaultMessage: 'Download Elastic Maps Service boundaries',
                   }),
-                  textPre: i18n.translate('kbn.server.tutorials.ems.downloadStepText', {
+                  textPre: i18n.translate('xpack.maps.tutorials.ems.downloadStepText', {
                     defaultMessage:
                       '1. Navigate to Elastic Maps Service [landing page]({emsLandingPageUrl}).\n\
 2. In the left sidebar, select an administrative boundary.\n\
@@ -54,10 +54,10 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
                   }),
                 },
                 {
-                  title: i18n.translate('kbn.server.tutorials.ems.uploadStepTitle', {
+                  title: i18n.translate('xpack.maps.tutorials.ems.uploadStepTitle', {
                     defaultMessage: 'Index Elastic Maps Service boundaries',
                   }),
-                  textPre: i18n.translate('kbn.server.tutorials.ems.uploadStepText', {
+                  textPre: i18n.translate('xpack.maps.tutorials.ems.uploadStepText', {
                     defaultMessage:
                       '1. Open [Elastic Maps]({newMapUrl}).\n\
 2. Click `Add layer`, then select `Upload GeoJSON`.\n\

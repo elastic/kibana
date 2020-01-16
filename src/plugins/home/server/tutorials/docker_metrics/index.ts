@@ -33,14 +33,14 @@ export function dockerMetricsSpecProvider(context: TutorialContext): TutorialSch
   const moduleName = 'docker';
   return {
     id: 'dockerMetrics',
-    name: i18n.translate('kbn.server.tutorials.dockerMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.dockerMetrics.nameTitle', {
       defaultMessage: 'Docker metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.dockerMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.dockerMetrics.shortDescription', {
       defaultMessage: 'Fetch metrics about your Docker containers.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.dockerMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.dockerMetrics.longDescription', {
       defaultMessage:
         'The `docker` Metricbeat module fetches metrics from the Docker server. \
 [Learn more]({learnMoreLink}).',
@@ -53,12 +53,9 @@ export function dockerMetricsSpecProvider(context: TutorialContext): TutorialSch
       dashboards: [
         {
           id: 'AV4REOpp5NkDleZmzKkE-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.dockerMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'Docker metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.dockerMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'Docker metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

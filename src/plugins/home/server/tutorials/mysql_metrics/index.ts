@@ -33,14 +33,14 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
   const moduleName = 'mysql';
   return {
     id: 'mysqlMetrics',
-    name: i18n.translate('kbn.server.tutorials.mysqlMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.mysqlMetrics.nameTitle', {
       defaultMessage: 'MySQL metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.mysqlMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.mysqlMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from MySQL.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.mysqlMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.mysqlMetrics.longDescription', {
       defaultMessage:
         'The `mysql` Metricbeat module fetches internal metrics from the MySQL server. \
 [Learn more]({learnMoreLink}).',
@@ -53,12 +53,9 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
       dashboards: [
         {
           id: '66881e90-0006-11e7-bf7f-c9acc3d3e306-ecs',
-          linkLabel: i18n.translate(
-            'kbn.server.tutorials.mysqlMetrics.artifacts.dashboards.linkLabel',
-            {
-              defaultMessage: 'MySQL metrics dashboard',
-            }
-          ),
+          linkLabel: i18n.translate('home.tutorials.mysqlMetrics.artifacts.dashboards.linkLabel', {
+            defaultMessage: 'MySQL metrics dashboard',
+          }),
           isOverview: true,
         },
       ],

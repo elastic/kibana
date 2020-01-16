@@ -11,7 +11,7 @@ import apmIndexPattern from './index_pattern.json';
 import { CloudSetup } from '../../../cloud/server';
 import { ArtifactsSchema, TutorialsCategory } from '../../../../../src/plugins/home/server';
 
-const apmIntro = i18n.translate('kbn.server.tutorials.apm.introduction', {
+const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage: 'Collect in-depth performance metrics and errors from inside your applications.',
 });
 
@@ -47,7 +47,7 @@ export const tutorialProvider = ({
       {
         id: '8d3ed660-7828-11e7-8c47-65b845b5cfb3',
         linkLabel: i18n.translate(
-          'kbn.server.tutorials.apm.specProvider.artifacts.dashboards.linkLabel',
+          'xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel',
           {
             defaultMessage: 'APM dashboard',
           }
@@ -60,7 +60,7 @@ export const tutorialProvider = ({
   if (isEnabled) {
     artifacts.application = {
       path: '/app/apm',
-      label: i18n.translate('kbn.server.tutorials.apm.specProvider.artifacts.application.label', {
+      label: i18n.translate('xpack.apm.tutorial.specProvider.artifacts.application.label', {
         defaultMessage: 'Launch APM',
       }),
     };
@@ -68,12 +68,12 @@ export const tutorialProvider = ({
 
   return {
     id: 'apm',
-    name: i18n.translate('kbn.server.tutorials.apm.specProvider.name', {
+    name: i18n.translate('xpack.apm.tutorial.specProvider.name', {
       defaultMessage: 'APM',
     }),
     category: TutorialsCategory.OTHER,
     shortDescription: apmIntro,
-    longDescription: i18n.translate('kbn.server.tutorials.apm.specProvider.longDescription', {
+    longDescription: i18n.translate('xpack.apm.tutorial.specProvider.longDescription', {
       defaultMessage:
         'Application Performance Monitoring (APM) collects in-depth \
 performance metrics and errors from inside your application. \
@@ -91,7 +91,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects,
     savedObjectsInstallMsg: i18n.translate(
-      'kbn.server.tutorials.apm.specProvider.savedObjectsInstallMsg',
+      'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
       {
         defaultMessage: 'An APM index pattern is required for some features in the APM UI.',
       }
