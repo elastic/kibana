@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isValidDatemath, datemathToEpochMillis, extendDatemath, convertDate } from './datemath';
+import {
+  isValidDatemath,
+  datemathToEpochMillis,
+  extendDatemath,
+  convertDate,
+  normalizeDate,
+} from './datemath';
 import sinon from 'sinon';
 
 describe('isValidDatemath()', () => {
@@ -68,10 +74,26 @@ describe('extendDatemath()', () => {
         });
       });
 
+      it('normalizes miliseconds', () => {
+        expect(extendDatemath('now-500ms')).toEqual({
+          value: 'now-1s',
+          diffAmount: 500,
+          diffUnit: 'ms',
+        });
+      });
+
       it('doubles seconds', () => {
         expect(extendDatemath('now-10s')).toEqual({
           value: 'now-20s',
           diffAmount: 10,
+          diffUnit: 's',
+        });
+      });
+
+      it('normalizes seconds', () => {
+        expect(extendDatemath('now-30s')).toEqual({
+          value: 'now-1m',
+          diffAmount: 30,
           diffUnit: 's',
         });
       });
@@ -333,5 +355,47 @@ describe('convertDate()', () => {
   it('Handles weeks to years', () => {
     expect(convertDate(1, 'y', 'w')).toEqual(52);
     expect(convertDate(52, 'w', 'y')).toEqual(1);
+  });
+});
+
+describe('normalizeDate()', () => {
+  it('keeps units under the conversion ratio the same', () => {
+    expect(normalizeDate(999, 'ms')).toEqual({ amount: 999, unit: 'ms' });
+    expect(normalizeDate(59, 's')).toEqual({ amount: 59, unit: 's' });
+    expect(normalizeDate(59, 'm')).toEqual({ amount: 59, unit: 'm' });
+    expect(normalizeDate(23, 'h')).toEqual({ amount: 23, unit: 'h' });
+    expect(normalizeDate(6, 'd')).toEqual({ amount: 6, unit: 'd' });
+    expect(normalizeDate(3, 'w')).toEqual({ amount: 3, unit: 'w' });
+    expect(normalizeDate(11, 'M')).toEqual({ amount: 11, unit: 'M' });
+  });
+
+  it('Moves to the next unit for values equal to the conversion ratio', () => {
+    expect(normalizeDate(1000, 'ms')).toEqual({ amount: 1, unit: 's' });
+    expect(normalizeDate(60, 's')).toEqual({ amount: 1, unit: 'm' });
+    expect(normalizeDate(60, 'm')).toEqual({ amount: 1, unit: 'h' });
+    expect(normalizeDate(24, 'h')).toEqual({ amount: 1, unit: 'd' });
+    expect(normalizeDate(7, 'd')).toEqual({ amount: 1, unit: 'w' });
+    expect(normalizeDate(4, 'w')).toEqual({ amount: 1, unit: 'M' });
+    expect(normalizeDate(12, 'M')).toEqual({ amount: 1, unit: 'y' });
+  });
+
+  it('keeps units slightly over the conversion ratio the same', () => {
+    expect(normalizeDate(1001, 'ms')).toEqual({ amount: 1001, unit: 'ms' });
+    expect(normalizeDate(61, 's')).toEqual({ amount: 61, unit: 's' });
+    expect(normalizeDate(61, 'm')).toEqual({ amount: 61, unit: 'm' });
+    expect(normalizeDate(25, 'h')).toEqual({ amount: 25, unit: 'h' });
+    expect(normalizeDate(8, 'd')).toEqual({ amount: 8, unit: 'd' });
+    expect(normalizeDate(5, 'w')).toEqual({ amount: 5, unit: 'w' });
+    expect(normalizeDate(13, 'M')).toEqual({ amount: 13, unit: 'M' });
+  });
+
+  it('moves to the next unit for any value higher than twice the conversion ratio', () => {
+    expect(normalizeDate(2001, 'ms')).toEqual({ amount: 2, unit: 's' });
+    expect(normalizeDate(121, 's')).toEqual({ amount: 2, unit: 'm' });
+    expect(normalizeDate(121, 'm')).toEqual({ amount: 2, unit: 'h' });
+    expect(normalizeDate(49, 'h')).toEqual({ amount: 2, unit: 'd' });
+    expect(normalizeDate(15, 'd')).toEqual({ amount: 2, unit: 'w' });
+    expect(normalizeDate(9, 'w')).toEqual({ amount: 2, unit: 'M' });
+    expect(normalizeDate(25, 'M')).toEqual({ amount: 2, unit: 'y' });
   });
 });

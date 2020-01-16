@@ -53,6 +53,7 @@ export function extendDatemath(
     let newUnit: Unit = unit as Unit;
     let newAmount: number;
 
+    // Extend the amount
     switch (unit) {
       // For small units, always double or halve the amount
       case 'ms':
@@ -106,13 +107,18 @@ export function extendDatemath(
         throw new TypeError('Unhandled datemath unit');
     }
 
+    // normalize amount and unit (i.e. 120s -> 2m)
+    const { unit: normalizedUnit, amount: normalizedAmount } = normalizeDate(newAmount, newUnit);
+
+    // How much have we changed the time?
+    const diffAmount = Math.abs(normalizedAmount - convertDate(parsedAmount, unit, normalizedUnit));
+    // if `diffAmount` is not an integer after normalization, express the difference in the original unit
+    const shouldKeepDiffUnit = diffAmount % 1 !== 0;
+
     return {
-      value: `now${operator}${newAmount}${newUnit}`,
-      diffUnit: newUnit,
-      diffAmount:
-        newUnit !== unit
-          ? Math.abs(newAmount - convertDate(parsedAmount, unit, newUnit))
-          : Math.abs(newAmount - parsedAmount),
+      value: `now${operator}${normalizedAmount}${normalizedUnit}`,
+      diffUnit: shouldKeepDiffUnit ? unit : newUnit,
+      diffAmount: shouldKeepDiffUnit ? Math.abs(newAmount - parsedAmount) : diffAmount,
     };
   }
 
@@ -153,38 +159,68 @@ const CONVERSION_RATIOS: Record<string, Array<[Unit, number]>> = {
   ],
 };
 
+function getRatioScale(from: Unit, to?: Unit) {
+  if ((from === 'y' && to === 'w') || (from === 'w' && to === 'y')) {
+    return CONVERSION_RATIOS.wy;
+  } else if (from === 'w' || to === 'w') {
+    return CONVERSION_RATIOS.w;
+  } else if (from === 'M' || to === 'M') {
+    return CONVERSION_RATIOS.M;
+  } else {
+    return CONVERSION_RATIOS.default;
+  }
+}
+
 export function convertDate(value: number, from: Unit, to: Unit): number {
   if (from === to) {
     return value;
   }
 
-  let ratios;
-  if ((from === 'y' && to === 'w') || (from === 'w' && to === 'y')) {
-    ratios = CONVERSION_RATIOS.wy;
-  } else if (from === 'w' || to === 'w') {
-    ratios = CONVERSION_RATIOS.w;
-  } else if (from === 'M' || to === 'M') {
-    ratios = CONVERSION_RATIOS.M;
-  } else {
-    ratios = CONVERSION_RATIOS.default;
-  }
+  const ratioScale = getRatioScale(from, to);
+  const fromIdx = ratioScale.findIndex(ratio => ratio[0] === from);
+  const toIdx = ratioScale.findIndex(ratio => ratio[0] === to);
 
   let convertedValue = value;
-
-  const fromIdx = ratios.findIndex(ratio => ratio[0] === from);
-  const toIdx = ratios.findIndex(ratio => ratio[0] === to);
 
   if (fromIdx > toIdx) {
     // `from` is the bigger unit. Multiply the value
     for (let i = toIdx; i < fromIdx; i++) {
-      convertedValue *= ratios[i][1];
+      convertedValue *= ratioScale[i][1];
     }
   } else {
     // `from` is the smaller unit. Divide the value
     for (let i = fromIdx; i < toIdx; i++) {
-      convertedValue /= ratios[i][1];
+      convertedValue /= ratioScale[i][1];
     }
   }
 
   return convertedValue;
+}
+
+export function normalizeDate(amount: number, unit: Unit): { amount: number; unit: Unit } {
+  // There is nothing after years
+  if (unit === 'y') {
+    return { amount, unit };
+  }
+
+  const nextUnit = dateMath.unitsAsc[dateMath.unitsAsc.indexOf(unit) + 1];
+  const ratioScale = getRatioScale(unit, nextUnit);
+  const ratio = ratioScale.find(r => r[0] === unit)![1];
+
+  const newAmount = amount / ratio;
+
+  // Exact conversion
+  if (newAmount === 1) {
+    return { amount: newAmount, unit: nextUnit };
+  }
+
+  // Might be able to go one unit more, so try again, rounding the value
+  // 7200s => 120m => 2h
+  // 7249s ~> 120m ~> 2h
+  if (newAmount >= 2) {
+    return normalizeDate(Math.round(newAmount), nextUnit);
+  }
+
+  // Cannot go one one unit above. Return as it is
+  return { amount, unit };
 }
