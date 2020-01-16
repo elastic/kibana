@@ -58,7 +58,7 @@ function RangesPanel({
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.gaugeOptions.rangesTitle"
+            id="visTypeVislib.controls.gaugeOptions.rangesTitle"
             defaultMessage="Ranges"
           />
         </h3>
@@ -75,10 +75,10 @@ function RangesPanel({
 
       <SwitchOption
         disabled={stateParams.gauge.colorsRange.length < 2}
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.autoExtendRangeLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.autoExtendRangeLabel', {
           defaultMessage: 'Auto extend range',
         })}
-        tooltip={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.extendRangeTooltip', {
+        tooltip={i18n.translate('visTypeVislib.controls.gaugeOptions.extendRangeTooltip', {
           defaultMessage: 'Extends range to the maximum value in your data.',
         })}
         paramName="extendRange"
@@ -88,7 +88,7 @@ function RangesPanel({
 
       <SwitchOption
         data-test-subj="gaugePercentageMode"
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.percentageModeLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.percentageModeLabel', {
           defaultMessage: 'Percentage mode',
         })}
         paramName="percentageMode"
@@ -106,7 +106,7 @@ function RangesPanel({
       />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showOutline', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showOutline', {
           defaultMessage: 'Show outline',
         })}
         paramName="outline"
@@ -115,7 +115,7 @@ function RangesPanel({
       />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showLegendLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showLegendLabel', {
           defaultMessage: 'Show legend',
         })}
         paramName="addLegend"
@@ -124,7 +124,7 @@ function RangesPanel({
       />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showScaleLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showScaleLabel', {
           defaultMessage: 'Show scale',
         })}
         paramName="show"

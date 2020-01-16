@@ -56,14 +56,14 @@ export function hierarchicalTooltipFormatter(metricFieldFormatter) {
             <FormattedMessage
               tagName="th"
               scope="col"
-              id="common.ui.aggResponse.fieldLabel"
+              id="visTypeVislib.vislib.tooltip.fieldLabel"
               defaultMessage="field"
             />
 
             <FormattedMessage
               tagName="th"
               scope="col"
-              id="common.ui.aggResponse.valueLabel"
+              id="visTypeVislib.vislib.tooltip.valueLabel"
               defaultMessage="value"
             />
             <th scope="col">{/* {metricCol.label} */}</th>
