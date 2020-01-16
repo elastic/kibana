@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
+import { npSetup } from '../../../legacy_imports';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {

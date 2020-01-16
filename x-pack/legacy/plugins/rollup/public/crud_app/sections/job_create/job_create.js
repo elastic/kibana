@@ -14,7 +14,7 @@ import first from 'lodash/array/first';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { npSetup } from 'ui/new_platform';
+import { npSetup } from '../../../legacy_imports';
 
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 

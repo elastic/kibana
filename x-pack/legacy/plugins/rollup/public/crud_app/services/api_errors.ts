@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart, npSetup } from 'ui/new_platform';
+import { npStart, npSetup } from '../../legacy_imports';
 
 function createToastConfig(error: any, errorTitle: string) {
   // Expect an error in the shape provided by Angular's $http service.

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
+import { npStart } from '../../../legacy_imports';
 
 import {
   deleteJobs as sendDeleteJobsRequest,
