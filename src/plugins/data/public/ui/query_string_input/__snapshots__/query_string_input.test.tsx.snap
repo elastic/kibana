@@ -211,6 +211,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -843,6 +849,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -1457,6 +1469,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -2086,6 +2104,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -2700,6 +2724,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -3329,6 +3359,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
