@@ -108,8 +108,6 @@ describe('getSortedObjectsForExport()', () => {
               "namespace": undefined,
               "perPage": 500,
               "search": undefined,
-              "sortField": "_id",
-              "sortOrder": "asc",
               "type": Array [
                 "index-pattern",
                 "search",
@@ -256,8 +254,6 @@ describe('getSortedObjectsForExport()', () => {
               "namespace": undefined,
               "perPage": 500,
               "search": "foo",
-              "sortField": "_id",
-              "sortOrder": "asc",
               "type": Array [
                 "index-pattern",
                 "search",
@@ -345,8 +341,6 @@ describe('getSortedObjectsForExport()', () => {
               "namespace": "foo",
               "perPage": 500,
               "search": undefined,
-              "sortField": "_id",
-              "sortOrder": "asc",
               "type": Array [
                 "index-pattern",
                 "search",
@@ -397,6 +391,121 @@ describe('getSortedObjectsForExport()', () => {
         types: ['index-pattern', 'search'],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
+  });
+
+  test('sorts objects within type', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '3',
+          type: 'index-pattern',
+          attributes: {
+            name: 'baz',
+          },
+          references: [],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {
+            name: 'foo',
+          },
+          references: [],
+        },
+        {
+          id: '2',
+          type: 'index-pattern',
+          attributes: {
+            name: 'bar',
+          },
+          references: [],
+        },
+      ],
+    });
+    const exportStream = await getSortedObjectsForExport({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      types: ['index-pattern'],
+      objects: [
+        {
+          type: 'index-pattern',
+          id: '3',
+        },
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'index-pattern',
+          id: '2',
+        },
+      ],
+    });
+    const response = await readStreamToCompletion(exportStream);
+    expect(response).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attributes": Object {
+            "name": "foo",
+          },
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {
+            "name": "bar",
+          },
+          "id": "2",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {
+            "name": "baz",
+          },
+          "id": "3",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "exportedCount": 3,
+          "missingRefCount": 0,
+          "missingReferences": Array [],
+        },
+      ]
+    `);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Array [
+              Object {
+                "id": "3",
+                "type": "index-pattern",
+              },
+              Object {
+                "id": "1",
+                "type": "index-pattern",
+              },
+              Object {
+                "id": "2",
+                "type": "index-pattern",
+              },
+            ],
+            Object {
+              "namespace": undefined,
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
   });
 
   test('exports selected objects and sorts them', async () => {

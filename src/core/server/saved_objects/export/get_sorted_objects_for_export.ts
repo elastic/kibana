@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import { createListStream } from '../../../../legacy/utils/streams';
-import { SavedObjectsClientContract } from '../types';
+import { SavedObjectsClientContract, SavedObject } from '../types';
 import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
@@ -69,6 +69,10 @@ export interface SavedObjectsExportResultDetails {
   }>;
 }
 
+function compareSavedObjects(a: SavedObject, b: SavedObject) {
+  return a.id > b.id ? 1 : -1;
+}
+
 async function fetchObjectsToExport({
   objects,
   types,
@@ -105,8 +109,6 @@ async function fetchObjectsToExport({
     const findResponse = await savedObjectsClient.find({
       type: types,
       search,
-      sortField: '_id',
-      sortOrder: 'asc',
       perPage: exportSizeLimit,
       namespace,
     });
@@ -137,7 +139,7 @@ export async function getSortedObjectsForExport({
     exportSizeLimit,
     namespace,
   });
-  let exportedObjects = [...rootObjects];
+  let exportedObjects = [...rootObjects.sort(compareSavedObjects)];
   let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
   if (includeReferencesDeep) {
     const fetchResult = await fetchNestedDependencies(rootObjects, savedObjectsClient, namespace);
