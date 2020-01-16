@@ -20,7 +20,7 @@ certificate's distinguished name (DN) to the appropriate `kibana_system` role.
 NOTE: Using a PKI realm is a gold feature. For a comparison of the Elastic license levels, see https://www.elastic.co/subscriptions[the
 subscription page].
 
-To configure {kib} and {es} to use with mutual TLS authentication:
+To configure {kib} and {es} to use mutual TLS authentication:
 
 . <<using-kibana-with-security,Set up {kib} to work with {security}>> with a username and password.
 
