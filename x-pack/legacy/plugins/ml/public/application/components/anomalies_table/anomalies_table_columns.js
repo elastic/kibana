@@ -55,7 +55,7 @@ export function getColumns(
   examplesByJobId,
   isAggregatedData,
   interval,
-  timefilter,
+  bounds,
   showViewSeriesLink,
   showRuleEditorFlyout,
   itemIdToExpandedRowMap,
@@ -80,11 +80,13 @@ export function getColumns(
                 })
           }
           data-row-id={item.rowId}
+          data-test-subj="mlJobListRowDetailsToggle"
         />
       ),
     },
     {
       field: 'time',
+      'data-test-subj': 'mlAnomaliesListColumnTime',
       name: i18n.translate('xpack.ml.anomaliesTable.timeColumnName', {
         defaultMessage: 'time',
       }),
@@ -95,6 +97,7 @@ export function getColumns(
     },
     {
       field: 'severity',
+      'data-test-subj': 'mlAnomaliesListColumnSeverity',
       name: i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
         defaultMessage: 'severity',
       }),
@@ -105,6 +108,7 @@ export function getColumns(
     },
     {
       field: 'detector',
+      'data-test-subj': 'mlAnomaliesListColumnDetector',
       name: i18n.translate('xpack.ml.anomaliesTable.detectorColumnName', {
         defaultMessage: 'detector',
       }),
@@ -119,6 +123,7 @@ export function getColumns(
   if (items.some(item => item.entityValue !== undefined)) {
     columns.push({
       field: 'entityValue',
+      'data-test-subj': 'mlAnomaliesListColumnFoundFor',
       name: i18n.translate('xpack.ml.anomaliesTable.entityValueColumnName', {
         defaultMessage: 'found for',
       }),
@@ -138,6 +143,7 @@ export function getColumns(
   if (items.some(item => item.influencers !== undefined)) {
     columns.push({
       field: 'influencers',
+      'data-test-subj': 'mlAnomaliesListColumnInfluencers',
       name: i18n.translate('xpack.ml.anomaliesTable.influencersColumnName', {
         defaultMessage: 'influenced by',
       }),
@@ -159,6 +165,7 @@ export function getColumns(
   if (items.some(item => item.actual !== undefined)) {
     columns.push({
       field: 'actualSort',
+      'data-test-subj': 'mlAnomaliesListColumnActual',
       name: i18n.translate('xpack.ml.anomaliesTable.actualSortColumnName', {
         defaultMessage: 'actual',
       }),
@@ -176,6 +183,7 @@ export function getColumns(
   if (items.some(item => item.typical !== undefined)) {
     columns.push({
       field: 'typicalSort',
+      'data-test-subj': 'mlAnomaliesListColumnTypical',
       name: i18n.translate('xpack.ml.anomaliesTable.typicalSortColumnName', {
         defaultMessage: 'typical',
       }),
@@ -198,6 +206,7 @@ export function getColumns(
     if (nonTimeOfDayOrWeek === true) {
       columns.push({
         field: 'metricDescriptionSort',
+        'data-test-subj': 'mlAnomaliesListColumnDescription',
         name: i18n.translate('xpack.ml.anomaliesTable.metricDescriptionSortColumnName', {
           defaultMessage: 'description',
         }),
@@ -213,6 +222,7 @@ export function getColumns(
   if (jobIds && jobIds.length > 1) {
     columns.push({
       field: 'jobId',
+      'data-test-subj': 'mlAnomaliesListColumnJobID',
       name: i18n.translate('xpack.ml.anomaliesTable.jobIdColumnName', {
         defaultMessage: 'job ID',
       }),
@@ -223,6 +233,7 @@ export function getColumns(
   const showExamples = items.some(item => item.entityName === 'mlcategory');
   if (showExamples === true) {
     columns.push({
+      'data-test-subj': 'mlAnomaliesListColumnCategoryExamples',
       name: i18n.translate('xpack.ml.anomaliesTable.categoryExamplesColumnName', {
         defaultMessage: 'category examples',
       }),
@@ -254,6 +265,7 @@ export function getColumns(
 
   if (showLinks === true) {
     columns.push({
+      'data-test-subj': 'mlAnomaliesListColumnAction',
       name: i18n.translate('xpack.ml.anomaliesTable.actionsColumnName', {
         defaultMessage: 'actions',
       }),
@@ -262,10 +274,10 @@ export function getColumns(
           return (
             <LinksMenu
               anomaly={item}
+              bounds={bounds}
               showViewSeriesLink={showViewSeriesLink}
               isAggregatedData={isAggregatedData}
               interval={interval}
-              timefilter={timefilter}
               showRuleEditorFlyout={showRuleEditorFlyout}
             />
           );

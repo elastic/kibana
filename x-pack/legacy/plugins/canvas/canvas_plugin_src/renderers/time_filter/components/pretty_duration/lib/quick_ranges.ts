@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UnitStrings } from '../../../../../../i18n';
+import { UnitStrings } from '../../../../../../i18n/units';
 
 export interface QuickRange {
   /** Start date string of range */

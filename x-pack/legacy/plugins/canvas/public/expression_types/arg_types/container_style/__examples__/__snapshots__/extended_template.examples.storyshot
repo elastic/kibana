@@ -467,6 +467,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 className="euiPopover__anchor"
               >
                 <button
+                  aria-label="Border white"
                   className="euiLink euiLink--primary"
                   onClick={[Function]}
                   style={
@@ -956,6 +957,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
               className="euiPopover__anchor"
             >
               <button
+                aria-label="Border black"
                 className="euiLink euiLink--primary"
                 onClick={[Function]}
                 style={
@@ -1457,6 +1459,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 className="euiPopover__anchor"
               >
                 <button
+                  aria-label="Border white"
                   className="euiLink euiLink--primary"
                   onClick={[Function]}
                   style={

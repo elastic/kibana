@@ -55,6 +55,7 @@ export const persistTimelineMutation = gql`
           }
         }
         description
+        eventType
         favorite {
           fullName
           userName

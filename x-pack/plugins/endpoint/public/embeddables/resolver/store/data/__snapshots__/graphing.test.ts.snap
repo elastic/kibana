@@ -1,0 +1,347 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolver graph layout when rendering no nodes renders right 1`] = `
+Object {
+  "edgeLineSegments": Array [],
+  "processNodePositions": Map {},
+}
+`;
+
+exports[`resolver graph layout when rendering one node renders right 1`] = `
+Object {
+  "edgeLineSegments": Array [],
+  "processNodePositions": Map {
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 0,
+        "process_name": "",
+        "process_path": "",
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      0,
+      -0.8164965809277259,
+    ],
+  },
+}
+`;
+
+exports[`resolver graph layout when rendering two forks, and one fork has an extra long tine renders right 1`] = `
+Object {
+  "edgeLineSegments": Array [
+    Array [
+      Array [
+        0,
+        -0.8164965809277259,
+      ],
+      Array [
+        35.35533905932738,
+        -21.228911104120876,
+      ],
+    ],
+    Array [
+      Array [
+        -35.35533905932738,
+        -62.053740150507174,
+      ],
+      Array [
+        106.06601717798213,
+        19.595917942265423,
+      ],
+    ],
+    Array [
+      Array [
+        -35.35533905932738,
+        -62.053740150507174,
+      ],
+      Array [
+        0,
+        -82.46615467370032,
+      ],
+    ],
+    Array [
+      Array [
+        106.06601717798213,
+        19.595917942265423,
+      ],
+      Array [
+        141.4213562373095,
+        -0.8164965809277259,
+      ],
+    ],
+    Array [
+      Array [
+        0,
+        -82.46615467370032,
+      ],
+      Array [
+        35.35533905932738,
+        -102.87856919689347,
+      ],
+    ],
+    Array [
+      Array [
+        0,
+        -123.2909837200866,
+      ],
+      Array [
+        70.71067811865476,
+        -82.46615467370032,
+      ],
+    ],
+    Array [
+      Array [
+        0,
+        -123.2909837200866,
+      ],
+      Array [
+        35.35533905932738,
+        -143.70339824327976,
+      ],
+    ],
+    Array [
+      Array [
+        70.71067811865476,
+        -82.46615467370032,
+      ],
+      Array [
+        106.06601717798213,
+        -102.87856919689347,
+      ],
+    ],
+    Array [
+      Array [
+        141.4213562373095,
+        -0.8164965809277259,
+      ],
+      Array [
+        176.7766952966369,
+        -21.22891110412087,
+      ],
+    ],
+    Array [
+      Array [
+        141.4213562373095,
+        -41.64132562731402,
+      ],
+      Array [
+        212.13203435596427,
+        -0.8164965809277259,
+      ],
+    ],
+    Array [
+      Array [
+        141.4213562373095,
+        -41.64132562731402,
+      ],
+      Array [
+        176.7766952966369,
+        -62.053740150507174,
+      ],
+    ],
+    Array [
+      Array [
+        212.13203435596427,
+        -0.8164965809277259,
+      ],
+      Array [
+        247.48737341529164,
+        -21.228911104120883,
+      ],
+    ],
+    Array [
+      Array [
+        247.48737341529164,
+        -21.228911104120883,
+      ],
+      Array [
+        318.1980515339464,
+        -62.05374015050717,
+      ],
+    ],
+  ],
+  "processNodePositions": Map {
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 0,
+        "process_name": "",
+        "process_path": "",
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      0,
+      -0.8164965809277259,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "node_id": 1,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 0,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      0,
+      -82.46615467370032,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 2,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 0,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      141.4213562373095,
+      -0.8164965809277259,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 3,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 1,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      35.35533905932738,
+      -143.70339824327976,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 4,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 1,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      106.06601717798213,
+      -102.87856919689347,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 5,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 2,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      176.7766952966369,
+      -62.053740150507174,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 6,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 2,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      247.48737341529164,
+      -21.228911104120883,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 7,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 6,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      318.1980515339464,
+      -62.05374015050717,
+    ],
+  },
+}
+`;
+
+exports[`resolver graph layout when rendering two nodes, one being the parent of the other renders right 1`] = `
+Object {
+  "edgeLineSegments": Array [
+    Array [
+      Array [
+        0,
+        -0.8164965809277259,
+      ],
+      Array [
+        70.71067811865476,
+        -41.641325627314025,
+      ],
+    ],
+  ],
+  "processNodePositions": Map {
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "node_id": 0,
+        "process_name": "",
+        "process_path": "",
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      0,
+      -0.8164965809277259,
+    ],
+    Object {
+      "data_buffer": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "node_id": 1,
+        "process_name": "",
+        "process_path": "",
+        "source_id": 0,
+      },
+      "event_timestamp": 1,
+      "event_type": 1,
+      "machine_id": "",
+    } => Array [
+      70.71067811865476,
+      -41.641325627314025,
+    ],
+  },
+}
+`;
