@@ -48,7 +48,7 @@ export interface Props {
   value: string;
 
   /** Function invoked when text in editor is changed */
-  onChange?: (value: string) => void;
+  onChange: (value: string) => void;
 
   /**
    * Options for the Monaco Code Editor

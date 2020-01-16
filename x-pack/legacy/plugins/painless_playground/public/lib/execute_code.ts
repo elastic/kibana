@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ROUTES } from '../../common/constants';
+import { API_ROUTE_EXECUTE } from '../../common/constants';
 
 export async function executeCode(http: any, payload: Record<string, any>) {
-  return await http.post(`${ROUTES.API_ROOT}/execute`, {
+  return await http.post(API_ROUTE_EXECUTE, {
     body: JSON.stringify(payload),
   });
 }

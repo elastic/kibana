@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'painless_playground',
-};
+export const PLUGIN_ID = 'painless_playground';
 
-export const ROUTES = {
-  API_ROOT: '/api/painless_playground',
-};
+export const API_ROUTE_EXECUTE = '/api/painless_playground/execute';

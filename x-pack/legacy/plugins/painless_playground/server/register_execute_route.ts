@@ -6,12 +6,13 @@
 import { ServerRoute } from 'hapi';
 import { licensePreRoutingFactory } from './lib/license_pre_routing_factory';
 import { Legacy } from '../../../../../kibana';
+import { API_ROUTE_EXECUTE } from '../common/constants';
 
 export function registerExecuteRoute(server: any) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/painless_playground/execute',
+    path: API_ROUTE_EXECUTE,
     method: 'POST',
     handler: (request: Legacy.Request) => {
       const cluster = server.plugins.elasticsearch.getCluster('data');

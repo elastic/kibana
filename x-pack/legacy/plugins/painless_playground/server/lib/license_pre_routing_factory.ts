@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import Boom from 'boom';
-import { PLUGIN } from '../../common/constants';
+import { PLUGIN_ID } from '../../common/constants';
 import { ServerFacade } from '../../../index_management';
 
 export const licensePreRoutingFactory = (server: ServerFacade) => {
@@ -13,7 +12,7 @@ export const licensePreRoutingFactory = (server: ServerFacade) => {
 
   // License checking and enable/disable logic
   function licensePreRouting() {
-    const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
+    const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN_ID).getLicenseCheckResults();
     if (!licenseCheckResults.enableAPIRoute) {
       throw Boom.forbidden(licenseCheckResults.message);
     }

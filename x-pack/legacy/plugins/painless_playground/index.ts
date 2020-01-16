@@ -5,14 +5,14 @@
  */
 
 import { resolve } from 'path';
-import { PLUGIN } from './common/constants';
+import { PLUGIN_ID } from './common/constants';
 
 import { registerLicenseChecker } from './server/register_license_checker';
 import { registerExecuteRoute } from './server/register_execute_route';
 
 export const painlessPlayground = (kibana: any) =>
   new kibana.Plugin({
-    id: PLUGIN.ID,
+    id: PLUGIN_ID,
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.painless_playground',
