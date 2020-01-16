@@ -138,7 +138,6 @@ export const RelationsParameter = () => (
   >
     <UseArray path="relations">
       {({ items: relationItems, addItem: addRelationItem, removeItem: removeRelationItem }) => {
-        const totalRelations = relationItems.length;
         return (
           <>
             {relationItems.map(({ id: relationId, path: relationPath, isNew: relationIsNew }) => {
@@ -185,24 +184,22 @@ export const RelationsParameter = () => (
                                               readDefaultValueOnForm={!relationIsNew && !isChildNew}
                                             />
 
-                                            {totalRelations === 1 && totalChildren === 1 ? null : (
-                                              <EuiButtonIcon
-                                                className="mappingsEditor__dynamicItem__removeButton"
-                                                color="danger"
-                                                onClick={() =>
-                                                  totalChildren === 1
-                                                    ? removeRelationItem(relationId)
-                                                    : removeChildItem(childId)
+                                            <EuiButtonIcon
+                                              className="mappingsEditor__dynamicItem__removeButton"
+                                              color="danger"
+                                              onClick={() =>
+                                                totalChildren === 1
+                                                  ? removeRelationItem(relationId)
+                                                  : removeChildItem(childId)
+                                              }
+                                              iconType="cross"
+                                              aria-label={i18n.translate(
+                                                'xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel',
+                                                {
+                                                  defaultMessage: 'Remove child',
                                                 }
-                                                iconType="cross"
-                                                aria-label={i18n.translate(
-                                                  'xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel',
-                                                  {
-                                                    defaultMessage: 'Remove child',
-                                                  }
-                                                )}
-                                              />
-                                            )}
+                                              )}
+                                            />
                                           </>
                                         </div>
                                       );
