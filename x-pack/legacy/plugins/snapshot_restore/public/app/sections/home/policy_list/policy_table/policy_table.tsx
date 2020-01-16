@@ -184,7 +184,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
           render: ({ name, inProgress }: SlmPolicy) => {
             return (
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <PolicyExecuteProvider>
                     {executePolicyPrompt => {
                       return (
@@ -220,7 +220,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                     }}
                   </PolicyExecuteProvider>
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={i18n.translate(
                       'xpack.snapshotRestore.policyList.table.actionEditTooltip',
@@ -242,7 +242,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <PolicyDeleteProvider>
                     {deletePolicyPrompt => {
                       return (
