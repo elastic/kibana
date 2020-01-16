@@ -19,6 +19,7 @@
 
 import { readdirSync } from 'fs';
 import { resolve, parse } from 'path';
+import uuid from 'uuid';
 
 import { Subject } from 'rxjs';
 // @ts-ignore
@@ -112,13 +113,13 @@ export class PulseService {
           } else {
             this.log.info(`the index .kibana_pulse_local_${request.params.channel} does NOT exist`);
           }
-          let id = 1;
+          const id = uuid.v4();
+          // what I should be doing is generate a guid
           await this.elasticsearch!.callAsInternalUser('index', {
             index: `.kibana_pulse_local_${channel}`,
             id: `${id}`,
             body: payload,
           });
-          id = id + 1;
           return response.ok({
             body: {
               message: `payload: ${payload} received`,
