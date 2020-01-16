@@ -37,12 +37,7 @@ export const createCaseResolvers = (
       return libs.case.getCase(req, args.caseId);
     },
     async getCases(root, args, { req }) {
-      return libs.case.getCases(
-        req,
-        // args.pageInfo || null,
-        args.search || null
-        // args.sort || null
-      );
+      return libs.case.getCases(req, args.pageInfo || null, args.search || null, args.sort || null);
     },
   },
   Mutation: {

@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { GetCasesQuery, CasesSavedObjects } from '../../../graphql/types';
+import { GetCasesQuery, CasesSavedObjects, Direction, SortFieldCase } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
@@ -35,7 +35,15 @@ const CasesComponentQuery = React.memo<CasesProps>(({ id = ID, children, skip, s
     notifyOnNetworkStatusChange
     skip={skip}
     variables={{
+      pageInfo: {
+        pageIndex: 1,
+        pageSize: 5,
+      },
       search,
+      sort: {
+        sortField: SortFieldCase.created_at,
+        sortOrder: Direction.asc,
+      },
     }}
   >
     {({ data, loading, refetch }) => {

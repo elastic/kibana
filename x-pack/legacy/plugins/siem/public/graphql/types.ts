@@ -8,6 +8,18 @@
 
 export type Maybe<T> = T | null;
 
+export interface PageInfoCase {
+  pageIndex: number;
+
+  pageSize: number;
+}
+
+export interface SortCase {
+  sortField: SortFieldCase;
+
+  sortOrder: Direction;
+}
+
 export interface PageInfoNote {
   pageIndex: number;
 
@@ -267,14 +279,18 @@ export interface FavoriteTimelineInput {
   favoriteDate?: Maybe<number>;
 }
 
-export enum SortFieldNote {
-  updatedBy = 'updatedBy',
-  updated = 'updated',
+export enum SortFieldCase {
+  created_at = 'created_at',
 }
 
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
+}
+
+export enum SortFieldNote {
+  updatedBy = 'updatedBy',
+  updated = 'updated',
 }
 
 export enum LastEventIndexKey {
@@ -2241,7 +2257,11 @@ export interface GetCaseQueryArgs {
   caseId: string;
 }
 export interface GetCasesQueryArgs {
+  pageInfo?: Maybe<PageInfoCase>;
+
   search?: Maybe<string>;
+
+  sort?: Maybe<SortCase>;
 }
 export interface GetNoteQueryArgs {
   id: string;
@@ -2792,7 +2812,9 @@ export namespace GetCaseQuery {
 
 export namespace GetCasesQuery {
   export type Variables = {
+    pageInfo: PageInfoCase;
     search?: Maybe<string>;
+    sort?: Maybe<SortCase>;
   };
 
   export type Query = {

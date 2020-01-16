@@ -12,8 +12,8 @@ import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 export type CasesColumns = [
   Columns<CaseSavedObject['attributes']['title']>,
   Columns<CaseSavedObject['id']>,
-  Columns<CaseSavedObject['attributes']['created_by']['username']>,
   Columns<CaseSavedObject['attributes']['created_at']>,
+  Columns<CaseSavedObject['attributes']['created_by']['username']>,
   Columns<CaseSavedObject['updated_at']>,
   Columns<CaseSavedObject['attributes']['state']>
 ];
@@ -34,6 +34,7 @@ export const getCasesColumns = (): CasesColumns => [
   {
     field: 'attributes.created_at',
     name: 'Created at',
+    sortable: true,
     render: createdAt => {
       if (createdAt != null) {
         return <FormattedRelativePreferenceDate value={createdAt} />;

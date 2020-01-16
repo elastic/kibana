@@ -37,9 +37,21 @@
             "description": "",
             "args": [
               {
+                "name": "pageInfo",
+                "description": "",
+                "type": { "kind": "INPUT_OBJECT", "name": "PageInfoCase", "ofType": null },
+                "defaultValue": null
+              },
+              {
                 "name": "search",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "sort",
+                "description": "",
+                "type": { "kind": "INPUT_OBJECT", "name": "SortCase", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -539,6 +551,98 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "PageInfoCase",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "pageIndex",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "pageSize",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SortCase",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "sortField",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "ENUM", "name": "SortFieldCase", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "sortOrder",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "ENUM", "name": "Direction", "ofType": null }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "SortFieldCase",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "created_at",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "Direction",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "asc", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "desc", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "CasesSavedObjects",
         "description": "",
@@ -773,19 +877,6 @@
             "deprecationReason": null
           },
           { "name": "updated", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "Direction",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          { "name": "asc", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "desc", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

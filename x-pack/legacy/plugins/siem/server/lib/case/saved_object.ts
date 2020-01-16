@@ -5,9 +5,10 @@
  */
 
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
-import { CaseSavedObject, CasesSavedObjects } from '../../graphql/types';
+import { CaseSavedObject, CasesSavedObjects, PageInfoCase, SortCase } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import { caseSavedObjectType } from './saved_object_mappings';
+
 export class Case {
   public async deleteCase(request: FrameworkRequest, noteIds: string[]) {
     const savedObjectsClient = request.context.core.savedObjects.client;
@@ -23,19 +24,21 @@ export class Case {
 
   public async getCases(
     request: FrameworkRequest,
-    // pageInfo: PageInfoCase | null,
-    search: string | null
-    // sort: SortCase | null
+    pageInfo: PageInfoCase | null,
+    search: string | null,
+    sort: SortCase | null
   ): Promise<CasesSavedObjects> {
     const options: SavedObjectsFindOptions = {
       type: caseSavedObjectType,
-      // perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-      // page: pageInfo != null ? pageInfo.pageIndex : undefined,
+      perPage: pageInfo != null ? pageInfo.pageSize : undefined,
+      page: pageInfo != null ? pageInfo.pageIndex : undefined,
       search: search != null ? search : undefined,
-      // searchFields: ['note'],
-      // sortField: sort != null ? sort.sortField : undefined,
-      // sortOrder: sort != null ? sort.sortOrder : undefined,
+      searchFields: ['tags'],
+      sortField: sort != null ? sort.sortField : undefined,
+      sortOrder: sort != null ? sort.sortOrder : undefined,
     };
+
+    console.log('getCases return')
     return this.getAllSavedCase(request, options);
   }
 
@@ -55,15 +58,16 @@ export class Case {
   }
 
   private async getAllSavedCase(request: FrameworkRequest, options: SavedObjectsFindOptions) {
+    console.log('getAllSavedCase start', options)
     const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObjects = await savedObjectsClient.find(options);
-    return savedObjects;
-    // return {
-    //   totalCount: savedObjects.total,
-    //   cases: savedObjects.saved_objects.map(savedObject =>
-    //     convertSavedObjectToSavedCase(savedObject)
-    //   ),
-    // };
+    console.log('getAllSavedCase return')
+    return {
+      ...savedObjects,
+      saved_objects: savedObjects.saved_objects.map(savedObject =>
+        convertSavedObjectToSavedCase(savedObject)
+      ),
+    };
   }
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

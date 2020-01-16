@@ -7,6 +7,19 @@
 import gql from 'graphql-tag';
 
 export const caseSchema = gql`
+  input PageInfoCase {
+    pageIndex: Float!
+    pageSize: Float!
+  }
+
+  enum SortFieldCase {
+    created_at
+  }
+
+  input SortCase {
+    sortField: SortFieldCase!
+    sortOrder: Direction!
+  }
   ###############
   #### QUERY ####
   ###############
@@ -45,7 +58,7 @@ export const caseSchema = gql`
 
   extend type Query {
     getCase(caseId: ID!): CaseSavedObject!
-    getCases(search: String): CasesSavedObjects!
+    getCases(pageInfo: PageInfoCase, search: String, sort: SortCase): CasesSavedObjects!
   }
 
   extend type Mutation {

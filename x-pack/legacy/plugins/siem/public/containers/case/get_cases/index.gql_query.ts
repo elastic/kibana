@@ -7,8 +7,8 @@
 import gql from 'graphql-tag';
 
 export const casesQuery = gql`
-  query GetCasesQuery($search: String) {
-    getCases(search: $search) {
+  query GetCasesQuery($pageInfo: PageInfoCase!, $search: String, $sort: SortCase) {
+    getCases(pageInfo: $pageInfo, search: $search, sort: $sort) {
       page
       per_page
       total
