@@ -11,6 +11,10 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { MapListing } from './components/map_listing';
 // @ts-ignore
 import { setLicenseId } from './kibana_services';
+// @ts-ignore
+import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory.js';
+// @ts-ignore
+import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -25,8 +29,10 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: any, plugins: any) {
     const {
       __LEGACY: { uiModules },
-      np: { licensing },
+      np: { licensing, embeddable },
     } = plugins;
+
+    embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 
     uiModules
       .get('app/maps', ['ngRoute', 'react'])

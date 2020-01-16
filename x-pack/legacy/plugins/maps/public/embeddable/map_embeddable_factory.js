@@ -12,7 +12,6 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 
@@ -146,5 +145,3 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     );
   }
 }
-
-setup.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
