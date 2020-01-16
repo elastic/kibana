@@ -59,6 +59,7 @@ export function ibmmqMetricsSpecProvider(context) {
       },
     },
     completionTimeMinutes: 10,
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/ibmmq_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
