@@ -76,8 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
-    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
-    it.skip('should disable single alert', async () => {
+    it('should disable single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -85,8 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const collapsedItemActions = await testSubjects.find('collapsedItemActions');
       await collapsedItemActions.click();
 
-      const enableSwitch = await testSubjects.find('enableSwitch');
-      await enableSwitch.click();
+      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -98,8 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('false');
     });
 
-    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
-    it.skip('should re-enable single alert', async () => {
+    it('should re-enable single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -107,16 +104,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const collapsedItemActions = await testSubjects.find('collapsedItemActions');
       await collapsedItemActions.click();
 
-      const enableSwitch = await testSubjects.find('enableSwitch');
-      await enableSwitch.click();
+      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const collapsedItemActionsAfterDisable = await testSubjects.find('collapsedItemActions');
       await collapsedItemActionsAfterDisable.click();
 
-      const enableSwitchAfterDisable = await testSubjects.find('enableSwitch');
-      await enableSwitchAfterDisable.click();
+      await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -128,8 +123,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('true');
     });
 
-    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
-    it.skip('should mute single alert', async () => {
+    it('should mute single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -137,8 +131,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const collapsedItemActions = await testSubjects.find('collapsedItemActions');
       await collapsedItemActions.click();
 
-      const muteSwitch = await testSubjects.find('muteSwitch');
-      await muteSwitch.click();
+      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -150,8 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('true');
     });
 
-    // Flaky until https://github.com/elastic/eui/issues/2612 fixed
-    it.skip('should unmute single alert', async () => {
+    it('should unmute single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -159,8 +151,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const collapsedItemActions = await testSubjects.find('collapsedItemActions');
       await collapsedItemActions.click();
 
-      const muteSwitch = await testSubjects.find('muteSwitch');
-      await muteSwitch.click();
+      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -180,8 +171,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('false');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
-    it.skip('should delete single alert', async () => {
+    it('should delete single alert', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -200,8 +190,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/49830
-    it.skip('should mute all selection', async () => {
+    it('should mute all selection', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -228,8 +217,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('true');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/49830
-    it.skip('should unmute all selection', async () => {
+    it('should unmute all selection', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -259,8 +247,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('false');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/49830
-    it.skip('should disable all selection', async () => {
+    it('should disable all selection', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -287,8 +274,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('false');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/49830
-    it.skip('should enable all selection', async () => {
+    it('should enable all selection', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -318,8 +304,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('true');
     });
 
-    // Flaky, will be fixed with https://github.com/elastic/kibana/issues/53956
-    it.skip('should delete all selection', async () => {
+    it('should delete all selection', async () => {
       const createdAlert = await createAlert();
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
