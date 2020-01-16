@@ -142,7 +142,7 @@ Extract the instance certificate's private key (without encryption):
 openssl pkcs12 -in elastic-certificates.p12 -nocerts -nodes > server.key
 ----------------------------------------------------------
 
-Extract the instance public certificate:
+Extract the instance certificate:
 
 [source,shell]
 ----------------------------------------------------------
