@@ -193,7 +193,7 @@ export class TelemetryCollectionManager {
         }
       } catch (err) {
         statsCollectionConfig.server.log(
-          ['debu', 'telemetry', 'collection'],
+          ['debug', 'telemetry', 'collection'],
           `Failed to collect any usage with registered collections.`
         );
         // swallow error to try next collection;

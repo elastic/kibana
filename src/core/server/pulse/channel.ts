@@ -19,9 +19,9 @@
 
 import { Subject } from 'rxjs';
 import { PulseCollectorConstructor } from './types';
-import { IClusterClient } from '../elasticsearch';
-import { SavedObjectsServiceSetup } from '../saved_objects';
+// import { SavedObjectsServiceSetup } from '../saved_objects';
 import { Logger } from '../logging';
+import { IPulseElasticsearchClient, IPulseClient } from './clientWrappers/types';
 
 export interface PulseInstruction {
   owner: string;
@@ -35,8 +35,9 @@ export interface ChannelConfig {
   logger: Logger;
 }
 export interface ChannelSetupContext {
-  elasticsearch: IClusterClient;
-  savedObjects: SavedObjectsServiceSetup;
+  pulse?: IPulseClient;
+  elasticsearch?: IPulseElasticsearchClient;
+  // savedObjects: SavedObjectsServiceSetup;
 }
 
 export class PulseChannel<Payload = any, Rec = Payload> {
@@ -59,11 +60,11 @@ export class PulseChannel<Payload = any, Rec = Payload> {
     return this.config.id;
   }
 
-  public sendPulse<T = any>(payload: T) {
+  public async sendPulse<T = any>(payload: T) {
     if (!this.collector.putRecord) {
       throw Error(`this.collector.putRecords not implemented for ${this.id}.`);
     }
-    this.collector.putRecord(payload);
+    await this.collector.putRecord(payload);
   }
 
   public instructions$() {

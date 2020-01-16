@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import { PulseCollector } from '../types';
-export class Collector extends PulseCollector<unknown, { ping_received: boolean }> {
-  public async putRecord() {}
-  public async getRecords() {
-    return [];
-    // if (this.elasticsearch) {
-    //   const pingResult = await this.elasticsearch.callAsInternalUser('ping');
+export interface IPulseElasticsearchClient {
+  createIndexIfNotExist?: (channel: string, mappings: Record<string, any>) => Promise<void>;
+  index: (channel: string, doc: Record<string, any>) => Promise<void>;
+  search: <T>(channel: string, query: Record<string, any>) => Promise<T[]>;
+}
 
-    //   return [{ ping_received: pingResult }];
-    // }
-    // throw Error(`Default collector not initialised with an "elasticsearch" client!`);
-  }
+export interface IPulseClient {
+  putRecord: (channel: string, record: any) => Promise<void>;
+  getRecords: <T>(channel: string) => Promise<T[]>;
 }

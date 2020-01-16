@@ -19,7 +19,6 @@
 
 import { readdirSync } from 'fs';
 import { resolve, parse } from 'path';
-import uuid from 'uuid';
 
 import { Subject } from 'rxjs';
 // @ts-ignore
@@ -29,9 +28,10 @@ import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
-import { sendPulse, Fetcher } from './send_pulse';
+import { sendUsageFrom, sendPulse, Fetcher } from './send_pulse';
 import { SavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
+import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
 
 export interface InternalPulseService {
   getChannel: (id: string) => PulseChannel;
@@ -99,58 +99,66 @@ export class PulseService {
       }),
     };
     router.post(
-      { path: '/api/pulse_local/elasticsearch/{channel}', validate },
-      // @ts-ignore
+      { path: '/api/pulse_local/{channel}', validate },
       async (context, request, response) => {
         try {
           const { channel } = request.params;
           const { payload } = request.body;
-          const exists = await this.elasticsearch!.callAsInternalUser('indices.exists', {
-            index: `.kibana_pulse_local_${channel}`,
-          });
-          if (exists) {
-            this.log.info(`the index .kibana_pulse_local_${request.params.channel} exists`);
-          } else {
-            this.log.info(`the index .kibana_pulse_local_${request.params.channel} does NOT exist`);
-          }
-          const id = uuid.v4();
-          // what I should be doing is generate a guid
-          await this.elasticsearch!.callAsInternalUser('index', {
-            index: `.kibana_pulse_local_${channel}`,
-            id: `${id}`,
-            body: payload,
-          });
+          const ch = this.channels.get(channel);
+          await ch?.sendPulse(payload);
           return response.ok({
             body: {
               message: `payload: ${payload} received`,
             },
           });
         } catch (error) {
-          if (error) {
-            return response.badRequest({ body: error });
-          }
+          return response.badRequest({ body: error });
+        }
+      }
+    );
+    router.get(
+      {
+        path: '/api/pulse_local/{channel}',
+        validate: {
+          params: schema.object({
+            channel: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { channel } = request.params;
+          const results = await this.channels.get(channel)?.getRecords();
+          return response.ok({
+            body: results,
+          });
+        } catch (error) {
+          return response.badRequest({ body: error });
         }
       }
     );
 
+    const pulseElasticsearchClient = new PulseElasticsearchClient(this.elasticsearch!);
     this.channels.forEach(channel =>
       channel.setup({
-        elasticsearch: this.elasticsearch!,
-        savedObjects: deps.savedObjects,
+        elasticsearch: pulseElasticsearchClient,
+        // savedObjects: deps.savedObjects,
       })
     );
-    // poll for instructions every second for this deployment
-    setInterval(() => {
-      this.loadInstructions().catch(err => this.log.error(err.stack));
-    }, 10000);
-
-    this.log.debug('Will attempt first telemetry collection in 5 seconds...');
-
-    setTimeout(() => {
+    if (sendUsageFrom === 'server') {
+      // poll for instructions every second for this deployment
       setInterval(() => {
-        this.sendTelemetry().catch(err => this.log.error(err.stack));
+        this.loadInstructions().catch(err => this.log.error(err.stack));
+      }, 10000);
+
+      this.log.debug('Will attempt first telemetry collection in 5 seconds...');
+
+      setTimeout(() => {
+        setInterval(() => {
+          this.sendTelemetry().catch(err => this.log.error(err.stack));
+        }, 5000);
       }, 5000);
-    }, 5000);
+    }
 
     return {
       getChannel: (id: string) => {

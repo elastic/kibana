@@ -21,10 +21,9 @@ import { Subject } from 'rxjs';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InstructionsResponse } from '../../server/pulse';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { PulseChannel, PulseInstruction } from './channel';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Fetcher, sendPulse } from '../../server/pulse/send_pulse';
+import { Fetcher, sendPulse, sendUsageFrom } from '../../server/pulse/send_pulse';
 
 export interface PulseServiceSetup {
   getChannel: (id: string) => PulseChannel;
@@ -33,6 +32,7 @@ export interface PulseServiceSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PulseServiceStart {}
 
+// TODO: Why are we not looping through these?
 const channelNames = ['default', 'notifications', 'errors'];
 
 const logger = {
@@ -59,33 +59,22 @@ export class PulseService {
   }
 
   public async setup(): Promise<PulseServiceSetup> {
-    // poll for instructions every second for this deployment
-    setInterval(() => {
-      // eslint-disable-next-line no-console
-      this.loadInstructions().catch(err => console.error(err.stack));
-      // move this into a wrapper function
-
-      fetch('/api/pulse_local/elasticsearch/errors', {
-        method: 'post',
-        headers: {
-          'content-type': 'application/json',
-          'kbn-xsrf': 'true',
-        },
-        body: JSON.stringify({
-          payload: { message: 'Hello world!', errorId: 'Houston We Have a Problem!' },
-        }),
-        // eslint-disable-next-line no-console
-      }).catch(err => console.error(err.stack));
-    }, 10000);
-
-    // eslint-disable-next-line no-console
-    console.log('Will attempt first telemetry collection in 5 seconds...');
-    setTimeout(() => {
+    if (sendUsageFrom === 'browser') {
+      // poll for instructions every second for this deployment
       setInterval(() => {
         // eslint-disable-next-line no-console
-        this.sendTelemetry().catch(err => console.error(err.stack));
-      }, 5000);
-    }, 5000);
+        this.loadInstructions().catch(err => console.error(err.stack));
+      }, 10000);
+
+      // eslint-disable-next-line no-console
+      console.log('Will attempt first telemetry collection in 5 seconds...');
+      setTimeout(() => {
+        setInterval(() => {
+          // eslint-disable-next-line no-console
+          this.sendTelemetry().catch(err => console.error(err.stack));
+        }, 5000);
+      }, 1000);
+    }
 
     return {
       getChannel: (id: string) => {

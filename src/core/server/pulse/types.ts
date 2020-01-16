@@ -17,20 +17,21 @@
  * under the License.
  */
 
-import { IClusterClient } from '../elasticsearch';
-import { SavedObjectsServiceSetup, ISavedObjectsRepository } from '../saved_objects';
+// import { SavedObjectsServiceSetup, ISavedObjectsRepository } from '../saved_objects';
 import { Logger } from '../logging';
+import { IPulseElasticsearchClient, IPulseClient } from './clientWrappers/types';
 
 export type PulseCollectorConstructor = new (logger: Logger) => PulseCollector;
 
 export interface CollectorSetupContext {
-  elasticsearch: IClusterClient;
-  savedObjects: SavedObjectsServiceSetup;
+  elasticsearch: IPulseElasticsearchClient;
+  // savedObjects: SavedObjectsServiceSetup;
 }
 
 export abstract class PulseCollector<Payload = unknown, PulseRecord = Payload> {
-  protected savedObjects?: ISavedObjectsRepository;
-  protected elasticsearch?: IClusterClient;
+  // protected savedObjects?: ISavedObjectsRepository;
+  protected elasticsearch?: IPulseElasticsearchClient;
+  protected pulse?: IPulseClient;
 
   constructor(protected readonly logger: Logger) {}
 
@@ -38,7 +39,7 @@ export abstract class PulseCollector<Payload = unknown, PulseRecord = Payload> {
   public abstract async getRecords(): Promise<PulseRecord[]>;
 
   public async setup(setupContext: CollectorSetupContext) {
-    this.savedObjects = setupContext.savedObjects.createInternalRepository();
+    // this.savedObjects = setupContext.savedObjects.createInternalRepository();
     this.elasticsearch = setupContext.elasticsearch;
   }
 }

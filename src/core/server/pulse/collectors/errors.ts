@@ -21,7 +21,7 @@
 // records for the errors channel. Each record will ultimately
 // be stored as an individual document in the errors channel index
 // by the service
-
+import moment from 'moment';
 import { PulseCollector, CollectorSetupContext } from '../types';
 
 export interface Payload {
@@ -29,49 +29,53 @@ export interface Payload {
 }
 
 export class Collector extends PulseCollector<Payload> {
-  private payloads: Payload[] = [];
-  private readonly indexName = '.kibana_pulse_errors';
+  private readonly channelName = 'errors';
 
   public async setup(deps: CollectorSetupContext) {
     await super.setup(deps);
-    const exists = await this.elasticsearch!.callAsInternalUser('indices.exists', {
-      index: this.indexName,
-    });
-    if (!exists) {
-      await this.elasticsearch!.callAsInternalUser('indices.create', {
-        index: this.indexName,
-        body: {
-          settings: {
-            number_of_shards: 1,
+    if (this.elasticsearch?.createIndexIfNotExist) {
+      const mappings = {
+        properties: {
+          timestamp: {
+            type: 'date',
           },
-          mappings: {
-            properties: {
-              errorId: {
+          errorId: {
+            type: 'keyword',
+          },
+          message: {
+            type: 'text',
+            fields: {
+              keyword: {
                 type: 'keyword',
               },
             },
           },
         },
-      });
+      };
+      await this.elasticsearch!.createIndexIfNotExist(this.channelName, mappings);
     }
   }
-  public async putRecord(payload: Payload) {
-    this.payloads.push(payload);
-    if (this.elasticsearch) {
-      await this.elasticsearch.callAsInternalUser('create', {
-        index: this.indexName,
-        body: payload,
-      });
-    }
+  public async putRecord(originalPayload: Payload) {
+    const payload = { timestamp: moment.utc().toISOString(), ...originalPayload };
+    if (this.elasticsearch) await this.elasticsearch.index(this.channelName, payload);
   }
 
   public async getRecords() {
     if (this.elasticsearch) {
-      const results = await this.elasticsearch.callAsInternalUser('search', {
-        index: this.indexName,
+      const results = await this.elasticsearch.search<Payload>(this.channelName, {
+        bool: {
+          filter: {
+            range: {
+              timestamp: {
+                gte: 'now-10s',
+                lte: 'now',
+              },
+            },
+          },
+        },
       });
-      // TODO: Set results as sent and return them
+      return results;
     }
-    return this.payloads.splice(0, this.payloads.length);
+    return [];
   }
 }

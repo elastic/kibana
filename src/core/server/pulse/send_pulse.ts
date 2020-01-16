@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { PulseChannel } from './channel';
-
 export const CLUSTER_UUID = '123';
 export const BASE_URL = 'http://localhost:5601/api/pulse_poc';
 export interface ChannelsToSend {
@@ -26,20 +24,32 @@ export interface ChannelsToSend {
   channel_id: string;
 }
 
+export interface IPulseChannel {
+  id: string;
+  getRecords: <T>() => Promise<T[]>;
+}
+
+export const sendUsageFrom: 'browser' | 'server' = 'browser';
+
 export type Fetcher<Response> = (
   url: string,
   channelsToSend: ChannelsToSend[]
 ) => Promise<Response>;
 
 export async function sendPulse<Response>(
-  channels: Map<string, PulseChannel>,
+  channels: Map<string, IPulseChannel>,
   fetcher: Fetcher<Response>
 ) {
   const url = `${BASE_URL}/intake/${CLUSTER_UUID}`;
 
   const channelsToSend = [];
+  // TODO: It looks like this loop is getting stuck
   for (const channel of channels.values()) {
+    // eslint-disable-next-line no-console
+    console.log(`Getting records from channel ${channel.id}`);
     const records = await channel.getRecords();
+    // eslint-disable-next-line no-console
+    console.log(`Got some records! ${JSON.stringify(records)}`);
     channelsToSend.push({
       records,
       channel_id: channel.id,

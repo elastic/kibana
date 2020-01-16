@@ -44,6 +44,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     const instructions$ = core.pulse.getChannel('errors').instructions$();
     core.pulse.getChannel('errors').sendPulse({
       errorId: 'new_error',
+      message: 'Hey! I failed!',
     });
 
     instructions$.subscribe(instruction => {
