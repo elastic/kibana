@@ -232,12 +232,21 @@ export const RelationsParameter = () => {
                                                     : removeChildItem(childId)
                                                 }
                                                 iconType="cross"
-                                                aria-label={i18n.translate(
-                                                  'xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel',
-                                                  {
-                                                    defaultMessage: 'Remove child',
-                                                  }
-                                                )}
+                                                aria-label={
+                                                  totalChildren === 1
+                                                    ? i18n.translate(
+                                                        'xpack.idxMgmt.mappingsEditor.joinType.removeRelationButtonLabel',
+                                                        {
+                                                          defaultMessage: 'Remove join relation',
+                                                        }
+                                                      )
+                                                    : i18n.translate(
+                                                        'xpack.idxMgmt.mappingsEditor.joinType.removeChildRelationButtonLabel',
+                                                        {
+                                                          defaultMessage: 'Remove child relation',
+                                                        }
+                                                      )
+                                                }
                                               />
                                             </>
                                           </div>
