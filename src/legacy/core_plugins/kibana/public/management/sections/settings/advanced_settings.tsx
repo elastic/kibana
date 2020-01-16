@@ -48,7 +48,7 @@ interface AdvancedSettingsProps {
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
-  query: { text: string };
+  query: any;
   filteredSettings: Record<string, Setting[]>;
 }
 
@@ -142,9 +142,10 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     }, {});
   }
 
-  onQueryChange = ({ query }: AdvancedSettingsProps) => {
+  // todo
+  onQueryChange = ({ query }: { query: any }) => {
     this.setState({
-      query: { text: query },
+      query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
     });
   };
