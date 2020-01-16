@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+import { npStart } from 'ui/new_platform';
 
 import {
   deleteJobs as sendDeleteJobsRequest,
@@ -40,14 +40,14 @@ export const deleteJobs = jobIds => async (dispatch, getState) => {
   }
 
   if (jobIds.length === 1) {
-    toastNotifications.addSuccess(
+    npStart.core.notifications.toasts.addSuccess(
       i18n.translate('xpack.rollupJobs.deleteAction.successSingleNotificationTitle', {
         defaultMessage: `Rollup job '{jobId}' was deleted`,
         values: { jobId: jobIds[0] },
       })
     );
   } else {
-    toastNotifications.addSuccess(
+    npStart.core.notifications.toasts.addSuccess(
       i18n.translate('xpack.rollupJobs.deleteAction.successMultipleNotificationTitle', {
         defaultMessage: '{count} rollup jobs were deleted',
         values: { count: jobIds.length },

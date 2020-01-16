@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fatalError } from 'ui/notify';
+import { npSetup } from 'ui/new_platform';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
@@ -78,7 +78,7 @@ export const createJob = jobConfig => async dispatch => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(
+    return npSetup.core.fatalErrors.add(
       error,
       i18n.translate('xpack.rollupJobs.createAction.errorTitle', {
         defaultMessage: 'Error creating rollup job',
