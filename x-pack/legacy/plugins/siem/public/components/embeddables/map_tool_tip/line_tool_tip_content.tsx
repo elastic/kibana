@@ -56,9 +56,11 @@ export const LineToolTipContentComponent = ({
       </EuiFlexItem>
       <SourceDestinationArrows
         contextId={contextId}
-        destinationBytes={lineProps[SUM_OF_DESTINATION_BYTES] || lineProps[SUM_OF_SERVER_BYTES]}
+        destinationBytes={
+          isSrcDest ? lineProps[SUM_OF_DESTINATION_BYTES] : lineProps[SUM_OF_SERVER_BYTES]
+        }
         eventId={`map-line-tooltip-${contextId}`}
-        sourceBytes={lineProps[SUM_OF_SOURCE_BYTES] || lineProps[SUM_OF_CLIENT_BYTES]}
+        sourceBytes={isSrcDest ? lineProps[SUM_OF_SOURCE_BYTES] : lineProps[SUM_OF_CLIENT_BYTES]}
       />
       <EuiFlexItem>
         <FlowBadge color="hollow">

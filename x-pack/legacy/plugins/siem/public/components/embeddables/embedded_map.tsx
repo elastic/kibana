@@ -18,7 +18,7 @@ import { Loader } from '../loader';
 import { displayErrorToast, useStateToaster } from '../toasters';
 import { Embeddable } from './embeddable';
 import { EmbeddableHeader } from './embeddable_header';
-import { createEmbeddable } from './embedded_map_helpers';
+import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
@@ -108,9 +108,11 @@ export const EmbeddedMapComponent = ({
     let isSubscribed = true;
     async function setupEmbeddable() {
       // Ensure at least one `siem:defaultIndex` kibana index pattern exists before creating embeddable
-      const matchingIndexPatterns = kibanaIndexPatterns.filter(kip =>
-        siemDefaultIndices.some(sdi => new RegExp(kip.attributes.title).test(sdi))
-      );
+      const matchingIndexPatterns = findMatchingIndexPatterns({
+        kibanaIndexPatterns,
+        siemDefaultIndices,
+      });
+
       if (matchingIndexPatterns.length === 0 && isSubscribed) {
         setIsLoading(false);
         setIsIndexError(true);

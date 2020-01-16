@@ -44,7 +44,7 @@ export interface LayerMapping {
 }
 
 export interface LayerMappingCollection {
-  [key: string]: LayerMapping;
+  [indexPatternTitle: string]: LayerMapping;
 }
 
 export type SetQuery = (params: {
