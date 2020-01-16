@@ -40,10 +40,10 @@ export function registerJobGenerationRoutes(
   async function handler(
     exportTypeId: string,
     jobParams: object,
-    originalRequest: Legacy.Request,
+    legacyRequest: Legacy.Request,
     h: ReportingResponseToolkit
   ) {
-    const request = makeRequestFacade(originalRequest);
+    const request = makeRequestFacade(legacyRequest);
     const user = request.pre.user;
     const headers = request.headers;
 

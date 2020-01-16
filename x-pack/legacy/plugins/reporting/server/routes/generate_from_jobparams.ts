@@ -56,8 +56,8 @@ export function registerGenerateFromJobParams(
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     options: getRouteConfig(),
-    handler: async (originalRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const request = makeRequestFacade(originalRequest);
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
       let jobParamsRison: string | null;
 
       if (request.payload) {
@@ -83,7 +83,7 @@ export function registerGenerateFromJobParams(
         if (!jobParams) {
           throw new Error('missing jobParams!');
         }
-        response = await handler(exportType, jobParams, originalRequest, h);
+        response = await handler(exportType, jobParams, legacyRequest, h);
       } catch (err) {
         throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
       }

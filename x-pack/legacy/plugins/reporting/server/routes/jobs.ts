@@ -42,8 +42,8 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/list`,
     method: 'GET',
     options: getRouteConfig(),
-    handler: (originalRequest: Legacy.Request) => {
-      const request = makeRequestFacade(originalRequest);
+    handler: (legacyRequest: Legacy.Request) => {
+      const request = makeRequestFacade(legacyRequest);
       const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
@@ -65,8 +65,8 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/count`,
     method: 'GET',
     options: getRouteConfig(),
-    handler: (originalRequest: Legacy.Request) => {
-      const request = makeRequestFacade(originalRequest);
+    handler: (legacyRequest: Legacy.Request) => {
+      const request = makeRequestFacade(legacyRequest);
       const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
       return results;
     },
@@ -77,8 +77,8 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/output/{docId}`,
     method: 'GET',
     options: getRouteConfig(),
-    handler: (originalRequest: Legacy.Request) => {
-      const request = makeRequestFacade(originalRequest);
+    handler: (legacyRequest: Legacy.Request) => {
+      const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
       return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
@@ -103,8 +103,8 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/info/{docId}`,
     method: 'GET',
     options: getRouteConfig(),
-    handler: (originalRequest: Legacy.Request) => {
-      const request = makeRequestFacade(originalRequest);
+    handler: (legacyRequest: Legacy.Request) => {
+      const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
       return jobsQuery
@@ -136,8 +136,8 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
     options: getRouteConfigDownload(),
-    handler: async (originalRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const request = makeRequestFacade(originalRequest);
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
       let response = await jobResponseHandler(

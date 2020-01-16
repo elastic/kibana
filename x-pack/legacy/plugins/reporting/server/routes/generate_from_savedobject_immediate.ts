@@ -44,8 +44,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (originalRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const request = makeRequestFacade(originalRequest);
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
 

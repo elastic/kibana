@@ -9,7 +9,7 @@ import { makeRequestFacade } from './make_request_facade';
 
 describe('makeRequestFacade', () => {
   test('creates a default object', () => {
-    const originalRequest = ({
+    const legacyRequest = ({
       getBasePath: () => 'basebase',
       params: {
         param1: 123,
@@ -22,7 +22,7 @@ describe('makeRequestFacade', () => {
       },
     } as unknown) as Legacy.Request;
 
-    expect(makeRequestFacade(originalRequest)).toMatchInlineSnapshot(`
+    expect(makeRequestFacade(legacyRequest)).toMatchInlineSnapshot(`
       Object {
         "getBasePath": [Function],
         "getRawRequest": [Function],
@@ -44,7 +44,7 @@ describe('makeRequestFacade', () => {
   });
 
   test('getRawRequest', () => {
-    const originalRequest = ({
+    const legacyRequest = ({
       getBasePath: () => 'basebase',
       params: {
         param1: 123,
@@ -57,6 +57,6 @@ describe('makeRequestFacade', () => {
       },
     } as unknown) as Legacy.Request;
 
-    expect(makeRequestFacade(originalRequest).getRawRequest()).toBe(originalRequest);
+    expect(makeRequestFacade(legacyRequest).getRawRequest()).toBe(legacyRequest);
   });
 });
