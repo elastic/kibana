@@ -121,14 +121,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       if (!isEqual(myDefaultValues, myStepData)) {
         setMyStepData(myDefaultValues);
         setLocalUseIndicesConfig(isEqual(myDefaultValues.index, indicesConfig));
-        if (!isReadOnlyView) {
-          Object.keys(schema).forEach(key => {
-            const val = get(key, myDefaultValues);
-            if (val != null) {
-              form.setFieldValue(key, val);
-            }
-          });
-        }
+        Object.keys(schema).forEach(key => {
+          const val = get(key, myDefaultValues);
+          if (val != null) {
+            form.setFieldValue(key, val);
+          }
+        });
       }
     }
   }, [defaultValues, indicesConfig]);
@@ -152,7 +150,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setOpenTimelineSearch(false);
   }, []);
 
-  return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView && myStepData?.queryBar != null ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription
         direction={descriptionDirection}

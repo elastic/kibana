@@ -71,14 +71,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
         isNew: false,
       };
       setMyStepData(myDefaultValues);
-      if (!isReadOnlyView) {
-        Object.keys(schema).forEach(key => {
-          const val = get(key, myDefaultValues);
-          if (val != null) {
-            form.setFieldValue(key, val);
-          }
-        });
-      }
+      Object.keys(schema).forEach(key => {
+        const val = get(key, myDefaultValues);
+        if (val != null) {
+          form.setFieldValue(key, val);
+        }
+      });
     }
   }, [defaultValues]);
 

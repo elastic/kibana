@@ -95,6 +95,7 @@ export const CreateRuleComponent = React.memo(() => {
         const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
         if ([0, 1].includes(stepRuleIdx)) {
           if (isStepRuleInReadOnlyView[stepsRuleOrder[stepRuleIdx + 1]]) {
+            setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
             setIsStepRuleInEditView({
               ...isStepRuleInReadOnlyView,
               [step]: true,
@@ -203,12 +204,15 @@ export const CreateRuleComponent = React.memo(() => {
     async (id: RuleStep) => {
       const activeForm = await stepsForm.current[openAccordionId]?.submit();
       if (activeForm != null && activeForm?.isValid) {
+        stepsData.current[openAccordionId] = {
+          ...stepsData.current[openAccordionId],
+          data: activeForm.data,
+          isValid: activeForm.isValid,
+        };
         setOpenAccordionId(id);
-        openCloseAccordion(openAccordionId);
-
         setIsStepRuleInEditView({
           ...isStepRuleInReadOnlyView,
-          [openAccordionId]: openAccordionId === RuleStep.scheduleRule ? false : true,
+          [openAccordionId]: true,
           [id]: false,
         });
       }
@@ -252,6 +256,9 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepDefineRule
               addPadding={true}
+              defaultValues={
+                (stepsData.current[RuleStep.defineRule].data as DefineStepRule) ?? null
+              }
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -284,6 +291,7 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepAboutRule
               addPadding={true}
+              defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
               descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
@@ -316,6 +324,9 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepScheduleRule
               addPadding={true}
+              defaultValues={
+                (stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule) ?? null
+              }
               descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}
