@@ -15,7 +15,7 @@ export const painlessContextOptions = [
   {
     value: 'filter',
     text: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', {
-      defaultMessage: 'Filter - Execute like inside a script query',
+      defaultMessage: 'Filter - Execute like inside a filter query',
     }),
   },
   {

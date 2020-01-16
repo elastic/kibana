@@ -171,7 +171,7 @@ export function PainlessPlayground({
                       >
                         <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
                           <CodeEditor
-                            languageId="json"
+                            languageId="javascript"
                             height={100}
                             value={contextSetup.params}
                             onChange={(value: string) => setContextSetup({ params: value })}
@@ -253,7 +253,7 @@ export function PainlessPlayground({
                         >
                           <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
                             <CodeEditor
-                              languageId="json"
+                              languageId="javascript"
                               height={100}
                               value={contextSetup.document}
                               onChange={(value: string) =>
