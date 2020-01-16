@@ -24,7 +24,8 @@ import {
   onPremCloudInstructions,
 } from '../instructions/metricbeat_instructions';
 import {
-  TutorialContext, TutorialsCategory,
+  TutorialContext,
+  TutorialsCategory,
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
