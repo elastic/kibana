@@ -30,6 +30,7 @@ describe('#getActionsColumns', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -41,7 +42,7 @@ describe('#getActionsColumns', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -57,6 +58,7 @@ describe('#getActionsColumns', () => {
 
     const wrapper = mountWithIntl(
       <TimelinesTable
+        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
         deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         loading={false}
@@ -68,7 +70,7 @@ describe('#getActionsColumns', () => {
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={with6Events}
-        showExtendedColumnsAndActions={true}
+        showExtendedColumns={true}
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={with6Events.length}
@@ -82,6 +84,7 @@ describe('#getActionsColumns', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -93,7 +96,7 @@ describe('#getActionsColumns', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -109,6 +112,7 @@ describe('#getActionsColumns', () => {
 
     const wrapper = mountWithIntl(
       <TimelinesTable
+        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
         deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         loading={false}
@@ -120,7 +124,7 @@ describe('#getActionsColumns', () => {
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={with4Notes}
-        showExtendedColumnsAndActions={true}
+        showExtendedColumns={true}
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={with4Notes.length}
@@ -134,6 +138,7 @@ describe('#getActionsColumns', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <TimelinesTable
+          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
           deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           loading={false}
@@ -145,7 +150,7 @@ describe('#getActionsColumns', () => {
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           searchResults={mockResults}
-          showExtendedColumnsAndActions={true}
+          showExtendedColumns={true}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
           totalSearchResultsCount={mockResults.length}
@@ -161,6 +166,7 @@ describe('#getActionsColumns', () => {
 
     const wrapper = mountWithIntl(
       <TimelinesTable
+        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
         deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         loading={false}
@@ -172,7 +178,7 @@ describe('#getActionsColumns', () => {
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={undefinedFavorite}
-        showExtendedColumnsAndActions={true}
+        showExtendedColumns={true}
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={undefinedFavorite.length}
@@ -187,6 +193,7 @@ describe('#getActionsColumns', () => {
 
     const wrapper = mountWithIntl(
       <TimelinesTable
+        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
         deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         loading={false}
@@ -198,7 +205,7 @@ describe('#getActionsColumns', () => {
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={nullFavorite}
-        showExtendedColumnsAndActions={true}
+        showExtendedColumns={true}
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={nullFavorite.length}
@@ -213,6 +220,7 @@ describe('#getActionsColumns', () => {
 
     const wrapper = mountWithIntl(
       <TimelinesTable
+        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
         deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         loading={false}
@@ -224,7 +232,7 @@ describe('#getActionsColumns', () => {
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={emptyFavorite}
-        showExtendedColumnsAndActions={true}
+        showExtendedColumns={true}
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={emptyFavorite.length}
@@ -249,6 +257,7 @@ describe('#getActionsColumns', () => {
 
     const wrapper = mountWithIntl(
       <TimelinesTable
+        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
         deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         loading={false}
@@ -260,7 +269,7 @@ describe('#getActionsColumns', () => {
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={emptyFavorite}
-        showExtendedColumnsAndActions={true}
+        showExtendedColumns={true}
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={emptyFavorite.length}
@@ -289,6 +298,7 @@ describe('#getActionsColumns', () => {
 
     const wrapper = mountWithIntl(
       <TimelinesTable
+        actionTimelineToShow={['delete', 'duplicate', 'selectable']}
         deleteTimelines={jest.fn()}
         defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         loading={false}
@@ -300,7 +310,7 @@ describe('#getActionsColumns', () => {
         pageIndex={0}
         pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
         searchResults={emptyFavorite}
-        showExtendedColumnsAndActions={true}
+        showExtendedColumns={true}
         sortDirection={DEFAULT_SORT_DIRECTION}
         sortField={DEFAULT_SORT_FIELD}
         totalSearchResultsCount={emptyFavorite.length}

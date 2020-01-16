@@ -6,11 +6,14 @@
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
 import { TimeHistory } from 'ui/timefilter';
 import { TimeRange } from 'src/plugins/data/public';
 
-import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
+import {
+  mlTimefilterRefresh$,
+  mlTimefilterTimeChange$,
+} from '../../../services/timefilter_refresh_service';
 import { useUiContext } from '../../../contexts/ui/use_ui_context';
 
 interface Duration {
@@ -27,6 +30,10 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
       };
     });
   };
+}
+
+function updateLastRefresh(timeRange: OnRefreshProps) {
+  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
 export const TopNav: FC = () => {
@@ -74,6 +81,7 @@ export const TopNav: FC = () => {
     timefilter.setTime(newTime);
     setTime(newTime);
     setRecentlyUsedRanges(getRecentlyUsedRanges());
+    mlTimefilterTimeChange$.next({ lastRefresh: Date.now(), timeRange: { start, end } });
   }
 
   function updateInterval({
@@ -104,7 +112,7 @@ export const TopNav: FC = () => {
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={() => mlTimefilterRefresh$.next()}
+            onRefresh={updateLastRefresh}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}

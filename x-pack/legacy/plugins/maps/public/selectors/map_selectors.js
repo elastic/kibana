@@ -150,6 +150,10 @@ export const getLayerList = createSelector(
   }
 );
 
+export const getHiddenLayerIds = createSelector(getLayerListRaw, layers =>
+  layers.filter(layer => !layer.visible).map(layer => layer.id)
+);
+
 export const getSelectedLayer = createSelector(
   getSelectedLayerId,
   getLayerList,

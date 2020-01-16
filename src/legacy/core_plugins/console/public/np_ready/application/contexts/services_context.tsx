@@ -20,6 +20,7 @@
 import React, { createContext, useContext } from 'react';
 import { NotificationsSetup } from 'kibana/public';
 import { History, Storage, Settings } from '../../services';
+import { ObjectStorageClient } from '../../../../common/types';
 import { MetricsTracker } from '../../types';
 
 export interface ContextValue {
@@ -28,6 +29,7 @@ export interface ContextValue {
     storage: Storage;
     settings: Settings;
     notifications: NotificationsSetup;
+    objectStorageClient: ObjectStorageClient;
     trackUiMetric: MetricsTracker;
   };
   elasticsearchUrl: string;

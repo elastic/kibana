@@ -26,7 +26,6 @@ export class EndpointPlugin
       EndpointPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
-    const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
     core.application.register({
       id: 'endpoint',
       title: i18n.translate('xpack.endpoint.pluginTitle', {
@@ -38,6 +37,8 @@ export class EndpointPlugin
         return renderApp(coreStart, params);
       },
     });
+
+    const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
 
     plugins.embeddable.registerEmbeddableFactory(
       resolverEmbeddableFactory.type,

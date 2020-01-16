@@ -25,15 +25,19 @@ export interface TodoItem {
   id: number;
 }
 
-export type TodoState = TodoItem[];
+export interface TodoState {
+  todos: TodoItem[];
+}
 
-export const defaultState: TodoState = [
-  {
-    id: 0,
-    text: 'Learning state containers',
-    completed: false,
-  },
-];
+export const defaultState: TodoState = {
+  todos: [
+    {
+      id: 0,
+      text: 'Learning state containers',
+      completed: false,
+    },
+  ],
+};
 
 export interface TodoActions {
   add: PureTransition<TodoState, [TodoItem]>;
@@ -44,17 +48,34 @@ export interface TodoActions {
   clearCompleted: PureTransition<TodoState, []>;
 }
 
+export interface TodosSelectors {
+  todos: (state: TodoState) => () => TodoItem[];
+  todo: (state: TodoState) => (id: number) => TodoItem | null;
+}
+
 export const pureTransitions: TodoActions = {
-  add: state => todo => [...state, todo],
-  edit: state => todo => state.map(item => (item.id === todo.id ? { ...item, ...todo } : item)),
-  delete: state => id => state.filter(item => item.id !== id),
-  complete: state => id =>
-    state.map(item => (item.id === id ? { ...item, completed: true } : item)),
-  completeAll: state => () => state.map(item => ({ ...item, completed: true })),
-  clearCompleted: state => () => state.filter(({ completed }) => !completed),
+  add: state => todo => ({ todos: [...state.todos, todo] }),
+  edit: state => todo => ({
+    todos: state.todos.map(item => (item.id === todo.id ? { ...item, ...todo } : item)),
+  }),
+  delete: state => id => ({ todos: state.todos.filter(item => item.id !== id) }),
+  complete: state => id => ({
+    todos: state.todos.map(item => (item.id === id ? { ...item, completed: true } : item)),
+  }),
+  completeAll: state => () => ({ todos: state.todos.map(item => ({ ...item, completed: true })) }),
+  clearCompleted: state => () => ({ todos: state.todos.filter(({ completed }) => !completed) }),
 };
 
-const container = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
+export const pureSelectors: TodosSelectors = {
+  todos: state => () => state.todos,
+  todo: state => id => state.todos.find(todo => todo.id === id) ?? null,
+};
+
+const container = createStateContainer<TodoState, TodoActions, TodosSelectors>(
+  defaultState,
+  pureTransitions,
+  pureSelectors
+);
 
 container.transitions.add({
   id: 1,
@@ -64,6 +85,6 @@ container.transitions.add({
 container.transitions.complete(0);
 container.transitions.complete(1);
 
-console.log(container.get()); // eslint-disable-line
+console.log(container.selectors.todos()); // eslint-disable-line
 
-export const result = container.get();
+export const result = container.selectors.todos();

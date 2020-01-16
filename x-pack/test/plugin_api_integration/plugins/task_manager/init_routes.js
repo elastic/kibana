@@ -23,9 +23,7 @@ const taskManagerQuery = {
   },
 };
 
-export function initRoutes(server, taskTestingEvents) {
-  const taskManager = server.plugins.task_manager;
-
+export function initRoutes(server, taskManager, legacyTaskManager, taskTestingEvents) {
   server.route({
     path: '/api/sample_tasks/schedule',
     method: 'POST',
@@ -54,6 +52,45 @@ export function initRoutes(server, taskTestingEvents) {
         };
 
         const taskResult = await taskManager.schedule(task, { request });
+
+        return taskResult;
+      } catch (err) {
+        return err;
+      }
+    },
+  });
+
+  /*
+    Schedule using legacy Api
+   */
+  server.route({
+    path: '/api/sample_tasks/schedule_legacy',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            taskType: Joi.string().required(),
+            schedule: Joi.object({
+              interval: Joi.string(),
+            }).optional(),
+            interval: Joi.string().optional(),
+            params: Joi.object().required(),
+            state: Joi.object().optional(),
+            id: Joi.string().optional(),
+          }),
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        const { task: taskFields } = request.payload;
+        const task = {
+          ...taskFields,
+          scope: [scope],
+        };
+
+        const taskResult = await legacyTaskManager.schedule(task, { request });
 
         return taskResult;
       } catch (err) {
@@ -157,14 +194,43 @@ export function initRoutes(server, taskTestingEvents) {
   });
 
   server.route({
+    path: '/api/sample_tasks/task/{taskId}',
+    method: 'GET',
+    async handler(request) {
+      try {
+        return taskManager.fetch({
+          query: {
+            bool: {
+              must: [
+                {
+                  ids: {
+                    values: [`task:${request.params.taskId}`],
+                  },
+                },
+              ],
+            },
+          },
+        });
+      } catch (err) {
+        return err;
+      }
+    },
+  });
+
+  server.route({
     path: '/api/sample_tasks',
     method: 'DELETE',
     async handler() {
       try {
-        const { docs: tasks } = await taskManager.fetch({
-          query: taskManagerQuery,
-        });
-        return Promise.all(tasks.map(task => taskManager.remove(task.id)));
+        let tasksFound = 0;
+        do {
+          const { docs: tasks } = await taskManager.fetch({
+            query: taskManagerQuery,
+          });
+          tasksFound = tasks.length;
+          await Promise.all(tasks.map(task => taskManager.remove(task.id)));
+        } while (tasksFound > 0);
+        return 'OK';
       } catch (err) {
         return err;
       }
