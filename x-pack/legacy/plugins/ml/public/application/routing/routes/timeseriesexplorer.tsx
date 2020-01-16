@@ -74,7 +74,7 @@ interface TimeSeriesExplorerUrlStateManager {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
+export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
   config,
   jobsWithTimeRange,
 }) => {
@@ -113,7 +113,13 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
         from: globalState.time.from,
         to: globalState.time.to,
       });
-      setBounds(timefilter.getBounds());
+
+      const timefilterBounds = timefilter.getBounds();
+      // Only if both min/max bounds are valid moment times set the bounds.
+      // An invalid string restored from globalState might return `undefined`.
+      if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
+        setBounds(timefilter.getBounds());
+      }
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
@@ -138,7 +144,7 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
   }, [JSON.stringify(selectedJobIds)]);
 
   // Next we get globalState and appState information to pass it on as props later.
-  // If a job change is going on, we fall back to defaults (as if appState was already cleard),
+  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
   // otherwise the page could break.
   const selectedDetectorIndex = isJobChange
     ? 0
