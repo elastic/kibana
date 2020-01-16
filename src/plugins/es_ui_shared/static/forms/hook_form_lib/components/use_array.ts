@@ -24,6 +24,7 @@ import { useFormContext } from '../form_context';
 interface Props {
   path: string;
   initialNumberOfItems?: number;
+  readDefaultValueOnForm?: boolean;
   children: (args: {
     items: ArrayItem[];
     addItem: () => void;
@@ -52,10 +53,15 @@ export interface ArrayItem {
  *
  * Look at the README.md for some examples.
  */
-export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
+export const UseArray = ({
+  path,
+  initialNumberOfItems,
+  readDefaultValueOnForm = true,
+  children,
+}: Props) => {
   const didMountRef = useRef(false);
   const form = useFormContext();
-  const defaultValues = form.getFieldDefaultValue(path) as any[];
+  const defaultValues = readDefaultValueOnForm && (form.getFieldDefaultValue(path) as any[]);
   const uniqueId = useRef(0);
 
   const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
