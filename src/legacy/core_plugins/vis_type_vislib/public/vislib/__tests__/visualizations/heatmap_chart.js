@@ -28,6 +28,7 @@ import seriesPosNeg from '../lib/fixtures/mock_data/date_histogram/_series_pos_n
 import seriesNeg from '../lib/fixtures/mock_data/date_histogram/_series_neg';
 import termsColumns from '../lib/fixtures/mock_data/terms/_columns';
 import stackedSeries from '../lib/fixtures/mock_data/date_histogram/_stacked_series';
+
 import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
 
 // tuple, with the format [description, mode, data]

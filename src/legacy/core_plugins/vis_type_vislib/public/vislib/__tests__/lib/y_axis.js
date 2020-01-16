@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
-import expect from '@kbn/expect';
 import $ from 'jquery';
+import expect from '@kbn/expect';
 
 import { Axis } from '../../lib/axis';
 import { VisConfig } from '../../lib/vis_config';

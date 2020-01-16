@@ -26,7 +26,7 @@ import { VisConfig } from '../../lib/vis_config';
 import { getMockUiState } from './fixtures/_vis_fixture';
 
 describe('Vislib ChartTitle Class Test Suite', function() {
-  let persistedState;
+  let mockUiState;
   let chartTitle;
   let el;
   const data = {
@@ -89,7 +89,7 @@ describe('Vislib ChartTitle Class Test Suite', function() {
   };
 
   beforeEach(() => {
-    persistedState = getMockUiState();
+    mockUiState = getMockUiState();
     el = d3
       .select('body')
       .append('div')
@@ -108,7 +108,7 @@ describe('Vislib ChartTitle Class Test Suite', function() {
         },
       },
       data,
-      persistedState,
+      mockUiState,
       el.node(),
       () => undefined
     );
