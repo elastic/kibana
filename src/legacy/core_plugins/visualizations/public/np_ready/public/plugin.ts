@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { TypesService, TypesSetup, TypesStart } from './types';
 import {
@@ -27,13 +28,14 @@ import {
   setIndexPatterns,
   setSavedObjects,
   setUsageCollector,
+  setFilterManager,
 } from './services';
 import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
 import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
 import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
-import { visualization as visualizationFunction } from '../../expressions/visualization_function';
-import { visualization as visualizationRenderer } from '../../expressions/visualization_renderer';
+import { visualization as visualizationFunction } from './expressions/visualization_function';
+import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 /**
@@ -106,6 +108,7 @@ export class VisualizationsPlugin
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
     setIndexPatterns(data.indexPatterns);
+    setFilterManager(data.query.filterManager);
 
     return {
       types,
