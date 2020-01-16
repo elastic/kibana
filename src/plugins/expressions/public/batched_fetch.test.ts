@@ -18,7 +18,7 @@
  */
 
 import { batchedFetch, Request } from './batched_fetch';
-import { defer } from '../../../../../plugins/kibana_utils/public';
+import { defer } from '../../kibana_utils/public';
 import { Subject } from 'rxjs';
 
 const serialize = (o: any) => JSON.stringify(o);

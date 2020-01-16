@@ -17,16 +17,6 @@
  * under the License.
  */
 
-export const createHandlers = (request: any, server: any) => {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const config = server.config();
-
-  return {
-    environment: 'server',
-    serverUri:
-      config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
-        ? `${server.info.uri}${config.get('server.basePath')}`
-        : server.info.uri,
-    elasticsearchClient: async (...args: any) => callWithRequest(request, ...args),
-  };
-};
+export * from './item_buffer';
+export * from './timed_item_buffer';
+export * from './create_batched_function';
