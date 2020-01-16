@@ -63,7 +63,7 @@ export const boot = (deps: AppDependencies) => {
   render(
     <I18nContext>
       <Provider store={store}>
-        <HashRouter basename={BASE_PATH}>
+        <HashRouter>
           <App />
         </HashRouter>
       </Provider>

@@ -37,8 +37,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
               const { eui_utils } = plugins as any;
               const { boot } = await import('./application/boot');
 
-              const createTimeBuckets = () => new TimeBuckets(uiSettings, data);
-
               return boot({
                 element,
                 toasts: notifications.toasts,
@@ -49,65 +47,13 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
                 euiUtils: eui_utils,
                 savedObjects: savedObjects.client,
                 I18nContext: i18n.Context,
-                createTimeBuckets,
+                createTimeBuckets: () => new TimeBuckets(uiSettings, data),
                 MANAGEMENT_BREADCRUMB,
               });
             },
           });
         }
       }
-
-      //     management.sections.getSection('elasticsearch/watcher').register('watches', {
-      //       display: i18n.translate(
-      //         'xpack.watcher.sections.watchList.managementSection.watchesDisplayName',
-      //         {
-      //           defaultMessage: 'Watches',
-      //         }
-      //       ),
-      //       order: 1,
-      //     } as any);
-      //
-      //     management.sections.getSection('elasticsearch/watcher').register('watch', {
-      //       visible: false,
-      //     } as any);
-      //
-      //     management.sections.getSection('elasticsearch/watcher/watch').register('status', {
-      //       display: i18n.translate(
-      //         'xpack.watcher.sections.watchList.managementSection.statusDisplayName',
-      //         {
-      //           defaultMessage: 'Status',
-      //         }
-      //       ),
-      //       order: 1,
-      //       visible: false,
-      //     } as any);
-      //
-      //     management.sections.getSection('elasticsearch/watcher/watch').register('edit', {
-      //       display: i18n.translate(
-      //         'xpack.watcher.sections.watchList.managementSection.editDisplayName',
-      //         {
-      //           defaultMessage: 'Edit',
-      //         }
-      //       ),
-      //       order: 2,
-      //       visible: false,
-      //     } as any);
-      //
-      //     management.sections.getSection('elasticsearch/watcher/watch').register('new', {
-      //       display: i18n.translate(
-      //         'xpack.watcher.sections.watchList.managementSection.newWatchDisplayName',
-      //         {
-      //           defaultMessage: 'New Watch',
-      //         }
-      //       ),
-      //       order: 1,
-      //       visible: false,
-      //     } as any);
-      //
-      //     management.sections.getSection('elasticsearch/watcher/watch').register('history-item', {
-      //       order: 1,
-      //       visible: false,
-      //     } as any);
     });
   }
 
