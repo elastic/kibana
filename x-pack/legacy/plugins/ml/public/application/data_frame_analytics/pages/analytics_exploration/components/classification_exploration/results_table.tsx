@@ -79,6 +79,7 @@ export const ResultsTable: FC<Props> = React.memo(
     const [pageSize, setPageSize] = useState(25);
     const [selectedFields, setSelectedFields] = useState([] as Field[]);
     const [docFields, setDocFields] = useState([] as Field[]);
+    const [depVarType, setDepVarType] = useState<ES_FIELD_TYPES | undefined>(undefined);
     const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
     const [searchError, setSearchError] = useState<any>(undefined);
@@ -102,7 +103,9 @@ export const ResultsTable: FC<Props> = React.memo(
     function toggleColumn(column: EsFieldName) {
       if (tableItems.length > 0 && jobConfig !== undefined) {
         // spread to a new array otherwise the component wouldn't re-render
-        setSelectedFields([...toggleSelectedField(selectedFields, column)]);
+        setSelectedFields([
+          ...toggleSelectedField(selectedFields, column, jobConfig.dest.results_field, depVarType),
+        ]);
       }
     }
 
@@ -113,7 +116,7 @@ export const ResultsTable: FC<Props> = React.memo(
       sortDirection,
       status,
       tableItems,
-    } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields);
+    } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields, setDepVarType);
 
     const columns: Array<ColumnType<TableItem>> = selectedFields.map(field => {
       const { type } = field;
