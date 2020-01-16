@@ -60,7 +60,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             ])
             kibanaPipeline.jobRunner('tests-l', false) {
               kibanaPipeline.downloadCoverageArtifacts()
-              kibanaPipeline.uploadCoverageStaticSite(new Date().format("yyyy-MM-dd'T'HH-mm'Z'"))
+              kibanaPipeline.uploadCoverageStaticSite(new Date().format("yyyy-MM-dd'T'HH-mm-ss'Z'", TimeZone.getTimeZone("UTC")))
               kibanaPipeline.bash(
                 """
                   echo "###  Ingesting Code Coverage"
