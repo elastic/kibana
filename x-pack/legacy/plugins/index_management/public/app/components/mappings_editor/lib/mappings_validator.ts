@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { ordString } from 'fp-ts/lib/Ord';
 import { toArray } from 'fp-ts/lib/Set';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
-import { ErrorReporter } from './error_reporter';
+import { errorReporter } from './error_reporter';
 import { ALL_DATA_TYPES, PARAMETERS_DEFINITION } from '../constants';
 import { FieldMeta } from '../types';
 import { getFieldMeta } from '../lib';
@@ -218,7 +218,7 @@ const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.
 const validateMappingsConfiguration = (
   mappingsConfiguration: any
 ): { value: any; errors: MappingsValidationError[] } => {
-  // Array to keep track of invalid configuration parameters.
+  // Set to keep track of invalid configuration parameters.
   const configurationRemoved: Set<string> = new Set();
 
   let copyOfMappingsConfig = { ...mappingsConfiguration };
@@ -228,7 +228,7 @@ const validateMappingsConfiguration = (
     /**
      * To keep the logic simple we will strip out the parameters that contain errors
      */
-    const errors = ErrorReporter.report(result);
+    const errors = errorReporter.report(result);
     errors.forEach(error => {
       const configurationName = error.path[0];
       configurationRemoved.add(configurationName);
