@@ -525,8 +525,8 @@ export class MyPlugin implements Plugin {
 
 In Kibana, a "chromeless" application is one where the primary Kibana UI components
 such as header or navigation can be hidden. In the legacy platform these were referred to
-as "hidden" applications. Chromeless applications are not displayed in the left
-navbar.
+as "hidden" applications, and were set via the `hidden` property in a Kibana plugin.
+Chromeless applications are also not displayed in the left navbar.
 
 To mark an application as chromeless, specify `chromeless: false` when registering your application
 to hide the chrome UI when the application is mounted:
