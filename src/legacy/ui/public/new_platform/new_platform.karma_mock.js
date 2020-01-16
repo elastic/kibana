@@ -155,6 +155,11 @@ export const npStart = {
           hasItem: sinon.fake(),
         }),
       },
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
     },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
