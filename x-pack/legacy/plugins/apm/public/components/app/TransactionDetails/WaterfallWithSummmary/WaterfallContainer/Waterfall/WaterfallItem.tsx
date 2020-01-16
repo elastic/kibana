@@ -232,7 +232,7 @@ export function WaterfallItem({
           </ErrorOverviewLink>
         ) : null}
         <Duration item={item} />
-        {item.docType === 'span' && <SyncBadge sync={item.span.span.sync} />}
+        {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
       </ItemText>
     </Container>
   );
