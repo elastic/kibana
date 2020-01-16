@@ -61,8 +61,7 @@ Machine Learning::
 
 
 Maps::
-* Fixes regression that prevents maps telemetry from populating. Removes unneeded task manager logic {pull}54055[#54055]
-* Fixes regression preventing maps telemetry from populating &amp; remove task manager logic {pull}52834[#52834]
+* Fixes regression that prevents maps telemetry from populating. Removes unneeded task manager logic {pull}52834[#52834]
 
 Monitoring::
 * Adds error state for unstructured logs {pull}53299[#53299]
