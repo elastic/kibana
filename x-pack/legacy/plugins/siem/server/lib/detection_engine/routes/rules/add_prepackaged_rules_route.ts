@@ -45,15 +45,15 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
         const callWithRequest = callWithRequestFactory(request, server);
         const rulesFromFileSystem = getPrepackagedRules();
 
-        const prepackedRules = await getExistingPrepackagedRules({ alertsClient });
-        const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackedRules);
-        const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackedRules);
+        const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
+        const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
+        const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
         const spaceIndex = getIndex(request, server);
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
           const spaceIndexExists = await getIndexExists(callWithRequest, spaceIndex);
           if (!spaceIndexExists) {
-            throw new Boom(
+            return Boom.badRequest(
               `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`
             );
           }

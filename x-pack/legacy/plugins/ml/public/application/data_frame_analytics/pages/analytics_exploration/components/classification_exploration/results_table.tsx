@@ -67,6 +67,22 @@ import { ExplorationTitle } from './classification_exploration';
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
+
+const showingDocs = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.documentsShownHelpText',
+  {
+    defaultMessage: 'Showing documents for which predictions exist',
+  }
+);
+
+const showingFirstDocs = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.firstDocumentsShownHelpText',
+  {
+    defaultMessage: 'Showing first {searchSize} documents for which predictions exist',
+    values: { searchSize: SEARCH_SIZE },
+  }
+);
+
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
@@ -79,6 +95,7 @@ export const ResultsTable: FC<Props> = React.memo(
     const [pageSize, setPageSize] = useState(25);
     const [selectedFields, setSelectedFields] = useState([] as Field[]);
     const [docFields, setDocFields] = useState([] as Field[]);
+    const [depVarType, setDepVarType] = useState<ES_FIELD_TYPES | undefined>(undefined);
     const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
     const [searchError, setSearchError] = useState<any>(undefined);
@@ -102,7 +119,9 @@ export const ResultsTable: FC<Props> = React.memo(
     function toggleColumn(column: EsFieldName) {
       if (tableItems.length > 0 && jobConfig !== undefined) {
         // spread to a new array otherwise the component wouldn't re-render
-        setSelectedFields([...toggleSelectedField(selectedFields, column)]);
+        setSelectedFields([
+          ...toggleSelectedField(selectedFields, column, jobConfig.dest.results_field, depVarType),
+        ]);
       }
     }
 
@@ -113,7 +132,7 @@ export const ResultsTable: FC<Props> = React.memo(
       sortDirection,
       status,
       tableItems,
-    } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields);
+    } = useExploreData(jobConfig, selectedFields, setSelectedFields, setDocFields, setDepVarType);
 
     const columns: Array<ColumnType<TableItem>> = selectedFields.map(field => {
       const { type } = field;
@@ -465,19 +484,11 @@ export const ResultsTable: FC<Props> = React.memo(
         )}
         {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
           <Fragment>
-            {tableItems.length === SEARCH_SIZE && (
-              <EuiFormRow
-                helpText={i18n.translate(
-                  'xpack.ml.dataframe.analytics.classificationExploration.documentsShownHelpText',
-                  {
-                    defaultMessage: 'Showing first {searchSize} documents',
-                    values: { searchSize: SEARCH_SIZE },
-                  }
-                )}
-              >
-                <Fragment />
-              </EuiFormRow>
-            )}
+            <EuiFormRow
+              helpText={tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
+            >
+              <Fragment />
+            </EuiFormRow>
             <EuiSpacer />
             <MlInMemoryTableBasic
               allowNeutralSort={false}

@@ -20,7 +20,8 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { BfetchPublicPlugin } from './plugin';
 
-export { BfetchPublicSetup, BfetchPublicStart, BfetchPublicApi } from './plugin';
+export { BfetchPublicSetup, BfetchPublicStart, BfetchPublicContract } from './plugin';
+export { split } from './streaming';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchPublicPlugin(initializerContext);
