@@ -142,6 +142,9 @@ export class ExpressionInput extends React.Component<Props> {
           position.lineNumber,
           position.column
         );
+
+        // Retrieve suggestions for subexpressions
+        // TODO: make this work for expressions nested more than one level deep
         aSuggestions = getAutocompleteSuggestions(
           this.props.functionDefinitions,
           text.substring(0, text.length - lengthAfterPosition) + '}',
