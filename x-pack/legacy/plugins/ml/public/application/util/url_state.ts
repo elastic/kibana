@@ -19,7 +19,7 @@ export type SetUrlState = (attribute: string | Dictionary<any>, value?: any) => 
 export type UrlState = [Dictionary<any>, SetUrlState];
 
 const decodedParams = new Set(['_a', '_g']);
-function getUrlState(search: string) {
+export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
   const parsedQueryString = queryString.parse(search);
 
