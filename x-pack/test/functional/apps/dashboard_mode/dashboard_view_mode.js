@@ -43,7 +43,7 @@ export default function({ getService, getPageObjects }) {
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.saveSearch(savedSearchName);
 
       await PageObjects.common.navigateToApp('dashboard');
@@ -142,7 +142,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('can filter on a visualization', async () => {
-        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await PageObjects.timePicker.setHistoricalDataRange();
         await pieChart.filterOnPieSlice();
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

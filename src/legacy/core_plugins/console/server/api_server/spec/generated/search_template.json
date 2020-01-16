@@ -22,8 +22,7 @@
       "explain": "__flag__",
       "profile": "__flag__",
       "typed_keys": "__flag__",
-      "rest_total_hits_as_int": "__flag__",
-      "ccs_minimize_roundtrips": "__flag__"
+      "rest_total_hits_as_int": "__flag__"
     },
     "methods": [
       "GET",

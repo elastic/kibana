@@ -21,13 +21,6 @@ export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.add
   defaultMessage: 'Add new rule',
 });
 
-export const ACTIVITY_MONITOR = i18n.translate(
-  'xpack.siem.detectionEngine.rules.activityMonitorTitle',
-  {
-    defaultMessage: 'Activity monitor',
-  }
-);
-
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageTitle', {
   defaultMessage: 'Rules',
 });
@@ -123,7 +116,7 @@ export const SUCCESSFULLY_EXPORTED_RULES = (totalRules: number) =>
   i18n.translate('xpack.siem.detectionEngine.rules.allRules.successfullyExportedRulesTitle', {
     values: { totalRules },
     defaultMessage:
-      'Successfully exported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+      'Successfully exported {totalRules, plural, =0 {all rules} =1 {{totalRules} rule} other {{totalRules} rules}}',
   });
 
 export const ALL_RULES = i18n.translate('xpack.siem.detectionEngine.rules.allRules.tableTitle', {
@@ -163,10 +156,10 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
-export const RUN_RULE_MANUALLY = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.actions.runRuleManuallyDescription',
+export const DUPLICATE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.actions.duplicateTitle',
   {
-    defaultMessage: 'Run rule manually…',
+    defaultMessage: 'Duplicate',
   }
 );
 
@@ -176,6 +169,13 @@ export const DUPLICATE_RULE = i18n.translate(
     defaultMessage: 'Duplicate rule…',
   }
 );
+
+export const SUCCESSFULLY_DUPLICATED_RULES = (totalRules: number) =>
+  i18n.translate('xpack.siem.detectionEngine.rules.allRules.successfullyDuplicatedRulesTitle', {
+    values: { totalRules },
+    defaultMessage:
+      'Successfully duplicated {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+  });
 
 export const DUPLICATE_RULE_ERROR = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.actions.duplicateRuleErrorDescription',
@@ -220,9 +220,9 @@ export const COLUMN_SEVERITY = i18n.translate(
 );
 
 export const COLUMN_LAST_COMPLETE_RUN = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.columns.lastCompletedRunTitle',
+  'xpack.siem.detectionEngine.rules.allRules.columns.lastRunTitle',
   {
-    defaultMessage: 'Last completed run',
+    defaultMessage: 'Last run',
   }
 );
 
@@ -244,6 +244,19 @@ export const COLUMN_ACTIVATE = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.columns.activateTitle',
   {
     defaultMessage: 'Activate',
+  }
+);
+
+export const COLUMN_STATUS = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.currentStatusTitle',
+  {
+    defaultMessage: 'Current status',
+  }
+);
+export const NO_STATUS = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.unknownStatusDescription',
+  {
+    defaultMessage: 'Unknown',
   }
 );
 

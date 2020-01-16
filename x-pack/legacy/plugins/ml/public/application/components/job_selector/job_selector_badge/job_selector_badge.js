@@ -33,7 +33,7 @@ export function JobSelectorBadge({ icon, id, isGroup = false, numJobs, removeId 
   }
 
   return (
-    <EuiBadge key={`${id}-id`} {...props}>
+    <EuiBadge key={`${id}-id`} data-test-subj={`mlJobSelectionBadge ${id}`} {...props}>
       {`${id}${jobCount ? jobCount : ''}`}
     </EuiBadge>
   );
