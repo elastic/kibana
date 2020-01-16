@@ -25,6 +25,7 @@ interface ScheduleItemProps {
   dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
+  minimumValue?: number;
 }
 
 const timeTypeOptions = [
@@ -61,7 +62,13 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
-export const ScheduleItem = ({ dataTestSubj, field, idAria, isDisabled }: ScheduleItemProps) => {
+export const ScheduleItem = ({
+  dataTestSubj,
+  field,
+  idAria,
+  isDisabled,
+  minimumValue = 0,
+}: ScheduleItemProps) => {
   const [timeType, setTimeType] = useState('s');
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);

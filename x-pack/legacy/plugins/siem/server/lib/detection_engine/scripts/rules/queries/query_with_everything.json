@@ -21,7 +21,6 @@
     }
   ],
   "enabled": false,
-  "immutable": false,
   "index": ["auditbeat-*", "filebeat-*"],
   "interval": "5m",
   "query": "user.name: root or user.name: admin",

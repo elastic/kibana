@@ -20,6 +20,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
 import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import {
   setCoreStart,
@@ -32,6 +33,8 @@ import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
 import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
+import { variable } from './functions/var';
+import { variableSet } from './functions/var_set';
 import {
   boolean as booleanType,
   datatable as datatableType,
@@ -56,12 +59,15 @@ import { ExpressionLoader, loader } from './loader';
 import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
 import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
+import { serializeProvider } from '../common';
 
 export interface ExpressionsSetupDeps {
+  bfetch: BfetchPublicSetup;
   inspector: InspectorSetup;
 }
 
 export interface ExpressionsStartDeps {
+  bfetch: BfetchPublicStart;
   inspector: InspectorStart;
 }
 
@@ -74,6 +80,7 @@ export interface ExpressionsSetup {
     renderers: RenderFunctionsRegistry;
     types: TypesRegistry;
     getExecutor: () => ExpressionExecutor;
+    loadLegacyServerFunctionWrappers: () => Promise<void>;
   };
 }
 
@@ -96,7 +103,7 @@ export class ExpressionsPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
+  public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
     const { functions, renderers, types } = this;
 
     setRenderersRegistry(renderers);
@@ -109,6 +116,8 @@ export class ExpressionsPublicPlugin
     registerFunction(fontFunction);
     registerFunction(kibanaFunction);
     registerFunction(kibanaContextFunction);
+    registerFunction(variable);
+    registerFunction(variableSet);
 
     types.register(booleanType);
     types.register(datatableType);
@@ -142,6 +151,31 @@ export class ExpressionsPublicPlugin
 
     setInterpreter(getExecutor().interpreter);
 
+    let cached: Promise<void> | null = null;
+    const loadLegacyServerFunctionWrappers = async () => {
+      if (!cached) {
+        cached = (async () => {
+          const serverFunctionList = await core.http.get(`/api/interpreter/fns`);
+          const batchedFunction = bfetch.batchedFunction({ url: `/api/interpreter/fns` });
+          const { serialize } = serializeProvider(types.toJS());
+
+          // For every sever-side function, register a client-side
+          // function that matches its definition, but which simply
+          // calls the server-side function endpoint.
+          Object.keys(serverFunctionList).forEach(functionName => {
+            const fn = () => ({
+              ...serverFunctionList[functionName],
+              fn: (context: any, args: any) => {
+                return batchedFunction({ functionName, args, context: serialize(context) });
+              },
+            });
+            registerFunction(fn);
+          });
+        })();
+      }
+      return cached;
+    };
+
     const setup: ExpressionsSetup = {
       registerFunction,
       registerRenderer: (renderer: any) => {
@@ -155,6 +189,7 @@ export class ExpressionsPublicPlugin
         renderers,
         types,
         getExecutor,
+        loadLegacyServerFunctionWrappers,
       },
     };
 

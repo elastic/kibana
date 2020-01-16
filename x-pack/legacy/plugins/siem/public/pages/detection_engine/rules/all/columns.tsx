@@ -8,11 +8,10 @@
 
 import {
   EuiBadge,
-  EuiIconTip,
   EuiLink,
-  EuiTextColor,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
+  EuiHealth,
 } from '@elastic/eui';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
@@ -22,13 +21,12 @@ import {
   duplicateRuleAction,
   editRuleAction,
   exportRulesAction,
-  runRuleAction,
 } from './actions';
 
 import { Action } from './reducer';
 import { TableData } from '../types';
 import * as i18n from '../translations';
-import { PreferenceFormattedDate } from '../../../../components/formatted_date';
+import { FormattedDate } from '../../../../components/formatted_date';
 import { RuleSwitch } from '../components/rule_switch';
 import { SeverityBadge } from '../components/severity_badge';
 import { ActionToaster } from '../../../../components/toasters';
@@ -44,13 +42,6 @@ const getActions = (
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: TableData) => editRuleAction(rowItem.sourceRule, history),
     enabled: (rowItem: TableData) => !rowItem.sourceRule.immutable,
-  },
-  {
-    description: i18n.RUN_RULE_MANUALLY,
-    icon: 'play',
-    name: i18n.RUN_RULE_MANUALLY,
-    onClick: runRuleAction,
-    enabled: () => false,
   },
   {
     description: i18n.DUPLICATE_RULE,
@@ -96,60 +87,63 @@ export const getColumns = (
       field: 'method',
       name: i18n.COLUMN_METHOD,
       truncateText: true,
+      width: '16%',
     },
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
       render: (value: TableData['severity']) => <SeverityBadge value={value} />,
       truncateText: true,
+      width: '16%',
     },
     {
-      field: 'lastCompletedRun',
+      field: 'statusDate',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
-      render: (value: TableData['lastCompletedRun']) => {
+      render: (value: TableData['statusDate']) => {
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <PreferenceFormattedDate value={new Date(value)} />
+          <FormattedDate value={value} fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} />
         );
       },
       sortable: true,
       truncateText: true,
-      width: '16%',
+      width: '20%',
     },
     {
-      field: 'lastResponse',
+      field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: TableData['lastResponse']) => {
-        return value == null ? (
-          getEmptyTagValue()
-        ) : (
+      render: (value: TableData['status']) => {
+        const color =
+          value == null
+            ? 'subdued'
+            : value === 'succeeded'
+            ? 'success'
+            : value === 'failed'
+            ? 'danger'
+            : value === 'executing'
+            ? 'warning'
+            : 'subdued';
+        return (
           <>
-            {value.type === 'Fail' ? (
-              <EuiTextColor color="danger">
-                {value.type} <EuiIconTip content={value.message} type="iInCircle" />
-              </EuiTextColor>
-            ) : (
-              <EuiTextColor color="secondary">{value.type}</EuiTextColor>
-            )}
+            <EuiHealth color={color}>{value ?? getEmptyTagValue()}</EuiHealth>
           </>
         );
       },
+      width: '16%',
       truncateText: true,
     },
     {
       field: 'tags',
       name: i18n.COLUMN_TAGS,
       render: (value: TableData['tags']) => (
-        <div>
-          <>
-            {value.map((tag, i) => (
-              <EuiBadge color="hollow" key={i}>
-                {tag}
-              </EuiBadge>
-            ))}
-          </>
-        </div>
+        <>
+          {value.map((tag, i) => (
+            <EuiBadge color="hollow" key={`${tag}-${i}`}>
+              {tag}
+            </EuiBadge>
+          ))}
+        </>
       ),
       truncateText: true,
       width: '20%',

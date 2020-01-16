@@ -1,0 +1,11 @@
+{
+  "ml.put_trained_model": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ml/inference/{model_id}"
+    ],
+    "documentation": "TODO"
+  }
+}
