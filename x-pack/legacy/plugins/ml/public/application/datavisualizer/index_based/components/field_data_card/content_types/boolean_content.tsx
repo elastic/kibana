@@ -5,21 +5,20 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldDataCardProps } from '../field_data_card';
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 
-function getPercentLabel(valueCount: number, totalCount: number): string {
-  if (valueCount === 0) {
+function getPercentLabel(value: number): string {
+  if (value === 0) {
     return '0%';
   }
-
-  const percent = (100 * valueCount) / totalCount;
-  if (percent >= 0.1) {
-    return `${roundToDecimalPlace(percent, 1)}%`;
+  if (value >= 0.1) {
+    return `${value}%`;
   } else {
     return '< 0.1%';
   }
@@ -31,64 +30,74 @@ export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
   const { count, sampleCount, trueCount, falseCount } = stats;
   const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
 
-  // TODO - display counts of true / false in an Elastic Charts bar chart (or Pie chart if available).
-
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiIcon type="document" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardBoolean.documentsCountDescription"
-          defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-          values={{
-            count,
-            docsPercent,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="document" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardBoolean.documentsCountDescription"
+            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
+            values={{
+              count,
+              docsPercent,
+            }}
+          />
+        </EuiText>
       </div>
 
       <EuiSpacer size="m" />
 
       <div>
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
-          defaultMessage="values"
-        />
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 100 }} className="eui-textTruncate">
-            <EuiText size="s" textAlign="right">
-              true
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiProgress value={trueCount} max={count} color="primary" size="l" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ width: 70 }} className="eui-textTruncate">
-            <EuiText size="s" textAlign="left">
-              {getPercentLabel(trueCount, count)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="xs" />
-
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 100 }} className="eui-textTruncate">
-            <EuiText size="s" textAlign="right">
-              false
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiProgress value={falseCount} max={count} color="subdued" size="l" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ width: 70 }} className="eui-textTruncate">
-            <EuiText size="s" textAlign="left">
-              {getPercentLabel(falseCount, count)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="s">
+          <h6>
+            <FormattedMessage
+              id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
+              defaultMessage="Values"
+            />
+          </h6>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <Chart renderer="canvas" className="story-chart" size={{ height: 200 }}>
+          <Axis id="bottom" position="bottom" showOverlappingTicks />
+          <Settings
+            showLegend={false}
+            theme={{
+              barSeriesStyle: {
+                displayValue: {
+                  fill: '#000',
+                  fontSize: 12,
+                  fontStyle: 'normal',
+                  offsetX: 0,
+                  offsetY: -5,
+                  padding: 0,
+                },
+              },
+            }}
+          />
+          <BarSeries
+            id={config.fieldName || config.fieldFormat}
+            data={[
+              { x: 'true', y: roundToDecimalPlace((trueCount / count) * 100) },
+              { x: 'false', y: roundToDecimalPlace((falseCount / count) * 100) },
+            ]}
+            displayValueSettings={{
+              hideClippedValue: true,
+              isAlternatingValueLabel: true,
+              valueFormatter: getPercentLabel,
+              isValueContainedInElement: false,
+              showValueLabel: true,
+            }}
+            customSeriesColors={['rgba(230, 194, 32, 0.5)', 'rgba(224, 187, 20, 0.71)']}
+            splitSeriesAccessors={['x']}
+            stackAccessors={['x']}
+            xAccessor="x"
+            xScaleType="ordinal"
+            yAccessors={['y']}
+            yScaleType="linear"
+          />
+        </Chart>
       </div>
     </div>
   );

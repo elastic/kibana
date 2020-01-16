@@ -23,6 +23,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Enumeration | Description |
 |  --- | --- |
 |  [AppLeaveActionType](./kibana-plugin-public.appleaveactiontype.md) | Possible type of actions on application leave. |
+|  [AppNavLinkStatus](./kibana-plugin-public.appnavlinkstatus.md) | Status of the application's navLink. |
+|  [AppStatus](./kibana-plugin-public.appstatus.md) | Accessibility status of an application. |
 
 ## Interfaces
 
@@ -118,6 +120,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppMount](./kibana-plugin-public.appmount.md) | A mount function called when the user navigates to this app's route. |
 |  [AppMountDeprecated](./kibana-plugin-public.appmountdeprecated.md) | A mount function called when the user navigates to this app's route. |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
+|  [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-public.appupdater.md)<!-- -->. |
+|  [AppUpdater](./kibana-plugin-public.appupdater.md) | Updater for applications. see [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-public.chromehelpextensionmenucustomlink.md) |  |
 |  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-public.chromehelpextensionmenudiscusslink.md) |  |

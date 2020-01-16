@@ -15,7 +15,7 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-
+export type EventType = 'all' | 'raw' | 'signal';
 export interface TimelineModel {
   /** The columns displayed in the timeline */
   columns: ColumnHeader[];
@@ -25,6 +25,8 @@ export interface TimelineModel {
   deletedEventIds: string[];
   /** A summary of the events and notes in this timeline */
   description: string;
+  /** Typoe of event you want to see in this timeline */
+  eventType?: EventType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
   filters?: esFilters.Filter[];
@@ -92,6 +94,7 @@ export type SubsetTimelineModel = Readonly<
     | 'dataProviders'
     | 'deletedEventIds'
     | 'description'
+    | 'eventType'
     | 'eventIdToNoteIds'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
@@ -126,6 +129,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   dataProviders: [],
   deletedEventIds: [],
   description: '',
+  eventType: 'raw',
   eventIdToNoteIds: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
