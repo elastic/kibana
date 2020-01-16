@@ -13,3 +13,9 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.createRule.
 export const EDIT_RULE = i18n.translate('xpack.siem.detectionEngine.createRule.editRuleButton', {
   defaultMessage: 'Edit',
 });
+
+export const SUCCESSFULLY_CREATED_RULES = (ruleName: string) =>
+  i18n.translate('xpack.siem.detectionEngine.rules.create.successfullyRuleCreatedTitle', {
+    values: { ruleName },
+    defaultMessage: '{ruleName} was created',
+  });

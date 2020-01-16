@@ -86,7 +86,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     }
   }, [form]);
 
-  return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView && myStepData.name != null ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
     </StepContentWrapper>

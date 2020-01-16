@@ -9,10 +9,11 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { usePersistRule } from '../../../../containers/detection_engine/rules';
 import { HeaderPage } from '../../../../components/header_page';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { WrapperPage } from '../../../../components/wrapper_page';
-import { usePersistRule } from '../../../../containers/detection_engine/rules';
+import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
 import { AccordionTitle } from '../components/accordion_title';
@@ -55,6 +56,7 @@ export const CreateRuleComponent = React.memo(() => {
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
+  const [, dispatchToaster] = useStateToaster();
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
@@ -221,6 +223,8 @@ export const CreateRuleComponent = React.memo(() => {
   );
 
   if (isSaved) {
+    const ruleName = (stepsData.current[RuleStep.aboutRule].data as AboutStepRule).name;
+    displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
