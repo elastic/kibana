@@ -8,8 +8,9 @@ import { EuiSpacer, EuiForm, EuiCallOut } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import { SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
 import { ValidatedIndex, ValidationIndicesUIError } from './validation';
@@ -21,6 +22,7 @@ interface InitialConfigurationStepProps {
   endTime: number | undefined;
   isValidating: boolean;
   validatedIndices: ValidatedIndex[];
+  setupStatus: SetupStatus;
   setValidatedIndices: (selectedIndices: ValidatedIndex[]) => void;
   validationErrors?: ValidationIndicesUIError[];
 }
@@ -39,20 +41,25 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   endTime,
   isValidating,
   validatedIndices,
+  setupStatus,
   setValidatedIndices,
   validationErrors = [],
 }: InitialConfigurationStepProps) => {
+  const disabled = useMemo(() => !editableFormStatus.includes(setupStatus), [setupStatus]);
+
   return (
     <>
       <EuiSpacer size="m" />
       <EuiForm>
         <AnalysisSetupTimerangeForm
+          disabled={disabled}
           setStartTime={setStartTime}
           setEndTime={setEndTime}
           startTime={startTime}
           endTime={endTime}
         />
         <AnalysisSetupIndicesForm
+          disabled={disabled}
           indices={validatedIndices}
           isValidating={isValidating}
           onChangeSelectedIndices={setValidatedIndices}
@@ -64,6 +71,13 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
     </>
   );
 };
+
+const editableFormStatus = [
+  'required',
+  'requiredForReconfiguration',
+  'requiredForUpdate',
+  'failed',
+];
 
 const errorCalloutTitle = i18n.translate(
   'xpack.infra.analysisSetup.steps.initialConfigurationStep.errorCalloutTitle',

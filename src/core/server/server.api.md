@@ -450,11 +450,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest) => string;
+    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest, requestSpecificBasePath: string) => void;
+    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -636,6 +636,12 @@ export interface DeprecationInfo {
 }
 
 // @public
+export interface DeprecationSettings {
+    docLinksKey: string;
+    message: string;
+}
+
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -795,6 +801,17 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
+// Warning: (ae-missing-release-tag) "ImageValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface ImageValidation {
+    // (undocumented)
+    maxSize: {
+        length: number;
+        description: string;
+    };
+}
+
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -803,7 +820,13 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public (undocumented)
 export interface IRenderOptions {
+    // @internal @deprecated
+    app?: {
+        getId(): string;
+    };
     includeUserSettings?: boolean;
+    // @internal @deprecated
+    vars?: Record<string, any>;
 }
 
 // @public
@@ -832,7 +855,7 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 
 // @public (undocumented)
 export interface IScopedRenderingClient {
-    render(options?: IRenderOptions): Promise<string>;
+    render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
 }
 
 // @public
@@ -932,20 +955,12 @@ export class LegacyInternals implements ILegacyInternals {
     // (undocumented)
     getInjectedUiAppVars(id: string): Promise<Record<string, any>>;
     // (undocumented)
-    getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
+    getVars(id: string, request: KibanaRequest | LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
     // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     injectUiAppVars(id: string, injector: VarsInjector): void;
     }
-
-// @internal @deprecated (undocumented)
-export interface LegacyRenderOptions extends IRenderOptions {
-    app?: {
-        getId(): string;
-    };
-    vars?: Record<string, any>;
-}
 
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
@@ -1233,7 +1248,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 
 // @internal (undocumented)
 export interface RenderingServiceSetup {
-    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions): Promise<string>;
+    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: IRenderOptions): Promise<string>;
 }
 
 // @public
@@ -1796,7 +1811,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): any;
+    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
@@ -1925,9 +1940,20 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
 }>;
 
+// Warning: (ae-missing-release-tag) "StringValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface StringValidation {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    regexString: string;
+}
+
 // @public
 export interface UiSettingsParams {
     category?: string[];
+    deprecation?: DeprecationSettings;
     description?: string;
     name?: string;
     optionLabels?: Record<string, string>;
@@ -1935,6 +1961,8 @@ export interface UiSettingsParams {
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
+    // (undocumented)
+    validation?: ImageValidation | StringValidation;
     value?: SavedObjectAttribute;
 }
 

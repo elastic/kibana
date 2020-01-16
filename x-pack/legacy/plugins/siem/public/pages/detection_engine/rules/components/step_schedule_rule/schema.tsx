@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import * as RuleI18n from '../../translations';
+import { OptionalFieldLabel } from '../optional_field_label';
 import { FormSchema } from '../shared_imports';
 
 export const schema: FormSchema = {
@@ -33,7 +31,7 @@ export const schema: FormSchema = {
         defaultMessage: 'Additional look-back',
       }
     ),
-    labelAppend: <EuiText size="xs">{RuleI18n.OPTIONAL_FIELD}</EuiText>,
+    labelAppend: OptionalFieldLabel,
     helpText: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldAdditionalLookBackHelpText',
       {

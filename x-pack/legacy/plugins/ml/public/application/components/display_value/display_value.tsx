@@ -13,11 +13,11 @@ export const DisplayValue: FC<{ value: any }> = ({ value }) => {
   const length = String(value).length;
 
   if (length <= MAX_CHARS) {
-    return value;
+    return <b>{value}</b>;
   } else {
     return (
       <EuiToolTip content={value} anchorClassName="valueWrapper">
-        <span>{value}</span>
+        <b>{value}</b>
       </EuiToolTip>
     );
   }
