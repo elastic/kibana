@@ -32,7 +32,7 @@ fi
 #installs dependencies and runs the build
 cd %{name}
 /usr/bin/yarn
-/usr/bin/yarn kbn bootstrap
+/usr/bin/yarn kbn bootstrap --skip-kibana-plugins
 node scripts/build --rpm --oss --skip-archives --release --verbose
 
 %install
