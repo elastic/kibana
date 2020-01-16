@@ -36,10 +36,10 @@ import {
   SwitchOption,
   RangeOption,
   SetColorSchemaOptionsValue,
-} from '../../../kbn_vislib_vis_types/public/components';
-import { ColorModes } from '../../../kbn_vislib_vis_types/public/utils/collections';
+} from '../../../vis_type_vislib/public/components';
+import { ColorModes } from '../../../vis_type_vislib/public/utils/collections';
 import { MetricVisParam, VisParams } from '../types';
-import { SetColorRangeValue } from '../../../kbn_vislib_vis_types/public/components/common/color_ranges';
+import { SetColorRangeValue } from '../../../vis_type_vislib/public/components/common/color_ranges';
 
 function MetricVisOptions({
   stateParams,
