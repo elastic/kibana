@@ -70,16 +70,16 @@ When the symbolization range minimum and maximum are the same and there is no ra
 [[maps-vector-style-qualitative-data-driven]]
 ==== Qualitative data driven styling
 
-Quantitative data driven styling symbolizes non-numeric properties like strings and ip addresses by category.
+Qualitative data driven styling symbolizes non-numeric properties like strings and ip addresses by category.
 
-Quantitative data driven styling is available for the following styling properties:
+Qualitative data driven styling is available for the following styling properties:
 
 * *Fill color*
 * *Border color*
 * *Label color*
 * *Label border color*
 
-Quantitative data driven styling uses {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to retrieve the top nine categories for the property. Feature values within the top categories set are assigned a unique color. Feature values outside of the top categories set are grouped into the *Other* category. A feature is assigned the *Other* category when the property value is undefined.
+Qualitative data driven styling uses {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to retrieve the top nine categories for the property. Feature values within the top categories set are assigned a unique color. Feature values outside of the top categories set are grouped into the *Other* category. A feature is assigned the *Other* category when the property value is undefined.
 
 The image below shows an example of quantitative data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The `machine.os.keyword` property determines the color of each symbol based on category.
