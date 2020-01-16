@@ -29,9 +29,9 @@ Standard Deviation:: Requires a numeric field. Uses the {ref}/search-aggregation
 {ref}/search-aggregations-metrics-top-hits-aggregation.html[Top Hit]:: Returns a sample of individual documents. When the Top Hit aggregation is matched to more than one document, you must choose a technique for combining the values. Techniques include average, minimum, maximum, and sum.
 
 {ref}/search-aggregations-metrics-percentile-aggregation.html[Percentiles]:: Divides the
-values in a numeric field into specified percentile bands. Select a field from the drop-down, then specify one or more ranges in the *Percentiles* fields. Click the *X* to remove a percentile field. Click *+ Add* to add a percentile field.
+values in a numeric field into specified percentile bands. Select a field from the drop-down, then specify one or more ranges in the *Percentiles* fields.
 
-{ref}/search-aggregations-metrics-percentile-rank-aggregation.html[Percentile Rank]:: Returns the percentile rankings for the values in the specified numeric field. Select a numeric field from the drop-down, then specify one or more percentile rank values in the *Values* fields. Click the *X* to remove a values field. Click *+Add* to add a values field.
+{ref}/search-aggregations-metrics-percentile-rank-aggregation.html[Percentile Rank]:: Returns the percentile rankings for the values in the specified numeric field. Select a numeric field from the drop-down, then specify one or more percentile rank values in the *Values* fields.
 
 [float]
 [[visualize-sibling-pipeline-aggregations]]
@@ -55,7 +55,7 @@ has the effect of condensing many buckets into one number.
 {ref}/search-aggregations-bucket-datehistogram-aggregation.html[Date Histogram]:: Splits a date field into buckets by interval. If the date field is the primary time field for the index pattern, it will pick an automatic interval for you. You can also choose a minimum time interval, or specify a custom interval frame by selecting *Custom* as the interval and
 specifying a number and a time unit in the text field. Custom interval time units are *s* for seconds, *m* for minutes,
 *h* for hours, *d* for days, *w* for weeks, and *y* for years. Different units support different levels of precision,
-down to one millisecond. Intervals are labeled at the start of the interval, using the date-key returned by Elasticsearch.For example, the tooltip for a monthly interval will show the first day of the month.
+down to one millisecond. Intervals are labeled at the start of the interval, using the date-key returned by Elasticsearch. For example, the tooltip for a monthly interval will show the first day of the month.
 
 {ref}/search-aggregations-bucket-histogram-aggregation.html[Histogram]:: Builds from a numeric field. Specify an integer interval for this field. Select the *Show empty buckets* checkbox to include empty intervals in the histogram.
 
@@ -106,7 +106,7 @@ You can also nest these aggregations. For example, if you want to produce a thir
 
 These visualizations support parent pipeline aggregations:
 
-* Line, Area and Bar charts
+* Line, area, and bar charts
 * Data table
 
 {ref}/search-aggregations-pipeline-derivative-aggregation.html[Derivative]:: Calculates the derivative of specific metrics.

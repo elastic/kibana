@@ -3,9 +3,9 @@
 
 [partintro]
 --
-_Visualize_ enables you to create visualizations of the data from your Elasticsearch indices, which you can then add to dashboards for analysis.
+_Visualize_ enables you to create visualizations of the data from your {es} indices, which you can then add to dashboards for analysis.
 
-{kib} visualizations are based on Elasticsearch queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
+{kib} visualizations are based on {es} queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
 [float]
 [[create-a-visualization]]
@@ -15,31 +15,46 @@ _Visualize_ enables you to create visualizations of the data from your Elasticse
 . Click *Create new visualization*.
 . Choose the visualization type:
 +
-* *Basic charts*
-<<lens,Lens>>:: Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
+* <<lens,Lens>>
+Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
+
 * *<<most-frequent,Most frequently used visualizations>>*
 [horizontal]
 Line&comma; area, and bar charts:: Compare different series in X/Y charts.
+
 Pie chart:: Display each source contribution to a total.
+
 Data table:: Flattens aggregations into table format.
+
 Metric:: Display a single number.
+
 Goal and gauge:: Display a number with progress indicators.
-Heat maps:: Display shaded cells within a matrix.
+
 Tag cloud:: Display words in a cloud, where the size of the word corresponds to its importance.
+
 * *Time series optimized*
 [horizontal]
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
+
 <<timelion,Timelion>>:: Compute and combine data from multiple time series
 data sets.
+
 * *Maps*
 [horizontal]
-<<maps, Elastic maps>>:: The most powerful way of visualizing map data in {kib}.
-<<tilemap,_Coordinate map_>>:: Displays points on a map using a geohash aggregation.
-<<regionmap,_Region map_>>:: Merge any structured map data onto a shape.
-* *<<for-dashboard, For use in dashboards>>*
+<<maps,Elastic maps>>:: The most powerful way of visualizing map data in {kib}.
+
+<<tilemap,Coordinate map>>:: Displays points on a map using a geohash aggregation.
+
+<<regionmap,Region map>>:: Merge any structured map data onto a shape.
+
+<<heatmap,Heat map>>:: Display shaded cells within a matrix.
+
+* *<<for-dashboard,Dashboard tools>>*
 [horizontal]
 <<for-dashboard,Controls>>:: Provides the ability to add interactive inputs to a Dashboard.
+
 <<for-dashboard,Markdown widget>>:: Display free-form information or instructions.
+
 * *For developers*
 [horizontal]
 <<vega-graph,Vega>>:: Complete control over query and display.
@@ -70,6 +85,7 @@ include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
 include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
 include::{kib-repo-dir}/visualize/regionmap.asciidoc[]
+include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
 
 include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 

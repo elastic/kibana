@@ -1,0 +1,156 @@
+[[heatmap]]
+== Heat map
+
+Heat maps are graphical representations of data where the individual values are represented as colors.
+
+NOTE: Heat map has been replaced with <<maps>>, which offers more functionality and is easier to use.
+
+[float]
+[[heatmap-aggregation]]
+=== Supported aggregations
+
+Heat maps support metric, sibling pipeline, bucket, and parent pipeline aggregations.
+
+[float]
+[[heatmap-metric-aggregation]]
+==== Metric aggregations
+
+The color for each matrix position is determined by the metric aggregation.
+
+The following metric aggregations are supported:
+
+{ref}/search-aggregations-metrics-valuecount-aggregation.html[Count]:: Returns a raw count of
+the elements in the index pattern.
+
+{ref}/search-aggregations-metrics-avg-aggregation.html[Average]:: Returns the average of a numeric
+field.
+
+{ref}/search-aggregations-metrics-sum-aggregation.html[Sum]:: Returns the total sum of a numeric
+field.
+
+{ref}/search-aggregations-metrics-min-aggregation.html[Min]:: Returns the minimum value of a
+numeric field.
+
+{ref}/search-aggregations-metrics-max-aggregation.html[Max]:: Returns the maximum value of a
+numeric field.
+
+{ref}/search-aggregations-metrics-cardinality-aggregation.html[Unique Count]:: Returns
+the number of unique values in a field.
+
+{ref}/search-aggregations-metrics-top-hits-aggregation.html[Top Hit]:: Returns a sample of individual documents. When the Top Hit aggregation is matched to more than one document, you must choose a technique for combining the values. Techniques include average, minimum, maximum, and sum.
+
+{ref}/search-aggregations-metrics-percentile-aggregation.html[Percentiles]:: Divides the
+values in a numeric field into specified percentile bands.
+
+{ref}/search-aggregations-metrics-percentile-rank-aggregation.html[Percentile Rank]:: Returns the percentile rankings for the values in the specified numeric field.
+
+[float]
+[[heatmap-sibling-pipeline]]
+==== Sibling pipeline aggregations
+
+For each sibling pipeline aggregation, you must define the following aggregations:
+
+* Metric - Calculates the sibling pipeline aggregation.
+
+* Bucket - Specifies the bucket aggregations that run the sibling pipeline aggregation.
+
+The following sibling pipeline aggregations are supported:
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Average Bucket]:: Calculates the mean or average value of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Sum Bucket]:: Calculates the sum of the values of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Min Bucket]:: Calculates the minimum value of a specified metric in a sibling aggregation.
+
+{ref}/search-aggregations-pipeline-avg-bucket-aggregation.html[Max Bucket]:: Calculates the maximum value of a specified metric in a sibling aggregation.
+
+[float]
+[[heatmap-bucket-aggregation]]
+==== Bucket aggregations
+
+Bucket aggregations determine the information retrieved from the data set.
+
+The following bucket aggregations are supported:
+
+{ref}/search-aggregations-bucket-datehistogram-aggregation.html[Date Histogram]:: Splits a date field into buckets by interval. If the date field is the primary time field for the index pattern, it chooses an automatic interval for you. Intervals are labeled at the start of the interval, using the date-key returned by {es}. For example, the tooltip for a monthly interval displays the first day of the month.
+
+{ref}/search-aggregations-bucket-histogram-aggregation.html[Histogram]:: Builds from a numeric field.
+
+{ref}/search-aggregations-bucket-range-aggregation.html[Range]:: Specifies ranges of values for a numeric field.
+
+{ref}/search-aggregations-bucket-daterange-aggregation.html[Date Range]:: Reports values that are within a specified time range. To specify the date ranges, use {ref}/common-options.html#date-math[_date math_] expressions.
+
+{ref}/search-aggregations-bucket-iprange-aggregation.html[IPv4 Range]:: Specifies the IPv4 ranges.
+
+*Filters*:: Each filter creates a bucket of records. Specify a filter as a
+<<kuery-query, KQL>> or <<lucene-query, Lucene>> query string.
+
+{ref}/search-aggregations-bucket-terms-aggregation.html[Terms]:: Specify the top or bottom n elements of a field, which are ordered by count or a custom metric.
+
+{ref}/search-aggregations-bucket-significantterms-aggregation.html[Significant Terms]:: Returns interesting or unusual occurrences of terms in a set.
+
+Terms and Significant Terms support {es} {ref}/search-aggregations-bucket-terms-aggregation.html#_filtering_values_4[exclude and include patterns], which
+are available when you select a field, then click *Advanced*.
+
+{kib} supports only filtering string fields with regular expression patterns. {kib} does not support matching with arrays or filtering numeric fields.
+Patterns are case sensitive.
+
+For example:
+
+* To exclude the metricbeat process from your visualization of top processes, use `metricbeat.*`
+* To show processes that collect beats, use `.*beat`
+* To exclude two specific values, such as `"empty"` and `"none"`, use `empty|none`
+
+[float]
+[[heatmap-parent-pipeline]]
+==== Parent pipeline aggregations
+
+For each parent pipeline aggregation, you must define the metric aggregations that calculates the parent pipeline aggregation. The metric can include an existing metric, or a new metric.
+
+You can nest parent pipeline aggregations. For example, when you want to generate a third derivative.
+
+The following parent pipeline aggregations are supported:
+
+{ref}/search-aggregations-pipeline-derivative-aggregation.html[Derivative]:: Calculates the derivative of specific metrics.
+
+{ref}/search-aggregations-pipeline-cumulative-sum-aggregation.html[Cumulative Sum]:: Calculates the cumulative sum of a specified metric in a parent histogram.
+
+{ref}/search-aggregations-pipeline-movavg-aggregation.html[Moving Average]:: Slides a window across the data and emits the average value of the window.
+
+{ref}/search-aggregations-pipeline-serialdiff-aggregation.html[Serial Diff]:: Values in a time series data set are subtracted from itself at different time ranges.
+
+[float]
+[[heatmap-advanced-aggregation]]
+==== JSON input
+
+Add JSON-formatted properties that merges with the aggregation
+definition.
+
+For example, implement an {es} {ref}/search-aggregations.html[Script Value Source] that replaces
+the value in the metric:
+
+[source,shell]
+{ "script" : "doc['grade'].value * 1.2" }
+
+The availability of these options varies depending on the aggregation
+you choose.
+
+[float]
+[[navigate-heatmap]]
+=== Change the color ranges
+
+When only one color displays on the heat map, you might need to change the color ranges.
+
+To specify the number of color ranges:
+
+. Click *Options*.
+
+. Enter the *Number of colors* to display.
+
+To specify custom ranges:
+
+. Click *Options*.
+
+. Select *Use custom ranges*.
+
+. Enter the ranges to display.
