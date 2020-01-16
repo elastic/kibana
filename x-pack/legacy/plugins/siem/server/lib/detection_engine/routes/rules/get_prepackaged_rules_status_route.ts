@@ -6,23 +6,19 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
-import Boom from 'boom';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { ServerFacade, RequestFacade } from '../../../../types';
-import { getIndexExists } from '../../index/get_index_exists';
-import { callWithRequestFactory, getIndex, transformError } from '../utils';
+import { transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
-import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
-import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 
-export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createGetPrepackagedRulesStatusRoute = (): Hapi.ServerRoute => {
   return {
-    method: 'PUT',
-    path: DETECTION_ENGINE_PREPACKAGED_URL,
+    method: 'GET',
+    path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
     options: {
       tags: ['access:siem'],
       validate: {
@@ -42,27 +38,14 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
       }
 
       try {
-        const callWithRequest = callWithRequestFactory(request, server);
         const rulesFromFileSystem = getPrepackagedRules();
-
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
-
-        const spaceIndex = getIndex(request, server);
-        if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-          const spaceIndexExists = await getIndexExists(callWithRequest, spaceIndex);
-          if (!spaceIndexExists) {
-            return Boom.badRequest(
-              `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`
-            );
-          }
-        }
-        await installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex);
-        await updatePrepackagedRules(alertsClient, actionsClient, rulesToUpdate, spaceIndex);
         return {
-          rules_installed: rulesToInstall.length,
-          rules_updated: rulesToUpdate.length,
+          rules_installed: prepackagedRules.length,
+          rules_not_installed: rulesToInstall.length,
+          rules_not_updated: rulesToUpdate.length,
         };
       } catch (err) {
         return transformError(err);
@@ -71,6 +54,6 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
   };
 };
 
-export const addPrepackedRulesRoute = (server: ServerFacade): void => {
-  server.route(createAddPrepackedRulesRoute(server));
+export const getPrepackagedRulesStatusRoute = (server: ServerFacade): void => {
+  server.route(createGetPrepackagedRulesStatusRoute());
 };
