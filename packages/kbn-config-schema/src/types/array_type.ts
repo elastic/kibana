@@ -24,7 +24,6 @@ import { Type, TypeOptions } from './type';
 export type ArrayOptions<T> = TypeOptions<T[]> & {
   minSize?: number;
   maxSize?: number;
-  sparse?: boolean;
 };
 
 export class ArrayType<T> extends Type<T[]> {
@@ -40,10 +39,6 @@ export class ArrayType<T> extends Type<T[]> {
 
     if (options.maxSize !== undefined) {
       schema = schema.max(options.maxSize);
-    }
-
-    if (options.sparse !== undefined) {
-      schema = schema.sparse(options.sparse);
     }
 
     super(schema, options);

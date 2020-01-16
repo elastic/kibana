@@ -102,11 +102,6 @@ describe('#hostname', () => {
       schema.string({ hostname: true, maxLength: 3 }).validate('www.example.com')
     ).toThrowErrorMatchingSnapshot();
   });
-
-  test('allows non-hostname when overriding with `allow`', () => {
-    expect(schema.string({ hostname: true, allow: '*' }).validate('*')).toBe('*');
-    expect(() => schema.string({ hostname: true }).validate('*')).toThrowErrorMatchingSnapshot();
-  });
 });
 
 describe('#defaultValue', () => {

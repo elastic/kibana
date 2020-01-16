@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#hostname allows non-hostname when overriding with \`allow\` 1`] = `"value is [*] but it must be a valid hostname (see RFC 1123)."`;
-
 exports[`#hostname returns error when empty string 1`] = `"any.empty"`;
 
 exports[`#hostname returns error when value is not a valid hostname 1`] = `"value is [host:name] but it must be a valid hostname (see RFC 1123)."`;
