@@ -10,7 +10,7 @@ import { createFormatCsvValues } from './format_csv_values';
 describe('formatCsvValues', function() {
   const separator = ',';
   const fields = ['foo', 'bar'];
-  const mockEscapeValue = (value: any, index: number, array: any[]) => value || 'null value';
+  const mockEscapeValue = (value: any, index: number, array: any[]) => value || '';
   describe('with _source as one of the fields', function() {
     const formatsMap = new Map();
     const formatCsvValues = createFormatCsvValues(
