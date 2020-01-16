@@ -22,7 +22,6 @@ export const NetworkTopNFlowQueryTable = ({
   skip,
   startDate,
   type,
-  indexPattern,
 }: NetworkWithIndexComponentsQueryTableProps) => (
   <NetworkTopNFlowQuery
     endDate={endDate}
@@ -50,7 +49,6 @@ export const NetworkTopNFlowQueryTable = ({
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         flowTargeted={flowTarget}
         id={id}
-        indexPattern={indexPattern}
         inspect={inspect}
         isInspect={isInspected}
         loading={loading}

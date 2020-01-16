@@ -200,6 +200,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Pauses the execution in the browser, similar to setting a breakpoint for debugging.
+     * @return {Promise<void>}
+     */
+    public async pause() {
+      await driver.executeAsyncScript(`(async () => { debugger; return Promise.resolve(); })()`);
+    }
+
+    /**
      * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
      * offset to browser page top left corner.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move

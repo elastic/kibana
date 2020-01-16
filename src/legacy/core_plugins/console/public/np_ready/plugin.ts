@@ -55,11 +55,11 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
         defaultMessage: 'Console',
       }),
       enableRouting: false,
-      async mount(ctx, { element }) {
+      async mount({ core: { docLinks } }, { element }) {
         const { boot } = await import('./application');
         render(
           boot({
-            docLinkVersion: ctx.core.docLinks.DOC_LINK_VERSION,
+            docLinkVersion: docLinks.DOC_LINK_VERSION,
             I18nContext,
             notifications,
             elasticsearchUrl,

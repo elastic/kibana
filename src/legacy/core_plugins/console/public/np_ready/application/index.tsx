@@ -18,10 +18,11 @@
  */
 
 import React from 'react';
-import { NotificationsSetup } from 'kibana/public';
+import { NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
+import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { createUsageTracker } from '../services/tracker';
 
 let settingsRef: Settings;
@@ -46,6 +47,7 @@ export function boot(deps: {
   });
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
+  const objectStorageClient = localStorageObjectClient.create(storage);
   settingsRef = settings;
 
   return (
@@ -60,6 +62,7 @@ export function boot(deps: {
             settings,
             notifications,
             trackUiMetric,
+            objectStorageClient,
           },
         }}
       >
