@@ -60,13 +60,15 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
 
   private static transformServer(configValue: any = {}) {
     // TODO: New platform uses just a subset of `server` config from the legacy platform,
-    // new values will be exposed once we need them (eg. customResponseHeaders or xsrf).
+    // new values will be exposed once we need them
     return {
       autoListen: configValue.autoListen,
       basePath: configValue.basePath,
       cors: configValue.cors,
+      customResponseHeaders: configValue.customResponseHeaders,
       host: configValue.host,
       maxPayload: configValue.maxPayloadBytes,
+      name: configValue.name,
       port: configValue.port,
       rewriteBasePath: configValue.rewriteBasePath,
       ssl: configValue.ssl,
@@ -74,6 +76,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       socketTimeout: configValue.socketTimeout,
       compression: configValue.compression,
       uuid: configValue.uuid,
+      xsrf: configValue.xsrf,
     };
   }
 

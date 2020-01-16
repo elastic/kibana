@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders without crashing 1`] = `
+<form
+  onSubmit={[Function]}
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Initials (2 max)"
+    labelType="label"
+  >
+    <EuiFieldText
+      disabled={false}
+      inputRef={[Function]}
+      name="spaceInitials"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Color"
+    labelType="label"
+  >
+    <EuiColorPicker
+      color="#DA8B45"
+      isInvalid={false}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Custom image"
+    labelType="label"
+  >
+    <EuiFilePicker
+      accept={
+        Array [
+          "image/svg+xml",
+          "image/jpeg",
+          "image/png",
+          "image/gif",
+        ]
+      }
+      compressed={false}
+      display="default"
+      initialPromptText="Select image file"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</form>
+`;

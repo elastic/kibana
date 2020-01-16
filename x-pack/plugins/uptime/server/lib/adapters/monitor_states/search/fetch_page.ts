@@ -6,7 +6,7 @@
 
 import { flatten } from 'lodash';
 import { CursorPagination } from '../adapter_types';
-import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QueryContext } from './query_context';
 import { CursorDirection, MonitorSummary, SortOrder, QUERY } from '../../../../../common';
 import { enrichMonitorGroups } from './enrich_monitor_groups';
 import { MonitorGroupIterator } from './monitor_group_iterator';
@@ -50,6 +50,7 @@ const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
   size: number
 ): Promise<MonitorGroupsPage> => {
   const monitorGroups: MonitorGroups[] = [];
+
   const iterator = new MonitorGroupIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;

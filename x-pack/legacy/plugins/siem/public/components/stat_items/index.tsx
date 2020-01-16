@@ -21,7 +21,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
@@ -30,7 +30,7 @@ import { BarChart } from '../charts/barchart';
 import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
 import { getEmptyTagValue } from '../empty_value';
 
-import { InspectButton } from '../inspect';
+import { InspectButton, InspectButtonContainer } from '../inspect';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
@@ -209,9 +209,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     statKey = 'item',
     to,
   }) => {
-    const [isHover, setIsHover] = useState(false);
-    const handleMouseEnter = useCallback(() => setIsHover(true), [setIsHover]);
-    const handleMouseLeave = useCallback(() => setIsHover(false), [setIsHover]);
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -223,72 +220,69 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
 
     return (
       <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
-        <EuiPanel onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          <EuiFlexGroup gutterSize={'none'}>
-            <EuiFlexItem>
-              <EuiTitle size="xxxs">
-                <h6>{description}</h6>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <InspectButton
-                queryId={id}
-                title={`KPI ${description}`}
-                inspectIndex={index}
-                show={isHover}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <InspectButtonContainer>
+          <EuiPanel>
+            <EuiFlexGroup gutterSize={'none'}>
+              <EuiFlexItem>
+                <EuiTitle size="xxxs">
+                  <h6>{description}</h6>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InspectButton queryId={id} title={`KPI ${description}`} inspectIndex={index} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-          <EuiFlexGroup>
-            {fields.map(field => (
-              <FlexItem key={`stat-items-field-${field.key}`}>
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
-                    <FlexItem grow={false}>
-                      <EuiIcon
-                        type={field.icon}
-                        color={field.color}
-                        size="l"
-                        data-test-subj="stat-icon"
-                      />
+            <EuiFlexGroup>
+              {fields.map(field => (
+                <FlexItem key={`stat-items-field-${field.key}`}>
+                  <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                    {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
+                      <FlexItem grow={false}>
+                        <EuiIcon
+                          type={field.icon}
+                          color={field.color}
+                          size="l"
+                          data-test-subj="stat-icon"
+                        />
+                      </FlexItem>
+                    )}
+
+                    <FlexItem>
+                      <StatValue>
+                        <p data-test-subj="stat-title">
+                          {field.value != null ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
+                          {field.description}
+                        </p>
+                      </StatValue>
                     </FlexItem>
-                  )}
+                  </EuiFlexGroup>
+                </FlexItem>
+              ))}
+            </EuiFlexGroup>
 
-                  <FlexItem>
-                    <StatValue>
-                      <p data-test-subj="stat-title">
-                        {field.value != null ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
-                        {field.description}
-                      </p>
-                    </StatValue>
-                  </FlexItem>
-                </EuiFlexGroup>
-              </FlexItem>
-            ))}
-          </EuiFlexGroup>
+            {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
+            <EuiFlexGroup>
+              {enableBarChart && (
+                <FlexItem>
+                  <BarChart barChart={barChart} configs={barchartConfigs()} />
+                </FlexItem>
+              )}
 
-          {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
-          <EuiFlexGroup>
-            {enableBarChart && (
-              <FlexItem>
-                <BarChart barChart={barChart} configs={barchartConfigs()} />
-              </FlexItem>
-            )}
-
-            {enableAreaChart && from != null && to != null && (
-              <FlexItem>
-                <AreaChart
-                  areaChart={areaChart}
-                  configs={areachartConfigs({
-                    xTickFormatter: niceTimeFormatter([from, to]),
-                    onBrushEnd: narrowDateRange,
-                  })}
-                />
-              </FlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPanel>
+              {enableAreaChart && from != null && to != null && (
+                <FlexItem>
+                  <AreaChart
+                    areaChart={areaChart}
+                    configs={areachartConfigs({
+                      xTickFormatter: niceTimeFormatter([from, to]),
+                      onBrushEnd: narrowDateRange,
+                    })}
+                  />
+                </FlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPanel>
+        </InspectButtonContainer>
       </FlexItem>
     );
   }

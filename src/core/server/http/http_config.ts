@@ -18,6 +18,8 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { hostname } from 'os';
+
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
@@ -33,6 +35,7 @@ export const config = {
   path: 'server',
   schema: schema.object(
     {
+      name: schema.string({ defaultValue: () => hostname() }),
       autoListen: schema.boolean({ defaultValue: true }),
       basePath: schema.maybe(
         schema.string({
@@ -54,6 +57,9 @@ export const config = {
         ),
         schema.boolean({ defaultValue: false })
       ),
+      customResponseHeaders: schema.recordOf(schema.string(), schema.string(), {
+        defaultValue: {},
+      }),
       host: schema.string({
         defaultValue: 'localhost',
         hostname: true,
@@ -88,6 +94,13 @@ export const config = {
           validate: match(uuidRegexp, 'must be a valid uuid'),
         })
       ),
+      xsrf: schema.object({
+        disableProtection: schema.boolean({ defaultValue: false }),
+        whitelist: schema.arrayOf(
+          schema.string({ validate: match(/^\//, 'must start with a slash') }),
+          { defaultValue: [] }
+        ),
+      }),
     },
     {
       validate: rawConfig => {
@@ -116,18 +129,21 @@ export const config = {
 export type HttpConfigType = TypeOf<typeof config.schema>;
 
 export class HttpConfig {
+  public name: string;
   public autoListen: boolean;
   public host: string;
   public keepaliveTimeout: number;
   public socketTimeout: number;
   public port: number;
   public cors: boolean | { origin: string[] };
+  public customResponseHeaders: Record<string, string>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
+  public xsrf: { disableProtection: boolean; whitelist: string[] };
 
   /**
    * @internal
@@ -137,7 +153,9 @@ export class HttpConfig {
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
+    this.customResponseHeaders = rawHttpConfig.customResponseHeaders;
     this.maxPayload = rawHttpConfig.maxPayload;
+    this.name = rawHttpConfig.name;
     this.basePath = rawHttpConfig.basePath;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
@@ -145,5 +163,6 @@ export class HttpConfig {
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
+    this.xsrf = rawHttpConfig.xsrf;
   }
 }

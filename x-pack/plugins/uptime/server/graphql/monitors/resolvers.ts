@@ -5,16 +5,11 @@
  */
 
 import {
-  FilterBar,
   GetFilterBarQueryArgs,
-  GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
-  GetMonitorPageTitleQueryArgs,
   GetSnapshotHistogramQueryArgs,
   HistogramResult,
   MonitorChart,
-  MonitorPageTitle,
-  Ping,
   UMGqlRange,
   UMResolver,
 } from '../../../common';
@@ -22,13 +17,6 @@ import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
-
-export type UMLatestMonitorsResolver = UMResolver<
-  Ping[] | Promise<Ping[]>,
-  any,
-  GetLatestMonitorsQueryArgs,
-  UMContext
->;
 
 export type UMGetMonitorChartsResolver = UMResolver<
   any | Promise<any>,
@@ -41,13 +29,6 @@ export type UMGetFilterBarResolver = UMResolver<
   any | Promise<any>,
   any,
   GetFilterBarQueryArgs,
-  UMContext
->;
-
-export type UMGetMontiorPageTitleResolver = UMResolver<
-  MonitorPageTitle | Promise<MonitorPageTitle | null> | null,
-  any,
-  GetMonitorPageTitleQueryArgs,
   UMContext
 >;
 
@@ -64,9 +45,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   Query: {
     getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
-    getLatestMonitors: UMLatestMonitorsResolver;
-    getFilterBar: UMGetFilterBarResolver;
-    getMonitorPageTitle: UMGetMontiorPageTitleResolver;
   };
 } => ({
   Query: {
@@ -96,37 +74,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         dateRangeEnd,
         location,
       });
-    },
-    async getLatestMonitors(
-      _resolver,
-      { dateRangeStart, dateRangeEnd, monitorId, location },
-      { APICaller }
-    ): Promise<Ping[]> {
-      return await libs.pings.getLatestMonitorDocs({
-        callES: APICaller,
-        dateRangeStart,
-        dateRangeEnd,
-        monitorId,
-        location,
-      });
-    },
-    async getFilterBar(
-      _resolver,
-      { dateRangeStart, dateRangeEnd },
-      { APICaller }
-    ): Promise<FilterBar> {
-      return await libs.monitors.getFilterBar({
-        callES: APICaller,
-        dateRangeStart,
-        dateRangeEnd,
-      });
-    },
-    async getMonitorPageTitle(
-      _resolver: any,
-      { monitorId },
-      { APICaller }
-    ): Promise<MonitorPageTitle | null> {
-      return await libs.monitors.getMonitorPageTitle({ callES: APICaller, monitorId });
     },
   },
 });

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   TIMELINE_FLYOUT_BODY,
   TIMELINE_NOT_READY_TO_DROP_BUTTON,
@@ -19,10 +18,6 @@ import { toggleTimelineVisibility } from '../../lib/timeline/helpers';
 describe('timeline flyout button', () => {
   beforeEach(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-  });
-
-  afterEach(() => {
-    return logout();
   });
 
   it('toggles open the timeline', () => {

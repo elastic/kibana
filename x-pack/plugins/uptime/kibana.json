@@ -2,7 +2,7 @@
   "configPath": ["xpack"],
   "id": "uptime",
   "kibanaVersion": "kibana",
-  "optionalPlugins": ["home", "data", "capabilities"],
+  "optionalPlugins": ["kibana_react", "home", "data", "capabilities"],
   "requiredPlugins": ["embeddable", "features", "licensing", "usageCollection"],
   "server": true,
   "ui": true,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore TODO: this should be resolved before merging
 import { DataSeriesColorsValues, SpecId } from '@elastic/charts';
 
 /**

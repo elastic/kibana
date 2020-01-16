@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut } from '@elastic/eui';
+
+import { RecreateJobButton } from './recreate_job_button';
 
 export const RecreateJobCallout: React.FC<{
   onRecreateMlJob: () => void;
@@ -14,11 +15,6 @@ export const RecreateJobCallout: React.FC<{
 }> = ({ children, onRecreateMlJob, title }) => (
   <EuiCallOut color="warning" iconType="alert" title={title}>
     <p>{children}</p>
-    <EuiButton color="warning" onClick={onRecreateMlJob}>
-      <FormattedMessage
-        id="xpack.infra.logs.analysis.recreateJobButtonLabel"
-        defaultMessage="Recreate ML job"
-      />
-    </EuiButton>
+    <RecreateJobButton color="warning" onClick={onRecreateMlJob} />
   </EuiCallOut>
 );

@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
-import { AutocompleteProviderRegister } from 'src/plugins/data/public';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
@@ -19,13 +18,12 @@ import {
   DEFAULT_DARK_MODE,
   DEFAULT_TIMEPICKER_QUICK_RANGES,
 } from '../../../../common/constants';
-import { getTelemetryMonitorPageLogger, getTelemetryOverviewPageLogger } from '../telemetry';
 import { UMFrameworkAdapter, BootstrapUptimeApp } from '../../lib';
 import { createApolloClient } from './apollo_client_adapter';
 
 export const getKibanaFrameworkAdapter = (
-  core: CoreStart,
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>
+  core: LegacyCoreStart,
+  plugins: any
 ): UMFrameworkAdapter => {
   const {
     application: { capabilities },
@@ -44,10 +42,10 @@ export const getKibanaFrameworkAdapter = (
   );
   const canSave = get(capabilities, 'uptime.save', false);
   const props: UptimeAppProps = {
-    autocomplete,
     basePath: basePath.get(),
     canSave,
     client: createApolloClient(`${basePath.get()}/api/uptime/graphql`, 'true'),
+    core,
     darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     i18n,
@@ -55,8 +53,7 @@ export const getKibanaFrameworkAdapter = (
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
     kibanaBreadcrumbs: breadcrumbs,
-    logMonitorPageLoad: getTelemetryMonitorPageLogger('true', basePath.get()),
-    logOverviewPageLoad: getTelemetryOverviewPageLogger('true', basePath.get()),
+    plugins,
     renderGlobalHelpControls: () =>
       setHelpExtension({
         appName: i18nFormatter.translate('xpack.uptime.header.appName', {

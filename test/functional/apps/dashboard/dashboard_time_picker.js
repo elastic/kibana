@@ -44,7 +44,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
       await pieChart.expectPieSliceCount(0);
 
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
       await pieChart.expectPieSliceCount(10);
     });
 
@@ -95,7 +95,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
-      // Same date range as `setTimepickerInHistoricalDataRange`
+      // Same date range as `timePicker.setHistoricalDataRange()`
       await PageObjects.timePicker.setAbsoluteRange(
         '2015-09-19 06:31:44.000',
         '2015-09-23 18:31:44.000'

@@ -11,8 +11,8 @@ import {
   MonitorSummaryResult,
   StatesIndexStatus,
   UMResolver,
+  CONTEXT_DEFAULTS,
 } from '../../../common';
-import { CONTEXT_DEFAULTS } from '../../../common/constants/context_defaults';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,

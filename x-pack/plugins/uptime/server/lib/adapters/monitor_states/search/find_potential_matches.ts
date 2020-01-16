@@ -5,9 +5,8 @@
  */
 
 import { get, set } from 'lodash';
-import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QueryContext } from './query_context';
 import { CursorDirection, INDEX_NAMES } from '../../../../../common';
-import { makeDateRangeFilter } from '../../../helper/make_date_rate_filter';
 
 // This is the first phase of the query. In it, we find the most recent check groups that matched the given query.
 // Note that these check groups may not be the most recent groups for the matching monitor ID! We'll filter those
@@ -54,7 +53,7 @@ export const findPotentialMatches = async (
 };
 
 const query = async (queryContext: QueryContext, searchAfter: any, size: number) => {
-  const body = queryBody(queryContext, searchAfter, size);
+  const body = await queryBody(queryContext, searchAfter, size);
 
   const params = {
     index: INDEX_NAMES.HEARTBEAT,
@@ -64,15 +63,11 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
   return await queryContext.search(params);
 };
 
-const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) => {
+const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {
   const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
 
-  const filters: any[] = [
-    makeDateRangeFilter(queryContext.dateRangeStart, queryContext.dateRangeEnd),
-  ];
-  if (queryContext.filterClause) {
-    filters.push(queryContext.filterClause);
-  }
+  const filters = await queryContext.dateAndCustomFilters();
+
   if (queryContext.statusFilter) {
     filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
   }
@@ -81,6 +76,11 @@ const queryBody = (queryContext: QueryContext, searchAfter: any, size: number) =
     size: 0,
     query: { bool: { filter: filters } },
     aggs: {
+      has_timespan: {
+        filter: {
+          exists: { field: 'monitor.timespan' },
+        },
+      },
       monitors: {
         composite: {
           size,

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QueryContext } from './query_context';
 import { CursorDirection, INDEX_NAMES } from '../../../../../common';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
-import { makeDateRangeFilter } from '../../../helper/make_date_rate_filter';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.
@@ -102,7 +101,7 @@ export const mostRecentCheckGroups = async (
       query: {
         bool: {
           filter: [
-            makeDateRangeFilter(queryContext.dateRangeStart, queryContext.dateRangeEnd),
+            await queryContext.dateRangeFilter(),
             { terms: { 'monitor.id': potentialMatchMonitorIDs } },
             // only match summary docs because we only want the latest *complete* check group.
             { exists: { field: 'summary' } },

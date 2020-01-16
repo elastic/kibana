@@ -3,29 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   LegacyCoreStart,
-  PluginInitializerContext,
+  // PluginInitializerContext,
   CoreSetup,
   CoreStart,
   AppMountParameters,
 } from 'src/core/public';
-import { PluginsStart } from 'ui/new_platform/new_platform';
-import { Chrome } from 'ui/chrome';
+// import { PluginsStart } from '../../../../../src/' 'ui/new_platform/new_platform';
+// import { Chrome } from 'ui/chrome';
 import { Plugin } from '../../../../../src/core/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common';
-import { getKibanaFrameworkAdapter } from '../lib/adapters/framework/new_platform_adapter';
-import template from './template.html';
-import { UptimeApp } from '../uptime_app';
+// import { getKibanaFrameworkAdapter } from '../lib/adapters/framework/new_platform_adapter';
+// import template from './template.html';
+// import { UptimeApp } from '../uptime_app';
+// @ts-ignore
 import { createApolloClient } from '../lib/adapters/framework/apollo_client_adapter';
+// @ts-ignore
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
-import { renderApp } from './render_app';
+// import { renderApp } from './render_app';
 
 export interface StartObject {
   core: LegacyCoreStart;
-  plugins: PluginsStart;
+  plugins: any;
 }
 
 export class UptimePlugin implements Plugin {
@@ -40,10 +41,10 @@ export class UptimePlugin implements Plugin {
   }
 
   public async setup(core: CoreSetup, plugins: { home: any }) {
-    console.log('core setup', core);
+    // console.log('core setup', core);
 
-    console.log('plugins from setup', plugins);
-    console.log(plugins.home);
+    // console.log('plugins from setup', plugins);
+    // console.log(plugins.home);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
@@ -63,32 +64,28 @@ export class UptimePlugin implements Plugin {
       euiIconType: 'uptimeApp',
       order: 8900,
       title: PLUGIN.TITLE,
-      descrption: PLUGIN.DESCRIPTION,
+      // description: PLUGIN.DESCRIPTION,
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
         const { element } = params;
+        // console.log('plugins from mount', plugins);
         const libs: UMFrontendLibs = {
-          framework: getKibanaFrameworkAdapter(coreStart, plugins.data.autocomplete),
+          // @ts-ignore
+          framework: getKibanaFrameworkAdapter(coreStart, plugins),
         };
-        console.log(libs);
-        console.log('corestart from mount', coreStart);
-        console.log(Object.keys(plugins.embeddable));
-        console.log(plugins.embeddable.registerEmbeddableFactory(''))
+        // console.log(libs);
+        // console.log('corestart from mount', coreStart);
+        // @ts-ignore
         libs.framework.render({}, {}, element);
         return () => {};
+        // console.log('value after setting el', this.el);
         // return renderApp(element);
-        console.log('the ele', element);
-        // this.el = element;
-        console.log('value after setting el', this.el);
-        return renderApp(element);
       },
     });
   }
 
   public start(start: CoreStart, plugins: {}): void {
-    console.log('corestart from start:', start);
-    // console.log('start', start);
-    // console.log('plugins', plugins);
+    // console.log('corestart from start:', start);
     // const {
     //   data: { autocomplete },
     // } = plugins;
