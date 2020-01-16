@@ -20,7 +20,7 @@ in `kibana.yml`.
 Coordinate maps support the metric and bucket aggregations.
 
 [float]
-===== Metric aggregations
+==== Metric aggregations
 
 The following metric aggregations are supported:
 
@@ -43,7 +43,7 @@ numeric field.
 the number of unique values in a field.
 
 [[coordinate-bucket-aggregation]]
-===== Bucket aggregation
+==== Bucket aggregation
 
 Coordinate maps support the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] bucket aggregation.
 
