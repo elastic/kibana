@@ -17,6 +17,7 @@ import {
   Plugin,
   PluginInitializerContext
 } from '../../../../../../src/core/public';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
@@ -32,7 +33,6 @@ import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { px, unit, units } from '../style/variables';
 import { history } from '../utils/history';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';

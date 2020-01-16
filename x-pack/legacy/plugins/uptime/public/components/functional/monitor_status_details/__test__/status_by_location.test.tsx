@@ -5,12 +5,27 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 import { StatusByLocations } from '../';
 
 describe('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];
+
+  it('renders properly against props', () => {
+    monitorLocations = [
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+      },
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'st-paul', location: { lat: '52.487448', lon: ' 13.394798' } },
+      },
+    ];
+    const component = shallowWithIntl(<StatusByLocations locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
+  });
 
   it('renders when up in all locations', () => {
     monitorLocations = [
