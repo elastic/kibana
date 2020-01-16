@@ -4,6 +4,8 @@ exports[`#maxSize returns error when more items 1`] = `"array size is [2], but c
 
 exports[`#minSize returns error when fewer items 1`] = `"array size is [1], but cannot be smaller than [2]"`;
 
+exports[`#sparse returns error when there are undefined values 1`] = `"[1]: array.sparse"`;
+
 exports[`fails for null values if optional 1`] = `"[0]: expected value of type [string] but got [null]"`;
 
 exports[`fails if mixed types of content in array 1`] = `"[2]: expected value of type [string] but got [boolean]"`;

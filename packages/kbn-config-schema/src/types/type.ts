@@ -24,6 +24,7 @@ import { Reference } from '../references';
 export interface TypeOptions<T> {
   defaultValue?: T | Reference<T> | (() => T);
   validate?: (value: T) => string | void;
+  allow?: T | T[];
 }
 
 export abstract class Type<V> {
@@ -56,6 +57,10 @@ export abstract class Type<V> {
 
     if (options.validate) {
       schema = schema.custom(options.validate);
+    }
+
+    if (options.allow) {
+      schema = schema.allow(...(Array.isArray(options.allow) ? options.allow : [options.allow]));
     }
 
     // Attach generic error handler only if it hasn't been attached yet since

@@ -134,3 +134,15 @@ describe('#maxSize', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 });
+
+describe('#sparse', () => {
+  test('returns value when sparse enmabled', () => {
+    expect(schema.arrayOf(schema.string(), { sparse: true }).validate([])).toEqual([]);
+  });
+
+  test('returns error when there are undefined values', () => {
+    expect(() =>
+      schema.arrayOf(schema.string(), { sparse: false }).validate(['', undefined])
+    ).toThrowErrorMatchingSnapshot();
+  });
+});
