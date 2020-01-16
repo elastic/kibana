@@ -636,6 +636,12 @@ export interface DeprecationInfo {
 }
 
 // @public
+export interface DeprecationSettings {
+    docLinksKey: string;
+    message: string;
+}
+
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -793,6 +799,17 @@ export interface IKibanaSocket {
     // (undocumented)
     getPeerCertificate(detailed: false): PeerCertificate | null;
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
+}
+
+// Warning: (ae-missing-release-tag) "ImageValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface ImageValidation {
+    // (undocumented)
+    maxSize: {
+        length: number;
+        description: string;
+    };
 }
 
 // @public (undocumented)
@@ -1925,10 +1942,19 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
 }>;
 
+// Warning: (ae-missing-release-tag) "StringValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface StringValidation {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    regexString: string;
+}
+
 // @public
 export interface UiSettingsParams {
     category?: string[];
-    // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
     deprecation?: DeprecationSettings;
     description?: string;
     name?: string;
@@ -1937,9 +1963,6 @@ export interface UiSettingsParams {
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
-    // Warning: (ae-forgotten-export) The symbol "ImageValidation" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "StringValidation" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     validation?: ImageValidation | StringValidation;
     value?: SavedObjectAttribute;
