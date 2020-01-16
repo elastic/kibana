@@ -26,7 +26,7 @@ import { Vis as Vislib } from './vislib/vis';
 import { Positions } from './utils/collections';
 import { KbnVislibVisTypesDependencies } from './plugin';
 import { mountReactNode } from '../../../../core/public/utils';
-import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/vislib_vis_legend';
+import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 
 const legendClassName = {
   top: 'visLib--legend-top',

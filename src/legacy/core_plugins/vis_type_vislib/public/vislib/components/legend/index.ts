@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { VisLegend } from './vislib_vis_legend';
+export { VisLegend } from './legend';
 export { CUSTOM_LEGEND_VIS_TYPES } from './models';
