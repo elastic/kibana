@@ -665,6 +665,11 @@ export const PARAMETERS_DEFINITION = {
     },
     schema: Joi.boolean().strict(),
   },
+  eager_global_ordinals_join: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
   index_phrases: {
     fieldConfig: {
       defaultValue: false,
