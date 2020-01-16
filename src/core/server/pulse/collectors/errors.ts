@@ -62,7 +62,7 @@ export class Collector extends PulseCollector<Payload> {
 
   public async getRecords() {
     if (this.elasticsearch) {
-      const results = await this.elasticsearch.search<Payload>(this.channelName, {
+      const results = await this.elasticsearch.search(this.channelName, {
         bool: {
           filter: {
             range: {

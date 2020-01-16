@@ -21,11 +21,11 @@ import { IRouter, IClusterClient } from 'src/core/server';
 // import { registerDeleteRoute } from './delete';
 // import { registerGetRoute } from './get';
 // import { registerSetManyRoute } from './set_many';
-import { registerSetRoute } from './set_route';
+// import { registerSetRoute } from './set_route';
 
 export function registerRoutes(router: IRouter, elasticsearch: IClusterClient) {
   // registerGetRoute(router);
   // registerDeleteRoute(router);
-  registerSetRoute(router, elasticsearch);
+  // registerSetRoute(router, elasticsearch);
   // registerSetManyRoute(router);
 }

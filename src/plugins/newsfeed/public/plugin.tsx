@@ -39,8 +39,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   }
 
   public setup(core: CoreSetup): Setup {
-    // TODO: move the following code to an appropriate place to handle pulse_error instructions
-    // expose a route to post Pulse errors to so that we can index them in the .kibana-errors index.
+    // TODO: move the following code to an appropriate place to handle pulse_error instructions and to send Pulse error reports to
     const instructions$ = core.pulse.getChannel('errors').instructions$();
     core.pulse.getChannel('errors').sendPulse({
       errorId: 'new_error',

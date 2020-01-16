@@ -22,6 +22,7 @@ import { Subject } from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InstructionsResponse } from '../../server/pulse';
 import { PulseChannel, PulseInstruction } from './channel';
+import { channelNames } from './config';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fetcher, sendPulse, sendUsageFrom } from '../../server/pulse/send_pulse';
 
@@ -31,9 +32,6 @@ export interface PulseServiceSetup {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PulseServiceStart {}
-
-// TODO: Why are we not looping through these?
-const channelNames = ['default', 'notifications', 'errors'];
 
 const logger = {
   ...console,

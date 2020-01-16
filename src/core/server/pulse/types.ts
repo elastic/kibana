@@ -17,9 +17,12 @@
  * under the License.
  */
 
+/*
+  Uncomment SavedObjects if a use case arises. For now, we're using an index pattern for storage.
+*/
 // import { SavedObjectsServiceSetup, ISavedObjectsRepository } from '../saved_objects';
 import { Logger } from '../logging';
-import { IPulseElasticsearchClient, IPulseClient } from './clientWrappers/types';
+import { IPulseElasticsearchClient } from './client_wrappers/types';
 
 export type PulseCollectorConstructor = new (logger: Logger) => PulseCollector;
 
@@ -31,12 +34,11 @@ export interface CollectorSetupContext {
 export abstract class PulseCollector<Payload = unknown, PulseRecord = Payload> {
   // protected savedObjects?: ISavedObjectsRepository;
   protected elasticsearch?: IPulseElasticsearchClient;
-  protected pulse?: IPulseClient;
 
   constructor(protected readonly logger: Logger) {}
 
   public abstract async putRecord(payload: Payload): Promise<void>;
-  public abstract async getRecords(): Promise<PulseRecord[]>;
+  public abstract async getRecords(): Promise<PulseRecord[] | unknown[]>;
 
   public async setup(setupContext: CollectorSetupContext) {
     // this.savedObjects = setupContext.savedObjects.createInternalRepository();

@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export async function getRecords() {
-  return [{}];
-}
+// channels for which we want a public service for.
+export const channelNames = ['default', 'notifications', 'errors'];
