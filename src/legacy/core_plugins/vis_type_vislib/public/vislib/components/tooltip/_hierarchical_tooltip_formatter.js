@@ -22,7 +22,7 @@ import _ from 'lodash';
 import numeral from 'numeral';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
 import { collectBranch } from './_collect_branch';
 
@@ -50,42 +50,44 @@ export function hierarchicalTooltipFormatter(metricFieldFormatter) {
     });
 
     return renderToStaticMarkup(
-      <table className="visTooltip__table">
-        <thead>
-          <tr className="eui-textLeft visTooltip__label">
-            <FormattedMessage
-              tagName="th"
-              scope="col"
-              id="visTypeVislib.vislib.tooltip.fieldLabel"
-              defaultMessage="field"
-            />
+      <I18nProvider>
+        <table className="visTooltip__table">
+          <thead>
+            <tr className="eui-textLeft visTooltip__label">
+              <FormattedMessage
+                tagName="th"
+                scope="col"
+                id="visTypeVislib.vislib.tooltip.fieldLabel"
+                defaultMessage="field"
+              />
 
-            <FormattedMessage
-              tagName="th"
-              scope="col"
-              id="visTypeVislib.vislib.tooltip.valueLabel"
-              defaultMessage="value"
-            />
-            <th scope="col">{/* {metricCol.label} */}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, index) => (
-            <tr className="visTooltip__value" key={index}>
-              <td>
-                <div className="visTooltip__labelContainer">
-                  <span ng-bind-html="row.spacer" />
-                  {row.field}
-                </div>
-              </td>
-              <td>
-                <div className="visTooltip__labelContainer">{row.bucket}</div>
-              </td>
-              <td>{row.metric}</td>
+              <FormattedMessage
+                tagName="th"
+                scope="col"
+                id="visTypeVislib.vislib.tooltip.valueLabel"
+                defaultMessage="value"
+              />
+              <th scope="col">{/* {metricCol.label} */}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row, index) => (
+              <tr className="visTooltip__value" key={index}>
+                <td>
+                  <div className="visTooltip__labelContainer">
+                    <span ng-bind-html="row.spacer" />
+                    {row.field}
+                  </div>
+                </td>
+                <td>
+                  <div className="visTooltip__labelContainer">{row.bucket}</div>
+                </td>
+                <td>{row.metric}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </I18nProvider>
     );
   };
 }
