@@ -481,7 +481,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoom,
     } = this.props;
 
-    if (selectedJobIds === undefined) {
+    if (selectedJobIds === undefined || bounds === undefined) {
       return;
     }
 

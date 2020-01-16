@@ -102,22 +102,20 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
     timefilter.enableAutoRefreshSelector();
   }, []);
 
+  // We cannot simply infer bounds from the globalState's `time` attribute
+  // with `moment` since it can contain custom strings such as `now-15m`.
+  // So when globalState's `time` changes, we update the timefilter and use
+  // `timefilter.getBounds()` to update `bounds` in this component's state.
+  const [bounds, setBounds] = useState<TimeRangeBounds | undefined>(undefined);
   useEffect(() => {
     if (globalState?.time !== undefined) {
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
       });
+      setBounds(timefilter.getBounds());
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
-
-  let bounds: TimeRangeBounds | undefined;
-  if (globalState?.time !== undefined) {
-    bounds = {
-      min: moment(globalState.time.from),
-      max: moment(globalState.time.to),
-    };
-  }
 
   const selectedJobIds = globalState?.ml?.jobIds;
   // Sort selectedJobIds so we can be sure comparison works when stringifying.
