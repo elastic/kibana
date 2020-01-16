@@ -34,7 +34,7 @@ export class ManagementApp {
   readonly basePath: string;
   readonly order: number;
   readonly mount: ManagementSectionMount;
-  protected enabledStatus: boolean = true;
+  private enabledStatus: boolean = true;
 
   constructor(
     { id, title, basePath, order = 100, mount }: CreateManagementApp,
@@ -54,35 +54,38 @@ export class ManagementApp {
       title,
       mount: async ({}, params) => {
         let appUnmount: Unmount;
-        async function setBreadcrumbs(crumbs: ChromeBreadcrumb[]) {
-          const [coreStart] = await getStartServices();
-          coreStart.chrome.setBreadcrumbs([
-            {
-              text: i18n.translate('management.breadcrumb', {
-                defaultMessage: 'Management',
-              }),
-              href: '#/management',
-            },
-            ...crumbs,
-          ]);
+        if (!this.enabledStatus) {
+          window.location.hash = '/management';
+        } else {
+          async function setBreadcrumbs(crumbs: ChromeBreadcrumb[]) {
+            const [coreStart] = await getStartServices();
+            coreStart.chrome.setBreadcrumbs([
+              {
+                text: i18n.translate('management.breadcrumb', {
+                  defaultMessage: 'Management',
+                }),
+                href: '#/management',
+              },
+              ...crumbs,
+            ]);
+          }
+
+          ReactDOM.render(
+            <ManagementChrome
+              getSections={getSections}
+              selectedId={id}
+              legacySections={getLegacyManagementSections().items}
+              onMounted={async element => {
+                appUnmount = await mount({
+                  basePath,
+                  element,
+                  setBreadcrumbs,
+                });
+              }}
+            />,
+            params.element
+          );
         }
-
-        ReactDOM.render(
-          <ManagementChrome
-            getSections={getSections}
-            selectedId={id}
-            legacySections={getLegacyManagementSections().items}
-            onMounted={async element => {
-              appUnmount = await mount({
-                basePath,
-                element,
-                setBreadcrumbs,
-              });
-            }}
-          />,
-          params.element
-        );
-
         return async () => {
           appUnmount();
           ReactDOM.unmountComponentAtNode(params.element);

@@ -36,5 +36,10 @@ export default function({ getService, getPageObjects }) {
       await testSubjects.click('test-management-link-basepath');
       await testSubjects.existOrFail('test-management-link-one');
     });
+
+    it('should redirect when app is disabled', async () => {
+      await testSubjects.click('test-management-disable');
+      await testSubjects.existOrFail('management-landing');
+    });
   });
 }
