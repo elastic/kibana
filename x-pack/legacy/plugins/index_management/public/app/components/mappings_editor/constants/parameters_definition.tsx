@@ -100,11 +100,10 @@ const fielddataFrequencyFilterParam = {
       },
     },
   },
-  schema: t.partial({
-    min: t.number,
-    max: t.number,
-    min_segment_size: t.number,
-  }),
+  schema: t.record(
+    t.union([t.literal('min'), t.literal('max'), t.literal('min_segment_size')]),
+    t.number
+  ),
 };
 
 const analyzerValidations = [
