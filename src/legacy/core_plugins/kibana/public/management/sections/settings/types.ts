@@ -32,17 +32,18 @@ export interface ImageValidation {
     description: string;
   };
 }
+
+// todo consider whether this is needed
 export interface Setting {
   displayName: string;
   name: string;
   value: SavedObjectAttribute;
   description?: string;
-  options?: string[]; // array of stringa,
+  options?: string[];
   optionLabels?: Record<string, string>;
   requiresPageReload: boolean;
   type: UiSettingsType;
   category: string[];
-  //
   ariaName: string;
   isOverridden: boolean;
   defVal: SavedObjectAttribute;

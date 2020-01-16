@@ -72,7 +72,7 @@ export function registerSettingsComponent(
  *
  * @param {*} id the ID of the component to retrieve
  */
-export function getSettingsComponent(id: Id): FunctionComponent<Record<string, any>> | undefined {
+export function getSettingsComponent(id: Id): FunctionComponent<Record<string, any>> {
   if (!(id in registry)) {
     throw new Error(`Component not found with id ${id}`);
   }

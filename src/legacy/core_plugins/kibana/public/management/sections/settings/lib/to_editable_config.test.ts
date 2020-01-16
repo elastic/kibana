@@ -101,10 +101,9 @@ describe('Settings', function() {
               message: 'must start with "foo"',
             };
             const result = invoke({ def });
-            expect((result.validation as StringValidation).regexString).to.be.a(RegExp);
-            expect((result.validation as StringValidation).message).to.equal(
-              'must start with "foo"'
-            );
+            const validationTyped = result.validation as StringValidation;
+            expect(validationTyped.regexString).to.be.a(RegExp);
+            expect(validationTyped.message).to.equal('must start with "foo"');
           });
         });
       });

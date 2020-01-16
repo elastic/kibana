@@ -18,8 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import { FunctionComponent } from 'react';
-
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { CallOuts } from './components/call_outs';
@@ -167,11 +165,9 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   render() {
     const { filteredSettings, query, footerQueryMatched } = this.state;
 
-    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT) as FunctionComponent;
-    const PageSubtitle = getSettingsComponent(PAGE_SUBTITLE_COMPONENT) as FunctionComponent;
-    const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT) as FunctionComponent<
-      Record<string, any>
-    >;
+    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
+    const PageSubtitle = getSettingsComponent(PAGE_SUBTITLE_COMPONENT);
+    const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
 
     return (
       <div>

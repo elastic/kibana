@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 const upperFirst = (str = '') => str.replace(/^./, strng => strng.toUpperCase());
 
-const names: { [key: string]: string } = {
+const names: Record<string, string> = {
   general: i18n.translate('kbn.management.settings.categoryNames.generalLabel', {
     defaultMessage: 'General',
   }),

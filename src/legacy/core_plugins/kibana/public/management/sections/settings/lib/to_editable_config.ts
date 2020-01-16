@@ -26,7 +26,6 @@ import {
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
 import { DEFAULT_CATEGORY } from './default_category';
-// import { SavedObjectAttribute } from '../../../../core/server/saved_objects/types';
 import { SavedObjectAttribute } from '../../../../../../../../core/server/saved_objects/types';
 
 /**
@@ -44,14 +43,16 @@ export function toEditableConfig({
 }: {
   def: UiSettingsParams & UserProvidedValues<any>;
   name: string;
-  // value: UserProvidedValues<any>;
-  value: SavedObjectAttribute;
+  value: SavedObjectAttribute; // todo verify this
   isCustom: boolean;
   isOverridden: boolean;
 }) {
   if (!def) {
     def = {};
   }
+
+  const validationTyped = def.validation as StringValidation;
+
   const conf = {
     name,
     displayName: def.name || name,
@@ -66,10 +67,10 @@ export function toEditableConfig({
     description: def.description,
     deprecation: def.deprecation,
     validation:
-      def.validation && (def.validation as StringValidation).regexString
+      validationTyped && validationTyped.regexString
         ? {
-            regex: new RegExp((def.validation as StringValidation).regexString || ''),
-            message: (def.validation as StringValidation).message,
+            regex: new RegExp(validationTyped.regexString || ''),
+            message: validationTyped.message,
           }
         : def.validation,
     options: def.options,

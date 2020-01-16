@@ -21,8 +21,11 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { shallow } from 'enzyme';
 import dedent from 'dedent';
-import { UiSettingsType } from '../../../../../../../core/server/types';
-import { UiSettingsParams, UserProvidedValues } from '../../../../../../../core/server/';
+import {
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+} from '../../../../../../../core/server/';
 
 import { AdvancedSettings } from './advanced_settings';
 
