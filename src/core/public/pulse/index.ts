@@ -63,6 +63,19 @@ export class PulseService {
     setInterval(() => {
       // eslint-disable-next-line no-console
       this.loadInstructions().catch(err => console.error(err.stack));
+      // move this into a wrapper function
+
+      fetch('/api/pulse_local/elasticsearch/errors', {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
+        body: JSON.stringify({
+          payload: { message: 'Hello world!', errorId: 'Houston We Have a Problem!' },
+        }),
+        // eslint-disable-next-line no-console
+      }).catch(err => console.error(err.stack));
     }, 10000);
 
     // eslint-disable-next-line no-console

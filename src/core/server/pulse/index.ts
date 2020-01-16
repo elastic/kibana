@@ -23,12 +23,14 @@ import { resolve, parse } from 'path';
 import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
+import { schema } from '@kbn/config-schema';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
 import { PulseChannel, PulseInstruction } from './channel';
 import { sendPulse, Fetcher } from './send_pulse';
 import { SavedObjectsServiceSetup } from '../saved_objects';
+import { InternalHttpServiceSetup } from '../http';
 
 export interface InternalPulseService {
   getChannel: (id: string) => PulseChannel;
@@ -37,6 +39,7 @@ export interface InternalPulseService {
 export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsServiceSetup;
+  http: InternalHttpServiceSetup;
 }
 
 export type PulseServiceSetup = InternalPulseService;
@@ -78,8 +81,57 @@ export class PulseService {
 
   public async setup(deps: PulseSetupDeps): Promise<InternalPulseService> {
     this.log.debug('Setting up pulse service');
-
     this.elasticsearch = deps.elasticsearch.createClient('pulse-service');
+
+    this.log.debug('Setting up pulse service routes');
+
+    const router = deps.http.createRouter('');
+    const validate = {
+      params: schema.object({
+        channel: schema.string(),
+      }),
+      body: schema.object({
+        payload: schema.object(
+          { message: schema.string(), errorId: schema.string() },
+          { allowUnknowns: true }
+        ),
+      }),
+    };
+    router.post(
+      { path: '/api/pulse_local/elasticsearch/{channel}', validate },
+      // @ts-ignore
+      async (context, request, response) => {
+        try {
+          const { channel } = request.params;
+          const { payload } = request.body;
+          const exists = await this.elasticsearch!.callAsInternalUser('indices.exists', {
+            index: `.kibana_pulse_local_${channel}`,
+          });
+          if (exists) {
+            this.log.info(`the index .kibana_pulse_local_${request.params.channel} exists`);
+          } else {
+            this.log.info(`the index .kibana_pulse_local_${request.params.channel} does NOT exist`);
+          }
+          let id = 1;
+          await this.elasticsearch!.callAsInternalUser('index', {
+            index: `.kibana_pulse_local_${channel}`,
+            id: `${id}`,
+            body: payload,
+          });
+          id = id + 1;
+          return response.ok({
+            body: {
+              message: `payload: ${payload} received`,
+            },
+          });
+        } catch (error) {
+          if (error) {
+            return response.badRequest({ body: error });
+          }
+        }
+      }
+    );
+
     this.channels.forEach(channel =>
       channel.setup({
         elasticsearch: this.elasticsearch!,

@@ -137,6 +137,7 @@ export class Server {
     const pulseSetup = await this.pulse.setup({
       elasticsearch: elasticsearchServiceSetup,
       savedObjects: savedObjectsSetup,
+      http: httpSetup,
     });
 
     // example of retrieving instructions for a specific channel

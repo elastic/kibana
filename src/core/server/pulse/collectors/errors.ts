@@ -30,7 +30,7 @@ export interface Payload {
 
 export class Collector extends PulseCollector<Payload> {
   private payloads: Payload[] = [];
-  private readonly indexName = '.pulse-errors';
+  private readonly indexName = '.kibana_pulse_errors';
 
   public async setup(deps: CollectorSetupContext) {
     await super.setup(deps);
