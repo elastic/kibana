@@ -301,7 +301,7 @@ function createElasticSearchModule(data: DataPublicPluginStart) {
     .module('discoverEs', ['discoverConfig'])
     // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
     .service('es', () => {
-      return data.__LEGACY.esClient;
+      return data.search.__LEGACY.esClient;
     });
 }
 
