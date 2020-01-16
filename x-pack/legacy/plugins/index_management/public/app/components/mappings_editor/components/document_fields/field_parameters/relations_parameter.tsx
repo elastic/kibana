@@ -157,16 +157,6 @@ export const RelationsParameter = () => {
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.relationsTitle', {
         defaultMessage: 'Relations',
       })}
-      // description={i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldDescription', {
-      //   defaultMessage:
-      //     'Account for field length when scoring queries. Norms require significant memory and are not necessary for fields that are used solely for filtering or aggregations.',
-      // })}
-      // docLink={{
-      //   text: i18n.translate('xpack.idxMgmt.mappingsEditor.normsDocLinkText', {
-      //     defaultMessage: 'Norms documentation',
-      //   }),
-      //   href: documentationService.getNormsLink(),
-      // }}
       withToggle={false}
     >
       <UseArray path="relations">
@@ -183,21 +173,26 @@ export const RelationsParameter = () => {
                 return (
                   <div key={relationId}>
                     <EuiFlexGroup>
+                      {/* Parent */}
                       <EuiFlexItem>
                         {/* By adding ".parent" to the path, we are saying that we want an **object**
-                    to be created for each array item, with a "parent" property */}
+                            to be created for each array item.
+                            This object will have a "parent" property with the field value.*/}
                         <UseField
                           path={`${relationPath}.parent`}
                           config={parentConfig}
                           // For newly created relations, we don't want to read
-                          // the default value from the form as... it is new! :)
+                          // the default value provided to the form because... it is new! :)
                           readDefaultValueOnForm={!isNewRelation}
                         />
                       </EuiFlexItem>
+
+                      {/* Children */}
                       <EuiFlexItem>
                         {/* Extra div to get out of flex flow */}
                         <div>
-                          {/* Nested array under the "children" property of the relation (array) item */}
+                          {/* Nested array under the "children" property of the relation object.
+                              This will give us the following output for a relation: { parent: "myParent", children: ["child1", child2] }*/}
                           <UseArray
                             path={`${relationPath}.children`}
                             readDefaultValueOnForm={!isNewRelation}
@@ -210,7 +205,7 @@ export const RelationsParameter = () => {
                               const totalChildren = childrenItems.length;
                               return (
                                 <>
-                                  {/* Extra div to be able to target css :last-child */}
+                                  {/* Extra div to be able to target the :last-child selector */}
                                   <div>
                                     {childrenItems.map(
                                       ({ id: childId, path: childPath, isNew: isNewChild }) => {
@@ -250,7 +245,10 @@ export const RelationsParameter = () => {
                                       }
                                     )}
                                   </div>
+
                                   <EuiSpacer size="s" />
+
+                                  {/* Add child button */}
                                   <EuiTextAlign textAlign="right">
                                     <EuiButtonEmpty
                                       onClick={addChildItem}
@@ -276,8 +274,7 @@ export const RelationsParameter = () => {
                 );
               })}
 
-              <EuiSpacer size="s" />
-
+              {/* Add relation button */}
               <EuiButtonEmpty
                 onClick={addRelationItem}
                 iconType="plusInCircleFilled"
