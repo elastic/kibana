@@ -146,7 +146,7 @@ Extract the instance certificate:
 
 [source,shell]
 ----------------------------------------------------------
-openssl pkcs12 -in elastic-certificates.p12 -clcerts -nokeys > server.crt
+openssl pkcs12 -in elastic-certificates.p12 -clcerts -nokeys -out server.crt
 ----------------------------------------------------------
 
 Extract the certificate authority certificate as a PEM file:
