@@ -5,10 +5,12 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { LogEntryRatePageProvider } from './log_entry_rate';
 import { LogStreamPageProvider } from './log_stream';
 
 export function LogsUiProvider(context: FtrProviderContext) {
   return {
+    logEntryRatePage: LogEntryRatePageProvider(context),
     logStreamPage: LogStreamPageProvider(context),
   };
 }
