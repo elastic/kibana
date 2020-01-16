@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const { logStreamPage } = getService('logsUi');
+  const logsUi = getService('logsUi');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'infraLogs']);
 
@@ -48,8 +48,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the no indices screen when no indices match the pattern', async () => {
-        await logStreamPage.navigateTo();
-        await logStreamPage.getNoLogsIndicesPrompt();
+        await logsUi.logStreamPage.navigateTo();
+        await logsUi.logStreamPage.getNoLogsIndicesPrompt();
       });
 
       it('can change the log indices back to a pattern that matches something', async () => {
@@ -64,16 +64,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the default log columns with their headers', async () => {
-        await logStreamPage.navigateTo();
-        const columnHeaderLabels = await logStreamPage.getColumnHeaderLabels();
+        await logsUi.logStreamPage.navigateTo();
+        const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
         expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
 
-        const logStreamEntries = await logStreamPage.getStreamEntries();
+        const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await logStreamPage.getLogColumnsOfStreamEntry(
+        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
           firstLogStreamEntry
         );
 
@@ -94,19 +94,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the changed log columns with their headers', async () => {
-        await logStreamPage.navigateTo();
-        const columnHeaderLabels = await logStreamPage.getColumnHeaderLabels();
+        await logsUi.logStreamPage.navigateTo();
+        const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
         // TODO: make test more robust
         // expect(columnHeaderLabels).to.eql(['host.name', 'Timestamp']);
         expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'host.name']);
 
-        const logStreamEntries = await logStreamPage.getStreamEntries();
+        const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
 
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await logStreamPage.getLogColumnsOfStreamEntry(
+        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
           firstLogStreamEntry
         );
 

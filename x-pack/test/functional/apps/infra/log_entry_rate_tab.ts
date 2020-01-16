@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
-  const { logEntryRatePage } = getService('logsUi');
+  const logsUi = getService('logsUi');
   const retry = getService('retry');
 
   describe('Log Entry Rate Tab', function() {
@@ -17,10 +17,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with a basic license', () => {
       it('is visible', async () => {
-        await logEntryRatePage.navigateTo();
+        await logsUi.logEntryRatePage.navigateTo();
 
         await retry.try(async () => {
-          expect(await logEntryRatePage.getSetupScreen()).to.be.ok();
+          expect(await logsUi.logEntryRatePage.getSetupScreen()).to.be.ok();
         });
       });
     });
