@@ -12,7 +12,7 @@ When {security} is enabled on your cluster, each request that {kib} makes to {es
 {es} are authenticated by using the credentials of the logged-in user. There are, however, a few internal requests that the {kib} server
 needs to make to the {es} cluster. For this reason, you must configure credentials for the {kib} server to use for those requests.
 
-If {kib} has `elasticsearch.username` and `elasticsearch.password` configured, it will attempt to use these authenticate to {es} via the
+If {kib} has `elasticsearch.username` and `elasticsearch.password` configured, it will attempt to use these to authenticate to {es} via the
 {ref}/native-realm.html[Native realm]. However, {kib} also supports mutual TLS authentication with {es} via a {ref}/pki-realm.html[Public
 Key Infrastructure (PKI) realm]. To do so, {es} needs to verify the signature on the {kib} client certificate, and it also needs to map the
 certificate's distinguished name (DN) to the appropriate `kibana_system` role.
