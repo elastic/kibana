@@ -40,6 +40,10 @@ export class CreateSourceEditor extends Component {
     onSourceConfigChange: PropTypes.func.isRequired,
   };
 
+  static defaultProps = {
+    filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
+  };
+
   state = {
     isLoadingIndexPattern: false,
     noGeoIndexPatternsExist: false,
