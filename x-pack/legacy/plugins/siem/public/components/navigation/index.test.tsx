@@ -68,7 +68,7 @@ describe('SIEM Navigation', () => {
           disabled: false,
           href: '#/link-to/detections',
           id: 'detections',
-          name: 'Detection engine',
+          name: 'Detections',
           urlKey: 'detections',
         },
         hosts: {
@@ -150,7 +150,7 @@ describe('SIEM Navigation', () => {
           disabled: false,
           href: '#/link-to/detections',
           id: 'detections',
-          name: 'Detection engine',
+          name: 'Detections',
           urlKey: 'detections',
         },
         hosts: {

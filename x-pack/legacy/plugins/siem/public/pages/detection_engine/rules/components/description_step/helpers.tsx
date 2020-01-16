@@ -63,8 +63,8 @@ export const buildQueryBarDescription = ({
                       valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
                   ) : (
-                      <EuiLoadingSpinner size="m" />
-                    )}
+                    <EuiLoadingSpinner size="m" />
+                  )}
                 </EuiBadgeWrap>
               </EuiFlexItem>
             ))}
