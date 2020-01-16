@@ -7,20 +7,16 @@
 import { shallowWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { UptimeDatePicker } from '../uptime_date_picker';
+import { renderWithRouter } from '../../../lib';
 
 describe('UptimeDatePicker component', () => {
   it('validates props with shallow render', () => {
-    const component = shallowWithIntl(<UptimeDatePicker refreshApp={jest.fn()} />);
+    const component = shallowWithIntl(renderWithRouter(<UptimeDatePicker />));
     expect(component).toMatchSnapshot();
   });
 
   it('renders properly with mock data', () => {
-    const component = renderWithIntl(<UptimeDatePicker refreshApp={jest.fn()} />);
-    expect(component).toMatchSnapshot();
-  });
-
-  it('renders properly without commonlyUsedRanges prop', () => {
-    const component = renderWithIntl(<UptimeDatePicker refreshApp={jest.fn()} />);
+    const component = renderWithIntl(renderWithRouter(<UptimeDatePicker />));
     expect(component).toMatchSnapshot();
   });
 });

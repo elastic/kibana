@@ -55,10 +55,6 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
           }
         >
           <EuiSelect
-            compressed={false}
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -147,10 +143,6 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
               }
             >
               <EuiSelect
-                compressed={false}
-                fullWidth={false}
-                hasNoInitialSelection={false}
-                isLoading={false}
                 onChange={[Function]}
                 options={
                   Array [
@@ -262,10 +254,6 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
           }
         >
           <EuiSelect
-            compressed={false}
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [
@@ -353,10 +341,6 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
               }
             >
               <EuiSelect
-                compressed={false}
-                fullWidth={false}
-                hasNoInitialSelection={false}
-                isLoading={false}
                 onChange={[Function]}
                 options={
                   Array [

@@ -33,6 +33,8 @@ import { clog as clogFunction } from './functions/clog';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
 import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
+import { variable } from './functions/var';
+import { variableSet } from './functions/var_set';
 import {
   boolean as booleanType,
   datatable as datatableType,
@@ -114,6 +116,8 @@ export class ExpressionsPublicPlugin
     registerFunction(fontFunction);
     registerFunction(kibanaFunction);
     registerFunction(kibanaContextFunction);
+    registerFunction(variable);
+    registerFunction(variableSet);
 
     types.register(booleanType);
     types.register(datatableType);

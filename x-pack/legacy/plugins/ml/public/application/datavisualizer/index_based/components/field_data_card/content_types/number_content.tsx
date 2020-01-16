@@ -5,7 +5,14 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -53,15 +60,15 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
 
   const detailsOptions = [
     {
-      value: DETAILS_MODE.DISTRIBUTION,
-      text: i18n.translate('xpack.ml.fieldDataCard.cardNumber.details.distributionOfValuesLabel', {
-        defaultMessage: 'distribution of values',
+      id: DETAILS_MODE.TOP_VALUES,
+      label: i18n.translate('xpack.ml.fieldDataCard.cardNumber.details.topValuesLabel', {
+        defaultMessage: 'Top values',
       }),
     },
     {
-      value: DETAILS_MODE.TOP_VALUES,
-      text: i18n.translate('xpack.ml.fieldDataCard.cardNumber.details.topValuesLabel', {
-        defaultMessage: 'top values',
+      id: DETAILS_MODE.DISTRIBUTION,
+      label: i18n.translate('xpack.ml.fieldDataCard.cardNumber.details.distributionOfValuesLabel', {
+        defaultMessage: 'Distribution',
       }),
     },
   ];
@@ -69,49 +76,60 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiIcon type="document" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardNumber.documentsCountDescription"
-          defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-          values={{
-            count,
-            docsPercent,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="document" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardNumber.documentsCountDescription"
+            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
+            values={{
+              count,
+              docsPercent,
+            }}
+          />
+        </EuiText>
       </div>
-
       <EuiSpacer size="xs" />
-
       <div>
-        <EuiIcon type="database" />
-        &nbsp;
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardNumber.distinctCountDescription"
-          defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
-          values={{
-            cardinality,
-          }}
-        />
+        <EuiText size="xs" color="subdued">
+          <EuiIcon type="database" />
+          &nbsp;
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardNumber.distinctCountDescription"
+            defaultMessage="{cardinality} distinct {cardinality, plural, zero {value} one {value} other {values}}"
+            values={{
+              cardinality,
+            }}
+          />
+        </EuiText>
       </div>
-
-      <EuiSpacer size="xs" />
-
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xs" justifyContent="center">
         <EuiFlexItem grow={1}>
-          <FormattedMessage id="xpack.ml.fieldDataCard.cardNumber.minLabel" defaultMessage="min" />
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.ml.fieldDataCard.cardNumber.minLabel"
+              defaultMessage="min"
+            />
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardNumber.medianLabel"
-            defaultMessage="median"
-          />
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.ml.fieldDataCard.cardNumber.medianLabel"
+              defaultMessage="median"
+            />
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <FormattedMessage id="xpack.ml.fieldDataCard.cardNumber.maxLabel" defaultMessage="max" />
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.ml.fieldDataCard.cardNumber.maxLabel"
+              defaultMessage="max"
+            />
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiFlexGroup gutterSize="xs" justifyContent="center">
         <EuiFlexItem grow={1} className="eui-textTruncate">
           <DisplayValue value={kibanaFieldFormat(min, fieldFormat)} />
@@ -123,30 +141,22 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           <DisplayValue value={kibanaFieldFormat(max, fieldFormat)} />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="s" />
-
-      <EuiFlexGroup gutterSize="xs" justifyContent="center">
-        <EuiFlexItem grow={false} style={{ width: 200 }} className="eui-textTruncate">
-          <EuiSelect
-            options={detailsOptions}
-            value={detailsMode}
-            compressed
-            onChange={e => setDetailsMode(e.target.value as DETAILS_MODE)}
-            style={{ width: '200px' }}
-            aria-label={i18n.translate(
-              'xpack.ml.fieldDataCard.cardNumber.selectMetricDetailsDisplayAriaLabel',
-              {
-                defaultMessage: 'Select display option for metric details',
-              }
-            )}
-            data-test-subj="mlFieldDataCardNumberDetailsSelect"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-
+      <EuiButtonGroup
+        options={detailsOptions}
+        idSelected={detailsMode}
+        onChange={optionId => setDetailsMode(optionId as DETAILS_MODE)}
+        aria-label={i18n.translate(
+          'xpack.ml.fieldDataCard.cardNumber.selectMetricDetailsDisplayAriaLabel',
+          {
+            defaultMessage: 'Select display option for metric details',
+          }
+        )}
+        data-test-subj="mlFieldDataCardNumberDetailsSelect"
+        isFullWidth={true}
+        buttonSize="compressed"
+      />
+      <EuiSpacer size="m" />
       {detailsMode === DETAILS_MODE.DISTRIBUTION && (
         <Fragment>
           <EuiFlexGroup justifyContent="spaceAround" gutterSize="xs">
@@ -175,7 +185,6 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
           </EuiFlexGroup>
         </Fragment>
       )}
-
       {detailsMode === DETAILS_MODE.TOP_VALUES && (
         <EuiFlexGroup>
           <EuiFlexItem>

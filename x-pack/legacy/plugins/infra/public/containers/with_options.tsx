@@ -7,8 +7,11 @@
 import moment from 'moment';
 import React from 'react';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { InfraFormatterType, InfraOptions, InfraWaffleMapLegendMode } from '../lib/lib';
 import { RendererFunction } from '../utils/typed_react';
+
+const euiVisColorPalette = euiPaletteColorBlind();
 
 const initialState = {
   options: {
@@ -34,7 +37,7 @@ const initialState = {
           },
           {
             value: 1,
-            color: '#3185FC',
+            color: euiVisColorPalette[1],
           },
         ],
       },
