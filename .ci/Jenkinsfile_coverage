@@ -60,6 +60,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
             ])
             kibanaPipeline.jobRunner('tests-l', false) {
               kibanaPipeline.downloadCoverageArtifacts()
+              kibanaPipeline.uploadCoverageStaticSite(new Date().format("yyyy-MM-dd'T'HH-mm'Z'"))
               kibanaPipeline.bash(
                 """
                   echo "###  Ingesting Code Coverage"
@@ -115,8 +116,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
               kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
               sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
               kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
-
-              kibanaPipeline.uploadCoverageStaticSite(new Date().format("yyyy-MM-dd'T'HH-mm'Z'"))
             }
           }
         }
