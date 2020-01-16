@@ -20,12 +20,13 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { CUSTOM_LEGEND_VIS_TYPES, VisLegend, Vis, VisParams } from './legacy_imports';
+import { Vis, VisParams } from './legacy_imports';
 // @ts-ignore
 import { Vis as Vislib } from './vislib/vis';
 import { Positions } from './utils/collections';
 import { KbnVislibVisTypesDependencies } from './plugin';
 import { mountReactNode } from '../../../../core/public/utils';
+import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/vislib_vis_legend';
 
 const legendClassName = {
   top: 'visLib--legend-top',
