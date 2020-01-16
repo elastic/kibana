@@ -19,6 +19,8 @@
 
 import { Url } from 'url';
 import { Request } from 'hapi';
+import { Observable, fromEvent } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
@@ -44,6 +46,17 @@ export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
   options: KibanaRequestRouteOptions<Method>;
+}
+
+/**
+ * KibanaRequest events
+ * @public
+ */
+export interface KibanaRequestEvents {
+  /**
+   * emits once & completes when the request has been aborted.
+   */
+  aborted$: Observable<void>;
 }
 
 /**
@@ -116,6 +129,7 @@ export class KibanaRequest<
   public readonly headers: Headers;
 
   public readonly socket: IKibanaSocket;
+  public readonly events: KibanaRequestEvents;
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -130,6 +144,9 @@ export class KibanaRequest<
     private readonly withoutSecretHeaders: boolean
   ) {
     this.url = request.url;
+    this.events = {
+      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first()),
+    };
     this.headers = deepFreeze({ ...request.headers });
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
