@@ -488,8 +488,8 @@ uiModules.get('xpack/ml').run(() => {
 });
 ```
 
-In the new platform, navlinks should not be updated directly. Instead, it is now possible to add an `updater` when registering
-an application to change the application and the navlink state at runtime.
+In the new platform, navlinks should not be updated directly. Instead, it is now possible to add an `updater` when 
+registering an application to change the application or the navlink state at runtime.
 
 ```ts
 // my_plugin has a required dependencie to the `licensing` plugin
