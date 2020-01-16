@@ -17,5 +17,35 @@
  * under the License.
  */
 
-// The server endpoint for retrieiving and running Canvas functions.
-export const FUNCTIONS_URL = '/api/interpreter/fns';
+import * as React from 'react';
+import {
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+} from '@elastic/eui';
+
+export interface PageProps {
+  title?: React.ReactNode;
+}
+
+export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+  return (
+    <EuiPageBody>
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>{title}</h1>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto' }}>
+          {children}
+        </EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+};
