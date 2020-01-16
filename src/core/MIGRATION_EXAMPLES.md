@@ -489,30 +489,33 @@ uiModules.get('xpack/ml').run(() => {
 ```
 
 In the new platform, navlinks should not be updated directly. Instead, it is now possible to add an `updater` when registering
-an application to change the application and the navlink state at runtime
+an application to change the application and the navlink state at runtime.
 
 ```ts
-// inside your plugin's setup function
-export class MyPlugin implements Plugin {
-  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+// my_plugin has a required dependencie to the `licensing` plugin
+interface MyPluginSetupDeps {
+  licensing: LicensingPluginSetup;
+}
 
-  setup({ application }) {
+export class MyPlugin implements Plugin {
+  setup({ application }, { licensing }: MyPluginSetupDeps) {
+    const updater$ = licensing.license$.pipe(
+      map(license => {
+        const { hidden, disabled } = calcStatusFor(license);
+        if (hidden) return { navLinkStatus: AppNavLinkStatus.hidden };
+        if (disabled) return { navLinkStatus: AppNavLinkStatus.disabled };
+        return { navLinkStatus: AppNavLinkStatus.default };
+      })
+    );
+
     application.register({
       id: 'my-app',
       title: 'My App',
-      updater$: this.appUpdater,
+      updater$,
       async mount(params) {
         const { renderApp } = await import('./application');
         return renderApp(params);
       },
     });
-  }
-  start() {
-     // later, when the navlink needs to be updated
-     if(!isAvailable) {
-        appUpdater.next(() => {
-          navLinkStatus: AppNavLinkStatus.hidden,
-        })
-     }
   }
 ```
