@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { ColorSchemas } from 'ui/color_maps';
 import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
 import { SchemaConfig } from '../../visualizations/public';
-import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
-import { Labels, Style } from '../../kbn_vislib_vis_types/public/types';
+import { ColorModes } from '../../vis_type_vislib/public/utils/collections';
+import { Labels, Style } from '../../vis_type_vislib/public/types';
 
 export const visType = 'metric';
 
