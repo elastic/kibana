@@ -17,7 +17,7 @@ import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common
 export function maps(kibana) {
   return new kibana.Plugin({
     // task_manager could be required, but is only used for telemetry
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
