@@ -10,7 +10,11 @@ import {
   CATEGORY_EXAMPLES_ERROR_LIMIT,
   CATEGORY_EXAMPLES_WARNING_LIMIT,
 } from '../../../../../common/constants/new_job';
-import { FieldExampleCheck, CategoryFieldExample } from '../../../../../common/types/categories';
+import {
+  FieldExampleCheck,
+  CategoryFieldExample,
+  VALIDATION_RESULT,
+} from '../../../../../common/types/categories';
 import { getMedianStringLength } from '../../../../../common/util/string_utils';
 
 const VALID_TOKEN_COUNT = 3;
@@ -34,6 +38,10 @@ export class ValidationResults {
     return CATEGORY_EXAMPLES_VALID_STATUS.VALID;
   }
 
+  private _resultExists(id: VALIDATION_RESULT) {
+    return this._results.some(r => r.id === id);
+  }
+
   public createTokenCountResult(sortedExamples: CategoryFieldExample[], sampleSize: number) {
     const validExamplesSize = sortedExamples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT)
       .length;
@@ -46,20 +54,29 @@ export class ValidationResults {
       valid = CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID;
     }
 
-    this._results.push({
-      valid,
-      message: i18n.translate(
-        'xpack.ml.models.jobService.categorization.messages.tokenLengthValidation',
-        {
-          defaultMessage:
-            '{number} field {number, plural, zero {value} one {value} other {values}} analyzed, {percentage}% contain valid tokens.',
-          values: {
-            number: sampleSize,
-            percentage: Math.floor(percentValid * 100),
-          },
-        }
-      ),
-    });
+    const message = i18n.translate(
+      'xpack.ml.models.jobService.categorization.messages.tokenLengthValidation',
+      {
+        defaultMessage:
+          '{number} field {number, plural, zero {value} one {value} other {values}} analyzed, {percentage}% contain {validTokenCount} or more tokens.',
+        values: {
+          number: sampleSize,
+          percentage: Math.floor(percentValid * 100),
+          validTokenCount: VALID_TOKEN_COUNT,
+        },
+      }
+    );
+
+    if (
+      this._resultExists(VALIDATION_RESULT.TOO_MANY_TOKENS) === false &&
+      this._resultExists(VALIDATION_RESULT.FAILED_TO_TOKENIZE) === false
+    ) {
+      this._results.unshift({
+        id: VALIDATION_RESULT.TOKEN_COUNT,
+        valid,
+        message,
+      });
+    }
   }
 
   public createMedianMessageLengthResult(examples: string[]) {
@@ -67,6 +84,7 @@ export class ValidationResults {
 
     if (median > MEDIAN_LINE_LENGTH_LIMIT) {
       this._results.push({
+        id: VALIDATION_RESULT.MEDIAN_LINE_LENGTH,
         valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
         message: i18n.translate(
           'xpack.ml.models.jobService.categorization.messages.medianLineLength',
@@ -85,9 +103,10 @@ export class ValidationResults {
 
     if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
       this._results.push({
+        id: VALIDATION_RESULT.NULL_VALUES,
         valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
         message: i18n.translate('xpack.ml.models.jobService.categorization.messages.nullValues', {
-          defaultMessage: 'More than {percent}% of values are null',
+          defaultMessage: 'More than {percent}% of values are null.',
           values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
         }),
       });
@@ -96,7 +115,8 @@ export class ValidationResults {
 
   public createTooManyTokensResult(error: any, sampleSize: number) {
     // expecting error reason:
-    // The number of tokens produced by calling _analyze has exceeded the allowed maximum of [10000]. This limit can be set by changing the [index.analyze.max_token_count] index level setting.
+    // The number of tokens produced by calling _analyze has exceeded the allowed maximum of [10000].
+    // This limit can be set by changing the [index.analyze.max_token_count] index level setting.
 
     const reason: string = error?.body?.error?.reason;
     if (reason) {
@@ -105,12 +125,13 @@ export class ValidationResults {
       if (match?.length === 2) {
         const tokenLimit = match[1];
         this._results.push({
-          valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+          id: VALIDATION_RESULT.TOO_MANY_TOKENS,
+          valid: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
           message: i18n.translate(
             'xpack.ml.models.jobService.categorization.messages.tooManyTokens',
             {
               defaultMessage:
-                'In a sample of {sampleSize}, more than {tokenLimit} tokens were found.',
+                'Tokenization of the examples has failed due to more than {tokenLimit} tokens being found in a sample of {sampleSize} examples.',
               values: { sampleSize, tokenLimit },
             }
           ),
@@ -124,7 +145,8 @@ export class ValidationResults {
 
   public createFailureToTokenize(reason: string | undefined) {
     this._results.push({
-      valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+      id: VALIDATION_RESULT.FAILED_TO_TOKENIZE,
+      valid: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
       message: i18n.translate(
         'xpack.ml.models.jobService.categorization.messages.failureToGetTokens',
         {

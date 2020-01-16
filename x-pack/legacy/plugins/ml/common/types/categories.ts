@@ -38,7 +38,16 @@ export interface CategoryFieldExample {
   tokens: Token[];
 }
 
+export enum VALIDATION_RESULT {
+  TOKEN_COUNT,
+  MEDIAN_LINE_LENGTH,
+  NULL_VALUES,
+  TOO_MANY_TOKENS,
+  FAILED_TO_TOKENIZE,
+}
+
 export interface FieldExampleCheck {
+  id: VALIDATION_RESULT;
   valid: CATEGORY_EXAMPLES_VALID_STATUS;
   message: string;
 }
