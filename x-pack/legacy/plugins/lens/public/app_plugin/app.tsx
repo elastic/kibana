@@ -258,7 +258,7 @@ export function App({
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
-                  filters: [],
+                  filters: data.query.filterManager.getGlobalFilters(),
                   query: {
                     query: '',
                     language:
