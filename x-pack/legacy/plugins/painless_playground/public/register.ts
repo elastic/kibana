@@ -13,10 +13,10 @@ import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public
 
 npSetup.plugins.home.featureCatalogue.register({
   id: 'painless_playground',
-  title: i18n.translate('xpack.painlessPlayground.registryProviderTitle', {
+  title: i18n.translate('xpack.painless_playground.registryProviderTitle', {
     defaultMessage: 'Painless Playground',
   }),
-  description: i18n.translate('xpack.painlessPlayground.registryProviderDescription', {
+  description: i18n.translate('xpack.painless_playground.registryProviderDescription', {
     defaultMessage: 'Simulate and debug painless code',
   }),
   icon: '',
@@ -27,7 +27,7 @@ npSetup.plugins.home.featureCatalogue.register({
 
 npSetup.plugins.dev_tools.register({
   order: 7,
-  title: i18n.translate('xpack.painlessPlayground.displayName', {
+  title: i18n.translate('xpack.painless_playground.displayName', {
     defaultMessage: 'Painless Playground',
   }),
   id: 'painless_playground',

@@ -62,7 +62,10 @@ export function PainlessPlayground({
 
   const renderExecuteBtn = () => (
     <EuiButton fill onClick={submit} isDisabled={code.trim() === ''} data-test-subj="btnExecute">
-      <FormattedMessage id="xpack.painlessPlayground.executeButtonLabel" defaultMessage="Execute" />
+      <FormattedMessage
+        id="xpack.painless_playground.executeButtonLabel"
+        defaultMessage="Execute"
+      />
     </EuiButton>
   );
 
@@ -77,7 +80,7 @@ export function PainlessPlayground({
         <EuiFlexItem grow={false}>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
-              {i18n.translate('console.pageHeading', {
+              {i18n.translate('xpack.painless_playground.title', {
                 defaultMessage: 'Painless Playground',
               })}
             </h1>
@@ -133,7 +136,7 @@ export function PainlessPlayground({
                       <EuiFormRow
                         label={
                           <FormattedMessage
-                            id="xpack.painlessPlayground.codeLabel"
+                            id="xpack.painless_playground.execution_context"
                             defaultMessage="Execution Context"
                           />
                         }
@@ -151,7 +154,7 @@ export function PainlessPlayground({
                       <EuiFormRow
                         label={
                           <FormattedMessage
-                            id="xpack.painlessPlayground.parametersLabel"
+                            id="xpack.painless_playground.parametersLabel"
                             defaultMessage="Parameters"
                           />
                         }
@@ -159,14 +162,14 @@ export function PainlessPlayground({
                         labelAppend={
                           <EuiIconTip
                             aria-label={i18n.translate(
-                              'xpack.painlessPlayground.helpIconAriaLabel',
+                              'xpack.painless_playground.helpIconAriaLabel',
                               {
                                 defaultMessage: 'Help',
                               }
                             )}
                             content={
                               <FormattedMessage
-                                id="xpack.painlessPlayground.parametersHelp"
+                                id="xpack.painless_playground.parametersHelp"
                                 defaultMessage="Enter JSON that's available as 'params' in the code"
                               />
                             }
@@ -196,7 +199,7 @@ export function PainlessPlayground({
                         <EuiFormRow
                           label={
                             <FormattedMessage
-                              id="xpack.painlessPlayground.indexLabel"
+                              id="xpack.painless_playground.indexLabel"
                               defaultMessage="Index"
                             />
                           }
@@ -204,14 +207,14 @@ export function PainlessPlayground({
                           labelAppend={
                             <EuiIconTip
                               aria-label={i18n.translate(
-                                'xpack.painlessPlayground.helpIconAriaLabel',
+                                'xpack.painless_playground.helpIconAriaLabel',
                                 {
                                   defaultMessage: 'Help',
                                 }
                               )}
                               content={
                                 <FormattedMessage
-                                  id="xpack.painlessPlayground.indexHelp"
+                                  id="xpack.painless_playground.indexHelp"
                                   defaultMessage="The name of an index containing a mapping that is compatible with the document being indexed."
                                 />
                               }
@@ -233,7 +236,7 @@ export function PainlessPlayground({
                         <EuiFormRow
                           label={
                             <FormattedMessage
-                              id="xpack.painlessPlayground.codeLabel"
+                              id="xpack.painless_playground.codeLabel"
                               defaultMessage="Document"
                             />
                           }
@@ -241,14 +244,14 @@ export function PainlessPlayground({
                           labelAppend={
                             <EuiIconTip
                               aria-label={i18n.translate(
-                                'xpack.painlessPlayground.helpIconAriaLabel',
+                                'xpack.painless_playground.helpIconAriaLabel',
                                 {
                                   defaultMessage: 'Help',
                                 }
                               )}
                               content={
                                 <FormattedMessage
-                                  id="xpack.painlessPlayground.documentHelp"
+                                  id="xpack.painless_playground.documentHelp"
                                   defaultMessage="Enter document as JSON that's available as 'doc' in the code"
                                 />
                               }

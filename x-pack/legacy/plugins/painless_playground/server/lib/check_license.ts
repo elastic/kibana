@@ -13,7 +13,7 @@ export function checkLicense(xpackLicenseInfo: any) {
     return {
       enableLink: false,
       enableAPIRoute: false,
-      message: i18n.translate('xpack.painlessPlayground.unavailableLicenseInformationMessage', {
+      message: i18n.translate('xpack.painless_playground.unavailableLicenseInformationMessage', {
         defaultMessage:
           'You cannot use the Painless Playground because license information is not available at this time.',
       }),
@@ -28,7 +28,7 @@ export function checkLicense(xpackLicenseInfo: any) {
     return {
       enableLink: false,
       enableAPIRoute: false,
-      message: i18n.translate('xpack.painlessPlayground.licenseHasExpiredMessage', {
+      message: i18n.translate('xpack.painless_playground.licenseHasExpiredMessage', {
         defaultMessage:
           'You cannot use the Painless Playground because your {licenseType} license has expired.',
         values: {
