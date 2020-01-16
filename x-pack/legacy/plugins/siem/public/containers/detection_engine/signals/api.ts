@@ -14,12 +14,14 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
 } from '../../../../common/constants';
 import {
-  QuerySignals,
-  SignalSearchResponse,
-  UpdateSignalStatusProps,
-  SignalsIndex,
-  Privilege,
   BasicSignals,
+  PostSignalError,
+  Privilege,
+  QuerySignals,
+  SignalIndexError,
+  SignalSearchResponse,
+  SignalsIndex,
+  UpdateSignalStatusProps,
 } from './types';
 
 /**
@@ -76,15 +78,18 @@ export const updateSignalStatus = async ({
  * @param signal AbortSignal for cancelling request
  */
 export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> => {
-  const response = await npStart.core.http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
-    method: 'GET',
-    credentials: 'same-origin',
-    signal,
-    asResponse: true,
-  });
-
-  await throwIfNotOk(response.response);
-  return response.body!;
+  try {
+    return await npStart.core.http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
+      method: 'GET',
+      credentials: 'same-origin',
+      signal,
+    });
+  } catch (e) {
+    if (e.body) {
+      throw new SignalIndexError(e.body);
+    }
+    throw e;
+  }
 };
 
 /**
@@ -110,13 +115,16 @@ export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privil
  * @param signal AbortSignal for cancelling request
  */
 export const createSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsIndex> => {
-  const response = await npStart.core.http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
-    method: 'POST',
-    credentials: 'same-origin',
-    signal,
-    asResponse: true,
-  });
-
-  await throwIfNotOk(response.response);
-  return response.body!;
+  try {
+    return await npStart.core.http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
+      method: 'POST',
+      credentials: 'same-origin',
+      signal,
+    });
+  } catch (e) {
+    if (e.body) {
+      throw new PostSignalError(e.body);
+    }
+    throw e;
+  }
 };
