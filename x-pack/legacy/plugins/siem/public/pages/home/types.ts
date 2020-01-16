@@ -10,7 +10,7 @@ export enum SiemPageName {
   overview = 'overview',
   hosts = 'hosts',
   network = 'network',
-  detectionEngine = 'detection-engine',
+  detectionEngine = 'detections',
   timelines = 'timelines',
 }
 

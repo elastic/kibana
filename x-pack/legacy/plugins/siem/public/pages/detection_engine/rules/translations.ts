@@ -18,7 +18,7 @@ export const IMPORT_RULE = i18n.translate('xpack.siem.detectionEngine.rules.impo
 });
 
 export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.addNewRuleTitle', {
-  defaultMessage: 'Add new rule',
+  defaultMessage: 'Create new rule',
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageTitle', {
@@ -32,7 +32,7 @@ export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules
 export const BATCH_ACTIONS = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.batchActionsTitle',
   {
-    defaultMessage: 'Batch actions',
+    defaultMessage: 'Bulk actions',
   }
 );
 
@@ -243,7 +243,7 @@ export const COLUMN_TAGS = i18n.translate(
 export const COLUMN_ACTIVATE = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.columns.activateTitle',
   {
-    defaultMessage: 'Activate',
+    defaultMessage: 'Activated',
   }
 );
 

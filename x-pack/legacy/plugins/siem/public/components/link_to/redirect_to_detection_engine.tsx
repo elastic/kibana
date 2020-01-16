@@ -13,7 +13,7 @@ export type DetectionEngineComponentProps = RouteComponentProps<{
   search: string;
 }>;
 
-export const DETECTION_ENGINE_PAGE_NAME = 'detection-engine';
+export const DETECTION_ENGINE_PAGE_NAME = 'detections';
 
 export const RedirectToDetectionEnginePage = ({
   location: { search },

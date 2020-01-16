@@ -64,12 +64,12 @@ describe('SIEM Navigation', () => {
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,
       navTabs: {
-        'detection-engine': {
+        detections: {
           disabled: false,
-          href: '#/link-to/detection-engine',
-          id: 'detection-engine',
+          href: '#/link-to/detections',
+          id: 'detections',
           name: 'Detection engine',
-          urlKey: 'detection-engine',
+          urlKey: 'detections',
         },
         hosts: {
           disabled: false,
@@ -146,12 +146,12 @@ describe('SIEM Navigation', () => {
       detailName: undefined,
       filters: [],
       navTabs: {
-        'detection-engine': {
+        detections: {
           disabled: false,
-          href: '#/link-to/detection-engine',
-          id: 'detection-engine',
+          href: '#/link-to/detections',
+          id: 'detections',
           name: 'Detection engine',
-          urlKey: 'detection-engine',
+          urlKey: 'detections',
         },
         hosts: {
           disabled: false,

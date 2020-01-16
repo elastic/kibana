@@ -14,7 +14,7 @@ import { RuleDetails } from './rules/details';
 import { RulesComponent } from './rules';
 import { ManageUserInfo } from './components/user_info';
 
-const detectionEnginePath = `/:pageName(detection-engine)`;
+const detectionEnginePath = `/:pageName(detections)`;
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
@@ -37,9 +37,9 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
         <EditRuleComponent />
       </Route>
       <Route
-        path="/detection-engine/"
+        path="/detections/"
         render={({ location: { search = '' } }) => (
-          <Redirect from="/detection-engine/" to={`/detection-engine${search}`} />
+          <Redirect from="/detections/" to={`/detections${search}`} />
         )}
       />
     </Switch>

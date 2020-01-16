@@ -41,7 +41,7 @@ export const navTabs: SiemNavTab = {
     name: i18n.DETECTION_ENGINE,
     href: getDetectionEngineUrl(),
     disabled: false,
-    urlKey: 'detection-engine',
+    urlKey: 'detections',
   },
   [SiemPageName.timelines]: {
     id: SiemPageName.timelines,

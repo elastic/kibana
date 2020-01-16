@@ -79,7 +79,7 @@ export const getUrlType = (pageName: string): UrlStateType => {
   } else if (pageName === SiemPageName.network) {
     return 'network';
   } else if (pageName === SiemPageName.detectionEngine) {
-    return 'detection-engine';
+    return 'detections';
   } else if (pageName === SiemPageName.timelines) {
     return 'timeline';
   }

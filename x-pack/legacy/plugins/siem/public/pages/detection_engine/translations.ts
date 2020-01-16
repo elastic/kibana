@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.pageTitle', {
-  defaultMessage: 'Detection engine',
+  defaultMessage: 'Detections',
 });
 
 export const LAST_SIGNAL = i18n.translate('xpack.siem.detectionEngine.lastSignalTitle', {
