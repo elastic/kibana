@@ -61,9 +61,16 @@ exports[`Form should render normally 1`] = `
             "category": Array [
               "general",
             ],
-            "description": "bar",
+            "defVal": "defVal",
+            "description": "description",
             "displayName": "Test date",
+            "isCustom": false,
+            "isOverridden": false,
             "name": "general:test:date",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
           }
         }
       />
@@ -78,9 +85,16 @@ exports[`Form should render normally 1`] = `
             "category": Array [
               "general",
             ],
-            "description": "foo",
+            "defVal": "defVal",
+            "description": "description",
             "displayName": "Test setting",
+            "isCustom": false,
+            "isOverridden": false,
             "name": "setting:test",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
           }
         }
       />
@@ -120,8 +134,16 @@ exports[`Form should render normally 1`] = `
             "category": Array [
               "dashboard",
             ],
+            "defVal": "defVal",
+            "description": "description",
             "displayName": "Dashboard test setting",
+            "isCustom": false,
+            "isOverridden": false,
             "name": "dashboard:test:setting",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
           }
         }
       />
@@ -187,9 +209,16 @@ exports[`Form should render normally 1`] = `
             "category": Array [
               "x-pack",
             ],
-            "description": "bar",
+            "defVal": "defVal",
+            "description": "description",
             "displayName": "X-Pack test setting",
+            "isCustom": false,
+            "isOverridden": false,
             "name": "xpack:test:setting",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
           }
         }
       />
@@ -234,9 +263,16 @@ exports[`Form should render read-only when saving is disabled 1`] = `
             "category": Array [
               "general",
             ],
-            "description": "bar",
+            "defVal": "defVal",
+            "description": "description",
             "displayName": "Test date",
+            "isCustom": false,
+            "isOverridden": false,
             "name": "general:test:date",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
           }
         }
       />
@@ -251,9 +287,16 @@ exports[`Form should render read-only when saving is disabled 1`] = `
             "category": Array [
               "general",
             ],
-            "description": "foo",
+            "defVal": "defVal",
+            "description": "description",
             "displayName": "Test setting",
+            "isCustom": false,
+            "isOverridden": false,
             "name": "setting:test",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
           }
         }
       />
@@ -293,8 +336,16 @@ exports[`Form should render read-only when saving is disabled 1`] = `
             "category": Array [
               "dashboard",
             ],
+            "defVal": "defVal",
+            "description": "description",
             "displayName": "Dashboard test setting",
+            "isCustom": false,
+            "isOverridden": false,
             "name": "dashboard:test:setting",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
           }
         }
       />
@@ -360,9 +411,16 @@ exports[`Form should render read-only when saving is disabled 1`] = `
             "category": Array [
               "x-pack",
             ],
-            "description": "bar",
+            "defVal": "defVal",
+            "description": "description",
             "displayName": "X-Pack test setting",
+            "isCustom": false,
+            "isOverridden": false,
             "name": "xpack:test:setting",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
           }
         }
       />

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import {
   tryRegisterSettingsComponent,
   registerSettingsComponent,
@@ -65,8 +65,7 @@ describe('registerSettingsComponent', () => {
   it('should set a displayName for the component if one does not exist', () => {
     const component = () => <div />;
     registerSettingsComponent('display_name_component', component);
-    // @ts-ignore
-    expect(component.displayName).toEqual('display_name_component');
+    expect((component as FunctionComponent).displayName).toEqual('display_name_component');
   });
 
   it('should not set a displayName for the component if one already exists', () => {
@@ -75,8 +74,7 @@ describe('registerSettingsComponent', () => {
     };
 
     registerSettingsComponent('another_display_name_component', component);
-    // @ts-ignore
-    expect(component.displayName).toEqual('<AwesomeComponent>');
+    expect((component as FunctionComponent).displayName).toEqual('<AwesomeComponent>');
   });
 });
 

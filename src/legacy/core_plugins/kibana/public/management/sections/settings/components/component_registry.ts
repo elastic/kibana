@@ -19,7 +19,7 @@
 
 import { FunctionComponent } from 'react';
 
-const registry: { [key: string]: FunctionComponent } = {};
+const registry: Record<string, FunctionComponent> = {};
 type Id = string;
 
 /**

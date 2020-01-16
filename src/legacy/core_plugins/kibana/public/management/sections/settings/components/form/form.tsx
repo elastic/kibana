@@ -39,7 +39,7 @@ type Category = string;
 interface FormProps {
   settings: Record<string, Setting[]>;
   categories: Category[];
-  categoryCounts: { [key: string]: number };
+  categoryCounts: Record<string, number>;
   clearQuery: () => void;
   save: (key: string, value: any) => Promise<void>;
   clear: (key: string) => Promise<void>;
