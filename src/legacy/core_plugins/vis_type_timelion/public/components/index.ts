@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './panel';
 export * from './timelion_expression_input';
 export * from './timelion_interval';
 export * from './timelion_vis';

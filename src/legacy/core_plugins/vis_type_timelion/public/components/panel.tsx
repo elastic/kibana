@@ -38,7 +38,7 @@ import { tickFormatters } from '../helpers/tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
 
-export interface PanelProps {
+interface PanelProps {
   interval: string;
   seriesList: Sheet;
   renderComplete(): void;
@@ -215,8 +215,8 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
   );
 
   useEffect(() => {
-    updatePlot(chart, seriesList.render.grid);
-  }, [chart, updatePlot, seriesList.render.grid]);
+    updatePlot(chart, seriesList.render && seriesList.render.grid);
+  }, [chart, updatePlot, seriesList.render]);
 
   useEffect(() => {
     const colorsSet: Array<[Series, string]> = [];
@@ -231,7 +231,7 @@ function Panel({ interval, seriesList, renderComplete }: PanelProps) {
     });
     setChart(newChart);
     setOriginalColorMap(new Map(colorsSet));
-  }, [seriesList.list, seriesList.render.grid]);
+  }, [seriesList.list]);
 
   const unhighlightSeries = useCallback(() => {
     if (highlightedSeries === null) {

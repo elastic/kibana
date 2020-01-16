@@ -47,8 +47,7 @@ export interface Series {
 
 export interface Sheet {
   list: Series[];
-  render: {
-    type: string;
+  render?: {
     grid?: boolean;
   };
   type: string;
