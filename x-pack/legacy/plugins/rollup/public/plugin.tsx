@@ -43,7 +43,7 @@ import { ManagementStart } from '../../../../../src/plugins/management/public';
 import { rollupJobsStore } from './crud_app/store';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
-import { setHttp, setApiPrefix, setEsBaseAndXPackBase } from './crud_app/services';
+import { setEsBaseAndXPackBase } from './crud_app/services';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
@@ -109,8 +109,6 @@ export class RollupPlugin implements Plugin {
   }
 
   start(core: CoreStart, { management }: RollupPluginStartDependencies) {
-    setHttp(core.http);
-    setApiPrefix(core.http.basePath.prepend('/api/rollup'));
     setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
 
     const esSection = management.sections.getSection('elasticsearch');
