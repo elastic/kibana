@@ -499,6 +499,8 @@ export interface Source {
 
   NetworkDns: NetworkDnsData;
 
+  NetworkDnsHistogram: NetworkDsOverTimeData;
+
   NetworkHttp: NetworkHttpData;
 
   OverviewNetwork?: Maybe<OverviewNetworkData>;
@@ -1752,6 +1754,14 @@ export interface MatrixOverOrdinalHistogramData {
   g: string;
 }
 
+export interface NetworkDsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
 export interface NetworkHttpData {
   edges: NetworkHttpEdges[];
 
@@ -2429,6 +2439,15 @@ export interface NetworkDnsSourceArgs {
   timerange: TimerangeInput;
 
   defaultIndex: string[];
+}
+export interface NetworkDnsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+
+  stackByField?: Maybe<string>;
 }
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;
@@ -3306,8 +3325,9 @@ export namespace GetMatrixHistogramQuery {
     isAlertsHistogram: boolean;
     isAnomaliesHistogram: boolean;
     isAuthenticationsHistogram: boolean;
+    isDnsHistogram: boolean;
     defaultIndex: string[];
-    isEventsType: boolean;
+    isEventsHistogram: boolean;
     filterQuery?: Maybe<string>;
     inspect: boolean;
     sourceId: string;
@@ -3333,6 +3353,8 @@ export namespace GetMatrixHistogramQuery {
     AuthenticationsHistogram: AuthenticationsHistogram;
 
     EventsHistogram: EventsHistogram;
+
+    NetworkDnsHistogram: NetworkDnsHistogram;
   };
 
   export type AlertsHistogram = {
@@ -3446,6 +3468,34 @@ export namespace GetMatrixHistogramQuery {
 
     response: string[];
   };
+
+  export type NetworkDnsHistogram = {
+    __typename?: 'NetworkDsOverTimeData';
+
+    matrixHistogramData: ____MatrixHistogramData[];
+
+    totalCount: number;
+
+    inspect: Maybe<____Inspect>;
+  };
+
+  export type ____MatrixHistogramData = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type ____Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetNetworkDnsQuery {
@@ -3453,7 +3503,6 @@ export namespace GetNetworkDnsQuery {
     defaultIndex: string[];
     filterQuery?: Maybe<string>;
     inspect: boolean;
-    isDNSHistogram: boolean;
     isPtrIncluded: boolean;
     pagination: PaginationInputPaginated;
     sort: NetworkDnsSortField;
@@ -3486,8 +3535,6 @@ export namespace GetNetworkDnsQuery {
     pageInfo: PageInfo;
 
     inspect: Maybe<Inspect>;
-
-    histogram: Maybe<Histogram[]>;
   };
 
   export type Edges = {
@@ -3536,16 +3583,6 @@ export namespace GetNetworkDnsQuery {
     dsl: string[];
 
     response: string[];
-  };
-
-  export type Histogram = {
-    __typename?: 'MatrixOverOrdinalHistogramData';
-
-    x: string;
-
-    y: number;
-
-    g: string;
   };
 }
 
