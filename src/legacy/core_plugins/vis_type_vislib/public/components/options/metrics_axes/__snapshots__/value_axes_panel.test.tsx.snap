@@ -50,7 +50,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
     buttonContent={
       <React.Fragment>
         ValueAxis-1
-
+         
         <EuiToolTip
           content="Count"
           delay="regular"
@@ -277,7 +277,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
     buttonContent={
       <React.Fragment>
         ValueAxis-1
-
+         
         <EuiToolTip
           content="Average"
           delay="regular"
