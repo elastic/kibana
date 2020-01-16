@@ -135,7 +135,7 @@ the output file is a PKCS#12 keystore. The keystore contains the private key,
 instance certificate, and CA certificate.  You can use `openssl` to extract the files
 from the keystore.
 
-Extract the private key for the instance certificate:
+Extract the instance certificate's private key (without encryption):
 
 [source,shell]
 ----------------------------------------------------------
