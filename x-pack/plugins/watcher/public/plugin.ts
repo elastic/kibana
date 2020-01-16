@@ -12,6 +12,7 @@ import { Dependencies } from './types';
 
 export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   hasValidLicense: boolean = false;
+  hasRegisteredESManagementSection = false;
 
   setup(
     { application, notifications, http, uiSettings, getStartServices }: CoreSetup,
@@ -25,33 +26,47 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       if (this.hasValidLicense) {
         const esSection = management.sections.getSection('elasticsearch');
         if (esSection) {
-          esSection.registerApp({
-            id: 'watcher',
-            title: 'Watcher',
-            mount: async ({ element }) => {
-              if (!this.hasValidLicense) {
-                return () => undefined;
-              }
-              const [core, plugins] = await getStartServices();
-              const { chrome, i18n, docLinks, savedObjects } = core;
-              const { eui_utils } = plugins as any;
-              const { boot } = await import('./application/boot');
+          if (!this.hasRegisteredESManagementSection) {
+            esSection.registerApp({
+              id: 'watcher',
+              title: 'Watcher',
+              mount: async ({ element }) => {
+                if (!this.hasValidLicense) {
+                  return () => undefined;
+                }
+                const [core, plugins] = await getStartServices();
+                const { chrome, i18n, docLinks, savedObjects } = core;
+                const { eui_utils } = plugins as any;
+                const { boot } = await import('./application/boot');
 
-              return boot({
-                element,
-                toasts: notifications.toasts,
-                http,
-                uiSettings,
-                docLinks,
-                chrome,
-                euiUtils: eui_utils,
-                savedObjects: savedObjects.client,
-                I18nContext: i18n.Context,
-                createTimeBuckets: () => new TimeBuckets(uiSettings, data),
-                MANAGEMENT_BREADCRUMB,
-              });
-            },
-          });
+                return boot({
+                  element,
+                  toasts: notifications.toasts,
+                  http,
+                  uiSettings,
+                  docLinks,
+                  chrome,
+                  euiUtils: eui_utils,
+                  savedObjects: savedObjects.client,
+                  I18nContext: i18n.Context,
+                  createTimeBuckets: () => new TimeBuckets(uiSettings, data),
+                  MANAGEMENT_BREADCRUMB,
+                });
+              },
+            });
+            this.hasRegisteredESManagementSection = true;
+          } else {
+            // App must exist at this point
+            esSection.getApp(PLUGIN.ID)!.enable();
+          }
+        }
+      } else {
+        const esSection = management.sections.getSection('elasticsearch');
+        if (esSection) {
+          const app = esSection.getApp(PLUGIN.ID);
+          if (app) {
+            app.disable();
+          }
         }
       }
     });
