@@ -121,9 +121,9 @@ export class JobListUi extends Component {
   }
 
   renderError(error) {
-    // We can safely depend upon the shape of this error coming from Angular $http, because we
+    // We can safely depend upon the shape of this error coming from http service, because we
     // handle unexpected error shapes in the API action.
-    const { statusCode, error: errorString } = error.data;
+    const { statusCode, error: errorString } = error.body;
 
     const title = i18n.translate('xpack.rollupJobs.jobList.loadingErrorTitle', {
       defaultMessage: 'Error loading rollup jobs',

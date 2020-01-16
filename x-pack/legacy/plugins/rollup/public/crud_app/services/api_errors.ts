@@ -7,9 +7,9 @@
 import { npStart, npSetup } from '../../legacy_imports';
 
 function createToastConfig(error: any, errorTitle: string) {
-  // Expect an error in the shape provided by Angular's $http service.
-  if (error && error.data) {
-    const { error: errorString, statusCode, message } = error.data;
+  // Expect an error in the shape provided by http service.
+  if (error && error.body) {
+    const { error: errorString, statusCode, message } = error.body;
     return {
       title: errorTitle,
       text: `${statusCode}: ${errorString}. ${message}`,

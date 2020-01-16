@@ -298,9 +298,9 @@ export class JobCreateUi extends Component {
           return;
         }
 
-        // Expect an error in the shape provided by Angular's $http service.
-        if (error && error.data) {
-          const { error: errorString, statusCode } = error.data;
+        // Expect an error in the shape provided by http service.
+        if (error && error.body) {
+          const { error: errorString, statusCode } = error.body;
 
           const indexPatternAsyncErrors = [
             <FormattedMessage
