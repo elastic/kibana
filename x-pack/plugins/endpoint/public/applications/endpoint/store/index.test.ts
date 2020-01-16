@@ -12,7 +12,6 @@ describe('endpoint app store', () => {
     const coreStart = coreMock.createStart({ basePath: '/mock' });
     const store = appStoreFactory(coreStart);
 
-    expect(store).toBeDefined();
     expect(store.dispatch).toBeInstanceOf(Function);
   });
 });
