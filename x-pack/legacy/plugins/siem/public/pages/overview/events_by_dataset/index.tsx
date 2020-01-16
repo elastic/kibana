@@ -108,7 +108,7 @@ export const EventsByDataset = React.memo<Props>(
         })}
         headerChildren={eventsCountViewEventsButton}
         id={ID}
-        isEventsType={true}
+        isEventsHistogram={true}
         legendPosition={'right'}
         query={MatrixHistogramGqlQuery}
         setQuery={setQuery}
