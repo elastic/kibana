@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trunc } from 'lodash';
+import { trunc, map } from 'lodash';
 import open from 'opn';
 import { parse as parseUrl } from 'url';
 import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
@@ -66,6 +66,9 @@ export class HeadlessChromiumDriver {
     let interceptedCount = 0;
 
     await this.page.setRequestInterception(true);
+
+    // We have to reach into the Chrome Remote Protocol to apply headers as using
+    // puppeteer's API will render map tiles as blanks :/
     client.on('Fetch.requestPaused', (interceptedRequest: InterceptedRequest) => {
       const requestId = interceptedRequest.requestId;
       const interceptedUrl = interceptedRequest.request.url;
@@ -85,7 +88,7 @@ export class HeadlessChromiumDriver {
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
         logger.debug(`Using custom headers for ${interceptedUrl}`);
-        const headers = _.map(
+        const headers = map(
           {
             ...interceptedRequest.request.headers,
             ...conditionalHeaders.headers,
