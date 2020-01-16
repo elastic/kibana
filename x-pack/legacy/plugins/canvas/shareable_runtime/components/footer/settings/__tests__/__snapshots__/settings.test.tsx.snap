@@ -607,11 +607,8 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
       data-focus-lock-disabled="disabled"
     >
       <div
-        aria-describedby="generated-id"
         aria-live="assertive"
-        aria-modal="true"
         class="euiPanel euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen euiPopover__panel-withTitle"
-        role="dialog"
         style="top: -16px; left: -22px; z-index: 2000;"
       >
         <div
@@ -765,58 +762,56 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
                         <div
                           class="euiSwitch"
                         >
-                          <button
-                            aria-checked="false"
+                          <input
                             aria-describedby="generated-id-help"
-                            class="euiSwitch__button"
+                            class="euiSwitch__input"
                             data-test-subj="hideToolbarSwitch"
                             id="generated-id"
-                            role="switch"
-                            type="button"
+                            name="toolbarHide"
+                            type="checkbox"
+                          />
+                          <span
+                            class="euiSwitch__body"
                           >
                             <span
-                              class="euiSwitch__body"
+                              class="euiSwitch__thumb"
+                            />
+                            <span
+                              class="euiSwitch__track"
                             >
-                              <span
-                                class="euiSwitch__thumb"
-                              />
-                              <span
-                                class="euiSwitch__track"
+                              <svg
+                                class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon"
+                                focusable="false"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
                               >
-                                <svg
-                                  class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon"
-                                  focusable="false"
-                                  height="16"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
-                                  />
-                                </svg>
-                                <svg
-                                  class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked"
-                                  focusable="false"
-                                  height="16"
-                                  viewBox="0 0 16 16"
-                                  width="16"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </span>
+                                <path
+                                  d="M7.293 8L3.146 3.854a.5.5 0 1 1 .708-.708L8 7.293l4.146-4.147a.5.5 0 0 1 .708.708L8.707 8l4.147 4.146a.5.5 0 0 1-.708.708L8 8.707l-4.146 4.147a.5.5 0 0 1-.708-.708L7.293 8z"
+                                />
+                              </svg>
+                              <svg
+                                class="euiIcon euiIcon--medium euiIcon-isLoaded euiSwitch__icon euiSwitch__icon--checked"
+                                focusable="false"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M6.5 12a.502.502 0 0 1-.354-.146l-4-4a.502.502 0 0 1 .708-.708L6.5 10.793l6.646-6.647a.502.502 0 0 1 .708.708l-7 7A.502.502 0 0 1 6.5 12"
+                                  fill-rule="evenodd"
+                                />
+                              </svg>
                             </span>
-                          </button>
-                          <p
+                          </span>
+                          <label
                             class="euiSwitch__label"
-                            id="generated-id"
+                            for="generated-id"
                           >
                             Hide Toolbar
-                          </p>
+                          </label>
                         </div>
                         <div
                           class="euiFormHelpText euiFormRow__text"

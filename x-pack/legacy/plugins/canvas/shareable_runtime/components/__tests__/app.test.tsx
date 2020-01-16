@@ -123,7 +123,7 @@ describe('<App />', () => {
     await openSettings(wrapper);
     await selectMenuItem(wrapper, 1);
 
-    toolbarCheck(wrapper).simulate('click');
+    toolbarCheck(wrapper).simulate('change');
     await tick(20);
 
     // Simulate the mouse leaving the container
