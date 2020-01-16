@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { merge } from 'lodash';
 
 /**
  * Terminology
@@ -189,7 +188,9 @@ export interface PinnedClause<T extends BoolClauseFilter> {
 export function matchesClauses<T extends BoolClauseFilter>(
   ...clauses: Array<BoolClauseWithAnyCondition<T>>
 ): BoolClauseWithAnyCondition<T> {
-  return merge({}, ...clauses);
+  return {
+    bool: Object.assign({}, ...clauses.map(clause => clause.bool)),
+  };
 }
 
 export function shouldBeOneOf<T extends BoolClauseFilter>(
