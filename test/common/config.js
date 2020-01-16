@@ -32,7 +32,7 @@ export default function() {
     servers,
 
     esTestCluster: {
-      license: 'trial',
+      license: 'oss',
       from: 'snapshot',
       serverArgs: [],
     },
