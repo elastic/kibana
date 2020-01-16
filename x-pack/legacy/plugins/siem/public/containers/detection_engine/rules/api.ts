@@ -40,7 +40,6 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
 export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> => {
   const response = await npStart.core.http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
     method: rule.id != null ? 'PUT' : 'POST',
-    credentials: 'same-origin',
     body: JSON.stringify(rule),
     asResponse: true,
     signal,
@@ -83,7 +82,6 @@ export const fetchRules = async ({
     {
       method: 'GET',
       query,
-      credentials: 'same-origin',
       signal,
       asResponse: true,
     }
@@ -102,7 +100,6 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
   const response = await npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
-    credentials: 'same-origin',
     asResponse: true,
     signal,
   });
@@ -124,7 +121,6 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
     `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     {
       method: 'PUT',
-      credentials: 'same-origin',
       body: JSON.stringify(ids.map(id => ({ id, enabled }))),
       asResponse: true,
     }
@@ -146,7 +142,6 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule
     `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
     {
       method: 'PUT',
-      credentials: 'same-origin',
       body: JSON.stringify(ids.map(id => ({ id }))),
       asResponse: true,
     }
@@ -166,7 +161,6 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
     rules.map(rule =>
       npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
         method: 'POST',
-        credentials: 'same-origin',
         body: JSON.stringify({
           ...rule,
           name: `${rule.name} [${i18n.DUPLICATE}]`,
@@ -200,7 +194,6 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
 export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
   const response = await npStart.core.http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
-    credentials: 'same-origin',
     signal,
     asResponse: true,
   });
@@ -230,7 +223,6 @@ export const importRules = async ({
     `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',
-      credentials: 'same-origin',
       query: { overwrite },
       body: formData,
       asResponse: true,
@@ -265,7 +257,6 @@ export const exportRules = async ({
 
   const response = await npStart.core.http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
     method: 'POST',
-    credentials: 'same-origin',
     body,
     query: {
       exclude_export_details: excludeExportDetails,
@@ -297,7 +288,6 @@ export const getRuleStatusById = async ({
     DETECTION_ENGINE_RULES_STATUS,
     {
       method: 'GET',
-      credentials: 'same-origin',
       query: { ids: JSON.stringify([id]) },
       signal,
       asResponse: true,

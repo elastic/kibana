@@ -37,7 +37,6 @@ export const fetchQuerySignals = async <Hit, Aggregations>({
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
       method: 'POST',
-      credentials: 'same-origin',
       body: JSON.stringify(query),
       asResponse: true,
       signal,
@@ -62,7 +61,6 @@ export const updateSignalStatus = async ({
 }: UpdateSignalStatusProps): Promise<unknown> => {
   const response = await npStart.core.http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     method: 'POST',
-    credentials: 'same-origin',
     body: JSON.stringify({ status, ...query }),
     asResponse: true,
     signal,
@@ -81,7 +79,6 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsI
   try {
     return await npStart.core.http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
       method: 'GET',
-      credentials: 'same-origin',
       signal,
     });
   } catch (e) {
@@ -100,7 +97,6 @@ export const getSignalIndex = async ({ signal }: BasicSignals): Promise<SignalsI
 export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privilege> => {
   const response = await npStart.core.http.fetch<Privilege>(DETECTION_ENGINE_PRIVILEGES_URL, {
     method: 'GET',
-    credentials: 'same-origin',
     signal,
     asResponse: true,
   });
@@ -118,7 +114,6 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Signa
   try {
     return await npStart.core.http.fetch<SignalsIndex>(DETECTION_ENGINE_INDEX_URL, {
       method: 'POST',
-      credentials: 'same-origin',
       signal,
     });
   } catch (e) {
