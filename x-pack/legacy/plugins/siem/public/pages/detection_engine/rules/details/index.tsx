@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiHealth,
   EuiTab,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -261,7 +262,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
                               <EuiHealth color={statusColor}>
-                                {rule?.status ?? getEmptyTagValue()}
+                                <EuiText size="xs">{rule?.status ?? getEmptyTagValue()}</EuiText>
                               </EuiHealth>
                             </EuiFlexItem>
                             {rule?.status_date && (
