@@ -46,13 +46,17 @@ export function PainlessPlayground({
 
   const submit = async () => {
     try {
-      const res = await executeCode(buildRequestPayloadPreview());
       localStorage.setItem('painlessPlaygroundCode', code);
       localStorage.setItem('painlessPlaygroundContext', context);
       localStorage.setItem('painlessPlaygroundContextSetup', JSON.stringify(contextSetup));
+      const res = await executeCode(buildRequestPayloadPreview());
       setResponse(res);
     } catch (e) {
-      setResponse(e);
+      setResponse({
+        error: {
+          message: e.message,
+        },
+      });
     }
   };
 

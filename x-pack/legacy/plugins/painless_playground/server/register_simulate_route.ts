@@ -11,7 +11,7 @@ export function registerSimulateRoute(server: ServerFacade) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/painless_playground/simulate',
+    path: '/api/painless_playground/execute',
     method: 'POST',
     handler: (request: RequestFacade) => {
       const cluster = server.plugins.elasticsearch.getCluster('data');
@@ -19,7 +19,7 @@ export function registerSimulateRoute(server: ServerFacade) {
         .callWithRequest(request, 'scriptsPainlessExecute', {
           body: request.payload,
         })
-        .catch((e: any) => {
+        .catch((e: Error) => {
           return e.body;
         });
     },

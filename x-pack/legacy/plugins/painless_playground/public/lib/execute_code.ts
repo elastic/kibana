@@ -7,11 +7,7 @@
 import { ROUTES } from '../../common/constants';
 
 export async function executeCode(http: any, payload: Record<string, any>) {
-  try {
-    return await http.post(`${ROUTES.API_ROOT}/simulate`, {
-      body: JSON.stringify(payload),
-    });
-  } catch (e) {
-    return e;
-  }
+  return await http.post(`${ROUTES.API_ROOT}/execute`, {
+    body: JSON.stringify(payload),
+  });
 }
