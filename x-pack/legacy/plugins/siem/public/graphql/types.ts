@@ -460,8 +460,6 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-
-  AlertsHistogram: AlertsOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
@@ -486,6 +484,8 @@ export interface Source {
   KpiHosts: KpiHostsData;
 
   KpiHostDetails: KpiHostDetailsData;
+
+  MatrixHistogram: MatrixHistogramOverTimeData;
 
   NetworkTopCountries: NetworkTopCountriesData;
 
@@ -556,28 +556,6 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
-}
-
-export interface AlertsOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
 }
 
 export interface AuthenticationsData {
@@ -712,6 +690,12 @@ export interface PageInfoPaginated {
   fakeTotalCount: number;
 
   showMorePagesIndicator: boolean;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
 }
 
 export interface TimelineData {
@@ -1560,6 +1544,22 @@ export interface KpiHostDetailsData {
   inspect?: Maybe<Inspect>;
 }
 
+export interface MatrixHistogramOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface MatrixOverTimeHistogramData {
+  x?: Maybe<number>;
+
+  y?: Maybe<string>;
+
+  g?: Maybe<string>;
+}
+
 export interface NetworkTopCountriesData {
   edges: NetworkTopCountriesEdges[];
 
@@ -2124,14 +2124,6 @@ export interface EventsTimelineData {
   inspect?: Maybe<Inspect>;
 }
 
-export interface EventsOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
-}
-
 export interface OsFields {
   platform?: Maybe<string>;
 
@@ -2160,14 +2152,6 @@ export interface HostFields {
   os?: Maybe<OsFields>;
 
   type?: Maybe<string>;
-}
-
-export interface NetworkDsOverTimeData {
-  inspect?: Maybe<Inspect>;
-
-  matrixHistogramData: MatrixOverTimeHistogramData[];
-
-  totalCount: number;
 }
 
 // ====================================================
@@ -2208,17 +2192,6 @@ export interface GetAllTimelineQueryArgs {
   sort?: Maybe<SortTimeline>;
 
   onlyUserFavorite?: Maybe<boolean>;
-}
-export interface AlertsHistogramSourceArgs {
-  filterQuery?: Maybe<string>;
-
-  defaultIndex: string[];
-
-  timerange: TimerangeInput;
-
-  stackByField: string;
-
-  histogramType: string;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2339,6 +2312,17 @@ export interface KpiHostDetailsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+}
+export interface MatrixHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+
+  stackByField: string;
+
+  histogramType: string;
 }
 export interface NetworkTopCountriesSourceArgs {
   id?: Maybe<string>;
@@ -3287,7 +3271,33 @@ export namespace GetMatrixHistogramQuery {
     MatrixHistogram: MatrixHistogram;
   };
 
-  export type MatrixHistogram = Template.Fragment;
+  export type MatrixHistogram = {
+    __typename?: 'MatrixHistogramOverTimeData';
+
+    matrixHistogramData: MatrixHistogramData[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type MatrixHistogramData = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: Maybe<number>;
+
+    y: Maybe<string>;
+
+    g: Maybe<string>;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
 }
 
 export namespace GetNetworkDnsQuery {
@@ -5884,35 +5894,5 @@ export namespace KpiNetworkChartFields {
     x: Maybe<number>;
 
     y: Maybe<number>;
-  };
-}
-
-export namespace Template {
-  export type Fragment = {
-    __typename?: 'AlertsOverTimeData';
-
-    matrixHistogramData: MatrixHistogramData[];
-
-    totalCount: number;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type MatrixHistogramData = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: number;
-
-    y: number;
-
-    g: string;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
   };
 }

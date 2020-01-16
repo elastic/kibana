@@ -21,10 +21,6 @@ export interface AuthenticationsAdapter {
     req: FrameworkRequest,
     options: RequestOptionsPaginated
   ): Promise<AuthenticationsData>;
-  getAuthenticationsOverTime(
-    req: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<AuthenticationsOverTimeData>;
 }
 
 type StringOrNumber = string | number;

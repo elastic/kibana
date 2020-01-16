@@ -6,16 +6,27 @@
 
 import { FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
-import { AlertsAdapter } from './types';
-import { AlertsOverTimeData } from '../../graphql/types';
+import { MatrixHistogramAdapter } from './types';
+import { MatrixHistogramOverTimeData } from '../../graphql/types';
 
-export class Alerts {
-  constructor(private readonly adapter: AlertsAdapter) {}
+export class MatrixHistogram {
+  constructor(private readonly adapter: MatrixHistogramAdapter) {}
 
-  public async getAlertsHistogramData(
+  public async getMatrixHistogramData(
     req: FrameworkRequest,
     options: MatrixHistogramRequestOptions
-  ): Promise<AlertsOverTimeData> {
-    return this.adapter.getAlertsHistogramData(req, options);
+  ): Promise<MatrixHistogramOverTimeData> {
+    switch (options.histogramType) {
+      case 'alerts':
+        return this.adapter.getAlertsHistogramData(req, options);
+      case 'anomalies':
+        return this.adapter.getAnomaliesHistogram(req, options);
+      case 'authentications':
+        return this.adapter.getAuthenticationsHistogram(req, options);
+      case 'dns':
+        return this.adapter.getDnsHistogram(req, options);
+      case 'events':
+        return this.adapter.getEventsHistogram(req, options);
+    }
   }
 }

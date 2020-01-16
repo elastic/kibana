@@ -73,13 +73,6 @@ export class Network {
     return this.adapter.getNetworkDns(req, options);
   }
 
-  public async getNetworkDnsHistogramData(
-    req: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<NetworkDsOverTimeData> {
-    return this.adapter.getNetworkDnsHistogramData(req, options);
-  }
-
   public async getNetworkHttp(
     req: FrameworkRequest,
     options: NetworkHttpRequestOptions

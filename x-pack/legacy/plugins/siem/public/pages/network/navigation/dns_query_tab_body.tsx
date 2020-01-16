@@ -15,7 +15,7 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { NetworkComponentQueryProps } from './types';
 import { networkModel } from '../../../store';
 
-import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import * as i18n from '../translations';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 
@@ -58,7 +58,7 @@ export const DnsQueryTabBody = ({
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_DNS_DATA}
         filterQuery={filterQuery}
-        histogramType={HistogramType.dns}
+        histogramType="dns"
         id={HISTOGRAM_ID}
         setQuery={setQuery}
         sourceId="default"

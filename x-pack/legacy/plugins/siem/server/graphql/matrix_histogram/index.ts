@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createAlertsResolvers } from './resolvers';
-export { alertsSchema } from './schema.gql';
+export { createMatrixHistogramResolvers } from './resolvers';
+export { matrixHistogramSchema } from './schema.gql';

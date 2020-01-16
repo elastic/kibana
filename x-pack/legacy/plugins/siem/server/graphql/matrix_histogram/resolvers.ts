@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alerts } from '../../lib/matrix_histogram';
+import { MatrixHistogram } from '../../lib/matrix_histogram';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
 
-export interface AlertsResolversDeps {
-  alerts: Alerts;
+export interface MatrixHistogramResolversDeps {
+  matrixHistogram: MatrixHistogram;
 }
 
 type QueryMatrixHistogramResolver = ChildResolverOf<
@@ -19,8 +19,8 @@ type QueryMatrixHistogramResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-export const createAlertsResolvers = (
-  libs: AlertsResolversDeps
+export const createMatrixHistogramResolvers = (
+  libs: MatrixHistogramResolversDeps
 ): {
   Source: {
     MatrixHistogram: QueryMatrixHistogramResolver;
@@ -33,7 +33,7 @@ export const createAlertsResolvers = (
         stackByField: args.stackByField,
         histogramType: args.histogramType,
       };
-      return libs.alerts.getAlertsHistogramData(req, options);
+      return libs.matrixHistogram.getMatrixHistogramData(req, options);
     },
   },
 });

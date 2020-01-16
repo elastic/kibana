@@ -6,7 +6,7 @@
 import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 
 import expect from '@kbn/expect';
-import { ElasticsearchAlertsAdapter } from './elasticsearch_adapter';
+import { ElasticsearchMatrixHistogramAdapter } from './elasticsearch_adapter';
 import {
   mockRequest,
   mockOptions,
@@ -38,7 +38,7 @@ describe('alerts elasticsearch_adapter', () => {
         callWithRequest: mockCallWithRequest,
       }));
 
-      const EsNetworkTimelineAlerts = new ElasticsearchAlertsAdapter(mockFramework);
+      const EsNetworkTimelineAlerts = new ElasticsearchMatrixHistogramAdapter(mockFramework);
       const data = await EsNetworkTimelineAlerts.getAlertsHistogramData(
         (mockRequest as unknown) as FrameworkRequest,
         (mockOptions as unknown) as MatrixHistogramRequestOptions

@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
-import { MatrixHistogramOption, HistogramType } from '../matrix_histogram/types';
+import { MatrixHistogramOption } from '../matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
 const ID = 'alertsOverTimeQuery';
 export const alertsStackByOptions: MatrixHistogramOption[] = [
@@ -55,7 +55,7 @@ export const AlertsView = ({
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_ALERTS_DATA}
         filterQuery={filterQuery}
-        histogramType={HistogramType.alerts}
+        histogramType="alerts"
         id={ID}
         setQuery={setQuery}
         skip={skip}

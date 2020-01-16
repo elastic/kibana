@@ -15,7 +15,6 @@ import { hostsModel } from '../../../store/hosts';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
-  HistogramType,
 } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
@@ -72,7 +71,7 @@ export const AuthenticationsQueryTabBody = ({
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA}
         filterQuery={filterQuery}
-        histogramType={HistogramType.authentications}
+        histogramType="authentications"
         id={ID}
         mapping={authMatrixDataMappingFields}
         setQuery={setQuery}

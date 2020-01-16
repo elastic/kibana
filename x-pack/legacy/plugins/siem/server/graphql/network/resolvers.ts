@@ -7,7 +7,7 @@
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { Network } from '../../lib/network';
-import { createOptionsPaginated, createOptions } from '../../utils/build_query/create_options';
+import { createOptionsPaginated } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type QueryNetworkTopCountriesResolver = ChildResolverOf<
@@ -30,10 +30,6 @@ type QueryDnsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-type QueryMatrixHistogramResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.MatrixHistogramResolver>,
-  QuerySourceResolver
->;
 export interface NetworkResolversDeps {
   network: Network;
 }
@@ -46,7 +42,6 @@ export const createNetworkResolvers = (
     NetworkTopCountries: QueryNetworkTopCountriesResolver;
     NetworkTopNFlow: QueryNetworkTopNFlowResolver;
     NetworkDns: QueryDnsResolver;
-    MatrixHistogram: QueryMatrixHistogramResolver;
   };
 } => ({
   Source: {
@@ -83,14 +78,6 @@ export const createNetworkResolvers = (
         isPtrIncluded: args.isPtrIncluded,
       };
       return libs.network.getNetworkDns(req, options);
-    },
-    async MatrixHistogram(source, args, { req }, info) {
-      const options = {
-        ...createOptions(source, args, info),
-        stackByField: args.stackByField,
-        histogramType: args.histogramType,
-      };
-      return libs.network.getNetworkDnsHistogramData(req, options);
     },
   },
 });

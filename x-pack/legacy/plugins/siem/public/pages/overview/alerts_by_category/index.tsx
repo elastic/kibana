@@ -95,8 +95,6 @@ export const AlertsByCategory = React.memo<Props>(
 
     return (
       <MatrixHistogramContainer
-        dataKey="AlertsHistogram"
-        deleteQuery={deleteQuery}
         defaultStackByOption={alertsStackByOptions[0]}
         endDate={to}
         errorMessage={ERROR_FETCHING_ALERTS_DATA}

@@ -31,12 +31,6 @@ type QueryLastEventTimeResolver = ChildResolverOf<
 export interface EventsResolversDeps {
   events: Events;
 }
-
-type MatrixHistogramResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.MatrixHistogramResolver>,
-  QuerySourceResolver
->;
-
 export const createEventsResolvers = (
   libs: EventsResolversDeps
 ): {
@@ -44,7 +38,6 @@ export const createEventsResolvers = (
     Timeline: QueryTimelineResolver;
     TimelineDetails: QueryTimelineDetailsResolver;
     LastEventTime: QueryLastEventTimeResolver;
-    MatrixHistogram: MatrixHistogramResolver;
   };
 } => ({
   Source: {
@@ -70,14 +63,6 @@ export const createEventsResolvers = (
         details: args.details,
       };
       return libs.events.getLastEventTimeData(req, options);
-    },
-    async MatrixHistogram(source, args, { req }, info) {
-      const options = {
-        ...createOptions(source, args, info),
-        stackByField: args.stackByField,
-        histogramType: args.histogramType,
-      };
-      return libs.events.getEventsOverTime(req, options);
     },
   },
 });

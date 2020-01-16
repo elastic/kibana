@@ -5,14 +5,7 @@
  */
 
 import { ScaleType, Position } from '@elastic/charts';
-import { SetStateAction } from 'react';
-import { DocumentNode } from 'graphql';
-import {
-  MatrixOverTimeHistogramData,
-  MatrixOverOrdinalHistogramData,
-  NetworkDnsSortField,
-  PaginationInputPaginated,
-} from '../../graphql/types';
+import { MatrixOverTimeHistogramData, MatrixOverOrdinalHistogramData } from '../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
 import { ESQuery } from '../../../common/typed_json';
 import { SetQuery } from '../../pages/hosts/navigation/types';
@@ -48,13 +41,7 @@ export interface MatrixHistogramBasicProps {
   updateDateRange: UpdateDateRange;
 }
 
-export enum HistogramType {
-  authentications = 'authentications',
-  anomalies = 'anomalies',
-  events = 'events',
-  alerts = 'alerts',
-  dns = 'dns',
-}
+export type HistogramType = 'authentications' | 'anomalies' | 'events' | 'alerts' | 'dns';
 
 export interface MatrixHistogramQueryProps {
   dataKey: string;

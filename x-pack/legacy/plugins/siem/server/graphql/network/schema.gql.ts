@@ -196,12 +196,6 @@ export const networkSchema = gql`
     inspect: Inspect
   }
 
-  type NetworkDsOverTimeData {
-    inspect: Inspect
-    matrixHistogramData: [MatrixOverTimeHistogramData!]!
-    totalCount: Float!
-  }
-
   extend type Source {
     NetworkTopCountries(
       id: String

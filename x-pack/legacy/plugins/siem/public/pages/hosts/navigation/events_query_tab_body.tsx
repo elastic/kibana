@@ -10,7 +10,7 @@ import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
-import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import * as i18n from '../translations';
 
@@ -51,7 +51,7 @@ export const EventsQueryTabBody = ({
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_EVENTS_DATA}
         filterQuery={filterQuery}
-        histogramType={HistogramType.events}
+        histogramType="events"
         setQuery={setQuery}
         sourceId="default"
         stackByOptions={eventsStackByOptions}

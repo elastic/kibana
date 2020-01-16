@@ -11,6 +11,7 @@ import React from 'react';
 
 import { MatrixHistogram } from '.';
 import { MatrixHistogramGqlQuery as mockQuery } from '../../containers/matrix_histogram/index.gql_query';
+import { HistogramType } from './types';
 
 jest.mock('../../lib/kibana');
 
@@ -39,6 +40,7 @@ describe('Matrix Histogram Component', () => {
     defaultStackByOption: { text: 'text', value: 'value' },
     endDate: new Date('2019-07-18T20:00:00.000Z').valueOf(),
     errorMessage: 'error',
+    histogramType: 'alerts' as HistogramType,
     id: 'mockId',
     isInspected: false,
     isPtrIncluded: false,

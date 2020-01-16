@@ -122,7 +122,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     } else {
       setHideHistogram(false);
     }
-
     setBarChartData(getCustomChartData(data, mapping));
 
     setQuery({ id, inspect, loading, refetch });
@@ -134,8 +133,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     setQuery,
     hideHistogramIfEmpty,
     totalCount,
+    id,
+    inspect,
     isInspected,
     loading,
+    refetch,
     data,
   ]);
 

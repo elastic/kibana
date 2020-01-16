@@ -6,20 +6,26 @@
 
 import gql from 'graphql-tag';
 
-export const alertsSchema = gql`
-  type AlertsOverTimeData {
+export const matrixHistogramSchema = gql`
+  type MatrixOverTimeHistogramData {
+    x: Float
+    y: String
+    g: String
+  }
+
+  type MatrixHistogramOverTimeData {
     inspect: Inspect
     matrixHistogramData: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 
   extend type Source {
-    AlertsHistogram(
+    MatrixHistogram(
       filterQuery: String
       defaultIndex: [String!]!
       timerange: TimerangeInput!
       stackByField: String!
       histogramType: String!
-    ): AlertsOverTimeData!
+    ): MatrixHistogramOverTimeData!
   }
 `;
