@@ -11,20 +11,20 @@ import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
 
 export const getBarchartConfigs = ({
   from,
+  legendPosition,
   to,
   scaleType,
   onBrushEnd,
   yTickFormatter,
   showLegend,
-  legendPosition,
 }: {
   from: number;
+  legendPosition?: Position;
   to: number;
   scaleType: ScaleType;
   onBrushEnd: UpdateDateRange;
   yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
-  legendPosition?: Position;
 }) => ({
   series: {
     xScaleType: scaleType || ScaleType.Time,
@@ -40,9 +40,9 @@ export const getBarchartConfigs = ({
     tickSize: 8,
   },
   settings: {
-    legendPosition: legendPosition || Position.Bottom,
+    legendPosition: legendPosition ?? Position.Bottom,
     onBrushEnd,
-    showLegend: showLegend || true,
+    showLegend: showLegend ?? true,
     theme: {
       scales: {
         barsPadding: 0.08,

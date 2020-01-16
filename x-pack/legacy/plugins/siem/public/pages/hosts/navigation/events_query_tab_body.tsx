@@ -18,10 +18,14 @@ import * as i18n from '../translations';
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
-const eventsStackByOptions: MatrixHistogramOption[] = [
+export const eventsStackByOptions: MatrixHistogramOption[] = [
   {
     text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION,
     value: 'event.action',
+  },
+  {
+    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_DATASET,
+    value: 'event.dataset',
   },
 ];
 
@@ -48,7 +52,7 @@ export const EventsQueryTabBody = ({
         defaultStackByOption={eventsStackByOptions[0]}
         deleteQuery={deleteQuery}
         endDate={endDate}
-        isEventsType={true}
+        isEventsHistogram={true}
         errorMessage={i18n.ERROR_FETCHING_EVENTS_DATA}
         filterQuery={filterQuery}
         query={MatrixHistogramGqlQuery}

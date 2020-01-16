@@ -11,7 +11,7 @@ import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../';
 
 // Failing: https://github.com/elastic/kibana/issues/54818
-describe.skip('LocationStatusTags component', () => {
+describe('LocationStatusTags component', () => {
   let monitorLocations: MonitorLocation[];
 
   it('renders properly against props', () => {

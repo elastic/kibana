@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment, MouseEvent } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -20,7 +20,8 @@ import {
 import { Popover } from '../popover';
 import { CustomElementModal } from '../custom_element_modal';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
-import { ComponentStrings, ShortcutStrings } from '../../../i18n';
+import { ComponentStrings } from '../../../i18n/components';
+import { ShortcutStrings } from '../../../i18n/shortcuts';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
 
@@ -138,7 +139,7 @@ interface MenuTuple {
   panel: EuiContextMenuPanelDescriptor;
 }
 
-const contextMenuButton = (handleClick: (event: MouseEvent) => void) => (
+const contextMenuButton = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
   <EuiButtonIcon
     color="text"
     iconType="boxesVertical"
