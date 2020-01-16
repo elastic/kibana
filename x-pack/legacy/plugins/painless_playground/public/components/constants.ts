@@ -15,13 +15,14 @@ export const painlessContextOptions = [
   {
     value: 'filter',
     text: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', {
-      defaultMessage: 'Filter - Execute like inside a filter query',
+      defaultMessage: 'Filter - Execute like inside a script query of a filter',
     }),
   },
   {
     value: 'score',
     text: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', {
-      defaultMessage: 'Score - Execute like inside a script query',
+      defaultMessage:
+        'Score - Execution like inside a script_score function in function_score query',
     }),
   },
 ];
