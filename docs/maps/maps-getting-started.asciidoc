@@ -150,7 +150,7 @@ image::maps/images/grid_metrics_both.png[]
 . In the map legend, click *Add layer*.
 . Click the *Grid aggregation* data source.
 . Set *Index pattern* to *kibana_sample_data_logs*.
-. Set *Show as* to *points*.
+. Set *Show as* to *clusters*.
 . Click the *Add layer* button.
 . Set *Layer name* to `Total Requests and Bytes`.
 . Set *Zoom range for layer visibility* to the range [0, 9].
