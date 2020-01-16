@@ -275,8 +275,6 @@ export class LegacyService implements CoreService {
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
-        createInternalRepository: setupDeps.core.savedObjects.createInternalRepository,
-        createScopedRepository: setupDeps.core.savedObjects.createScopedRepository,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
@@ -287,7 +285,11 @@ export class LegacyService implements CoreService {
     };
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
-      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
+      savedObjects: {
+        getScopedClient: startDeps.core.savedObjects.getScopedClient,
+        createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+        createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
+      },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
 

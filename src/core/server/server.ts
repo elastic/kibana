@@ -159,6 +159,8 @@ export class Server {
 
     this.registerCoreContext(coreSetup, renderingSetup);
 
+    await this.savedObjects.runMigration();
+
     return coreSetup;
   }
 
@@ -215,6 +217,8 @@ export class Server {
       coreId,
       'core',
       async (context, req, res): Promise<RequestHandlerContext['core']> => {
+        // TODO: this is exposed from start now. will need to either register the context during startup
+        // TODO: or use `getStartServices()` here (will force to implement getStartService for internalCore though...)
         const savedObjectsClient = coreSetup.savedObjects.getScopedClient(req);
         const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
 

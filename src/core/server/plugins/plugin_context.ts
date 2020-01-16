@@ -167,8 +167,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
-      createInternalRepository: deps.savedObjects.createInternalRepository,
-      createScopedRepository: deps.savedObjects.createScopedRepository,
     },
     uiSettings: {
       register: deps.uiSettings.register,
@@ -202,6 +200,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
+      createInternalRepository: deps.savedObjects.createInternalRepository,
+      createScopedRepository: deps.savedObjects.createScopedRepository,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
