@@ -588,7 +588,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "sortField",
+            "name": "field",
             "description": "",
             "type": {
               "kind": "NON_NULL",
@@ -598,7 +598,7 @@
             "defaultValue": null
           },
           {
-            "name": "sortOrder",
+            "name": "direction",
             "description": "",
             "type": {
               "kind": "NON_NULL",

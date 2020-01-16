@@ -31,11 +31,11 @@ export class Case {
     const options: SavedObjectsFindOptions = {
       type: caseSavedObjectType,
       perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-      page: pageInfo != null ? pageInfo.pageIndex : undefined,
+      page: pageInfo != null ? pageInfo.pageIndex + 1 : undefined, // + 1 because table pagination starts at 0 and saved object page index starts at 1
       search: search != null ? search : undefined,
       searchFields: ['tags'],
-      sortField: sort != null ? sort.sortField : undefined,
-      sortOrder: sort != null ? sort.sortOrder : undefined,
+      sortField: sort != null ? sort.field : undefined,
+      sortOrder: sort != null ? sort.direction : undefined,
     };
 
     console.log('getCases return')

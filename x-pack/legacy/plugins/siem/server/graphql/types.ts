@@ -17,9 +17,9 @@ export interface PageInfoCase {
 }
 
 export interface SortCase {
-  sortField: SortFieldCase;
+  field: SortFieldCase;
 
-  sortOrder: Direction;
+  direction: Direction;
 }
 
 export interface PageInfoNote {

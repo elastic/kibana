@@ -17,8 +17,8 @@ export const caseSchema = gql`
   }
 
   input SortCase {
-    sortField: SortFieldCase!
-    sortOrder: Direction!
+    field: SortFieldCase!
+    direction: Direction!
   }
   ###############
   #### QUERY ####

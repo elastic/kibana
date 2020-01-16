@@ -5,9 +5,10 @@
  */
 
 export { appModel } from './app';
-export { inputsModel } from './inputs';
-export { hostsModel } from './hosts';
+export { caseModel } from './case';
 export { dragAndDropModel } from './drag_and_drop';
+export { hostsModel } from './hosts';
+export { inputsModel } from './inputs';
 export { networkModel } from './network';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene';
