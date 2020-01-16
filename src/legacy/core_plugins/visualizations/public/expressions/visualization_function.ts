@@ -25,7 +25,7 @@ import { PersistedState } from 'ui/persisted_state';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
 import { ExpressionFunction, Render } from 'src/plugins/expressions/public';
 import { npStart } from 'ui/new_platform';
-import { start as visualizations } from '../np_ready/public/legacy';
+import { getTypes } from '../np_ready/public/services';
 
 interface Arguments {
   index?: string | null;
@@ -97,7 +97,7 @@ export const visualization = (): ExpressionFunctionVisualization => ({
 
     const visConfigParams = args.visConfig ? JSON.parse(args.visConfig) : {};
     const schemas = args.schemas ? JSON.parse(args.schemas) : {};
-    const visType = visualizations.types.get(args.type || 'histogram') as any;
+    const visType = getTypes().get(args.type || 'histogram') as any;
     const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
 
     const uiStateParams = args.uiState ? JSON.parse(args.uiState) : {};
