@@ -66,8 +66,8 @@ describe('defaultSearchStrategy', function() {
           search: newSearchMock,
           __LEGACY: {
             esClient: {
-              search: {},
-              msearch: {},
+              search: searchMock,
+              msearch: msearchMock,
             },
           },
         },
