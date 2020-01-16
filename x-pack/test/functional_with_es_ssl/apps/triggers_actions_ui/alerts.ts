@@ -158,8 +158,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const collapsedItemActionsAfterMute = await testSubjects.find('collapsedItemActions');
       await collapsedItemActionsAfterMute.click();
 
-      const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
-      await muteSwitchAfterMute.click();
+      await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
