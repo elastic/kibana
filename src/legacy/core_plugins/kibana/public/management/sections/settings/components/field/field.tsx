@@ -213,7 +213,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     let error = null;
 
     if (validation && (validation as StringValidation).regex) {
-      if (!(validation as StringValidation).regex.test(newUnsavedValue.toString())) {
+      if (!(validation as StringValidation).regex!.test(newUnsavedValue.toString())) {
         error = (validation as StringValidation).message;
         isInvalid = true;
       }

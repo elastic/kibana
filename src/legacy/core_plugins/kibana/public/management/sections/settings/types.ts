@@ -21,7 +21,8 @@ import { UiSettingsType } from '../../../../../../../core/server/ui_settings';
 import { SavedObjectAttribute } from '../../../../../../../core/server/saved_objects/types';
 
 export interface StringValidation {
-  regex: RegExp;
+  regex?: RegExp;
+  regexString?: string;
   message: string;
 }
 

@@ -68,7 +68,7 @@ export function toEditableConfig({
     validation:
       def.validation && (def.validation as StringValidation).regexString
         ? {
-            regex: new RegExp((def.validation as StringValidation).regexString),
+            regex: new RegExp((def.validation as StringValidation).regexString || ''),
             message: (def.validation as StringValidation).message,
           }
         : def.validation,

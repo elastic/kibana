@@ -50,7 +50,7 @@ export function tryRegisterSettingsComponent(id: Id, component: FunctionComponen
  */
 export function registerSettingsComponent(
   id: Id,
-  component: FunctionComponent,
+  component: FunctionComponent<Record<string, any>>,
   allowOverride = false
 ) {
   if (!allowOverride && id in registry) {
@@ -72,7 +72,7 @@ export function registerSettingsComponent(
  *
  * @param {*} id the ID of the component to retrieve
  */
-export function getSettingsComponent(id: Id) {
+export function getSettingsComponent(id: Id): FunctionComponent<Record<string, any>> | undefined {
   if (!(id in registry)) {
     throw new Error(`Component not found with id ${id}`);
   }

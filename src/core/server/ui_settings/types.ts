@@ -129,8 +129,9 @@ export interface UiSettingsParams {
 }
 
 export interface StringValidation {
-  regexString: string;
+  regex?: RegExp;
   message: string;
+  regexString?: string;
 }
 
 export interface ImageValidation {

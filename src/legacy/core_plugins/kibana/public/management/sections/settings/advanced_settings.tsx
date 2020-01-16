@@ -18,6 +18,7 @@
  */
 
 import React, { Component } from 'react';
+import { FunctionComponent } from 'react';
 
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
@@ -47,7 +48,7 @@ interface AdvancedSettingsProps {
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
-  query: { text: string } | string;
+  query: { text: string };
   filteredSettings: Record<string, Setting[]>;
 }
 
@@ -143,7 +144,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   onQueryChange = ({ query }: AdvancedSettingsProps) => {
     this.setState({
-      query,
+      query: { text: query },
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
     });
   };
@@ -165,9 +166,11 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   render() {
     const { filteredSettings, query, footerQueryMatched } = this.state;
 
-    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
-    const PageSubtitle = getSettingsComponent(PAGE_SUBTITLE_COMPONENT);
-    const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
+    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT) as FunctionComponent;
+    const PageSubtitle = getSettingsComponent(PAGE_SUBTITLE_COMPONENT) as FunctionComponent;
+    const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT) as FunctionComponent<
+      Record<string, any>
+    >;
 
     return (
       <div>
