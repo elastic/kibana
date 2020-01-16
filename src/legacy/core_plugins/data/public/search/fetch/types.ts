@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ISearchStart, LegacyApiCaller } from 'src/plugins/data/public';
+import { ISearchStart } from 'src/plugins/data/public';
 import { IUiSettingsClient } from '../../../../../../core/public';
 
 export interface FetchOptions {
