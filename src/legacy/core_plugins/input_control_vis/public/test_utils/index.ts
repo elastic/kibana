@@ -17,19 +17,8 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../../../../../../plugins/data/public';
-
-/**
- * Returns forced **Partial** IndexPattern for use in tests
- */
-export const getIndexPatternMock = (): Promise<IIndexPattern> => {
-  return Promise.resolve({
-    id: 'mockIndexPattern',
-    title: 'mockIndexPattern',
-    fields: [
-      { name: 'keywordField', type: 'string', aggregatable: true },
-      { name: 'textField', type: 'string', aggregatable: false },
-      { name: 'numberField', type: 'number', aggregatable: true },
-    ],
-  } as IIndexPattern);
-};
+export { getDepsMock } from './get_deps_mock';
+export { getIndexPatternMock } from './get_index_pattern_mock';
+export { getIndexPatternsMock } from './get_index_patterns_mock';
+export { getSearchSourceMock } from './get_search_service_mock';
+export { updateComponent } from './update_component';

@@ -24,12 +24,11 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 
 import { RangeControlEditor } from './range_control_editor';
 import { ControlParams } from '../../editor_utils';
-import { getDepsMock } from './__tests__/get_deps_mock';
-import { updateComponent } from './__tests__/update_component';
+import { getDepsMock } from '../../test_utils/get_deps_mock';
+import { getIndexPatternMock, updateComponent } from '../../test_utils';
 
 const controlParams: ControlParams = {
   id: '1',

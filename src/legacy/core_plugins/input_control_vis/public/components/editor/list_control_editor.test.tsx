@@ -25,11 +25,10 @@ import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { getDepsMock } from './__tests__/get_deps_mock';
-import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
+import { getIndexPatternMock } from '../../test_utils/get_index_pattern_mock';
 import { ListControlEditor } from './list_control_editor';
 import { ControlParams } from '../../editor_utils';
-import { updateComponent } from './__tests__/update_component';
+import { getDepsMock, updateComponent } from '../../test_utils';
 
 const controlParamsBase: ControlParams = {
   id: '1',
