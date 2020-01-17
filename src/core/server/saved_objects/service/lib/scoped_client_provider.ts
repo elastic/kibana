@@ -48,8 +48,7 @@ export type SavedObjectsClientFactory<Request = unknown> = ({
 }) => SavedObjectsClientContract;
 
 /**
- * TODO: doc + export
- *
+ * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
  * @public
  */
 export type SavedObjectsClientFactoryProvider<Request = unknown> = (

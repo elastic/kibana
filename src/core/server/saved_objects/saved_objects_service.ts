@@ -102,8 +102,6 @@ export interface SavedObjectsServiceSetup {
 }
 
 /**
- * TODO remove
- *
  * @internal
  */
 export type InternalSavedObjectsServiceSetup = SavedObjectsServiceSetup;
@@ -173,7 +171,8 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
 }
 
 /**
- * TODO documentation
+ * Factory provided when invoking a {@link SavedObjectsClientFactoryProvider}
+ * See {@link SavedObjectsServiceSetup.setClientFactoryProvider}
  *
  * @public
  */
