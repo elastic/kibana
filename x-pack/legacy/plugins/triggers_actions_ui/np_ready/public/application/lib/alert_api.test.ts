@@ -255,10 +255,11 @@ describe('createAlert', () => {
   test('should call create alert API', async () => {
     const alertToCreate = {
       name: 'test',
+      consumer: 'alerting',
       tags: ['foo'],
       enabled: true,
       alertTypeId: 'test',
-      interval: '1m',
+      schedule: { interval: '1m' },
       actions: [],
       params: {},
       throttle: null,
@@ -290,9 +291,10 @@ describe('updateAlert', () => {
   test('should call alert update API', async () => {
     const alertToUpdate = {
       throttle: '1m',
+      consumer: 'alerting',
       name: 'test',
       tags: ['foo'],
-      interval: '1m',
+      schedule: { interval: '1m' },
       params: {},
       actions: [],
     };

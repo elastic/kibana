@@ -83,7 +83,7 @@ export async function updateAlert({
   id,
 }: {
   http: HttpSetup;
-  alert: Pick<AlertWithoutId, 'throttle' | 'name' | 'tags' | 'interval' | 'params' | 'actions'>;
+  alert: Pick<AlertWithoutId, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/${id}`, {
