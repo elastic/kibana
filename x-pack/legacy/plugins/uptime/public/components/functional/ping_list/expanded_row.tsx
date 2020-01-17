@@ -11,11 +11,13 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Ping, HttpBody } from '../../../../common/graphql/types';
+import { DocLinkForBody } from './doc_link_body';
 
 interface Props {
   ping: Ping;
@@ -50,6 +52,14 @@ const BodyExcerpt = ({ content }: { content: string }) =>
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];
 
+  // Show the error block
+  if (ping.error) {
+    listItems.push({
+      title: i18n.translate('xpack.uptime.pingList.expandedRow.error', { defaultMessage: 'Error' }),
+      description: <EuiText>{ping.error.message}</EuiText>,
+    });
+  }
+
   // Show the body, if present
   if (ping.http?.response?.body) {
     const body = ping.http.response.body;
@@ -59,31 +69,20 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
         defaultMessage: 'Response Body',
       }),
       description: (
-        <Fragment>
+        <>
           <BodyDescription body={body} />
-          <BodyExcerpt content={body.content || ''} />
-        </Fragment>
+          <EuiSpacer size={'s'} />
+          {body.content ? <BodyExcerpt content={body.content || ''} /> : <DocLinkForBody />}
+        </>
       ),
     });
   }
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        {ping?.error && (
-          <EuiCallOut
-            color={'danger'}
-            title={i18n.translate('xpack.uptime.pingList.expandedRow.error', {
-              defaultMessage: 'Error',
-            })}
-          >
-            <EuiText>{ping.error.message}</EuiText>
-          </EuiCallOut>
-        )}
-        {ping.http?.response?.body && (
-          <EuiCallOut>
-            <EuiDescriptionList listItems={listItems} />
-          </EuiCallOut>
-        )}
+        <EuiCallOut color={ping?.error ? 'danger' : 'primary'}>
+          <EuiDescriptionList listItems={listItems} />
+        </EuiCallOut>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
