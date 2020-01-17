@@ -7,12 +7,13 @@
 import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
+import { ManageUserInfo } from './components/user_info';
 import { CreateRuleComponent } from './rules/create';
-import { DetectionEngine, DetectionEngineTab } from './detection_engine';
+import { DetectionEngine } from './detection_engine';
 import { EditRuleComponent } from './rules/edit';
 import { RuleDetails } from './rules/details';
 import { RulesComponent } from './rules';
-import { ManageUserInfo } from './components/user_info';
+import { DetectionEngineTab } from './types';
 
 const detectionEnginePath = `/:pageName(detection-engine)`;
 
@@ -23,7 +24,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
     <Switch>
       <Route
         exact
-        path={`${detectionEnginePath}/:tabName(${DetectionEngineTab.signal}|${DetectionEngineTab.alert})`}
+        path={`${detectionEnginePath}/:tabName(${DetectionEngineTab.signals}|${DetectionEngineTab.alerts})`}
         strict
       >
         <DetectionEngine />
@@ -45,7 +46,7 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
         render={({ location: { search = '' } }) => (
           <Redirect
             from="/detection-engine/"
-            to={`/detection-engine/${DetectionEngineTab.signal}${search}`}
+            to={`/detection-engine/${DetectionEngineTab.signals}${search}`}
           />
         )}
       />

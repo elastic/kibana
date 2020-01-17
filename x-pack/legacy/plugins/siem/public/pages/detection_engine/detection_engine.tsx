@@ -19,6 +19,7 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { AlertsTable } from '../../components/alerts_viewer/alerts_table';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
+import { DETECTION_ENGINE_PAGE_NAME } from '../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
 import { State } from '../../store';
@@ -38,12 +39,7 @@ import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../components/link_to/redirect_to_detection_engine';
-
-export enum DetectionEngineTab {
-  signal = 'signal',
-  alert = 'alert',
-}
+import { DetectionEngineTab } from './types';
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -62,12 +58,12 @@ type DetectionEngineComponentProps = ReduxProps & DispatchProps;
 
 const detectionsTabs = [
   {
-    id: DetectionEngineTab.signal,
+    id: DetectionEngineTab.signals,
     name: i18n.SIGNAL,
     disabled: false,
   },
   {
-    id: DetectionEngineTab.alert,
+    id: DetectionEngineTab.alerts,
     name: i18n.ALERT,
     disabled: false,
   },
@@ -75,7 +71,7 @@ const detectionsTabs = [
 
 const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
   ({ filters, query, setAbsoluteRangeDatePicker }) => {
-    const { tabName = DetectionEngineTab.signal } = useParams();
+    const { tabName = DetectionEngineTab.signals } = useParams();
     const [selectedTab, setSelectedTab] = useState(tabName);
     const {
       loading,
@@ -148,7 +144,6 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                 </FiltersGlobal>
                 <WrapperPage>
                   <HeaderPage
-                    border
                     subtitle={
                       lastSignals != null && (
                         <>
@@ -170,7 +165,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                       <>
                         {tabs}
                         <EuiSpacer />
-                        {selectedTab === DetectionEngineTab.signal && (
+                        {selectedTab === DetectionEngineTab.signals && (
                           <>
                             <SignalsHistogramPanel
                               filters={filters}
@@ -192,7 +187,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                             />
                           </>
                         )}
-                        {selectedTab === DetectionEngineTab.alert && (
+                        {selectedTab === DetectionEngineTab.alerts && (
                           <>
                             <AlertsByCategory
                               deleteQuery={deleteQuery}

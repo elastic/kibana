@@ -22,7 +22,7 @@ export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
   defaultMessage: 'Signals',
 });
 
-export const ALERT = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
+export const ALERT = i18n.translate('xpack.siem.detectionEngine.alertTitle', {
   defaultMessage: 'Third-party alerts',
 });
 

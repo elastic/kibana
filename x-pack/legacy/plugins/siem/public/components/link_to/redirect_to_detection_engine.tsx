@@ -7,7 +7,7 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { DetectionEngineTab } from '../../pages/detection_engine/detection_engine';
+import { DetectionEngineTab } from '../../pages/detection_engine/types';
 import { RedirectWrapper } from './redirect_wrapper';
 
 export type DetectionEngineComponentProps = RouteComponentProps<{
@@ -23,7 +23,7 @@ export const RedirectToDetectionEnginePage = ({
   },
   location: { search },
 }: DetectionEngineComponentProps) => {
-  const defaultSelectedTab = DetectionEngineTab.signal;
+  const defaultSelectedTab = DetectionEngineTab.signals;
   const selectedTab = tabName ? tabName : defaultSelectedTab;
   const to = `/${DETECTION_ENGINE_PAGE_NAME}/${selectedTab}${search}`;
 
@@ -54,7 +54,7 @@ export const RedirectToEditRulePage = ({ location: { search } }: DetectionEngine
 
 export const getDetectionEngineUrl = () => `#/link-to/${DETECTION_ENGINE_PAGE_NAME}`;
 export const getDetectionEngineAlertUrl = () =>
-  `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/${DetectionEngineTab.alert}`;
+  `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/${DetectionEngineTab.alerts}`;
 export const getRulesUrl = () => `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/rules`;
 export const getCreateRuleUrl = () => `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/rules/create-rule`;
 export const getRuleDetailsUrl = () => `#/link-to/${DETECTION_ENGINE_PAGE_NAME}/rules/rule-details`;
