@@ -87,7 +87,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             if (!indexExists) {
               return createBulkErrorObject({
                 ruleId: ruleIdOrUuid,
-                statusCode: 409,
+                statusCode: 400,
                 message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
               });
             }

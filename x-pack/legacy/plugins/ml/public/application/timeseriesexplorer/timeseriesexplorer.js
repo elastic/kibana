@@ -195,8 +195,10 @@ export class TimeSeriesExplorer extends React.Component {
     selectedDetectorIndex: PropTypes.number,
     selectedEntities: PropTypes.object,
     selectedForecastId: PropTypes.string,
+    setGlobalState: PropTypes.func.isRequired,
     tableInterval: PropTypes.string,
     tableSeverity: PropTypes.number,
+    zoom: PropTypes.object,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -481,7 +483,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoom,
     } = this.props;
 
-    if (selectedJobIds === undefined) {
+    if (selectedJobIds === undefined || bounds === undefined) {
       return;
     }
 
