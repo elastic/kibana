@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2 } from '../../types';
+import { Vector2, PanDirection } from '../../types';
 
 interface UserSetZoomLevel {
   readonly type: 'userSetZoomLevel';
@@ -12,6 +12,14 @@ interface UserSetZoomLevel {
    * A number whose value is always between 0 and 1 and will be the new scaling factor for the projection.
    */
   readonly payload: number;
+}
+
+interface UserClickedZoomOut {
+  readonly type: 'userClickedZoomOut';
+}
+
+interface UserClickedZoomIn {
+  readonly type: 'userClickedZoomIn';
 }
 
 interface UserZoomed {
@@ -56,6 +64,14 @@ interface UserStoppedPanning {
   readonly type: 'userStoppedPanning';
 }
 
+interface UserClickedPanControl {
+  readonly type: 'userClickedPanControl';
+  /**
+   * String that represents the direction in which Resolver can be panned
+   */
+  readonly payload: PanDirection;
+}
+
 interface UserMovedPointer {
   readonly type: 'userMovedPointer';
   /**
@@ -72,4 +88,7 @@ export type CameraAction =
   | UserStartedPanning
   | UserStoppedPanning
   | UserZoomed
-  | UserMovedPointer;
+  | UserMovedPointer
+  | UserClickedZoomOut
+  | UserClickedZoomIn
+  | UserClickedPanControl;

@@ -34,6 +34,16 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       ...state,
       scalingFactor: clamp(action.payload, 0, 1),
     };
+  } else if (action.type === 'userClickedZoomIn') {
+    return {
+      ...state,
+      scalingFactor: clamp(state.scalingFactor + 0.1, 0, 1),
+    };
+  } else if (action.type === 'userClickedZoomOut') {
+    return {
+      ...state,
+      scalingFactor: clamp(state.scalingFactor - 0.1, 0, 1),
+    };
   } else if (action.type === 'userZoomed') {
     const stateWithNewScaling: CameraState = {
       ...state,
@@ -100,6 +110,29 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     } else {
       return state;
     }
+  } else if (action.type === 'userClickedPanControl') {
+    const panDirection = action.payload;
+    const deltaAmount = (1 + state.scalingFactor) * 20;
+    let delta: Vector;
+    if (panDirection === 'north') {
+      delta = [0, deltaAmount];
+    } else if (panDirection === 'south') {
+      delta = [0, -deltaAmount];
+    } else if (panDirection === 'east') {
+      delta = [deltaAmount, 0];
+    } else if (panDirection === 'west') {
+      delta = [-deltaAmount, 0];
+    } else {
+      delta = [0, 0];
+    }
+
+    return {
+      ...state,
+      translationNotCountingCurrentPanning: [
+        state.translationNotCountingCurrentPanning[0] + delta[0],
+        state.translationNotCountingCurrentPanning[1] + delta[1],
+      ],
+    };
   } else if (action.type === 'userSetRasterSize') {
     /**
      * Handle resizes of the Resolver component. We need to know the size in order to convert between screen
