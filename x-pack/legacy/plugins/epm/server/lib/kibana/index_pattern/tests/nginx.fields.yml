@@ -94,3 +94,12 @@
           type: alias
           path: source.geo.region_iso_code
           migration: true
+
+- name: source
+  type: group
+  fields: 
+    - name: geo
+      type: group
+      fields:
+        - name: continent_name
+          type: text
