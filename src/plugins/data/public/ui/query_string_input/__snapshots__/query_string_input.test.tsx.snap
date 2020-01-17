@@ -151,8 +151,8 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
             },
             "data": Object {
               "autocomplete": Object {
-                "getValueSuggestions": [MockFunction],
                 "getQuerySuggestions": [MockFunction],
+                "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
@@ -777,8 +777,8 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                     },
                     "data": Object {
                       "autocomplete": Object {
-                        "getValueSuggestions": [MockFunction],
                         "getQuerySuggestions": [MockFunction],
+                        "getValueSuggestions": [MockFunction],
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
@@ -1385,8 +1385,8 @@ exports[`QueryStringInput Should pass the query language to the language switche
             },
             "data": Object {
               "autocomplete": Object {
-                "getValueSuggestions": [MockFunction],
                 "getQuerySuggestions": [MockFunction],
+                "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
@@ -2008,8 +2008,8 @@ exports[`QueryStringInput Should pass the query language to the language switche
                     },
                     "data": Object {
                       "autocomplete": Object {
-                        "getValueSuggestions": [MockFunction],
                         "getQuerySuggestions": [MockFunction],
+                        "getValueSuggestions": [MockFunction],
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
@@ -2616,8 +2616,8 @@ exports[`QueryStringInput Should render the given query 1`] = `
             },
             "data": Object {
               "autocomplete": Object {
-                "getValueSuggestions": [MockFunction],
                 "getQuerySuggestions": [MockFunction],
+                "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
@@ -3239,8 +3239,8 @@ exports[`QueryStringInput Should render the given query 1`] = `
                     },
                     "data": Object {
                       "autocomplete": Object {
-                        "getValueSuggestions": [MockFunction],
                         "getQuerySuggestions": [MockFunction],
+                        "getValueSuggestions": [MockFunction],
                         "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
