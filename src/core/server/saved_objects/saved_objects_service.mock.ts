@@ -56,7 +56,6 @@ const createSetupContractMock = () => {
 const createSavedObjectsServiceMock = () => {
   const mocked: jest.Mocked<SavedObjectsServiceContract> = {
     setup: jest.fn(),
-    runMigration: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };

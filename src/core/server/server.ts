@@ -161,8 +161,6 @@ export class Server {
 
     this.registerCoreContext(coreSetup, renderingSetup);
 
-    await this.savedObjects.runMigration();
-
     return coreSetup;
   }
 

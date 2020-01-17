@@ -211,14 +211,9 @@ export class SavedObjectsService
   implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
   private logger: Logger;
 
-  private migrator?: KibanaMigrator;
   private setupDeps?: SavedObjectsSetupDeps;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider<KibanaRequest>;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
-  private createRepository?: (
-    callCluster: APICaller,
-    extraTypes?: string[]
-  ) => ISavedObjectsRepository;
 
   private mappings: SavedObjectsMapping[] = [];
   private migrations: MigrationDefinition = {};
@@ -253,8 +248,6 @@ export class SavedObjectsService
           );
         }
         this.clientFactoryProvider = provider;
-        // const factory = provider(repositoryFactory);
-        // this.clientProvider.setClientFactory(factory);
       },
       addClientWrapper: (priority, id, factory) => {
         this.clientFactoryWrappers.push({
@@ -262,46 +255,34 @@ export class SavedObjectsService
           id,
           factory,
         });
-        // this.clientProvider.addClientWrapperFactory.bind(this.clientProvider)
       },
     };
   }
 
-  public async runMigration(migrationsRetryDelay?: number) {
+  public async start(
+    core: SavedObjectsStartDeps,
+    migrationsRetryDelay?: number
+  ): Promise<InternalSavedObjectsServiceStart> {
+    if (!this.setupDeps) {
+      throw new Error('#setup() needs to be run first');
+    }
+
+    this.logger.debug('Starting SavedObjects service');
+
     const kibanaConfig = await this.coreContext.configService
       .atPath<KibanaConfigType>('kibana')
       .pipe(first())
       .toPromise();
-
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('migrations')
       .pipe(first())
       .toPromise();
-
-    const savedObjectSchemas = new SavedObjectsSchema(this.schemas);
-
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
-
-    const migrator = (this.migrator = new KibanaMigrator({
-      savedObjectSchemas,
-      savedObjectMappings: this.mappings,
-      savedObjectMigrations: this.migrations,
-      savedObjectValidations: this.validations,
-      logger: this.coreContext.logger.get('migrations'),
-      kibanaVersion: this.coreContext.env.packageInfo.version,
-      config: this.setupDeps!.legacyPlugins.pluginExtendedConfig,
-      savedObjectsConfig,
-      kibanaConfig,
-      callCluster: migrationsRetryCallCluster(
-        adminClient.callAsInternalUser,
-        this.coreContext.logger.get('migrations'),
-        migrationsRetryDelay
-      ),
-    }));
+    const migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
 
     /**
      * Note: We want to ensure that migrations have completed before
-     * continuing with further Core startup steps that might use SavedObjects
+     * continuing with further Core start steps that might use SavedObjects
      * such as running the legacy server, legacy plugins and allowing incoming
      * HTTP requests.
      *
@@ -311,10 +292,11 @@ export class SavedObjectsService
      */
     const cliArgs = this.coreContext.env.cliArgs;
     const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
+    await migrator.runMigrations(skipMigrations);
 
-    this.createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
+    const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
-        this.migrator!,
+        migrator,
         new SavedObjectsSchema(this.schemas),
         this.setupDeps!.legacyPlugins.pluginExtendedConfig,
         kibanaConfig.index,
@@ -323,26 +305,11 @@ export class SavedObjectsService
       );
     };
 
-    await migrator.runMigrations(skipMigrations);
-  }
-
-  public async start(core: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
-    if (!this.setupDeps) {
-      throw new Error('#setup() needs to be run first');
-    }
-    if (!this.createRepository) {
-      throw new Error('#runMigration() needs to be run first');
-    }
-
-    this.logger.debug('Starting SavedObjects service');
-
-    const adminClient = this.setupDeps!.elasticsearch.adminClient;
-
     const repositoryFactory: SavedObjectsRepositoryFactory = {
       createInternalRepository: (extraTypes?: string[]) =>
-        this.createRepository!(adminClient.callAsInternalUser, extraTypes),
+        createRepository!(adminClient.callAsInternalUser, extraTypes),
       createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
-        this.createRepository!(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+        createRepository!(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
     };
 
     const clientProvider = new SavedObjectsClientProvider<KibanaRequest>({
@@ -360,7 +327,7 @@ export class SavedObjectsService
     });
 
     return {
-      migrator: this.migrator!,
+      migrator,
       clientProvider,
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       createScopedRepository: repositoryFactory.createScopedRepository,
@@ -369,4 +336,30 @@ export class SavedObjectsService
   }
 
   public async stop() {}
+
+  private createMigrator(
+    kibanaConfig: KibanaConfigType,
+    savedObjectsConfig: SavedObjectsConfigType,
+    migrationsRetryDelay?: number
+  ): KibanaMigrator {
+    const savedObjectSchemas = new SavedObjectsSchema(this.schemas);
+    const adminClient = this.setupDeps!.elasticsearch.adminClient;
+
+    return new KibanaMigrator({
+      savedObjectSchemas,
+      savedObjectMappings: this.mappings,
+      savedObjectMigrations: this.migrations,
+      savedObjectValidations: this.validations,
+      logger: this.coreContext.logger.get('migrations'),
+      kibanaVersion: this.coreContext.env.packageInfo.version,
+      config: this.setupDeps!.legacyPlugins.pluginExtendedConfig,
+      savedObjectsConfig,
+      kibanaConfig,
+      callCluster: migrationsRetryCallCluster(
+        adminClient.callAsInternalUser,
+        this.coreContext.logger.get('migrations'),
+        migrationsRetryDelay
+      ),
+    });
+  }
 }
