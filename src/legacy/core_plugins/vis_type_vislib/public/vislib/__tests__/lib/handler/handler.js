@@ -34,8 +34,12 @@ const names = ['series', 'columns', 'rows', 'stackedSeries'];
 dateHistogramArray.forEach(function(data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function() {
     const events = ['click', 'brush'];
-    const vis = getVis();
-    vis.render(data, getMockUiState());
+    let vis;
+
+    beforeEach(() => {
+      vis = getVis();
+      vis.render(data, getMockUiState());
+    });
 
     afterEach(function() {
       vis.destroy();
