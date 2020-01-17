@@ -58,7 +58,7 @@ describe('response', () => {
     http.intercept(interceptor);
     fetchMock.mock('*', 200);
 
-    await http.fetch('/foo-api', { asSystemApi: true });
+    await http.fetch('/foo-api', { asSystemRequest: true });
 
     expect(sessionTimeoutMock.extend).not.toHaveBeenCalled();
   });
@@ -99,7 +99,7 @@ describe('responseError', () => {
     http.intercept(interceptor);
     fetchMock.mock('*', 401);
 
-    await expect(http.fetch('/foo-api', { asSystemApi: true })).rejects.toMatchInlineSnapshot(
+    await expect(http.fetch('/foo-api', { asSystemRequest: true })).rejects.toMatchInlineSnapshot(
       `[Error: Unauthorized]`
     );
 
