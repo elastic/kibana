@@ -577,22 +577,6 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 // @public
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
-// @public (undocumented)
-export interface HttpErrorRequest {
-    // (undocumented)
-    error: Error;
-    // (undocumented)
-    fetchOptions: Readonly<HttpFetchOptionsWithPath>;
-}
-
-// @public (undocumented)
-export interface HttpErrorResponse extends HttpResponse {
-    // (undocumented)
-    error: Error | IHttpFetchError;
-    // (undocumented)
-    request: Readonly<Request>;
-}
-
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
@@ -639,9 +623,25 @@ export interface HttpHeadersInit {
 // @public
 export interface HttpInterceptor {
     request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
-    requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+    requestError?(httpErrorRequest: HttpInterceptorRequestError, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
     response?(httpResponse: HttpResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+    responseError?(httpErrorResponse: HttpInterceptorResponseError, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+}
+
+// @public (undocumented)
+export interface HttpInterceptorRequestError {
+    // (undocumented)
+    error: Error;
+    // (undocumented)
+    fetchOptions: Readonly<HttpFetchOptionsWithPath>;
+}
+
+// @public (undocumented)
+export interface HttpInterceptorResponseError extends HttpResponse {
+    // (undocumented)
+    error: Error | IHttpFetchError;
+    // (undocumented)
+    request: Readonly<Request>;
 }
 
 // @public

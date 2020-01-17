@@ -303,12 +303,12 @@ export interface IHttpFetchError extends Error {
 }
 
 /** @public */
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpInterceptorResponseError extends HttpResponse {
   request: Readonly<Request>;
   error: Error | IHttpFetchError;
 }
 /** @public */
-export interface HttpErrorRequest {
+export interface HttpInterceptorRequestError {
   fetchOptions: Readonly<HttpFetchOptionsWithPath>;
   error: Error;
 }
@@ -332,11 +332,11 @@ export interface HttpInterceptor {
 
   /**
    * Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise.
-   * @param httpErrorRequest {@link HttpErrorRequest}
+   * @param httpErrorRequest {@link HttpInterceptorRequestError}
    * @param controller {@link IHttpInterceptController}
    */
   requestError?(
-    httpErrorRequest: HttpErrorRequest,
+    httpErrorRequest: HttpInterceptorRequestError,
     controller: IHttpInterceptController
   ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 
@@ -352,11 +352,11 @@ export interface HttpInterceptor {
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
-   * @param httpErrorResponse {@link HttpErrorResponse}
+   * @param httpErrorResponse {@link HttpInterceptorResponseError}
    * @param controller {@link IHttpInterceptController}
    */
   responseError?(
-    httpErrorResponse: HttpErrorResponse,
+    httpErrorResponse: HttpInterceptorResponseError,
     controller: IHttpInterceptController
   ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 }

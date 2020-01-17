@@ -59,14 +59,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ErrorToastOptions](./kibana-plugin-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-public.itoasts.md) APIs. |
 |  [FatalErrorInfo](./kibana-plugin-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
-|  [HttpErrorRequest](./kibana-plugin-public.httperrorrequest.md) |  |
-|  [HttpErrorResponse](./kibana-plugin-public.httperrorresponse.md) |  |
 |  [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) | All options that may be used with a [HttpHandler](./kibana-plugin-public.httphandler.md)<!-- -->. |
 |  [HttpFetchOptionsWithPath](./kibana-plugin-public.httpfetchoptionswithpath.md) | Similar to [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) but with the URL path included. |
 |  [HttpFetchQuery](./kibana-plugin-public.httpfetchquery.md) |  |
 |  [HttpHandler](./kibana-plugin-public.httphandler.md) | A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) for options and [HttpResponse](./kibana-plugin-public.httpresponse.md) for the response. |
 |  [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) |  |
 |  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) | An object that may define global interceptor functions for different parts of the request and response lifecycle. See [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md)<!-- -->. |
+|  [HttpInterceptorRequestError](./kibana-plugin-public.httpinterceptorrequesterror.md) |  |
+|  [HttpInterceptorResponseError](./kibana-plugin-public.httpinterceptorresponseerror.md) |  |
 |  [HttpRequestInit](./kibana-plugin-public.httprequestinit.md) | Fetch API options available to [HttpHandler](./kibana-plugin-public.httphandler.md)<!-- -->s. |
 |  [HttpResponse](./kibana-plugin-public.httpresponse.md) |  |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |

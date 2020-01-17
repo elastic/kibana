@@ -9,14 +9,14 @@ Define an interceptor to be executed if a response interceptor throws an error o
 <b>Signature:</b>
 
 ```typescript
-responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+responseError?(httpErrorResponse: HttpInterceptorResponseError, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  httpErrorResponse | <code>HttpErrorResponse</code> |  |
+|  httpErrorResponse | <code>HttpInterceptorResponseError</code> |  |
 |  controller | <code>IHttpInterceptController</code> |  |
 
 <b>Returns:</b>
