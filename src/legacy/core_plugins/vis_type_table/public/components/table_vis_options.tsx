@@ -30,7 +30,6 @@ import { totalAggregations, isAggConfigNumeric } from './utils';
 
 function TableOptions({
   aggs,
-  aggsLabels,
   stateParams,
   setValidity,
   setValue,
@@ -47,7 +46,7 @@ function TableOptions({
         .filter(col => isAggConfigNumeric(get(col, 'aggConfig.type.name'), stateParams.dimensions))
         .map(({ name }) => ({ value: name, text: name })),
     ],
-    [aggs, aggsLabels, stateParams.percentageCol, stateParams.dimensions]
+    [aggs, stateParams.percentageCol, stateParams.dimensions]
   );
 
   const isPerPageValid = stateParams.perPage === '' || stateParams.perPage > 0;

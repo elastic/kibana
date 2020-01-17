@@ -40,7 +40,6 @@ For testing purposes APM uses 3 custom users:
 
 **kibana_write_user** Apps: read/write. Indices: None
 
-
 To create the users with the correct roles run the following script:
 
 ```sh
@@ -87,6 +86,12 @@ yarn prettier  "./x-pack/legacy/plugins/apm/**/*.{tsx,ts,js}" --write
 ```
 yarn eslint ./x-pack/legacy/plugins/apm --fix
 ```
+
+#### Storybook
+
+Start the [Storybook](https://storybook.js.org/) development environment with
+`yarn storybook apm`. All files with a .stories.tsx extension will be loaded.
+You can access the development environment at http://localhost:9001.
 
 #### Further resources
 

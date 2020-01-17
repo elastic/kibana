@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import {
   ServerFacade,
-  RequestFacade,
   ResponseFacade,
   HeadlessChromiumDriverFactory,
   ReportingResponseToolkit,
@@ -16,8 +16,9 @@ import {
   JobDocOutputExecuted,
 } from '../../types';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
+import { getRouteOptionsCsv } from './lib/route_config_factories';
+import { makeRequestFacade } from './lib/make_request_facade';
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -43,7 +44,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });
 
