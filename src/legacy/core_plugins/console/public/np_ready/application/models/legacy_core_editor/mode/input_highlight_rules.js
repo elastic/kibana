@@ -89,6 +89,7 @@ export function InputHighlightRules() {
       addEOL(['url.amp'], /(&)/, 'start')
     ),
     'url-sql': mergeTokens(
+      addEOL(['url.part'], /([^?\/,\s]+)/, 'start-sql'),
       addEOL(['url.comma'], /(,)/, 'start-sql'),
       addEOL(['url.slash'], /(\/)/, 'start-sql'),
       addEOL(['url.questionmark'], /(\?)/, 'start-sql', 'urlParams-sql')
