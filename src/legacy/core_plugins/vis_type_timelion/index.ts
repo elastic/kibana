@@ -17,24 +17,28 @@
  * under the License.
  */
 
-import { TimelionFunctionArgs } from '../../../../vis_type_timelion/common/types';
+import { resolve } from 'path';
+import { Legacy } from 'kibana';
 
-export interface TimelionFunctionInterface extends TimelionFunctionConfig {
-  chainable: boolean;
-  originalFn: Function;
-  argsByName: TimelionFunctionArgs[];
-}
+import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
 
-export interface TimelionFunctionConfig {
-  name: string;
-  help: string;
-  extended: boolean;
-  aliases: string[];
-  fn: Function;
-  args: TimelionFunctionArgs[];
-}
+const timelionVisPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
+  new Plugin({
+    id: 'timelion_vis',
+    require: ['kibana', 'elasticsearch', 'visualizations', 'data'],
+    publicDir: resolve(__dirname, 'public'),
+    uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      hacks: [resolve(__dirname, 'public/legacy')],
+      injectDefaultVars: server => ({}),
+    },
+    init: (server: Legacy.Server) => ({}),
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+  });
 
 // eslint-disable-next-line import/no-default-export
-export default class TimelionFunction {
-  constructor(name: string, config: TimelionFunctionConfig);
-}
+export default timelionVisPluginInitializer;
