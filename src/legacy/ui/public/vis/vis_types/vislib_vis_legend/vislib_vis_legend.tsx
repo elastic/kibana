@@ -24,11 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
 // @ts-ignore
-import { Data } from '../../../vislib/lib/data';
-// @ts-ignore
 import { createFiltersFromEvent } from '../../../../../core_plugins/visualizations/public';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './vislib_vis_legend_item';
+import { getPieNames } from './pie_utils';
 import { getTableAggs } from '../../../visualize/loader/pipeline_helpers/utilities';
 
 export interface VisLegendProps {
@@ -128,7 +127,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     if (!data) return [];
     data = data.columns || data.rows || [data];
 
-    if (type === 'pie') return Data.prototype.pieNames(data);
+    if (type === 'pie') return getPieNames(data);
 
     return this.getSeriesLabels(data);
   };

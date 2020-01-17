@@ -12,6 +12,7 @@ import { TestProviders } from '../../../mock';
 import { getEmptyStringTag } from '../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
 import { useMountAppended } from '../../../utils/use_mount_appended';
+import { FlowTarget } from '../../../graphql/types';
 
 jest.mock('../../search_bar', () => ({
   siemFilterManager: {
@@ -91,13 +92,15 @@ describe('PointToolTipContent', () => {
 
     test('it returns IPDetailsLink if field is source.ip', () => {
       const value = '127.0.0.1';
-      expect(getRenderedFieldValue('source.ip', value)).toStrictEqual(<IPDetailsLink ip={value} />);
+      expect(getRenderedFieldValue('source.ip', value)).toStrictEqual(
+        <IPDetailsLink ip={value} flowTarget={FlowTarget.source} />
+      );
     });
 
     test('it returns IPDetailsLink if field is destination.ip', () => {
       const value = '127.0.0.1';
       expect(getRenderedFieldValue('destination.ip', value)).toStrictEqual(
-        <IPDetailsLink ip={value} />
+        <IPDetailsLink ip={value} flowTarget={FlowTarget.destination} />
       );
     });
 

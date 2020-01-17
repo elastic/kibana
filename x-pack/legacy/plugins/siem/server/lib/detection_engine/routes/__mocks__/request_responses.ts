@@ -15,6 +15,7 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   INTERNAL_RULE_ID_KEY,
   INTERNAL_IMMUTABLE_KEY,
+  DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
@@ -157,7 +158,17 @@ export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
 
 export const getPrivilegeRequest = (): ServerInjectOptions => ({
   method: 'GET',
-  url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
+  url: DETECTION_ENGINE_PRIVILEGES_URL,
+});
+
+export const addPrepackagedRulesRequest = (): ServerInjectOptions => ({
+  method: 'PUT',
+  url: DETECTION_ENGINE_PREPACKAGED_URL,
+});
+
+export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
+  method: 'GET',
+  url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
 });
 
 export interface FindHit {
