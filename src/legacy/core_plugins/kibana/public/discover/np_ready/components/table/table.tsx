@@ -110,7 +110,9 @@ export function DocViewTable({
                 const nestedRootRegex = new RegExp(escapeRegExp(field) + '(\\.|$)');
                 return nestedRootRegex.test(patternField.subType?.nested?.path ?? '');
               });
-            const fieldType = isNestedField ? 'nested' : undefined;
+            const fieldType = isNestedField
+              ? 'nested'
+              : indexPattern.fields.find(patternField => patternField.name === field)?.type;
 
             return (
               <DocViewTableRow
