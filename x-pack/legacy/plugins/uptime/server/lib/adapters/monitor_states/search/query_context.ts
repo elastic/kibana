@@ -64,8 +64,13 @@ export class QueryContext {
       return timestampClause;
     }
 
-    // @ts-ignore
-    const tsStart = DateMath.parse(this.dateRangeEnd).subtract(10, 'seconds');
+    // We subtract 5m from the start to account for data that shows up late,
+    // for instance, with a large value for the elasticsearch refresh interval
+    // setting it lower can work very well on someone's laptop, but with real world
+    // latencies and slowdowns that's dangerous. Making this value larger makes things
+    // only slower, but only marginally so, and prevents people from seeing weird
+    // behavior.
+    const tsStart = DateMath.parse(this.dateRangeEnd)!.subtract(5, 'minutes');
     const tsEnd = DateMath.parse(this.dateRangeEnd)!;
 
     return {
