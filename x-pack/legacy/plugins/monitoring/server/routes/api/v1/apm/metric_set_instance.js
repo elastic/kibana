@@ -29,9 +29,9 @@ export const metricSet = [
     keys: [
       'apm_server_responses_count',
       'apm_server_responses_valid_ok',
-      'apm_server_responses_valid_accepted'
+      'apm_server_responses_valid_accepted',
     ],
-    name: 'apm_server_responses'
+    name: 'apm_server_responses',
   },
   {
     keys: [
@@ -51,16 +51,12 @@ export const metricSet = [
     name: 'apm_responses_errors',
   },
   {
-    keys: [
-      'apm_server_requests'
-    ],
-    name: 'apm_server_requests'
+    keys: ['apm_server_requests'],
+    name: 'apm_server_requests',
   },
   {
-    keys: [
-      'apm_acm_requests'
-    ],
-    name: 'apm_acm_requests'
+    keys: ['apm_acm_requests'],
+    name: 'apm_acm_requests',
   },
   {
     keys: [

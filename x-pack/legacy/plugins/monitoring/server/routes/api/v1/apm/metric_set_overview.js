@@ -32,16 +32,16 @@ export const metricSet = [
       'apm_server_responses_valid_accepted',
       'apm_server_responses_errors_count',
     ],
-    name: 'apm_server_responses'
+    name: 'apm_server_responses',
   },
   {
     keys: [
       'apm_acm_responses_count',
       'apm_acm_responses_valid_notmodified',
       'apm_acm_responses_valid_ok',
-      'apm_acm_responses_errors_count'
+      'apm_acm_responses_errors_count',
     ],
-    name: 'apm_acm_responses'
+    name: 'apm_acm_responses',
   },
   {
     keys: [
@@ -58,7 +58,7 @@ export const metricSet = [
       'apm_server_responses_errors_closed',
       'apm_server_responses_errors_internal',
     ],
-    name: 'apm_server_responses_errors'
+    name: 'apm_server_responses_errors',
   },
   {
     keys: [
@@ -68,19 +68,15 @@ export const metricSet = [
       'apm_acm_responses_errors_method',
       'apm_acm_responses_errors_invalid_query',
     ],
-    name: 'apm_acm_responses_errors'
+    name: 'apm_acm_responses_errors',
   },
   {
-    keys: [
-      'apm_server_requests'
-    ],
-    name: 'apm_server_requests'
+    keys: ['apm_server_requests'],
+    name: 'apm_server_requests',
   },
   {
-    keys: [
-      'apm_acm_requests'
-    ],
-    name: 'apm_acm_requests'
+    keys: ['apm_acm_requests'],
+    name: 'apm_acm_requests',
   },
   {
     keys: [
