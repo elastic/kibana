@@ -18,5 +18,5 @@
  */
 
 describe('convertSeriesToVars(series, model)', () => {
-  it('returns and object', () => {});
+  test('returns and object', () => {});
 });
