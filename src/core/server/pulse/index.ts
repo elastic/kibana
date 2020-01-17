@@ -23,7 +23,6 @@ import { resolve, parse } from 'path';
 import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
-import { schema } from '@kbn/config-schema';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
