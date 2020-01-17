@@ -6,10 +6,10 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function EndpointPageProvider({ getService }: FtrProviderContext) {
+export function EndpointPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const table = getService('table');
+  const { header } = getPageObjects(['header']);
 
   return {
     async welcomeEndpointMessage() {
@@ -33,10 +33,25 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       const menuItems = await menuPanel.findAllByCssSelector('button.euiContextMenuItem');
       await menuItems[0].click();
     },
-    async getEndpointListContent() {
-      const endpointTable = await table.getDataFromTestSubj('endpointListTable');
+    async getEndpointListRowsCount() {
+      const endpointListRows = await find.allByCssSelector('.euiTableRow');
       // eslint-disable-next-line no-console
-      console.log(endpointTable);
+      return endpointListRows.length;
+    },
+    async getAllEndpointListRowsCount() {
+      let morePages = true;
+      let totalCount = 0;
+      while (morePages) {
+        totalCount += await this.getEndpointListRowsCount();
+        morePages = !(
+          (await testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
+        );
+        if (morePages) {
+          await testSubjects.click('pagination-button-next');
+          await header.waitUntilLoadingHasFinished();
+        }
+      }
+      return totalCount;
     },
     async checkFirstPageIsActive() {
       const pageOneElement = await testSubjects.getAttributeAll('pagination-button-0', 'class');

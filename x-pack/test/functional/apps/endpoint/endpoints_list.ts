@@ -12,8 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const expectedPagination = 5;
-  const expectedListings = 16;
+  const expectedCount = 16;
 
   describe('Endpoints List Page', function() {
     this.tags(['skipCloud']);
@@ -24,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      // await esArchiver.unload('endpoint/pagination');
+      await esArchiver.unload('endpoint/pagination');
     });
 
     it('Navigate to Endpoints list page', async () => {
@@ -54,13 +53,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const validateFirstPageClass = await pageObjects.endpoint.checkFirstPageIsActive();
       expect(validateFirstPageClass).to.be(true);
       // get all of the page numbers
-      const paginationArr = await pageObjects.endpoint.getPagination();
-      // validate that we have the right number of pages
-      expect(paginationArr[1]).to.be('Page 1 of 4');
-      // validate before page 1 there is a previous
-      expect(paginationArr[0]).to.be('Previous page');
-      // validate there is a page after page 1
-      expect(paginationArr[2]).to.be('Page 2 of 4');
+      // validate that we have 5 items on the page
+      const actualCount = await pageObjects.endpoint.getAllEndpointListRowsCount();
+      // eslint-disable-next-line no-console
+      expect(actualCount).to.be(expectedCount);
     });
   });
 };
