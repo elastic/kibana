@@ -34,7 +34,7 @@ function invoke({
   name?: string;
   value?: any;
 }) {
-  return toEditableConfig({ def, name, value, isCustom: def === false, isOverridden: true });
+  return toEditableConfig({ def, name, value, isCustom: def === defDefault, isOverridden: true });
 }
 
 describe('Settings', function() {
@@ -102,7 +102,7 @@ describe('Settings', function() {
             };
             const result = invoke({ def });
             const validationTyped = result.validation as StringValidation;
-            expect(validationTyped.regexString).to.be.a(RegExp);
+            expect(validationTyped.regex).to.be.a(RegExp);
             expect(validationTyped.message).to.equal('must start with "foo"');
           });
         });
