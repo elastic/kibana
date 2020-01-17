@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
 
 /**
@@ -15,17 +14,6 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
  * major version!
  * @return {Array} array of rename operations and callback function for rename logging
  */
-export const deprecations = () => {
-  return [
-    (settings, log) => {
-      const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
-      const emailNotificationsEnabled =
-        clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
-      if (emailNotificationsEnabled && !get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
-        log(
-          `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
-        );
-      }
-    },
-  ];
+export const deprecations = ({ unused }) => {
+  return [unused(CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)];
 };
