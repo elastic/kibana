@@ -24,7 +24,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -49,14 +48,12 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { ChartTooltip } from '../components/chart_tooltip';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
-import { JobSelector } from '../components/job_selector';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { NavigationMenu } from '../components/navigation_menu';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
-import { TimeseriesexplorerNoJobsFound } from './components/timeseriesexplorer_no_jobs_found';
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
+import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 
 import { ml } from '../services/ml_api_service';
 import { mlFieldFormatService } from '../services/field_format_service';
@@ -152,33 +149,6 @@ function getTimeseriesexplorerDefaultState() {
     zoomToFocusLoaded: undefined,
   };
 }
-
-const TimeSeriesExplorerPage = ({ children, jobSelectorProps, loading, resizeRef }) => (
-  <Fragment>
-    <NavigationMenu tabId="timeseriesexplorer" />
-    {/* Show animated progress bar while loading */}
-    {loading && <EuiProgress className="mlTimeSeriesExplorerProgress" color="primary" size="xs" />}
-    {/* Show a progress bar with progress 0% when not loading.
-        If we'd just show no progress bar when not loading it would result in a flickering height effect. */}
-    {!loading && (
-      <EuiProgress
-        className="mlTimeSeriesExplorerProgress"
-        value={0}
-        max={100}
-        color="primary"
-        size="xs"
-      />
-    )}
-    <JobSelector {...jobSelectorProps} />
-    <div
-      className="ml-time-series-explorer"
-      ref={resizeRef}
-      data-test-subj="mlPageSingleMetricViewer"
-    >
-      {children}
-    </div>
-  </Fragment>
-);
 
 const containerPadding = 24;
 
@@ -1091,26 +1061,10 @@ export class TimeSeriesExplorer extends React.Component {
       autoZoomDuration,
     };
 
-    const jobSelectorProps = {
-      dateFormatTz,
-      singleSelection: true,
-      timeseriesOnly: true,
-    };
-
     const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
-    if (jobs.length === 0) {
-      return (
-        <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
-          <TimeseriesexplorerNoJobsFound />
-        </TimeSeriesExplorerPage>
-      );
-    }
-
     if (selectedDetectorIndex === undefined || mlJobService.getJob(selectedJobId) === undefined) {
-      return (
-        <TimeSeriesExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef} />
-      );
+      return <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef} />;
     }
 
     const selectedJob = mlJobService.getJob(selectedJobId);
@@ -1155,7 +1109,7 @@ export class TimeSeriesExplorer extends React.Component {
 
     return (
       <TimeSeriesExplorerPage
-        jobSelectorProps={jobSelectorProps}
+        dateFormatTz={dateFormatTz}
         loading={loading}
         resizeRef={this.resizeRef}
       >

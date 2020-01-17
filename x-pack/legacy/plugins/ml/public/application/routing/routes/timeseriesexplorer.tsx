@@ -28,6 +28,8 @@ import {
   getAutoZoomDuration,
   validateJobSelection,
 } from '../../timeseriesexplorer/timeseriesexplorer_utils';
+import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
+import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { useUrlState } from '../../util/url_state';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
@@ -163,10 +165,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   } = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
 
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
+  const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
 
   let autoZoomDuration: number | undefined;
   if (selectedJobId !== undefined && selectedJob !== undefined) {
-    autoZoomDuration = getAutoZoomDuration(createTimeSeriesJobData(mlJobService.jobs), selectedJob);
+    autoZoomDuration = getAutoZoomDuration(timeSeriesJobs, selectedJob);
   }
 
   const appStateHandler = useCallback(
@@ -266,6 +269,14 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
+
+  if (timeSeriesJobs.length === 0) {
+    return (
+      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz}>
+        <TimeseriesexplorerNoJobsFound />
+      </TimeSeriesExplorerPage>
+    );
+  }
 
   if (selectedJobId === undefined || autoZoomDuration === undefined || bounds === undefined) {
     return null;
