@@ -171,25 +171,25 @@ export class HotPhase extends PureComponent {
                         },
                         {
                           value: 'b',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.bytesLabel', {
                             defaultMessage: 'bytes',
                           }),
                         },
                         {
                           value: 'kb',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.kilobytesLabel', {
                             defaultMessage: 'kilobytes',
                           }),
                         },
                         {
                           value: 'tb',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.terabytesLabel', {
                             defaultMessage: 'terabytes',
                           }),
                         },
                         {
                           value: 'pb',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.megabytesLabel', {
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.petabytesLabel', {
                             defaultMessage: 'petabytes',
                           }),
                         },
