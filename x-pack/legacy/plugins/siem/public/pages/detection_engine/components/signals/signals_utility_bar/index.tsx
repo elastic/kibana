@@ -89,7 +89,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
                 </UtilityBarAction>
 
                 <UtilityBarAction
-                  iconType="pagesSelect"
+                  iconType={showClearSelection ? 'cross' : 'pagesSelect'}
                   onClick={() => {
                     if (!showClearSelection) {
                       selectAll();
