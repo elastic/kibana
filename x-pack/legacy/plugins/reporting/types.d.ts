@@ -340,8 +340,6 @@ export interface AbsoluteURLFactoryOptions {
   hostname: string;
   port: string | number;
 }
-<<<<<<< HEAD
-=======
 
 export interface InterceptedRequest {
   requestId: string;
@@ -359,4 +357,3 @@ export interface InterceptedRequest {
 }
 
 export { ServerFacade };
->>>>>>> e8b859bf2f... [Reporting] Fix map tiles not loading by using Chrome's Remote Protocol (#55137)
