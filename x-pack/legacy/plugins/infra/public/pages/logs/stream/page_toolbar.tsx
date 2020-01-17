@@ -25,13 +25,6 @@ import { Source } from '../../../containers/source';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import euiStyled from '../../../../../../common/eui_styled_components';
 
-// We need to raise the z-index of the toolbar, so the datepicker inside is
-// above the table header of the log stream.
-const LogsToolbarWrapper = euiStyled(Toolbar)`
-  position: relative;
-  z-index: 2
-`;
-
 export const LogsToolbar = () => {
   const { createDerivedIndexPattern } = useContext(Source.Context);
   const derivedIndexPattern = createDerivedIndexPattern('logs');
@@ -70,7 +63,7 @@ export const LogsToolbar = () => {
     stopLiveStreaming,
   } = useContext(LogPositionState.Context);
   return (
-    <LogsToolbarWrapper>
+    <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
           <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
@@ -141,6 +134,6 @@ export const LogsToolbar = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </LogsToolbarWrapper>
+    </Toolbar>
   );
 };
