@@ -17,64 +17,93 @@
  * under the License.
  */
 
-import { expect } from 'chai';
-import { createTickFormatter } from '../tick_formatter';
+import { npStart } from 'ui/new_platform';
+import { createTickFormatter } from './tick_formatter';
+import { getFieldFormatsRegistry } from '../../../../../../test_utils/public/stub_field_formats';
+
+const mockUiSettings = {
+  get: item => {
+    return mockUiSettings[item];
+  },
+  getUpdate$: () => ({
+    subscribe: jest.fn(),
+  }),
+  'query:allowLeadingWildcards': true,
+  'query:queryString:options': {},
+  'courier:ignoreFilterIfFieldNotInIndex': true,
+  'dateFormat:tz': 'Browser',
+  'format:defaultTypeMap': {},
+};
+
+const mockCore = {
+  chrome: {},
+  uiSettings: mockUiSettings,
+  http: {
+    basePath: {
+      get: jest.fn(),
+    },
+  },
+};
 
 describe('createTickFormatter(format, template)', () => {
-  it('returns a number with two decimal place by default', () => {
+  npStart.plugins.data = {
+    fieldFormats: getFieldFormatsRegistry(mockCore),
+  };
+
+  test('returns a number with two decimal place by default', () => {
     const fn = createTickFormatter();
-    expect(fn(1.5556)).to.equal('1.56');
+    expect(fn(1.5556)).toEqual('1.56');
   });
 
-  it('returns a percent with percent formatter', () => {
+  test('returns a percent with percent formatter', () => {
     const config = {
       'format:percent:defaultPattern': '0.[00]%',
     };
     const fn = createTickFormatter('percent', null, key => config[key]);
-    expect(fn(0.5556)).to.equal('55.56%');
+    expect(fn(0.5556)).toEqual('55.56%');
   });
 
-  it('returns a byte formatted string with byte formatter', () => {
+  test('returns a byte formatted string with byte formatter', () => {
     const config = {
       'format:bytes:defaultPattern': '0.0b',
     };
     const fn = createTickFormatter('bytes', null, key => config[key]);
-    expect(fn(1500 ^ 10)).to.equal('1.5KB');
+    expect(fn(1500 ^ 10)).toEqual('1.5KB');
   });
 
-  it('returns a custom formatted string with custom formatter', () => {
+  test('returns a custom formatted string with custom formatter', () => {
     const fn = createTickFormatter('0.0a');
-    expect(fn(1500)).to.equal('1.5k');
+    expect(fn(1500)).toEqual('1.5k');
   });
 
-  it('returns a located string with custom locale setting', () => {
+  test('returns a located string with custom locale setting', () => {
     const config = {
       'format:number:defaultLocale': 'fr',
     };
     const fn = createTickFormatter('0,0.0', null, key => config[key]);
-    expect(fn(1500)).to.equal('1 500,0');
+    expect(fn(1500)).toEqual('1 500,0');
   });
 
-  it('returns a custom formatted string with custom formatter and template', () => {
+  test('returns a custom formatted string with custom formatter and template', () => {
     const fn = createTickFormatter('0.0a', '{{value}}/s');
-    expect(fn(1500)).to.equal('1.5k/s');
+    expect(fn(1500)).toEqual('1.5k/s');
   });
 
-  it('returns "foo" if passed a string', () => {
+  test('returns "foo" if passed a string', () => {
     const fn = createTickFormatter();
-    expect(fn('foo')).to.equal('foo');
+    expect(fn('foo')).toEqual('foo');
   });
 
-  it('returns value if passed a bad formatter', () => {
+  test('returns value if passed a bad formatter', () => {
     const fn = createTickFormatter('102');
-    expect(fn(100)).to.equal('100');
+    expect(fn(100)).toEqual('100');
   });
 
-  it('returns formatted value if passed a bad template', () => {
+  test('returns formatted value if passed a bad template', () => {
     const config = {
       'format:number:defaultPattern': '0,0.[00]',
     };
     const fn = createTickFormatter('number', '{{value', key => config[key]);
-    expect(fn(1.5556)).to.equal('1.56');
+    expect(fn(1.5556)).toEqual('1.56');
   });
 });
