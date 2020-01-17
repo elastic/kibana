@@ -149,6 +149,7 @@ export const EndpointsPage = () => {
             updateOnChange={handleUserFilteredData}
           />
           <EuiBasicTable
+            data-test-subj={'endpointListTable'}
             items={showFiltered ? filteredEndpoints : endpoints}
             columns={columns}
             pagination={paginationSetup}
