@@ -31,17 +31,31 @@ export function FieldSelect({ fields, selectedFieldName, onChange, ...rest }) {
       }
     });
 
+    function fieldsListToOptions(fieldsList) {
+      return fieldsList
+        .map(field => {
+          return { value: field, label: field.label };
+        })
+        .sort((a, b) => {
+          return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+        });
+    }
+
+    if (fieldsByOriginMap.size === 1) {
+      // do not show origin group if all fields are from same origin
+      const onlyOriginKey = fieldsByOriginMap.keys().next().value;
+      const fieldsList = fieldsByOriginMap.get(onlyOriginKey);
+      return fieldsListToOptions(fieldsList);
+    }
+
     const optionGroups = [];
     fieldsByOriginMap.forEach((fieldsList, fieldOrigin) => {
       optionGroups.push({
-        label: fieldOrigin,
-        options: fieldsList
-          .map(field => {
-            return { value: field, label: field.label };
-          })
-          .sort((a, b) => {
-            return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
-          }),
+        label: i18n.translate('xpack.maps.style.fieldSelect.OriginLabel', {
+          defaultMessage: 'Fields from {fieldOrigin}',
+          values: { fieldOrigin },
+        }),
+        options: fieldsListToOptions(fieldsList),
       });
     });
 
