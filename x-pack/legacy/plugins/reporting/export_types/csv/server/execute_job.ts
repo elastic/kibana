@@ -86,7 +86,6 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
-        // @ts-ignore fieldFormatServiceFactory' does not exist on type 'ServerFacade TODO
         const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),

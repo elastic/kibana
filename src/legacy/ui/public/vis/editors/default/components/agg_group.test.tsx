@@ -109,8 +109,9 @@ describe('DefaultEditorAgg component', () => {
       reorderAggs,
       addSchema: () => {},
       removeAgg: () => {},
-      onAggParamsChange: () => {},
-      onAggTypeChange: () => {},
+      setAggParamValue: jest.fn(),
+      setStateParamValue: jest.fn(),
+      onAggTypeChange: jest.fn(),
       onToggleEnableAgg: () => {},
     };
   });
@@ -125,46 +126,6 @@ describe('DefaultEditorAgg component', () => {
     mount(<DefaultEditorAggGroup {...defaultProps} />);
 
     expect(setTouched).toBeCalledWith(false);
-  });
-
-  it('should mark group as touched when all invalid aggs are touched', () => {
-    defaultProps.groupName = AggGroupNames.Buckets;
-    const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
-    act(() => {
-      const aggProps = comp.find(DefaultEditorAgg).props();
-      aggProps.setValidity(false);
-      aggProps.setTouched(true);
-    });
-
-    expect(setTouched).toBeCalledWith(true);
-  });
-
-  it('should mark group as touched when the form applied', () => {
-    const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
-    act(() => {
-      comp
-        .find(DefaultEditorAgg)
-        .first()
-        .props()
-        .setValidity(false);
-    });
-    expect(setTouched).toBeCalledWith(false);
-    comp.setProps({ formIsTouched: true });
-
-    expect(setTouched).toBeCalledWith(true);
-  });
-
-  it('should mark group as invalid when at least one agg is invalid', () => {
-    const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
-    act(() => {
-      comp
-        .find(DefaultEditorAgg)
-        .first()
-        .props()
-        .setValidity(false);
-    });
-
-    expect(setValidity).toBeCalledWith(false);
   });
 
   it('should last bucket has truthy isLastBucket prop', () => {
@@ -182,10 +143,10 @@ describe('DefaultEditorAgg component', () => {
       comp.props().onDragEnd({ source: { index: 0 }, destination: { index: 1 } });
     });
 
-    expect(reorderAggs).toHaveBeenCalledWith([
-      defaultProps.state.aggs.aggs[1],
+    expect(reorderAggs).toHaveBeenCalledWith(
       defaultProps.state.aggs.aggs[0],
-    ]);
+      defaultProps.state.aggs.aggs[1]
+    );
   });
 
   it('should show add button when schemas count is less than max', () => {

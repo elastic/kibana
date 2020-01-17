@@ -17,7 +17,7 @@ import {
   TaskInstanceWithId,
   TaskDefinition,
 } from '../../../../plugins/task_manager/server/task.js';
-import { FetchOpts } from '../../../../plugins/task_manager/server/task_store.js';
+import { SearchOpts } from '../../../../plugins/task_manager/server/task_store.js';
 
 // Once all plugins are migrated to NP and we can remove Legacy TaskManager in version 8.0.0,
 // this can be removed
@@ -46,7 +46,7 @@ export function createLegacyApi(legacyTaskManager: Promise<TaskManager>): Legacy
     registerTaskDefinitions: (taskDefinitions: TaskDictionary<TaskDefinition>) => {
       legacyTaskManager.then((tm: TaskManager) => tm.registerTaskDefinitions(taskDefinitions));
     },
-    fetch: (opts: FetchOpts) => legacyTaskManager.then((tm: TaskManager) => tm.fetch(opts)),
+    fetch: (opts: SearchOpts) => legacyTaskManager.then((tm: TaskManager) => tm.fetch(opts)),
     remove: (id: string) => legacyTaskManager.then((tm: TaskManager) => tm.remove(id)),
     schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: any) =>
       legacyTaskManager.then((tm: TaskManager) => tm.schedule(taskInstance, options)),

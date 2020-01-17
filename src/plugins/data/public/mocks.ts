@@ -30,9 +30,9 @@ export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
 const autocompleteMock: any = {
-  addProvider: jest.fn(),
-  getProvider: jest.fn(),
-  clearProviders: jest.fn(),
+  getValueSuggestions: jest.fn(),
+  getQuerySuggestions: jest.fn(),
+  hasQuerySuggestions: jest.fn(),
 };
 
 const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {

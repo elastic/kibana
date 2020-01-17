@@ -157,9 +157,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 },
               },
               "autocomplete": Object {
-                "addProvider": [MockFunction],
-                "clearProviders": [MockFunction],
-                "getProvider": [MockFunction],
+                "getQuerySuggestions": [MockFunction],
+                "getValueSuggestions": [MockFunction],
+                "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
@@ -795,9 +795,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         },
                       },
                       "autocomplete": Object {
-                        "addProvider": [MockFunction],
-                        "clearProviders": [MockFunction],
-                        "getProvider": [MockFunction],
+                        "getQuerySuggestions": [MockFunction],
+                        "getValueSuggestions": [MockFunction],
+                        "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
@@ -1415,9 +1415,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 },
               },
               "autocomplete": Object {
-                "addProvider": [MockFunction],
-                "clearProviders": [MockFunction],
-                "getProvider": [MockFunction],
+                "getQuerySuggestions": [MockFunction],
+                "getValueSuggestions": [MockFunction],
+                "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
@@ -2050,9 +2050,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         },
                       },
                       "autocomplete": Object {
-                        "addProvider": [MockFunction],
-                        "clearProviders": [MockFunction],
-                        "getProvider": [MockFunction],
+                        "getQuerySuggestions": [MockFunction],
+                        "getValueSuggestions": [MockFunction],
+                        "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
@@ -2670,9 +2670,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 },
               },
               "autocomplete": Object {
-                "addProvider": [MockFunction],
-                "clearProviders": [MockFunction],
-                "getProvider": [MockFunction],
+                "getQuerySuggestions": [MockFunction],
+                "getValueSuggestions": [MockFunction],
+                "hasQuerySuggestions": [MockFunction],
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
@@ -3305,9 +3305,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         },
                       },
                       "autocomplete": Object {
-                        "addProvider": [MockFunction],
-                        "clearProviders": [MockFunction],
-                        "getProvider": [MockFunction],
+                        "getQuerySuggestions": [MockFunction],
+                        "getValueSuggestions": [MockFunction],
+                        "hasQuerySuggestions": [MockFunction],
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
