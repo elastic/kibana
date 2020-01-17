@@ -137,17 +137,16 @@ export const updateRules = async ({
     }
   );
 
-  let ruleCurrentStatus;
-  if (savedObjectsClient != null) {
-    ruleCurrentStatus = await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
-      type: ruleStatusSavedObjectType,
-      perPage: 1,
-      sortField: 'statusDate',
-      sortOrder: 'desc',
-      search: rule.id,
-      searchFields: ['alertId'],
-    });
-  }
+  const ruleCurrentStatus = savedObjectsClient
+    ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
+        type: ruleStatusSavedObjectType,
+        perPage: 1,
+        sortField: 'statusDate',
+        sortOrder: 'desc',
+        search: rule.id,
+        searchFields: ['alertId'],
+      })
+    : null;
 
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
