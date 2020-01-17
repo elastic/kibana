@@ -182,7 +182,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
         ? 'success'
         : rule?.status === 'failed'
         ? 'danger'
-        : rule?.status === 'executing'
+        : rule?.status === 'executing' || rule?.status === 'going to run'
         ? 'warning'
         : 'subdued';
 

@@ -7,7 +7,12 @@
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
 
-import { SavedObject, SavedObjectAttributes, SavedObjectsFindResponse } from 'kibana/server';
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
@@ -48,7 +53,7 @@ export interface IRuleStatusAttributes {
   lastFailureMessage: string | null | undefined;
   lastSuccessAt: string | null | undefined;
   lastSuccessMessage: string | null | undefined;
-  status: RuleStatusString;
+  status: RuleStatusString | null | undefined;
 }
 
 export interface IRuleSavedAttributesSavedObjectAttributes
@@ -138,6 +143,7 @@ export interface FindRulesStatusesRequest extends Omit<RequestFacade, 'query'> {
 export interface Clients {
   alertsClient: AlertsClient;
   actionsClient: ActionsClient;
+  savedObjectsClient?: SavedObjectsClientContract;
 }
 
 export type UpdateRuleParams = Partial<RuleAlertParams> & {

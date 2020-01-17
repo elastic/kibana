@@ -121,7 +121,7 @@ export const getColumns = (
             ? 'success'
             : value === 'failed'
             ? 'danger'
-            : value === 'executing'
+            : value === 'executing' || value === 'going to run'
             ? 'warning'
             : 'subdued';
         return (

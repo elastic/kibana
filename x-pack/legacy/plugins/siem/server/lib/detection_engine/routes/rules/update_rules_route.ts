@@ -80,6 +80,7 @@ export const createUpdateRulesRoute: Hapi.ServerRoute = {
         language,
         outputIndex,
         savedId,
+        savedObjectsClient,
         timelineId,
         timelineTitle,
         meta,
