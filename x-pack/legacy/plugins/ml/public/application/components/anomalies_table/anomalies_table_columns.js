@@ -101,6 +101,7 @@ export function getColumns(
         defaultMessage: 'time',
       }),
       dataType: 'date',
+      scope: 'row',
       render: date => renderTime(date, interval),
       textOnly: true,
       sortable: true,
