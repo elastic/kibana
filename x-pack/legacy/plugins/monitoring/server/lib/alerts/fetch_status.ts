@@ -6,13 +6,14 @@
 import moment from 'moment';
 import { get } from 'lodash';
 import { AlertClusterState } from '../../alerts/types';
-import { ALERT_TYPES } from '../../../common/constants';
+import { ALERT_TYPES, LOGGING_TAG } from '../../../common/constants';
 
 export async function fetchStatus(
   callCluster: any,
   start: number,
   end: number,
-  clusterUuid: string
+  clusterUuid: string,
+  server: any
 ): Promise<any[]> {
   const statuses = await Promise.all(
     ALERT_TYPES.map(
@@ -58,7 +59,16 @@ export async function fetchStatus(
             }
             return resolve(false);
           } catch (err) {
-            return reject(err);
+            const reason = get(err, 'body.error.type');
+            if (reason === 'index_not_found_exception') {
+              server.log(
+                ['error', LOGGING_TAG],
+                `Unable to fetch alerts. Alerts depends on task manager, which has not been started yet.`
+              );
+            } else {
+              server.log(['error', LOGGING_TAG], err.message);
+            }
+            return resolve(false);
           }
         })
     )
