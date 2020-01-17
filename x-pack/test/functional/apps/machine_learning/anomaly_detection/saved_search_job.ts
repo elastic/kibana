@@ -272,7 +272,7 @@ export default function({ getService }: FtrProviderContext) {
   ];
 
   describe('saved search', function() {
-    this.tags(['smoke', 'mlqa', 'dima']);
+    this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
     });
