@@ -3,8 +3,8 @@
 env.GIT_TRACE = '1'
 env.GIT_CURL_VERBOSE = '1'
 
-def NUMBER_OF_NODES = 30
-def CLONES_PER_NODE = 3
+def NUMBER_OF_NODES = 5
+def CLONES_PER_NODE = 2
 
 def work = [:]
 for(def i = 0; i < NUMBER_OF_NODES; i++) {
