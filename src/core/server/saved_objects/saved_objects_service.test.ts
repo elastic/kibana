@@ -44,6 +44,69 @@ describe('SavedObjectsService', () => {
   };
 
   describe('#setup()', () => {
+    describe('#setClientFactoryProvider', () => {
+      it('registers the factory to the clientProvider', async () => {
+        const coreContext = mockCoreContext.create();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps({}));
+
+        const factory = jest.fn();
+        const factoryProvider: SavedObjectsClientFactoryProvider<KibanaRequest> = () => factory;
+
+        setup.setClientFactoryProvider(factoryProvider);
+
+        await soService.start({});
+
+        expect(clientProviderInstanceMock.setClientFactory).toHaveBeenCalledWith(factory);
+      });
+      it('throws if a factory is already registered', async () => {
+        const coreContext = mockCoreContext.create();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps({}));
+
+        const firstFactory = () => jest.fn();
+        const secondFactory = () => jest.fn();
+
+        setup.setClientFactoryProvider(firstFactory);
+
+        expect(() => {
+          setup.setClientFactoryProvider(secondFactory);
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"custom client factory is already set, unable to replace the current one"`
+        );
+      });
+    });
+
+    describe('#addClientWrapper', () => {
+      it('registers the wrapper to the clientProvider', async () => {
+        const coreContext = mockCoreContext.create();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps({}));
+
+        const wrapperA = jest.fn();
+        const wrapperB = jest.fn();
+
+        setup.addClientWrapper(1, 'A', wrapperA);
+        setup.addClientWrapper(2, 'B', wrapperB);
+
+        await soService.start({});
+
+        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledTimes(2);
+        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
+          1,
+          'A',
+          wrapperA
+        );
+        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
+          2,
+          'B',
+          wrapperB
+        );
+      });
+    });
+  });
+
+  describe('#start()', () => {
     it('creates a KibanaMigrator which retries NoConnections errors from callAsInternalUser', async () => {
       const coreContext = mockCoreContext.create();
       let i = 0;
@@ -60,27 +123,12 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = createSetupDeps({ clusterClient });
 
-      await soService.setup(coreSetup, 1);
+      await soService.setup(coreSetup);
+      await soService.start({}, 1);
 
       return expect(KibanaMigratorMock.mock.calls[0][0].callCluster()).resolves.toMatch('success');
     });
 
-    describe('#setClientFactoryProvider', () => {
-      it('registers the factory to the clientProvider', async () => {
-        const coreContext = mockCoreContext.create();
-        const soService = new SavedObjectsService(coreContext);
-        const setup = await soService.setup(createSetupDeps({}));
-
-        const factory = jest.fn();
-        const factoryProvider: SavedObjectsClientFactoryProvider<KibanaRequest> = () => factory;
-
-        setup.setClientFactoryProvider(factoryProvider);
-        expect(clientProviderInstanceMock.setClientFactory).toHaveBeenCalledWith(factory);
-      });
-    });
-  });
-
-  describe('#start()', () => {
     it('skips KibanaMigrator migrations when --optimize=true', async () => {
       const coreContext = mockCoreContext.create({
         env: ({ cliArgs: { optimize: true }, packageInfo: { version: 'x.x.x' } } as unknown) as Env,
