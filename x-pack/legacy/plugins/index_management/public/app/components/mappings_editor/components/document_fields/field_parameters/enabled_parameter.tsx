@@ -14,9 +14,16 @@ import { EditFieldFormRow } from '../fields/edit_field';
 export const EnabledParameter = () => {
   return (
     <EditFieldFormRow
-      title={i18n.translate('xpack.idxMgmt.mappingsEditor.enabledPropertiesFieldTitle', {
+      title={i18n.translate('xpack.idxMgmt.mappingsEditor.enabledParameter.fieldTitle', {
         defaultMessage: 'Parse and index the JSON value for the object',
       })}
+      description={i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.enabledParameter.fieldDescription',
+        {
+          defaultMessage:
+            'If you disable this setting Elasticsearch will skip parsing the contents of the field entirely. The JSON can still be retrieved from the _source field, but it is not searchable or stored in any other way.',
+        }
+      )}
       docLink={{
         text: i18n.translate('xpack.idxMgmt.mappingsEditor.enabledDocLinkText', {
           defaultMessage: 'Enabled documentation',

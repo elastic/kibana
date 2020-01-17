@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-
 import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../services/documentation';
@@ -14,9 +13,16 @@ import { EditFieldFormRow } from '../fields/edit_field';
 export const DynamicParameter = () => {
   return (
     <EditFieldFormRow
-      title={i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicPropertiesFieldTitle', {
+      title={i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicParameter.fieldTitle', {
         defaultMessage: 'Dynamically add new properies',
       })}
+      description={i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.dynamicParameter.fieldDescription',
+        {
+          defaultMessage:
+            'By default, fields can be added dynamically to an objects within a document, just by indexing a document containing the new field.',
+        }
+      )}
       docLink={{
         text: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicDocLinkText', {
           defaultMessage: 'Dynamic documentation',
