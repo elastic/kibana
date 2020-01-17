@@ -62,19 +62,10 @@ describe('registerSettingsComponent', () => {
     expect(getSettingsComponent('test3')).toBe(anotherComponent);
   });
 
-  it('should set a displayName for the component if one does not exist', () => {
+  it('should set a displayName for the component', () => {
     const component = () => <div />;
     registerSettingsComponent('display_name_component', component);
     expect((component as FunctionComponent).displayName).toEqual('display_name_component');
-  });
-
-  it('should not set a displayName for the component if one already exists', () => {
-    const component = function AwesomeComponent() {
-      return <div />;
-    };
-
-    registerSettingsComponent('another_display_name_component', component);
-    expect((component as FunctionComponent).displayName).toEqual('<AwesomeComponent>');
   });
 });
 
