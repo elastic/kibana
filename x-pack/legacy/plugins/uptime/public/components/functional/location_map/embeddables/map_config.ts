@@ -5,7 +5,7 @@
  */
 
 import lowPolyLayerFeatures from './low_poly_layer.json';
-import { LocationPoint } from './embedded_map';
+import { LocationPoint } from './embedded_map.js';
 import { UptimeAppColors } from '../../../../uptime_app';
 
 /**
@@ -16,7 +16,7 @@ import { UptimeAppColors } from '../../../../uptime_app';
 export const getLayerList = (
   upPoints: LocationPoint[],
   downPoints: LocationPoint[],
-  { gray, danger }: Pick<UptimeAppColors, 'gray' | 'danger'>
+  { danger }: Pick<UptimeAppColors, 'danger'>
 ) => {
   return [getLowPolyLayer(), getDownPointsLayer(downPoints, danger), getUpPointsLayer(upPoints)];
 };

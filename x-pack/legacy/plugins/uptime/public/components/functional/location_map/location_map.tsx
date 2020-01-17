@@ -8,8 +8,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
-import { EmbeddedMap } from './embeddables/embedded_map';
-import { Location, MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
+import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
+import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 import { LocationMissingWarning } from './location_missing';
 
@@ -26,8 +26,8 @@ interface LocationMapProps {
 }
 
 export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
-  const upPoints: Location[] = [];
-  const downPoints: Location[] = [];
+  const upPoints: LocationPoint[] = [];
+  const downPoints: LocationPoint[] = [];
 
   let isGeoInfoMissing = false;
 
@@ -35,11 +35,19 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
     monitorLocations.locations.forEach((item: MonitorLocation) => {
       if (item.geo?.name === UNNAMED_LOCATION || !item.geo?.location) {
         isGeoInfoMissing = true;
-      } else if (item.geo?.name !== UNNAMED_LOCATION) {
+      } else if (
+        item.geo?.name !== UNNAMED_LOCATION &&
+        !!item.geo.location.lat &&
+        !!item.geo.location.lon
+      ) {
+        // TypeScript doesn't infer that the above checks in this block's condition
+        // ensure that lat and lon are defined when we try to pass the location object directly,
+        // but if we destructure the values it does. Improvement to this block is welcome.
+        const { lat, lon } = item.geo.location;
         if (item?.summary?.down === 0) {
-          upPoints.push(item.geo.location);
+          upPoints.push({ lat, lon });
         } else {
-          downPoints.push(item.geo.location);
+          downPoints.push({ lat, lon });
         }
       }
     });

@@ -19,9 +19,11 @@ import { getLayerList } from './map_config';
 import { UptimeThemeContext } from '../../../../contexts';
 
 export interface EmbeddedMapProps {
-  upPoints: Location[];
-  downPoints: Location[];
+  upPoints: LocationPoint[];
+  downPoints: LocationPoint[];
 }
+
+export type LocationPoint = Required<Location>;
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
