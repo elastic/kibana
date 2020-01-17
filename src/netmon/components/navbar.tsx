@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { SnackbarProvider } from 'notistack';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import { AuthContext, AuthContextValue } from '@logrhythm/nm-web-shared/contexts/auth_context';
 import {
   BlockingProcessContext,
