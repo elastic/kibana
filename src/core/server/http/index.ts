@@ -29,6 +29,7 @@ export {
   HttpResponsePayload,
   ErrorHttpResponseOptions,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,

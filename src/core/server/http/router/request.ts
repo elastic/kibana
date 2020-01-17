@@ -49,12 +49,12 @@ export interface KibanaRequestRoute<Method extends RouteMethod> {
 }
 
 /**
- * KibanaRequest events
+ * Request events.
  * @public
- */
+ * */
 export interface KibanaRequestEvents {
   /**
-   * emits once & completes when the request has been aborted.
+   * emits once when the request has been aborted.
    */
   aborted$: Observable<void>;
 }
@@ -128,7 +128,9 @@ export class KibanaRequest<
    */
   public readonly headers: Headers;
 
+  /** {@link IKibanaSocket} */
   public readonly socket: IKibanaSocket;
+  /** Request events {@link KibanaRequestEvents} */
   public readonly events: KibanaRequestEvents;
 
   /** @internal */
