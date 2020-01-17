@@ -52,6 +52,7 @@ function getPdfUrlParts(
 
   const jobParams = {
     browserTimezone: 'America/Phoenix', // TODO: get browser timezone, or Kibana setting?
+    browserLocales: ['en-US', 'en'], // TODO: get browser locales
     layout: {
       dimensions: { width, height },
       id: PDF_LAYOUT_TYPE,

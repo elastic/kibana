@@ -62,7 +62,7 @@ const encryptHeaders = async headers => {
   return await crypto.encrypt(headers);
 };
 
-test(`passes browserTimezone to generatePdf`, async () => {
+test(`passes browserTimezone and browserLocales to generatePdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
@@ -70,9 +70,10 @@ test(`passes browserTimezone to generatePdf`, async () => {
 
   const executeJob = executeJobFactory(mockServer, { browserDriverFactory: {} });
   const browserTimezone = 'UTC';
+  const browserLocales = ['es-419', 'es', 'en'];
   await executeJob(
     'pdfJobId',
-    { relativeUrls: [], browserTimezone, headers: encryptedHeaders },
+    { relativeUrls: [], browserTimezone, browserLocales, headers: encryptedHeaders },
     cancellationToken
   );
 
@@ -82,6 +83,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
     undefined,
     [],
     browserTimezone,
+    browserLocales,
     expect.anything(),
     undefined,
     undefined

@@ -42,6 +42,7 @@ export interface JobInfo {
     title: string;
     forceNow: string;
     browserTimezone: string;
+    browserLocales: string[];
   };
   meta: {
     layout: string;

@@ -32,9 +32,10 @@ export function screenshotsObservableFactory(
     conditionalHeaders,
     layout,
     browserTimezone,
+    browserLocales,
   }: ScreenshotObservableOpts): Rx.Observable<ScreenshotResults[]> {
     const create$ = browserDriverFactory.createPage(
-      { viewport: layout.getBrowserViewport(), browserTimezone },
+      { viewport: layout.getBrowserViewport(), browserTimezone, browserLocales },
       logger
     );
 

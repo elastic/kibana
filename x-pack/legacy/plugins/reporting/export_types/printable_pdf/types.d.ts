@@ -13,6 +13,7 @@ export interface JobParamsPDF {
   title: string;
   relativeUrls: string[];
   browserTimezone: string;
+  browserLocales: string[];
   layout: LayoutInstance;
 }
 
@@ -20,6 +21,7 @@ export interface JobParamsPDF {
 export interface JobDocPayloadPDF extends JobDocPayload<JobParamsPDF> {
   basePath?: string;
   browserTimezone: string;
+  browserLocales: string[];
   forceNow?: string;
   layout: LayoutParams;
   relativeUrls: string[];

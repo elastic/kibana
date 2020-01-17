@@ -103,6 +103,8 @@
 # and all requests.
 #logging.verbose: false
 
+logging.events.log: ['warning', 'error', 'fatal', 'info', 'reporting']
+
 # Set the interval in milliseconds to sample system and process performance
 # metrics. Minimum is 100ms. Defaults to 5000.
 #ops.interval: 5000

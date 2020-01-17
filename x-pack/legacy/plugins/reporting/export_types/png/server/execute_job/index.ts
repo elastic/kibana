@@ -45,6 +45,7 @@ export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFa
           jobLogger,
           hashUrl,
           job.browserTimezone,
+          job.browserLocales,
           conditionalHeaders,
           job.layout
         );

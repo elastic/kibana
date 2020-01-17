@@ -11,6 +11,7 @@ interface jobParameters {
   objectType: string;
   title: string;
   browserTimezone: string;
+  browserLocales: string[];
   relativeUrls: string[];
   layout: {
     id: string;
@@ -23,6 +24,7 @@ interface jobParameters {
 ----
 
 `jobParameters.browserTimezone` is a string that appears in the tz database
+`jobParameters.browserLocales` is an ordered array of locale codes such as "en-US"
 `jobParameters.layout.id` presently only accepts "print" and "preserve_layout"
 `jobParameters.layout.dimensions` is only currently used by "preserve_layout"
 

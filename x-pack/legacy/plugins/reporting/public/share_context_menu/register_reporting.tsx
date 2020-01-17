@@ -42,10 +42,16 @@ async function reportingProvider() {
           ? moment.tz.guess()
           : chrome.getUiSettingsClient().get('dateFormat:tz');
 
+      const browserLocales =
+        chrome.getUiSettingsClient().get('format:defaultLocale') === 'detect'
+          ? navigator.languages?.concat(['en']) || [navigator.language, 'en']
+          : [chrome.getUiSettingsClient().get('format:defaultLocale')];
+
       return {
         ...sharingData,
         objectType,
         browserTimezone,
+        browserLocales,
         relativeUrls: [relativeUrl],
       };
     };
@@ -59,10 +65,16 @@ async function reportingProvider() {
           ? moment.tz.guess()
           : chrome.getUiSettingsClient().get('dateFormat:tz');
 
+      const browserLocales =
+        chrome.getUiSettingsClient().get('format:defaultLocale') === 'detect'
+          ? navigator.languages?.concat(['en']) || [navigator.language, 'en']
+          : [chrome.getUiSettingsClient().get('format:defaultLocale')];
+
       return {
         ...sharingData,
         objectType,
         browserTimezone,
+        browserLocales,
         relativeUrl,
       };
     };

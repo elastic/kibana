@@ -22,6 +22,7 @@ export function generatePngObservableFactory(
     logger: LevelLogger,
     url: string,
     browserTimezone: string,
+    browserLocales: string[],
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
   ): Rx.Observable<Buffer> {
@@ -36,6 +37,7 @@ export function generatePngObservableFactory(
       conditionalHeaders,
       layout,
       browserTimezone,
+      browserLocales,
     }).pipe(
       map(([{ screenshots }]) => {
         if (screenshots.length !== 1) {

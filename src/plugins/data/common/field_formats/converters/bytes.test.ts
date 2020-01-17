@@ -31,13 +31,13 @@ describe('BytesFormat', () => {
   test('default pattern', () => {
     const formatter = new BytesFormat({}, getConfig);
 
-    expect(formatter.convert(5150000)).toBe('4.911MB');
+    expect(formatter.convert(5150123)).toBe('4.9MB');
   });
 
   test('custom pattern and locale', () => {
     config['format:number:defaultLocale'] = 'de';
-    const formatter = new BytesFormat({ pattern: '0,0.[0]b' }, getConfig);
+    const formatter = new BytesFormat({ pattern: '0,0.[000]b' }, getConfig);
 
-    expect(formatter.convert('10500')).toBe('10,3KB');
+    expect(formatter.convert('10513')).toBe('10,267KB');
   });
 });

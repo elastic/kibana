@@ -21,6 +21,11 @@ import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 
+const numeralLocaleToBrowser: Record<string, string> = {
+  'be-nl': 'nl-BE',
+  chs: 'zh-CN',
+};
+
 export abstract class IntlNumberFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.NUMBER;
 
@@ -41,9 +46,20 @@ export abstract class IntlNumberFormat extends FieldFormat {
 
     if (isNaN(val)) return '';
 
+    const locales = this.getLocales();
+    const inst = new Intl.NumberFormat(locales, this.getArguments());
+
+    return inst.format(val);
+  }
+
+  getLocales = () => {
+    const numeralLocale = this.getConfig?.('format:number:defaultLocale');
     const defaultLocale = this.getConfig?.('format:defaultLocale');
     let locales;
-    if (defaultLocale === 'detect') {
+    if (defaultLocale === 'numeral') {
+      // Special case where numeral uses an invalid locale
+      locales = [numeralLocaleToBrowser[numeralLocale] || numeralLocale, 'en'];
+    } else if (defaultLocale === 'detect') {
       locales = navigator.languages
         ? navigator.languages.concat(['en'])
         : [navigator.language, defaultLocale, 'en'];
@@ -52,11 +68,8 @@ export abstract class IntlNumberFormat extends FieldFormat {
     } else {
       locales = ['en'];
     }
-
-    const inst = new Intl.NumberFormat(locales, this.getArguments());
-
-    return inst.format(val);
-  }
+    return locales;
+  };
 
   textConvert: TextContextTypeConvert = val => {
     return this.getConvertedValue(val);

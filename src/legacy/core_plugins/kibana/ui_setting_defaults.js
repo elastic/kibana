@@ -36,9 +36,15 @@ export function getUiSettingDefaults() {
     }),
   ];
 
-  const locales = ['detect', ...i18n.getKnownLocales()];
+  const locales = ['numeral', 'detect', ...i18n.getKnownLocales()];
   const localeDisplay = Object.fromEntries(
     [
+      [
+        'numeral',
+        i18n.translate('kbn.advancedSettings.locale.useNumeralLocale', {
+          defaultMessage: 'Use the same value as format:number:defaultLocale',
+        }),
+      ],
       [
         'detect',
         i18n.translate('kbn.advancedSettings.locale.detectFromBrowserLabel', {
@@ -745,7 +751,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.format.formattingLocaleTitle', {
         defaultMessage: 'Default number display locale',
       }),
-      value: 'detect',
+      value: 'numeral',
       type: 'select',
       options: locales,
       optionLabels: localeDisplay,

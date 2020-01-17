@@ -37,6 +37,7 @@ export function generatePdfObservableFactory(
     title: string,
     urls: string[],
     browserTimezone: string,
+    browserLocales: string[],
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
     logo?: string
@@ -48,6 +49,7 @@ export function generatePdfObservableFactory(
       conditionalHeaders,
       layout,
       browserTimezone,
+      browserLocales,
     }).pipe(
       mergeMap(async urlScreenshots => {
         const pdfOutput = pdf.create(layout, logo);

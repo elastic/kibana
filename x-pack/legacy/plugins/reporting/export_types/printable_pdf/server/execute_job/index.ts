@@ -44,12 +44,13 @@ export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFa
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls({ server, job });
 
-        const { browserTimezone, layout, title } = job;
+        const { browserTimezone, browserLocales, layout, title } = job;
         return generatePdfObservable(
           jobLogger,
           title,
           urls,
           browserTimezone,
+          browserLocales,
           conditionalHeaders,
           layout,
           logo

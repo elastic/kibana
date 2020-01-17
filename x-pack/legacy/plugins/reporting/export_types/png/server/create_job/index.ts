@@ -21,7 +21,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   const crypto = cryptoFactory(server);
 
   return async function createJob(
-    { objectType, title, relativeUrl, browserTimezone, layout }: JobParamsPNG,
+    { objectType, title, relativeUrl, browserTimezone, browserLocales, layout }: JobParamsPNG,
     headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ) {
@@ -35,6 +35,7 @@ export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
       relativeUrl,
       headers: serializedEncryptedHeaders,
       browserTimezone,
+      browserLocales,
       layout,
       basePath: request.getBasePath(),
       forceNow: new Date().toISOString(),

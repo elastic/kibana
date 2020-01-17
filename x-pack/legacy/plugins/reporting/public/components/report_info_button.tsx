@@ -116,6 +116,10 @@ export class ReportInfoButton extends Component<Props, State> {
           title: 'Browser Timezone',
           description: get(info, 'payload.browserTimezone') || NA,
         },
+        {
+          title: 'Browser Locales',
+          description: get(info, 'payload.browserLocales')?.join(', ') || NA,
+        },
       ],
       payload: [
         {

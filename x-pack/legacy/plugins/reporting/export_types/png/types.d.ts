@@ -13,6 +13,7 @@ export interface JobParamsPNG {
   title: string;
   relativeUrl: string;
   browserTimezone: string;
+  browserLocales: string[];
   layout: LayoutInstance;
 }
 
@@ -20,6 +21,7 @@ export interface JobParamsPNG {
 export interface JobDocPayloadPNG extends JobDocPayload<JobParamsPNG> {
   basePath?: string;
   browserTimezone: string;
+  browserLocales: string[];
   forceNow?: string;
   layout: LayoutParams;
   relativeUrl: string;

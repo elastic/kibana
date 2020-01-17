@@ -88,7 +88,11 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { viewport, browserTimezone }: { viewport: BrowserConfig['viewport']; browserTimezone: string },
+    {
+      viewport,
+      browserTimezone,
+      browserLocales,
+    }: { viewport: BrowserConfig['viewport']; browserTimezone: string; browserLocales: string[] },
     pLogger: Logger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
@@ -100,12 +104,13 @@ export class HeadlessChromiumDriverFactory {
       let browser: Browser;
       let page: Page;
       try {
+        logger.debug(`Browser locales ${browserLocales}`);
         browser = await puppeteerLaunch({
           pipe: !this.browserConfig.inspect,
           userDataDir: this.userDataDir,
           executablePath: this.binaryPath,
           ignoreHTTPSErrors: true,
-          args: chromiumArgs,
+          args: [...chromiumArgs, `--lang=${browserLocales.join(',')}`],
           env: {
             TZ: browserTimezone,
           },
@@ -121,6 +126,7 @@ export class HeadlessChromiumDriverFactory {
 
         logger.debug(`Browser page driver created`);
       } catch (err) {
+        logger.warn(err);
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
         throw err;
       }

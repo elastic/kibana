@@ -14,6 +14,7 @@ export interface ScreenshotObservableOpts {
   conditionalHeaders: ConditionalHeaders;
   layout: LayoutInstance;
   browserTimezone: string;
+  browserLocales: string[];
 }
 
 export interface TimeRange {
