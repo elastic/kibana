@@ -49,6 +49,7 @@ exports.EcsEventLogProperties = [
   'event.start',
   'event.duration',
   'event.end',
+  'error.message',
   'user.name',
   'kibana.server_uuid',
   'kibana.namespace',

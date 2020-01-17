@@ -43,6 +43,11 @@ export const EventSchema = schema.maybe(
         end: ecsDate(),
       })
     ),
+    error: schema.maybe(
+      schema.object({
+        message: ecsString(),
+      })
+    ),
     user: schema.maybe(
       schema.object({
         name: ecsString(),

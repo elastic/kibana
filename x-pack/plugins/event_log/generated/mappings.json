@@ -43,6 +43,15 @@
             },
             "dynamic": "strict"
         },
+        "error": {
+            "properties": {
+                "message": {
+                    "norms": false,
+                    "type": "text"
+                }
+            },
+            "dynamic": "strict"
+        },
         "user": {
             "properties": {
                 "name": {
