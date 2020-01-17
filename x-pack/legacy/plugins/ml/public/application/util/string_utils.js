@@ -309,7 +309,7 @@ export function guessTimeFormat(time) {
 export function toLocaleString(x) {
   let result = x;
   if (x && typeof x === 'number') {
-    const parts = (x % 1 === 0 ? x.toString() : x.toFixed(3)).split('.');
+    const parts = x.toString().split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     result = parts.join('.');
   }
