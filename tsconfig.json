@@ -51,7 +51,8 @@
     "types": [
       "node",
       "jest",
-      "react"
+      "react",
+      "flot"
     ]
   },
   "include": [

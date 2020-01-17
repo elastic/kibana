@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import toMS from '../../server/lib/to_milliseconds.js';
+import { toMS } from './to_milliseconds';
 
 // Totally cribbed this from Kibana 3.
 // I bet there's something similar in the Kibana 4 code. Somewhere. Somehow.
-function roundInterval(interval) {
+function roundInterval(interval: number) {
   switch (true) {
     case interval <= 500: // <= 0.5s
       return '100ms';
@@ -58,9 +58,24 @@ function roundInterval(interval) {
   }
 }
 
-export function calculateInterval(from, to, size, interval, min) {
-  if (interval !== 'auto') return interval;
-  const dateMathInterval = roundInterval((to - from) / size);
-  if (toMS(dateMathInterval) < toMS(min)) return min;
+export function calculateInterval(
+  from: number,
+  to: number,
+  size: number,
+  interval: string,
+  min: string
+) {
+  if (interval !== 'auto') {
+    return interval;
+  }
+
+  const dateMathInterval: string = roundInterval((to - from) / size);
+  const dateMathIntervalMs = toMS(dateMathInterval);
+  const minMs = toMS(min);
+
+  if (dateMathIntervalMs !== undefined && minMs !== undefined && dateMathIntervalMs < minMs) {
+    return min;
+  }
+
   return dateMathInterval;
 }

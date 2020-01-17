@@ -17,5 +17,9 @@
  * under the License.
  */
 
-import './_tick_generator.js';
-describe('Timelion', function() {});
+import { PluginInitializerContext } from '../../../../core/public';
+import { TimelionVisPlugin as Plugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}

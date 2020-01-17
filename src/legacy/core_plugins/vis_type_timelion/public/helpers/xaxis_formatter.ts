@@ -20,12 +20,13 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'kibana/public';
 
-export function xaxisFormatterProvider(config: any) {
+export function xaxisFormatterProvider(config: IUiSettingsClient) {
   function getFormat(esInterval: any) {
     const parts = esInterval.match(/(\d+)(ms|s|m|h|d|w|M|y|)/);
 
-    if (parts == null || parts[1] == null || parts[2] == null) {
+    if (parts === null || parts[1] === null || parts[2] === null) {
       throw new Error(
         i18n.translate('timelion.panels.timechart.unknownIntervalErrorMessage', {
           defaultMessage: 'Unknown interval',
@@ -48,7 +49,5 @@ export function xaxisFormatterProvider(config: any) {
     return config.get('dateFormat');
   }
 
-  return function(esInterval: any) {
-    return getFormat(esInterval);
-  };
+  return (esInterval: any) => getFormat(esInterval);
 }

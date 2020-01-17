@@ -33,6 +33,7 @@
 
   .ngLegendValue {
     color: $euiTextColor;
+    cursor: pointer;
 
     &:focus,
     &:hover {
