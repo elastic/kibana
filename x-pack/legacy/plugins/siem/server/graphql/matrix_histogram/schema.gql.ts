@@ -9,7 +9,7 @@ import gql from 'graphql-tag';
 export const matrixHistogramSchema = gql`
   type MatrixOverTimeHistogramData {
     x: Float
-    y: String
+    y: Float
     g: String
   }
 

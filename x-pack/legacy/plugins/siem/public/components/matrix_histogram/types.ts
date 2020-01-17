@@ -44,7 +44,6 @@ export interface MatrixHistogramBasicProps {
 export type HistogramType = 'authentications' | 'anomalies' | 'events' | 'alerts' | 'dns';
 
 export interface MatrixHistogramQueryProps {
-  dataKey: string;
   endDate: number;
   errorMessage: string;
   filterQuery?: ESQuery | string | undefined;

@@ -36,7 +36,7 @@ export const mockAlertsHistogramDataResponse = {
     hits: [],
   },
   aggregations: {
-    alertsByModuleGroup: {
+    alertsGroup: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 802087,
       buckets: [

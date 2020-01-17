@@ -29,9 +29,7 @@ import {
 import { ChartSeriesData } from '../charts/common';
 import { InspectButtonContainer } from '../inspect';
 
-export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
-  MatrixHistogramQueryProps> = ({
-  dataKey,
+const MatrixHistogramComponent: React.FC<MatrixHistogramProps & MatrixHistogramQueryProps> = ({
   defaultStackByOption,
   endDate,
   errorMessage,
@@ -95,7 +93,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
 
   const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
     {
-      dataKey,
       endDate,
       errorMessage,
       filterQuery,
@@ -171,20 +168,20 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
         {loading ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
         ) : (
-          <>
-            <BarChart barChart={barChartData} configs={barchartConfigs} />
+            <>
+              <BarChart barChart={barChartData} configs={barchartConfigs} />
 
-            {loading && (
-              <Loader
-                overlay
-                overlayBackground={
-                  darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-                }
-                size="xl"
-              />
-            )}
-          </>
-        )}
+              {loading && (
+                <Loader
+                  overlay
+                  overlayBackground={
+                    darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+                  }
+                  size="xl"
+                />
+              )}
+            </>
+          )}
       </Panel>
     </InspectButtonContainer>
   ) : null;

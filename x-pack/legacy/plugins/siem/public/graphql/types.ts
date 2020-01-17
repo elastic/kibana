@@ -1555,7 +1555,7 @@ export interface MatrixHistogramOverTimeData {
 export interface MatrixOverTimeHistogramData {
   x?: Maybe<number>;
 
-  y?: Maybe<string>;
+  y?: Maybe<number>;
 
   g?: Maybe<string>;
 }
@@ -3286,7 +3286,7 @@ export namespace GetMatrixHistogramQuery {
 
     x: Maybe<number>;
 
-    y: Maybe<string>;
+    y: Maybe<number>;
 
     g: Maybe<string>;
   };

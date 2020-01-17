@@ -1557,7 +1557,7 @@ export interface MatrixHistogramOverTimeData {
 export interface MatrixOverTimeHistogramData {
   x?: Maybe<number>;
 
-  y?: Maybe<string>;
+  y?: Maybe<number>;
 
   g?: Maybe<string>;
 }
@@ -6794,7 +6794,7 @@ export namespace MatrixOverTimeHistogramDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = MatrixOverTimeHistogramData> {
     x?: XResolver<Maybe<number>, TypeParent, TContext>;
 
-    y?: YResolver<Maybe<string>, TypeParent, TContext>;
+    y?: YResolver<Maybe<number>, TypeParent, TContext>;
 
     g?: GResolver<Maybe<string>, TypeParent, TContext>;
   }
@@ -6805,7 +6805,7 @@ export namespace MatrixOverTimeHistogramDataResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type YResolver<
-    R = Maybe<string>,
+    R = Maybe<number>,
     Parent = MatrixOverTimeHistogramData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

@@ -26,20 +26,20 @@ import { buildAuthenticationsOverTimeQuery } from './query.authentications_over_
 import { AuthenticationHit } from '../authentications/types';
 
 export class ElasticsearchMatrixHistogramAdapter implements MatrixHistogramAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(private readonly framework: FrameworkAdapter) { }
 
   public async getAlertsHistogramData(
     request: FrameworkRequest,
     options: MatrixHistogramRequestOptions
   ): Promise<MatrixHistogramOverTimeData> {
-    const dsl = buildAlertsHistogramQuery(options.histogramType)(options);
+    const dsl = buildAlertsHistogramQuery(options);
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',
       dsl
     );
     const totalCount = getOr(0, 'hits.total.value', response);
-    const matrixHistogramData = getOr([], 'aggregations.alertsByModuleGroup.buckets', response);
+    const matrixHistogramData = getOr([], 'aggregations.alertsGroup.buckets', response);
     const inspect = {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
@@ -242,9 +242,9 @@ export const getTotalEventsOverTime = (
 ): MatrixOverTimeHistogramData[] => {
   return data && data.length > 0
     ? data.map<MatrixOverTimeHistogramData>(({ key, doc_count }) => ({
-        x: key,
-        y: doc_count,
-        g: 'total events',
-      }))
+      x: key,
+      y: doc_count,
+      g: 'total events',
+    }))
     : [];
 };

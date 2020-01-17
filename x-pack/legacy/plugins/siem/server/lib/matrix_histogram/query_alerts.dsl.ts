@@ -83,7 +83,7 @@ export const buildAlertsHistogramQuery = ({
       },
     };
     return {
-      alertsByModuleGroup: {
+      alertsGroup: {
         terms: {
           field: stackByField,
           missing: 'All others',

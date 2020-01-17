@@ -20,7 +20,6 @@ import { MatrixHistogramGqlQuery } from './index.gql_query';
 import { GetMatrixHistogramQuery } from '../../graphql/types';
 
 export const useQuery = <Hit, Aggs, TCache = object>({
-  dataKey,
   endDate,
   errorMessage,
   filterQuery,
@@ -100,7 +99,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [defaultIndex, filterQuery, isInspected, stackByField, startDate, endDate]);
+  }, [defaultIndex, filterQuery, isInspected, stackByField, startDate, endDate, data]);
 
   return { data, loading, inspect, totalCount, refetch };
 };
