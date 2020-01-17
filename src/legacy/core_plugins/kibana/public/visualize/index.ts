@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import 'ui/collapsible_sidebar'; // used in default editor
-import 'ui/vis/editors/default/sidebar';
-
 import {
   IPrivate,
   legacyChrome,
