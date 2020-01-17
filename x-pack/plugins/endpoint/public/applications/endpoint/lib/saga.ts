@@ -35,6 +35,18 @@ export interface SagaContext<TAction extends AnyAction = AnyAction> {
   dispatch: Dispatch<TAction>;
 }
 
+export interface SagaMiddleware extends Middleware {
+  /**
+   * Start the saga. Should be called after the `store` has been created
+   */
+  start: () => void;
+
+  /**
+   * Stop the saga by exiting the internal generator `for await...of` loop.
+   */
+  stop: () => void;
+}
+
 const noop = () => {};
 
 /**
@@ -43,7 +55,7 @@ const noop = () => {};
  * @param {Saga} saga The `saga` should initialize a long-running `for await...of` loop against
  * the return value of the `actionsAndState()` method provided by the `SagaContext`.
  *
- * @return {Middleware}
+ * @return {SagaMiddleware}
  *
  * @example
  *
@@ -64,22 +76,33 @@ const noop = () => {};
  * //....
  * const store = createStore(reducers, [ endpointsSagaMiddleware ]);
  */
-export function createSagaMiddleware(saga: Saga): Middleware {
+export function createSagaMiddleware(saga: Saga): SagaMiddleware {
   const iteratorInstances = new Set<IteratorInstance>();
   let runSaga: () => void = noop;
+  let running = false;
 
   async function* getActionsAndStateIterator(): StoreActionsAndState {
     const instance: IteratorInstance = { queue: [], nextResolve: null };
     iteratorInstances.add(instance);
+    running = true;
+
     try {
-      while (true) {
-        yield await nextActionAndState();
+      while (running) {
+        const actionAndState = await nextActionAndState();
+
+        // while waiting for the nextActionAndState, the saga could have been stopped.
+        if (!running) {
+          continue;
+        }
+
+        yield actionAndState;
       }
     } finally {
       // If the consumer stops consuming this (e.g. `break` or `return` is called in the `for await`
       // then this `finally` block will run and unregister this instance and reset `runSaga`
       iteratorInstances.delete(instance);
       runSaga = noop;
+      running = false;
     }
 
     function nextActionAndState() {
@@ -109,7 +132,6 @@ export function createSagaMiddleware(saga: Saga): Middleware {
         actionsAndState: getActionsAndStateIterator,
         dispatch,
       });
-      runSaga();
     }
     return (next: Dispatch<AnyAction>) => (action: AnyAction) => {
       // Call the next dispatch method in the middleware chain.
@@ -124,6 +146,20 @@ export function createSagaMiddleware(saga: Saga): Middleware {
       return returnValue;
     };
   }
+
+  middleware.start = () => {
+    runSaga();
+  };
+
+  middleware.stop = () => {
+    running = false;
+
+    // In order to actually stop the iterator instances, we need to force the loop to run one last time
+    enqueue({
+      action: { type: '' },
+      state: {} as GlobalState,
+    });
+  };
 
   return middleware;
 }
