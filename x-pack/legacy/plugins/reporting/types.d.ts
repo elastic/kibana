@@ -340,3 +340,20 @@ export interface AbsoluteURLFactoryOptions {
   hostname: string;
   port: string | number;
 }
+
+export interface InterceptedRequest {
+  requestId: string;
+  request: {
+    url: string;
+    method: string;
+    headers: {
+      [key: string]: string;
+    };
+    initialPriority: string;
+    referrerPolicy: string;
+  };
+  frameId: string;
+  resourceType: string;
+}
+
+export { ServerFacade };

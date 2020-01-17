@@ -136,6 +136,7 @@
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
     "@kbn/ui-shared-deps": "1.0.0",
+    "@types/flot": "^0.0.31",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.clonedeep": "^4.5.4",
     "@types/node-forge": "^0.9.0",
