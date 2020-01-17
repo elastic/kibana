@@ -196,6 +196,12 @@ export const networkSchema = gql`
     inspect: Inspect
   }
 
+  type NetworkDsOverTimeData {
+    inspect: Inspect
+    matrixHistogramData: [MatrixOverTimeHistogramData!]!
+    totalCount: Float!
+  }
+
   extend type Source {
     NetworkTopCountries(
       id: String
@@ -223,9 +229,16 @@ export const networkSchema = gql`
       isPtrIncluded: Boolean!
       pagination: PaginationInputPaginated!
       sort: NetworkDnsSortField!
+      stackByField: String
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkDnsData!
+    NetworkDnsHistogram(
+      filterQuery: String
+      defaultIndex: [String!]!
+      timerange: TimerangeInput!
+      stackByField: String
+    ): NetworkDsOverTimeData!
     NetworkHttp(
       id: String
       filterQuery: String

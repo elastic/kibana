@@ -6,11 +6,12 @@
 
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
 
-import { forkJoin, of } from 'rxjs';
-import { mergeMap, tap } from 'rxjs/operators';
+import { forkJoin, of, Observable, Subject } from 'rxjs';
+import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
-import { explorerChartsContainerServiceFactory } from '../explorer_charts/explorer_charts_container_service';
+import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
 import { VIEW_BY_JOB_LABEL } from '../explorer_constants';
 import { explorerService } from '../explorer_dashboard_service';
 import {
@@ -25,35 +26,82 @@ import {
   loadTopInfluencers,
   loadViewBySwimlane,
   loadViewByTopFieldValuesForSelectedTime,
+  AppStateSelectedCells,
+  ExplorerJob,
+  TimeRangeBounds,
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
 
+// Memoize the data fetching methods.
+// wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
+// which will be considered by memoizeOne. This way we can add the `lastRefresh` argument as a
+// caching parameter without having to change all the original functions which shouldn't care
+// about this parameter. The generic type T retains and returns the type information of
+// the original function.
 const memoizeIsEqual = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
+const wrapWithLastRefreshArg = <T extends (...a: any[]) => any>(func: T) => {
+  return function(lastRefresh: number, ...args: Parameters<T>): ReturnType<T> {
+    return func.apply(null, args);
+  };
+};
+const memoize = <T extends (...a: any[]) => any>(func: T) => {
+  return memoizeOne(wrapWithLastRefreshArg<T>(func), memoizeIsEqual);
+};
 
-// Memoize the data fetching methods
-// TODO: We need to track an attribute that allows refetching when the date picker
-// triggers a refresh, otherwise we'll get back the stale data. Note this was also
-// an issue with the previous version and the custom caching done within the component.
-const memoizedLoadAnnotationsTableData = memoizeOne(loadAnnotationsTableData, memoizeIsEqual);
-const memoizedLoadDataForCharts = memoizeOne(loadDataForCharts, memoizeIsEqual);
-const memoizedLoadFilteredTopInfluencers = memoizeOne(loadFilteredTopInfluencers, memoizeIsEqual);
-const memoizedLoadOverallData = memoizeOne(loadOverallData, memoizeIsEqual);
-const memoizedLoadTopInfluencers = memoizeOne(loadTopInfluencers, memoizeIsEqual);
-const memoizedLoadViewBySwimlane = memoizeOne(loadViewBySwimlane, memoizeIsEqual);
-const memoizedLoadAnomaliesTableData = memoizeOne(loadAnomaliesTableData, memoizeIsEqual);
+const memoizedAnomalyDataChange = memoize<typeof anomalyDataChange>(anomalyDataChange);
+const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
+  loadAnnotationsTableData
+);
+const memoizedLoadDataForCharts = memoize<typeof loadDataForCharts>(loadDataForCharts);
+const memoizedLoadFilteredTopInfluencers = memoize<typeof loadFilteredTopInfluencers>(
+  loadFilteredTopInfluencers
+);
+const memoizedLoadOverallData = memoize(loadOverallData);
+const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
+const memoizedLoadViewBySwimlane = memoize(loadViewBySwimlane);
+const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
 
 const dateFormatTz = getDateFormatTz();
+
+export interface LoadExplorerDataConfig {
+  bounds: TimeRangeBounds;
+  influencersFilterQuery: any;
+  lastRefresh: number;
+  noInfluencersConfigured: boolean;
+  selectedCells: AppStateSelectedCells | undefined;
+  selectedJobs: ExplorerJob[];
+  swimlaneBucketInterval: any;
+  swimlaneLimit: number;
+  tableInterval: string;
+  tableSeverity: number;
+  viewBySwimlaneFieldName: string;
+}
+
+export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
+  return (
+    arg !== undefined &&
+    arg.bounds !== undefined &&
+    arg.selectedJobs !== undefined &&
+    arg.selectedJobs !== null &&
+    arg.viewBySwimlaneFieldName !== undefined
+  );
+};
 
 /**
  * Fetches the data necessary for the Anomaly Explorer using observables.
  *
- * @param state ExplorerState
+ * @param config LoadExplorerDataConfig
  *
  * @return Partial<ExplorerState>
  */
-export function loadExplorerData(state: ExplorerState) {
+function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<ExplorerState>> {
+  if (!isLoadExplorerDataConfig(config)) {
+    return of({});
+  }
+
   const {
     bounds,
+    lastRefresh,
     influencersFilterQuery,
     noInfluencersConfigured,
     selectedCells,
@@ -63,19 +111,12 @@ export function loadExplorerData(state: ExplorerState) {
     tableInterval,
     tableSeverity,
     viewBySwimlaneFieldName,
-  } = state;
-
-  if (selectedJobs === null || bounds === undefined || viewBySwimlaneFieldName === undefined) {
-    return of({});
-  }
-
-  // TODO This factory should be refactored so we can load the charts using memoization.
-  const updateCharts = explorerChartsContainerServiceFactory(explorerService.setCharts);
+  } = config;
 
   const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
 
   const jobIds =
-    selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
+    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
       ? selectedCells.lanes
       : selectedJobs.map(d => d.id);
 
@@ -89,12 +130,14 @@ export function loadExplorerData(state: ExplorerState) {
   // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
   return forkJoin({
     annotationsData: memoizedLoadAnnotationsTableData(
+      lastRefresh,
       selectedCells,
       selectedJobs,
       swimlaneBucketInterval.asSeconds(),
       bounds
     ),
     anomalyChartRecords: memoizedLoadDataForCharts(
+      lastRefresh,
       jobIds,
       timerange.earliestMs,
       timerange.latestMs,
@@ -105,6 +148,7 @@ export function loadExplorerData(state: ExplorerState) {
     influencers:
       selectionInfluencers.length === 0
         ? memoizedLoadTopInfluencers(
+            lastRefresh,
             jobIds,
             timerange.earliestMs,
             timerange.latestMs,
@@ -113,8 +157,14 @@ export function loadExplorerData(state: ExplorerState) {
             influencersFilterQuery
           )
         : Promise.resolve({}),
-    overallState: memoizedLoadOverallData(selectedJobs, swimlaneBucketInterval, bounds),
+    overallState: memoizedLoadOverallData(
+      lastRefresh,
+      selectedJobs,
+      swimlaneBucketInterval,
+      bounds
+    ),
     tableData: memoizedLoadAnomaliesTableData(
+      lastRefresh,
       selectedCells,
       selectedJobs,
       dateFormatTz,
@@ -126,7 +176,7 @@ export function loadExplorerData(state: ExplorerState) {
       influencersFilterQuery
     ),
     topFieldValues:
-      selectedCells !== null && selectedCells.showTopFieldValues === true
+      selectedCells !== undefined && selectedCells.showTopFieldValues === true
         ? loadViewByTopFieldValuesForSelectedTime(
             timerange.earliestMs,
             timerange.latestMs,
@@ -143,10 +193,22 @@ export function loadExplorerData(state: ExplorerState) {
     tap(explorerService.setViewBySwimlaneLoading),
     // Trigger a side-effect to update the charts.
     tap(({ anomalyChartRecords }) => {
-      if (selectedCells !== null && Array.isArray(anomalyChartRecords)) {
-        updateCharts(anomalyChartRecords, timerange.earliestMs, timerange.latestMs);
+      if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
+        memoizedAnomalyDataChange(
+          lastRefresh,
+          anomalyChartRecords,
+          timerange.earliestMs,
+          timerange.latestMs,
+          tableSeverity
+        );
       } else {
-        updateCharts([], timerange.earliestMs, timerange.latestMs);
+        memoizedAnomalyDataChange(
+          lastRefresh,
+          [],
+          timerange.earliestMs,
+          timerange.latestMs,
+          tableSeverity
+        );
       }
     }),
     // Load view-by swimlane data and filtered top influencers.
@@ -161,6 +223,7 @@ export function loadExplorerData(state: ExplorerState) {
             anomalyChartRecords !== undefined &&
             anomalyChartRecords.length > 0
               ? memoizedLoadFilteredTopInfluencers(
+                  lastRefresh,
                   jobIds,
                   timerange.earliestMs,
                   timerange.latestMs,
@@ -171,6 +234,7 @@ export function loadExplorerData(state: ExplorerState) {
                 )
               : Promise.resolve(influencers),
           viewBySwimlaneState: memoizedLoadViewBySwimlane(
+            lastRefresh,
             topFieldValues,
             {
               earliest: overallState.overallSwimlaneData.earliest,
@@ -183,7 +247,10 @@ export function loadExplorerData(state: ExplorerState) {
             noInfluencersConfigured
           ),
         }),
-      ({ annotationsData, overallState, tableData }, { influencers, viewBySwimlaneState }) => {
+      (
+        { annotationsData, overallState, tableData },
+        { influencers, viewBySwimlaneState }
+      ): Partial<ExplorerState> => {
         return {
           annotationsData,
           influencers,
@@ -195,3 +262,13 @@ export function loadExplorerData(state: ExplorerState) {
     )
   );
 }
+
+const loadExplorerData$ = new Subject<LoadExplorerDataConfig>();
+const explorerData$ = loadExplorerData$.pipe(
+  switchMap((config: LoadExplorerDataConfig) => loadExplorerData(config))
+);
+
+export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
+  const explorerData = useObservable(explorerData$);
+  return [explorerData, c => loadExplorerData$.next(c)];
+};

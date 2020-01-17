@@ -74,6 +74,7 @@ const basicSuperSelectOptions = [
 const getBasicSelectableOptions = (timelineId: string) => [
   {
     description: i18n.DEFAULT_TIMELINE_DESCRIPTION,
+    favorite: [],
     label: i18n.DEFAULT_TIMELINE_TITLE,
     id: null,
     title: i18n.DEFAULT_TIMELINE_TITLE,
@@ -143,26 +144,33 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={`${option.favorite ? 'starFilled' : 'starEmpty'}`} />
+          <EuiIcon
+            type={`${
+              option.favorite != null && isEmpty(option.favorite) ? 'starEmpty' : 'starFilled'
+            }`}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }, []);
 
-  const handleTimelineChange = useCallback(options => {
-    const selectedTimeline = options.filter(
-      (option: { checked: string }) => option.checked === 'on'
-    );
-    if (selectedTimeline != null && selectedTimeline.length > 0 && onTimelineChange != null) {
-      onTimelineChange(
-        isEmpty(selectedTimeline[0].title)
-          ? i18nTimeline.UNTITLED_TIMELINE
-          : selectedTimeline[0].title,
-        selectedTimeline[0].id
+  const handleTimelineChange = useCallback(
+    options => {
+      const selectedTimeline = options.filter(
+        (option: { checked: string }) => option.checked === 'on'
       );
-    }
-    setIsPopoverOpen(false);
-  }, []);
+      if (selectedTimeline != null && selectedTimeline.length > 0) {
+        onTimelineChange(
+          isEmpty(selectedTimeline[0].title)
+            ? i18nTimeline.UNTITLED_TIMELINE
+            : selectedTimeline[0].title,
+          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id
+        );
+      }
+      setIsPopoverOpen(false);
+    },
+    [onTimelineChange]
+  );
 
   const handleOnScroll = useCallback(
     (
@@ -290,7 +298,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                   (t, index) =>
                     ({
                       description: t.description,
-                      favorite: !isEmpty(t.favorite),
+                      favorite: t.favorite,
                       label: t.title,
                       id: t.savedObjectId,
                       key: `${t.title}-${index}`,

@@ -28,5 +28,7 @@ export default function({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./ui_settings'));
     loadTestFile(require.resolve('./top_nav'));
     loadTestFile(require.resolve('./application_leave_confirm'));
+    loadTestFile(require.resolve('./application_status'));
+    loadTestFile(require.resolve('./rendering'));
   });
 }

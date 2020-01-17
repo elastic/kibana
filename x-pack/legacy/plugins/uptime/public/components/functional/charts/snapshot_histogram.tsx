@@ -14,7 +14,7 @@ import { getChartDateLabel } from '../../../lib/helper';
 import { withUptimeGraphQL, UptimeGraphQLQueryProps } from '../../higher_order';
 import { snapshotHistogramQuery } from '../../../queries/snapshot_histogram_query';
 import { ChartWrapper } from './chart_wrapper';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../../contexts';
 import { ResponsiveWrapperProps, withResponsiveWrapper } from '../../higher_order';
 import { HistogramResult } from '../../../../common/domain_types';
 
@@ -53,7 +53,7 @@ export const SnapshotHistogramComponent: React.FC<Props> = ({
 }: Props) => {
   const {
     colors: { danger, gray },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
   if (!data || !data.queryResult)
     /**
      * TODO: the Fragment, EuiTitle, and EuiPanel should be extracted to a dumb component

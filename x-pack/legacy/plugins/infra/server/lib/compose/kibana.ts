@@ -12,7 +12,7 @@ import { InfraFieldsDomain } from '../domains/fields_domain';
 import { InfraLogEntriesDomain } from '../domains/log_entries_domain';
 import { InfraMetricsDomain } from '../domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from '../infra_types';
-import { InfraLogAnalysis } from '../log_analysis';
+import { LogEntryCategoriesAnalysis, LogEntryRateAnalysis } from '../log_analysis';
 import { InfraSnapshot } from '../snapshot';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
@@ -29,7 +29,8 @@ export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServ
     sources,
   });
   const snapshot = new InfraSnapshot({ sources, framework });
-  const logAnalysis = new InfraLogAnalysis({ framework });
+  const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
+  const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
 
   // TODO: separate these out individually and do away with "domains" as a temporary group
   const domainLibs: InfraDomainLibs = {
@@ -45,7 +46,8 @@ export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServ
   const libs: InfraBackendLibs = {
     configuration: config, // NP_TODO: Do we ever use this anywhere?
     framework,
-    logAnalysis,
+    logEntryCategoriesAnalysis,
+    logEntryRateAnalysis,
     snapshot,
     sources,
     sourceStatus,

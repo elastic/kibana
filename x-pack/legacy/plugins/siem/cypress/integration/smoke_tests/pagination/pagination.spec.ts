@@ -18,9 +18,16 @@ import {
 import { DEFAULT_TIMEOUT, loginAndWaitForPage, waitForTableLoad } from '../../lib/util/helpers';
 
 describe('Pagination', () => {
-  it('pagination updates results and page number', () => {
+  before(() => {
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
+  });
+
+  afterEach(() => {
+    cy.get(getPageButtonSelector(0)).click({ force: true });
+  });
+
+  it('pagination updates results and page number', () => {
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
 
     cy.get(getDraggableField('process.name'))
@@ -42,8 +49,6 @@ describe('Pagination', () => {
   });
 
   it('pagination keeps track of page results when tabs change', () => {
-    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
-    waitForTableLoad(UNCOMMON_PROCCESSES_TABLE);
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
     let thirdPageResult: string;
     cy.get(getPageButtonSelector(2)).click({ force: true });
@@ -78,7 +83,6 @@ describe('Pagination', () => {
    * when we figure out a way to really mock the data, we should come back to it
    */
   it('pagination resets results and page number to first page when refresh is clicked', () => {
-    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
     cy.get(NUMBERED_PAGINATION, { timeout: DEFAULT_TIMEOUT });
     cy.get(getPageButtonSelector(0)).should('have.class', 'euiPaginationButton-isActive');
     // let firstResult: string;

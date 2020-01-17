@@ -19,13 +19,15 @@ export const validateAllPrepackagedRules = (
   return rules.map(rule => {
     const validatedRule = addPrepackagedRulesSchema.validate(rule);
     if (validatedRule.error != null) {
-      const ruleName = rule.name ? rule.name : '(rule_name unknown)';
-      const ruleId = rule.rule_id ? rule.rule_id : '(rule_id unknown)';
+      const ruleName = rule.name ? rule.name : '(rule name unknown)';
+      const ruleId = rule.rule_id ? rule.rule_id : '(rule rule_id unknown)';
       throw new TypeError(
         `name: "${ruleName}", rule_id: "${ruleId}" within the folder rules/prepackaged_rules ` +
           `is not a valid detection engine rule. Expect the system ` +
           `to not work with pre-packaged rules until this rule is fixed ` +
-          `or the file is removed. Error is: ${validatedRule.error.message}`
+          `or the file is removed. Error is: ${
+            validatedRule.error.message
+          }, Full rule contents are:\n${JSON.stringify(rule, null, 2)}`
       );
     } else {
       return validatedRule.value;
