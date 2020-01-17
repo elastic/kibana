@@ -244,7 +244,7 @@ export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFi
 export const getDefaultFieldsFromJobCaps = (
   fields: Field[],
   jobConfig: DataFrameAnalyticsConfig
-): { selectedFields: Field[]; docFields: Field[] } => {
+): { selectedFields: Field[]; docFields: Field[]; depVarType?: ES_FIELD_TYPES } => {
   const fieldsObj = { selectedFields: [], docFields: [] };
   if (fields.length === 0) {
     return fieldsObj;
@@ -282,6 +282,7 @@ export const getDefaultFieldsFromJobCaps = (
   return {
     selectedFields,
     docFields: allFields,
+    depVarType: type,
   };
 };
 
@@ -388,13 +389,40 @@ export const toggleSelectedFieldSimple = (
   }
   return selectedFields;
 };
-
-export const toggleSelectedField = (selectedFields: Field[], column: EsFieldName): Field[] => {
+// Fields starting with 'ml' or custom result name not included in newJobCapsService fields so
+// need to recreate the field with correct type and add to selected fields
+export const toggleSelectedField = (
+  selectedFields: Field[],
+  column: EsFieldName,
+  resultsField: string,
+  depVarType?: ES_FIELD_TYPES
+): Field[] => {
   const index = selectedFields.map(field => field.name).indexOf(column);
   if (index === -1) {
     const columnField = newJobCapsService.getFieldById(column);
     if (columnField !== null) {
       selectedFields.push(columnField);
+    } else {
+      const resultFieldPattern = `^${resultsField}\.`;
+      const regex = new RegExp(resultFieldPattern);
+      const isResultField = column.match(regex) !== null;
+      let newField;
+
+      if (isResultField && column.includes('is_training')) {
+        newField = {
+          id: column,
+          name: column,
+          type: ES_FIELD_TYPES.BOOLEAN,
+        };
+      } else if (isResultField && depVarType !== undefined) {
+        newField = {
+          id: column,
+          name: column,
+          type: depVarType,
+        };
+      }
+
+      if (newField) selectedFields.push(newField);
     }
   } else {
     selectedFields.splice(index, 1);

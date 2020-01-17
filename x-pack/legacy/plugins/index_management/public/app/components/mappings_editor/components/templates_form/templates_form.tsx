@@ -62,8 +62,11 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const subscription = form.subscribe(updatedTemplates => {
-      dispatch({ type: 'templates.update', value: { ...updatedTemplates, form } });
+    const subscription = form.subscribe(({ data, isValid, validate }) => {
+      dispatch({
+        type: 'templates.update',
+        value: { data, isValid, validate, submitForm: form.submit },
+      });
     });
     return subscription.unsubscribe;
   }, [form]);

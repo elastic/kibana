@@ -15,7 +15,7 @@ import {
   FIELD_ORIGIN,
 } from '../../../common/constants';
 
-const AGG_DELIMITER = '_of_';
+export const AGG_DELIMITER = '_of_';
 
 export class AbstractESAggSource extends AbstractESSource {
   static METRIC_SCHEMA_CONFIG = {
@@ -53,33 +53,12 @@ export class AbstractESAggSource extends AbstractESSource {
       : [];
   }
 
-  createField({ fieldName, label }) {
-    //if there is a corresponding field with a custom label, use that one.
-    if (!label) {
-      const matchField = this._metricFields.find(field => field.getName() === fieldName);
-      if (matchField) {
-        label = matchField.getLabel();
-      }
-    }
+  getFieldByName(name) {
+    return this.getMetricFieldForName(name);
+  }
 
-    if (fieldName === COUNT_PROP_NAME) {
-      return new ESAggMetricField({
-        aggType: COUNT_AGG_TYPE,
-        label: label,
-        source: this,
-        origin: this.getOriginForField(),
-      });
-    }
-    //this only works because aggType is a fixed set and does not include the `_of_` string
-    const [aggType, docField] = fieldName.split(AGG_DELIMITER);
-    const esDocField = new ESDocField({ fieldName: docField, source: this });
-    return new ESAggMetricField({
-      label: label,
-      esDocField,
-      aggType,
-      source: this,
-      origin: this.getOriginForField(),
-    });
+  createField() {
+    throw new Error('Cannot create a new field from just a fieldname for an es_agg_source.');
   }
 
   hasMatchingMetricField(fieldName) {
