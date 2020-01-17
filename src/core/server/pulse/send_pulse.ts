@@ -43,7 +43,6 @@ export async function sendPulse<Response>(
   const url = `${BASE_URL}/intake/${CLUSTER_UUID}`;
 
   const channelsToSend = [];
-  // TODO: It looks like this loop is getting stuck
   for (const channel of channels.values()) {
     // eslint-disable-next-line no-console
     console.log(`Getting records from channel ${channel.id}`);
