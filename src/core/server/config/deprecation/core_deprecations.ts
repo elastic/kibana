@@ -120,6 +120,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot('xpack.telemetry.banner', 'telemetry.banner'),
   renameFromRoot('xpack.telemetry.url', 'telemetry.url'),
   // Monitoring renames
+  // TODO: Remove these from here once the monitoring plugin is migrated to NP
   renameFromRoot('xpack.monitoring.ui.enabled', 'monitoring.ui.enabled'),
   renameFromRoot(
     'xpack.monitoring.kibana.collection.enabled',
