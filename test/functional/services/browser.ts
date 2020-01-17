@@ -238,8 +238,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: any },
-      to: { offset: { x: any; y: any }; location: any }
+      from: { offset?: { x: any; y: any }; location: any },
+      to: { offset?: { x: any; y: any }; location: any }
     ) {
       if (this.isW3CEnabled) {
         // The offset should be specified in pixels relative to the center of the element's bounding box
