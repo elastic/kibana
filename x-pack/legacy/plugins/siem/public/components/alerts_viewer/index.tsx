@@ -67,7 +67,7 @@ export const AlertsView = ({
         stackByOptions={alertsStackByOptions}
         startDate={startDate}
         subtitle={getSubtitle}
-        title={i18n.ALERTS_TABLE_TITLE}
+        title={i18n.ALERTS_GRAPH_TITLE}
         type={type}
         updateDateRange={updateDateRange}
       />

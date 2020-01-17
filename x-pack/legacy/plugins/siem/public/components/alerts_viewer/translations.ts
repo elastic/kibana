@@ -14,7 +14,11 @@ export const TOTAL_COUNT_OF_ALERTS = i18n.translate('xpack.siem.alertsView.total
   defaultMessage: 'alerts match the search criteria',
 });
 
-export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.alertsView.alertsTableType', {
+export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.alertsView.alertsTableTitle', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.alertsView.alertsGraphTitle', {
   defaultMessage: 'Alert detection frequency',
 });
 

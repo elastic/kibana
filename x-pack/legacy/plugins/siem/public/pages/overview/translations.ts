@@ -12,6 +12,10 @@ export const ALERTS_COUNT_BY = (groupByField: string) =>
     defaultMessage: 'Alerts count by {groupByField}',
   });
 
+export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.overview.alertsGraphTitle', {
+  defaultMessage: 'Alert detection frequency',
+});
+
 export const EVENTS_COUNT_BY = (groupByField: string) =>
   i18n.translate('xpack.siem.overview.eventsCountByTitle', {
     values: { groupByField },
@@ -53,8 +57,4 @@ export const VIEW_ALERTS = i18n.translate('xpack.siem.overview.viewAlertsButtonL
 
 export const VIEW_EVENTS = i18n.translate('xpack.siem.overview.viewEventsButtonLabel', {
   defaultMessage: 'View events',
-});
-
-export const ALERTS_TITLE = i18n.translate('xpack.siem.overview.alertsTitle', {
-  defaultMessage: 'Alert detection frequency',
 });
