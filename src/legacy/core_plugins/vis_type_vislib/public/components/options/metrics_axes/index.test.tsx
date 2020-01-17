@@ -63,7 +63,6 @@ const createAggs = (aggs: any[]) => ({
 
 describe('MetricsAxisOptions component', () => {
   let setValue: jest.Mock;
-  let setVisType: jest.Mock;
   let defaultProps: ValidationVisOptionsProps<BasicVislibParams>;
   let axis: ValueAxis;
   let axisRight: ValueAxis;
@@ -71,7 +70,6 @@ describe('MetricsAxisOptions component', () => {
 
   beforeEach(() => {
     setValue = jest.fn();
-    setVisType = jest.fn();
 
     axis = {
       ...valueAxis,
@@ -91,12 +89,13 @@ describe('MetricsAxisOptions component', () => {
 
     defaultProps = {
       aggs: createAggs([aggCount]),
-      aggsLabels: '',
+      isTabSelected: true,
       vis: {
         type: {
           type: ChartTypes.AREA,
           schemas: { metrics: [{ name: 'metric' }] },
         },
+        setVisType: jest.fn(),
       },
       stateParams: {
         valueAxes: [axis],
@@ -105,7 +104,6 @@ describe('MetricsAxisOptions component', () => {
         grid: { valueAxis: defaultValueAxisId },
       },
       setValue,
-      setVisType,
     } as any;
   });
 
@@ -120,7 +118,6 @@ describe('MetricsAxisOptions component', () => {
       const comp = mount(<MetricsAxisOptions {...defaultProps} />);
       comp.setProps({
         aggs: createAggs([aggCount, aggAverage]),
-        aggsLabels: `${aggCount.makeLabel()}, ${aggAverage.makeLabel()}`,
       });
 
       const updatedSeries = [chart, { ...chart, data: { id: '2', label: aggAverage.makeLabel() } }];
@@ -135,7 +132,7 @@ describe('MetricsAxisOptions component', () => {
       });
 
       const updatedSeries = [{ ...chart, data: { id: agg.id, label: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenLastCalledWith(SERIES_PARAMS, updatedSeries);
+      expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
     });
 
     it('should update visType when one seriesParam', () => {
@@ -149,7 +146,7 @@ describe('MetricsAxisOptions component', () => {
         },
       });
 
-      expect(setVisType).toHaveBeenLastCalledWith(ChartTypes.LINE);
+      expect(defaultProps.vis.setVisType).toHaveBeenLastCalledWith(ChartTypes.LINE);
     });
 
     it('should set histogram visType when multiple seriesParam', () => {
@@ -163,7 +160,7 @@ describe('MetricsAxisOptions component', () => {
         },
       });
 
-      expect(setVisType).toHaveBeenLastCalledWith(ChartTypes.HISTOGRAM);
+      expect(defaultProps.vis.setVisType).toHaveBeenLastCalledWith(ChartTypes.HISTOGRAM);
     });
   });
 
@@ -177,7 +174,6 @@ describe('MetricsAxisOptions component', () => {
       };
       comp.setProps({
         aggs: createAggs([newAgg]),
-        aggsLabels: `${newAgg.makeLabel()}`,
       });
       const updatedValues = [{ ...axis, title: { text: newAgg.makeLabel() } }];
       expect(setValue).not.toHaveBeenCalledWith(VALUE_AXES, updatedValues);
@@ -192,11 +188,14 @@ describe('MetricsAxisOptions component', () => {
       };
       comp.setProps({
         aggs: createAggs([agg]),
-        aggsLabels: agg.makeLabel(),
       });
 
+      const updatedSeriesParams = [{ ...chart, data: { ...chart.data, label: agg.makeLabel() } }];
       const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
+
+      expect(setValue).toHaveBeenCalledTimes(3);
+      expect(setValue).toHaveBeenNthCalledWith(2, SERIES_PARAMS, updatedSeriesParams);
+      expect(setValue).toHaveBeenNthCalledWith(3, VALUE_AXES, updatedValues);
     });
 
     it('should not set the custom title to match the value axis label when more than one agg exists for that axis', () => {
@@ -204,7 +203,6 @@ describe('MetricsAxisOptions component', () => {
       const agg = { id: aggCount.id, makeLabel: () => 'Custom label' };
       comp.setProps({
         aggs: createAggs([agg, aggAverage]),
-        aggsLabels: `${agg.makeLabel()}, ${aggAverage.makeLabel()}`,
         stateParams: {
           ...defaultProps.stateParams,
           seriesParams: [chart, chart],
@@ -224,47 +222,9 @@ describe('MetricsAxisOptions component', () => {
       };
       comp.setProps({
         aggs: createAggs([agg]),
-        aggsLabels: agg.makeLabel(),
       });
 
       expect(setValue).not.toHaveBeenCalledWith(VALUE_AXES);
-    });
-
-    it('should overwrite the custom title when the agg type changes', () => {
-      defaultProps.stateParams.valueAxes[0].title.text = 'Custom title';
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      const agg = {
-        id: aggCount.id,
-        type: { name: 'max' },
-        makeLabel: () => 'Max',
-      };
-      comp.setProps({
-        aggs: createAggs([agg]),
-        aggsLabels: agg.makeLabel(),
-      });
-
-      const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
-    });
-
-    it('should overwrite the custom title when the agg field changes', () => {
-      defaultProps.stateParams.valueAxes[0].title.text = 'Custom title';
-      const agg = {
-        id: aggCount.id,
-        type: { name: 'max' },
-        makeLabel: () => 'Max',
-      } as AggConfig;
-      defaultProps.aggs = createAggs([agg]) as any;
-      const comp = mount(<MetricsAxisOptions {...defaultProps} />);
-      agg.params = { field: { name: 'Field' } };
-      agg.makeLabel = () => 'Max, Field';
-      comp.setProps({
-        aggs: createAggs([agg]),
-        aggsLabels: agg.makeLabel(),
-      });
-
-      const updatedValues = [{ ...axis, title: { text: agg.makeLabel() } }];
-      expect(setValue).toHaveBeenCalledWith(VALUE_AXES, updatedValues);
     });
   });
 
