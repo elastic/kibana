@@ -6,6 +6,7 @@
 
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
+import { ActionsCoreStart } from '../shim';
 import { RunContext } from '../../../../../plugins/task_manager/server';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
 import { ActionTaskParams, GetBasePathFunction, SpaceIdToNamespaceFunction } from '../types';
@@ -14,6 +15,7 @@ export interface TaskRunnerContext {
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
+  getScopedSavedObjectsClient: ActionsCoreStart['savedObjects']['getScopedSavedObjectsClient'];
 }
 
 export class TaskRunnerFactory {
@@ -43,6 +45,7 @@ export class TaskRunnerFactory {
       encryptedSavedObjectsPlugin,
       spaceIdToNamespace,
       getBasePath,
+      getScopedSavedObjectsClient,
     } = this.taskRunnerContext!;
 
     return {
@@ -93,6 +96,10 @@ export class TaskRunnerFactory {
             executorResult.data,
             executorResult.retry == null ? false : executorResult.retry
           );
+        } else if (executorResult.status === 'ok') {
+          // Cleanup action_task_params object now that we're done with it
+          const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
+          await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
         }
       },
     };

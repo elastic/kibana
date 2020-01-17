@@ -161,6 +161,7 @@ export class Plugin {
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath,
       spaceIdToNamespace,
+      getScopedSavedObjectsClient: core.savedObjects.getScopedSavedObjectsClient,
     });
 
     const executeFn = createExecuteFunction({
