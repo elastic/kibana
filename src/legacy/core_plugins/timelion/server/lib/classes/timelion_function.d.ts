@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TimelionFunctionArgs } from '../../../common/types';
+import { TimelionFunctionArgs } from '../../../../vis_type_timelion/common/types';
 
 export interface TimelionFunctionInterface extends TimelionFunctionConfig {
   chainable: boolean;

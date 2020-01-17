@@ -43,7 +43,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
-import grammar from 'raw-loader!../chain.peg';
+import grammar from 'raw-loader!../../../vis_type_timelion/public/chain.peg';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,
@@ -52,7 +52,7 @@ import {
   insertAtLocation,
 } from './timelion_expression_input_helpers';
 import { comboBoxKeyCodes } from '@elastic/eui';
-import { getArgValueSuggestions } from '../services/arg_value_suggestions';
+import { getArgValueSuggestions } from '../../../vis_type_timelion/public/helpers/arg_value_suggestions';
 
 const Parser = PEG.generate(grammar);
 

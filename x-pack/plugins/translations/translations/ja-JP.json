@@ -3213,7 +3213,6 @@
     "visTypeTimeseries.addDeleteButtons.deleteButtonDefaultTooltip": "削除",
     "visTypeTimeseries.addDeleteButtons.reEnableTooltip": "再度有効にする",
     "visTypeTimeseries.addDeleteButtons.temporarilyDisableTooltip": "一時的に無効にする",
-    "visTypeTimeseries.aggLookup.addPipelineAggDescription": "{label} (「+」ボタンでこのパイプライン集約を追加します)",
     "visTypeTimeseries.aggLookup.averageLabel": "平均",
     "visTypeTimeseries.aggLookup.calculationLabel": "計算",
     "visTypeTimeseries.aggLookup.cardinalityLabel": "基数",
