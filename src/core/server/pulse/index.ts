@@ -32,6 +32,7 @@ import { sendUsageFrom, sendPulse, Fetcher } from './send_pulse';
 import { SavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
 import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
+import { registerPulseRoutes } from './routes';
 
 export interface InternalPulseService {
   getChannel: (id: string) => PulseChannel;
@@ -85,37 +86,39 @@ export class PulseService {
     this.elasticsearch = deps.elasticsearch.createClient('pulse-service');
 
     this.log.debug('Setting up pulse service routes');
-
     const router = deps.http.createRouter('');
-    const validate = {
-      params: schema.object({
-        channel: schema.string(),
-      }),
-      body: schema.object({
-        payload: schema.object(
-          { message: schema.string(), errorId: schema.string() },
-          { allowUnknowns: true }
-        ),
-      }),
-    };
-    router.post(
-      { path: '/api/pulse_local/{channel}', validate },
-      async (context, request, response) => {
-        try {
-          const { channel } = request.params;
-          const { payload } = request.body;
-          const ch = this.channels.get(channel);
-          await ch?.sendPulse(payload);
-          return response.ok({
-            body: {
-              message: `payload: ${payload} received`,
-            },
-          });
-        } catch (error) {
-          return response.badRequest({ body: error });
-        }
-      }
-    );
+
+    const pulseElasticsearchClient = new PulseElasticsearchClient(this.elasticsearch!);
+    registerPulseRoutes(router, pulseElasticsearchClient, this.channels);
+    // const validate = {
+    //   params: schema.object({
+    //     channel: schema.string(),
+    //   }),
+    //   body: schema.object({
+    //     payload: schema.object(
+    //       { message: schema.string(), errorId: schema.string() },
+    //       { allowUnknowns: true }
+    //     ),
+    //   }),
+    // };
+    // router.post(
+    //   { path: '/api/pulse_local/{channel}', validate },
+    //   async (context, request, response) => {
+    //     try {
+    //       const { channel } = request.params;
+    //       const { payload } = request.body;
+    //       const ch = this.channels.get(channel);
+    //       await ch?.sendPulse(payload);
+    //       return response.ok({
+    //         body: {
+    //           message: `payload: ${payload} received`,
+    //         },
+    //       });
+    //     } catch (error) {
+    //       return response.badRequest({ body: error });
+    //     }
+    //   }
+    // );
     router.get(
       {
         path: '/api/pulse_local/{channel}',
@@ -138,7 +141,6 @@ export class PulseService {
       }
     );
 
-    const pulseElasticsearchClient = new PulseElasticsearchClient(this.elasticsearch!);
     this.channels.forEach(channel =>
       channel.setup({
         elasticsearch: pulseElasticsearchClient,

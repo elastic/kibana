@@ -16,16 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IRouter, IClusterClient } from 'src/core/server';
+import { IRouter } from 'src/core/server';
+import { PulseElasticsearchClient } from '../client_wrappers/elasticsearch';
+import { registerIndexRoute } from './index_route';
+import { PulseChannel } from '../channel';
 
 // import { registerDeleteRoute } from './delete';
 // import { registerGetRoute } from './get';
 // import { registerSetManyRoute } from './set_many';
 // import { registerSetRoute } from './set_route';
 
-export function registerRoutes(router: IRouter, elasticsearch: IClusterClient) {
+export function registerPulseRoutes(
+  router: IRouter,
+  elasticsearch: PulseElasticsearchClient,
+  channels: Map<string, PulseChannel>
+) {
   // registerGetRoute(router);
   // registerDeleteRoute(router);
-  // registerSetRoute(router, elasticsearch);
+  registerIndexRoute(router, elasticsearch, channels);
   // registerSetManyRoute(router);
 }
