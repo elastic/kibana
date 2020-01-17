@@ -58,8 +58,8 @@ export interface IRuleStatusAttributes {
 
 export interface RuleStatusResponse {
   [key: string]: {
-    current_status: IRuleStatusAttributes;
-    failures: IRuleStatusAttributes[];
+    current_status: IRuleStatusAttributes | null | undefined;
+    failures: IRuleStatusAttributes[] | null | undefined;
   };
 }
 

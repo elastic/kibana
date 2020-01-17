@@ -68,7 +68,10 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
       return {
         ...(await acc),
         [id]: {
-          current_status: convertToSnakeCase(lastFiveErrorsForId.saved_objects[0].attributes),
+          current_status:
+            lastFiveErrorsForId.saved_objects.length > 0
+              ? convertToSnakeCase(lastFiveErrorsForId.saved_objects[0].attributes)
+              : null,
           failures: lastFiveErrorsForId.saved_objects
             .slice(1)
             .map(errorItem => convertToSnakeCase(errorItem.attributes)),
