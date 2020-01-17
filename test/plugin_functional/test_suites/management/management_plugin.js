@@ -38,7 +38,10 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should redirect when app is disabled', async () => {
-      await testSubjects.click('test-management-disable');
+      await PageObjects.common.navigateToActualUrl(
+        'kibana',
+        'management/test-section/test-managemenet-disabled'
+      );
       await testSubjects.existOrFail('management-landing');
     });
   });
