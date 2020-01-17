@@ -28,7 +28,7 @@ import {
   NumberInputOption,
   SwitchOption,
   SelectOption,
-} from '../../../kbn_vislib_vis_types/public/components/common';
+} from '../../../vis_type_vislib/public/components/common';
 import { TableVisParams } from '../types';
 import { totalAggregations, isAggConfigNumeric } from './utils';
 

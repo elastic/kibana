@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
 export interface TopNavMenuItem {
@@ -29,19 +29,26 @@ export interface TopNavMenuItem {
 }
 
 interface Props {
+  disabled?: boolean;
   items: TopNavMenuItem[];
 }
 
-export function TopNavMenu({ items }: Props) {
+export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
   return (
     <EuiTabs size="s">
       {items.map((item, idx) => {
         return (
-          <EuiTab key={idx} onClick={item.onClick} title={item.label} data-test-subj={item.testId}>
+          <EuiTab
+            key={idx}
+            disabled={disabled}
+            onClick={item.onClick}
+            title={item.label}
+            data-test-subj={item.testId}
+          >
             {item.label}
           </EuiTab>
         );
       })}
     </EuiTabs>
   );
-}
+};
