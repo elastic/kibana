@@ -90,7 +90,7 @@ export class ValidationResults {
           'xpack.ml.models.jobService.categorization.messages.medianLineLength',
           {
             defaultMessage:
-              'The median length for the values analysed is over {medianLimit} characters.',
+              'The median length for the field values analysed is over {medianLimit} characters.',
             values: { medianLimit: MEDIAN_LINE_LENGTH_LIMIT },
           }
         ),
@@ -106,7 +106,7 @@ export class ValidationResults {
         id: VALIDATION_RESULT.NULL_VALUES,
         valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
         message: i18n.translate('xpack.ml.models.jobService.categorization.messages.nullValues', {
-          defaultMessage: 'More than {percent}% of values are null.',
+          defaultMessage: 'More than {percent}% of field values are null.',
           values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
         }),
       });
@@ -131,7 +131,7 @@ export class ValidationResults {
             'xpack.ml.models.jobService.categorization.messages.tooManyTokens',
             {
               defaultMessage:
-                'Tokenization of the examples has failed due to more than {tokenLimit} tokens being found in a sample of {sampleSize} examples.',
+                'Tokenization of field value examples has failed due to more than {tokenLimit} tokens being found in a sample of {sampleSize} values.',
               values: { sampleSize, tokenLimit },
             }
           ),
@@ -150,7 +150,8 @@ export class ValidationResults {
       message: i18n.translate(
         'xpack.ml.models.jobService.categorization.messages.failureToGetTokens',
         {
-          defaultMessage: 'It was not possible to tokenize a sample of field values. {reason}',
+          defaultMessage:
+            'It was not possible to tokenize a sample of example field values. {reason}',
           values: { reason: reason || '' },
         }
       ),
