@@ -16,10 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Stream } from 'stream';
-import Boom from 'boom';
 import supertest from 'supertest';
-import { schema } from '@kbn/config-schema';
 
 import { HttpService } from '../http_service';
 
@@ -78,6 +75,7 @@ describe('KibanaRequest', () => {
 
         setTimeout(() => incomingRequest.abort(), 50);
       });
+
       it('does not emit when request handled', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -96,10 +94,32 @@ describe('KibanaRequest', () => {
         await server.start();
 
         await supertest(innerServer.listener).get('/');
-        await delay(50);
 
         expect(nextSpy).toHaveBeenCalledTimes(0);
-        expect(completeSpy).toHaveBeenCalledTimes(0);
+        expect(completeSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not emit when request rejected', async () => {
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        const nextSpy = jest.fn();
+        const completeSpy = jest.fn();
+        router.get({ path: '/', validate: false }, async (context, request, res) => {
+          request.events.aborted$.subscribe({
+            next: nextSpy,
+            complete: completeSpy,
+          });
+
+          return res.badRequest();
+        });
+
+        await server.start();
+
+        await supertest(innerServer.listener).get('/');
+
+        expect(nextSpy).toHaveBeenCalledTimes(0);
+        expect(completeSpy).toHaveBeenCalledTimes(1);
       });
     });
   });

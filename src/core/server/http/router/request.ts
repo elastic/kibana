@@ -20,7 +20,7 @@
 import { Url } from 'url';
 import { Request } from 'hapi';
 import { Observable, fromEvent } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, takeUntil } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
@@ -144,9 +144,6 @@ export class KibanaRequest<
     private readonly withoutSecretHeaders: boolean
   ) {
     this.url = request.url;
-    this.events = {
-      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first()),
-    };
     this.headers = deepFreeze({ ...request.headers });
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
@@ -155,12 +152,19 @@ export class KibanaRequest<
       enumerable: false,
     });
 
-    this.route = deepFreeze(this.getRouteInfo());
+    this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = new KibanaSocket(request.raw.req.socket);
+    this.events = this.getEvents(request);
   }
 
-  private getRouteInfo(): KibanaRequestRoute<Method> {
-    const request = this[requestSymbol];
+  private getEvents(request: Request): KibanaRequestEvents {
+    const end$ = fromEvent<void>(request.raw.req, 'end').pipe(first());
+    return {
+      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(end$)),
+    } as const;
+  }
+
+  private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
     const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
 
