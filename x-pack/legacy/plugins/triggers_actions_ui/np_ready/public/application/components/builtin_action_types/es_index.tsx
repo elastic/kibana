@@ -74,7 +74,6 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   index,
   editAction,
   errors,
-  hasErrors,
 }) => {
   const { refresh } = action;
   return (
@@ -82,7 +81,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         error={errors.index}
-        isInvalid={hasErrors === true && action.index !== undefined}
+        isInvalid={errors.index.length > 0 && action.index !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexFieldLabel',
           {
@@ -92,7 +91,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiFieldText
           fullWidth
-          isInvalid={hasErrors === true && action.index !== undefined}
+          isInvalid={errors.index.length > 0 && action.index !== undefined}
           name="index"
           data-test-subj="indexInput"
           value={action.index || ''}

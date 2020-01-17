@@ -94,7 +94,6 @@ describe('IndexActionConnectorFields renders', () => {
         errors={{}}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="indexInput"]').length > 0).toBeTruthy();
@@ -120,13 +119,7 @@ describe('IndexParamsFields renders', () => {
       documents: ['test'],
     };
     const wrapper = mountWithIntl(
-      <ParamsFields
-        action={actionParams}
-        errors={{}}
-        editAction={() => {}}
-        index={0}
-        hasErrors={false}
-      />
+      <ParamsFields action={actionParams} errors={{}} editAction={() => {}} index={0} />
     );
     expect(wrapper.find('[data-test-subj="indexInput"]').length > 0).toBeTruthy();
     expect(

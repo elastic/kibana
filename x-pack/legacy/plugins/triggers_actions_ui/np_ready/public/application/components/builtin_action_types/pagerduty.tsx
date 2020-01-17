@@ -142,7 +142,6 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   editAction,
   index,
   errors,
-  hasErrors,
 }) => {
   const { eventAction, dedupKey, summary, source, severity, timestamp, component, group } = action;
   const severityOptions = [
@@ -332,7 +331,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         id="pagerDutySummary"
         fullWidth
         error={errors.summary}
-        isInvalid={hasErrors === true && summary !== undefined}
+        isInvalid={errors.summary.length > 0 && summary !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
           {
@@ -342,7 +341,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiFieldText
           fullWidth
-          isInvalid={hasErrors === true && summary !== undefined}
+          isInvalid={errors.summary.length > 0 && summary !== undefined}
           name="summary"
           value={summary || ''}
           data-test-subj="pagerdutyDescriptionInput"

@@ -120,7 +120,6 @@ describe('PagerDutyActionConnectorFields renders', () => {
         errors={{ routingKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').length > 0).toBeTruthy();
@@ -153,13 +152,7 @@ describe('PagerDutyParamsFields renders', () => {
       class: 'test class',
     };
     const wrapper = mountWithIntl(
-      <ParamsFields
-        action={actionParams}
-        errors={{}}
-        editAction={() => {}}
-        index={0}
-        hasErrors={false}
-      />
+      <ParamsFields action={actionParams} errors={{}} editAction={() => {}} index={0} />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
     expect(

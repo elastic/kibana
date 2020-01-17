@@ -143,13 +143,7 @@ describe('WebhookParamsFields renders', () => {
       body: 'test message',
     };
     const wrapper = mountWithIntl(
-      <ParamsFields
-        action={actionParams}
-        errors={{ body: [] }}
-        editAction={() => {}}
-        index={0}
-        hasErrors={false}
-      />
+      <ParamsFields action={actionParams} errors={{ body: [] }} editAction={() => {}} index={0} />
     );
     expect(wrapper.find('[data-test-subj="webhookBodyEditor"]').length > 0).toBeTruthy();
     expect(

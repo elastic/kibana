@@ -132,7 +132,6 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   editAction,
   index,
   errors,
-  hasErrors,
 }) => {
   const { message } = action;
 
@@ -151,7 +150,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         id="slackMessage"
         fullWidth
         error={errors.message}
-        isInvalid={hasErrors && message !== undefined}
+        isInvalid={errors.message.length > 0 && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.messageTextAreaFieldLabel',
           {
@@ -161,7 +160,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiTextArea
           fullWidth
-          isInvalid={hasErrors && message !== undefined}
+          isInvalid={errors.message.length > 0 && message !== undefined}
           name="message"
           value={message}
           data-test-subj="slackMessageTextarea"

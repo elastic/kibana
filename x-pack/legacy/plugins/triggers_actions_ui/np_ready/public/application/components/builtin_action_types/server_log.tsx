@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../types';
@@ -49,7 +49,6 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
   editAction,
   index,
   errors,
-  hasErrors,
 }) => {
   const { message, level } = action;
   const levelOptions = [
@@ -61,8 +60,10 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
     { value: 'fatal', text: 'Fatal' },
   ];
 
-  // Set default value 'info' for level param
-  editAction('level', 'info', index);
+  useEffect(() => {
+    editAction('level', 'info', index);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Fragment>
@@ -92,7 +93,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
         id="loggingMessage"
         fullWidth
         error={errors.message}
-        isInvalid={hasErrors && message !== undefined}
+        isInvalid={errors.message.length > 0 && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.logMessageFieldLabel',
           {
@@ -102,12 +103,17 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps> =
       >
         <EuiTextArea
           fullWidth
-          isInvalid={hasErrors && message !== undefined}
+          isInvalid={errors.message.length > 0 && message !== undefined}
           value={message || ''}
           name="message"
           data-test-subj="loggingMessageInput"
           onChange={e => {
             editAction('message', e.target.value, index);
+          }}
+          onBlur={() => {
+            if (!message) {
+              editAction('message', '', index);
+            }
           }}
         />
       </EuiFormRow>

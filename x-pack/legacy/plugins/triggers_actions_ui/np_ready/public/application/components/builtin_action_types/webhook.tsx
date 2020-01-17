@@ -458,7 +458,6 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   editAction,
   index,
   errors,
-  hasErrors,
 }) => {
   const { body } = action;
 
@@ -472,13 +471,13 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             defaultMessage: 'Body',
           }
         )}
-        isInvalid={hasErrors === true}
+        isInvalid={errors.body.length > 0 && body !== undefined}
         fullWidth
         error={errors.body}
       >
         <EuiCodeEditor
           fullWidth
-          isInvalid={hasErrors === true}
+          isInvalid={errors.body.length > 0 && body !== undefined}
           mode="json"
           width="100%"
           height="200px"

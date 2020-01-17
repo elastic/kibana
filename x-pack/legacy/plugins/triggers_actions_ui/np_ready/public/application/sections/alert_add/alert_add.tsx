@@ -209,7 +209,7 @@ export const AlertAdd = () => {
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
-  const actionErrors = alert.actions.reduce((acc: any, alertAction: AlertAction) => {
+  const actionsErrors = alert.actions.reduce((acc: any, alertAction: AlertAction) => {
     const actionTypeConnectors = connectors.find(field => field.id === alertAction.id);
     if (!actionTypeConnectors) {
       return [];
@@ -219,15 +219,16 @@ export const AlertAdd = () => {
       return [];
     }
     const actionValidationErrors = actionType.validateParams(alertAction.params);
-    acc[alertAction.id] = actionValidationErrors;
-    return acc;
+    return { ...acc, [alertAction.id]: actionValidationErrors };
   }, {});
 
-  const hasActionErrors = !!Object.keys(actionErrors).find(actionError => {
-    return !!Object.keys(actionErrors[actionError]).find((actionErrorKey: string) => {
-      return actionErrors[actionError][actionErrorKey].length >= 1;
+  const hasActionErrors = !!Object.entries(actionsErrors)
+    .map(([, actionErrors]) => actionErrors)
+    .find((actionErrors: any) => {
+      return !!Object.keys(actionErrors.errors).find(
+        errorKey => actionErrors.errors[errorKey].length >= 1
+      );
     });
-  });
 
   const tabs = [
     {
@@ -398,10 +399,8 @@ export const AlertAdd = () => {
         if (actionTypeRegisterd === null || actionItem.group !== selectedTabId) return null;
         const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
         const actionParamsErrors =
-          Object.keys(actionErrors).length > 0 ? actionErrors[actionItem.id] : [];
-        const hasActionParamsErrors = !!Object.keys(actionParamsErrors).find(
-          errorKey => actionParamsErrors[errorKey].length >= 1
-        );
+          Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : [];
+
         return (
           <EuiAccordion
             initialIsOpen={true}
@@ -483,7 +482,6 @@ export const AlertAdd = () => {
                 index={index}
                 errors={actionParamsErrors.errors}
                 editAction={setActionParamsProperty}
-                hasErrors={hasActionParamsErrors}
               />
             ) : null}
           </EuiAccordion>

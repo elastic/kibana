@@ -370,7 +370,6 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   editAction,
   index,
   errors,
-  hasErrors,
 }) => {
   const { to, cc, bcc, subject, message } = action;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
@@ -382,7 +381,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         error={errors.to}
-        isInvalid={hasErrors && to !== undefined}
+        isInvalid={errors.to.length > 0 && to !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
           {
@@ -392,7 +391,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiComboBox
           noSuggestions
-          isInvalid={hasErrors && to !== undefined}
+          isInvalid={errors.to.length > 0 && to !== undefined}
           fullWidth
           data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
@@ -421,7 +420,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         error={errors.cc}
-        isInvalid={hasErrors && cc !== undefined}
+        isInvalid={errors.cc.length > 0 && cc !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
           {
@@ -431,7 +430,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiComboBox
           noSuggestions
-          isInvalid={hasErrors && cc !== undefined}
+          isInvalid={errors.cc.length > 0 && cc !== undefined}
           fullWidth
           data-test-subj="ccEmailAddressInput"
           selectedOptions={ccOptions}
@@ -460,7 +459,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         error={errors.bcc}
-        isInvalid={hasErrors && bcc !== undefined}
+        isInvalid={errors.bcc.length > 0 && bcc !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
           {
@@ -470,7 +469,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiComboBox
           noSuggestions
-          isInvalid={hasErrors && bcc !== undefined}
+          isInvalid={errors.bcc.length > 0 && bcc !== undefined}
           fullWidth
           data-test-subj="bccEmailAddressInput"
           selectedOptions={bccOptions}
@@ -499,7 +498,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         error={errors.subject}
-        isInvalid={hasErrors && message !== undefined}
+        isInvalid={errors.subject.length > 0 && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
           {
@@ -509,7 +508,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiFieldText
           fullWidth
-          isInvalid={hasErrors && message !== undefined}
+          isInvalid={errors.subject.length > 0 && message !== undefined}
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}
@@ -521,7 +520,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       <EuiFormRow
         fullWidth
         error={errors.message}
-        isInvalid={hasErrors && message !== undefined}
+        isInvalid={errors.message.length > 0 && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {
@@ -531,7 +530,7 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiTextArea
           fullWidth
-          isInvalid={hasErrors && message !== undefined}
+          isInvalid={errors.message.length > 0 && message !== undefined}
           value={message || ''}
           name="message"
           data-test-subj="emailMessageInput"

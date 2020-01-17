@@ -126,7 +126,6 @@ describe('SlackParamsFields renders', () => {
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="slackMessageTextarea"]').length > 0).toBeTruthy();

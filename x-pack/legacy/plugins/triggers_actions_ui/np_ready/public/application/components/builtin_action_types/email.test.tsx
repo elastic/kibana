@@ -175,7 +175,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], service: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
@@ -205,13 +204,7 @@ describe('EmailParamsFields renders', () => {
       message: 'test message',
     };
     const wrapper = mountWithIntl(
-      <ParamsFields
-        action={actionParams}
-        errors={{}}
-        editAction={() => {}}
-        index={0}
-        hasErrors={false}
-      />
+      <ParamsFields action={actionParams} errors={{}} editAction={() => {}} index={0} />
     );
     expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
     expect(
