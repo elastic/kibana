@@ -21,7 +21,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import { CoreSetup, Plugin } from 'kibana/public';
-import { ManagementSetup, ManagementApp } from '../../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../../src/plugins/management/public';
 
 export class ManagementTestPlugin
   implements Plugin<ManagementTestPluginSetup, ManagementTestPluginStart> {
@@ -33,14 +33,7 @@ export class ManagementTestPlugin
       order: 25,
     });
 
-    function disableAndNav(app: ManagementApp) {
-      return () => {
-        app.disable();
-        window.location.hash = '/management/test-section';
-      };
-    }
-
-    const app = testSection!.registerApp({
+    testSection!.registerApp({
       id: 'test-management',
       title: 'Management Test',
       mount(params) {
@@ -48,15 +41,6 @@ export class ManagementTestPlugin
         ReactDOM.render(
           <Router>
             <h1 data-test-subj="test-management-header">Hello from management test plugin</h1>
-            <div>
-              <a
-                onClick={disableAndNav(app)}
-                onKeyUp={disableAndNav(app)}
-                data-test-subj="test-management-disable"
-              >
-                Disable
-              </a>
-            </div>
             <Switch>
               <Route exact path={`${params.basePath}`}>
                 <Link to={`${params.basePath}/one`} data-test-subj="test-management-link-one">

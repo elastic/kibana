@@ -55,7 +55,8 @@ export class ManagementApp {
       mount: async ({}, params) => {
         let appUnmount: Unmount;
         if (!this.enabledStatus) {
-          window.location.hash = '/management';
+          const [coreStart] = await getStartServices();
+          coreStart.application.navigateToApp('kibana#/management');
           return () => {};
         }
         async function setBreadcrumbs(crumbs: ChromeBreadcrumb[]) {
