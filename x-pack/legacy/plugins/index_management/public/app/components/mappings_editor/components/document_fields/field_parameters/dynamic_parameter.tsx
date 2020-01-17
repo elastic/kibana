@@ -20,7 +20,7 @@ export const DynamicParameter = () => {
         'xpack.idxMgmt.mappingsEditor.dynamicParameter.fieldDescription',
         {
           defaultMessage:
-            'By default, fields can be added dynamically to an objects within a document, just by indexing a document containing the new field.',
+            'By default, fields can be added dynamically to objects within a document, just by indexing a document containing the new field.',
         }
       )}
       docLink={{
