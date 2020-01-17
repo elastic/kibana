@@ -29,19 +29,23 @@ export const deprecations = () => {
 
       const fromPath = 'xpack.monitoring.elasticsearch';
       const es = get(settings, 'elasticsearch');
-      if (es?.username === 'elastic') {
-        log(
-          `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
-        );
-      }
-      if (es?.ssl?.key !== undefined && es?.ssl?.certificate === undefined) {
-        log(
-          `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-        );
-      } else if (es?.ssl?.certificate !== undefined && es?.ssl?.key === undefined) {
-        log(
-          `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-        );
+      if (es) {
+        if (es.username === 'elastic') {
+          log(
+            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+          );
+        }
+        if (es.ssl) {
+          if (es.ssl.key !== undefined && es.ssl.certificate === undefined) {
+            log(
+              `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+            );
+          } else if (es.ssl.certificate !== undefined && es.ssl.key === undefined) {
+            log(
+              `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+            );
+          }
+        }
       }
     },
   ];
