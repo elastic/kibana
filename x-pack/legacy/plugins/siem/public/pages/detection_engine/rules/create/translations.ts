@@ -15,7 +15,7 @@ export const EDIT_RULE = i18n.translate('xpack.siem.detectionEngine.createRule.e
 });
 
 export const SUCCESSFULLY_CREATED_RULES = (ruleName: string) =>
-  i18n.translate('xpack.siem.detectionEngine.rules.create.successfullyRuleCreatedTitle', {
+  i18n.translate('xpack.siem.detectionEngine.rules.create.successfullyCreatedRuleTitle', {
     values: { ruleName },
     defaultMessage: '{ruleName} was created',
   });
