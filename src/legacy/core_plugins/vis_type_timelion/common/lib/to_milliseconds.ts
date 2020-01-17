@@ -17,35 +17,35 @@
  * under the License.
  */
 
-import { transform, keys } from 'lodash';
+import { keys } from 'lodash';
 import moment, { unitOfTime } from 'moment';
 
 type Units = unitOfTime.Base | unitOfTime._quarter;
 type Values = { [key in Units]: number };
+
 // map of moment's short/long unit ids and elasticsearch's long unit ids
 // to their value in milliseconds
-const vals = transform(
-  [
-    ['ms', 'milliseconds', 'millisecond'],
-    ['s', 'seconds', 'second', 'sec'],
-    ['m', 'minutes', 'minute', 'min'],
-    ['h', 'hours', 'hour'],
-    ['d', 'days', 'day'],
-    ['w', 'weeks', 'week'],
-    ['M', 'months', 'month'],
-    ['quarter'],
-    ['y', 'years', 'year'],
-  ] as any,
-  // @ts-ignore
-  function(values: Values, units: Units[]) {
-    const normal = moment.normalizeUnits(units[0]) as Units;
-    const val = moment.duration(1, normal).asMilliseconds();
-    ([] as Units[]).concat(normal, units).forEach((unit: Units) => {
-      values[unit] = val;
-    });
-  },
-  {} as Values
-);
+const unitMappings = [
+  ['ms', 'milliseconds', 'millisecond'],
+  ['s', 'seconds', 'second', 'sec'],
+  ['m', 'minutes', 'minute', 'min'],
+  ['h', 'hours', 'hour'],
+  ['d', 'days', 'day'],
+  ['w', 'weeks', 'week'],
+  ['M', 'months', 'month'],
+  ['quarter'],
+  ['y', 'years', 'year'],
+] as Units[][];
+
+const vals = {} as Values;
+unitMappings.forEach(units => {
+  const normal = moment.normalizeUnits(units[0]) as Units;
+  const val = moment.duration(1, normal).asMilliseconds();
+  ([] as Units[]).concat(normal, units).forEach((unit: Units) => {
+    vals[unit] = val;
+  });
+});
+
 // match any key from the vals object preceded by an optional number
 const parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + keys(vals).join('|') + ')$');
 
@@ -56,6 +56,6 @@ export function toMS(expr: string) {
       throw new Error('Invalid interval. 1M is only valid monthly interval.');
     }
 
-    return parseFloat(match[1] || '1') * vals[match[2]];
+    return parseFloat(match[1] || '1') * vals[match[2] as Units];
   }
 }
