@@ -20,7 +20,7 @@
 export interface PanelController {
   setWidth: (percent: number) => void;
   getWidth: () => number;
-  initialWidth: string;
+  width: number;
 }
 
 export class PanelRegistry {
@@ -35,6 +35,6 @@ export class PanelRegistry {
   }
 
   getPanels() {
-    return this.panels.map(panel => ({ ...panel }));
+    return this.panels;
   }
 }

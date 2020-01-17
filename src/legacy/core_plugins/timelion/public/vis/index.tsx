@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { DefaultEditorSize } from 'ui/vis/editor_size';
+
 import { VisOptionsProps } from 'ui/vis/editors/default';
+import { DefaultEditorSize } from '../../../visualizations/public';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';

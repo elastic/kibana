@@ -18,20 +18,28 @@
  */
 
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-type ResizerMouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
+export type ResizerMouseEvent = React.MouseEvent<HTMLButtonElement, MouseEvent>;
+export type ResizerKeyDownEvent = React.KeyboardEvent<HTMLButtonElement>;
 
 export interface Props {
+  onKeyDown: (eve: ResizerKeyDownEvent) => void;
   onMouseDown: (eve: ResizerMouseEvent) => void;
+  className?: string;
 }
 
-/**
- * TODO: This component uses styling constants from public UI - should be removed, next iteration should incl. horizontal and vertical resizers.
- */
 export function Resizer(props: Props) {
   return (
-    <div {...props} className="conApp__resizer" data-test-subj="splitPanelResizer">
-      &#xFE19;
-    </div>
+    <button
+      {...props}
+      data-test-subj="splitPanelResizer"
+      aria-label={i18n.translate('console.splitPanel.adjustPanelSizeAriaLabel', {
+        defaultMessage: 'Press left/right to adjust panels size',
+      })}
+    >
+      <EuiIcon type="grabHorizontal" />
+    </button>
   );
 }
