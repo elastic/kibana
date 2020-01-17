@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   TIMELINE_FLYOUT_BODY,
   TIMELINE_NOT_READY_TO_DROP_BUTTON,
@@ -14,15 +13,21 @@ import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
 import { loginAndWaitForPage } from '../../lib/util/helpers';
 import { drag } from '../../lib/drag_n_drop/helpers';
-import { toggleTimelineVisibility } from '../../lib/timeline/helpers';
+import { createNewTimeline, toggleTimelineVisibility } from '../../lib/timeline/helpers';
 
 describe('timeline flyout button', () => {
-  beforeEach(() => {
+  before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
   });
 
   afterEach(() => {
-    return logout();
+    cy.get('[data-test-subj="kibanaChrome"]').then($page => {
+      if ($page.find('[data-test-subj="flyoutOverlay"]').length === 1) {
+        toggleTimelineVisibility();
+      }
+    });
+
+    createNewTimeline();
   });
 
   it('toggles open the timeline', () => {

@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { ComponentStrings } from '../../../../../i18n';
+import { ComponentStrings } from '../../../../../i18n/components';
 
 import { Clipboard } from '../../../clipboard';
 import { OnCopyFn } from './share_website_flyout';

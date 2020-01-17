@@ -50,7 +50,7 @@ export class Plugin implements CorePlugin<IEventLogService> {
       logger: this.systemLogger,
       // TODO: get index prefix from config.get(kibana.index)
       indexNameRoot: KIBANA_INDEX,
-      clusterClient$: core.elasticsearch.adminClient$,
+      clusterClient: core.elasticsearch.adminClient,
     });
 
     this.eventLogService = new EventLogService({

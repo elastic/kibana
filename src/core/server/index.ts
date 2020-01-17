@@ -74,6 +74,7 @@ export { CspConfig, ICspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,
+  ICustomClusterClient,
   Headers,
   ScopedClusterClient,
   IScopedClusterClient,
@@ -83,6 +84,7 @@ export {
   ElasticsearchServiceSetup,
   APICaller,
   FakeRequest,
+  ScopeableRequest,
 } from './elasticsearch';
 export * from './elasticsearch/api_types';
 export {
@@ -150,7 +152,7 @@ export {
   SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
-export { RenderingServiceSetup, IRenderOptions, LegacyRenderOptions } from './rendering';
+export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -214,6 +216,9 @@ export {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UserProvidedValues,
+  ImageValidation,
+  DeprecationSettings,
+  StringValidation,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';

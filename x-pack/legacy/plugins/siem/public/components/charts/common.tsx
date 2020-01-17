@@ -5,23 +5,20 @@
  */
 
 import {
-  CustomSeriesColorsMap,
   DARK_THEME,
-  DataSeriesColorsValues,
-  getSpecId,
   LIGHT_THEME,
   mergeWithDefaultTheme,
   PartialTheme,
   Rendering,
   Rotation,
   ScaleType,
-  SettingSpecProps,
+  SettingsSpecProps,
   TickFormatter,
+  Position,
 } from '@elastic/charts';
-import moment from 'moment-timezone';
 import styled from 'styled-components';
 import { useUiSetting } from '../../lib/kibana';
-import { DEFAULT_DATE_FORMAT_TZ, DEFAULT_DARK_MODE } from '../../../common/constants';
+import { DEFAULT_DARK_MODE } from '../../../common/constants';
 
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';
@@ -39,6 +36,7 @@ export interface ChartData {
 
 export interface ChartSeriesConfigs {
   customHeight?: number;
+  customSeriesColors?: string[];
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
@@ -47,7 +45,7 @@ export interface ChartSeriesConfigs {
     xTickFormatter?: TickFormatter | undefined;
     yTickFormatter?: TickFormatter | undefined;
   };
-  settings?: Partial<SettingSpecProps>;
+  settings?: Partial<SettingsSpecProps>;
 }
 
 export interface ChartSeriesData {
@@ -75,24 +73,6 @@ export enum SeriesType {
   AREA = 'area',
   LINE = 'line',
 }
-
-// Customize colors: https://ela.st/custom-colors
-export const getSeriesStyle = (
-  seriesKey: string,
-  color: string | undefined,
-  seriesType?: SeriesType
-) => {
-  if (!color) return undefined;
-  const customSeriesColors: CustomSeriesColorsMap = new Map();
-  const dataSeriesColorValues: DataSeriesColorsValues = {
-    colorValues: seriesType === SeriesType.BAR ? [seriesKey] : [],
-    specId: getSpecId(seriesKey),
-  };
-
-  customSeriesColors.set(dataSeriesColorValues, color);
-
-  return customSeriesColors;
-};
 
 // Apply margins and paddings: https://ela.st/charts-spacing
 const theme: PartialTheme = {
@@ -127,11 +107,7 @@ export const chartDefaultSettings = {
   showLegend: false,
   showLegendDisplayValue: false,
   debug: false,
-};
-
-export const useBrowserTimeZone = () => {
-  const kibanaTimezone = useUiSetting<string>(DEFAULT_DATE_FORMAT_TZ);
-  return kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
+  legendPosition: Position.Bottom,
 };
 
 export const getChartHeight = (customHeight?: number, autoSizerHeight?: number): string => {

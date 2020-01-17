@@ -30,48 +30,11 @@ exports[`HeaderGlobal it renders 1`] = `
         <FlexItem
           component="nav"
         >
-          <SiemNavigation
-            display="condensed"
-            navTabs={
-              Object {
-                "detection-engine": Object {
-                  "disabled": false,
-                  "href": "#/link-to/detection-engine",
-                  "id": "detection-engine",
-                  "name": "Detection engine",
-                  "urlKey": "detection-engine",
-                },
-                "hosts": Object {
-                  "disabled": false,
-                  "href": "#/link-to/hosts",
-                  "id": "hosts",
-                  "name": "Hosts",
-                  "urlKey": "host",
-                },
-                "network": Object {
-                  "disabled": false,
-                  "href": "#/link-to/network",
-                  "id": "network",
-                  "name": "Network",
-                  "urlKey": "network",
-                },
-                "overview": Object {
-                  "disabled": false,
-                  "href": "#/link-to/overview",
-                  "id": "overview",
-                  "name": "Overview",
-                  "urlKey": "overview",
-                },
-                "timelines": Object {
-                  "disabled": false,
-                  "href": "#/link-to/timelines",
-                  "id": "timelines",
-                  "name": "Timelines",
-                  "urlKey": "timeline",
-                },
-              }
-            }
-          />
+          <WithSource
+            sourceId="default"
+          >
+            <Component />
+          </WithSource>
         </FlexItem>
       </EuiFlexGroup>
     </FlexItem>

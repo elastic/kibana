@@ -5,13 +5,13 @@
  */
 
 import { AnomaliesOverTimeData } from '../../graphql/types';
-import { FrameworkRequest, RequestBasicOptions } from '../framework';
+import { FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 import { SearchHit } from '../types';
 
 export interface AnomaliesAdapter {
   getAnomaliesOverTime(
     req: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<AnomaliesOverTimeData>;
 }
 

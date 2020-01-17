@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import ApolloClient from 'apollo-client';
 import React from 'react';
 
 import { esFilters } from '../../../../../../../../../src/plugins/data/common/es_query';
@@ -18,7 +21,7 @@ import {
 import { SubsetTimelineModel, timelineDefaults } from '../../../../store/timeline/model';
 
 import { FILTER_OPEN } from './signals_filter_group';
-import { sendSignalsToTimelineAction, updateSignalStatusAction } from './actions';
+import { sendSignalToTimelineAction, updateSignalStatusAction } from './actions';
 import * as i18n from './translations';
 import { CreateTimeline, SetEventsDeletedProps, SetEventsLoadingProps } from './types';
 
@@ -166,27 +169,40 @@ export const requiredFieldsForActions = [
 ];
 
 export const getSignalsActions = ({
+  apolloClient,
+  canUserCRUD,
+  hasIndexWrite,
   setEventsLoading,
   setEventsDeleted,
   createTimeline,
   status,
-  kbnVersion,
+  updateTimelineIsLoading,
 }: {
+  apolloClient?: ApolloClient<{}>;
+  canUserCRUD: boolean;
+  hasIndexWrite: boolean;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
-  kbnVersion: string;
+  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 }): TimelineAction[] => [
   {
-    getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
+    getAction: ({ eventId, ecsData }: TimelineActionProps): JSX.Element => (
       <EuiToolTip
         data-test-subj="send-signal-to-timeline-tool-tip"
         content={i18n.ACTION_VIEW_IN_TIMELINE}
       >
         <EuiButtonIcon
-          data-test-subj={'send-signal-to-timeline-tool-tip'}
-          onClick={() => sendSignalsToTimelineAction({ createTimeline, data: [data] })}
+          data-test-subj={'send-signal-to-timeline-button'}
+          onClick={() =>
+            sendSignalToTimelineAction({
+              apolloClient,
+              createTimeline,
+              ecsData,
+              updateTimelineIsLoading,
+            })
+          }
           iconType="tableDensityNormal"
           aria-label="Next"
         />
@@ -196,7 +212,7 @@ export const getSignalsActions = ({
     width: 26,
   },
   {
-    getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
+    getAction: ({ eventId }: TimelineActionProps): JSX.Element => (
       <EuiToolTip
         data-test-subj="update-signal-status-tool-tip"
         content={status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL}
@@ -209,9 +225,9 @@ export const getSignalsActions = ({
               status,
               setEventsLoading,
               setEventsDeleted,
-              kbnVersion,
             })
           }
+          isDisabled={!canUserCRUD || !hasIndexWrite}
           iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
           aria-label="Next"
         />

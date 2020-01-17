@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { Logger, ClusterClient } from 'src/core/server';
 
 import { EsNames, getEsNames } from './names';
@@ -31,25 +29,23 @@ export function createEsContext(params: EsContextCtorParams): EsContext {
   return new EsContextImpl(params);
 }
 
-type EsClusterClient$ = Observable<EsClusterClient>;
-
 export interface EsContextCtorParams {
   logger: Logger;
-  clusterClient$: EsClusterClient$;
+  clusterClient: EsClusterClient;
   indexNameRoot: string;
 }
 
 class EsContextImpl implements EsContext {
   public readonly logger: Logger;
   public readonly esNames: EsNames;
-  private readonly clusterClient$: EsClusterClient$;
+  private readonly clusterClient: EsClusterClient;
   private readonly readySignal: ReadySignal<boolean>;
   private initialized: boolean;
 
   constructor(params: EsContextCtorParams) {
     this.logger = params.logger;
     this.esNames = getEsNames(params.indexNameRoot);
-    this.clusterClient$ = params.clusterClient$;
+    this.clusterClient = params.clusterClient;
     this.readySignal = createReadySignal();
     this.initialized = false;
   }
@@ -78,11 +74,9 @@ class EsContextImpl implements EsContext {
   }
 
   async callEs(operation: string, body?: any): Promise<any> {
-    const clusterClient = await this.clusterClient$.pipe(first()).toPromise();
-
     try {
       this.debug(`callEs(${operation}) calls:`, body);
-      const result = await clusterClient.callAsInternalUser(operation, body);
+      const result = await this.clusterClient.callAsInternalUser(operation, body);
       this.debug(`callEs(${operation}) result:`, result);
       return result;
     } catch (err) {

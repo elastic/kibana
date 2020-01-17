@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { map, mergeMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import {
   CoreSetup,
   CoreStart,
-  LegacyRenderOptions,
   Logger,
   PluginInitializerContext,
   PluginConfigDescriptor,
@@ -78,29 +77,6 @@ class Plugin {
       }
     );
 
-    router.get(
-      {
-        path: '/requestcontext/render/{id}',
-        validate: {
-          params: schema.object({
-            id: schema.maybe(schema.string()),
-          }),
-        },
-      },
-      async (context, req, res) => {
-        const { id } = req.params;
-        const options: Partial<LegacyRenderOptions> = { app: { getId: () => id! } };
-        const body = await context.core.rendering.render(options);
-
-        return res.ok({
-          body,
-          headers: {
-            'content-securty-policy': core.http.csp.header,
-          },
-        });
-      }
-    );
-
     return {
       data$: this.initializerContext.config.create<ConfigType>().pipe(
         map(configValue => {
@@ -108,9 +84,7 @@ class Plugin {
           return `Some exposed data derived from config: ${configValue.secret}`;
         })
       ),
-      pingElasticsearch$: core.elasticsearch.adminClient$.pipe(
-        mergeMap(client => client.callAsInternalUser('ping'))
-      ),
+      pingElasticsearch: () => core.elasticsearch.adminClient.callAsInternalUser('ping'),
     };
   }
 
