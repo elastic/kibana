@@ -33,6 +33,12 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       const menuItems = await menuPanel.findAllByCssSelector('button.euiContextMenuItem');
       await menuItems[0].click();
     },
+    async checkFirstPageIsActive() {
+      const pageOneElement = await testSubjects.getAttributeAll('pagination-button-0', 'class');
+      if (pageOneElement[0].indexOf('euiPaginationButton-isActive')) {
+        return true;
+      }
+    },
     async getEndpointListRowsCount() {
       const endpointListRows = await find.allByCssSelector('.euiTableRow');
       // eslint-disable-next-line no-console
@@ -52,22 +58,6 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
         }
       }
       return totalCount;
-    },
-    async checkFirstPageIsActive() {
-      const pageOneElement = await testSubjects.getAttributeAll('pagination-button-0', 'class');
-      if (pageOneElement[0].indexOf('euiPaginationButton-isActive')) {
-        return true;
-      }
-    },
-    async getPagination() {
-      const paginationBlock = await find.byCssSelector('.euiPagination');
-      const $ = await paginationBlock.parseDomContent();
-      const paginationButtons = $('button')
-        .toArray()
-        // eslint-disable-next-line no-shadow
-        .map(button => $(button).attr('aria-label'));
-      // eslint-disable-next-line no-console
-      return paginationButtons;
     },
   };
 }

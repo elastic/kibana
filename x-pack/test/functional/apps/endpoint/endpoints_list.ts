@@ -52,10 +52,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // check that we are on page 1
       const validateFirstPageClass = await pageObjects.endpoint.checkFirstPageIsActive();
       expect(validateFirstPageClass).to.be(true);
-      // get all of the page numbers
       // validate that we have 5 items on the page
       const actualCount = await pageObjects.endpoint.getAllEndpointListRowsCount();
-      // eslint-disable-next-line no-console
       expect(actualCount).to.be(expectedCount);
     });
   });
