@@ -43,6 +43,7 @@ export class JobCreator {
   protected _aggs: Aggregation[] = [];
   protected _fields: Field[] = [];
   protected _scriptFields: Field[] = [];
+  protected _aggregationFields: Field[] = [];
   protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
     stop: boolean;
@@ -450,6 +451,14 @@ export class JobCreator {
     return this._scriptFields;
   }
 
+  public get aggregationFields(): Field[] {
+    return this._aggregationFields;
+  }
+
+  public get additionalFields(): Field[] {
+    return [...this._scriptFields, ...this._aggregationFields];
+  }
+
   public get subscribers(): ProgressSubscriber[] {
     return this._subscribers;
   }
@@ -603,6 +612,7 @@ export class JobCreator {
     }
     this._sparseData = isSparseDataJob(job, datafeed);
 
+    this._scriptFields = [];
     if (this._datafeed_config.script_fields !== undefined) {
       this._scriptFields = Object.keys(this._datafeed_config.script_fields).map(f => ({
         id: f,
@@ -610,8 +620,33 @@ export class JobCreator {
         type: ES_FIELD_TYPES.KEYWORD,
         aggregatable: true,
       }));
-    } else {
-      this._scriptFields = [];
+    }
+
+    this._aggregationFields = [];
+    if (this._datafeed_config.aggregations?.buckets !== undefined) {
+      traverseAggs(this._datafeed_config.aggregations.buckets, this._aggregationFields);
+    }
+    // if (this._scriptFields.length) {
+    //   this._fields
+    // }
+  }
+}
+
+function traverseAggs(o: any, aggFields: Field[]) {
+  for (const i in o) {
+    if (o[i] !== null && typeof o[i] === 'object') {
+      if (i === 'aggregations' || i === 'aggs') {
+        const aggFieldName = Object.keys(o[i])[0];
+        if (aggFieldName !== undefined) {
+          aggFields.push({
+            id: aggFieldName,
+            name: aggFieldName,
+            type: ES_FIELD_TYPES.KEYWORD,
+            aggregatable: true,
+          });
+        }
+      }
+      traverseAggs(o[i], aggFields);
     }
   }
 }
