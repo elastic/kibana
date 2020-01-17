@@ -17,13 +17,11 @@
  * under the License.
  */
 
-// @ts-ignore
-import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { VisParams } from 'ui/vis';
 import { i18n } from '@kbn/i18n';
-import { TimelionVisualizationDependencies } from '../plugin';
 import { TimeRange, esFilters, esQuery, Query } from '../../../../../plugins/data/public';
+import { timezoneProvider, VisParams } from '../legacy_imports';
+import { TimelionVisDependencies } from '../plugin';
 
 interface Stats {
   cacheCount: number;
@@ -33,9 +31,25 @@ interface Stats {
   sheetTime: number;
 }
 
-interface Sheet {
-  list: Array<Record<string, unknown>>;
-  render: Record<string, unknown>;
+export interface Series {
+  _global?: boolean;
+  _hide?: boolean;
+  _id?: number;
+  _title?: string;
+  color?: string;
+  data: Array<Record<number, number>>;
+  fit: string;
+  label: string;
+  split: string;
+  stack?: boolean;
+  type: string;
+}
+
+export interface Sheet {
+  list: Series[];
+  render?: {
+    grid?: boolean;
+  };
   type: string;
 }
 
@@ -46,8 +60,11 @@ export interface TimelionSuccessResponse {
   type: KIBANA_CONTEXT_NAME;
 }
 
-export function getTimelionRequestHandler(dependencies: TimelionVisualizationDependencies) {
-  const { uiSettings, http, timefilter } = dependencies;
+export function getTimelionRequestHandler({
+  uiSettings,
+  http,
+  timefilter,
+}: TimelionVisDependencies) {
   const timezone = timezoneProvider(uiSettings)();
 
   return async function({

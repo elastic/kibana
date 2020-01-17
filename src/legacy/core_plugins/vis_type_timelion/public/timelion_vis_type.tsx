@@ -20,20 +20,17 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
-import { DefaultEditorSize } from '../../../visualizations/public';
-import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
-import { getTimelionRequestHandler } from './timelion_request_handler';
-import visConfigTemplate from './timelion_vis.html';
-import { TimelionVisualizationDependencies } from '../plugin';
-// @ts-ignore
-import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
+import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
+import { DefaultEditorSize, VisOptionsProps } from './legacy_imports';
+import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
+import { TimelionVisComponent, TimelionVisComponentProp } from './components';
 import { TimelionOptions } from './timelion_options';
-import { VisParams } from '../timelion_vis_fn';
+import { VisParams } from './timelion_vis_fn';
+import { TimelionVisDependencies } from './plugin';
 
 export const TIMELION_VIS_NAME = 'timelion';
 
-export function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
+export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) {
   const { http, uiSettings } = dependencies;
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
@@ -46,13 +43,16 @@ export function getTimelionVisualization(dependencies: TimelionVisualizationDepe
     description: i18n.translate('timelion.timelionDescription', {
       defaultMessage: 'Build time-series using functional expressions',
     }),
-    visualization: AngularVisController,
     visConfig: {
       defaults: {
         expression: '.es(*)',
         interval: 'auto',
       },
-      template: visConfigTemplate,
+      component: (props: TimelionVisComponentProp) => (
+        <KibanaContextProvider services={{ ...dependencies }}>
+          <TimelionVisComponent {...props} />
+        </KibanaContextProvider>
+      ),
     },
     editorConfig: {
       optionsTemplate: (props: VisOptionsProps<VisParams>) => (

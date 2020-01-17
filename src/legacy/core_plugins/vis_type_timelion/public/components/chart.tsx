@@ -17,24 +17,23 @@
  * under the License.
  */
 
-import { TimelionFunctionArgs } from '../../../../vis_type_timelion/common/types';
+import React from 'react';
 
-export interface TimelionFunctionInterface extends TimelionFunctionConfig {
-  chainable: boolean;
-  originalFn: Function;
-  argsByName: TimelionFunctionArgs[];
+import { Sheet } from '../helpers/timelion_request_handler';
+import { Panel } from './panel';
+
+interface ChartComponentProp {
+  interval: string;
+  renderComplete(): void;
+  seriesList: Sheet;
 }
 
-export interface TimelionFunctionConfig {
-  name: string;
-  help: string;
-  extended: boolean;
-  aliases: string[];
-  fn: Function;
-  args: TimelionFunctionArgs[];
+function ChartComponent(props: ChartComponentProp) {
+  if (!props.seriesList) {
+    return null;
+  }
+
+  return <Panel {...props} />;
 }
 
-// eslint-disable-next-line import/no-default-export
-export default class TimelionFunction {
-  constructor(name: string, config: TimelionFunctionConfig);
-}
+export { ChartComponent };

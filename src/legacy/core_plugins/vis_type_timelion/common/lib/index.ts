@@ -17,5 +17,7 @@
  * under the License.
  */
 
-export * from './timelion_expression_input';
-export * from './timelion_interval';
+export { calculateInterval } from './calculate_interval';
+export { toMS } from './to_milliseconds';
+
+export const DEFAULT_TIME_FORMAT = 'MMMM Do YYYY, HH:mm:ss.SSS';
