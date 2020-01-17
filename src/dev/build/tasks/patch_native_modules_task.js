@@ -19,29 +19,35 @@
 import { deleteAll, download, untar } from '../lib';
 
 const BASE_URL = `https://storage.googleapis.com/native-modules`;
+const DOWNLOAD_DIRECTORY = '.native_modules';
 
-const shas = {
-  darwin: '0808d599921d458ea8489bc53e98f0c1fca09b8020d871a1b2530162a9720644',
-  linux: '925830c881748396c83b84dc9ed479d0ab01b8440cf186092cf0005422c373c8',
-  windows: '96d8194f1bbb2105b71330b671b202b2b46e3fa09141bd600d9c284202eda7b4',
-};
+const packages = [
+  {
+    name: 're2',
+    version: '1.10.5',
+    destinationPath: 'node_modules/re2/build/Release/',
+    shas: {
+      darwin: '0640af2971828597cdca590e3f022071d6f11d5d4f01f16d80783ff840019f33',
+      linux: '938efd0719855304b00b8a41f90eb78871d41f758ecb917c8de1db406cc8c243',
+      windows: '96d8194f1bbb2105b71330b671b202b2b46e3fa09141bd600d9c284202eda7b4',
+    },
+  },
+];
 
-async function patchRE2(config, log, build, platform) {
+async function patchModule(config, log, build, platform, pkg) {
   const platformName = platform.getName();
-  const moduleName = 're2';
-  const version = '1.10.5';
-  const archiveName = `${version}-${platformName}.tar.gz`;
-  const downloadUrl = `${BASE_URL}/${moduleName}/${archiveName}`;
-  const downloadPath = config.resolveFromRepo('.native_modules', archiveName);
-  const extractedPath = build.resolvePathForPlatform(platform, 'node_modules/re2/build/Release/');
-  log.debug('Patching re2 binaries from ' + downloadUrl + ' to ' + extractedPath);
+  const archiveName = `${pkg.version}-${platformName}.tar.gz`;
+  const downloadUrl = `${BASE_URL}/${pkg.name}/${archiveName}`;
+  const downloadPath = config.resolveFromRepo(DOWNLOAD_DIRECTORY, archiveName);
+  const extractedPath = build.resolvePathForPlatform(platform, pkg.destinationPath);
+  log.debug(`Patching ${pkg.name} binaries from ${downloadUrl} to ${extractedPath}`);
 
   await deleteAll([extractedPath], log);
   await download({
     log,
     url: downloadUrl,
     destination: downloadPath,
-    sha256: shas[platformName],
+    sha256: pkg.shas[platformName],
     retries: 3,
   });
   await untar(downloadPath, extractedPath);
@@ -50,10 +56,12 @@ async function patchRE2(config, log, build, platform) {
 export const PatchNativeModulesTask = {
   description: 'Patching platform-specific native modules',
   async run(config, log, build) {
-    await Promise.all(
-      config.getTargetPlatforms().map(async platform => {
-        await patchRE2(config, log, build, platform);
-      })
-    );
+    for (const pkg of packages) {
+      await Promise.all(
+        config.getTargetPlatforms().map(async platform => {
+          await patchModule(config, log, build, platform, pkg);
+        })
+      );
+    }
   },
 };
