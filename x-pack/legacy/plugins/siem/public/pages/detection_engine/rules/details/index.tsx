@@ -79,14 +79,19 @@ export interface DispatchProps {
   }>;
 }
 
+enum RuleDetailTabs {
+  signals = 'signals',
+  failures = 'failures',
+}
+
 const ruleDetailTabs = [
   {
-    id: 'signal',
+    id: RuleDetailTabs.signals,
     name: detectionI18n.SIGNAL,
     disabled: false,
   },
   {
-    id: 'failure',
+    id: RuleDetailTabs.failures,
     name: i18n.FAILURE_HISTORY_TAB,
     disabled: false,
   },
@@ -195,7 +200,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
               onClick={() => setRuleDetailTab(tab.id)}
               isSelected={tab.id === ruleDetailTab}
               disabled={tab.disabled}
-              key={tab.name}
+              key={tab.id}
             >
               {tab.name}
             </EuiTab>
@@ -320,7 +325,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                       {ruleError}
                       {tabs}
                       <EuiSpacer />
-                      {ruleDetailTab === 'signal' && (
+                      {ruleDetailTab === RuleDetailTabs.signals && (
                         <>
                           <EuiFlexGroup>
                             <EuiFlexItem component="section" grow={1}>
@@ -385,7 +390,9 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           )}
                         </>
                       )}
-                      {ruleDetailTab === 'failure' && <FailureHistory id={rule?.id} />}
+                      {ruleDetailTab === RuleDetailTabs.failures && (
+                        <FailureHistory id={rule?.id} />
+                      )}
                     </WrapperPage>
                   </StickyContainer>
                 )}

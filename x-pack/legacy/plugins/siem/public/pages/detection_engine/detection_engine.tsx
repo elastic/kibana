@@ -121,7 +121,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
             <EuiTab
               isSelected={tab.id === selectedTab}
               disabled={tab.disabled}
-              key={tab.name}
+              key={tab.id}
               href={`#/${DETECTION_ENGINE_PAGE_NAME}/${tab.id}`}
             >
               {tab.name}
