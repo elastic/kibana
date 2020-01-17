@@ -97,7 +97,7 @@ export class PluginWrapper<
 
     this.log.info('Setting up plugin');
 
-    return await this.instance.setup(setupContext, plugins); // todo: remove await
+    return this.instance.setup(setupContext, plugins);
   }
 
   /**
