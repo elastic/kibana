@@ -63,9 +63,9 @@ describe('Mappings configuration validator', () => {
     expect(errors).not.toBe(undefined);
     expect(errors!.length).toBe(3);
     expect(errors!).toEqual([
-      { code: 'ERR_CONFIG', configName: 'numeric_detection' },
-      { code: 'ERR_CONFIG', configName: 'dynamic_date_formats' },
       { code: 'ERR_CONFIG', configName: '_source' },
+      { code: 'ERR_CONFIG', configName: 'dynamic_date_formats' },
+      { code: 'ERR_CONFIG', configName: 'numeric_detection' },
     ]);
   });
 });
@@ -220,7 +220,6 @@ describe('Properties validator', () => {
         coerce: 1234,
         coerce_shape: '',
         ignore_malformed: 0,
-        null_value: {},
         null_value_numeric: 'abc',
         null_value_boolean: [],
         copy_to: [],

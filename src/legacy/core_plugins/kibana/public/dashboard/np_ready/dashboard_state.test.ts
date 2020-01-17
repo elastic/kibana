@@ -23,6 +23,13 @@ import { getSavedDashboardMock } from '../__tests__';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 
+jest.mock('ui/agg_types', () => ({
+  aggTypes: {
+    metrics: [],
+    buckets: [],
+  },
+}));
+
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();

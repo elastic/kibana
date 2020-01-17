@@ -4489,6 +4489,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = __webpack_require__(36);
 var proc_runner_1 = __webpack_require__(37);
 exports.withProcRunner = proc_runner_1.withProcRunner;
+exports.ProcRunner = proc_runner_1.ProcRunner;
 var tooling_log_1 = __webpack_require__(415);
 exports.ToolingLog = tooling_log_1.ToolingLog;
 exports.ToolingLogTextWriter = tooling_log_1.ToolingLogTextWriter;
@@ -4761,6 +4762,8 @@ function __importDefault(mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var with_proc_runner_1 = __webpack_require__(38);
 exports.withProcRunner = with_proc_runner_1.withProcRunner;
+var proc_runner_1 = __webpack_require__(39);
+exports.ProcRunner = proc_runner_1.ProcRunner;
 
 
 /***/ }),
@@ -37069,6 +37072,7 @@ const exit_hook_1 = tslib_1.__importDefault(__webpack_require__(348));
 const tooling_log_1 = __webpack_require__(415);
 const fail_1 = __webpack_require__(425);
 const flags_1 = __webpack_require__(426);
+const proc_runner_1 = __webpack_require__(37);
 async function run(fn, options = {}) {
     var _a;
     const flags = flags_1.getFlags(process.argv.slice(2), options);
@@ -37118,10 +37122,13 @@ async function run(fn, options = {}) {
             throw fail_1.createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
         }
         try {
-            await fn({
-                log,
-                flags,
-                addCleanupTask: (task) => cleanupTasks.push(task),
+            await proc_runner_1.withProcRunner(log, async (procRunner) => {
+                await fn({
+                    log,
+                    flags,
+                    procRunner,
+                    addCleanupTask: (task) => cleanupTasks.push(task),
+                });
             });
         }
         finally {
