@@ -7,9 +7,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiComboBox } from '@elastic/eui';
-import { SOURCE_DATA_ID_ORIGIN } from '../../../../../common/constants';
+import { EuiComboBox, EuiHighlight } from '@elastic/eui';
+import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 export function FieldSelect({ fields, selectedFieldName, onChange, ...rest }) {
   const onFieldChange = selectedFields => {
@@ -58,6 +59,16 @@ export function FieldSelect({ fields, selectedFieldName, onChange, ...rest }) {
     });
   }
 
+  function renderOption(option, searchValue, contentClassName) {
+    return (
+      <span className={contentClassName}>
+        <FieldIcon type={option.value.type} size="m" useColor />
+        &nbsp;
+        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+      </span>
+    );
+  }
+
   return (
     <EuiComboBox
       selectedOptions={selectedOption ? [selectedOption] : []}
@@ -69,6 +80,7 @@ export function FieldSelect({ fields, selectedFieldName, onChange, ...rest }) {
       placeholder={i18n.translate('xpack.maps.styles.vector.selectFieldPlaceholder', {
         defaultMessage: 'Select a field',
       })}
+      renderOption={renderOption}
       {...rest}
     />
   );
@@ -76,7 +88,8 @@ export function FieldSelect({ fields, selectedFieldName, onChange, ...rest }) {
 
 export const fieldShape = PropTypes.shape({
   name: PropTypes.string.isRequired,
-  origin: PropTypes.oneOf(['join', SOURCE_DATA_ID_ORIGIN]).isRequired,
+  origin: PropTypes.oneOf(Object.values(FIELD_ORIGIN)).isRequired,
+  type: PropTypes.string.isRequired,
 });
 
 FieldSelect.propTypes = {
