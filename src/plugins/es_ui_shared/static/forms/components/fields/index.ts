@@ -28,3 +28,4 @@ export * from './select_field';
 export * from './super_select_field';
 export * from './toggle_field';
 export * from './text_area_field';
+export * from './json_editor_field';

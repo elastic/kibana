@@ -12,7 +12,7 @@ import { ArgumentStrings } from '../../../i18n';
 
 const { Toggle: strings } = ArgumentStrings;
 
-const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
+const ToggleArgInput = ({ onValueChange, argValue, argId, renderError, typeInstance }) => {
   const handleChange = () => onValueChange(!argValue);
   if (typeof argValue !== 'boolean') {
     renderError();
@@ -26,6 +26,9 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
         checked={argValue}
         onChange={handleChange}
         className="canvasArg__switch"
+        aria-label={typeInstance.displayName}
+        label=""
+        showLabel={false}
       />
     </EuiFormRow>
   );

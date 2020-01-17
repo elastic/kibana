@@ -37,5 +37,6 @@ exports[`render 1`] = `
   noItemsMessage="No items found"
   responsive={true}
   rowProps={[Function]}
+  tableLayout="fixed"
 />
 `;
