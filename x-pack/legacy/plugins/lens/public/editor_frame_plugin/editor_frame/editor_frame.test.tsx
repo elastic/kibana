@@ -9,7 +9,7 @@ import { ReactWrapper } from 'enzyme';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { EditorFrame } from './editor_frame';
-import { Visualization, DatasourcePublicAPI, DatasourceSuggestion } from '../../types';
+import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import {
@@ -18,13 +18,17 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
 } from '../mocks';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
-const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
+async function waitForPromises(n = 3) {
+  for (let i = 0; i < n; ++i) {
+    await Promise.resolve();
+  }
+}
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -35,6 +39,7 @@ function generateSuggestion(state = {}): DatasourceSuggestion {
       layerId: 'first',
       changeType: 'unchanged',
     },
+    keptLayerIds: ['first'],
   };
 }
 
@@ -86,6 +91,9 @@ describe('editor_frame', () => {
         },
       ],
     };
+
+    mockVisualization.getLayerIds.mockReturnValue(['first']);
+    mockVisualization2.getLayerIds.mockReturnValue(['second']);
 
     mockDatasource = createMockDatasource();
     mockDatasource2 = createMockDatasource();
@@ -201,7 +209,7 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization.renderConfigPanel).not.toHaveBeenCalled();
+      expect(mockVisualization.renderLayerConfigPanel).not.toHaveBeenCalled();
       expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
     });
 
@@ -293,6 +301,7 @@ describe('editor_frame', () => {
 
     it('should remove layer on active datasource on frame api call', async () => {
       const initialState = { datasource2: '' };
+      mockDatasource.getLayers.mockReturnValue(['first']);
       mockDatasource2.initialize.mockReturnValue(Promise.resolve(initialState));
       mockDatasource2.getLayers.mockReturnValue(['abc', 'def']);
       mockDatasource2.removeLayer.mockReturnValue({ removed: true });
@@ -360,7 +369,7 @@ describe('editor_frame', () => {
 
     it('should initialize visualization state and render config panel', async () => {
       const initialState = {};
-
+      mockDatasource.getLayers.mockReturnValue(['first']);
       mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -381,7 +390,7 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: initialState })
       );
@@ -389,6 +398,7 @@ describe('editor_frame', () => {
 
     it('should render the resulting expression using the expression renderer', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
+
       const instance = mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -508,7 +518,6 @@ describe('editor_frame', () => {
       );
 
       await waitForPromises();
-      await waitForPromises();
 
       instance.update();
 
@@ -600,6 +609,7 @@ describe('editor_frame', () => {
 
   describe('state update', () => {
     it('should re-render config panel after state update', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
       mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -618,14 +628,14 @@ describe('editor_frame', () => {
       await waitForPromises();
 
       const updatedState = {};
-      const setVisualizationState = (mockVisualization.renderConfigPanel as jest.Mock).mock
+      const setVisualizationState = (mockVisualization.renderLayerConfigPanel as jest.Mock).mock
         .calls[0][1].setState;
       act(() => {
         setVisualizationState(updatedState);
       });
 
-      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(2);
-      expect(mockVisualization.renderConfigPanel).toHaveBeenLastCalledWith(
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
           state: updatedState,
@@ -634,6 +644,7 @@ describe('editor_frame', () => {
     });
 
     it('should re-render data panel after state update', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
       mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -688,10 +699,13 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      const updatedPublicAPI = {};
-      mockDatasource.getPublicAPI.mockReturnValue(
-        (updatedPublicAPI as unknown) as DatasourcePublicAPI
-      );
+      const updatedPublicAPI: DatasourcePublicAPI = {
+        renderLayerPanel: jest.fn(),
+        renderDimensionPanel: jest.fn(),
+        getOperationForColumnId: jest.fn(),
+        getTableSpec: jest.fn(),
+      };
+      mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
         .setState;
@@ -699,8 +713,8 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(2);
-      expect(mockVisualization.renderConfigPanel).toHaveBeenLastCalledWith(
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -753,10 +767,10 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      expect(mockVisualization.renderConfigPanel).toHaveBeenCalled();
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalled();
 
       const datasourceLayers =
-        mockVisualization.renderConfigPanel.mock.calls[0][1].frame.datasourceLayers;
+        mockVisualization.renderLayerConfigPanel.mock.calls[0][1].frame.datasourceLayers;
       expect(datasourceLayers.first).toBe(mockDatasource.publicAPIMock);
       expect(datasourceLayers.second).toBe(mockDatasource2.publicAPIMock);
       expect(datasourceLayers.third).toBe(mockDatasource2.publicAPIMock);
@@ -807,30 +821,38 @@ describe('editor_frame', () => {
       await waitForPromises();
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
-        datasource1State,
-        expect.anything(),
-        'first'
+        expect.objectContaining({
+          state: datasource1State,
+          setState: expect.anything(),
+          layerId: 'first',
+        })
       );
       expect(mockDatasource2.getPublicAPI).toHaveBeenCalledWith(
-        datasource2State,
-        expect.anything(),
-        'second'
+        expect.objectContaining({
+          state: datasource2State,
+          setState: expect.anything(),
+          layerId: 'second',
+        })
       );
       expect(mockDatasource2.getPublicAPI).toHaveBeenCalledWith(
-        datasource2State,
-        expect.anything(),
-        'third'
+        expect.objectContaining({
+          state: datasource2State,
+          setState: expect.anything(),
+          layerId: 'third',
+        })
       );
     });
 
     it('should give access to the datasource state in the datasource factory function', async () => {
       const datasourceState = {};
+      const dateRange = { fromDate: 'now-1w', toDate: 'now' };
       mockDatasource.initialize.mockResolvedValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
       mount(
         <EditorFrame
           {...getDefaultProps()}
+          dateRange={dateRange}
           visualizationMap={{
             testVis: mockVisualization,
           }}
@@ -845,11 +867,12 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
-        datasourceState,
-        expect.any(Function),
-        'first'
-      );
+      expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
+        dateRange,
+        state: datasourceState,
+        setState: expect.any(Function),
+        layerId: 'first',
+      });
     });
 
     it('should re-create the public api after state has been set', async () => {
@@ -872,15 +895,17 @@ describe('editor_frame', () => {
       await waitForPromises();
 
       const updatedState = {};
-      const setDatasourceState = mockDatasource.getPublicAPI.mock.calls[0][1];
+      const setDatasourceState = mockDatasource.getPublicAPI.mock.calls[0][0].setState;
       act(() => {
         setDatasourceState(updatedState);
       });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenLastCalledWith(
-        updatedState,
-        expect.any(Function),
-        'first'
+        expect.objectContaining({
+          state: updatedState,
+          setState: expect.any(Function),
+          layerId: 'first',
+        })
       );
     });
   });
@@ -907,7 +932,7 @@ describe('editor_frame', () => {
     }
 
     beforeEach(async () => {
-      mockDatasource.getLayers.mockReturnValue(['first']);
+      mockDatasource.getLayers.mockReturnValue(['first', 'second']);
       mockDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
         {
           state: {},
@@ -917,6 +942,7 @@ describe('editor_frame', () => {
             layerId: 'first',
             changeType: 'unchanged',
           },
+          keptLayerIds: [],
         },
       ]);
 
@@ -1005,7 +1031,7 @@ describe('editor_frame', () => {
 
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
-      expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
+      expect(mockVisualization2.renderLayerConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: { initial: true } })
       );
@@ -1019,9 +1045,11 @@ describe('editor_frame', () => {
       expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(
-        expect.objectContaining({ datasourceLayers: { first: mockDatasource.publicAPIMock } })
+        expect.objectContaining({
+          datasourceLayers: expect.objectContaining({ first: mockDatasource.publicAPIMock }),
+        })
       );
-      expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
+      expect(mockVisualization2.renderLayerConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: { initial: true } })
       );
@@ -1062,6 +1090,7 @@ describe('editor_frame', () => {
             isMultiRow: true,
             layerId: 'first',
           },
+          keptLayerIds: [],
         },
       ]);
       mount(
@@ -1088,6 +1117,7 @@ describe('editor_frame', () => {
     });
 
     it('should display top 5 suggestions in descending order', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
       const instance = mount(
         <EditorFrame
           {...getDefaultProps()}
@@ -1171,6 +1201,7 @@ describe('editor_frame', () => {
     });
 
     it('should switch to suggested visualization', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first', 'second', 'third']);
       const newDatasourceState = {};
       const suggestionVisState = {};
       const instance = mount(
@@ -1214,8 +1245,8 @@ describe('editor_frame', () => {
           .simulate('click');
       });
 
-      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledTimes(1);
-      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
@@ -1230,6 +1261,7 @@ describe('editor_frame', () => {
     });
 
     it('should switch to best suggested visualization on field drop', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first']);
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
@@ -1279,7 +1311,7 @@ describe('editor_frame', () => {
           .simulate('drop');
       });
 
-      expect(mockVisualization.renderConfigPanel).toHaveBeenCalledWith(
+      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
@@ -1288,6 +1320,7 @@ describe('editor_frame', () => {
     });
 
     it('should use the currently selected visualization if possible on field drop', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first', 'second', 'third']);
       const suggestionVisState = {};
       const instance = mount(
         <EditorFrame
@@ -1352,7 +1385,7 @@ describe('editor_frame', () => {
         });
       });
 
-      expect(mockVisualization2.renderConfigPanel).toHaveBeenCalledWith(
+      expect(mockVisualization2.renderLayerConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
@@ -1361,10 +1394,12 @@ describe('editor_frame', () => {
     });
 
     it('should use the highest priority suggestion available', async () => {
+      mockDatasource.getLayers.mockReturnValue(['first', 'second', 'third']);
       const suggestionVisState = {};
       const mockVisualization3 = {
         ...createMockVisualization(),
         id: 'testVis3',
+        getLayerIds: () => ['third'],
         visualizationTypes: [
           {
             icon: 'empty',
@@ -1446,7 +1481,7 @@ describe('editor_frame', () => {
         });
       });
 
-      expect(mockVisualization3.renderConfigPanel).toHaveBeenCalledWith(
+      expect(mockVisualization3.renderLayerConfigPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
           state: suggestionVisState,
@@ -1509,7 +1544,7 @@ describe('editor_frame', () => {
             query: { query: '', language: 'lucene' },
             filters: [],
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },
@@ -1528,7 +1563,7 @@ describe('editor_frame', () => {
             query: { query: '', language: 'lucene' },
             filters: [],
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },
@@ -1585,7 +1620,7 @@ describe('editor_frame', () => {
             query: { query: 'new query', language: 'lucene' },
             filters: [],
           },
-          title: 'New visualization',
+          title: '',
           type: 'lens',
           visualizationType: 'testVis',
         },
@@ -1619,13 +1654,16 @@ describe('editor_frame', () => {
       await waitForPromises();
       expect(onChange).toHaveBeenCalledTimes(2);
 
-      (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        updater: () => ({
-          newState: true,
-        }),
-        datasourceId: 'testDatasource',
+      act(() => {
+        (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
+          type: 'UPDATE_DATASOURCE_STATE',
+          updater: () => ({
+            newState: true,
+          }),
+          datasourceId: 'testDatasource',
+        });
       });
+
       await waitForPromises();
 
       expect(onChange).toHaveBeenCalledTimes(3);

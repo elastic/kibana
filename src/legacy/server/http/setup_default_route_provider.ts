@@ -29,7 +29,7 @@ export function setupDefaultRouteProvider(server: Legacy.Server) {
 
     const uiSettings = request.getUiSettingsService();
 
-    const defaultRoute = await uiSettings.get('defaultRoute');
+    const defaultRoute = await uiSettings.get<string>('defaultRoute');
     const qualifiedDefaultRoute = `${request.getBasePath()}${defaultRoute}`;
 
     if (isRelativePath(qualifiedDefaultRoute, serverBasePath)) {
@@ -40,7 +40,7 @@ export function setupDefaultRouteProvider(server: Legacy.Server) {
         `Ignoring configured default route of '${defaultRoute}', as it is malformed.`
       );
 
-      const fallbackRoute = uiSettings.getDefaults().defaultRoute.value;
+      const fallbackRoute = uiSettings.getRegistered().defaultRoute.value;
 
       const qualifiedFallbackRoute = `${request.getBasePath()}${fallbackRoute}`;
       return qualifiedFallbackRoute;

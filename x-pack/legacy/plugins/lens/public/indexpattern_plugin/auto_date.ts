@@ -9,26 +9,59 @@ import dateMath from '@elastic/datemath';
 import {
   ExpressionFunction,
   KibanaContext,
-} from '../../../../../../src/plugins/expressions/common';
+} from '../../../../../../src/plugins/expressions/public';
+import { DateRange } from '../../common';
 
 interface LensAutoDateProps {
   aggConfigs: string;
 }
 
-export function getAutoInterval(ctx?: KibanaContext | null) {
+export function toAbsoluteDates(dateRange?: DateRange) {
+  if (!dateRange) {
+    return;
+  }
+
+  const fromDate = dateMath.parse(dateRange.fromDate);
+  const toDate = dateMath.parse(dateRange.toDate, { roundUp: true });
+
+  if (!fromDate || !toDate) {
+    return;
+  }
+
+  return {
+    fromDate: fromDate.toDate(),
+    toDate: toDate.toDate(),
+  };
+}
+
+export function autoIntervalFromDateRange(dateRange?: DateRange, defaultValue: string = '1h') {
+  const dates = toAbsoluteDates(dateRange);
+  if (!dates) {
+    return defaultValue;
+  }
+
+  const buckets = new TimeBuckets();
+
+  buckets.setInterval('auto');
+  buckets.setBounds({
+    min: dates.fromDate,
+    max: dates.toDate,
+  });
+
+  return buckets.getInterval().expression;
+}
+
+function autoIntervalFromContext(ctx?: KibanaContext | null) {
   if (!ctx || !ctx.timeRange) {
     return;
   }
 
   const { timeRange } = ctx;
-  const buckets = new TimeBuckets();
-  buckets.setInterval('auto');
-  buckets.setBounds({
-    min: dateMath.parse(timeRange.from),
-    max: dateMath.parse(timeRange.to, { roundUp: true }),
-  });
 
-  return buckets.getInterval();
+  return autoIntervalFromDateRange({
+    fromDate: timeRange.from,
+    toDate: timeRange.to,
+  });
 }
 
 /**
@@ -56,7 +89,7 @@ export const autoDate: ExpressionFunction<
     },
   },
   fn(ctx: KibanaContext, args: LensAutoDateProps) {
-    const interval = getAutoInterval(ctx);
+    const interval = autoIntervalFromContext(ctx);
 
     if (!interval) {
       return args.aggConfigs;
@@ -76,7 +109,7 @@ export const autoDate: ExpressionFunction<
         ...c,
         params: {
           ...c.params,
-          interval: interval.expression,
+          interval,
         },
       };
     });

@@ -10,12 +10,13 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Provider } from 'react-redux';
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
 import { CoreStart } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GraphStore } from '../state_management';
 import { GuidancePanel } from './guidance_panel';
+import { GraphTitle } from './graph_title';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -23,7 +24,7 @@ export interface GraphAppProps extends SearchBarProps {
   coreStart: CoreStart;
   // This is not named dataStart because of Angular treating data- prefix differently
   pluginDataStart: DataPublicPluginStart;
-  store: Storage;
+  storage: IStorageWrapper;
   reduxStore: GraphStore;
   isInitialized: boolean;
   noIndexPatterns: boolean;
@@ -34,7 +35,7 @@ export function GraphApp(props: GraphAppProps) {
   const {
     coreStart,
     pluginDataStart,
-    store,
+    storage,
     reduxStore,
     noIndexPatterns,
     ...searchBarProps
@@ -45,13 +46,14 @@ export function GraphApp(props: GraphAppProps) {
       <KibanaContextProvider
         services={{
           appName: 'graph',
-          store,
+          storage,
           data: pluginDataStart,
           ...coreStart,
         }}
       >
         <Provider store={reduxStore}>
           <>
+            {props.isInitialized && <GraphTitle />}
             <div className="gphGraph__bar">
               <SearchBar {...searchBarProps} />
               <EuiSpacer size="s" />

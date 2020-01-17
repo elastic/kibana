@@ -23,118 +23,78 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 
-import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalHttpServiceSetup } from '../http';
-import { UiSettingsConfigType } from './ui_settings_config';
-import { IUiSettingsClient, UiSettingsClient } from './ui_settings_client';
+import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
+import { UiSettingsClient } from './ui_settings_client';
+import {
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+  UiSettingsParams,
+} from './types';
 import { mapToObject } from '../../utils/';
+
+import { registerRoutes } from './routes';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
 
-/**
- * UI element type to represent the settings.
- * @public
- * */
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
-
-/**
- * UiSettings parameters defined by the plugins.
- * @public
- * */
-export interface UiSettingsParams {
-  /** title in the UI */
-  name: string;
-  /** default value to fall back to if a user doesn't provide any */
-  value: SavedObjectAttribute;
-  /** description provided to a user in UI */
-  description: string;
-  /** used to group the configured setting in the UI */
-  category: string[];
-  /** a range of valid values */
-  options?: string[];
-  /** text labels for 'select' type UI element */
-  optionLabels?: Record<string, string>;
-  /** a flag indicating whether new value applying requires page reloading */
-  requiresPageReload?: boolean;
-  /** a flag indicating that value cannot be changed */
-  readonly?: boolean;
-  /** defines a type of UI element {@link UiSettingsType} */
-  type?: UiSettingsType;
-}
-
 /** @internal */
-export interface InternalUiSettingsServiceSetup {
-  /**
-   * Sets the parameters with default values for the uiSettings.
-   * @param values
-   */
-  setDefaults(values: Record<string, UiSettingsParams>): void;
-  /**
-   * Creates uiSettings client with provided *scoped* saved objects client {@link IUiSettingsClient}
-   * @param values
-   */
-  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
-}
-
-/** @internal */
-export class UiSettingsService implements CoreService<InternalUiSettingsServiceSetup> {
+export class UiSettingsService
+  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<UiSettingsConfigType>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
+  private overrides: Record<string, any> = {};
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
-    this.config$ = coreContext.configService.atPath<UiSettingsConfigType>('uiSettings');
+    this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
   }
 
   public async setup(deps: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
+    registerRoutes(deps.http.createRouter(''));
     this.log.debug('Setting up ui settings service');
-    const overrides = await this.getOverrides(deps);
-    const { version, buildNum } = this.coreContext.env.packageInfo;
+    const config = await this.config$.pipe(first()).toPromise();
+    this.overrides = config.overrides;
 
     return {
-      setDefaults: this.setDefaults.bind(this),
-      asScopedToClient: (savedObjectsClient: SavedObjectsClientContract) => {
-        return new UiSettingsClient({
-          type: 'config',
-          id: version,
-          buildNum,
-          savedObjectsClient,
-          defaults: mapToObject(this.uiSettingsDefaults),
-          overrides,
-          log: this.log,
-        });
-      },
+      register: this.register.bind(this),
+      asScopedToClient: this.getScopedClientFactory(),
     };
   }
 
-  public async start() {}
+  public async start(): Promise<InternalUiSettingsServiceStart> {
+    return {
+      asScopedToClient: this.getScopedClientFactory(),
+    };
+  }
 
   public async stop() {}
 
-  private setDefaults(values: Record<string, UiSettingsParams> = {}) {
-    Object.entries(values).forEach(([key, value]) => {
+  private getScopedClientFactory(): (
+    savedObjectsClient: SavedObjectsClientContract
+  ) => UiSettingsClient {
+    const { version, buildNum } = this.coreContext.env.packageInfo;
+    return (savedObjectsClient: SavedObjectsClientContract) =>
+      new UiSettingsClient({
+        type: 'config',
+        id: version,
+        buildNum,
+        savedObjectsClient,
+        defaults: mapToObject(this.uiSettingsDefaults),
+        overrides: this.overrides,
+        log: this.log,
+      });
+  }
+
+  private register(settings: Record<string, UiSettingsParams> = {}) {
+    Object.entries(settings).forEach(([key, value]) => {
       if (this.uiSettingsDefaults.has(key)) {
-        throw new Error(`uiSettings defaults for key [${key}] has been already set`);
+        throw new Error(`uiSettings for the key [${key}] has been already registered`);
       }
       this.uiSettingsDefaults.set(key, value);
     });
-  }
-
-  private async getOverrides(deps: SetupDeps) {
-    const config = await this.config$.pipe(first()).toPromise();
-    const overrides: Record<string, SavedObjectAttribute> = config.overrides;
-    // manually implemented deprecation until New platform Config service
-    // supports them https://github.com/elastic/kibana/issues/40255
-    if (typeof deps.http.config.defaultRoute !== 'undefined') {
-      overrides.defaultRoute = deps.http.config.defaultRoute;
-      this.log.warn(
-        'Config key "server.defaultRoute" is deprecated. It has been replaced with "uiSettings.overrides.defaultRoute"'
-      );
-    }
-
-    return overrides;
   }
 }

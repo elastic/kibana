@@ -16,7 +16,7 @@ export function NodeStatusIcon({ isOnline, status }) {
       type={type}
       label={i18n.translate('xpack.monitoring.elasticsearch.node.statusIconLabel', {
         defaultMessage: 'Status: {status}',
-        values: { status }
+        values: { status },
       })}
     />
   );

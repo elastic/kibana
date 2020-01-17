@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { taskManagerMock } from '../../../../plugins/task_manager/server/task_manager.mock';
 import { createExecuteFunction } from './create_execute_function';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
-const mockTaskManager = taskManagerMock.create();
-const savedObjectsClient = SavedObjectsClientMock.create();
+const mockTaskManager = taskManagerMock.start();
+const savedObjectsClient = savedObjectsClientMock.create();
 const getBasePath = jest.fn();
 
 beforeEach(() => jest.resetAllMocks());
@@ -138,6 +138,7 @@ describe('execute()', () => {
       id: '123',
       params: { baz: false },
       spaceId: 'default',
+      apiKey: null,
     });
     expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
       getBasePath: expect.anything(),

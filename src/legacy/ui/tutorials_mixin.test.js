@@ -31,14 +31,12 @@ const validTutorial = {
         instructionVariants: [
           {
             id: 'instructionVariant1',
-            instructions: [
-              {}
-            ]
-          }
-        ]
-      }
-    ]
-  }
+            instructions: [{}],
+          },
+        ],
+      },
+    ],
+  },
 };
 
 describe('tutorial mixins', () => {
@@ -50,9 +48,9 @@ describe('tutorial mixins', () => {
     await tutorialsMixin({}, serverMock);
 
     [
-      [,, getTutorials],
-      [,, registerTutorial],
-      [,, addScopedTutorialContextFactory]
+      [, , getTutorials],
+      [, , registerTutorial],
+      [, , addScopedTutorialContextFactory],
     ] = serverMock.decorate.mock.calls;
   });
 
@@ -61,14 +59,13 @@ describe('tutorial mixins', () => {
   });
 
   describe('scoped context', () => {
-
     const mockRequest = {};
-    const spacesContextFactory = (request) => {
+    const spacesContextFactory = request => {
       if (request !== mockRequest) {
         throw new Error('context factory not called with request object');
       }
       return {
-        spaceId: 'my-space'
+        spaceId: 'my-space',
       };
     };
     const specProvider = (server, context) => {
@@ -84,10 +81,9 @@ describe('tutorial mixins', () => {
     test('passes scoped context to specProviders', () => {
       const tutorials = getTutorials(mockRequest);
       expect(tutorials.length).toBe(1);
-      expect(tutorials[0].shortDescription).toBe('I have been provided with scoped context, spaceId: my-space');
+      expect(tutorials[0].shortDescription).toBe(
+        'I have been provided with scoped context, spaceId: my-space'
+      );
     });
   });
-
 });
-
-

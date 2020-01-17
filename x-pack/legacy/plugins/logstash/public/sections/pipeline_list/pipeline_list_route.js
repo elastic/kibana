@@ -11,15 +11,14 @@ import './components/pipeline_list';
 import 'plugins/logstash/services/license';
 import { getPipelineListBreadcrumbs } from '../breadcrumbs';
 
-routes
-  .when('/management/logstash/pipelines/', {
-    template,
-    k7Breadcrumbs: getPipelineListBreadcrumbs
-  });
+routes.when('/management/logstash/pipelines/', {
+  template,
+  k7Breadcrumbs: getPipelineListBreadcrumbs,
+});
 
 routes.defaults(/\/management/, {
   resolve: {
-    logstashManagementSection: ($injector) => {
+    logstashManagementSection: $injector => {
       const licenseService = $injector.get('logstashLicenseService');
       const logstashSection = management.getSection('logstash/pipelines');
 
@@ -29,6 +28,6 @@ routes.defaults(/\/management/, {
       } else {
         logstashSection.hide();
       }
-    }
-  }
+    },
+  },
 });

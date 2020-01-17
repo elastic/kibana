@@ -87,7 +87,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getInfraIpHref(summary, basePath)}
-              iconType="infraApp"
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.ip.message',
                 {
@@ -116,7 +116,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getInfraKubernetesHref(summary, basePath)}
-              iconType="infraApp"
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.message',
                 {
@@ -145,7 +145,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getInfraContainerHref(summary, basePath)}
-              iconType="infraApp"
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.container.message',
                 {
@@ -177,7 +177,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getLoggingIpHref(summary, basePath)}
-              iconType="loggingApp"
+              iconType="logsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.ip.message',
                 {
@@ -200,7 +200,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getLoggingKubernetesHref(summary, basePath)}
-              iconType="loggingApp"
+              iconType="logsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.kubernetes.message',
                 {
@@ -227,7 +227,7 @@ export const IntegrationGroup = ({
                 }
               )}
               href={getLoggingContainerHref(summary, basePath)}
-              iconType="loggingApp"
+              iconType="logsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.container.message',
                 {

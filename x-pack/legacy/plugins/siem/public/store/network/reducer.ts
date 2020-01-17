@@ -19,14 +19,13 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   setIpDetailsTablesActivePageToZero,
   setNetworkTablesActivePageToZero,
-  updateIpDetailsFlowTarget,
   updateNetworkTable,
 } from './actions';
 import {
   setNetworkDetailsQueriesActivePageToZero,
   setNetworkPageQueriesActivePageToZero,
 } from './helpers';
-import { IpDetailsTableType, NetworkModel, NetworkTableType, NetworkType } from './model';
+import { IpDetailsTableType, NetworkModel, NetworkTableType } from './model';
 
 export type NetworkState = NetworkModel;
 
@@ -58,6 +57,13 @@ export const initialNetworkState: NetworkState = {
         },
         isPtrIncluded: false,
       },
+      [NetworkTableType.http]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          direction: Direction.desc,
+        },
+      },
       [NetworkTableType.tls]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -82,10 +88,21 @@ export const initialNetworkState: NetworkState = {
           direction: Direction.desc,
         },
       },
+      [NetworkTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
     queries: {
+      [IpDetailsTableType.http]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          direction: Direction.desc,
+        },
+      },
       [IpDetailsTableType.topCountriesSource]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -169,13 +186,6 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
     details: {
       ...state.details,
       queries: setNetworkDetailsQueriesActivePageToZero(state),
-    },
-  }))
-  .case(updateIpDetailsFlowTarget, (state, { flowTarget }) => ({
-    ...state,
-    [NetworkType.details]: {
-      ...state[NetworkType.details],
-      flowTarget,
     },
   }))
   .build();

@@ -7,7 +7,7 @@
 import { ActionType } from '../types';
 import { validateParams } from '../lib';
 import { Logger } from '../../../../../../src/core/server';
-import { SavedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
 
 const ACTION_TYPE_ID = '.server-log';
@@ -25,7 +25,7 @@ beforeAll(() => {
 describe('get()', () => {
   test('returns action type', () => {
     expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('server-log');
+    expect(actionType.name).toEqual('Server log');
   });
 });
 
@@ -92,12 +92,12 @@ describe('execute()', () => {
       actionId,
       services: {
         callCluster: async (path: string, opts: any) => {},
-        savedObjectsClient: SavedObjectsClientMock.create(),
+        savedObjectsClient: savedObjectsClientMock.create(),
       },
       params: { message: 'message text here', level: 'info' },
       config: {},
       secrets: {},
     });
-    expect(mockedLogger.info).toHaveBeenCalledWith('message text here');
+    expect(mockedLogger.info).toHaveBeenCalledWith('Server log: message text here');
   });
 });

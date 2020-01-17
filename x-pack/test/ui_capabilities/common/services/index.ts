@@ -6,11 +6,11 @@
 
 import { FeaturesProvider } from './features';
 import { UICapabilitiesProvider } from './ui_capabilities';
-import { SecurityServiceProvider, SpacesServiceProvider } from '../../../common/services';
+import { services as commonServices } from '../../../common/services';
 
 export const services = {
-  security: SecurityServiceProvider,
-  spaces: SpacesServiceProvider,
+  ...commonServices,
+
   uiCapabilities: UICapabilitiesProvider,
   features: FeaturesProvider,
 };

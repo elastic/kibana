@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { XPackMainPlugin } from '../../../../../legacy/plugins/xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 
 export function isSecurityDisabled(xpackMainPlugin: XPackMainPlugin): boolean;

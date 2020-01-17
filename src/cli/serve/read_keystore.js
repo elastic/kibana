@@ -21,9 +21,9 @@ import path from 'path';
 import { set } from 'lodash';
 
 import { Keystore } from '../../legacy/server/keystore';
-import { getData } from '../../legacy/server/path';
+import { getDataPath } from '../../core/server/path';
 
-export function readKeystore(dataPath = getData()) {
+export function readKeystore(dataPath = getDataPath()) {
   const keystore = new Keystore(path.join(dataPath, 'kibana.keystore'));
   keystore.load();
 

@@ -30,7 +30,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     processorEvent,
     serviceName,
     serviceNodeName,
-    errorGroupId
+    errorGroupId,
+    traceId: traceIdLink
   } = getPathParams(location.pathname);
 
   const query = toQuery(location.search);
@@ -53,7 +54,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
     rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
     rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
-    environment
+    environment,
+    searchTerm
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -81,10 +83,12 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     kuery: kuery && decodeURIComponent(kuery),
     transactionName,
     transactionType,
+    searchTerm: toString(searchTerm),
 
     // path params
     processorEvent,
     serviceName,
+    traceIdLink,
     errorGroupId,
     serviceNodeName: serviceNodeName
       ? decodeURIComponent(serviceNodeName)

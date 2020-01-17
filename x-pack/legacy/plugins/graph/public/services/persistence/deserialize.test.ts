@@ -6,9 +6,9 @@
 
 import { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { savedWorkspaceToAppState } from './deserialize';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createWorkspace } from '../../angular/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
@@ -91,8 +91,8 @@ describe('deserialize', () => {
           },
         ],
         links: [
-          { inferred: false, label: '', weight: 5, width: 5, source: 2, target: 0 },
-          { inferred: false, label: '', weight: 5, width: 5, source: 2, target: 4 },
+          { label: '', weight: 5, width: 5, source: 2, target: 0 },
+          { label: '', weight: 5, width: 5, source: 2, target: 4 },
         ],
         urlTemplates: [
           {
@@ -119,9 +119,9 @@ describe('deserialize', () => {
       savedWorkspace,
       {
         getNonScriptedFields: () => [
-          { name: 'field1', type: 'string' },
-          { name: 'field2', type: 'string' },
-          { name: 'field3', type: 'string' },
+          { name: 'field1', type: 'string', aggregatable: true },
+          { name: 'field2', type: 'string', aggregatable: true },
+          { name: 'field3', type: 'string', aggregatable: true },
         ],
       } as IndexPattern,
       workspace
@@ -140,6 +140,7 @@ describe('deserialize', () => {
     expect(allFields).toMatchInlineSnapshot(`
       Array [
         Object {
+          "aggregatable": true,
           "color": "black",
           "hopSize": undefined,
           "icon": undefined,
@@ -149,6 +150,7 @@ describe('deserialize', () => {
           "type": "string",
         },
         Object {
+          "aggregatable": true,
           "color": "black",
           "hopSize": undefined,
           "icon": undefined,
@@ -158,7 +160,8 @@ describe('deserialize', () => {
           "type": "string",
         },
         Object {
-          "color": "#CE0060",
+          "aggregatable": true,
+          "color": "#D36086",
           "hopSize": 5,
           "icon": Object {
             "class": "fa-folder-open-o",

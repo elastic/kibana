@@ -5,12 +5,18 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/network';
-import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
+import {
+  Direction,
+  FlowTarget,
+  UsersEdges,
+  UsersFields,
+  UsersSortField,
+} from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable, SortingBasicTable } from '../../../paginated_table';
 
@@ -78,22 +84,45 @@ const UsersTableComponent = React.memo<UsersTableProps>(
     updateNetworkTable,
     sort,
   }) => {
-    const onChange = (criteria: Criteria) => {
-      if (criteria.sort != null) {
-        const splitField = criteria.sort.field.split('.');
-        const newUsersSort: UsersSortField = {
-          field: getSortFromString(splitField[splitField.length - 1]),
-          direction: criteria.sort.direction,
-        };
-        if (!isEqual(newUsersSort, sort)) {
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { sort: newUsersSort },
-          });
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable]
+    );
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const splitField = criteria.sort.field.split('.');
+          const newUsersSort: UsersSortField = {
+            field: getSortFromString(splitField[splitField.length - 1]),
+            direction: criteria.sort.direction as Direction,
+          };
+          if (!isEqual(newUsersSort, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: { sort: newUsersSort },
+            });
+          }
         }
-      }
-    };
+      },
+      [sort, type, updateNetworkTable]
+    );
 
     return (
       <PaginatedTable
@@ -109,25 +138,13 @@ const UsersTableComponent = React.memo<UsersTableProps>(
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         sorting={getSortField(sort)}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { activePage: newPage },
-          })
-        }
-        updateLimitPagination={newLimit =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { limit: newLimit },
-          })
-        }
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }
@@ -142,12 +159,9 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const UsersTable = connect(
-  makeMapStateToProps,
-  {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  }
-)(UsersTableComponent);
+export const UsersTable = connect(makeMapStateToProps, {
+  updateNetworkTable: networkActions.updateNetworkTable,
+})(UsersTableComponent);
 
 const getSortField = (sortField: UsersSortField): SortingBasicTable => {
   switch (sortField.field) {

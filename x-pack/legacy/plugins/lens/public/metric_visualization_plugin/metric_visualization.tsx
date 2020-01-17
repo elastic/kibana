@@ -54,6 +54,17 @@ export const metricVisualization: Visualization<State, PersistableState> = {
     },
   ],
 
+  clearLayer(state) {
+    return {
+      ...state,
+      accessor: generateId(),
+    };
+  },
+
+  getLayerIds(state) {
+    return [state.layerId];
+  },
+
   getDescription() {
     return {
       icon: chartMetricSVG,
@@ -76,7 +87,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
 
   getPersistableState: state => state,
 
-  renderConfigPanel: (domElement, props) =>
+  renderLayerConfigPanel: (domElement, props) =>
     render(
       <I18nProvider>
         <MetricConfigPanel {...props} />

@@ -14,7 +14,7 @@ import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
 export interface ColumnDefinition {
-  align?: string;
+  align?: 'left' | 'right' | 'center' | undefined;
   field: string;
   name: string;
   sortable?: boolean;
@@ -246,7 +246,10 @@ export const BeatsTableType: TableType = {
         name: i18n.translate('xpack.beatsManagement.beatsTable.typeLabel', {
           defaultMessage: 'Type',
         }),
-        options: uniq(data.map(({ type }: { type: any }) => ({ value: type })), 'value'),
+        options: uniq(
+          data.map(({ type }: { type: any }) => ({ value: type })),
+          'value'
+        ),
       },
     ],
   }),

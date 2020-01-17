@@ -21,7 +21,7 @@ export function handleGetPipelinesResponse(response, exclusivePipelineIds) {
         // Create new pipeline object if necessary
         if (!pipelinesById.hasOwnProperty(pipelineId)) {
           pipelinesById[pipelineId] = {
-            metrics: {}
+            metrics: {},
           };
         }
         const pipeline = pipelinesById[pipelineId];
@@ -33,11 +33,11 @@ export function handleGetPipelinesResponse(response, exclusivePipelineIds) {
           // to keep data "y" values specific to this pipeline
           pipeline.metrics[metric] = {
             ...omit(response[metric][0], 'data'),
-            data: []
+            data: [],
           };
         }
 
-        pipeline.metrics[metric].data.push([ x, y[pipelineId] ]);
+        pipeline.metrics[metric].data.push([x, y[pipelineId]]);
       });
     });
   });
@@ -48,15 +48,14 @@ export function handleGetPipelinesResponse(response, exclusivePipelineIds) {
     for (const exclusivePipelineId of exclusivePipelineIds) {
       pipelines.push({
         id: exclusivePipelineId,
-        ...pipelinesById[exclusivePipelineId]
+        ...pipelinesById[exclusivePipelineId],
       });
     }
-  }
-  else {
+  } else {
     Object.keys(pipelinesById).forEach(pipelineId => {
       pipelines.push({
         id: pipelineId,
-        ...pipelinesById[pipelineId]
+        ...pipelinesById[pipelineId],
       });
     });
   }
@@ -64,7 +63,11 @@ export function handleGetPipelinesResponse(response, exclusivePipelineIds) {
   return pipelines;
 }
 
-export async function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMetricKey) {
+export async function processPipelinesAPIResponse(
+  response,
+  throughputMetricKey,
+  nodesCountMetricKey
+) {
   // Clone to avoid mutating original response
   const processedResponse = cloneDeep(response);
 
@@ -73,7 +76,7 @@ export async function processPipelinesAPIResponse(response, throughputMetricKey,
   processedResponse.pipelines.forEach(pipeline => {
     pipeline.metrics = {
       throughput: pipeline.metrics[throughputMetricKey],
-      nodesCount: pipeline.metrics[nodesCountMetricKey]
+      nodesCount: pipeline.metrics[nodesCountMetricKey],
     };
 
     pipeline.latestThroughput = last(pipeline.metrics.throughput.data)[1];
@@ -83,13 +86,24 @@ export async function processPipelinesAPIResponse(response, throughputMetricKey,
   return processedResponse;
 }
 
-
-export async function getPipelines(req, logstashIndexPattern, pipelineIds, metricSet, metricOptions = {}) {
+export async function getPipelines(
+  req,
+  logstashIndexPattern,
+  pipelineIds,
+  metricSet,
+  metricOptions = {}
+) {
   checkParam(logstashIndexPattern, 'logstashIndexPattern in logstash/getPipelines');
   checkParam(metricSet, 'metricSet in logstash/getPipelines');
 
   const filters = [];
 
-  const metricsResponse = await getMetrics(req, logstashIndexPattern, metricSet, filters, metricOptions);
+  const metricsResponse = await getMetrics(
+    req,
+    logstashIndexPattern,
+    metricSet,
+    filters,
+    metricOptions
+  );
   return handleGetPipelinesResponse(metricsResponse, pipelineIds);
 }

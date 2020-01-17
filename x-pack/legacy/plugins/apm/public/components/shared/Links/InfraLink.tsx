@@ -9,7 +9,7 @@ import { compact } from 'lodash';
 import React from 'react';
 import url from 'url';
 import { fromQuery } from './url_helpers';
-import { useKibanaCore } from '../../../../../observability/public';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 interface InfraQueryParams {
   time?: number;
@@ -24,7 +24,7 @@ interface Props extends EuiLinkAnchorProps {
 }
 
 export function InfraLink({ path, query = {}, ...rest }: Props) {
-  const core = useKibanaCore();
+  const { core } = useApmPluginContext();
   const nextSearch = fromQuery(query);
   const href = url.format({
     pathname: core.http.basePath.prepend('/app/infra'),

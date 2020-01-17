@@ -16,17 +16,16 @@ export function MachineLearningJobWizardMultiMetricProvider({ getService }: FtrP
       await testSubjects.existOrFail('mlMultiMetricSplitFieldSelect > comboBoxInput');
     },
 
-    async assertSplitFieldSelection(identifier: string) {
+    async assertSplitFieldSelection(expectedIdentifier: string[]) {
       const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
         'mlMultiMetricSplitFieldSelect > comboBoxInput'
       );
-      expect(comboBoxSelectedOptions.length).to.eql(1);
-      expect(comboBoxSelectedOptions[0]).to.eql(identifier);
+      expect(comboBoxSelectedOptions).to.eql(expectedIdentifier);
     },
 
     async selectSplitField(identifier: string) {
       await comboBox.set('mlMultiMetricSplitFieldSelect > comboBoxInput', identifier);
-      await this.assertSplitFieldSelection(identifier);
+      await this.assertSplitFieldSelection([identifier]);
     },
 
     async assertDetectorSplitExists(splitField: string) {

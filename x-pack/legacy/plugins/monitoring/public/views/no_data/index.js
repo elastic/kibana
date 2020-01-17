@@ -11,6 +11,6 @@ import { NoDataController } from './controller';
 uiRoutes
   .when('/no-data', {
     template,
-    controller: NoDataController
+    controller: NoDataController,
   })
   .otherwise({ redirectTo: '/home' });

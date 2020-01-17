@@ -17,7 +17,7 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.hosts.pageTitle', {
 export const NAVIGATION_ALL_HOSTS_TITLE = i18n.translate(
   'xpack.siem.hosts.navigation.allHostsTitle',
   {
-    defaultMessage: 'All Hosts',
+    defaultMessage: 'All hosts',
   }
 );
 
@@ -25,6 +25,13 @@ export const NAVIGATION_AUTHENTICATIONS_TITLE = i18n.translate(
   'xpack.siem.hosts.navigation.authenticationsTitle',
   {
     defaultMessage: 'Authentications',
+  }
+);
+
+export const NAVIGATION_AUTHENTICATIONS_STACK_BY_EVENT_TYPE = i18n.translate(
+  'xpack.siem.hosts.navigation.authentications.stackByEventType',
+  {
+    defaultMessage: 'event type',
   }
 );
 
@@ -46,15 +53,34 @@ export const NAVIGATION_EVENTS_TITLE = i18n.translate('xpack.siem.hosts.navigati
   defaultMessage: 'Events',
 });
 
-export const EMPTY_TITLE = i18n.translate('xpack.siem.hosts.emptyTitle', {
-  defaultMessage:
-    'It looks like you don’t have any indices relevant to hosts in the SIEM application',
+export const NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION = i18n.translate(
+  'xpack.siem.hosts.navigation.eventsStackByEventAction',
+  {
+    defaultMessage: 'action',
+  }
+);
+
+export const NAVIGATION_EVENTS_STACK_BY_EVENT_DATASET = i18n.translate(
+  'xpack.siem.hosts.navigation.eventsStackByEventDataset',
+  {
+    defaultMessage: 'dataset',
+  }
+);
+
+export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.hosts.navigation.alertsTitle', {
+  defaultMessage: 'Alerts',
 });
 
-export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.hosts.emptyActionPrimary', {
-  defaultMessage: 'View setup instructions',
-});
+export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
+  'xpack.siem.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
+  {
+    defaultMessage: 'Failed to query authentications data',
+  }
+);
 
-export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.hosts.emptyActionSecondary', {
-  defaultMessage: 'Go to documentation',
-});
+export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
+  'xpack.siem.hosts.navigaton.matrixHistogram.errorFetchingEventsData',
+  {
+    defaultMessage: 'Failed to query events data',
+  }
+);

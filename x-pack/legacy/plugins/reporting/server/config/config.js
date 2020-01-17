@@ -17,5 +17,5 @@ function cpuCount() {
 }
 
 export const config = {
-  concurrency: cpuCount()
+  concurrency: cpuCount(),
 };

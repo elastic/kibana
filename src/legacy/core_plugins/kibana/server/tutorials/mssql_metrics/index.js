@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
-export function mssqlMetricsSpecProvider(server, context) {
+export function mssqlMetricsSpecProvider(context) {
   const moduleName = 'mssql';
   return {
     id: 'mssqlMetrics',
@@ -33,7 +37,8 @@ export function mssqlMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch monitoring metrics from a Microsoft SQL Server instance',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.mssqlMetrics.longDescription', {
-      defaultMessage: 'The `mssql` Metricbeat module fetches monitoring, log and performance metrics from a Microsoft SQL Server instance. \
+      defaultMessage:
+        'The `mssql` Metricbeat module fetches monitoring, log and performance metrics from a Microsoft SQL Server instance. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mssql.html',
@@ -45,20 +50,23 @@ export function mssqlMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'a2ead240-18bb-11e9-9836-f37dedd3b411-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.mssqlMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Microsoft SQL Server metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.mssqlMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Microsoft SQL Server metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-mssql.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-mssql.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/mssql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

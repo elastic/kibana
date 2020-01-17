@@ -1,0 +1,245 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/NumberFormat with custom format 1`] = `
+Array [
+  <div
+    className="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      className="euiFormControlLayout__childrenWrapper"
+    >
+      <select
+        className="euiSelect euiSelect--compressed"
+        id="NumberFormatExample3"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value="custom"
+      >
+        <option
+          value="0.0[000]"
+        >
+          Number
+        </option>
+        <option
+          value="0.0%"
+        >
+          Percent
+        </option>
+        <option
+          value="$0.00"
+        >
+          Currency
+        </option>
+        <option
+          value="00:00:00"
+        >
+          Duration
+        </option>
+        <option
+          value="0.0b"
+        >
+          Bytes
+        </option>
+        <option
+          value="custom"
+        >
+          Custom
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+            focusable="false"
+            height={16}
+            role="img"
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      className="euiFormControlLayout__childrenWrapper"
+    >
+      <input
+        className="euiFieldText euiFieldText--compressed"
+        onChange={[Function]}
+        placeholder="0.0a"
+        type="text"
+        value="0.0[000]a"
+      />
+    </div>
+  </div>,
+]
+`;
+
+exports[`Storyshots arguments/NumberFormat with no format 1`] = `
+Array [
+  <div
+    className="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      className="euiFormControlLayout__childrenWrapper"
+    >
+      <select
+        className="euiSelect euiSelect--compressed"
+        id="NumberFormatExample1"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value="custom"
+      >
+        <option
+          value="0.0[000]"
+        >
+          Number
+        </option>
+        <option
+          value="0.0%"
+        >
+          Percent
+        </option>
+        <option
+          value="$0.00"
+        >
+          Currency
+        </option>
+        <option
+          value="00:00:00"
+        >
+          Duration
+        </option>
+        <option
+          value="0.0b"
+        >
+          Bytes
+        </option>
+        <option
+          value="custom"
+        >
+          Custom
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+            focusable="false"
+            height={16}
+            role="img"
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      className="euiFormControlLayout__childrenWrapper"
+    >
+      <input
+        className="euiFieldText euiFieldText--compressed"
+        onChange={[Function]}
+        placeholder="0.0a"
+        type="text"
+        value=""
+      />
+    </div>
+  </div>,
+]
+`;
+
+exports[`Storyshots arguments/NumberFormat with preset format 1`] = `
+<div
+  className="euiFormControlLayout euiFormControlLayout--compressed"
+>
+  <div
+    className="euiFormControlLayout__childrenWrapper"
+  >
+    <select
+      className="euiSelect euiSelect--compressed"
+      id="NumberFormatExample2"
+      onChange={[Function]}
+      onMouseUp={[Function]}
+      value="$0.00"
+    >
+      <option
+        value="0.0[000]"
+      >
+        Number
+      </option>
+      <option
+        value="0.0%"
+      >
+        Percent
+      </option>
+      <option
+        value="$0.00"
+      >
+        Currency
+      </option>
+      <option
+        value="00:00:00"
+      >
+        Duration
+      </option>
+      <option
+        value="0.0b"
+      >
+        Bytes
+      </option>
+      <option
+        value="custom"
+      >
+        Custom
+      </option>
+    </select>
+    <div
+      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+    >
+      <span
+        className="euiFormControlLayoutCustomIcon"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </span>
+    </div>
+  </div>
+</div>
+`;

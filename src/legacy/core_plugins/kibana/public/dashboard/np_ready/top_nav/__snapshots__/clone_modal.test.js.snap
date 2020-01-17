@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders DashboardCloneModal 1`] = `
+<EuiOverlayMask>
+  <EuiModal
+    className="dshCloneModal"
+    data-test-subj="dashboardCloneModal"
+    maxWidth={true}
+    onClose={[Function]}
+  >
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        <FormattedMessage
+          defaultMessage="Clone dashboard"
+          id="kbn.dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
+          values={Object {}}
+        />
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiText>
+        <p>
+          <FormattedMessage
+            defaultMessage="Please enter a new name for your dashboard."
+            id="kbn.dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFieldText
+        autoFocus={true}
+        data-test-subj="clonedDashboardTitle"
+        isInvalid={false}
+        onChange={[Function]}
+        value="dash title"
+      />
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButtonEmpty
+        data-test-subj="cloneCancelButton"
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="kbn.dashboard.topNav.cloneModal.cancelButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+      <EuiButton
+        data-test-subj="cloneConfirmButton"
+        fill={true}
+        isLoading={false}
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Confirm Clone"
+          id="kbn.dashboard.topNav.cloneModal.confirmButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
+</EuiOverlayMask>
+`;

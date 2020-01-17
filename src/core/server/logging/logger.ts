@@ -20,6 +20,7 @@
 import { Appender } from './appenders/appenders';
 import { LogLevel } from './log_level';
 import { LogRecord } from './log_record';
+import { LoggerFactory } from './logger_factory';
 
 /**
  * Contextual metadata
@@ -84,6 +85,17 @@ export interface Logger {
 
   /** @internal */
   log(record: LogRecord): void;
+
+  /**
+   * Returns a new {@link Logger} instance extending the current logger context.
+   *
+   * @example
+   * ```typescript
+   * const logger = loggerFactory.get('plugin', 'service'); // 'plugin.service' context
+   * const subLogger = logger.get('feature'); // 'plugin.service.feature' context
+   * ```
+   */
+  get(...childContextPaths: string[]): Logger;
 }
 
 function isError(x: any): x is Error {
@@ -95,7 +107,8 @@ export class BaseLogger implements Logger {
   constructor(
     private readonly context: string,
     private readonly level: LogLevel,
-    private readonly appenders: Appender[]
+    private readonly appenders: Appender[],
+    private readonly factory: LoggerFactory
   ) {}
 
   public trace(message: string, meta?: LogMeta): void {
@@ -130,6 +143,10 @@ export class BaseLogger implements Logger {
     for (const appender of this.appenders) {
       appender.append(record);
     }
+  }
+
+  public get(...childContextPaths: string[]): Logger {
+    return this.factory.get(...[this.context, ...childContextPaths]);
   }
 
   private createLogRecord(

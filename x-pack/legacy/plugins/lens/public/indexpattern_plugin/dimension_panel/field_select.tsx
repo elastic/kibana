@@ -9,10 +9,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiComboBoxOptionProps } from '@elastic/eui';
 import classNames from 'classnames';
-import {
-  // @ts-ignore
-  EuiHighlight,
-} from '@elastic/eui';
+import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
@@ -21,9 +18,11 @@ import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../ty
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
 
-export type FieldChoice =
-  | { type: 'field'; field: string; operationType?: OperationType }
-  | { type: 'document' };
+export interface FieldChoice {
+  type: 'field';
+  field: string;
+  operationType?: OperationType;
+}
 
 export interface FieldSelectProps {
   currentIndexPattern: IndexPattern;
@@ -50,8 +49,7 @@ export function FieldSelect({
   onDeleteColumn,
   existingFields,
 }: FieldSelectProps) {
-  const { operationByDocument, operationByField } = operationFieldSupportMatrix;
-
+  const { operationByField } = operationFieldSupportMatrix;
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
 
@@ -65,68 +63,58 @@ export function FieldSelect({
       );
     }
 
-    const isCurrentOperationApplicableWithoutField =
-      (!selectedColumnOperationType && !incompatibleSelectedOperationType) ||
-      operationByDocument.includes(
-        incompatibleSelectedOperationType || selectedColumnOperationType!
-      );
+    const [specialFields, normalFields] = _.partition(
+      fields,
+      field => fieldMap[field].type === 'document'
+    );
 
-    const fieldOptions = [];
-
-    if (operationByDocument.length > 0) {
-      fieldOptions.push({
-        label: i18n.translate('xpack.lens.indexPattern.documentField', {
-          defaultMessage: 'Document',
-        }),
-        value: { type: 'document' },
-        className: classNames({
-          'lnFieldSelect__option--incompatible': !isCurrentOperationApplicableWithoutField,
-        }),
-        'data-test-subj': `lns-documentOption${
-          isCurrentOperationApplicableWithoutField ? '' : 'Incompatible'
-        }`,
-      });
+    function fieldNamesToOptions(items: string[]) {
+      return items
+        .map(field => ({
+          label: field,
+          value: {
+            type: 'field',
+            field,
+            dataType: fieldMap[field].type,
+            operationType:
+              selectedColumnOperationType && isCompatibleWithCurrentOperation(field)
+                ? selectedColumnOperationType
+                : undefined,
+          },
+          exists:
+            fieldMap[field].type === 'document' ||
+            fieldExists(existingFields, currentIndexPattern.title, field),
+          compatible: isCompatibleWithCurrentOperation(field),
+        }))
+        .filter(field => showEmptyFields || field.exists)
+        .sort((a, b) => {
+          if (a.compatible && !b.compatible) {
+            return -1;
+          }
+          if (!a.compatible && b.compatible) {
+            return 1;
+          }
+          return 0;
+        })
+        .map(({ label, value, compatible, exists }) => ({
+          label,
+          value,
+          className: classNames({
+            'lnFieldSelect__option--incompatible': !compatible,
+            'lnFieldSelect__option--nonExistant': !exists,
+          }),
+          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
+        }));
     }
+
+    const fieldOptions: unknown[] = fieldNamesToOptions(specialFields);
 
     if (fields.length > 0) {
       fieldOptions.push({
         label: i18n.translate('xpack.lens.indexPattern.individualFieldsLabel', {
           defaultMessage: 'Individual fields',
         }),
-        options: fields
-          .map(field => ({
-            label: field,
-            value: {
-              type: 'field',
-              field,
-              dataType: fieldMap[field].type,
-              operationType:
-                selectedColumnOperationType && isCompatibleWithCurrentOperation(field)
-                  ? selectedColumnOperationType
-                  : undefined,
-            },
-            exists: fieldExists(existingFields, currentIndexPattern.title, field),
-            compatible: isCompatibleWithCurrentOperation(field),
-          }))
-          .filter(field => showEmptyFields || field.exists)
-          .sort((a, b) => {
-            if (a.compatible && !b.compatible) {
-              return -1;
-            }
-            if (!a.compatible && b.compatible) {
-              return 1;
-            }
-            return 0;
-          })
-          .map(({ label, value, compatible, exists }) => ({
-            label,
-            value,
-            className: classNames({
-              'lnFieldSelect__option--incompatible': !compatible,
-              'lnFieldSelect__option--nonExistant': !exists,
-            }),
-            'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
-          })),
+        options: fieldNamesToOptions(normalFields),
       });
     }
 

@@ -20,26 +20,28 @@
 import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
-export class AggParamType extends BaseParamType {
-  makeAgg: (agg: AggConfig, state?: any) => AggConfig;
+export class AggParamType<TAggConfig extends AggConfig = AggConfig> extends BaseParamType<
+  TAggConfig
+> {
+  makeAgg: (agg: TAggConfig, state?: any) => TAggConfig;
 
   constructor(config: Record<string, any>) {
     super(config);
 
     if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: TAggConfig, output: Record<string, any>) => {
         if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
           output.params[this.name] = aggConfig.params[this.name];
         }
       };
     }
     if (!config.serialize) {
-      this.serialize = (agg: AggConfig) => {
+      this.serialize = (agg: TAggConfig) => {
         return agg.toJSON();
       };
     }
     if (!config.deserialize) {
-      this.deserialize = (state: unknown, agg?: AggConfig): AggConfig => {
+      this.deserialize = (state: unknown, agg?: TAggConfig): TAggConfig => {
         if (!agg) {
           throw new Error('aggConfig was not provided to AggParamType deserialize function');
         }

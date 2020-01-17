@@ -92,12 +92,7 @@ interface Props {
   onChange(item: PivotGroupByConfig): void;
 }
 
-export const PopoverForm: React.SFC<Props> = ({
-  defaultData,
-  otherAggNames,
-  onChange,
-  options,
-}) => {
+export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
   const isUnsupportedAgg = !isPivotGroupByConfigWithUiSupport(defaultData);
 
   const [agg, setAgg] = useState(defaultData.agg);
@@ -258,7 +253,7 @@ export const PopoverForm: React.SFC<Props> = ({
           <EuiSpacer size="m" />
           <EuiCodeEditor
             mode="json"
-            theme="github"
+            theme="textmate"
             width="100%"
             height="200px"
             value={JSON.stringify(getEsAggFromGroupByConfig(defaultData), null, 2)}

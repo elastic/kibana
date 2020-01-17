@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshot API throws when server response doesn't correspond to expected type 1`] = `
+[Error: Invalid value undefined supplied to : { down: number, total: number, up: number }/down: number
+Invalid value undefined supplied to : { down: number, total: number, up: number }/total: number
+Invalid value undefined supplied to : { down: number, total: number, up: number }/up: number]
+`;

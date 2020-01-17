@@ -20,14 +20,14 @@ it('calls the update function with proper parameters', async () => {
     method: 'PUT',
     url: '/api/action/1',
     payload: {
-      description: 'My description',
+      name: 'My name',
       config: { foo: true },
     },
   };
   const updateResult: ActionResult = {
     id: '1',
     actionTypeId: 'my-action-type-id',
-    description: 'My description',
+    name: 'My name',
     config: { foo: true },
   };
 
@@ -38,7 +38,7 @@ it('calls the update function with proper parameters', async () => {
   expect(response).toEqual({
     id: '1',
     actionTypeId: 'my-action-type-id',
-    description: 'My description',
+    name: 'My name',
     config: { foo: true },
   });
   expect(actionsClient.update).toHaveBeenCalledTimes(1);
@@ -49,7 +49,7 @@ it('calls the update function with proper parameters', async () => {
           "config": Object {
             "foo": true,
           },
-          "description": "My description",
+          "name": "My name",
           "secrets": Object {},
         },
         "id": "1",

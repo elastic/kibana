@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
 
@@ -51,6 +51,7 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
       maxCount: '',
       minCount: '',
     },
+    isManagedPolicy: false,
   });
 
   const {
@@ -182,17 +183,35 @@ export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams
     }
 
     return (
-      <PolicyForm
-        policy={policy}
-        indices={indices}
-        currentUrl={pathname}
-        isEditing={true}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-        onCancel={onCancel}
-      />
+      <>
+        {policy.isManagedPolicy ? (
+          <>
+            <EuiCallOut
+              size="m"
+              color="warning"
+              iconType="iInCircle"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.editPolicy.managedPolicyWarningTitle"
+                  defaultMessage="This is a managed policy. Changing this policy might affect other systems that use it. Proceed with caution."
+                />
+              }
+            />
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
+        <PolicyForm
+          policy={policy}
+          indices={indices}
+          currentUrl={pathname}
+          isEditing={true}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+          onCancel={onCancel}
+        />
+      </>
     );
   };
 

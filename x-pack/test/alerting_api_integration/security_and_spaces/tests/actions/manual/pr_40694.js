@@ -17,7 +17,7 @@ async function main() {
 
   response = await httpPost('api/action', {
     actionTypeId: '.email',
-    description: 'an email action',
+    name: 'an email action',
     config: {
       from: 'patrick.mueller@elastic.co',
       host: 'localhost',
@@ -27,7 +27,7 @@ async function main() {
     secrets: {
       user: 'elastic',
       password: 'changeme',
-    }
+    },
   });
   console.log(`result of create: ${JSON.stringify(response, null, 4)}`);
 
@@ -37,7 +37,7 @@ async function main() {
   console.log(`action after create: ${JSON.stringify(response, null, 4)}`);
 
   response = await httpPut(`api/action/${actionId}`, {
-    description: 'an email action',
+    name: 'an email action',
     config: {
       from: 'patrick.mueller@elastic.co',
       service: '__json',
@@ -57,8 +57,8 @@ async function main() {
     params: {
       to: ['patrick.mueller@elastic.co'],
       subject: 'the email subject',
-      message: 'the email message'
-    }
+      message: 'the email message',
+    },
   });
 
   console.log(`execute result: ${JSON.stringify(response, null, 4)}`);
@@ -75,8 +75,8 @@ async function httpPost(uri, body) {
     body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',
-      'kbn-xsrf': 'what-evs'
-    }
+      'kbn-xsrf': 'what-evs',
+    },
   });
 
   return response.json();
@@ -88,8 +88,8 @@ async function httpPut(uri, body) {
     body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',
-      'kbn-xsrf': 'what-evs'
-    }
+      'kbn-xsrf': 'what-evs',
+    },
   });
 
   return response.json();

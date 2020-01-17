@@ -8,24 +8,23 @@ import _ from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Storage } from 'ui/storage';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import { CoreStart, NotificationsStart } from 'src/core/public';
-import {
-  DataStart,
-  IndexPattern as IndexPatternInstance,
-  IndexPatterns as IndexPatternsService,
-  SavedQuery,
-  Query,
-} from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
-import { TopNavMenu } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { AppMountContext, NotificationsStart } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { npStart } from 'ui/new_platform';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
+import {
+  esFilters,
+  IndexPattern as IndexPatternInstance,
+  IndexPatternsContract,
+  SavedQuery,
+} from '../../../../../../src/plugins/data/public';
 
 interface State {
   isLoading: boolean;
@@ -40,57 +39,58 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
 }
 
 export function App({
   editorFrame,
   data,
-  dataShim,
   core,
-  store,
+  storage,
   docId,
   docStorage,
   redirectTo,
+  addToDashboardMode,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
-  core: CoreStart;
-  dataShim: DataStart;
-  store: Storage;
+  core: AppMountContext['core'];
+  storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
+  addToDashboardMode?: boolean;
 }) {
-  const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
-    store.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
+    storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
-  const [state, setState] = useState<State>({
-    isLoading: !!docId,
-    isSaveModalVisible: false,
-    indexPatternsForTopNav: [],
-    query: { query: '', language },
-    dateRange: {
-      fromDate: timeDefaults.from,
-      toDate: timeDefaults.to,
-    },
-    filters: [],
+  const [state, setState] = useState<State>(() => {
+    const currentRange = data.query.timefilter.timefilter.getTime();
+    return {
+      isLoading: !!docId,
+      isSaveModalVisible: false,
+      indexPatternsForTopNav: [],
+      query: { query: '', language },
+      dateRange: {
+        fromDate: currentRange.from,
+        toDate: currentRange.to,
+      },
+      filters: [],
+    };
   });
 
   const { lastKnownDoc } = state;
 
   useEffect(() => {
-    const subscription = dataShim.filter.filterManager.getUpdates$().subscribe({
+    const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState(s => ({ ...s, filters: dataShim.filter.filterManager.getFilters() }));
-
+        setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
     return () => {
-      subscription.unsubscribe();
+      filterSubscription.unsubscribe();
     };
   }, []);
 
@@ -119,7 +119,7 @@ export function App({
         .then(doc => {
           getAllIndexPatterns(
             doc.state.datasourceMetaData.filterableIndexPatterns,
-            dataShim.indexPatterns.indexPatterns,
+            data.indexPatterns,
             core.notifications
           )
             .then(indexPatterns => {
@@ -153,7 +153,11 @@ export function App({
     }
   }, [docId]);
 
-  const isSaveable = lastKnownDoc && core.application.capabilities.visualize.save;
+  const isSaveable =
+    lastKnownDoc &&
+    lastKnownDoc.expression &&
+    lastKnownDoc.expression.length > 0 &&
+    core.application.capabilities.visualize.save;
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -163,13 +167,22 @@ export function App({
     []
   );
 
+  const { TopNavMenu } = npStart.plugins.navigation.ui;
+
+  const confirmButton = addToDashboardMode ? (
+    <FormattedMessage
+      id="xpack.lens.app.saveAddToDashboard"
+      defaultMessage="Save and add to dashboard"
+    />
+  ) : null;
+
   return (
     <I18nProvider>
       <KibanaContextProvider
         services={{
           appName: 'lens',
           data,
-          store,
+          storage,
           ...core,
         }}
       >
@@ -199,6 +212,7 @@ export function App({
                   dateRange.from !== state.dateRange.fromDate ||
                   dateRange.to !== state.dateRange.toDate
                 ) {
+                  data.query.timefilter.timefilter.setTime(dateRange);
                   trackUiEvent('app_date_change');
                 } else {
                   trackUiEvent('app_query_change');
@@ -225,9 +239,7 @@ export function App({
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                dataShim.filter.filterManager.setFilters(
-                  savedQuery.attributes.filters || state.filters
-                );
+                data.query.filterManager.setFilters(savedQuery.attributes.filters || state.filters);
                 setState(s => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
@@ -240,7 +252,7 @@ export function App({
                 }));
               }}
               onClearSavedQuery={() => {
-                dataShim.filter.filterManager.removeAll();
+                data.query.filterManager.removeAll();
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
@@ -248,12 +260,14 @@ export function App({
                   query: {
                     query: '',
                     language:
-                      store.get('kibana.userQueryLanguage') ||
+                      storage.get('kibana.userQueryLanguage') ||
                       core.uiSettings.get('search:queryLanguage'),
                   },
                 }));
               }}
               query={state.query}
+              dateRangeFrom={state.dateRange.fromDate}
+              dateRangeTo={state.dateRange.toDate}
             />
           </div>
 
@@ -283,7 +297,7 @@ export function App({
                   ) {
                     getAllIndexPatterns(
                       filterableIndexPatterns,
-                      dataShim.indexPatterns.indexPatterns,
+                      data.indexPatterns,
                       core.notifications
                     ).then(indexPatterns => {
                       if (indexPatterns) {
@@ -316,12 +330,13 @@ export function App({
                     persistedDoc: newDoc,
                     lastKnownDoc: newDoc,
                   }));
-
                   if (docId !== id) {
                     redirectTo(id);
                   }
                 })
-                .catch(() => {
+                .catch(e => {
+                  // eslint-disable-next-line no-console
+                  console.dir(e);
                   trackUiEvent('save_failed');
                   core.notifications.toasts.addDanger(
                     i18n.translate('xpack.lens.app.docSavingError', {
@@ -333,10 +348,11 @@ export function App({
             }}
             onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
             title={lastKnownDoc.title || ''}
-            showCopyOnSave={true}
+            showCopyOnSave={!addToDashboardMode}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
+            confirmButtonLabel={confirmButton}
           />
         )}
       </KibanaContextProvider>
@@ -346,7 +362,7 @@ export function App({
 
 export async function getAllIndexPatterns(
   ids: Array<{ id: string }>,
-  indexPatternsService: IndexPatternsService,
+  indexPatternsService: IndexPatternsContract,
   notifications: NotificationsStart
 ): Promise<IndexPatternInstance[]> {
   try {

@@ -20,25 +20,26 @@ export interface IndexPattern {
   >;
 }
 
+export type AggregationRestrictions = Record<
+  string,
+  {
+    agg?: string;
+    interval?: number;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    delay?: string;
+    time_zone?: string;
+  }
+>;
+
 export interface IndexPatternField {
   name: string;
   type: string;
   esTypes?: string[];
   aggregatable: boolean;
+  scripted?: boolean;
   searchable: boolean;
-  aggregationRestrictions?: Partial<
-    Record<
-      string,
-      {
-        agg: string;
-        interval?: number;
-        fixed_interval?: string;
-        calendar_interval?: string;
-        delay?: string;
-        time_zone?: string;
-      }
-    >
-  >;
+  aggregationRestrictions?: Partial<AggregationRestrictions>;
 }
 
 export interface IndexPatternLayer {

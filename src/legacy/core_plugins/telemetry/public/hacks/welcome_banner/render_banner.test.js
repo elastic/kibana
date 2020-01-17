@@ -21,7 +21,6 @@ import '../../services/telemetry_opt_in.test.mocks';
 import { renderBanner } from './render_banner';
 
 describe('render_banner', () => {
-
   it('adds a banner to banners with priority of 10000', () => {
     const bannerID = 'brucer-banner';
 
@@ -40,5 +39,4 @@ describe('render_banner', () => {
     expect(bannerConfig.component).not.toBe(undefined);
     expect(bannerConfig.priority).toBe(10000);
   });
-
 });

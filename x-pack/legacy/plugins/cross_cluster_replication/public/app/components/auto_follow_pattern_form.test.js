@@ -12,7 +12,6 @@ jest.mock('../services/auto_follow_pattern_validators', () => ({
 }));
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 describe('<AutoFollowPatternForm state update', () => {
   describe('updateFormErrors()', () => {

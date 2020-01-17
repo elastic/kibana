@@ -228,7 +228,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo('/logged_out');
+      return DeauthenticationResult.redirectTo(
+        `${this.options.basePath.serverBasePath}/logged_out`
+      );
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
@@ -502,7 +504,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       const { id: requestId, redirect } = await this.options.client.callAsInternalUser(
         'shield.samlPrepare',
-        { body: { realm: this.realm } }
+        {
+          body: { realm: this.realm },
+        }
       );
 
       this.logger.debug('Redirecting to Identity Provider with SAML request.');

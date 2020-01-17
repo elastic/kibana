@@ -6,13 +6,15 @@
 
 import { useEffect, useState } from 'react';
 
-import { IndexPattern } from 'ui/index_patterns';
-
 import { dictionaryToArray } from '../../../../../../common/types/common';
 import { useApi } from '../../../../hooks/use_api';
 
 import { Dictionary } from '../../../../../../common/types/common';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import {
+  IndexPattern,
+  ES_FIELD_TYPES,
+} from '../../../../../../../../../../src/plugins/data/public';
+
 import {
   getPreviewRequestBody,
   PreviewRequestBody,
@@ -32,7 +34,8 @@ interface EsMappingType {
   type: ES_FIELD_TYPES;
 }
 
-type PreviewData = Array<Dictionary<any>>;
+export type PreviewItem = Dictionary<any>;
+type PreviewData = PreviewItem[];
 interface PreviewMappings {
   properties: Dictionary<EsMappingType>;
 }
@@ -91,11 +94,14 @@ export const usePivotPreviewData = (
 
   useEffect(() => {
     getPreviewData();
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPattern.title,
     JSON.stringify(aggsArr),
     JSON.stringify(groupByArr),
     JSON.stringify(query),
+    /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
   return { errorMessage, status, previewData, previewMappings, previewRequest };

@@ -77,12 +77,12 @@ export class WarmPhase extends PureComponent {
         <EuiDescribedFormGroup
           title={
             <div>
-              <span className="eui-displayInlineBlock eui-alignMiddle">
+              <h2 className="eui-displayInlineBlock eui-alignMiddle">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
                   defaultMessage="Warm phase"
                 />
-              </span>{' '}
+              </h2>{' '}
               {phaseData[PHASE_ENABLED] && !isShowingErrors ? <ActiveBadge /> : null}
               <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </div>
@@ -202,12 +202,12 @@ export class WarmPhase extends PureComponent {
           <Fragment>
             <EuiDescribedFormGroup
               title={
-                <p>
+                <h3>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkText"
                     defaultMessage="Shrink"
                   />
-                </p>
+                </h3>
               }
               description={
                 <EuiTextColor color="subdued">
@@ -270,12 +270,12 @@ export class WarmPhase extends PureComponent {
             </EuiDescribedFormGroup>
             <EuiDescribedFormGroup
               title={
-                <p>
+                <h3>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataText"
                     defaultMessage="Force merge"
                   />
-                </p>
+                </h3>
               }
               description={
                 <EuiTextColor color="subdued">

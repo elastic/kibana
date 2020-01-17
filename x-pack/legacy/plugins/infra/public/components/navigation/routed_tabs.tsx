@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { Route } from 'react-router-dom';
+
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface TabConfiguration {

@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LUCENE } from './constants';
+import { LUCENE, ELASTICSEARCH } from './constants';
 
 export const ArgTypesStrings = {
   Color: {
@@ -101,13 +101,17 @@ export const ArgTypesStrings = {
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.colorLabel', {
         defaultMessage: 'Color',
       }),
+    getColorValueDefault: () =>
+      i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.colorValueDefault', {
+        defaultMessage: 'Auto',
+      }),
     getStyleLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.styleLabel', {
         defaultMessage: 'Style',
       }),
     getRemoveAriaLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.removeAriaLabel', {
-        defaultMessage: 'Remove Series Color',
+        defaultMessage: 'Remove series color',
       }),
     getNoSeriesTooltip: () =>
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.noSeriesTooltip', {
@@ -115,11 +119,11 @@ export const ArgTypesStrings = {
       }),
     getSeriesIdentifierLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.seriesIdentifierLabel', {
-        defaultMessage: 'Series Identifier',
+        defaultMessage: 'Series id',
       }),
     getSelectSeriesOption: () =>
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.selectSeriesDropDown', {
-        defaultMessage: 'Select Series',
+        defaultMessage: 'Select series',
       }),
     getLineLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.lineLabel', {
@@ -152,15 +156,18 @@ export const ExpressionDataSourceStrings = {
       }),
     getWarningTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningTitle', {
-        defaultMessage: 'Be careful',
+        defaultMessage: 'Query with caution',
       }),
     getWarning: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
         defaultMessage: `
-          The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
+          This datasource pulls directly from {elasticsearch}
           without the use of aggregations. It is best used with low volume datasets and in
           situations where you need to view raw documents or plot exact, non-aggregated values on a
           chart.`,
+        values: {
+          elasticsearch: ELASTICSEARCH,
+        },
       }),
     getIndexTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexTitle', {

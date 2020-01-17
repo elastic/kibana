@@ -8,9 +8,9 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { ES_INDEX_NAME } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('create_enrollment_token', () => {
     it('should create one token by default', async () => {

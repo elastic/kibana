@@ -26,26 +26,26 @@ import { AdvancedSettings } from './advanced_settings';
 jest.mock('./components/field', () => ({
   Field: () => {
     return 'field';
-  }
+  },
 }));
 
 jest.mock('./components/call_outs', () => ({
   CallOuts: () => {
     return 'callOuts';
-  }
+  },
 }));
 
 jest.mock('./components/search', () => ({
   Search: () => {
     return 'search';
-  }
+  },
 }));
 
 const config = {
   set: () => {},
   remove: () => {},
-  isCustom: (setting) => setting.isCustom,
-  isOverridden: (key) => Boolean(config.getAll()[key].isOverridden),
+  isCustom: setting => setting.isCustom,
+  isOverridden: key => Boolean(config.getAll()[key].isOverridden),
   getAll: () => {
     return {
       'test:array:setting': {
@@ -145,29 +145,19 @@ const config = {
         options: ['apple', 'orange', 'banana'],
       },
     };
-  }
+  },
 };
 
 describe('AdvancedSettings', () => {
-
   it('should render normally', async () => {
-    const component = shallow(
-      <AdvancedSettings
-        config={config}
-        enableSaving={true}
-      />
-    );
+    const component = shallow(<AdvancedSettings config={config} enableSaving={true} />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render specific setting if given setting key', async () => {
     const component = shallow(
-      <AdvancedSettings
-        config={config}
-        query="test:string:setting"
-        enableSaving={true}
-      />
+      <AdvancedSettings config={config} query="test:string:setting" enableSaving={true} />
     );
 
     expect(component).toMatchSnapshot();
@@ -175,11 +165,7 @@ describe('AdvancedSettings', () => {
 
   it('should render read-only when saving is disabled', async () => {
     const component = shallow(
-      <AdvancedSettings
-        config={config}
-        query="test:string:setting"
-        enableSaving={false}
-      />
+      <AdvancedSettings config={config} query="test:string:setting" enableSaving={false} />
     );
 
     expect(component).toMatchSnapshot();

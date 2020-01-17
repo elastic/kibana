@@ -8,51 +8,60 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { TIMEOUT } from '../constants';
-import {
-  getXPackLicense,
-  getXPackUsage,
-  getXPack,
-  handleXPack,
-} from '../get_xpack';
+import { getXPackLicense, getXPackUsage, getXPack, handleXPack } from '../get_xpack';
 
 function mockGetXPackLicense(callCluster, license, req) {
-  callCluster.withArgs(req, 'transport.request', {
-    method: 'GET',
-    path: '/_license',
-    query: {
-      local: 'true'
-    }
-  })
-    .returns(license.then(response => ({ license: response })));
+  callCluster
+    .withArgs(req, 'transport.request', {
+      method: 'GET',
+      path: '/_license',
+      query: {
+        local: 'true',
+      },
+    })
+    .returns(
+      license.then(
+        response => ({ license: response }),
+        () => {} // Catch error so that we don't emit UnhandledPromiseRejectionWarning for tests with invalid license
+      )
+    );
 
-  callCluster.withArgs('transport.request', {
-    method: 'GET',
-    path: '/_license',
-    query: {
-      local: 'true'
-    }
-  })
+  callCluster
+    .withArgs('transport.request', {
+      method: 'GET',
+      path: '/_license',
+      query: {
+        local: 'true',
+      },
+    })
     // conveniently wraps the passed in license object as { license: response }, like it really is
-    .returns(license.then(response => ({ license: response })));
+    .returns(
+      license.then(
+        response => ({ license: response }),
+        () => {} // Catch error so that we don't emit UnhandledPromiseRejectionWarning for tests with invalid license
+      )
+    );
 }
 
 function mockGetXPackUsage(callCluster, usage, req) {
-  callCluster.withArgs(req, 'transport.request', {
-    method: 'GET',
-    path: '/_xpack/usage',
-    query: {
-      master_timeout: TIMEOUT
-    }
-  })
+  callCluster
+    .withArgs(req, 'transport.request', {
+      method: 'GET',
+      path: '/_xpack/usage',
+      query: {
+        master_timeout: TIMEOUT,
+      },
+    })
     .returns(usage);
 
-  callCluster.withArgs('transport.request', {
-    method: 'GET',
-    path: '/_xpack/usage',
-    query: {
-      master_timeout: TIMEOUT
-    }
-  })
+  callCluster
+    .withArgs('transport.request', {
+      method: 'GET',
+      path: '/_xpack/usage',
+      query: {
+        master_timeout: TIMEOUT,
+      },
+    })
     .returns(usage);
 }
 
@@ -70,9 +79,7 @@ export function mockGetXPack(callCluster, license, usage, req) {
 }
 
 describe('get_xpack', () => {
-
   describe('getXPackLicense', () => {
-
     it('uses callCluster to get /_license API', async () => {
       const response = { type: 'basic' };
       const callCluster = sinon.stub();
@@ -81,11 +88,9 @@ describe('get_xpack', () => {
 
       expect(await getXPackLicense(callCluster)).to.eql(response);
     });
-
   });
 
   describe('getXPackUsage', () => {
-
     it('uses callCluster to get /_xpack/usage API', () => {
       const response = Promise.resolve({});
       const callCluster = sinon.stub();
@@ -94,22 +99,18 @@ describe('get_xpack', () => {
 
       expect(getXPackUsage(callCluster)).to.be(response);
     });
-
   });
 
   describe('handleXPack', () => {
-
     it('uses data as expected', () => {
       const license = { fake: 'data' };
-      const usage = { also: 'fake', nested: { object: { data: [ { field: 1 }, { field: 2 } ] } } };
+      const usage = { also: 'fake', nested: { object: { data: [{ field: 1 }, { field: 2 }] } } };
 
       expect(handleXPack(license, usage)).to.eql({ license, stack_stats: { xpack: usage } });
     });
-
   });
 
   describe('getXPack', () => {
-
     it('returns the formatted response object', async () => {
       const license = { fancy: 'license' };
       const xpack = { also: 'fancy' };
@@ -130,7 +131,7 @@ describe('get_xpack', () => {
 
       const data = await getXPack(callCluster);
 
-      expect(data).to.eql({ });
+      expect(data).to.eql({});
     });
 
     it('returns empty object upon usage failure', async () => {
@@ -140,9 +141,7 @@ describe('get_xpack', () => {
 
       const data = await getXPack(callCluster);
 
-      expect(data).to.eql({ });
+      expect(data).to.eql({});
     });
-
   });
-
 });

@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
-import { RequestBasicOptions } from '../framework';
+import { MatrixHistogramRequestOptions } from '../framework';
 
 export const buildEventsOverTimeQuery = ({
   filterQuery,
-  timerange: { from, timezone, to },
+  timerange: { from, to },
   defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
   },
-}: RequestBasicOptions) => {
+  stackByField = 'event.action',
+}: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -21,15 +22,13 @@ export const buildEventsOverTimeQuery = ({
         [timestamp]: {
           gte: from,
           lte: to,
-          ...(timezone && { time_zone: timezone }),
         },
       },
     },
   ];
 
   const getHistogramAggregation = () => {
-    const minIntervalSeconds = 10;
-    const interval = calculateTimeseriesInterval(from, to, minIntervalSeconds);
+    const interval = calculateTimeseriesInterval(from, to);
     const histogramTimestampField = '@timestamp';
     const dateHistogram = {
       date_histogram: {
@@ -46,7 +45,7 @@ export const buildEventsOverTimeQuery = ({
     return {
       eventActionGroup: {
         terms: {
-          field: 'event.action',
+          field: stackByField,
           missing: 'All others',
           order: {
             _count: 'desc',

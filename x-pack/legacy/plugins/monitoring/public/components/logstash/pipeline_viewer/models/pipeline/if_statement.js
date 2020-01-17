@@ -13,7 +13,7 @@ import { ElseElement } from '../list/else_element';
 function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, pipelineStage) {
   outgoingVertices.forEach(vertex => {
     let currentVertex = vertex;
-    while(isVertexPipelineStage(currentVertex, pipelineStage) && (currentVertex !== next)) {
+    while (isVertexPipelineStage(currentVertex, pipelineStage) && currentVertex !== next) {
       statements.push(makeStatement(currentVertex, pipelineStage));
       currentVertex = currentVertex.next;
     }
@@ -59,20 +59,13 @@ export class IfStatement extends Statement {
   static fromPipelineGraphVertex(ifVertex, pipelineStage) {
     const trueStatements = [];
     const elseStatements = [];
-    const {
-      trueOutgoingVertices,
-      falseOutgoingVertices
-    } = ifVertex;
+    const { trueOutgoingVertices, falseOutgoingVertices } = ifVertex;
 
     const next = ifVertex.next;
 
     makeStatementsForOutgoingVertices(trueOutgoingVertices, trueStatements, next, pipelineStage);
     makeStatementsForOutgoingVertices(falseOutgoingVertices, elseStatements, next, pipelineStage);
 
-    return new IfStatement(
-      ifVertex,
-      trueStatements,
-      elseStatements
-    );
+    return new IfStatement(ifVertex, trueStatements, elseStatements);
   }
 }

@@ -5,14 +5,17 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 import { WithSource } from '../../containers/source';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
 import { timelineActions } from '../../store/actions';
-import { KqlMode, TimelineModel } from '../../store/timeline/model';
+import { EventType, KqlMode, timelineDefaults, TimelineModel } from '../../store/timeline/model';
+import { useSignalIndex } from '../../containers/detection_engine/signals/use_signal_index';
 
 import { ColumnHeader } from './body/column_headers/column_header';
 import { DataProvider, QueryOperator } from './data_providers/data_provider';
@@ -39,7 +42,9 @@ interface StateReduxProps {
   activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
+  eventType: EventType;
   end: number;
+  filters: esFilters.Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
@@ -136,7 +141,9 @@ const StatefulTimelineComponent = React.memo<Props>(
     columns,
     createTimeline,
     dataProviders,
+    eventType,
     end,
+    filters,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
@@ -159,79 +166,93 @@ const StatefulTimelineComponent = React.memo<Props>(
     updateItemsPerPage,
     upsertColumn,
   }) => {
-    const onDataProviderRemoved: OnDataProviderRemoved = (
-      providerId: string,
-      andProviderId?: string
-    ) => removeProvider!({ id, providerId, andProviderId });
+    const [loading, signalIndexExists, signalIndexName] = useSignalIndex();
 
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
-      providerId,
-      enabled,
-      andProviderId,
-    }) =>
-      updateDataProviderEnabled!({
-        id,
-        enabled,
-        providerId,
-        andProviderId,
-      });
-
-    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = ({
-      providerId,
-      excluded,
-      andProviderId,
-    }) =>
-      updateDataProviderExcluded!({
-        id,
-        excluded,
-        providerId,
-        andProviderId,
-      });
-
-    const onDataProviderEditedLocal: OnDataProviderEdited = ({
-      andProviderId,
-      excluded,
-      field,
-      operator,
-      providerId,
-      value,
-    }) =>
-      onDataProviderEdited!({
-        andProviderId,
-        excluded,
-        field,
-        id,
-        operator,
-        providerId,
-        value,
-      });
-    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = ({ providerId, kqlQuery }) =>
-      updateDataProviderKqlQuery!({ id, kqlQuery, providerId });
-
-    const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
-      updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage });
-
-    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = providerId =>
-      updateHighlightedDropAndProviderId!({ id, providerId });
-
-    const toggleColumn = (column: ColumnHeader) => {
-      const exists = columns.findIndex(c => c.id === column.id) !== -1;
-
-      if (!exists && upsertColumn != null) {
-        upsertColumn({
-          column,
-          id,
-          index: 1,
-        });
+    const indexToAdd = useMemo<string[]>(() => {
+      if (signalIndexExists && signalIndexName != null && ['signal', 'all'].includes(eventType)) {
+        return [signalIndexName];
       }
+      return [];
+    }, [eventType, signalIndexExists, signalIndexName]);
 
-      if (exists && removeColumn != null) {
-        removeColumn({
-          columnId: column.id,
+    const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
+      (providerId: string, andProviderId?: string) =>
+        removeProvider!({ id, providerId, andProviderId }),
+      [id]
+    );
+
+    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
+      ({ providerId, enabled, andProviderId }) =>
+        updateDataProviderEnabled!({
           id,
-        });
-      }
-    };
+          enabled,
+          providerId,
+          andProviderId,
+        }),
+      [id]
+    );
+
+    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
+      ({ providerId, excluded, andProviderId }) =>
+        updateDataProviderExcluded!({
+          id,
+          excluded,
+          providerId,
+          andProviderId,
+        }),
+      [id]
+    );
+
+    const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
+      ({ andProviderId, excluded, field, operator, providerId, value }) =>
+        onDataProviderEdited!({
+          andProviderId,
+          excluded,
+          field,
+          id,
+          operator,
+          providerId,
+          value,
+        }),
+      [id]
+    );
+
+    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = useCallback(
+      ({ providerId, kqlQuery }) => updateDataProviderKqlQuery!({ id, kqlQuery, providerId }),
+      [id]
+    );
+
+    const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
+      itemsChangedPerPage => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
+      [id]
+    );
+
+    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = useCallback(
+      providerId => updateHighlightedDropAndProviderId!({ id, providerId }),
+      [id]
+    );
+
+    const toggleColumn = useCallback(
+      (column: ColumnHeader) => {
+        const exists = columns.findIndex(c => c.id === column.id) !== -1;
+
+        if (!exists && upsertColumn != null) {
+          upsertColumn({
+            column,
+            id,
+            index: 1,
+          });
+        }
+
+        if (exists && removeColumn != null) {
+          removeColumn({
+            columnId: column.id,
+            id,
+          });
+        }
+      },
+      [columns, id]
+    );
 
     useEffect(() => {
       if (createTimeline != null) {
@@ -240,22 +261,25 @@ const StatefulTimelineComponent = React.memo<Props>(
     }, []);
 
     return (
-      <WithSource sourceId="default">
+      <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
             columns={columns}
             dataProviders={dataProviders!}
             end={end}
+            filters={filters}
             flyoutHeaderHeight={flyoutHeaderHeight}
             flyoutHeight={flyoutHeight}
             id={id}
             indexPattern={indexPattern}
+            indexToAdd={indexToAdd}
             isLive={isLive}
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
             kqlMode={kqlMode}
             kqlQueryExpression={kqlQueryExpression}
+            loadingIndexName={loading}
             onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
@@ -276,6 +300,7 @@ const StatefulTimelineComponent = React.memo<Props>(
   (prevProps, nextProps) => {
     return (
       prevProps.activePage === nextProps.activePage &&
+      prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
       prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
       prevProps.flyoutHeight === nextProps.flyoutHeight &&
@@ -290,6 +315,7 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.start === nextProps.start &&
       isEqual(prevProps.columns, nextProps.columns) &&
       isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      isEqual(prevProps.filters, nextProps.filters) &&
       isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
       isEqual(prevProps.sort, nextProps.sort)
     );
@@ -304,11 +330,13 @@ const makeMapStateToProps = () => {
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,
       dataProviders,
+      eventType,
+      filters,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
@@ -317,10 +345,14 @@ const makeMapStateToProps = () => {
     } = timeline;
     const kqlQueryExpression = getKqlQueryTimeline(state, id);
 
+    const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
+
     return {
       columns,
       dataProviders,
+      eventType,
       end: input.timerange.to,
+      filters: timelineFilter,
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
@@ -336,22 +368,19 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulTimeline = connect(
-  makeMapStateToProps,
-  {
-    addProvider: timelineActions.addProvider,
-    createTimeline: timelineActions.createTimeline,
-    onDataProviderEdited: timelineActions.dataProviderEdited,
-    removeColumn: timelineActions.removeColumn,
-    removeProvider: timelineActions.removeProvider,
-    updateColumns: timelineActions.updateColumns,
-    updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
-    updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
-    updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
-    updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
-    updateItemsPerPage: timelineActions.updateItemsPerPage,
-    updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
-    updateSort: timelineActions.updateSort,
-    upsertColumn: timelineActions.upsertColumn,
-  }
-)(StatefulTimelineComponent);
+export const StatefulTimeline = connect(makeMapStateToProps, {
+  addProvider: timelineActions.addProvider,
+  createTimeline: timelineActions.createTimeline,
+  onDataProviderEdited: timelineActions.dataProviderEdited,
+  removeColumn: timelineActions.removeColumn,
+  removeProvider: timelineActions.removeProvider,
+  updateColumns: timelineActions.updateColumns,
+  updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
+  updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
+  updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+  updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
+  updateItemsPerPage: timelineActions.updateItemsPerPage,
+  updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
+  updateSort: timelineActions.updateSort,
+  upsertColumn: timelineActions.upsertColumn,
+})(StatefulTimelineComponent);

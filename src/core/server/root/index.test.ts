@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { configService, logger, mockServer } from './index.test.mocks';
+import { rawConfigService, configService, logger, mockServer } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
@@ -26,13 +26,13 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 
 const env = new Env('.', getEnvOptions());
-const config$ = configService.getConfig$();
 
 let mockConsoleError: jest.SpyInstance;
 
 beforeEach(() => {
   jest.spyOn(global.process, 'exit').mockReturnValue(undefined as never);
   mockConsoleError = jest.spyOn(console, 'error').mockReturnValue(undefined);
+  rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
   configService.atPath.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
 });
 
@@ -40,7 +40,7 @@ afterEach(() => {
   jest.restoreAllMocks();
   logger.asLoggerFactory.mockClear();
   logger.stop.mockClear();
-  configService.getConfig$.mockClear();
+  rawConfigService.getConfig$.mockClear();
 
   logger.upgrade.mockReset();
   configService.atPath.mockReset();
@@ -49,7 +49,7 @@ afterEach(() => {
 });
 
 test('sets up services on "setup"', async () => {
-  const root = new Root(config$, env);
+  const root = new Root(rawConfigService, env);
 
   expect(logger.upgrade).not.toHaveBeenCalled();
   expect(mockServer.setup).not.toHaveBeenCalled();
@@ -65,7 +65,7 @@ test('upgrades logging configuration after setup', async () => {
   const mockLoggingConfig$ = new BehaviorSubject({ someValue: 'foo' });
   configService.atPath.mockReturnValue(mockLoggingConfig$);
 
-  const root = new Root(config$, env);
+  const root = new Root(rawConfigService, env);
   await root.setup();
 
   expect(logger.upgrade).toHaveBeenCalledTimes(1);
@@ -80,7 +80,7 @@ test('upgrades logging configuration after setup', async () => {
 
 test('stops services on "shutdown"', async () => {
   const mockOnShutdown = jest.fn();
-  const root = new Root(config$, env, mockOnShutdown);
+  const root = new Root(rawConfigService, env, mockOnShutdown);
 
   await root.setup();
 
@@ -98,7 +98,7 @@ test('stops services on "shutdown"', async () => {
 
 test('stops services on "shutdown" an calls `onShutdown` with error passed to `shutdown`', async () => {
   const mockOnShutdown = jest.fn();
-  const root = new Root(config$, env, mockOnShutdown);
+  const root = new Root(rawConfigService, env, mockOnShutdown);
 
   await root.setup();
 
@@ -117,7 +117,7 @@ test('stops services on "shutdown" an calls `onShutdown` with error passed to `s
 
 test('fails and stops services if server setup fails', async () => {
   const mockOnShutdown = jest.fn();
-  const root = new Root(config$, env, mockOnShutdown);
+  const root = new Root(rawConfigService, env, mockOnShutdown);
 
   const serverError = new Error('server failed');
   mockServer.setup.mockRejectedValue(serverError);
@@ -136,7 +136,7 @@ test('fails and stops services if server setup fails', async () => {
 
 test('fails and stops services if initial logger upgrade fails', async () => {
   const mockOnShutdown = jest.fn();
-  const root = new Root(config$, env, mockOnShutdown);
+  const root = new Root(rawConfigService, env, mockOnShutdown);
 
   const loggingUpgradeError = new Error('logging config upgrade failed');
   logger.upgrade.mockImplementation(() => {
@@ -167,7 +167,7 @@ test('stops services if consequent logger upgrade fails', async () => {
   const mockLoggingConfig$ = new BehaviorSubject({ someValue: 'foo' });
   configService.atPath.mockReturnValue(mockLoggingConfig$);
 
-  const root = new Root(config$, env, mockOnShutdown);
+  const root = new Root(rawConfigService, env, mockOnShutdown);
   await root.setup();
 
   expect(mockOnShutdown).not.toHaveBeenCalled();

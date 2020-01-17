@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
 
 import { FileDraggable } from './file_draggable';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('FileDraggable', () => {
+  const mount = useMountAppended();
+
   test('it prefers fileName and filePath over endgameFileName and endgameFilePath when all of them are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -22,14 +24,14 @@ describe('FileDraggable', () => {
           eventId="1"
           fileName="[fileName]"
           filePath="[filePath]"
-        ></FileDraggable>
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('[fileName]in[filePath]');
   });
 
   test('it returns an empty string when none of the files or paths are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -38,14 +40,14 @@ describe('FileDraggable', () => {
           eventId="1"
           fileName={undefined}
           filePath={undefined}
-        ></FileDraggable>
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
 
   test('it renders just the endgameFileName if only endgameFileName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -61,7 +63,7 @@ describe('FileDraggable', () => {
   });
 
   test('it renders "in endgameFilePath" if only endgameFilePath is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -77,7 +79,7 @@ describe('FileDraggable', () => {
   });
 
   test('it renders just the filename if only fileName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -93,7 +95,7 @@ describe('FileDraggable', () => {
   });
 
   test('it renders "in filePath" if only filePath is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"

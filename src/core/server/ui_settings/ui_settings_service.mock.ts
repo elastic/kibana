@@ -17,12 +17,16 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from './ui_settings_client';
-import { InternalUiSettingsServiceSetup } from './ui_settings_service';
+import {
+  IUiSettingsClient,
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+} from './types';
+import { UiSettingsService } from './ui_settings_service';
 
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {
-    getDefaults: jest.fn(),
+    getRegistered: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn(),
     getUserProvided: jest.fn(),
@@ -33,12 +37,15 @@ const createClientMock = () => {
     isOverridden: jest.fn(),
   };
   mocked.get.mockResolvedValue(false);
+  mocked.getAll.mockResolvedValue({});
+  mocked.getRegistered.mockReturnValue({});
+  mocked.getUserProvided.mockResolvedValue({});
   return mocked;
 };
 
 const createSetupMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = {
-    setDefaults: jest.fn(),
+    register: jest.fn(),
     asScopedToClient: jest.fn(),
   };
 
@@ -47,7 +54,31 @@ const createSetupMock = () => {
   return mocked;
 };
 
+const createStartMock = () => {
+  const mocked: jest.Mocked<InternalUiSettingsServiceStart> = {
+    asScopedToClient: jest.fn(),
+  };
+
+  mocked.asScopedToClient.mockReturnValue(createClientMock());
+
+  return mocked;
+};
+
+type UiSettingsServiceContract = PublicMethodsOf<UiSettingsService>;
+const createMock = () => {
+  const mocked: jest.Mocked<UiSettingsServiceContract> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mocked.setup.mockResolvedValue(createSetupMock());
+  mocked.start.mockResolvedValue(createStartMock());
+  return mocked;
+};
+
 export const uiSettingsServiceMock = {
-  createSetup: createSetupMock,
+  createSetupContract: createSetupMock,
+  createStartContract: createStartMock,
   createClient: createClientMock,
+  create: createMock,
 };

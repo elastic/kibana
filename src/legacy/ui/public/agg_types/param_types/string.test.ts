@@ -19,7 +19,7 @@
 
 import { BaseParamType } from './base';
 import { StringParamType } from './string';
-import { AggConfig } from 'ui/agg_types';
+import { AggConfig } from '../agg_config';
 
 jest.mock('ui/new_platform');
 
@@ -28,13 +28,12 @@ describe('String', function() {
   let aggConfig: AggConfig;
   let output: Record<string, any>;
 
-  function initAggParam(config: Record<string, any> = {}) {
-    return new StringParamType({
+  const initAggParam = (config: Record<string, any> = {}) =>
+    new StringParamType({
       ...config,
       type: 'string',
       name: paramName,
     });
-  }
 
   beforeEach(() => {
     aggConfig = { params: {} } as AggConfig;

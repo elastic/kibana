@@ -113,10 +113,26 @@ export function ServiceNodeMetrics() {
                 </ElasticDocsLink>
               )
             }}
-          ></FormattedMessage>
+          />
         </EuiCallOut>
       ) : (
         <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              titleSize="s"
+              description={i18n.translate(
+                'xpack.apm.serviceNodeMetrics.serviceName',
+                {
+                  defaultMessage: 'Service name'
+                }
+              )}
+              title={
+                <EuiToolTip content={serviceName}>
+                  <Truncate>{serviceName}</Truncate>
+                </EuiToolTip>
+              }
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiStat
               titleSize="s"
@@ -129,7 +145,7 @@ export function ServiceNodeMetrics() {
                   <Truncate>{host}</Truncate>
                 </EuiToolTip>
               }
-            ></EuiStat>
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiStat
@@ -146,7 +162,7 @@ export function ServiceNodeMetrics() {
                   <Truncate>{containerId}</Truncate>
                 </EuiToolTip>
               }
-            ></EuiStat>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

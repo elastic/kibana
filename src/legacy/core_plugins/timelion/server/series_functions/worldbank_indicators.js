@@ -23,7 +23,7 @@ import worldbank from './worldbank.js';
 import Bluebird from 'bluebird';
 import Datasource from '../lib/classes/datasource';
 
-export default new Datasource ('worldbank_indicators', {
+export default new Datasource('worldbank_indicators', {
   args: [
     {
       name: 'country', // countries/all/indicators/SP.POP.TOTL
@@ -44,12 +44,11 @@ export default new Datasource ('worldbank_indicators', {
           indicatorExample: 'SP.POP.TOTL',
         },
       }),
-    }
+    },
   ],
   aliases: ['wbi'],
   help: i18n.translate('timelion.help.functions.worldbankIndicatorsHelpText', {
-    defaultMessage:
-      `
+    defaultMessage: `
     [experimental]
     Pull data from {worldbankUrl} using the country name and indicator. The worldbank provides
     mostly yearly data, and often has no data for the current year. Try {offsetQuery} if you get no data for recent
@@ -62,25 +61,24 @@ export default new Datasource ('worldbank_indicators', {
   fn: function worldbankIndicators(args, tlConfig) {
     const config = _.defaults(args.byName, {
       country: 'wld',
-      indicator: 'SP.POP.TOTL'
+      indicator: 'SP.POP.TOTL',
     });
 
     const countries = config.country.split(':');
-    const seriesLists = _.map(countries, function (country) {
+    const seriesLists = _.map(countries, function(country) {
       const code = 'countries/' + country + '/indicators/' + config.indicator;
       const wbArgs = [code];
       wbArgs.byName = { code: code };
       return worldbank.timelionFn(wbArgs, tlConfig);
     });
 
-    return Bluebird.map(seriesLists, function (seriesList) {
+    return Bluebird.map(seriesLists, function(seriesList) {
       return seriesList.list[0];
-    }).then(function (list) {
+    }).then(function(list) {
       return {
         type: 'seriesList',
-        list: list
+        list: list,
       };
     });
-
-  }
+  },
 });

@@ -25,7 +25,7 @@ import {
   onPremCloudInstructions,
 } from '../../../common/tutorials/filebeat_instructions';
 
-export function zeekLogsSpecProvider(server, context) {
+export function zeekLogsSpecProvider(context) {
   const moduleName = 'zeek';
   const platforms = ['OSX', 'DEB', 'RPM'];
   return {

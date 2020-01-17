@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`news_loading rendering renders the default News Loading 1`] = `
+<EuiEmptyPrompt
+  body={
+    <p>
+      <FormattedMessage
+        defaultMessage="Getting the latest news..."
+        id="newsfeed.loadingPrompt.gettingNewsText"
+        values={Object {}}
+      />
+    </p>
+  }
+  title={
+    <EuiLoadingKibana
+      size="xl"
+    />
+  }
+/>
+`;

@@ -23,11 +23,11 @@ import { parseSingleFile } from './code_parser';
 import { _calculateTopLevelDependency, dependenciesParseStrategy } from './strategies';
 
 jest.mock('./can_require', () => ({
-  canRequire: jest.fn()
+  canRequire: jest.fn(),
 }));
 
 jest.mock('fs', () => ({
-  readFile: jest.fn()
+  readFile: jest.fn(),
 }));
 
 const mockCwd = '/tmp/project/dir/';
@@ -69,7 +69,13 @@ describe('Code Parser Strategies', () => {
       }
     });
 
-    const results = await dependenciesParseStrategy(mockCwd, parseSingleFile, 'dep1/file.js', {}, {});
+    const results = await dependenciesParseStrategy(
+      mockCwd,
+      parseSingleFile,
+      'dep1/file.js',
+      {},
+      {}
+    );
     expect(results[0]).toBe(`${mockCwd}node_modules/dep_from_node_modules/index.js`);
   });
 
@@ -78,7 +84,7 @@ describe('Code Parser Strategies', () => {
       cb(null, `require('./relative_dep')`);
     });
 
-    canRequire.mockImplementation((entry) => {
+    canRequire.mockImplementation(entry => {
       if (entry === `${mockCwd}dep1/relative_dep`) {
         return `${entry}/index.js`;
       }
@@ -86,7 +92,13 @@ describe('Code Parser Strategies', () => {
       return false;
     });
 
-    const results = await dependenciesParseStrategy(mockCwd, parseSingleFile, 'dep1/file.js', {}, {});
+    const results = await dependenciesParseStrategy(
+      mockCwd,
+      parseSingleFile,
+      'dep1/file.js',
+      {},
+      {}
+    );
     expect(results[0]).toBe(`${mockCwd}dep1/relative_dep/index.js`);
   });
 

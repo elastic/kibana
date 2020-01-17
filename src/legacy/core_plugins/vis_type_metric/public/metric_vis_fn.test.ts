@@ -19,8 +19,8 @@
 
 import { createMetricVisFn } from './metric_vis_fn';
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
 jest.mock('ui/new_platform');
 

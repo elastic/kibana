@@ -1,0 +1,17 @@
+{
+  "description": "EQL - System Shells via Services",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "EQL - System Shells via Services",
+  "query": " event.action:\"Process Create (rule: ProcessCreate)\" and    process.parent.name:\"services.exe\" and    process.name:(\"cmd.exe\" or \"powershell.exe\")",
+  "risk_score": 50,
+  "rule_id": "0022d47d-39c7-4f69-a232-4fe9dc7a3acd",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

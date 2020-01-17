@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
@@ -66,10 +66,13 @@ export const NoteCards = React.memo<Props>(
   }) => {
     const [newNote, setNewNote] = useState('');
 
-    const associateNoteAndToggleShow = (noteId: string) => {
-      associateNote(noteId);
-      toggleShowAddNote();
-    };
+    const associateNoteAndToggleShow = useCallback(
+      (noteId: string) => {
+        associateNote(noteId);
+        toggleShowAddNote();
+      },
+      [associateNote, toggleShowAddNote]
+    );
 
     return (
       <NoteCardsComp>

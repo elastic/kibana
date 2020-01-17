@@ -14,12 +14,38 @@ exports[`Logs should render a default message 1`] = `
         Object {
           "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
           >
             <FormattedMessage
               defaultMessage="Please verify your setup is correct."
               id="xpack.monitoring.logs.reason.defaultMessageLink"
               values={Object {}}
             />
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a bad indices reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="Corrupted filebeat index"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="There is an issue reading from your filebeat indices.  {link}."
+      id="xpack.monitoring.logs.reason.correctIndexNameMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/kibana/current/monitor-troubleshooting.html"
+            target="_blank"
+          >
+            Click here for more information
           </ForwardRef>,
         }
       }
@@ -41,7 +67,8 @@ exports[`Logs should render with a no cluster found reason 1`] = `
       values={
         Object {
           "link": <ForwardRef
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
           >
             setup
           </ForwardRef>,
@@ -65,7 +92,8 @@ exports[`Logs should render with a no index found reason 1`] = `
       values={
         Object {
           "link": <ForwardRef
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
           >
             setup
           </ForwardRef>,
@@ -90,6 +118,7 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
         Object {
           "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
           >
             Filebeat
           </ForwardRef>,
@@ -113,10 +142,39 @@ exports[`Logs should render with a no node found reason 1`] = `
       values={
         Object {
           "link": <ForwardRef
-            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
           >
             setup
           </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a no structured logs reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No structured logs found"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Check if the {varPaths} setting {link}."
+      id="xpack.monitoring.logs.reason.notUsingStructuredLogsMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
+          >
+            points to JSON logs
+          </ForwardRef>,
+          "varPaths": <Monospace>
+            var.paths
+          </Monospace>,
         }
       }
     />
@@ -138,6 +196,7 @@ exports[`Logs should render with a no type found reason 1`] = `
         Object {
           "link": <ForwardRef
             href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
           >
             these directions
           </ForwardRef>,

@@ -7,5 +7,5 @@
 export const VECTOR_SHAPE_TYPES = {
   POINT: 'POINT',
   LINE: 'LINE',
-  POLYGON: 'POLYGON'
+  POLYGON: 'POLYGON',
 };

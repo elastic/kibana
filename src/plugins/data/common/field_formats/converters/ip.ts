@@ -19,10 +19,10 @@
 
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class IpFormat extends FieldFormat {
-  static id = 'ip';
+  static id = FIELD_FORMAT_IDS.IP;
   static title = 'IP Address';
   static fieldType = KBN_FIELD_TYPES.IP;
 

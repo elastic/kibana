@@ -19,6 +19,13 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
     async monitorIdExists(key: string) {
       await testSubjects.existOrFail(key);
     },
+    async monitorPageLinkExists(monitorId: string) {
+      await testSubjects.existOrFail(`monitor-page-link-${monitorId}`);
+    },
+    async urlContains(expected: string) {
+      const url = await browser.getCurrentUrl();
+      return url.indexOf(expected) >= 0;
+    },
     async navigateToMonitorWithId(monitorId: string) {
       await testSubjects.click(`monitor-page-link-${monitorId}`);
     },
@@ -29,6 +36,33 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('xpack.uptime.filterBar');
       await testSubjects.setValue('xpack.uptime.filterBar', filterQuery);
       await browser.pressKeys(browser.keys.ENTER);
+    },
+    async goToNextPage() {
+      await testSubjects.click('xpack.uptime.monitorList.nextButton');
+    },
+    async goToPreviousPage() {
+      await testSubjects.click('xpack.uptime.monitorList.prevButton');
+    },
+    async setStatusFilterUp() {
+      await testSubjects.click('xpack.uptime.filterBar.filterStatusUp');
+    },
+    async setStatusFilterDown() {
+      await testSubjects.click('xpack.uptime.filterBar.filterStatusDown');
+    },
+    async selectFilterItem(filterType: string, option: string) {
+      const popoverId = `filter-popover_${filterType}`;
+      const optionId = `filter-popover-item_${option}`;
+      await testSubjects.existOrFail(popoverId);
+      await testSubjects.click(popoverId);
+      await testSubjects.existOrFail(optionId);
+      await testSubjects.click(optionId);
+      await testSubjects.click(popoverId);
+    },
+    async getSnapshotCount() {
+      return {
+        up: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.up'),
+        down: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.down'),
+      };
     },
   };
 }

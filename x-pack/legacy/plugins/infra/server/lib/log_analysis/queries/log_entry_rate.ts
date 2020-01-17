@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 
-const ML_ANOMALY_INDEX_PREFIX = '.ml-anomalies-';
+import { defaultRequestParameters, getMlResultIndex } from './common';
 
 export const createLogEntryRateQuery = (
   logRateJobId: string,
@@ -16,7 +16,7 @@ export const createLogEntryRateQuery = (
   size: number,
   afterKey?: CompositeTimestampPartitionKey
 ) => ({
-  allowNoIndices: true,
+  ...defaultRequestParameters,
   body: {
     query: {
       bool: {
@@ -118,11 +118,8 @@ export const createLogEntryRateQuery = (
       },
     },
   },
-  ignoreUnavailable: true,
-  index: `${ML_ANOMALY_INDEX_PREFIX}${logRateJobId}`,
+  index: getMlResultIndex(logRateJobId),
   size: 0,
-  trackScores: false,
-  trackTotalHits: false,
 });
 
 const logRateMlRecordRT = rt.type({

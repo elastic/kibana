@@ -6,13 +6,9 @@
 
 import { resolve } from 'path';
 
-import {
-  CONFIG_DASHBOARD_ONLY_MODE_ROLES
-} from './common';
+import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from './common';
 
-import {
-  createDashboardModeRequestInterceptor,
-} from './server';
+import { createDashboardModeRequestInterceptor } from './server';
 
 import { i18n } from '@kbn/i18n';
 
@@ -29,60 +25,67 @@ export function dashboardMode(kibana) {
       uiSettingDefaults: {
         [CONFIG_DASHBOARD_ONLY_MODE_ROLES]: {
           name: i18n.translate('xpack.dashboardMode.uiSettings.dashboardsOnlyRolesTitle', {
-            defaultMessage: 'Dashboards only roles'
+            defaultMessage: 'Dashboards only roles',
           }),
-          description: i18n.translate('xpack.dashboardMode.uiSettings.dashboardsOnlyRolesDescription', {
-            defaultMessage: 'Roles that belong to View Dashboards Only mode'
-          }),
+          description: i18n.translate(
+            'xpack.dashboardMode.uiSettings.dashboardsOnlyRolesDescription',
+            {
+              defaultMessage: 'Roles that belong to View Dashboards Only mode',
+            }
+          ),
           value: ['kibana_dashboard_only_user'],
           category: ['dashboard'],
-        }
+        },
       },
       app: {
         id: 'dashboardViewer',
         title: i18n.translate('xpack.dashboardMode.dashboardViewerTitle', {
-          defaultMessage: 'Dashboard Viewer'
+          defaultMessage: 'Dashboard Viewer',
         }),
         listed: false,
         hidden: true,
         description: i18n.translate('xpack.dashboardMode.dashboardViewerDescription', {
-          defaultMessage: 'view dashboards'
+          defaultMessage: 'view dashboards',
         }),
         main: 'plugins/dashboard_mode/dashboard_viewer',
         links: [
           {
             id: 'kibana:dashboard',
             title: i18n.translate('xpack.dashboardMode.dashboardViewer.dashboardTitle', {
-              defaultMessage: 'Dashboard'
+              defaultMessage: 'Dashboard',
             }),
             order: -1001,
             url: `${kbnBaseUrl}#/dashboards`,
             subUrlBase: `${kbnBaseUrl}#/dashboard`,
-            description: i18n.translate('xpack.dashboardMode.dashboardViewer.dashboardDescription', {
-              defaultMessage: 'Dashboard Viewer'
-            }),
+            description: i18n.translate(
+              'xpack.dashboardMode.dashboardViewer.dashboardDescription',
+              {
+                defaultMessage: 'Dashboard Viewer',
+              }
+            ),
             icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
-          }
+          },
         ],
       },
     },
 
     config(Joi) {
       return Joi.object({
-        enabled: Joi.boolean().default(true)
+        enabled: Joi.boolean().default(true),
       }).default();
     },
 
     init(server) {
-      server.injectUiAppVars('dashboardViewer', async () => (
-        await server.getInjectedUiAppVars('kibana')
-      ));
+      server.injectUiAppVars(
+        'dashboardViewer',
+        async () => await server.getInjectedUiAppVars('kibana')
+      );
 
       if (server.plugins.security) {
         // extend the server to intercept requests
         const dashboardViewerApp = server.getHiddenUiAppById('dashboardViewer');
         server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));
       }
-    }
+    },
   });
 }

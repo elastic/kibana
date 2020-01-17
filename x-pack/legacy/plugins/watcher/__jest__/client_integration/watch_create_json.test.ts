@@ -4,22 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
 import { WATCH } from './helpers/constants';
-import defaultWatchJson from '../../public/models/watch/default_watch.json';
+import defaultWatchJson from '../../public/np_ready/application/models/watch/default_watch.json';
 import { getExecuteDetails } from '../../test/fixtures';
-
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/watcher',
-}));
-
-jest.mock('ui/time_buckets', () => {});
 
 const { setup } = pageHelpers.watchCreateJson;
 
-describe.skip('<JsonWatchEdit /> create route', () => {
+describe('<JsonWatchEdit /> create route', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateJsonTestBed;
 
@@ -31,7 +24,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
     beforeEach(async () => {
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         const { component } = testBed;
         await nextTick();
@@ -95,7 +87,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
           form.setInputValue('nameInput', watch.name);
           form.setInputValue('idInput', watch.id);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSubmitButton();
             await nextTick();
@@ -109,7 +100,7 @@ describe.skip('<JsonWatchEdit /> create route', () => {
             'There are {{ctx.payload.hits.total}} documents in your index. Threshold is 10.';
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               id: watch.id,
               name: watch.name,
               type: watch.type,
@@ -144,7 +135,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
 
           httpRequestsMockHelpers.setSaveWatchResponse(watch.id, undefined, { body: error });
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSubmitButton();
             await nextTick();
@@ -173,7 +163,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
             watch: { id, type },
           } = WATCH;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -198,7 +187,7 @@ describe.skip('<JsonWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes,
               }),
@@ -234,7 +223,6 @@ describe.skip('<JsonWatchEdit /> create route', () => {
             },
           });
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -263,7 +251,7 @@ describe.skip('<JsonWatchEdit /> create route', () => {
           const scheduledTime = `now+${SCHEDULED_TIME}s`;
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 triggerData: {
                   triggeredTime,

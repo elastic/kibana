@@ -60,6 +60,7 @@ describe('DetailView', () => {
     const errorGroup = {
       occurrencesCount: 10,
       error: {
+        error: {},
         timestamp: {
           us: 0
         }
@@ -85,6 +86,7 @@ describe('DetailView', () => {
         timestamp: {
           us: 0
         },
+        error: {},
         service: {},
         user: {}
       } as any
@@ -109,6 +111,7 @@ describe('DetailView', () => {
         timestamp: {
           us: 0
         },
+        error: {},
         context: {}
       } as any
     };
@@ -122,5 +125,32 @@ describe('DetailView', () => {
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('should render without http request info', () => {
+    const errorGroup = {
+      occurrencesCount: 10,
+      transaction: undefined,
+      error: {
+        timestamp: {
+          us: 0
+        },
+        http: { response: { status_code: 404 } },
+        url: { full: 'myUrl' },
+        service: { name: 'myService' },
+        user: { id: 'myUserId' },
+        error: { exception: { handled: true } },
+        transaction: { id: 'myTransactionId', sampled: true }
+      } as any
+    };
+    expect(() =>
+      shallow(
+        <DetailView
+          errorGroup={errorGroup}
+          urlParams={{}}
+          location={{} as Location}
+        />
+      )
+    ).not.toThrowError();
   });
 });

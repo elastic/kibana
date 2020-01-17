@@ -28,13 +28,12 @@ import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+
 import { PluginWrapper } from './plugin';
 import { PluginName } from './types';
 import { PluginsSystem } from './plugins_system';
-import { contextServiceMock } from '../context/context_service.mock';
+import { coreMock } from '../mocks';
 
 const logger = loggingServiceMock.create();
 function createPlugin(
@@ -68,11 +67,10 @@ const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = {
-  context: contextServiceMock.createSetupContract(),
-  elasticsearch: elasticsearchServiceMock.createSetupContract(),
-  http: httpServiceMock.createSetupContract(),
-};
+
+const setupDeps = coreMock.createInternalSetup();
+const startDeps = coreMock.createInternalStart();
+
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
@@ -252,7 +250,6 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps.setup);
   }
 
-  const startDeps = {};
   expect([...(await pluginsSystem.startPlugins(startDeps))]).toMatchInlineSnapshot(`
     Array [
       Array [
@@ -326,13 +323,8 @@ test('`setupPlugins` only setups plugins that have server side', async () => {
   expect(thirdPluginToRun.setup).toHaveBeenCalledTimes(1);
 });
 
-test('`uiPlugins` returns empty Maps before plugins are added', async () => {
-  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`
-    Object {
-      "internal": Map {},
-      "public": Map {},
-    }
-  `);
+test('`uiPlugins` returns empty Map before plugins are added', async () => {
+  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`Map {}`);
 });
 
 test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
@@ -354,7 +346,7 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  expect([...pluginsSystem.uiPlugins().internal.keys()]).toMatchInlineSnapshot(`
+  expect([...pluginsSystem.uiPlugins().keys()]).toMatchInlineSnapshot(`
     Array [
       "order-0",
       "order-1",
@@ -383,14 +375,14 @@ test('`uiPlugins` returns only ui plugin dependencies', async () => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  const plugin = pluginsSystem.uiPlugins().internal.get('ui-plugin')!;
+  const plugin = pluginsSystem.uiPlugins().get('ui-plugin')!;
   expect(plugin.requiredPlugins).toEqual(['req-ui']);
   expect(plugin.optionalPlugins).toEqual(['opt-ui']);
 });
 
 test('can start without plugins', async () => {
   await pluginsSystem.setupPlugins(setupDeps);
-  const pluginsStart = await pluginsSystem.startPlugins({});
+  const pluginsStart = await pluginsSystem.startPlugins(startDeps);
 
   expect(pluginsStart).toBeInstanceOf(Map);
   expect(pluginsStart.size).toBe(0);
@@ -408,7 +400,7 @@ test('`startPlugins` only starts plugins that were setup', async () => {
     pluginsSystem.addPlugin(plugin);
   });
   await pluginsSystem.setupPlugins(setupDeps);
-  const result = await pluginsSystem.startPlugins({});
+  const result = await pluginsSystem.startPlugins(startDeps);
   expect([...result]).toMatchInlineSnapshot(`
     Array [
       Array [
@@ -421,4 +413,52 @@ test('`startPlugins` only starts plugins that were setup', async () => {
       ],
     ]
   `);
+});
+
+describe('setup', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
+    const plugin: PluginWrapper = createPlugin('timeout-setup');
+    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise(i => i));
+    pluginsSystem.addPlugin(plugin);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+
+    const promise = pluginsSystem.setupPlugins(setupDeps);
+    jest.runAllTimers();
+
+    await expect(promise).rejects.toMatchInlineSnapshot(
+      `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+    );
+  });
+});
+
+describe('start', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  it('throws timeout error if "start" was not completed in 30 sec.', async () => {
+    const plugin: PluginWrapper = createPlugin('timeout-start');
+    jest.spyOn(plugin, 'setup').mockResolvedValue({});
+    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise(i => i));
+
+    pluginsSystem.addPlugin(plugin);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const promise = pluginsSystem.startPlugins(startDeps);
+    jest.runAllTimers();
+
+    await expect(promise).rejects.toMatchInlineSnapshot(
+      `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+    );
+  });
 });

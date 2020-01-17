@@ -7,8 +7,8 @@
 import Joi from 'joi';
 
 import { difference } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../src/core/public';
-import { FeatureWithAllOrReadPrivileges } from './feature';
+import { Capabilities as UICapabilities } from '../../../../src/core/server';
+import { FeatureWithAllOrReadPrivileges } from '../common/feature';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
@@ -50,7 +50,9 @@ const schema = Joi.object({
     .required(),
   name: Joi.string().required(),
   excludeFromBasePrivileges: Joi.boolean(),
-  validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
+  validLicenses: Joi.array().items(
+    Joi.string().valid('basic', 'standard', 'gold', 'platinum', 'enterprise')
+  ),
   icon: Joi.string(),
   description: Joi.string(),
   navLinkId: Joi.string().regex(uiCapabilitiesRegex),

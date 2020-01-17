@@ -17,33 +17,32 @@
  * under the License.
  */
 
-import { Field } from 'ui/index_patterns';
 import { AggParam } from 'ui/agg_types';
 import { AggConfig } from '../../../../agg_types/agg_config';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from '../../config/types';
 import { VisState } from '../../..';
-import { SubAggParamsProp } from './agg_params';
+import { Field } from '../../../../../../../plugins/data/public';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it
 // https://github.com/babel/babel/issues/7641
 //
-export interface AggParamCommonProps<T> {
+export interface AggParamCommonProps<T, P = AggParam> {
   agg: AggConfig;
-  aggParam: AggParam;
+  aggParam: P;
   disabled?: boolean;
   editorConfig: EditorConfig;
+  formIsTouched: boolean;
   indexedFields?: ComboBoxGroupedOptions<Field>;
   showValidation: boolean;
   state: VisState;
   value?: T;
   metricAggs: AggConfig[];
-  subAggParams: SubAggParamsProp;
-  setValidity(isValid: boolean): void;
-  setTouched(): void;
 }
 
-export interface AggParamEditorProps<T> extends AggParamCommonProps<T> {
+export interface AggParamEditorProps<T, P = AggParam> extends AggParamCommonProps<T, P> {
   setValue(value?: T): void;
+  setValidity(isValid: boolean): void;
+  setTouched(): void;
 }

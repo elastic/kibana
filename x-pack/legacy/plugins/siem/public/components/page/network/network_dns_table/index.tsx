@@ -5,12 +5,17 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { networkActions } from '../../../../store/actions';
-import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
+import {
+  Direction,
+  NetworkDnsEdges,
+  NetworkDnsFields,
+  NetworkDnsSortField,
+} from '../../../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
@@ -77,24 +82,54 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
     type,
     updateNetworkTable,
   }) => {
-    const onChange = (criteria: Criteria) => {
-      if (criteria.sort != null) {
-        const newDnsSortField: NetworkDnsSortField = {
-          field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
-          direction: criteria.sort.direction,
-        };
-        if (!isEqual(newDnsSortField, sort)) {
-          updateNetworkTable({ networkType: type, tableType, updates: { sort: newDnsSortField } });
-        }
-      }
-    };
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable]
+    );
 
-    const onChangePtrIncluded = () =>
-      updateNetworkTable({
-        networkType: type,
-        tableType,
-        updates: { isPtrIncluded: !isPtrIncluded },
-      });
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable]
+    );
+
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const newDnsSortField: NetworkDnsSortField = {
+            field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
+            direction: criteria.sort.direction as Direction,
+          };
+          if (!isEqual(newDnsSortField, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: { sort: newDnsSortField },
+            });
+          }
+        }
+      },
+      [sort, type, updateNetworkTable]
+    );
+
+    const onChangePtrIncluded = useCallback(
+      () =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { isPtrIncluded: !isPtrIncluded },
+        }),
+      [type, updateNetworkTable, isPtrIncluded]
+    );
 
     return (
       <PaginatedTable
@@ -113,7 +148,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
         isInspect={isInspect}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
@@ -122,20 +157,8 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
           direction: sort.direction,
         }}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { activePage: newPage },
-          })
-        }
-        updateLimitPagination={newLimit =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { limit: newLimit },
-          })
-        }
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }
@@ -149,9 +172,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkDnsTable = connect(
-  makeMapStateToProps,
-  {
-    updateNetworkTable: networkActions.updateNetworkTable,
-  }
-)(NetworkDnsTableComponent);
+export const NetworkDnsTable = connect(makeMapStateToProps, {
+  updateNetworkTable: networkActions.updateNetworkTable,
+})(NetworkDnsTableComponent);

@@ -12,7 +12,7 @@ export const useCurrentIndexPattern = () => {
   const context = useContext(KibanaContext);
 
   if (!isKibanaContextInitialized(context)) {
-    throw new Error('currentIndexPattern is undefined');
+    throw new Error('useCurrentIndexPattern: kibanaContext not initialized');
   }
 
   return context.currentIndexPattern;

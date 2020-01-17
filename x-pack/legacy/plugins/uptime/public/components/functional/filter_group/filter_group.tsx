@@ -5,35 +5,49 @@
  */
 
 import { EuiFilterGroup } from '@elastic/eui';
-import React from 'react';
-import { get } from 'lodash';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
-import { filterBarQuery } from '../../../queries';
+import { connect } from 'react-redux';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
+import { OverviewFilters } from '../../../../common/runtime_types';
+import { fetchOverviewFilters, GetOverviewFiltersPayload } from '../../../state/actions';
+import { AppState } from '../../../state';
+import { useUrlParams } from '../../../hooks';
+import { parseFiltersMap } from './parse_filter_map';
 
-interface FilterBarQueryResult {
-  filters?: FilterBarType;
+interface OwnProps {
+  currentFilter: any;
+  onFilterUpdate: any;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  filters?: string;
+  statusFilter?: string;
 }
 
-interface FilterBarDropdownsProps {
-  currentFilter: string;
-  onFilterUpdate: (kuery: string) => void;
+interface StoreProps {
+  esKuery: string;
+  lastRefresh: number;
+  loading: boolean;
+  overviewFilters: OverviewFilters;
 }
 
-type Props = UptimeGraphQLQueryProps<FilterBarQueryResult> & FilterBarDropdownsProps;
+interface DispatchProps {
+  loadFilterGroup: typeof fetchOverviewFilters;
+}
 
-export const FilterGroupComponent = ({
-  loading: isLoading,
+type Props = OwnProps & StoreProps & DispatchProps;
+
+type PresentationalComponentProps = Pick<StoreProps, 'overviewFilters' | 'loading'> &
+  Pick<OwnProps, 'currentFilter' | 'onFilterUpdate'>;
+
+export const PresentationalComponent: React.FC<PresentationalComponentProps> = ({
   currentFilter,
-  data,
+  overviewFilters,
+  loading,
   onFilterUpdate,
-}: Props) => {
-  const locations = get<string[]>(data, 'filterBar.locations', []);
-  const ports = get<string[]>(data, 'filterBar.ports', []);
-  const schemes = get<string[]>(data, 'filterBar.schemes', []);
+}) => {
+  const { locations, ports, schemes, tags } = overviewFilters;
 
   let filterKueries: Map<string, string[]>;
   try {
@@ -67,34 +81,48 @@ export const FilterGroupComponent = ({
 
   const filterPopoverProps: FilterPopoverProps[] = [
     {
+      loading,
+      onFilterFieldChange,
       fieldName: 'observer.geo.name',
       id: 'location',
-      isLoading,
       items: locations,
-      onFilterFieldChange,
       selectedItems: getSelectedItems('observer.geo.name'),
       title: i18n.translate('xpack.uptime.filterBar.options.location.name', {
         defaultMessage: 'Location',
       }),
     },
     {
+      loading,
+      onFilterFieldChange,
       fieldName: 'url.port',
       id: 'port',
-      isLoading,
-      items: ports,
-      onFilterFieldChange,
+      disabled: ports.length === 0,
+      items: ports.map((p: number) => p.toString()),
       selectedItems: getSelectedItems('url.port'),
       title: i18n.translate('xpack.uptime.filterBar.options.portLabel', { defaultMessage: 'Port' }),
     },
     {
+      loading,
+      onFilterFieldChange,
       fieldName: 'monitor.type',
       id: 'scheme',
-      isLoading,
+      disabled: schemes.length === 0,
       items: schemes,
-      onFilterFieldChange,
       selectedItems: getSelectedItems('monitor.type'),
       title: i18n.translate('xpack.uptime.filterBar.options.schemeLabel', {
         defaultMessage: 'Scheme',
+      }),
+    },
+    {
+      loading,
+      onFilterFieldChange,
+      fieldName: 'tags',
+      id: 'tags',
+      disabled: tags.length === 0,
+      items: tags,
+      selectedItems: getSelectedItems('tags'),
+      title: i18n.translate('xpack.uptime.filterBar.options.tagsLabel', {
+        defaultMessage: 'Tags',
       }),
     },
   ];
@@ -105,6 +133,7 @@ export const FilterGroupComponent = ({
         content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
           defaultMessage: 'Up',
         })}
+        dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
         value="up"
         withNext={true}
       />
@@ -112,6 +141,7 @@ export const FilterGroupComponent = ({
         content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
           defaultMessage: 'Down',
         })}
+        dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
         value="down"
         withNext={false}
       />
@@ -122,7 +152,59 @@ export const FilterGroupComponent = ({
   );
 };
 
-export const FilterGroup = withUptimeGraphQL<FilterBarQueryResult, FilterBarDropdownsProps>(
-  FilterGroupComponent,
-  filterBarQuery
-);
+export const Container: React.FC<Props> = ({
+  currentFilter,
+  esKuery,
+  filters,
+  loading,
+  loadFilterGroup,
+  dateRangeStart,
+  dateRangeEnd,
+  overviewFilters,
+  statusFilter,
+  onFilterUpdate,
+}: Props) => {
+  const [getUrlParams] = useUrlParams();
+  const { filters: urlFilters } = getUrlParams();
+  useEffect(() => {
+    const filterSelections = parseFiltersMap(urlFilters);
+    loadFilterGroup({
+      dateRangeStart,
+      dateRangeEnd,
+      locations: filterSelections.locations ?? [],
+      ports: filterSelections.ports ?? [],
+      schemes: filterSelections.schemes ?? [],
+      search: esKuery,
+      statusFilter,
+      tags: filterSelections.tags ?? [],
+    });
+  }, [dateRangeStart, dateRangeEnd, esKuery, filters, statusFilter, urlFilters, loadFilterGroup]);
+  return (
+    <PresentationalComponent
+      currentFilter={currentFilter}
+      overviewFilters={overviewFilters}
+      loading={loading}
+      onFilterUpdate={onFilterUpdate}
+    />
+  );
+};
+
+const mapStateToProps = ({
+  overviewFilters: { loading, filters },
+  ui: { esKuery, lastRefresh },
+}: AppState): StoreProps => ({
+  esKuery,
+  overviewFilters: filters,
+  lastRefresh,
+  loading,
+});
+
+const mapDispatchToProps = (dispatch: any): DispatchProps => ({
+  loadFilterGroup: (payload: GetOverviewFiltersPayload) => dispatch(fetchOverviewFilters(payload)),
+});
+
+export const FilterGroup = connect<StoreProps, DispatchProps, OwnProps>(
+  // @ts-ignore connect is expecting null | undefined for some reason
+  mapStateToProps,
+  mapDispatchToProps
+)(Container);

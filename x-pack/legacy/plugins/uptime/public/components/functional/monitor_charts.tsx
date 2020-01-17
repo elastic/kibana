@@ -39,35 +39,34 @@ export const MonitorChartsComponent = ({
   dateRangeEnd,
   loading,
 }: Props) => {
+  const [getUrlParams] = useUrlParams();
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },
     } = data;
 
-    const [getUrlParams] = useUrlParams();
     const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
     return (
-      <Fragment>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <DurationChart
-              locationDurationLines={locationDurationLines}
-              meanColor={mean}
-              rangeColor={range}
-              loading={loading}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <SnapshotHistogram
-              absoluteStartDate={absoluteDateRangeStart}
-              absoluteEndDate={absoluteDateRangeEnd}
-              variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-              height="400px"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <DurationChart
+            locationDurationLines={locationDurationLines}
+            meanColor={mean}
+            rangeColor={range}
+            loading={loading}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SnapshotHistogram
+            absoluteStartDate={absoluteDateRangeStart}
+            absoluteEndDate={absoluteDateRangeEnd}
+            height="400px"
+            isResponsive={false}
+            variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
   return (

@@ -19,7 +19,7 @@ import {
 /**
  * State transitions: fields update
  */
-export const updateFields = (newValues) => ({ fields }) => ({
+export const updateFields = newValues => ({ fields }) => ({
   fields: {
     ...fields,
     ...newValues,
@@ -35,25 +35,16 @@ export class FormEntryRow extends PureComponent {
     type: PropTypes.string,
     onValueUpdate: PropTypes.func.isRequired,
     field: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number
-    ]).isRequired,
-    defaultValue: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number
-    ]),
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     isLoading: PropTypes.bool,
-    error: PropTypes.oneOfType([
-      PropTypes.node,
-      PropTypes.object,
-    ]),
+    error: PropTypes.oneOfType([PropTypes.node, PropTypes.object]),
     disabled: PropTypes.bool,
     areErrorsVisible: PropTypes.bool.isRequired,
     testSubj: PropTypes.string,
   };
 
-  onFieldChange = (value) => {
+  onFieldChange = value => {
     const { field, onValueUpdate, type } = this.props;
     const isNumber = type === 'number';
 
@@ -64,9 +55,9 @@ export class FormEntryRow extends PureComponent {
     }
 
     onValueUpdate({ [field]: valueParsed });
-  }
+  };
 
-  renderField = (isInvalid) => {
+  renderField = isInvalid => {
     const { value, type, disabled, isLoading, testSubj } = this.props;
     switch (type) {
       case 'number':
@@ -94,7 +85,7 @@ export class FormEntryRow extends PureComponent {
           />
         );
     }
-  }
+  };
 
   render() {
     const {
@@ -132,16 +123,11 @@ export class FormEntryRow extends PureComponent {
     );
 
     return (
-      <EuiDescribedFormGroup
-        title={title}
-        description={description}
-        fullWidth
-        key={field}
-      >
+      <EuiDescribedFormGroup title={title} description={description} fullWidth key={field}>
         <EuiFormRow
           label={label}
           helpText={fieldHelpText}
-          error={(error && error.message) ? error.message : error}
+          error={error && error.message ? error.message : error}
           isInvalid={isInvalid}
           fullWidth
         >

@@ -1,0 +1,361 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overrides render overrides 1`] = `
+<EuiForm>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error="Value must be greater than 3 and less than or equal to 1000000"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Number of lines to sample"
+        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.linesToSampleFormRowLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldNumber
+      isInvalid={false}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Data format"
+        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.dataFormatFormRowLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiComboBox
+      compressed={false}
+      fullWidth={false}
+      isClearable={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "label": "delimited",
+          },
+          Object {
+            "label": "ndjson",
+          },
+          Object {
+            "label": "semi_structured_text",
+          },
+        ]
+      }
+      selectedOptions={
+        Array [
+          Object {
+            "label": "",
+          },
+        ]
+      }
+      singleSelection={
+        Object {
+          "asPlainText": true,
+        }
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <ForwardRef
+          href="https://www.elastic.co/guide/en/elasticsearch/reference/jest-metadata-mock-branch/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern"
+          target="_blank"
+        >
+          See more on accepted formats
+        </ForwardRef>
+      </EuiText>
+    }
+    label={
+      <FormattedMessage
+        defaultMessage="Timestamp format"
+        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatFormRowLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiComboBox
+      compressed={false}
+      fullWidth={false}
+      isClearable={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "label": "custom",
+          },
+          Object {
+            "label": "dd/MMM/yyyy:HH:mm:ss XX",
+          },
+          Object {
+            "label": "EEE MMM dd HH:mm zzz yyyy",
+          },
+          Object {
+            "label": "EEE MMM dd HH:mm:ss yyyy",
+          },
+          Object {
+            "label": "EEE MMM dd HH:mm:ss zzz yyyy",
+          },
+          Object {
+            "label": "EEE MMM dd yyyy HH:mm zzz",
+          },
+          Object {
+            "label": "EEE MMM dd yyyy HH:mm:ss zzz",
+          },
+          Object {
+            "label": "EEE, dd MMM yyyy HH:mm XX",
+          },
+          Object {
+            "label": "EEE, dd MMM yyyy HH:mm XXX",
+          },
+          Object {
+            "label": "EEE, dd MMM yyyy HH:mm:ss XX",
+          },
+          Object {
+            "label": "EEE, dd MMM yyyy HH:mm:ss XXX",
+          },
+          Object {
+            "label": "ISO8601",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss,SSS",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss,SSSSSS",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss,SSSSSSSSS",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss.SSS",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss.SSSSSS",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss.SSSSSSSSS",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss:SSS",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss:SSSSSS",
+          },
+          Object {
+            "label": "MMM dd HH:mm:ss:SSSSSSSSS",
+          },
+          Object {
+            "label": "MMM dd yyyy HH:mm:ss",
+          },
+          Object {
+            "label": "MMM dd, yyyy h:mm:ss a",
+          },
+          Object {
+            "label": "TAI64N",
+          },
+          Object {
+            "label": "UNIX",
+          },
+          Object {
+            "label": "UNIX_MS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSSSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSSSSSSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSSSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSSSSSSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSSSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSSSSSSS",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSSSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSSSSSSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSSSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSSSSSSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSSSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSSSSSSS XX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSSSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSSSSSSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSSSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSSSSSSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSSSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSSSSSSSXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSSSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss,SSSSSSSSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSSSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss.SSSSSSSSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSSSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ss:SSSSSSSSSXXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ssXX",
+          },
+          Object {
+            "label": "yyyy-MM-dd HH:mm:ssXXX",
+          },
+          Object {
+            "label": "yyyyMMddHHmmss",
+          },
+        ]
+      }
+      selectedOptions={
+        Array [
+          Object {
+            "label": "",
+          },
+        ]
+      }
+      singleSelection={
+        Object {
+          "asPlainText": true,
+        }
+      }
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Time field"
+        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timeFieldFormRowLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiComboBox
+      compressed={false}
+      fullWidth={false}
+      isClearable={false}
+      onChange={[Function]}
+      options={Array []}
+      selectedOptions={
+        Array [
+          Object {
+            "label": "",
+          },
+        ]
+      }
+      singleSelection={
+        Object {
+          "asPlainText": true,
+        }
+      }
+    />
+  </EuiFormRow>
+</EuiForm>
+`;

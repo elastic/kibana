@@ -21,6 +21,7 @@ import { i18nLoader } from '@kbn/i18n';
 import { size } from 'lodash';
 import { getIntegrityHashes, Integrities } from './file_integrity';
 import { KIBANA_LOCALIZATION_STATS_TYPE } from '../../../common/constants';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 export interface UsageStats {
   locale: string;
   integrities: Integrities;
@@ -51,15 +52,15 @@ export function createCollectorFetch(server: any) {
   };
 }
 
-/*
- * @param {Object} server
- * @return {Object} kibana usage stats type collection object
- */
-export function createLocalizationUsageCollector(server: any) {
-  const { collectorSet } = server.usage;
-  return collectorSet.makeUsageCollector({
+export function registerLocalizationUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  server: any
+) {
+  const collector = usageCollection.makeUsageCollector({
     type: KIBANA_LOCALIZATION_STATS_TYPE,
     isReady: () => true,
     fetch: createCollectorFetch(server),
   });
+
+  usageCollection.registerCollector(collector);
 }

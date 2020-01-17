@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
-export function couchdbMetricsSpecProvider(server, context) {
+export function couchdbMetricsSpecProvider(context) {
   const moduleName = 'couchdb';
   return {
     id: 'couchdbMetrics',
@@ -33,7 +37,8 @@ export function couchdbMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch monitoring metrics from the CouchdB server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.couchdbMetrics.longDescription', {
-      defaultMessage: 'The `couchdb` Metricbeat module fetches monitoring metrics from CouchDB. \
+      defaultMessage:
+        'The `couchdb` Metricbeat module fetches monitoring metrics from CouchDB. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-couchdb.html',
@@ -44,20 +49,23 @@ export function couchdbMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: '496910f0-b952-11e9-a579-f5c0a5d81340',
-          linkLabel: i18n.translate('kbn.server.tutorials.couchdbMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'CouchDB metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.couchdbMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'CouchDB metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-couchdb.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-couchdb.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/couchdb_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

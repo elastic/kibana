@@ -12,10 +12,12 @@ import { LOGGING_TAG } from '../common/constants';
  * Expose xpackInfo for the Monitoring cluster as server.plugins.monitoring.info
  */
 export const initMonitoringXpackInfo = async ({ config, xpackMainPlugin, expose, log }) => {
-  const xpackInfo = hasMonitoringCluster(config) ? xpackMainPlugin.createXPackInfo({
-    clusterSource: 'monitoring',
-    pollFrequencyInMillis: config.get('xpack.monitoring.xpack_api_polling_frequency_millis')
-  }) : xpackMainPlugin.info;
+  const xpackInfo = hasMonitoringCluster(config)
+    ? xpackMainPlugin.createXPackInfo({
+        clusterSource: 'monitoring',
+        pollFrequencyInMillis: config.get('xpack.monitoring.xpack_api_polling_frequency_millis'),
+      })
+    : xpackMainPlugin.info;
 
   xpackInfo.feature('monitoring').registerLicenseCheckResultsGenerator(checkLicenseGenerator);
   expose('info', xpackInfo);
@@ -23,6 +25,9 @@ export const initMonitoringXpackInfo = async ({ config, xpackMainPlugin, expose,
   // check if X-Pack is installed on Monitoring Cluster
   const xpackInfoTest = await xpackInfo.refreshNow();
   if (!xpackInfoTest.isAvailable()) {
-    log([LOGGING_TAG, 'warning'], `X-Pack Monitoring Cluster Alerts will not be available: ${xpackInfoTest.unavailableReason()}`);
+    log(
+      [LOGGING_TAG, 'warning'],
+      `X-Pack Monitoring Cluster Alerts will not be available: ${xpackInfoTest.unavailableReason()}`
+    );
   }
 };

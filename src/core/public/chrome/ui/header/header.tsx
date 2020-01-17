@@ -24,21 +24,13 @@ import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
-  // @ts-ignore
   EuiHeader,
-  // @ts-ignore
   EuiHeaderLogo,
-  // @ts-ignore
   EuiHeaderSection,
-  // @ts-ignore
   EuiHeaderSectionItem,
-  // @ts-ignore
   EuiHeaderSectionItemButton,
-  // @ts-ignore
-  EuiHideFor,
   EuiHorizontalRule,
   EuiIcon,
-  // @ts-ignore
   EuiImage,
   // @ts-ignore
   EuiNavDrawer,
@@ -65,7 +57,7 @@ import {
 } from '../..';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
+import { InternalApplicationStart } from '../../../application/types';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -116,7 +108,7 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
-function extendNavLink(navLink: ChromeNavLink, urlForApp: ApplicationStart['getUrlForApp']) {
+function extendNavLink(navLink: ChromeNavLink) {
   if (navLink.legacy) {
     return {
       ...navLink,
@@ -126,7 +118,7 @@ function extendNavLink(navLink: ChromeNavLink, urlForApp: ApplicationStart['getU
 
   return {
     ...navLink,
-    href: urlForApp(navLink.id),
+    href: navLink.baseUrl,
   };
 }
 
@@ -171,7 +163,8 @@ interface Props {
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
-  helpExtension$: Rx.Observable<ChromeHelpExtension>;
+  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Rx.Observable<string>;
   legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
@@ -236,9 +229,7 @@ class HeaderUI extends Component<Props, State> {
           appTitle,
           isVisible,
           forceNavigation,
-          navLinks: navLinks.map(navLink =>
-            extendNavLink(navLink, this.props.application.getUrlForApp)
-          ),
+          navLinks: navLinks.map(extendNavLink),
           recentlyAccessed: recentlyAccessed.map(ra =>
             extendRecentlyAccessedHistoryItem(navLinks, ra, this.props.basePath)
           ),
@@ -290,6 +281,7 @@ class HeaderUI extends Component<Props, State> {
       basePath,
       breadcrumbs$,
       helpExtension$,
+      helpSupportUrl$,
       intl,
       isLocked,
       kibanaDocLink,
@@ -315,7 +307,7 @@ class HeaderUI extends Component<Props, State> {
       .filter(navLink => !navLink.hidden)
       .map(navLink => ({
         key: navLink.id,
-        label: navLink.title,
+        label: navLink.tooltip ?? navLink.title,
 
         // Use href and onClick to support "open in new tab" and SPA navigation in the same link
         href: navLink.href,
@@ -394,7 +386,14 @@ class HeaderUI extends Component<Props, State> {
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
-              <HeaderHelpMenu {...{ helpExtension$, kibanaDocLink, kibanaVersion }} />
+              <HeaderHelpMenu
+                {...{
+                  helpExtension$,
+                  helpSupportUrl$,
+                  kibanaDocLink,
+                  kibanaVersion,
+                }}
+              />
             </EuiHeaderSectionItem>
 
             <HeaderNavControls side="right" navControls={navControlsRight} />

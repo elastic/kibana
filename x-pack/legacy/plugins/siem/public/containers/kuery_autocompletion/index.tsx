@@ -5,9 +5,11 @@
  */
 
 import React, { useState } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
-import { useKibanaPlugins } from '../../lib/compose/kibana_plugins';
+import {
+  AutocompleteSuggestion,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
+import { useKibana } from '../../lib/kibana';
 
 type RendererResult = React.ReactElement<JSX.Element> | null;
 type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
@@ -18,7 +20,7 @@ interface KueryAutocompletionLifecycleProps {
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: AutocompleteSuggestion[];
   }>;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 interface KueryAutocompletionCurrentRequest {
@@ -32,13 +34,13 @@ export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>
       null
     );
     const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([]);
-    const plugins = useKibanaPlugins();
+    const kibana = useKibana();
     const loadSuggestions = async (
       expression: string,
       cursorPosition: number,
       maxSuggestions?: number
     ) => {
-      const autocompletionProvider = plugins.data.autocomplete.getProvider('kuery');
+      const autocompletionProvider = kibana.services.data.autocomplete.getProvider('kuery');
       const config = {
         get: () => true,
       };

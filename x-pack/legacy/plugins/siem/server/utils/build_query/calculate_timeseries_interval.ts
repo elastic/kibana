@@ -91,8 +91,7 @@ export const calculateAuto = {
 
 export const calculateTimeseriesInterval = (
   lowerBoundInMsSinceEpoch: number,
-  upperBoundInMsSinceEpoch: number,
-  minIntervalSeconds: number
+  upperBoundInMsSinceEpoch: number
 ) => {
   const duration = moment.duration(upperBoundInMsSinceEpoch - lowerBoundInMsSinceEpoch, 'ms');
 

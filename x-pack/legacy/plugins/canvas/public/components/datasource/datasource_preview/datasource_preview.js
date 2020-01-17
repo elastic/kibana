@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiText,
   EuiEmptyPrompt,
+  EuiSpacer,
 } from '@elastic/eui';
 import { Datatable } from '../../datatable';
 import { Error } from '../../error';
@@ -31,21 +32,22 @@ export const DatasourcePreview = ({ done, datatable }) => (
         <EuiModalHeaderTitle>{strings.getModalTitle()}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="canvasDatasourcePreview">
-        <EuiText size="s" color="subdued">
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="xpack.canvas.datasourceDatasourcePreview.modalDescription"
-              defaultMessage="Click {saveLabel} in the sidebar to use this data."
+              defaultMessage="The following data will be available to the selected element upon clicking {saveLabel} in the sidebar."
               values={{
                 saveLabel: <strong>{datasourceStrings.getSaveButtonLabel()}</strong>,
               }}
             />
           </p>
         </EuiText>
+        <EuiSpacer />
         {datatable.type === 'error' ? (
           <Error payload={datatable} />
         ) : (
-          <EuiPanel className="canvasDatasourcePreview__panel">
+          <EuiPanel className="canvasDatasourcePreview__panel" paddingSize="none">
             {datatable.rows.length > 0 ? (
               <Datatable datatable={datatable} showHeader paginate />
             ) : (

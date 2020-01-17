@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { once } from 'lodash';
 import { elasticsearchJsPlugin } from './elasticsearch_ml';
 
-const callWithRequest = once((elasticsearchPlugin) => {
-  const config = { plugins: [ elasticsearchJsPlugin ] };
+const callWithRequest = once(elasticsearchPlugin => {
+  const config = { plugins: [elasticsearchJsPlugin] };
   const cluster = elasticsearchPlugin.createCluster('ml', config);
 
   return cluster.callWithRequest;

@@ -4,9 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESQueryResponse, HapiServer, SavedObjectDoc, TaskInstance } from '../';
+import { APICaller, CoreSetup } from 'kibana/server';
 
-export const getMockTaskInstance = (): TaskInstance => ({ state: { runs: 0, stats: {} } });
+import {
+  ConcreteTaskInstance,
+  TaskStatus,
+  TaskManagerStartContract,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/task_manager/server';
+
+export const getMockTaskInstance = (
+  overrides: Partial<ConcreteTaskInstance> = {}
+): ConcreteTaskInstance => ({
+  state: { runs: 0, stats: {} },
+  taskType: 'test',
+  params: {},
+  id: '',
+  scheduledAt: new Date(),
+  attempts: 1,
+  status: TaskStatus.Idle,
+  runAt: new Date(),
+  startedAt: null,
+  retryAt: null,
+  ownerId: null,
+  ...overrides,
+});
 
 const defaultMockSavedObjects = [
   {
@@ -20,14 +42,35 @@ const defaultMockSavedObjects = [
 
 const defaultMockTaskDocs = [getMockTaskInstance()];
 
-export const getMockCallWithInternal = (hits: SavedObjectDoc[] = defaultMockSavedObjects) => {
-  return (): Promise<ESQueryResponse> => {
+export const getMockEs = (mockCallWithInternal: APICaller = getMockCallWithInternal()) =>
+  (({
+    createClient: () => ({ callAsInternalUser: mockCallWithInternal }),
+  } as unknown) as CoreSetup['elasticsearch']);
+
+export const getMockCallWithInternal = (hits: unknown[] = defaultMockSavedObjects): APICaller => {
+  return ((() => {
     return Promise.resolve({ hits: { hits } });
-  };
+  }) as unknown) as APICaller;
 };
 
-export const getMockTaskFetch = (docs: TaskInstance[] = defaultMockTaskDocs) => {
-  return () => Promise.resolve({ docs });
+export const getMockTaskFetch = (
+  docs: ConcreteTaskInstance[] = defaultMockTaskDocs
+): Partial<jest.Mocked<TaskManagerStartContract>> => {
+  return {
+    fetch: jest.fn(fetchOpts => {
+      return Promise.resolve({ docs, searchAfter: [] });
+    }),
+  } as Partial<jest.Mocked<TaskManagerStartContract>>;
+};
+
+export const getMockThrowingTaskFetch = (
+  throws: Error
+): Partial<jest.Mocked<TaskManagerStartContract>> => {
+  return {
+    fetch: jest.fn(fetchOpts => {
+      throw throws;
+    }),
+  } as Partial<jest.Mocked<TaskManagerStartContract>>;
 };
 
 export const getMockConfig = () => {
@@ -36,30 +79,6 @@ export const getMockConfig = () => {
   };
 };
 
-export const getMockKbnServer = (
-  mockCallWithInternal = getMockCallWithInternal(),
-  mockTaskFetch = getMockTaskFetch(),
-  mockConfig = getMockConfig()
-): HapiServer => ({
-  plugins: {
-    elasticsearch: {
-      getCluster: (cluster: string) => ({
-        callWithInternalUser: mockCallWithInternal,
-      }),
-    },
-    xpack_main: {},
-    task_manager: {
-      registerTaskDefinitions: (opts: any) => undefined,
-      schedule: (opts: any) => Promise.resolve(),
-      fetch: mockTaskFetch,
-    },
-  },
-  usage: {
-    collectorSet: {
-      makeUsageCollector: () => '',
-      register: () => undefined,
-    },
-  },
-  config: () => mockConfig,
-  log: () => undefined,
+export const getCluster = () => ({
+  callWithInternalUser: getMockCallWithInternal(),
 });

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', function () {
+export default function({ loadTestFile }) {
+  describe('apis', function() {
     this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./es'));
@@ -25,8 +25,9 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./siem'));
-    loadTestFile(require.resolve('./code'));
     loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
+    loadTestFile(require.resolve('./endpoint'));
+    loadTestFile(require.resolve('./ml'));
   });
 }

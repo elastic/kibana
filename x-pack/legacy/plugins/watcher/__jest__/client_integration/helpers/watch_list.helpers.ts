@@ -13,8 +13,9 @@ import {
   TestBedConfig,
   nextTick,
 } from '../../../../../../test_utils';
-import { WatchList } from '../../../public/sections/watch_list/components/watch_list';
+import { WatchList } from '../../../public/np_ready/application/sections/watch_list/components/watch_list';
 import { ROUTES } from '../../../common/constants';
+import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -23,7 +24,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WatchList, testBedConfig);
+const initTestBed = registerTestBed(withAppContext(WatchList), testBedConfig);
 
 export interface WatchListTestBed extends TestBed<WatchListTestSubjects> {
   actions: {
@@ -51,7 +52,6 @@ export const setup = async (): Promise<WatchListTestBed> => {
     const { rows } = testBed.table.getMetaData('watchesTable');
     const watchesLink = findTestSubject(rows[index].reactWrapper, 'watchesLink');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       const { href } = watchesLink.props();
       testBed.router.navigateTo(href!);
@@ -67,7 +67,6 @@ export const setup = async (): Promise<WatchListTestBed> => {
     const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
     const button = findTestSubject(lastColumn, `${action}WatchButton`);
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();

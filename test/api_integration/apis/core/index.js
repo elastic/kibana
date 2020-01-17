@@ -18,22 +18,21 @@
  */
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
 
   describe('core', () => {
     describe('request context', () => {
-      it('provides access to elasticsearch', async () => (
-        await supertest
-          .get('/requestcontext/elasticsearch')
-          .expect(200, 'Elasticsearch: true')
-      ));
+      it('provides access to elasticsearch', async () =>
+        await supertest.get('/requestcontext/elasticsearch').expect(200, 'Elasticsearch: true'));
 
-      it('provides access to SavedObjects client', async () => (
+      it('provides access to SavedObjects client', async () =>
         await supertest
           .get('/requestcontext/savedobjectsclient')
-          .expect(200, 'SavedObjects client: {"page":1,"per_page":20,"total":0,"saved_objects":[]}')
-      ));
+          .expect(
+            200,
+            'SavedObjects client: {"page":1,"per_page":20,"total":0,"saved_objects":[]}'
+          ));
     });
 
     describe('compression', () => {
@@ -46,11 +45,21 @@ export default function ({ getService }) {
           });
       });
 
-      it(`doesn't use compression when there is a referer`, async () => {
+      it(`uses compression when there is a whitelisted referer`, async () => {
         await supertest
           .get('/app/kibana')
           .set('accept-encoding', 'gzip')
-          .set('referer', 'https://www.google.com')
+          .set('referer', 'https://some-host.com')
+          .then(response => {
+            expect(response.headers).to.have.property('content-encoding', 'gzip');
+          });
+      });
+
+      it(`doesn't use compression when there is a non-whitelisted referer`, async () => {
+        await supertest
+          .get('/app/kibana')
+          .set('accept-encoding', 'gzip')
+          .set('referer', 'https://other.some-host.com')
           .then(response => {
             expect(response.headers).not.to.have.property('content-encoding');
           });

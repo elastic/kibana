@@ -6,11 +6,7 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunction,
-  ArgumentType,
-} from '../../../../../../src/legacy/core_plugins/interpreter/public';
-
+import { ExpressionFunction, ArgumentType } from 'src/plugins/expressions/common';
 import chartAreaSVG from '../assets/chart_area.svg';
 import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
 import chartBarSVG from '../assets/chart_bar.svg';
@@ -241,7 +237,7 @@ export const visualizationTypes: VisualizationType[] = [
     icon: 'visBarHorizontal',
     largeIcon: chartBarHorizontalSVG,
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
-      defaultMessage: 'Horizontal Bar',
+      defaultMessage: 'Horizontal bar',
     }),
   },
   {
@@ -249,7 +245,7 @@ export const visualizationTypes: VisualizationType[] = [
     icon: 'visBarVerticalStacked',
     largeIcon: chartBarStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
-      defaultMessage: 'Stacked Bar',
+      defaultMessage: 'Stacked bar',
     }),
   },
   {
@@ -257,7 +253,7 @@ export const visualizationTypes: VisualizationType[] = [
     icon: 'visBarHorizontalStacked',
     largeIcon: chartBarHorizontalStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
-      defaultMessage: 'Stacked Horizontal Bar',
+      defaultMessage: 'Stacked horizontal bar',
     }),
   },
   {
@@ -281,7 +277,7 @@ export const visualizationTypes: VisualizationType[] = [
     icon: 'visAreaStacked',
     largeIcon: chartAreaStackedSVG,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
-      defaultMessage: 'Stacked Area',
+      defaultMessage: 'Stacked area',
     }),
   },
 ];

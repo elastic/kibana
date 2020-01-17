@@ -18,15 +18,12 @@
  */
 
 // @ts-ignore
-import { buildEsQuery, getEsQueryConfig, Filter } from '@kbn/es-query';
-// @ts-ignore
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { KIBANA_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { TimeRange } from 'src/plugins/data/public';
 import { VisParams } from 'ui/vis';
 import { i18n } from '@kbn/i18n';
 import { TimelionVisualizationDependencies } from '../plugin';
+import { TimeRange, esFilters, esQuery, Query } from '../../../../../plugins/data/public';
 
 interface Stats {
   cacheCount: number;
@@ -60,7 +57,7 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
     visParams,
   }: {
     timeRange: TimeRange;
-    filters: Filter[];
+    filters: esFilters.Filter[];
     query: Query;
     visParams: VisParams;
     forceFetch?: boolean;
@@ -75,10 +72,10 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
       );
     }
 
-    const esQueryConfigs = getEsQueryConfig(uiSettings);
+    const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
 
     // parse the time range client side to make sure it behaves like other charts
-    const timeRangeBounds = timefilter.timefilter.calculateBounds(timeRange);
+    const timeRangeBounds = timefilter.calculateBounds(timeRange);
 
     try {
       return await http.post('../api/timelion/run', {
@@ -86,7 +83,7 @@ export function getTimelionRequestHandler(dependencies: TimelionVisualizationDep
           sheet: [expression],
           extended: {
             es: {
-              filter: buildEsQuery(undefined, query, filters, esQueryConfigs),
+              filter: esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs),
             },
           },
           time: {

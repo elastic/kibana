@@ -17,13 +17,12 @@
  * under the License.
  */
 
-
 export function DashboardReplacePanelProvider({ getService }) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
 
-  return new class DashboardReplacePanel {
+  return new (class DashboardReplacePanel {
     async toggleFilterPopover() {
       log.debug('DashboardReplacePanel.toggleFilter');
       await testSubjects.click('savedObjectFinderFilterButton');
@@ -73,7 +72,9 @@ export function DashboardReplacePanelProvider({ getService }) {
     }
 
     async replaceEmbeddable(embeddableName, embeddableType) {
-      log.debug(`DashboardReplacePanel.replaceEmbeddable, name: ${embeddableName}, type: ${embeddableType}`);
+      log.debug(
+        `DashboardReplacePanel.replaceEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
+      );
       await this.ensureReplacePanelIsShowing();
       if (embeddableType) {
         await this.toggleFilter(embeddableType);
@@ -98,5 +99,5 @@ export function DashboardReplacePanelProvider({ getService }) {
       await this.filterEmbeddableNames(`"${name}"`);
       return await testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
     }
-  };
+  })();
 }

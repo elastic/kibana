@@ -4,29 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
-import { AnomalyScore } from './anomaly_score';
+import React from 'react';
+import { AnomalyScoreComponent } from './anomaly_score';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 import { Anomalies } from '../types';
 
 const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const narrowDateRange = jest.fn();
 
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
-
 describe('anomaly_scores', () => {
   let anomalies: Anomalies = cloneDeep(mockAnomalies);
+  const mount = useMountAppended();
+
   beforeEach(() => {
     anomalies = cloneDeep(mockAnomalies);
   });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <AnomalyScore
+      <AnomalyScoreComponent
         jobKey="job-key-1"
         startDate={0}
         endDate={endDate}
@@ -35,13 +35,13 @@ describe('anomaly_scores', () => {
         narrowDateRange={narrowDateRange}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should not show a popover on initial render', () => {
     const wrapper = mount(
       <TestProviders>
-        <AnomalyScore
+        <AnomalyScoreComponent
           jobKey="job-key-1"
           startDate={0}
           endDate={endDate}
@@ -57,7 +57,7 @@ describe('anomaly_scores', () => {
   test('show a popover on a mouse click', () => {
     const wrapper = mount(
       <TestProviders>
-        <AnomalyScore
+        <AnomalyScoreComponent
           jobKey="job-key-1"
           startDate={0}
           endDate={endDate}

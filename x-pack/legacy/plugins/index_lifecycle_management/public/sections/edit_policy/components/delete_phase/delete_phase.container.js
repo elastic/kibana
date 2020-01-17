@@ -14,9 +14,8 @@ export const DeletePhase = connect(
   state => ({
     phaseData: getPhase(state, PHASE_DELETE),
     hotPhaseRolloverEnabled: getPhase(state, PHASE_HOT)[PHASE_ROLLOVER_ENABLED],
-
   }),
   {
-    setPhaseData: (key, value) => setPhaseData(PHASE_DELETE, key, value)
+    setPhaseData: (key, value) => setPhaseData(PHASE_DELETE, key, value),
   }
 )(PresentationComponent);

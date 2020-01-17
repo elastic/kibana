@@ -31,7 +31,6 @@ export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
     };
   }
 
-
   /**
    * _geohashMinDistance returns a min distance in meters for sizing
    * circle markers to fit within geohash grid rectangle

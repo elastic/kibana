@@ -6,7 +6,7 @@ exports[`LayerPanel is rendered 1`] = `
     Object {
       "appName": "maps",
       "data": undefined,
-      "store": Storage {
+      "storage": Storage {
         "clear": [Function],
         "get": [Function],
         "remove": [Function],
@@ -97,7 +97,9 @@ exports[`LayerPanel is rendered 1`] = `
       >
         <LayerErrors />
         <LayerSettings />
-        <SourceSettings />
+        <div>
+          mockSourceSettings
+        </div>
         <EuiPanel>
           <JoinEditor />
         </EuiPanel>

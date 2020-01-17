@@ -21,11 +21,10 @@ import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as vega from 'vega-lib';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 
 export class VegaMapView extends VegaBaseView {
-
   async _initViewCustomizations() {
     const mapConfig = this._parser.mapConfig;
     let baseMapOpts;
@@ -37,18 +36,21 @@ export class VegaMapView extends VegaBaseView {
       // In some cases, Vega may be initialized twice, e.g. after awaiting...
       if (!this._$container) return;
       const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
-      const mapStyle = mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
+      const mapStyle =
+        mapConfig.mapStyle === 'default' ? emsTileLayerId.bright : mapConfig.mapStyle;
       const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
-      baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
+      baseMapOpts = tmsServices.find(s => s.id === mapStyle);
       baseMapOpts = {
         ...baseMapOpts,
-        ...await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode),
+        ...(await this._serviceSettings.getAttributesForTMSLayer(baseMapOpts, true, isDarkMode)),
       };
       if (!baseMapOpts) {
-        this.onWarn(i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
-          defaultMessage: '{mapStyleParam} was not found',
-          values: { mapStyleParam: `"mapStyle": ${JSON.stringify(mapStyle)}` },
-        }));
+        this.onWarn(
+          i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
+            defaultMessage: '{mapStyleParam} was not found',
+            values: { mapStyleParam: `"mapStyle": ${JSON.stringify(mapStyle)}` },
+          })
+        );
       } else {
         limitMinZ = baseMapOpts.minZoom;
         limitMaxZ = baseMapOpts.maxZoom;
@@ -59,16 +61,20 @@ export class VegaMapView extends VegaBaseView {
       if (value === undefined) {
         value = dflt;
       } else if (value < min) {
-        this.onWarn(i18n.translate('visTypeVega.mapView.resettingPropertyToMinValueWarningMessage', {
-          defaultMessage: 'Resetting {name} to {min}',
-          values: { name: `"${name}"`, min },
-        }));
+        this.onWarn(
+          i18n.translate('visTypeVega.mapView.resettingPropertyToMinValueWarningMessage', {
+            defaultMessage: 'Resetting {name} to {min}',
+            values: { name: `"${name}"`, min },
+          })
+        );
         value = min;
       } else if (value > max) {
-        this.onWarn(i18n.translate('visTypeVega.mapView.resettingPropertyToMaxValueWarningMessage', {
-          defaultMessage: 'Resetting {name} to {max}',
-          values: { name: `"${name}"`, max },
-        }));
+        this.onWarn(
+          i18n.translate('visTypeVega.mapView.resettingPropertyToMaxValueWarningMessage', {
+            defaultMessage: 'Resetting {name} to {max}',
+            values: { name: `"${name}"`, max },
+          })
+        );
         value = max;
       }
       return value;
@@ -77,13 +83,15 @@ export class VegaMapView extends VegaBaseView {
     let minZoom = validate('minZoom', mapConfig.minZoom, limitMinZ, limitMinZ, limitMaxZ);
     let maxZoom = validate('maxZoom', mapConfig.maxZoom, limitMaxZ, limitMinZ, limitMaxZ);
     if (minZoom > maxZoom) {
-      this.onWarn(i18n.translate('visTypeVega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage', {
-        defaultMessage: '{minZoomPropertyName} and {maxZoomPropertyName} have been swapped',
-        values: {
-          minZoomPropertyName: '"minZoom"',
-          maxZoomPropertyName: '"maxZoom"',
-        },
-      }));
+      this.onWarn(
+        i18n.translate('visTypeVega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage', {
+          defaultMessage: '{minZoomPropertyName} and {maxZoomPropertyName} have been swapped',
+          values: {
+            minZoomPropertyName: '"minZoom"',
+            maxZoomPropertyName: '"maxZoom"',
+          },
+        })
+      );
       [minZoom, maxZoom] = [maxZoom, minZoom];
     }
     const zoom = validate('zoom', mapConfig.zoom, 2, minZoom, maxZoom);
@@ -94,19 +102,19 @@ export class VegaMapView extends VegaBaseView {
     //   maxBounds = L.latLngBounds(L.latLng(b[1], b[0]), L.latLng(b[3], b[2]));
     // }
 
-    this._kibanaMap = new KibanaMap(
-      this._$container.get(0),
-      {
-        zoom, minZoom, maxZoom,
-        center: [mapConfig.latitude, mapConfig.longitude],
-        zoomControl: mapConfig.zoomControl,
-        scrollWheelZoom: mapConfig.scrollWheelZoom,
-      });
+    this._kibanaMap = new KibanaMap(this._$container.get(0), {
+      zoom,
+      minZoom,
+      maxZoom,
+      center: [mapConfig.latitude, mapConfig.longitude],
+      zoomControl: mapConfig.zoomControl,
+      scrollWheelZoom: mapConfig.scrollWheelZoom,
+    });
 
     if (baseMapOpts) {
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: baseMapOpts
+        options: baseMapOpts,
       });
     }
 
@@ -133,5 +141,4 @@ export class VegaMapView extends VegaBaseView {
     this.setDebugValues(vegaView, this._parser.spec, this._parser.vlspec);
     await this.setView(vegaView);
   }
-
 }

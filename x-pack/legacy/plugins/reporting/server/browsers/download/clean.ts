@@ -7,8 +7,7 @@
 import { readdirSync } from 'fs';
 import { resolve as resolvePath } from 'path';
 
-import { fromNode as fcb } from 'bluebird';
-import rimraf from 'rimraf';
+import del from 'del';
 
 import { log, asyncMap } from './util';
 
@@ -32,7 +31,7 @@ export async function clean(dir: string, expectedPaths: string[]) {
     const path = resolvePath(dir, filename);
     if (!expectedPaths.includes(path)) {
       log(`Deleting unexpected file ${path}`);
-      await fcb(cb => rimraf(path, cb));
+      await del(path);
     }
   });
 }

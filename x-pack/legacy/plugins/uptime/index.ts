@@ -29,22 +29,23 @@ export const uptime = (kibana: any) =>
         }),
         main: 'plugins/uptime/app',
         order: 8900,
-        url: '/app/uptime/',
+        url: '/app/uptime#/',
       },
       home: ['plugins/uptime/register_feature'],
     },
     init(server: KibanaServer) {
       const initializerContext = {} as PluginInitializerContext;
       const { savedObjects } = server;
-      const { elasticsearch, xpack_main } = server.plugins;
+      const { xpack_main } = server.plugins;
+      const { usageCollection } = server.newPlatform.setup.plugins;
+
       plugin(initializerContext).setup(
         {
-          route: (arg: any) => server.route(arg),
+          route: server.newPlatform.setup.core.http.createRouter(),
         },
         {
-          elasticsearch,
           savedObjects,
-          usageCollector: server.usage,
+          usageCollection,
           xpack: xpack_main,
         }
       );

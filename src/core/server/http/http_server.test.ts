@@ -18,23 +18,29 @@
  */
 
 import { Server } from 'http';
-
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
-
+import { readFileSync } from 'fs';
 import supertest from 'supertest';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
-import { Router } from './router';
+import {
+  Router,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteValidationResultFactory,
+  RouteValidationFunction,
+} from './router';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
+import { Readable } from 'stream';
+import { RequestHandlerContext } from 'kibana/server';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 const cookieOptions = {
   name: 'sid',
   encryptionKey: 'something_at_least_32_characters',
-  validate: () => true,
+  validate: () => ({ isValid: true }),
   isSecure: false,
 };
 
@@ -46,22 +52,31 @@ const loggingService = loggingServiceMock.create();
 const logger = loggingService.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
+let certificate: string;
+let key: string;
+
+beforeAll(() => {
+  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
+  key = readFileSync(KBN_KEY_PATH, 'utf8');
+});
+
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
     ssl: { enabled: false },
+    compression: { enabled: true },
   } as HttpConfig;
 
   configWithSSL = {
     ...config,
     ssl: {
       enabled: true,
-      certificate: '/certificate',
+      certificate,
       cipherSuites: ['cipherSuite'],
       getSecureOptions: () => 0,
-      key: '/key',
+      key,
       redirectHttpFromPort: config.port + 1,
     },
   } as HttpConfig;
@@ -283,6 +298,229 @@ test('valid body', async () => {
     .expect(200)
     .then(res => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('valid body with validate function', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying params', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation = (
+    { bar, baz }: any = {},
+    { ok, badRequest }: RouteValidationResultFactory
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return badRequest('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+test('not inline validation - specifying validation handler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const bodyValidation: RouteValidationFunction<{ bar: string; baz: number }> = (
+    { bar, baz } = {},
+    { ok, badRequest }
+  ) => {
+    if (typeof bar === 'string' && typeof baz === 'number') {
+      return ok({ bar, baz });
+    } else {
+      return badRequest('Wrong payload', ['body']);
+    }
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: bodyValidation,
+      },
+    },
+    (context, req, res) => {
+      return res.ok({ body: req.body });
+    }
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', baz: 123 });
+    });
+});
+
+// https://github.com/elastic/kibana/issues/47047
+test('not inline handler - KibanaRequest', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler = (
+    context: RequestHandlerContext,
+    req: KibanaRequest<unknown, unknown, { bar: string; baz: number }>,
+    res: KibanaResponseFactory
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
+    });
+});
+
+test('not inline handler - RequestHandler', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext);
+
+  const handler: RequestHandler<unknown, unknown, { bar: string; baz: number }> = (
+    context,
+    req,
+    res
+  ) => {
+    const body = {
+      bar: req.body.bar.toUpperCase(),
+      baz: req.body.baz.toString(),
+    };
+
+    return res.ok({ body });
+  };
+
+  router.post(
+    {
+      path: '/',
+      validate: {
+        body: ({ bar, baz } = {}, { ok, badRequest }) => {
+          if (typeof bar === 'string' && typeof baz === 'number') {
+            return ok({ bar, baz });
+          } else {
+            return badRequest('Wrong payload', ['body']);
+          }
+        },
+      },
+    },
+    handler
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup(config);
+  registerRouter(router);
+
+  await server.start();
+
+  await supertest(innerServer.listener)
+    .post('/foo/')
+    .send({
+      bar: 'test',
+      baz: 123,
+    })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
 
@@ -578,42 +816,238 @@ test('exposes route details of incoming request to a route handler', async () =>
 });
 
 describe('conditional compression', () => {
-  test('disables compression when there is a referer', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
+  async function setupServer(innerConfig: HttpConfig) {
+    const { registerRouter, server: innerServer } = await server.setup(innerConfig);
     const router = new Router('', logger, enhanceWithContext);
-    router.get({ path: '/', validate: false }, (context, req, res) =>
-      // we need the large body here so that compression would normally be used
-      res.ok({ body: 'hello'.repeat(500), headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
-    );
+    // we need the large body here so that compression would normally be used
+    const largeRequest = {
+      body: 'hello'.repeat(500),
+      headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+    };
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(largeRequest));
     registerRouter(router);
-
     await server.start();
-    const response = await supertest(innerServer.listener)
-      .get('/')
-      .set('accept-encoding', 'gzip')
-      .set('referer', 'http://some-other-site/');
+    return innerServer.listener;
+  }
 
-    expect(response.header).not.toHaveProperty('content-encoding');
-  });
+  test('with `compression.enabled: true`', async () => {
+    const listener = await setupServer(config);
 
-  test(`enables compression when there isn't a referer`, async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.get({ path: '/', validate: false }, (context, req, res) =>
-      // we need the large body here so that compression will be used
-      res.ok({ body: 'hello'.repeat(500), headers: { 'Content-Type': 'text/html; charset=UTF-8' } })
-    );
-    registerRouter(router);
-
-    await server.start();
-    const response = await supertest(innerServer.listener)
+    const response = await supertest(listener)
       .get('/')
       .set('accept-encoding', 'gzip');
 
     expect(response.header).toHaveProperty('content-encoding', 'gzip');
   });
+
+  test('with `compression.enabled: false`', async () => {
+    const listener = await setupServer({
+      ...config,
+      compression: { enabled: false },
+    });
+
+    const response = await supertest(listener)
+      .get('/')
+      .set('accept-encoding', 'gzip');
+
+    expect(response.header).not.toHaveProperty('content-encoding');
+  });
+
+  describe('with defined `compression.referrerWhitelist`', () => {
+    let listener: Server;
+    beforeEach(async () => {
+      listener = await setupServer({
+        ...config,
+        compression: { enabled: true, referrerWhitelist: ['foo'] },
+      });
+    });
+
+    test('enables compression for no referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip');
+
+      expect(response.header).toHaveProperty('content-encoding', 'gzip');
+    });
+
+    test('enables compression for whitelisted referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://foo:1234');
+
+      expect(response.header).toHaveProperty('content-encoding', 'gzip');
+    });
+
+    test('disables compression for non-whitelisted referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://bar:1234');
+
+      expect(response.header).not.toHaveProperty('content-encoding');
+    });
+
+    test('disables compression for invalid referer', async () => {
+      const response = await supertest(listener)
+        .get('/')
+        .set('accept-encoding', 'gzip')
+        .set('referer', 'http://asdf$%^');
+
+      expect(response.header).not.toHaveProperty('content-encoding');
+    });
+  });
+});
+
+test('exposes route details of incoming request to a route handler (POST + payload options)', async () => {
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.post(
+    {
+      path: '/',
+      validate: { body: schema.object({ test: schema.number() }) },
+      options: { body: { accepts: 'application/json' } },
+    },
+    (context, req, res) => res.ok({ body: req.route })
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .post('/')
+    .send({ test: 1 })
+    .expect(200, {
+      method: 'post',
+      path: '/',
+      options: {
+        authRequired: true,
+        tags: [],
+        body: {
+          parse: true, // hapi populates the default
+          maxBytes: 1024, // hapi populates the default
+          accepts: ['application/json'],
+          output: 'data',
+        },
+      },
+    });
+});
+
+describe('body options', () => {
+  test('should reject the request because the Content-Type in the request is not valid', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.object({ test: schema.number() }) },
+        options: { body: { accepts: 'multipart/form-data' } }, // supertest sends 'application/json'
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({ test: 1 })
+      .expect(415, {
+        statusCode: 415,
+        error: 'Unsupported Media Type',
+        message: 'Unsupported Media Type',
+      });
+  });
+
+  test('should reject the request because the payload is too large', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.object({ test: schema.number() }) },
+        options: { body: { maxBytes: 1 } },
+      },
+      (context, req, res) => res.ok({ body: req.route })
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({ test: 1 })
+      .expect(413, {
+        statusCode: 413,
+        error: 'Request Entity Too Large',
+        message: 'Payload content length greater than maximum allowed: 1',
+      });
+  });
+
+  test('should not parse the content in the request', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: { body: schema.buffer() },
+        options: { body: { parse: false } },
+      },
+      (context, req, res) => {
+        try {
+          expect(req.body).toBeInstanceOf(Buffer);
+          expect(req.body.toString()).toBe(JSON.stringify({ test: 1 }));
+          return res.ok({ body: req.route.options.body });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener)
+      .post('/')
+      .send({ test: 1 })
+      .expect(200, {
+        parse: false,
+        maxBytes: 1024, // hapi populates the default
+        output: 'data',
+      });
+  });
+});
+
+test('should return a stream in the body', async () => {
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.put(
+    {
+      path: '/',
+      validate: { body: schema.stream() },
+      options: { body: { output: 'stream' } },
+    },
+    (context, req, res) => {
+      try {
+        expect(req.body).toBeInstanceOf(Readable);
+        return res.ok({ body: req.route.options.body });
+      } catch (err) {
+        return res.internalError({ body: err.message });
+      }
+    }
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener)
+    .put('/')
+    .send({ test: 1 })
+    .expect(200, {
+      parse: true,
+      maxBytes: 1024, // hapi populates the default
+      output: 'stream',
+    });
 });
 
 describe('setup contract', () => {

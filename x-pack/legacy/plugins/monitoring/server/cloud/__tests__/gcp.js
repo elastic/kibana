@@ -20,7 +20,7 @@ describe('GCP', () => {
       const metadata = {
         id: 'abcdef',
         'machine-type': 'projects/441331612345/machineTypes/f1-micro',
-        zone: 'projects/441331612345/zones/us-fake4-c'
+        zone: 'projects/441331612345/zones/us-fake4-c',
       };
       const request = (req, callback) => {
         const basePath = 'http://169.254.169.254/computeMetadata/v1/instance/';
@@ -50,7 +50,7 @@ describe('GCP', () => {
         region: 'us-fake4',
         vm_type: 'f1-micro',
         zone: 'us-fake4-c',
-        metadata: undefined
+        metadata: undefined,
       });
     });
 
@@ -97,7 +97,8 @@ describe('GCP', () => {
 
     it('handles not running on GCP with 404 response by throwing error', async () => {
       const body = 'This is some random error text';
-      const failedRequest = (_req, callback) => callback(null, { statusCode: 404, headers, body }, body);
+      const failedRequest = (_req, callback) =>
+        callback(null, { statusCode: 404, headers, body }, body);
 
       try {
         await GCP._checkIfService(failedRequest);
@@ -153,7 +154,7 @@ describe('GCP', () => {
         vm_type: 'f1-micro',
         region: 'us-fake4',
         zone: 'us-fake4-c',
-        metadata: undefined
+        metadata: undefined,
       });
     });
 
@@ -173,7 +174,7 @@ describe('GCP', () => {
         vm_type: undefined,
         region: undefined,
         zone: undefined,
-        metadata: undefined
+        metadata: undefined,
       });
     });
 
@@ -181,7 +182,9 @@ describe('GCP', () => {
       expect(() => GCP._combineResponses()).to.throwException();
       expect(() => GCP._combineResponses(undefined, undefined, undefined)).to.throwException();
       expect(() => GCP._combineResponses(null, null, null)).to.throwException();
-      expect(() => GCP._combineResponses({ id: 'x' }, { 'machineType': 'a' }, { 'zone': 'b' })).to.throwException();
+      expect(() =>
+        GCP._combineResponses({ id: 'x' }, { machineType: 'a' }, { zone: 'b' })
+      ).to.throwException();
       expect(() => GCP._combineResponses({ privateIp: 'a.b.c.d' })).to.throwException();
     });
   });

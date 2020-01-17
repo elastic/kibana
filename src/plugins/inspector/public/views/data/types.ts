@@ -20,11 +20,11 @@
 export interface DataViewColumn {
   name: string;
   field: string;
-  sortable: Function;
+  sortable: (item: DataViewRow) => string | number;
   render: DataViewColumnRender;
 }
 
-type DataViewColumnRender = (value: string) => string;
+type DataViewColumnRender = (value: string, _item: DataViewRow) => string;
 
 export interface DataViewRow {
   [fields: string]: {

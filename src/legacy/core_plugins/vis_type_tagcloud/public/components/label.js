@@ -30,7 +30,8 @@ export class Label extends Component {
       <div
         className="tgcVisLabel"
         style={{ display: this.state.shouldShowLabel ? 'block' : 'none' }}
-      >{this.state.label}
+      >
+        {this.state.label}
       </div>
     );
   }

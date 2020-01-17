@@ -5,12 +5,9 @@
  */
 
 import { Embeddable } from './embeddable';
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
-import { Filter } from '@kbn/es-query';
+import { ExpressionRendererProps } from 'src/plugins/expressions/public';
+import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({
   isAvailable: false,
@@ -61,29 +58,12 @@ describe('embeddable', () => {
     expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(savedVis.expression);
   });
 
-  it('should display error if expression renderering fails', () => {
-    const embeddable = new Embeddable(
-      expressionRenderer,
-      {
-        editUrl: '',
-        editable: true,
-        savedVis,
-      },
-      { id: '123' }
-    );
-    embeddable.render(mountpoint);
-
-    act(() => {
-      expressionRenderer.mock.calls[0][0]!.onRenderFailure!({ type: 'error' });
-    });
-
-    expect(mountpoint.innerHTML).toContain("Visualization couldn't be displayed");
-  });
-
   it('should re-render if new input is pushed', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+    const filters: esFilters.Filter[] = [
+      { meta: { alias: 'test', negate: false, disabled: false } },
+    ];
 
     const embeddable = new Embeddable(
       expressionRenderer,
@@ -108,7 +88,9 @@ describe('embeddable', () => {
   it('should pass context to embeddable', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
+    const filters: esFilters.Filter[] = [
+      { meta: { alias: 'test', negate: false, disabled: false } },
+    ];
 
     const embeddable = new Embeddable(
       expressionRenderer,
@@ -132,7 +114,9 @@ describe('embeddable', () => {
   it('should not re-render if only change is in disabled filter', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
+    const filters: esFilters.Filter[] = [
+      { meta: { alias: 'test', negate: false, disabled: true } },
+    ];
 
     const embeddable = new Embeddable(
       expressionRenderer,

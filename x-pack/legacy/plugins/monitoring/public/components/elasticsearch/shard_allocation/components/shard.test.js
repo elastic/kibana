@@ -17,11 +17,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Unassigned',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -33,11 +33,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Unassigned',
         type: 'shard',
-        master: false
-      }
+        master: false,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -49,11 +49,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Started',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -65,11 +65,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Started',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -81,11 +81,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Relocating',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -97,11 +97,11 @@ describe('Shard', () => {
         shard: 0,
         tooltip_message: 'Initializing',
         type: 'shard',
-        master: true
-      }
+        master: true,
+      },
     };
 
-    const component = shallow(<Shard {...props}/>);
+    const component = shallow(<Shard {...props} />);
     expect(component).toMatchSnapshot();
   });
 });

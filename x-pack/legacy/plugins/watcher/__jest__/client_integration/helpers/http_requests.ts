@@ -34,7 +34,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     const defaultResponse = { watchHistoryItems: [] };
     server.respondWith(
       'GET',
-      `${API_ROOT}/watch/:id/history?startTime=*`,
+      `${API_ROOT}/watch/:id/history`,
       mockResponse(defaultResponse, response)
     );
   };

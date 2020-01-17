@@ -5,18 +5,26 @@
  */
 
 import React from 'react';
-import { palettes } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { FieldIcon, typeToEuiIconMap } from '../../../../../../src/plugins/kibana_react/public';
 import { DataType } from '../types';
+import { normalizeOperationDataType } from './utils';
 
 export function getColorForDataType(type: string) {
-  const iconMap = typeToEuiIconMap[type];
+  const iconMap = typeToEuiIconMap[normalizeOperationDataType(type as DataType)];
   if (iconMap) {
     return iconMap.color;
   }
-  return palettes.euiPaletteColorBlind.colors[0];
+  return euiPaletteColorBlind()[0];
 }
 
 export function LensFieldIcon({ type }: { type: DataType }) {
-  return <FieldIcon type={type} className="lnsFieldListPanel__fieldIcon" size="m" useColor />;
+  return (
+    <FieldIcon
+      type={normalizeOperationDataType(type)}
+      className="lnsFieldListPanel__fieldIcon"
+      size="m"
+      useColor
+    />
+  );
 }

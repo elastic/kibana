@@ -17,14 +17,14 @@ import {
 export const defaultColdPhase = {
   [PHASE_ENABLED]: false,
   [PHASE_ROLLOVER_ALIAS]: '',
-  [PHASE_ROLLOVER_MINIMUM_AGE]: '',
+  [PHASE_ROLLOVER_MINIMUM_AGE]: 0,
   [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: 'd',
   [PHASE_NODE_ATTRS]: '',
   [PHASE_REPLICA_COUNT]: '',
   [PHASE_FREEZE_ENABLED]: false,
-  [PHASE_INDEX_PRIORITY]: 0
+  [PHASE_INDEX_PRIORITY]: 0,
 };
 export const defaultEmptyColdPhase = {
   ...defaultColdPhase,
-  [PHASE_INDEX_PRIORITY]: ''
+  [PHASE_INDEX_PRIORITY]: '',
 };

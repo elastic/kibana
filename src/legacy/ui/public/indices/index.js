@@ -17,9 +17,7 @@
  * under the License.
  */
 
-export {
-  INDEX_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
+export { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from './constants';
 
 export {
   indexNameBeginsWithPeriod,

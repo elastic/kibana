@@ -19,7 +19,7 @@ describe('Pipeline class', () => {
       graph = new Graph();
       graph.update({
         vertices: [],
-        edges: []
+        edges: [],
       });
     });
 
@@ -43,23 +43,23 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'twitter',
-            stats: {}
+            stats: {},
           },
           {
             id: '__QUEUE__',
             explicit_id: false,
             type: 'queue',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
             from: 'tweet_harvester',
             to: '__QUEUE__',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -98,10 +98,10 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
-        edges: []
+        edges: [],
       });
     });
 
@@ -127,10 +127,10 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
-        edges: []
+        edges: [],
       });
     });
 
@@ -156,13 +156,13 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'twitter',
-            stats: {}
+            stats: {},
           },
           {
             id: '__QUEUE__',
             explicit_id: false,
             type: 'queue',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
@@ -170,23 +170,23 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
             from: 'tweet_harvester',
             to: '__QUEUE__',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
             from: '__QUEUE__',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -213,13 +213,13 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'twitter',
-            stats: {}
+            stats: {},
           },
           {
             id: '__QUEUE__',
             explicit_id: false,
             type: 'queue',
-            stats: {}
+            stats: {},
           },
           {
             id: 'es',
@@ -227,23 +227,23 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
             from: 'tweet_harvester',
             to: '__QUEUE__',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
             from: '__QUEUE__',
             to: 'es',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -270,7 +270,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
+            stats: {},
           },
           {
             id: 'es',
@@ -278,17 +278,17 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'es',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -315,13 +315,13 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'twitter',
-            stats: {}
+            stats: {},
           },
           {
             id: '__QUEUE__',
             explicit_id: false,
             type: 'queue',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
@@ -329,7 +329,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
+            stats: {},
           },
           {
             id: 'es',
@@ -337,29 +337,29 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
             from: 'tweet_harvester',
             to: '__QUEUE__',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
             from: '__QUEUE__',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'es',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -387,7 +387,7 @@ describe('Pipeline class', () => {
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'log_line_parser',
@@ -395,8 +395,8 @@ describe('Pipeline class', () => {
             config_name: 'grok',
             type: 'plugin',
             plugin_type: 'filter',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
@@ -404,9 +404,9 @@ describe('Pipeline class', () => {
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'log_line_parser',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -434,7 +434,7 @@ describe('Pipeline class', () => {
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'es',
@@ -442,8 +442,8 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
@@ -451,9 +451,9 @@ describe('Pipeline class', () => {
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'es',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -482,20 +482,20 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'twitter',
-            stats: {}
+            stats: {},
           },
           {
             id: '__QUEUE__',
             explicit_id: false,
             type: 'queue',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'log_line_parser',
@@ -503,30 +503,30 @@ describe('Pipeline class', () => {
             config_name: 'grok',
             type: 'plugin',
             plugin_type: 'filter',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
             from: 'tweet_harvester',
             to: '__QUEUE__',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
             from: '__QUEUE__',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'log_line_parser',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -556,20 +556,20 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'twitter',
-            stats: {}
+            stats: {},
           },
           {
             id: '__QUEUE__',
             explicit_id: false,
             type: 'queue',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'log_line_parser',
@@ -577,14 +577,14 @@ describe('Pipeline class', () => {
             config_name: 'grok',
             type: 'plugin',
             plugin_type: 'filter',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'es',
@@ -592,50 +592,50 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
             from: 'tweet_harvester',
             to: '__QUEUE__',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
             from: '__QUEUE__',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
             from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             to: 'log_line_parser',
             type: 'boolean',
-            when: true
+            when: true,
           },
           {
             id: '6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029',
             from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             type: 'boolean',
-            when: false
+            when: false,
           },
           {
             id: 'ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296',
             from: 'log_line_parser',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'es',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -671,7 +671,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'twitter',
-            stats: {}
+            stats: {},
           },
           {
             id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
@@ -679,29 +679,29 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'stdin',
-            stats: {}
+            stats: {},
           },
           {
             id: '__QUEUE__',
             explicit_id: false,
             type: 'queue',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
             from: 'tweet_harvester',
             to: '__QUEUE__',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
             from: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
             to: '__QUEUE__',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -719,7 +719,9 @@ describe('Pipeline class', () => {
       expect(pipeline.inputStatements[0].name).to.be('twitter');
 
       expect(pipeline.inputStatements[1]).to.be.a(PluginStatement);
-      expect(pipeline.inputStatements[1].id).to.be('296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0');
+      expect(pipeline.inputStatements[1].id).to.be(
+        '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0'
+      );
       expect(pipeline.inputStatements[1].hasExplicitId).to.be(false);
       expect(pipeline.inputStatements[1].pluginType).to.be('input');
       expect(pipeline.inputStatements[1].name).to.be('stdin');
@@ -737,7 +739,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
@@ -745,17 +747,17 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'mutate',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
             from: 'log_line_parser',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -773,7 +775,9 @@ describe('Pipeline class', () => {
       expect(pipeline.filterStatements[0].name).to.be('grok');
 
       expect(pipeline.filterStatements[1]).to.be.a(PluginStatement);
-      expect(pipeline.filterStatements[1].id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(pipeline.filterStatements[1].id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(pipeline.filterStatements[1].hasExplicitId).to.be(false);
       expect(pipeline.filterStatements[1].pluginType).to.be('filter');
       expect(pipeline.filterStatements[1].name).to.be('mutate');
@@ -791,7 +795,7 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
@@ -799,10 +803,10 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'output',
             config_name: 'stdout',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
-        edges: []
+        edges: [],
       });
     });
 
@@ -820,7 +824,9 @@ describe('Pipeline class', () => {
       expect(pipeline.outputStatements[0].name).to.be('elasticsearch');
 
       expect(pipeline.outputStatements[1]).to.be.a(PluginStatement);
-      expect(pipeline.outputStatements[1].id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(pipeline.outputStatements[1].id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(pipeline.outputStatements[1].hasExplicitId).to.be(false);
       expect(pipeline.outputStatements[1].pluginType).to.be('output');
       expect(pipeline.outputStatements[1].name).to.be('stdout');
@@ -838,14 +844,14 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -853,24 +859,24 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'mutate',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
             from: 'log_line_parser',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -889,7 +895,9 @@ describe('Pipeline class', () => {
 
       const ifStatement = pipeline.filterStatements[1];
       expect(ifStatement).to.be.a(IfStatement);
-      expect(ifStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(ifStatement.id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(ifStatement.hasExplicitId).to.be(false);
       expect(ifStatement.condition).to.be('[is_rt] == "RT"');
 
@@ -908,14 +916,14 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -923,7 +931,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'mutate',
-            stats: {}
+            stats: {},
           },
           {
             id: 'micdrop',
@@ -931,37 +939,37 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'drop',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
             from: 'log_line_parser',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: true
+            when: true,
           },
           {
             id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'micdrop',
             type: 'boolean',
-            when: false
+            when: false,
           },
           {
             id: '6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029',
             from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             to: 'micdrop',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -980,7 +988,9 @@ describe('Pipeline class', () => {
 
       const ifStatement = pipeline.filterStatements[1];
       expect(ifStatement).to.be.a(IfStatement);
-      expect(ifStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(ifStatement.id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(ifStatement.hasExplicitId).to.be(false);
       expect(ifStatement.condition).to.be('[is_rt] == "RT"');
       expect(ifStatement.trueStatements[0]).to.be.a(PluginStatement);
@@ -1004,14 +1014,14 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1019,8 +1029,8 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'output',
             config_name: 'stdout',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
@@ -1028,9 +1038,9 @@ describe('Pipeline class', () => {
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
 
       it('fromPipelineGraph parses the pipelineGraph correctly', () => {
@@ -1048,7 +1058,9 @@ describe('Pipeline class', () => {
 
         const ifStatement = pipeline.outputStatements[1];
         expect(ifStatement).to.be.a(IfStatement);
-        expect(ifStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+        expect(ifStatement.id).to.be(
+          '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+        );
         expect(ifStatement.hasExplicitId).to.be(false);
         expect(ifStatement.condition).to.be('[is_rt] == "RT"');
         expect(ifStatement.trueStatements[0]).to.be.a(PluginStatement);
@@ -1067,14 +1079,14 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1082,7 +1094,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'output',
             config_name: 'stdout',
-            stats: {}
+            stats: {},
           },
           {
             id: 'local_persistent_out',
@@ -1090,8 +1102,8 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'output',
             config_name: 'file',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
@@ -1099,9 +1111,9 @@ describe('Pipeline class', () => {
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -1120,7 +1132,9 @@ describe('Pipeline class', () => {
 
       const ifStatement = pipeline.outputStatements[1];
       expect(ifStatement).to.be.a(IfStatement);
-      expect(ifStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(ifStatement.id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(ifStatement.hasExplicitId).to.be(false);
       expect(ifStatement.condition).to.be('[is_rt] == "RT"');
       expect(ifStatement.trueStatements[0]).to.be.a(PluginStatement);
@@ -1144,7 +1158,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'twitter',
-            stats: {}
+            stats: {},
           },
           {
             id: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
@@ -1152,13 +1166,13 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'input',
             config_name: 'stdin',
-            stats: {}
+            stats: {},
           },
           {
             id: '__QUEUE__',
             explicit_id: false,
             type: 'queue',
-            stats: {}
+            stats: {},
           },
           {
             id: 'log_line_parser',
@@ -1166,14 +1180,14 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
+            stats: {},
           },
           {
             id: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'mutant',
@@ -1181,7 +1195,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'mutate',
-            stats: {}
+            stats: {},
           },
           {
             id: 'es',
@@ -1189,14 +1203,14 @@ describe('Pipeline class', () => {
             config_name: 'elasticsearch',
             type: 'plugin',
             plugin_type: 'output',
-            stats: {}
+            stats: {},
           },
           {
             id: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1204,7 +1218,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'output',
             config_name: 'stdout',
-            stats: {}
+            stats: {},
           },
           {
             id: 'local_persistent_out',
@@ -1212,88 +1226,88 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'output',
             config_name: 'file',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
             id: '0296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f',
             from: 'tweet_harvester',
             to: '__QUEUE__',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '96ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f02',
             from: '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0',
             to: '__QUEUE__',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '6ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f029',
             from: '__QUEUE__',
             to: 'log_line_parser',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: 'ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296',
             from: 'log_line_parser',
             to: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: 'e28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296a',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'mutant',
             type: 'boolean',
-            when: true
+            when: true,
           },
           {
             id: '28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'es',
             type: 'boolean',
-            when: false
+            when: false,
           },
           {
             id: '8a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae2',
             from: 'mutant',
             to: 'es',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: 'a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
             type: 'boolean',
-            when: false
+            when: false,
           },
           {
             id: '1c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a1',
             from: 'mutant',
             to: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: 'c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a11',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'local_persistent_out',
             type: 'boolean',
-            when: false
+            when: false,
           },
           {
             id: 'c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0296ae28a11',
             from: 'mutant',
             to: 'local_persistent_out',
-            type: 'plain'
+            type: 'plain',
           },
           {
             id: '35591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
             from: '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -1311,7 +1325,9 @@ describe('Pipeline class', () => {
       expect(pipeline.inputStatements[0].name).to.be('twitter');
 
       expect(pipeline.inputStatements[1]).to.be.a(PluginStatement);
-      expect(pipeline.inputStatements[1].id).to.be('296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0');
+      expect(pipeline.inputStatements[1].id).to.be(
+        '296ae28a11c3d99d1adf44f793763db6b9c61379e0ad518371b49aa67ef902f0'
+      );
       expect(pipeline.inputStatements[1].hasExplicitId).to.be(false);
       expect(pipeline.inputStatements[1].pluginType).to.be('input');
       expect(pipeline.inputStatements[1].name).to.be('stdin');
@@ -1324,7 +1340,9 @@ describe('Pipeline class', () => {
 
       const filterIfStatement = pipeline.filterStatements[1];
       expect(filterIfStatement).to.be.a(IfStatement);
-      expect(filterIfStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(filterIfStatement.id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(filterIfStatement.hasExplicitId).to.be(false);
       expect(filterIfStatement.condition).to.be('[is_rt] == "RT"');
       expect(filterIfStatement.trueStatements[0]).to.be.a(PluginStatement);
@@ -1337,7 +1355,9 @@ describe('Pipeline class', () => {
 
       const outputIfStatement = pipeline.outputStatements[1];
       expect(outputIfStatement).to.be.a(IfStatement);
-      expect(outputIfStatement.id).to.be('90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8');
+      expect(outputIfStatement.id).to.be(
+        '90f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a8'
+      );
       expect(outputIfStatement.hasExplicitId).to.be(false);
       expect(outputIfStatement.condition).to.be('[is_rt] == "RT"');
       expect(outputIfStatement.trueStatements[0]).to.be.a(PluginStatement);
@@ -1363,7 +1383,7 @@ describe('Pipeline class', () => {
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1371,7 +1391,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'mutate',
-            stats: {}
+            stats: {},
           },
           {
             id: 'micdrop',
@@ -1379,8 +1399,8 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'drop',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
@@ -1388,16 +1408,16 @@ describe('Pipeline class', () => {
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: true
+            when: true,
           },
           {
             id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'micdrop',
             type: 'boolean',
-            when: false
-          }
-        ]
+            when: false,
+          },
+        ],
       });
     });
 
@@ -1410,12 +1430,16 @@ describe('Pipeline class', () => {
 
       const ifStatement = pipeline.filterStatements[0];
       expect(ifStatement).to.be.a(IfStatement);
-      expect(ifStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(ifStatement.id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(ifStatement.hasExplicitId).to.be(false);
       expect(ifStatement.condition).to.be('[is_rt] == "RT"');
 
       expect(ifStatement.trueStatements[0]).to.be.a(PluginStatement);
-      expect(ifStatement.trueStatements[0].id).to.be('a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84');
+      expect(ifStatement.trueStatements[0].id).to.be(
+        'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84'
+      );
 
       expect(ifStatement.elseStatements[0]).to.be.a(PluginStatement);
       expect(ifStatement.elseStatements[0].id).to.be('micdrop');
@@ -1432,7 +1456,7 @@ describe('Pipeline class', () => {
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1440,7 +1464,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'mutate',
-            stats: {}
+            stats: {},
           },
           {
             id: 'micdrop',
@@ -1448,8 +1472,8 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'drop',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
@@ -1457,15 +1481,15 @@ describe('Pipeline class', () => {
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: true
+            when: true,
           },
           {
             id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
             from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             to: 'micdrop',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -1478,13 +1502,17 @@ describe('Pipeline class', () => {
 
       const ifStatement = pipeline.filterStatements[0];
       expect(ifStatement).to.be.a(IfStatement);
-      expect(ifStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(ifStatement.id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(ifStatement.hasExplicitId).to.be(false);
       expect(ifStatement.condition).to.be('[is_rt] == "RT"');
 
       expect(ifStatement.trueStatements.length).to.be(2);
       expect(ifStatement.trueStatements[0]).to.be.a(PluginStatement);
-      expect(ifStatement.trueStatements[0].id).to.be('a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84');
+      expect(ifStatement.trueStatements[0].id).to.be(
+        'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84'
+      );
       expect(ifStatement.trueStatements[1]).to.be.a(PluginStatement);
       expect(ifStatement.trueStatements[1].id).to.be('micdrop');
 
@@ -1502,7 +1530,7 @@ describe('Pipeline class', () => {
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: '890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a',
@@ -1510,7 +1538,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'grok',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
@@ -1518,7 +1546,7 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'mutate',
-            stats: {}
+            stats: {},
           },
           {
             id: 'micdrop',
@@ -1526,8 +1554,8 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'drop',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
@@ -1535,22 +1563,22 @@ describe('Pipeline class', () => {
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: '890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a',
             type: 'boolean',
-            when: true
+            when: true,
           },
           {
             id: '591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc535',
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: false
+            when: false,
           },
           {
             id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
             from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             to: 'micdrop',
-            type: 'plain'
-          }
-        ]
+            type: 'plain',
+          },
+        ],
       });
     });
 
@@ -1563,17 +1591,23 @@ describe('Pipeline class', () => {
 
       const ifStatement = pipeline.filterStatements[0];
       expect(ifStatement).to.be.a(IfStatement);
-      expect(ifStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(ifStatement.id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(ifStatement.hasExplicitId).to.be(false);
       expect(ifStatement.condition).to.be('[is_rt] == "RT"');
 
       expect(ifStatement.trueStatements.length).to.be(1);
       expect(ifStatement.trueStatements[0]).to.be.a(PluginStatement);
-      expect(ifStatement.trueStatements[0].id).to.be('890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a');
+      expect(ifStatement.trueStatements[0].id).to.be(
+        '890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84a'
+      );
 
       expect(ifStatement.elseStatements.length).to.be(2);
       expect(ifStatement.elseStatements[0]).to.be.a(PluginStatement);
-      expect(ifStatement.elseStatements[0].id).to.be('a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84');
+      expect(ifStatement.elseStatements[0].id).to.be(
+        'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84'
+      );
       expect(ifStatement.elseStatements[1]).to.be.a(PluginStatement);
       expect(ifStatement.elseStatements[1].id).to.be('micdrop');
     });
@@ -1589,7 +1623,7 @@ describe('Pipeline class', () => {
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             plugin_type: 'output',
@@ -1601,11 +1635,11 @@ describe('Pipeline class', () => {
                 line: 124,
                 protocol: 'str',
                 id: 'pipeline',
-                column: 5
-              }
+                column: 5,
+              },
             },
             explicit_id: false,
-            stats: null
+            stats: null,
           },
           {
             plugin_type: 'output',
@@ -1617,11 +1651,11 @@ describe('Pipeline class', () => {
                 line: 117,
                 protocol: 'str',
                 id: 'pipeline',
-                column: 5
-              }
+                column: 5,
+              },
             },
             explicit_id: true,
-            stats: null
+            stats: null,
           },
         ],
         edges: [
@@ -1630,16 +1664,16 @@ describe('Pipeline class', () => {
             from: 'the_if',
             to: 'plugin_1',
             type: 'boolean',
-            when: true
+            when: true,
           },
           {
             id: '591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc535',
             from: 'the_if',
             to: 'plugin_2',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -1665,7 +1699,7 @@ describe('Pipeline class', () => {
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             plugin_type: 'output',
@@ -1677,11 +1711,11 @@ describe('Pipeline class', () => {
                 line: 124,
                 protocol: 'str',
                 id: 'pipeline',
-                column: 5
-              }
+                column: 5,
+              },
             },
             explicit_id: false,
-            stats: null
+            stats: null,
           },
           {
             plugin_type: 'output',
@@ -1693,11 +1727,11 @@ describe('Pipeline class', () => {
                 line: 117,
                 protocol: 'str',
                 id: 'pipeline',
-                column: 5
-              }
+                column: 5,
+              },
             },
             explicit_id: true,
-            stats: null
+            stats: null,
           },
           {
             plugin_type: 'output',
@@ -1709,11 +1743,11 @@ describe('Pipeline class', () => {
                 line: 120,
                 protocol: 'str',
                 id: 'pipeline',
-                column: 5
-              }
+                column: 5,
+              },
             },
             explicit_id: false,
-            stats: null
+            stats: null,
           },
         ],
         edges: [
@@ -1722,23 +1756,23 @@ describe('Pipeline class', () => {
             from: 'the_if',
             to: 'plugin_1',
             type: 'boolean',
-            when: false
+            when: false,
           },
           {
             id: '591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc535',
             from: 'the_if',
             to: 'plugin_2',
             type: 'boolean',
-            when: false
+            when: false,
           },
           {
             id: '637281923dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc5',
             from: 'the_if',
             to: 'plugin_3',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -1746,10 +1780,7 @@ describe('Pipeline class', () => {
       const pipeline = Pipeline.fromPipelineGraph(graph);
 
       expect(pipeline.outputStatements.length).to.be(1);
-      const {
-        trueStatements,
-        elseStatements
-      } = pipeline.outputStatements[0];
+      const { trueStatements, elseStatements } = pipeline.outputStatements[0];
       expect(trueStatements.length).to.be(1);
       expect(trueStatements[0].id).to.be('plugin_3');
       expect(elseStatements.length).to.be(2);
@@ -1768,14 +1799,14 @@ describe('Pipeline class', () => {
             explicit_id: false,
             type: 'if',
             condition: '[is_rt] == "RT"',
-            stats: {}
+            stats: {},
           },
           {
             id: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             explicit_id: false,
             type: 'if',
             condition: '[has_image] == true',
-            stats: {}
+            stats: {},
           },
           {
             id: 'micdrop',
@@ -1783,8 +1814,8 @@ describe('Pipeline class', () => {
             type: 'plugin',
             plugin_type: 'filter',
             config_name: 'drop',
-            stats: {}
-          }
+            stats: {},
+          },
         ],
         edges: [
           {
@@ -1792,16 +1823,16 @@ describe('Pipeline class', () => {
             from: '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8',
             to: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             type: 'boolean',
-            when: true
+            when: true,
           },
           {
             id: '5591f523dee3465d4c38f20232c56db453a9e4258af5885bf8c79f517690bc53',
             from: 'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84',
             to: 'micdrop',
             type: 'boolean',
-            when: true
-          }
-        ]
+            when: true,
+          },
+        ],
       });
     });
 
@@ -1814,13 +1845,17 @@ describe('Pipeline class', () => {
 
       const outerIfStatement = pipeline.filterStatements[0];
       expect(outerIfStatement).to.be.a(IfStatement);
-      expect(outerIfStatement.id).to.be('4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8');
+      expect(outerIfStatement.id).to.be(
+        '4a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e8'
+      );
       expect(outerIfStatement.hasExplicitId).to.be(false);
       expect(outerIfStatement.condition).to.be('[is_rt] == "RT"');
 
       const innerIfStatement = outerIfStatement.trueStatements[0];
       expect(innerIfStatement).to.be.a(IfStatement);
-      expect(innerIfStatement.id).to.be('a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84');
+      expect(innerIfStatement.id).to.be(
+        'a890f3e5c135c037eb40ba88d69b040faaeb954bb10510e95294259ffdd88e84'
+      );
       expect(innerIfStatement.hasExplicitId).to.be(false);
       expect(innerIfStatement.condition).to.be('[has_image] == true');
 

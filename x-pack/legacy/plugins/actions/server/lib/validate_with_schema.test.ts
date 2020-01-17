@@ -10,7 +10,7 @@ import { validateParams, validateConfig, validateSecrets } from './validate_with
 import { ActionType, ExecutorType } from '../types';
 
 const executor: ExecutorType = async options => {
-  return { status: 'ok' };
+  return { status: 'ok', actionId: options.actionId };
 };
 
 test('should validate when there are no validators', () => {

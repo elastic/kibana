@@ -18,12 +18,12 @@
  */
 
 import { moveFiltersToQuery, Pre600FilterQuery } from './move_filters_to_query';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { esFilters } from '../../../../../../plugins/data/public';
 
-const filter: Filter = {
+const filter: esFilters.Filter = {
   meta: { disabled: false, negate: false, alias: '' },
   query: {},
-  $state: { store: FilterStateStore.APP_STATE },
+  $state: { store: esFilters.FilterStateStore.APP_STATE },
 };
 
 const queryFilter: Pre600FilterQuery = {
@@ -38,7 +38,7 @@ test('Migrates an old filter query into the query field', () => {
   expect(newSearchSource).toEqual({
     filter: [
       {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
         meta: {
           alias: '',
           disabled: false,

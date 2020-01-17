@@ -17,15 +17,11 @@ import { CLOUD_METADATA_SERVICES } from '../../common/constants';
  * This is exported for testing purposes. Use the {@code AWS} singleton.
  */
 export class AWSCloudService extends CloudService {
-
-  constructor(options = { }) {
+  constructor(options = {}) {
     super('aws', options);
 
     // Allow the file system handler to be swapped out for tests
-    const {
-      _fs = fs,
-      _isWindows = process.platform.startsWith('win')
-    } = options;
+    const { _fs = fs, _isWindows = process.platform.startsWith('win') } = options;
 
     this._fs = _fs;
     this._isWindows = _isWindows;
@@ -35,13 +31,15 @@ export class AWSCloudService extends CloudService {
     const req = {
       method: 'GET',
       uri: CLOUD_METADATA_SERVICES.AWS_URL,
-      json: true
+      json: true,
     };
 
-    return promisify(request)(req)
-      .then(response => this._parseResponse(response.body, (body) => this._parseBody(body)))
-    // fall back to file detection
-      .catch(() => this._tryToDetectUuid());
+    return (
+      promisify(request)(req)
+        .then(response => this._parseResponse(response.body, body => this._parseBody(body)))
+        // fall back to file detection
+        .catch(() => this._tryToDetectUuid())
+    );
   }
 
   /**
@@ -74,14 +72,20 @@ export class AWSCloudService extends CloudService {
     const zone = get(body, 'availabilityZone');
     const metadata = omit(body, [
       // remove keys we already have
-      'instanceId', 'instanceType', 'region', 'availabilityZone',
+      'instanceId',
+      'instanceType',
+      'region',
+      'availabilityZone',
       // remove keys that give too much detail
-      'accountId', 'billingProducts', 'devpayProductCodes', 'privateIp'
+      'accountId',
+      'billingProducts',
+      'devpayProductCodes',
+      'privateIp',
     ]);
 
     // ensure we actually have some data
     if (id || vmType || region || zone) {
-      return new CloudServiceResponse(this._name, true,  { id, vmType, region, zone, metadata });
+      return new CloudServiceResponse(this._name, true, { id, vmType, region, zone, metadata });
     }
 
     return null;
@@ -96,24 +100,22 @@ export class AWSCloudService extends CloudService {
   _tryToDetectUuid() {
     // Windows does not have an easy way to check
     if (!this._isWindows) {
-      return promisify(this._fs.readFile)('/sys/hypervisor/uuid', 'utf8')
-        .then(uuid => {
-          if (isString(uuid)) {
+      return promisify(this._fs.readFile)('/sys/hypervisor/uuid', 'utf8').then(uuid => {
+        if (isString(uuid)) {
           // Some AWS APIs return it lowercase (like the file did in testing), while others return it uppercase
-            uuid = uuid.trim().toLowerCase();
+          uuid = uuid.trim().toLowerCase();
 
-            if (uuid.startsWith('ec2')) {
-              return new CloudServiceResponse(this._name, true, { id: uuid });
-            }
+          if (uuid.startsWith('ec2')) {
+            return new CloudServiceResponse(this._name, true, { id: uuid });
           }
+        }
 
-          return this._createUnconfirmedResponse();
-        });
+        return this._createUnconfirmedResponse();
+      });
     }
 
     return Promise.resolve(this._createUnconfirmedResponse());
   }
-
 }
 
 /**

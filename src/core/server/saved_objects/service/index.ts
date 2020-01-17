@@ -34,6 +34,7 @@ export interface SavedObjectsLegacyService<Request = any> {
   addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<
     Request
   >['addClientWrapperFactory'];
+  setScopedSavedObjectsClientFactory: SavedObjectsClientProvider<Request>['setClientFactory'];
   getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
   SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
@@ -57,6 +58,7 @@ export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
+  SavedObjectsClientFactory,
 } from './lib';
 
 export * from './saved_objects_client';

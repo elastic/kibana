@@ -1,0 +1,820 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EditFilterList adds new items to filter list 1`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-edit-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-edit-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EditFilterListHeader
+        canCreateFilter={true}
+        description="List of known safe domains"
+        isNewFilterIdInvalid={false}
+        newFilterId=""
+        totalItemCount={6}
+        updateDescription={[Function]}
+        updateNewFilterId={[Function]}
+        usedBy={
+          Object {
+            "detectors": Array [
+              "high info content",
+            ],
+            "jobs": Array [
+              "dns_exfiltration",
+            ],
+          }
+        }
+      />
+      <EditFilterListToolbar
+        addItems={[Function]}
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        deleteSelectedItems={[Function]}
+        onSearchChange={[Function]}
+        selectedItemCount={0}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ItemsGrid
+        activePage={0}
+        items={
+          Array [
+            "amazon.com",
+            "elastic.co",
+            "google.co.uk",
+            "google.com",
+            "spotify.com",
+            "youtube.com",
+          ]
+        }
+        itemsPerPage={50}
+        itemsPerPageOptions={
+          Array [
+            50,
+            100,
+            500,
+            1000,
+          ]
+        }
+        numberColumns={4}
+        selectedItems={Array []}
+        setActivePage={[Function]}
+        setItemSelected={[Function]}
+        setItemsPerPage={[Function]}
+        totalItemCount={6}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            disabled={false}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;
+
+exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-edit-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-edit-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EditFilterListHeader
+        canCreateFilter={true}
+        description="List of known safe domains"
+        isNewFilterIdInvalid={false}
+        newFilterId=""
+        totalItemCount={4}
+        updateDescription={[Function]}
+        updateNewFilterId={[Function]}
+        usedBy={
+          Object {
+            "detectors": Array [
+              "high info content",
+            ],
+            "jobs": Array [
+              "dns_exfiltration",
+            ],
+          }
+        }
+      />
+      <EditFilterListToolbar
+        addItems={[Function]}
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        deleteSelectedItems={[Function]}
+        onSearchChange={[Function]}
+        selectedItemCount={1}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ItemsGrid
+        activePage={0}
+        items={
+          Array [
+            "google.com",
+            "google.co.uk",
+            "elastic.co",
+            "youtube.com",
+          ]
+        }
+        itemsPerPage={50}
+        itemsPerPageOptions={
+          Array [
+            50,
+            100,
+            500,
+            1000,
+          ]
+        }
+        numberColumns={4}
+        selectedItems={
+          Array [
+            "google.co.uk",
+          ]
+        }
+        setActivePage={[Function]}
+        setItemSelected={[Function]}
+        setItemsPerPage={[Function]}
+        totalItemCount={4}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            disabled={false}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;
+
+exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-edit-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-edit-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EditFilterListHeader
+        canCreateFilter={true}
+        description="List of known safe domains"
+        isNewFilterIdInvalid={false}
+        newFilterId=""
+        totalItemCount={3}
+        updateDescription={[Function]}
+        updateNewFilterId={[Function]}
+        usedBy={
+          Object {
+            "detectors": Array [
+              "high info content",
+            ],
+            "jobs": Array [
+              "dns_exfiltration",
+            ],
+          }
+        }
+      />
+      <EditFilterListToolbar
+        addItems={[Function]}
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        deleteSelectedItems={[Function]}
+        onSearchChange={[Function]}
+        selectedItemCount={0}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ItemsGrid
+        activePage={0}
+        items={
+          Array [
+            "google.com",
+            "elastic.co",
+            "youtube.com",
+          ]
+        }
+        itemsPerPage={50}
+        itemsPerPageOptions={
+          Array [
+            50,
+            100,
+            500,
+            1000,
+          ]
+        }
+        numberColumns={4}
+        selectedItems={Array []}
+        setActivePage={[Function]}
+        setItemSelected={[Function]}
+        setItemsPerPage={[Function]}
+        totalItemCount={3}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            disabled={false}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;
+
+exports[`EditFilterList renders the edit page for a new filter list and updates ID 1`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-edit-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-edit-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EditFilterListHeader
+        canCreateFilter={true}
+        description=""
+        isNewFilterIdInvalid={true}
+        newFilterId=""
+        totalItemCount={0}
+        updateDescription={[Function]}
+        updateNewFilterId={[Function]}
+      />
+      <EditFilterListToolbar
+        addItems={[Function]}
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        deleteSelectedItems={[Function]}
+        onSearchChange={[Function]}
+        selectedItemCount={0}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ItemsGrid
+        activePage={0}
+        items={Array []}
+        itemsPerPage={50}
+        itemsPerPageOptions={
+          Array [
+            50,
+            100,
+            500,
+            1000,
+          ]
+        }
+        numberColumns={4}
+        selectedItems={Array []}
+        setActivePage={[Function]}
+        setItemSelected={[Function]}
+        setItemsPerPage={[Function]}
+        totalItemCount={0}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            disabled={true}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;
+
+exports[`EditFilterList renders the edit page for a new filter list and updates ID 2`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-edit-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-edit-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EditFilterListHeader
+        canCreateFilter={true}
+        description=""
+        isNewFilterIdInvalid={false}
+        newFilterId="new_filter_list"
+        totalItemCount={0}
+        updateDescription={[Function]}
+        updateNewFilterId={[Function]}
+      />
+      <EditFilterListToolbar
+        addItems={[Function]}
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        deleteSelectedItems={[Function]}
+        onSearchChange={[Function]}
+        selectedItemCount={0}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ItemsGrid
+        activePage={0}
+        items={Array []}
+        itemsPerPage={50}
+        itemsPerPageOptions={
+          Array [
+            50,
+            100,
+            500,
+            1000,
+          ]
+        }
+        numberColumns={4}
+        selectedItems={Array []}
+        setActivePage={[Function]}
+        setItemSelected={[Function]}
+        setItemsPerPage={[Function]}
+        totalItemCount={0}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            disabled={false}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;
+
+exports[`EditFilterList renders the edit page for an existing filter list and updates description 1`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-edit-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-edit-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EditFilterListHeader
+        canCreateFilter={true}
+        description="List of known safe domains"
+        isNewFilterIdInvalid={false}
+        newFilterId=""
+        totalItemCount={4}
+        updateDescription={[Function]}
+        updateNewFilterId={[Function]}
+        usedBy={
+          Object {
+            "detectors": Array [
+              "high info content",
+            ],
+            "jobs": Array [
+              "dns_exfiltration",
+            ],
+          }
+        }
+      />
+      <EditFilterListToolbar
+        addItems={[Function]}
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        deleteSelectedItems={[Function]}
+        onSearchChange={[Function]}
+        selectedItemCount={0}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ItemsGrid
+        activePage={0}
+        items={
+          Array [
+            "google.com",
+            "google.co.uk",
+            "elastic.co",
+            "youtube.com",
+          ]
+        }
+        itemsPerPage={50}
+        itemsPerPageOptions={
+          Array [
+            50,
+            100,
+            500,
+            1000,
+          ]
+        }
+        numberColumns={4}
+        selectedItems={Array []}
+        setActivePage={[Function]}
+        setItemSelected={[Function]}
+        setItemsPerPage={[Function]}
+        totalItemCount={4}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            disabled={false}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;
+
+exports[`EditFilterList renders the edit page for an existing filter list and updates description 2`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-edit-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-edit-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EditFilterListHeader
+        canCreateFilter={true}
+        description="Known safe web domains"
+        isNewFilterIdInvalid={false}
+        newFilterId=""
+        totalItemCount={4}
+        updateDescription={[Function]}
+        updateNewFilterId={[Function]}
+        usedBy={
+          Object {
+            "detectors": Array [
+              "high info content",
+            ],
+            "jobs": Array [
+              "dns_exfiltration",
+            ],
+          }
+        }
+      />
+      <EditFilterListToolbar
+        addItems={[Function]}
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        deleteSelectedItems={[Function]}
+        onSearchChange={[Function]}
+        selectedItemCount={0}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ItemsGrid
+        activePage={0}
+        items={
+          Array [
+            "google.com",
+            "google.co.uk",
+            "elastic.co",
+            "youtube.com",
+          ]
+        }
+        itemsPerPage={50}
+        itemsPerPageOptions={
+          Array [
+            50,
+            100,
+            500,
+            1000,
+          ]
+        }
+        numberColumns={4}
+        selectedItems={Array []}
+        setActivePage={[Function]}
+        setItemSelected={[Function]}
+        setItemsPerPage={[Function]}
+        totalItemCount={4}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            disabled={false}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;
+
+exports[`EditFilterList updates the items per page 1`] = `
+<Fragment>
+  <NavigationMenu
+    tabId="settings"
+  />
+  <EuiPage
+    className="ml-edit-filter-lists"
+  >
+    <EuiPageContent
+      className="ml-edit-filter-lists-content"
+      horizontalPosition="center"
+      verticalPosition="center"
+    >
+      <EditFilterListHeader
+        canCreateFilter={true}
+        description="List of known safe domains"
+        isNewFilterIdInvalid={false}
+        newFilterId=""
+        totalItemCount={4}
+        updateDescription={[Function]}
+        updateNewFilterId={[Function]}
+        usedBy={
+          Object {
+            "detectors": Array [
+              "high info content",
+            ],
+            "jobs": Array [
+              "dns_exfiltration",
+            ],
+          }
+        }
+      />
+      <EditFilterListToolbar
+        addItems={[Function]}
+        canCreateFilter={true}
+        canDeleteFilter={true}
+        deleteSelectedItems={[Function]}
+        onSearchChange={[Function]}
+        selectedItemCount={0}
+      />
+      <EuiSpacer
+        size="xl"
+      />
+      <ItemsGrid
+        activePage={0}
+        items={
+          Array [
+            "google.com",
+            "google.co.uk",
+            "elastic.co",
+            "youtube.com",
+          ]
+        }
+        itemsPerPage={500}
+        itemsPerPageOptions={
+          Array [
+            50,
+            100,
+            500,
+            1000,
+          ]
+        }
+        numberColumns={4}
+        selectedItems={Array []}
+        setActivePage={[Function]}
+        setItemSelected={[Function]}
+        setItemsPerPage={[Function]}
+        totalItemCount={4}
+      />
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            disabled={false}
+            fill={true}
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Save"
+              id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageContent>
+  </EuiPage>
+</Fragment>
+`;

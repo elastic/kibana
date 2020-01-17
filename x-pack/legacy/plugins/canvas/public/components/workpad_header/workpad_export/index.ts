@@ -24,8 +24,11 @@ import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
 // @ts-ignore Untyped local.
 import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
+import { WithKibanaProps } from '../../../index';
 
 import { ComponentStrings } from '../../../../i18n';
+
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 const mapStateToProps = (state: State) => ({
@@ -53,13 +56,14 @@ interface Props {
 
 export const WorkpadExport = compose<ComponentProps, {}>(
   connect(mapStateToProps),
+  withKibana,
   withProps(
-    ({ workpad, pageCount, enabled }: Props): ComponentProps => ({
+    ({ workpad, pageCount, enabled, kibana }: Props & WithKibanaProps): ComponentProps => ({
       enabled,
       getExportUrl: type => {
         if (type === 'pdf') {
-          const { createPdfUri } = getPdfUrl(workpad, { pageCount });
-          return getAbsoluteUrl(createPdfUri);
+          const pdfUrl = getPdfUrl(workpad, { pageCount }, kibana.services.http.basePath.prepend);
+          return getAbsoluteUrl(pdfUrl);
         }
 
         throw new Error(strings.getUnknownExportErrorMessage(type));
@@ -79,7 +83,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
       onExport: type => {
         switch (type) {
           case 'pdf':
-            return createPdf(workpad, { pageCount })
+            return createPdf(workpad, { pageCount }, kibana.services.http.basePath.prepend)
               .then(({ data }: { data: { job: { id: string } } }) => {
                 notify.info(strings.getExportPDFMessage(), {
                   title: strings.getExportPDFTitle(workpad.name),

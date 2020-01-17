@@ -4,95 +4,86 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE, HOSTS_PAGE_TAB_URLS, NETWORK_PAGE } from '../urls';
-
 export const INSPECT_BUTTON_ICON = '[data-test-subj="inspect-icon-button"]';
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-gear"]';
 export const TIMELINE_INSPECT_BUTTON = '[data-test-subj="inspect-empty-button"]';
 
-interface InspectButtonMetadata {
+export interface InspectButtonMetadata {
   altInspectId?: string;
   id: string;
   title: string;
-  url: string;
+  tabId?: string;
 }
 
-export const INSPECT_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
+export const INSPECT_HOSTS_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
   {
     id: '[data-test-subj="stat-hosts"]',
     title: 'Hosts Stat',
-    url: HOSTS_PAGE,
   },
   {
     id: '[data-test-subj="stat-authentication"]',
     title: 'User Authentications Stat',
-    url: HOSTS_PAGE,
   },
   {
     id: '[data-test-subj="stat-uniqueIps"]',
     title: 'Unique IPs Stat',
-    url: HOSTS_PAGE,
-  },
-  {
-    id: '[data-test-subj="stat-networkEvents"]',
-    title: 'Network events Stat',
-    url: NETWORK_PAGE,
-  },
-  {
-    id: '[data-test-subj="stat-dnsQueries"]',
-    title: 'DNS queries Stat',
-    url: NETWORK_PAGE,
-  },
-  {
-    id: '[data-test-subj="stat-uniqueFlowId"]',
-    title: 'Unique flow IDs Stat',
-    url: NETWORK_PAGE,
-  },
-  {
-    id: '[data-test-subj="stat-tlsHandshakes"]',
-    title: 'TLS handshakes Stat',
-    url: NETWORK_PAGE,
-  },
-  {
-    id: '[data-test-subj="stat-UniqueIps"]',
-    title: 'Unique private IPs Stat',
-    url: NETWORK_PAGE,
-  },
-  {
-    id: '[data-test-subj="table-topNFlowSource-loading-false"]',
-    title: 'Source IPs Table',
-    url: NETWORK_PAGE,
-  },
-  {
-    id: '[data-test-subj="table-topNFlowDestination-loading-false"]',
-    title: 'Destination IPs Table',
-    url: NETWORK_PAGE,
-  },
-  {
-    id: '[data-test-subj="table-dns-loading-false"]',
-    title: 'Top DNS Domains Table',
-    url: NETWORK_PAGE,
   },
   {
     id: '[data-test-subj="table-allHosts-loading-false"]',
     title: 'All Hosts Table',
-    url: HOSTS_PAGE_TAB_URLS.allHosts,
+    tabId: '[data-test-subj="navigation-allHosts"]',
   },
   {
     id: '[data-test-subj="table-authentications-loading-false"]',
     title: 'Authentications Table',
-    url: HOSTS_PAGE_TAB_URLS.authentications,
+    tabId: '[data-test-subj="navigation-authentications"]',
   },
   {
     id: '[data-test-subj="table-uncommonProcesses-loading-false"]',
     title: 'Uncommon processes Table',
-    url: HOSTS_PAGE_TAB_URLS.uncommonProcesses,
+    tabId: '[data-test-subj="navigation-uncommonProcesses"]',
   },
   {
-    altInspectId: `[data-test-subj="events-viewer-header"] ${INSPECT_BUTTON_ICON}`,
+    altInspectId: `[data-test-subj="events-viewer-panel"] ${INSPECT_BUTTON_ICON}`,
     id: '[data-test-subj="events-container-loading-false"]',
     title: 'Events Table',
-    url: HOSTS_PAGE_TAB_URLS.events,
+    tabId: '[data-test-subj="navigation-events"]',
+  },
+];
+
+export const INSPECT_NETWORK_BUTTONS_IN_SIEM: InspectButtonMetadata[] = [
+  {
+    id: '[data-test-subj="stat-networkEvents"]',
+    title: 'Network events Stat',
+  },
+  {
+    id: '[data-test-subj="stat-dnsQueries"]',
+    title: 'DNS queries Stat',
+  },
+  {
+    id: '[data-test-subj="stat-uniqueFlowId"]',
+    title: 'Unique flow IDs Stat',
+  },
+  {
+    id: '[data-test-subj="stat-tlsHandshakes"]',
+    title: 'TLS handshakes Stat',
+  },
+  {
+    id: '[data-test-subj="stat-UniqueIps"]',
+    title: 'Unique private IPs Stat',
+  },
+  {
+    id: '[data-test-subj="table-topNFlowSource-loading-false"]',
+    title: 'Source IPs Table',
+  },
+  {
+    id: '[data-test-subj="table-topNFlowDestination-loading-false"]',
+    title: 'Destination IPs Table',
+  },
+  {
+    id: '[data-test-subj="table-dns-loading-false"]',
+    title: 'Top DNS Domains Table',
+    tabId: '[data-test-subj="navigation-dns"]',
   },
 ];

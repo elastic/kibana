@@ -7,6 +7,7 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
+import { EuiAccordion } from '@elastic/eui';
 import {
   IStackframe,
   IStackframeWithLineContext
@@ -16,16 +17,11 @@ import {
   fontFamilyCode,
   fontSize
 } from '../../../style/variables';
-import { FrameHeading } from '../Stacktrace/FrameHeading';
+import { FrameHeading } from './FrameHeading';
 import { Context } from './Context';
 import { Variables } from './Variables';
 
-const CodeHeader = styled.div`
-  border-bottom: 1px solid ${theme.euiColorLightShade};
-  border-radius: ${borderRadius} ${borderRadius} 0 0;
-`;
-
-const Container = styled.div<{ isLibraryFrame: boolean }>`
+const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
@@ -40,12 +36,16 @@ const Container = styled.div<{ isLibraryFrame: boolean }>`
 interface Props {
   stackframe: IStackframe;
   codeLanguage?: string;
+  id: string;
+  initialIsOpen?: boolean;
   isLibraryFrame?: boolean;
 }
 
 export function Stackframe({
   stackframe,
   codeLanguage,
+  id,
+  initialIsOpen = false,
   isLibraryFrame = false
 }: Props) {
   if (!hasLineContext(stackframe)) {
@@ -55,19 +55,22 @@ export function Stackframe({
   }
 
   return (
-    <Container isLibraryFrame={isLibraryFrame}>
-      <CodeHeader>
+    <EuiAccordion
+      buttonContent={
         <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
-      </CodeHeader>
-
-      <Context
-        stackframe={stackframe}
-        codeLanguage={codeLanguage}
-        isLibraryFrame={isLibraryFrame}
-      />
-
+      }
+      id={id}
+      initialIsOpen={initialIsOpen}
+    >
+      <ContextContainer isLibraryFrame={isLibraryFrame}>
+        <Context
+          stackframe={stackframe}
+          codeLanguage={codeLanguage}
+          isLibraryFrame={isLibraryFrame}
+        />
+      </ContextContainer>
       <Variables vars={stackframe.vars} />
-    </Container>
+    </EuiAccordion>
   );
 }
 

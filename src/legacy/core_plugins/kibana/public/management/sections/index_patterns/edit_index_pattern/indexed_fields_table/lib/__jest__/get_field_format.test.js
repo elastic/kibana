@@ -23,14 +23,13 @@ const indexPattern = {
   fieldFormatMap: {
     Elastic: {
       type: {
-        title: 'string'
-      }
-    }
-  }
+        title: 'string',
+      },
+    },
+  },
 };
 
 describe('getFieldFormat', () => {
-
   it('should handle no arguments', () => {
     expect(getFieldFormat()).toEqual('');
   });

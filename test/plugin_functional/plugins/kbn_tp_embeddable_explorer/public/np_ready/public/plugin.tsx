@@ -27,33 +27,39 @@ import {
   Setup as InspectorSetupContract,
 } from '../../../../../../../src/plugins/inspector/public';
 
-import { Plugin as EmbeddablePlugin, CONTEXT_MENU_TRIGGER } from './embeddable_api';
+import { CONTEXT_MENU_TRIGGER } from './embeddable_api';
 
 const REACT_ROOT_ID = 'embeddableExplorerRoot';
 
 import {
   SayHelloAction,
   createSendMessageAction,
-  HelloWorldEmbeddableFactory,
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../../../src/plugins/kibana_react/public/saved_objects';
+import { HelloWorldEmbeddableFactory } from '../../../../../../../examples/embeddable_examples/public';
+import {
+  IEmbeddableStart,
+  IEmbeddableSetup,
+} from '.../../../../../../../src/plugins/embeddable/public';
 
 export interface SetupDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['setup']>;
+  embeddable: IEmbeddableSetup;
   inspector: InspectorSetupContract;
   __LEGACY: {
-    SavedObjectFinder: React.ComponentType<any>;
     ExitFullScreenButton: React.ComponentType<any>;
   };
 }
 
 interface StartDependencies {
-  embeddable: ReturnType<EmbeddablePlugin['start']>;
+  embeddable: IEmbeddableStart;
   uiActions: IUiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {
-    SavedObjectFinder: React.ComponentType<any>;
     ExitFullScreenButton: React.ComponentType<any>;
     onRenderComplete: (onRenderComplete: () => void) => void;
   };
@@ -95,6 +101,13 @@ export class EmbeddableExplorerPublicPlugin
 
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);
+      const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+        <SavedObjectFinderUi
+          {...props}
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+        />
+      );
       ReactDOM.render(
         <App
           getActions={plugins.uiActions.getTriggerCompatibleActions}
@@ -103,7 +116,7 @@ export class EmbeddableExplorerPublicPlugin
           notifications={core.notifications}
           overlays={core.overlays}
           inspector={plugins.inspector}
-          SavedObjectFinder={plugins.__LEGACY.SavedObjectFinder}
+          SavedObjectFinder={SavedObjectFinder}
           I18nContext={core.i18n.Context}
         />,
         root

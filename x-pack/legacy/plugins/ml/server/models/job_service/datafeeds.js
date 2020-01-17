@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 
 export function datafeedsProvider(callWithRequest) {
-
   async function forceStartDatafeeds(datafeedIds, start, end) {
     const jobIds = await getJobIdsByDatafeedId();
     const doStartsCalled = datafeedIds.reduce((p, c) => {
@@ -26,7 +24,6 @@ export function datafeedsProvider(callWithRequest) {
         try {
           await startDatafeed(datafeedId, start, end);
           return { started: true };
-
         } catch (error) {
           return { started: false, error };
         }
@@ -52,9 +49,12 @@ export function datafeedsProvider(callWithRequest) {
           results[datafeedId] = { started: false, error };
         }
       } else {
-        results[datafeedId] = { started: false, error: i18n.translate('xpack.ml.models.jobService.jobHasNoDatafeedErrorMessage', {
-          defaultMessage: 'Job has no datafeed',
-        }) };
+        results[datafeedId] = {
+          started: false,
+          error: i18n.translate('xpack.ml.models.jobService.jobHasNoDatafeedErrorMessage', {
+            defaultMessage: 'Job has no datafeed',
+          }),
+        };
       }
     }
 

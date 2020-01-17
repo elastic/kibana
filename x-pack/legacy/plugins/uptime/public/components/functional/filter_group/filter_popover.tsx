@@ -9,11 +9,13 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { UptimeFilterButton } from './uptime_filter_button';
 import { toggleSelectedItems } from './toggle_selected_item';
+import { LocationLink } from '../monitor_list';
 
 export interface FilterPopoverProps {
   fieldName: string;
   id: string;
-  isLoading: boolean;
+  loading: boolean;
+  disabled?: boolean;
   items: string[];
   onFilterFieldChange: (fieldName: string, values: string[]) => void;
   selectedItems: string[];
@@ -26,7 +28,8 @@ const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined
 export const FilterPopover = ({
   fieldName,
   id,
-  isLoading,
+  disabled,
+  loading,
   items,
   onFilterFieldChange,
   selectedItems,
@@ -47,10 +50,10 @@ export const FilterPopover = ({
   }, [searchQuery, items]);
 
   return (
-    // @ts-ignore zIndex prop is not described in the typing yet
     <EuiPopover
       button={
         <UptimeFilterButton
+          isDisabled={disabled}
           isSelected={tempSelectedItems.length > 0}
           numFilters={items.length}
           numActiveFilters={tempSelectedItems.length}
@@ -65,6 +68,7 @@ export const FilterPopover = ({
         setIsOpen(false);
         onFilterFieldChange(fieldName, tempSelectedItems);
       }}
+      data-test-subj={`filter-popover_${id}`}
       id={id}
       isOpen={isOpen}
       ownFocus={true}
@@ -73,9 +77,10 @@ export const FilterPopover = ({
     >
       <EuiPopoverTitle>
         <EuiFieldSearch
+          disabled={items.length === 0}
           onSearch={query => setSearchQuery(query)}
           placeholder={
-            isLoading
+            loading
               ? i18n.translate('xpack.uptime.filterPopout.loadingMessage', {
                   defaultMessage: 'Loading...',
                 })
@@ -88,16 +93,18 @@ export const FilterPopover = ({
           }
         />
       </EuiPopoverTitle>
-      {!isLoading &&
+      {!loading &&
         itemsToDisplay.map(item => (
           <EuiFilterSelectItem
             checked={isItemSelected(tempSelectedItems, item)}
+            data-test-subj={`filter-popover-item_${item}`}
             key={item}
             onClick={() => toggleSelectedItems(item, tempSelectedItems, setTempSelectedItems)}
           >
             {item}
           </EuiFilterSelectItem>
         ))}
+      {id === 'location' && items.length === 0 && <LocationLink />}
     </EuiPopover>
   );
 };

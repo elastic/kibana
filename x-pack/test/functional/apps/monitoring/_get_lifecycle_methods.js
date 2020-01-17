@@ -6,7 +6,8 @@
 
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['monitoring', 'timePicker']);
+  const security = getService('security');
+  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security']);
   const noData = getService('monitoringNoData');
   let _archive;
 
@@ -33,8 +34,10 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await PageObjects.timePicker.setAbsoluteRange(from, to);
     },
 
-    tearDown() {
+    async tearDown() {
+      await PageObjects.security.forceLogout();
+      await security.user.delete('basic_monitoring_user');
       return esArchiver.unload(_archive);
-    }
+    },
   };
 };

@@ -4,22 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import React, { PureComponent, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import { MinAgeInput } from '../min_age_input';
 
-import {
-  EuiDescribedFormGroup,
-  EuiSwitch,
-} from '@elastic/eui';
-import {
-  PHASE_DELETE,
-  PHASE_ENABLED,
-} from '../../../../constants';
+import { EuiDescribedFormGroup, EuiSwitch } from '@elastic/eui';
+import { PHASE_DELETE, PHASE_ENABLED } from '../../../../constants';
 import { ActiveBadge, PhaseErrorMessage } from '../../../components';
 
 export class DeletePhase extends PureComponent {
@@ -35,7 +26,7 @@ export class DeletePhase extends PureComponent {
       phaseData,
       errors,
       isShowingErrors,
-      hotPhaseRolloverEnabled
+      hotPhaseRolloverEnabled,
     } = this.props;
 
     return (
@@ -43,15 +34,13 @@ export class DeletePhase extends PureComponent {
         <EuiDescribedFormGroup
           title={
             <div>
-              <span className="eui-displayInlineBlock eui-alignMiddle">
+              <h2 className="eui-displayInlineBlock eui-alignMiddle">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseLabel"
                   defaultMessage="Delete phase"
                 />
-              </span>{' '}
-              {phaseData[PHASE_ENABLED] && !isShowingErrors ? (
-                <ActiveBadge />
-              ) : null}
+              </h2>{' '}
+              {phaseData[PHASE_ENABLED] && !isShowingErrors ? <ActiveBadge /> : null}
               <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </div>
           }
@@ -63,7 +52,6 @@ export class DeletePhase extends PureComponent {
                   id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
                   defaultMessage="You no longer need your index.  You can define when it is safe to delete it."
                 />
-
               </p>
               <EuiSwitch
                 data-test-subj="enablePhaseSwitch-delete"
@@ -93,7 +81,9 @@ export class DeletePhase extends PureComponent {
               setPhaseData={setPhaseData}
               rolloverEnabled={hotPhaseRolloverEnabled}
             />
-          ) : <div />}
+          ) : (
+            <div />
+          )}
         </EuiDescribedFormGroup>
       </div>
     );

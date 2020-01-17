@@ -18,17 +18,19 @@ import {
   PAGE,
   USER,
   USER_AGENT,
-  CUSTOM_TRANSACTION
+  CUSTOM_TRANSACTION,
+  MESSAGE_TRANSACTION
 } from '../sections';
 
 export const TRANSACTION_METADATA_SECTIONS: Section[] = [
-  TRANSACTION,
   { ...LABELS, required: true },
+  TRANSACTION,
   HTTP,
   HOST,
   CONTAINER,
   SERVICE,
   PROCESS,
+  MESSAGE_TRANSACTION,
   AGENT,
   URL,
   { ...PAGE, key: 'transaction.page' },

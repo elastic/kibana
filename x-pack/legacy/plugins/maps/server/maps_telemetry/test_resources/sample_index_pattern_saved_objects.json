@@ -1,0 +1,45 @@
+[
+  {
+    "attributes": {
+      "fields": "[{\"name\":\"geometry\",\"type\":\"geo_shape\",\"esTypes\":[\"geo_shape\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false}]",
+      "timeFieldName": "ORIG_DATE",
+      "title": "indexpattern-with-geoshape"
+    },
+    "id": "4a7f6010-0aed-11ea-9dd2-95afd7ad44d4",
+    "migrationVersion": {
+      "index-pattern": "7.6.0"
+    },
+    "references": [],
+    "type": "index-pattern",
+    "updated_at": "2019-11-19T16:54:46.405Z",
+    "version": "Wzg0LDFd"
+  },
+  {
+    "attributes": {
+      "fields": "[{\"name\":\"geometry\",\"type\":\"geo_point\",\"esTypes\":[\"geo_point\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+      "title": "indexpattern-with-geopoint"
+    },
+    "id": "55d572f0-0b07-11ea-9dd2-95afd7ad44d4",
+    "migrationVersion": {
+      "index-pattern": "7.6.0"
+    },
+    "references": [],
+    "type": "index-pattern",
+    "updated_at": "2019-11-19T20:05:37.607Z",
+    "version": "WzExMSwxXQ=="
+  },
+  {
+    "attributes": {
+      "fields": "[{\"name\":\"assessment_date\",\"type\":\"date\",\"esTypes\":[\"date\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"date_exterior_condition\",\"type\":\"date\",\"esTypes\":[\"date\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"recording_date\",\"type\":\"date\",\"esTypes\":[\"date\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"sale_date\",\"type\":\"date\",\"esTypes\":[\"date\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+      "title": "indexpattern-without-geo"
+    },
+    "id": "55d572f0-0b07-11ea-9dd2-95afd7ad44d4",
+    "migrationVersion": {
+      "index-pattern": "7.6.0"
+    },
+    "references": [],
+    "type": "index-pattern",
+    "updated_at": "2019-11-19T20:05:37.607Z",
+    "version": "WzExMSwxXQ=="
+  }
+]

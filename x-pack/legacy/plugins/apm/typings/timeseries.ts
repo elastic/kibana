@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Maybe } from '../typings/common';
 
 export interface Coordinate {
   x: number;
-  y: number | null | undefined;
+  y: Maybe<number>;
 }
 
 export interface RectCoordinate {
@@ -14,12 +15,14 @@ export interface RectCoordinate {
   x0: number;
 }
 
-export interface TimeSeries {
+export interface TimeSeries<
+  TCoordinate extends { x: number } = Coordinate | RectCoordinate
+> {
   title: string;
   titleShort?: string;
   hideLegend?: boolean;
   hideTooltipValue?: boolean;
-  data: Array<Coordinate | RectCoordinate>;
+  data: TCoordinate[];
   legendValue?: string;
   type: string;
   color: string;

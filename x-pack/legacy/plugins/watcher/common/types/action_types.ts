@@ -34,7 +34,7 @@ export interface EmailAction extends BaseAction {
 
 export interface LoggingAction extends BaseAction {
   type: LoggingActionType;
-  iconClass: 'loggingApp';
+  iconClass: 'logsApp';
   text: string;
 }
 
@@ -56,6 +56,7 @@ export interface WebhookAction extends BaseAction {
   method?: 'head' | 'get' | 'post' | 'put' | 'delete';
   host: string;
   port: number;
+  scheme?: 'http' | 'https';
   path?: string;
   body?: string;
   username?: string;

@@ -20,7 +20,4 @@ const mapDispatchToState = {
   setRefreshInterval,
 };
 
-export const Router = connect(
-  null,
-  mapDispatchToState
-)(Component);
+export const Router = connect(null, mapDispatchToState)(Component);

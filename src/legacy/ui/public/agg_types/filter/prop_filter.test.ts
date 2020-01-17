@@ -27,7 +27,7 @@ describe('prop filter', () => {
     nameFilter = propFilter('name');
   });
 
-  function getObjects(...names: string[]) {
+  const getObjects = (...names: string[]) => {
     const count = new Map();
     const objects = [];
 
@@ -41,8 +41,9 @@ describe('prop filter', () => {
       });
       count.set(name, count.get(name) + 1);
     }
+
     return objects;
-  }
+  };
 
   it('returns list when no filters are provided', () => {
     const objects = getObjects('table', 'table', 'pie');

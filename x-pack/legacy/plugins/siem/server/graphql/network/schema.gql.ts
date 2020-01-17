@@ -145,11 +145,61 @@ export const networkSchema = gql`
     cursor: CursorType!
   }
 
+  type MatrixOverOrdinalHistogramData {
+    x: String!
+    y: Float!
+    g: String!
+  }
+
   type NetworkDnsData {
     edges: [NetworkDnsEdges!]!
     totalCount: Float!
     pageInfo: PageInfoPaginated!
     inspect: Inspect
+    histogram: [MatrixOverOrdinalHistogramData!]
+  }
+
+  enum NetworkHttpFields {
+    domains
+    lastHost
+    lastSourceIp
+    methods
+    path
+    requestCount
+    statuses
+  }
+
+  input NetworkHttpSortField {
+    direction: Direction!
+  }
+
+  type NetworkHttpItem {
+    _id: String
+    domains: [String!]!
+    lastHost: String
+    lastSourceIp: String
+    methods: [String!]!
+    path: String
+    requestCount: Float
+    statuses: [String!]!
+  }
+
+  type NetworkHttpEdges {
+    node: NetworkHttpItem!
+    cursor: CursorType!
+  }
+
+  type NetworkHttpData {
+    edges: [NetworkHttpEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
+  }
+
+  type NetworkDsOverTimeData {
+    inspect: Inspect
+    matrixHistogramData: [MatrixOverTimeHistogramData!]!
+    totalCount: Float!
   }
 
   extend type Source {
@@ -179,8 +229,24 @@ export const networkSchema = gql`
       isPtrIncluded: Boolean!
       pagination: PaginationInputPaginated!
       sort: NetworkDnsSortField!
+      stackByField: String
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkDnsData!
+    NetworkDnsHistogram(
+      filterQuery: String
+      defaultIndex: [String!]!
+      timerange: TimerangeInput!
+      stackByField: String
+    ): NetworkDsOverTimeData!
+    NetworkHttp(
+      id: String
+      filterQuery: String
+      ip: String
+      pagination: PaginationInputPaginated!
+      sort: NetworkHttpSortField!
+      timerange: TimerangeInput!
+      defaultIndex: [String!]!
+    ): NetworkHttpData!
   }
 `;

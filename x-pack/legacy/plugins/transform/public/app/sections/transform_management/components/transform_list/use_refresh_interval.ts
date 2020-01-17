@@ -77,5 +77,7 @@ export const useRefreshInterval = (
       refreshIntervalSubscription.unsubscribe();
       clearRefreshInterval();
     };
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // [] as comparator makes sure this only runs once
 };

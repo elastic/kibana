@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FieldType } from 'ui/index_patterns';
+import { IFieldType } from 'src/plugins/data/public';
 import { startsWith, uniq } from 'lodash';
 import { getAllowedListForPrefix } from '../../common/ecs_allowed_list';
 
-interface DisplayableFieldType extends FieldType {
+interface DisplayableFieldType extends IFieldType {
   displayable?: boolean;
 }
 
@@ -19,12 +19,9 @@ export const isDisplayable = (field: DisplayableFieldType, additionalPrefixes: s
   // We need to start with at least one prefix, even if it's empty
   const prefixes = additionalPrefixes && additionalPrefixes.length ? additionalPrefixes : [''];
   // Create a set of allowed list based on the prefixes
-  const allowedList = prefixes.reduce(
-    (acc, prefix) => {
-      return uniq([...acc, ...getAllowedListForPrefix(prefix)]);
-    },
-    [] as string[]
-  );
+  const allowedList = prefixes.reduce((acc, prefix) => {
+    return uniq([...acc, ...getAllowedListForPrefix(prefix)]);
+  }, [] as string[]);
   // If the field is displayable and part of the allowed list or covered by the prefix
   return (
     (field.displayable && prefixes.some(fieldStartsWith(field))) ||

@@ -41,8 +41,9 @@ import { ApplicationService } from './application';
 import { mapToObject, pick } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
-import { SavedObjectsService } from './saved_objects/saved_objects_service';
+import { SavedObjectsService } from './saved_objects';
 import { ContextService } from './context';
+import { IntegrationsService } from './integrations';
 import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
@@ -63,7 +64,7 @@ export interface CoreContext {
 }
 
 /** @internal */
-export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
+export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
   application: InternalApplicationSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -98,6 +99,7 @@ export class CoreSystem {
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
   private readonly context: ContextService;
+  private readonly integrations: IntegrationsService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
@@ -134,6 +136,7 @@ export class CoreSystem {
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
+    this.integrations = new IntegrationsService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
@@ -155,6 +158,7 @@ export class CoreSystem {
         injectedMetadata,
         i18n: this.i18n.getContext(),
       });
+      await this.integrations.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
@@ -170,7 +174,7 @@ export class CoreSystem {
           [this.legacy.legacyId, [...pluginDependencies.keys()]],
         ]),
       });
-      const application = this.application.setup({ context });
+      const application = this.application.setup({ context, http, injectedMetadata });
 
       const core: InternalCoreSetup = {
         application,
@@ -207,10 +211,10 @@ export class CoreSystem {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const docLinks = await this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup! });
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
-      const application = await this.application.start({ http, injectedMetadata });
+      await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
@@ -234,6 +238,7 @@ export class CoreSystem {
         overlays,
         targetDomElement: notificationsTargetDomElement,
       });
+      const application = await this.application.start({ http, overlays });
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -248,10 +253,11 @@ export class CoreSystem {
         docLinks,
         http,
         i18n,
+        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
         notifications,
         overlays,
+        savedObjects,
         uiSettings,
-        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
       }));
 
       const core: InternalCoreStart = {
@@ -297,9 +303,11 @@ export class CoreSystem {
     this.plugins.stop();
     this.notifications.stop();
     this.http.stop();
+    this.integrations.stop();
     this.uiSettings.stop();
     this.chrome.stop();
     this.i18n.stop();
+    this.application.stop();
     this.rootDomElement.textContent = '';
   }
 }

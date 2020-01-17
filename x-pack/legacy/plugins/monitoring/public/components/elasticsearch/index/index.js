@@ -49,19 +49,16 @@ export const Index = ({
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
-                <MonitoringTimeseriesContainer
-                  series={metric}
-                  {...props}
-                />
+                <MonitoringTimeseriesContainer series={metric} {...props} />
                 <EuiSpacer />
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
           <EuiPanel>
             <Logs logs={logs} indexUuid={indexUuid} clusterUuid={clusterUuid} />
           </EuiPanel>
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
           <ShardAllocation scope={scope} kbnUrl={kbnUrl} type="index" />
         </EuiPageContent>
       </EuiPageBody>

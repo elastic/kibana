@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { WhatIs } from '../../blurbs';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,7 +27,7 @@ export class ExplainCollectionEnabled extends React.Component {
     this.waitedTooLongTimer = null;
 
     this.state = {
-      waitedTooLong: false
+      waitedTooLong: false,
     };
   }
 
@@ -46,11 +46,7 @@ export class ExplainCollectionEnabled extends React.Component {
   }
 
   render() {
-    const {
-      reason,
-      isCollectionEnabledUpdated,
-      isCollectionEnabledUpdating
-    } = this.props;
+    const { reason, isCollectionEnabledUpdated, isCollectionEnabledUpdating } = this.props;
 
     const { property, data, context } = reason;
 
@@ -66,8 +62,8 @@ export class ExplainCollectionEnabled extends React.Component {
               is set to {data}."
               values={{
                 context,
-                property: (<EuiCode>{property}</EuiCode>),
-                data: (<EuiCode>{data}</EuiCode>)
+                property: <EuiCode>{property}</EuiCode>,
+                data: <EuiCode>{data}</EuiCode>,
               }}
             />
           </p>
@@ -79,11 +75,7 @@ export class ExplainCollectionEnabled extends React.Component {
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceAround"
-          gutterSize="s"
-        >
+        <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
               fill={true}
@@ -153,5 +145,5 @@ ExplainCollectionEnabled.propTypes = {
   enabler: PropTypes.object.isRequired,
   reason: PropTypes.object.isRequired,
   isCollectionEnabledUpdated: PropTypes.bool,
-  isCollectionEnabledUpdating: PropTypes.bool
+  isCollectionEnabledUpdating: PropTypes.bool,
 };

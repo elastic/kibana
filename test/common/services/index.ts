@@ -18,13 +18,19 @@
  */
 
 import { LegacyEsProvider } from './legacy_es';
+import { ElasticsearchProvider } from './elasticsearch';
 import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
 import { RetryProvider } from './retry';
+import { RandomnessProvider } from './randomness';
+import { SecurityServiceProvider } from './security';
 
 export const services = {
-  es: LegacyEsProvider,
+  legacyEs: LegacyEsProvider,
+  es: ElasticsearchProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
   retry: RetryProvider,
+  randomness: RandomnessProvider,
+  security: SecurityServiceProvider,
 };

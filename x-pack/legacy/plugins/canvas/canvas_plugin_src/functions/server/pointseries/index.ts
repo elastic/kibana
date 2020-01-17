@@ -10,7 +10,14 @@ import uniqBy from 'lodash.uniqby';
 import { evaluate } from 'tinymath';
 import { groupBy, zipObject, omit } from 'lodash';
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
+import {
+  Datatable,
+  DatatableRow,
+  PointSeries,
+  PointSeriesColumnName,
+  PointSeriesColumns,
+} from 'src/plugins/expressions/common';
 // @ts-ignore Untyped local
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 // @ts-ignore Untyped local
@@ -20,13 +27,6 @@ import { isColumnReference } from './lib/is_column_reference';
 // @ts-ignore Untyped local
 import { getExpressionType } from './lib/get_expression_type';
 import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
-import {
-  Datatable,
-  DatatableRow,
-  PointSeries,
-  PointSeriesColumnName,
-  PointSeriesColumns,
-} from '../../../../types';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 
@@ -187,7 +187,10 @@ export function pointseries(): ExpressionFunction<
       // Then compute that 1 value for each measure
       Object.values<DatatableRow[]>(measureKeys).forEach(valueRows => {
         const subtable = { type: 'datatable', columns: context.columns, rows: valueRows };
-        const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
+        const subScope = pivotObjectArray(
+          subtable.rows,
+          subtable.columns.map(col => col.name)
+        );
         const measureValues = measureNames.map(measure => {
           try {
             const ev = evaluate(args[measure], subScope);

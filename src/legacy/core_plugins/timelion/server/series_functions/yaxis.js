@@ -22,20 +22,20 @@ import _ from 'lodash';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 const tickFormatters = {
-  'bits': 'bits',
+  bits: 'bits',
   'bits/s': 'bits/s',
-  'bytes': 'bytes',
+  bytes: 'bytes',
   'bytes/s': 'bytes/s',
-  'currency': 'currency(:ISO 4217 currency code)',
-  'percent': 'percent',
-  'custom': 'custom(:prefix:suffix)'
+  currency: 'currency(:ISO 4217 currency code)',
+  percent: 'percent',
+  custom: 'custom(:prefix:suffix)',
 };
 
 export default new Chainable('yaxis', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'yaxis',
@@ -91,7 +91,7 @@ export default new Chainable('yaxis', {
       }),
       suggestions: _.keys(tickFormatters).map(key => {
         return { name: key, help: tickFormatters[key] };
-      })
+      }),
     },
     {
       name: 'tickDecimals',
@@ -106,7 +106,17 @@ export default new Chainable('yaxis', {
       'Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis',
   }),
   fn: function yaxisFn(args) {
-    return alter(args, function (eachSeries, yaxis, min, max, position, label, color, units, tickDecimals) {
+    return alter(args, function(
+      eachSeries,
+      yaxis,
+      min,
+      max,
+      position,
+      label,
+      color,
+      units,
+      tickDecimals
+    ) {
       yaxis = yaxis || 1;
 
       eachSeries.yaxis = yaxis;
@@ -132,13 +142,14 @@ export default new Chainable('yaxis', {
         const unitTokens = units.split(':');
         const unitType = unitTokens[0];
         if (!tickFormatters[unitType]) {
-          throw new Error (
+          throw new Error(
             i18n.translate(
               'timelion.serverSideErrors.yaxisFunction.notSupportedUnitTypeErrorMessage',
               {
                 defaultMessage: '{units} is not a supported unit type.',
                 values: { units },
-              })
+              }
+            )
           );
         }
         if (unitType === 'currency') {
@@ -146,9 +157,12 @@ export default new Chainable('yaxis', {
           const currency = unitTokens[1];
           if (currency && !threeLetterCode.test(currency)) {
             throw new Error(
-              i18n.translate('timelion.serverSideErrors.yaxisFunction.notValidCurrencyFormatErrorMessage', {
-                defaultMessage: 'Currency must be a three letter code',
-              })
+              i18n.translate(
+                'timelion.serverSideErrors.yaxisFunction.notValidCurrencyFormatErrorMessage',
+                {
+                  defaultMessage: 'Currency must be a three letter code',
+                }
+              )
             );
           }
         }
@@ -156,7 +170,7 @@ export default new Chainable('yaxis', {
         myAxis.units = {
           type: unitType,
           prefix: unitTokens[1] || '',
-          suffix: unitTokens[2] || ''
+          suffix: unitTokens[2] || '',
         };
 
         if (unitType === 'percent') {
@@ -173,5 +187,5 @@ export default new Chainable('yaxis', {
 
       return eachSeries;
     });
-  }
+  },
 });

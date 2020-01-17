@@ -6,18 +6,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
 import { ComponentStrings } from '../../../i18n';
 const { DatasourceNoDatasource: strings } = ComponentStrings;
 
 export const NoDatasource = () => (
-  <EuiPanel>
-    <EuiText>
-      <h4>{strings.getPanelTitle()}</h4>
+  <div className="canvasDataSource__section">
+    <EuiCallOut title={strings.getPanelTitle()} iconType="iInCircle">
       <p>{strings.getPanelDescription()}</p>
-    </EuiText>
-  </EuiPanel>
+    </EuiCallOut>
+  </div>
 );
 
 NoDatasource.propTypes = {

@@ -19,11 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { SizeParamEditor } from '../../vis/editors/default/controls/size';
-import { BucketAggType, BucketAggParam } from './_bucket_agg_type';
+import { BucketAggType } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 const significantTermsTitle = i18n.translate('common.ui.aggTypes.buckets.significantTermsTitle', {
   defaultMessage: 'Significant Terms',
@@ -63,7 +63,7 @@ export const significantTermsBucketAgg = new BucketAggType({
       advanced: true,
       shouldShow: isStringType,
       ...migrateIncludeExcludeFormat,
-    } as BucketAggParam,
+    },
     {
       name: 'include',
       displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.includeLabel', {
@@ -73,6 +73,6 @@ export const significantTermsBucketAgg = new BucketAggType({
       advanced: true,
       shouldShow: isStringType,
       ...migrateIncludeExcludeFormat,
-    } as BucketAggParam,
+    },
   ],
 });

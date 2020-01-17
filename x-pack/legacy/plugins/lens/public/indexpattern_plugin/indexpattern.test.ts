@@ -5,7 +5,7 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { Storage } from 'ui/storage';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { SavedObjectsClientContract } from 'kibana/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
@@ -143,7 +143,7 @@ describe('IndexPattern Data Source', () => {
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
       chrome: chromeMock,
-      storage: {} as Storage,
+      storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
       savedObjectsClient: {} as SavedObjectsClientContract,
       data: pluginsMock.createStart().data,
@@ -183,6 +183,7 @@ describe('IndexPattern Data Source', () => {
         isBucketed: false,
         label: 'Foo',
         operationType: 'count',
+        sourceField: 'Records',
       };
       const map = uniqueLabels({
         a: {
@@ -240,19 +241,16 @@ describe('IndexPattern Data Source', () => {
             columnOrder: ['col1', 'col2'],
             columns: {
               col1: {
-                label: 'Count of Documents',
+                label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
               col2: {
                 label: 'Date',
                 dataType: 'date',
                 isBucketed: true,
-
-                // Private
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -272,7 +270,7 @@ describe('IndexPattern Data Source', () => {
               metricsAtAllLevels=false
               partialRows=false
               includeFormatHints=true
-              aggConfigs={lens_auto_date aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]'} | lens_rename_columns idMap='{\\"col-0-col1\\":{\\"label\\":\\"Count of Documents\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-col2\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}'"
+              aggConfigs={lens_auto_date aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]'} | lens_rename_columns idMap='{\\"col-0-col1\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-col2\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}'"
       `);
     });
   });
@@ -414,7 +412,15 @@ describe('IndexPattern Data Source', () => {
 
     beforeEach(async () => {
       const initialState = stateFromPersistedState(persistedState);
-      publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {}, 'first');
+      publicAPI = indexPatternDatasource.getPublicAPI({
+        state: initialState,
+        setState: () => {},
+        layerId: 'first',
+        dateRange: {
+          fromDate: 'now-30d',
+          toDate: 'now',
+        },
+      });
     });
 
     describe('getTableSpec', () => {
@@ -424,57 +430,6 @@ describe('IndexPattern Data Source', () => {
             columnId: 'col1',
           },
         ]);
-      });
-    });
-
-    describe('removeColumnInTableSpec', () => {
-      it('should remove the specified column', async () => {
-        const initialState = await indexPatternDatasource.initialize(persistedState);
-        const setState = jest.fn();
-        const sampleColumn: IndexPatternColumn = {
-          dataType: 'number',
-          isBucketed: false,
-          label: 'foo',
-          operationType: 'max',
-          sourceField: 'baz',
-          suggestedPriority: 0,
-        };
-        const columns: Record<string, IndexPatternColumn> = {
-          a: {
-            ...sampleColumn,
-            suggestedPriority: 0,
-          },
-          b: {
-            ...sampleColumn,
-            suggestedPriority: 1,
-          },
-          c: {
-            ...sampleColumn,
-            suggestedPriority: 2,
-          },
-        };
-        const api = indexPatternDatasource.getPublicAPI(
-          {
-            ...initialState,
-            layers: {
-              first: {
-                ...initialState.layers.first,
-                columns,
-                columnOrder: ['a', 'b', 'c'],
-              },
-            },
-          },
-          setState,
-          'first'
-        );
-
-        api.removeColumnInTableSpec('b');
-
-        expect(setState.mock.calls[0][0].layers.first.columnOrder).toEqual(['a', 'c']);
-        expect(setState.mock.calls[0][0].layers.first.columns).toEqual({
-          a: columns.a,
-          c: columns.c,
-        });
       });
     });
 

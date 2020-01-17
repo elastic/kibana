@@ -32,13 +32,13 @@ and data directory are stored in the following locations.
 | Type | Description | Default Location | Setting
 | home
   | Kibana home directory or `$KIBANA_HOME`
-  | /usr/local/var/homebrew/linked/kibana
+  | /usr/local/var/homebrew/linked/kibana-full
  d|
 
 | bin
   | Binary scripts including `kibana` to start a node
     and `kibana-plugin` to install plugins
-  | /usr/local/var/homebrew/linked/kibana/bin
+  | /usr/local/var/homebrew/linked/kibana-full/bin
  d|
 
 | conf
@@ -59,7 +59,7 @@ and data directory are stored in the following locations.
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
-  | /usr/local/var/homebrew/linked/kibana/plugins
+  | /usr/local/var/homebrew/linked/kibana-full/plugins
  d|
 
 |=======================================================================

@@ -56,7 +56,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_visualize_all_user',
@@ -68,15 +68,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_all_role');
         await security.user.delete('global_visualize_all_user');
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 
@@ -184,15 +182,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_read_role');
         await security.user.delete('global_visualize_read_user');
       });
 
       it('shows visualize navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 
@@ -294,7 +290,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('no_visualize_privileges_role');
         await security.user.delete('no_visualize_privileges_user');
       });

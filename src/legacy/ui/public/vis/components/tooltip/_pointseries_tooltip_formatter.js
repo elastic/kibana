@@ -18,23 +18,26 @@
  */
 
 import $ from 'jquery';
+
+import chrome from 'ui/chrome';
+
 import template from './_pointseries_tooltip.html';
 
 export function PointSeriesTooltipFormatterProvider($compile, $rootScope) {
-
   const $tooltipScope = $rootScope.$new();
   const $tooltip = $(template);
   $compile($tooltip)($tooltipScope);
 
-  return function () {
+  return function() {
     return function tooltipFormatter(event) {
       const data = event.data;
       const datum = event.datum;
       if (!datum) return '';
 
-      const details = $tooltipScope.details = [];
+      const details = ($tooltipScope.details = []);
 
-      const currentSeries = data.series && data.series.find(serie => serie.rawId === datum.seriesId);
+      const currentSeries =
+        data.series && data.series.find(serie => serie.rawId === datum.seriesId);
       const addDetail = (label, value) => details.push({ label, value });
 
       if (datum.extraMetrics) {
@@ -73,6 +76,12 @@ export const getPointSeriesTooltipFormatter = () => {
     throw new Error('tooltip formatter not initialized');
   }
   return _tooltipFormatter;
+};
+
+export const initializePointSeriesTooltipFormatter = async () => {
+  const $injector = await chrome.dangerouslyGetActiveInjector();
+  const Private = $injector.get('Private');
+  _tooltipFormatter = Private(PointSeriesTooltipFormatterProvider);
 };
 
 export const setPointSeriesTooltipFormatter = Private => {

@@ -25,13 +25,12 @@ describe('Chrome API :: Angular', () => {
     it('should return the sub app based on the url', () => {
       const chrome = {
         getInjected: noop,
-        addBasePath: noop
+        addBasePath: noop,
       };
       initAngularApi(chrome, {
-        devMode: true
+        devMode: true,
       });
     });
-    it('should return breadcrumbs based on the url', () => {
-    });
+    it('should return breadcrumbs based on the url', () => {});
   });
 });

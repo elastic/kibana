@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { AggGroupNames } from '../../vis/editors/default/agg_groups';
+import { esFilters, esQuery } from '../../../../../plugins/data/public';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -180,7 +180,7 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
       agg.buckets.some(bucket => bucket.key === '__missing__')
     ) {
       filters.push(
-        buildExistsFilter(
+        esFilters.buildExistsFilter(
           aggWithOtherBucket.params.field,
           aggWithOtherBucket.params.field.indexPattern
         )
@@ -196,7 +196,7 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
     });
 
     resultAgg.filters.filters[key] = {
-      bool: buildQueryFromFilters(filters, indexPattern),
+      bool: esQuery.buildQueryFromFilters(filters, indexPattern),
     };
   };
   walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
@@ -232,7 +232,7 @@ export const mergeOtherBucketAggResponse = (
     );
     const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
 
-    const phraseFilter = buildPhrasesFilter(
+    const phraseFilter = esFilters.buildPhrasesFilter(
       otherAgg.params.field,
       requestFilterTerms,
       otherAgg.params.field.indexPattern
@@ -243,7 +243,7 @@ export const mergeOtherBucketAggResponse = (
 
     if (aggResultBuckets.some(bucket => bucket.key === '__missing__')) {
       bucket.filters.push(
-        buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern)
+        esFilters.buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern)
       );
     }
     aggResultBuckets.push(bucket);

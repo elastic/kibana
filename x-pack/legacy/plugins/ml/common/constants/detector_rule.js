@@ -8,7 +8,6 @@
  * Contains values for ML job detector rules.
  */
 
-
 export const ACTION = {
   SKIP_MODEL_UPDATE: 'skip_model_update',
   SKIP_RESULT: 'skip_result',
@@ -33,9 +32,4 @@ export const OPERATOR = {
 };
 
 // List of detector functions which don't support rules with numeric conditions.
-export const CONDITIONS_NOT_SUPPORTED_FUNCTIONS = [
-  'freq_rare',
-  'lat_long',
-  'metric',
-  'rare',
-];
+export const CONDITIONS_NOT_SUPPORTED_FUNCTIONS = ['freq_rare', 'lat_long', 'metric', 'rare'];

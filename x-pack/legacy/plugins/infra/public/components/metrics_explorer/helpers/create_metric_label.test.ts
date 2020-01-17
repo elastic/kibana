@@ -5,15 +5,15 @@
  */
 
 import { createMetricLabel } from './create_metric_label';
-import { MetricsExplorerAggregation } from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric } from '../../../../server/routes/metrics_explorer/types';
 
 describe('createMetricLabel()', () => {
   it('should work with metrics with fields', () => {
-    const metric = { aggregation: MetricsExplorerAggregation.avg, field: 'system.load.1' };
+    const metric: MetricsExplorerMetric = { aggregation: 'avg', field: 'system.load.1' };
     expect(createMetricLabel(metric)).toBe('avg(system.load.1)');
   });
   it('should work with document count', () => {
-    const metric = { aggregation: MetricsExplorerAggregation.count };
+    const metric: MetricsExplorerMetric = { aggregation: 'count' };
     expect(createMetricLabel(metric)).toBe('count()');
   });
 });

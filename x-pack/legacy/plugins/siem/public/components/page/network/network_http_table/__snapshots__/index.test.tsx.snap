@@ -1,0 +1,102 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NetworkHttp Table Component rendering it renders the default NetworkHttp table 1`] = `
+<Connect(NetworkHttpTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "tiebreaker": null,
+          "value": "/computeMetadata/v1/instance/virtual-clock/drift-token",
+        },
+        "node": Object {
+          "_id": "/computeMetadata/v1/instance/virtual-clock/drift-token",
+          "domains": Array [
+            "metadata.google.internal",
+          ],
+          "lastHost": "suricata-iowa",
+          "lastSourceIp": "10.128.0.21",
+          "methods": Array [
+            "get",
+          ],
+          "path": "/computeMetadata/v1/instance/virtual-clock/drift-token",
+          "requestCount": 1440,
+          "statuses": Array [],
+        },
+      },
+      Object {
+        "cursor": Object {
+          "tiebreaker": null,
+          "value": "/computeMetadata/v1/",
+        },
+        "node": Object {
+          "_id": "/computeMetadata/v1/",
+          "domains": Array [
+            "metadata.google.internal",
+          ],
+          "lastHost": "suricata-iowa",
+          "lastSourceIp": "10.128.0.21",
+          "methods": Array [
+            "get",
+          ],
+          "path": "/computeMetadata/v1/",
+          "requestCount": 1020,
+          "statuses": Array [
+            "200",
+          ],
+        },
+      },
+      Object {
+        "cursor": Object {
+          "tiebreaker": null,
+          "value": "/computeMetadata/v1/instance/network-interfaces/",
+        },
+        "node": Object {
+          "_id": "/computeMetadata/v1/instance/network-interfaces/",
+          "domains": Array [
+            "metadata.google.internal",
+          ],
+          "lastHost": "suricata-iowa",
+          "lastSourceIp": "10.128.0.21",
+          "methods": Array [
+            "get",
+          ],
+          "path": "/computeMetadata/v1/instance/network-interfaces/",
+          "requestCount": 960,
+          "statuses": Array [],
+        },
+      },
+      Object {
+        "cursor": Object {
+          "tiebreaker": null,
+          "value": "/downloads/ca_setup.exe",
+        },
+        "node": Object {
+          "_id": "/downloads/ca_setup.exe",
+          "domains": Array [
+            "www.oxid.it",
+          ],
+          "lastHost": "jessie",
+          "lastSourceIp": "10.0.2.15",
+          "methods": Array [
+            "get",
+          ],
+          "path": "/downloads/ca_setup.exe",
+          "requestCount": 3,
+          "statuses": Array [
+            "200",
+          ],
+        },
+      },
+    ]
+  }
+  fakeTotalCount={4}
+  id="http"
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={false}
+  totalCount={4}
+  type="page"
+/>
+`;

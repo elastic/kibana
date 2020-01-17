@@ -21,7 +21,7 @@ export function getLegendColors(colorRamp, numLegendColors = 4) {
   const colors = [];
   colors[0] = getColor(colorRamp, 0);
   for (let i = 1; i < numLegendColors - 1; i++) {
-    colors[i] = getColor(colorRamp, Math.floor(colorRamp.length * i / numLegendColors));
+    colors[i] = getColor(colorRamp, Math.floor((colorRamp.length * i) / numLegendColors));
   }
   colors[numLegendColors - 1] = getColor(colorRamp, colorRamp.length - 1);
   return colors;

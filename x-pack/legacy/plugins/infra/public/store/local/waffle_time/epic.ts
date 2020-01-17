@@ -21,10 +21,7 @@ export const createWaffleTimeEpic = <State>(): Epic<
   State,
   WaffleTimeEpicDependencies<State>
 > => (action$, state$, { selectWaffleTimeUpdatePolicyInterval }) => {
-  const updateInterval$ = state$.pipe(
-    map(selectWaffleTimeUpdatePolicyInterval),
-    filter(isNotNull)
-  );
+  const updateInterval$ = state$.pipe(map(selectWaffleTimeUpdatePolicyInterval), filter(isNotNull));
 
   return action$.pipe(
     filter(startAutoReload.match),

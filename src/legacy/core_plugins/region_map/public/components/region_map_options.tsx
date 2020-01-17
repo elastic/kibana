@@ -28,7 +28,7 @@ import {
   NumberInputOption,
   SelectOption,
   SwitchOption,
-} from '../../../kbn_vislib_vis_types/public/components';
+} from '../../../vis_type_vislib/public/components';
 import { WmsOptions } from '../../../tile_map/public/components/wms_options';
 import { RegionMapVisParams } from '../types';
 
@@ -82,7 +82,10 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
   const setField = useCallback(
     (paramName: 'selectedJoinField', value: FileLayerField['name']) => {
       if (stateParams.selectedLayer) {
-        setValue(paramName, stateParams.selectedLayer.fields.find(f => f.name === value));
+        setValue(
+          paramName,
+          stateParams.selectedLayer.fields.find(f => f.name === value)
+        );
       }
     },
     [setValue, stateParams.selectedLayer]

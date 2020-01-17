@@ -9,5 +9,5 @@ Register a route handler for `DELETE` request.
 <b>Signature:</b>
 
 ```typescript
-delete: <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) => void;
+delete: RouteRegistrar<'delete'>;
 ```

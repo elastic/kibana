@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { transparentize } from 'polished';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
@@ -21,28 +21,26 @@ import {
   LogEntryColumnWidths,
 } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
-import { WithLogPosition } from '../../../containers/logs/with_log_position';
+import { LogPositionState } from '../../../containers/logs/log_position';
 import { localizedDate } from '../../../utils/formatters/datetime';
 
 export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
 }> = ({ columnConfigurations, columnWidths }) => {
+  const { firstVisiblePosition } = useContext(LogPositionState.Context);
   return (
     <LogColumnHeadersWrapper>
       {columnConfigurations.map(columnConfiguration => {
         if (isTimestampLogColumnConfiguration(columnConfiguration)) {
           return (
-            <WithLogPosition key={columnConfiguration.timestampColumn.id}>
-              {({ firstVisiblePosition }) => (
-                <LogColumnHeader
-                  columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
-                  data-test-subj="logColumnHeader timestampLogColumnHeader"
-                >
-                  {firstVisiblePosition ? localizedDate(firstVisiblePosition.time) : 'Timestamp'}
-                </LogColumnHeader>
-              )}
-            </WithLogPosition>
+            <LogColumnHeader
+              key={columnConfiguration.timestampColumn.id}
+              columnWidth={columnWidths[columnConfiguration.timestampColumn.id]}
+              data-test-subj="logColumnHeader timestampLogColumnHeader"
+            >
+              {firstVisiblePosition ? localizedDate(firstVisiblePosition.time) : 'Timestamp'}
+            </LogColumnHeader>
           );
         } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
           return (
@@ -79,9 +77,9 @@ const LogColumnHeader: React.FunctionComponent<{
   </LogColumnHeaderWrapper>
 );
 
-const LogColumnHeadersWrapper = euiStyled.div.attrs({
+const LogColumnHeadersWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
-})`
+}))`
   align-items: stretch;
   display: flex;
   flex-direction: row;
@@ -95,9 +93,9 @@ const LogColumnHeadersWrapper = euiStyled.div.attrs({
   z-index: 1;
 `;
 
-const LogColumnHeaderWrapper = LogEntryColumn.extend.attrs({
+const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs(() => ({
   role: 'columnheader',
-})`
+}))`
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -105,7 +103,7 @@ const LogColumnHeaderWrapper = LogEntryColumn.extend.attrs({
   overflow: hidden;
 `;
 
-const LogColumnHeaderContent = LogEntryColumnContent.extend`
+const LogColumnHeaderContent = euiStyled(LogEntryColumnContent)`
   color: ${props => props.theme.eui.euiTitleColor};
   font-size: ${props => props.theme.eui.euiFontSizeS};
   font-weight: ${props => props.theme.eui.euiFontWeightSemiBold};

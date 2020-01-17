@@ -5,6 +5,7 @@
  */
 import React, { useState, useEffect, Fragment } from 'react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -46,6 +47,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
     config,
     stats,
     retention,
+    isManagedPolicy,
   } = policy;
   const { includeGlobalState, ignoreUnavailable, indices, partial } = config || {
     includeGlobalState: undefined,
@@ -130,6 +132,22 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
 
   return (
     <Fragment>
+      {isManagedPolicy ? (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="iInCircle"
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyDetails.managedPolicyWarningTitle"
+                defaultMessage="This is a managed policy used by other systems. Any changes you make might affect how these systems operate."
+              />
+            }
+          />
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
       {/** Stats panel */}
       {stats && (
         <Fragment>

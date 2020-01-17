@@ -15,38 +15,164 @@ const taskManagerQuery = {
           {
             term: {
               'task.scope': scope,
-            }
-          }
-        ]
-      }
-    }
-  }
+            },
+          },
+        ],
+      },
+    },
+  },
 };
 
-export function initRoutes(server) {
-  const taskManager = server.plugins.task_manager;
-
+export function initRoutes(server, taskManager, legacyTaskManager, taskTestingEvents) {
   server.route({
-    path: '/api/sample_tasks',
+    path: '/api/sample_tasks/schedule',
     method: 'POST',
     config: {
       validate: {
         payload: Joi.object({
-          taskType: Joi.string().required(),
-          interval: Joi.string().optional(),
-          params: Joi.object().required(),
-          state: Joi.object().optional(),
-          id: Joi.string().optional(),
+          task: Joi.object({
+            taskType: Joi.string().required(),
+            schedule: Joi.object({
+              interval: Joi.string(),
+            }).optional(),
+            interval: Joi.string().optional(),
+            params: Joi.object().required(),
+            state: Joi.object().optional(),
+            id: Joi.string().optional(),
+          }),
         }),
       },
     },
     async handler(request) {
       try {
-        const task = await taskManager.schedule({
-          ...request.payload,
+        const { task: taskFields } = request.payload;
+        const task = {
+          ...taskFields,
           scope: [scope],
-        }, { request });
-        return task;
+        };
+
+        const taskResult = await taskManager.schedule(task, { request });
+
+        return taskResult;
+      } catch (err) {
+        return err;
+      }
+    },
+  });
+
+  /*
+    Schedule using legacy Api
+   */
+  server.route({
+    path: '/api/sample_tasks/schedule_legacy',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            taskType: Joi.string().required(),
+            schedule: Joi.object({
+              interval: Joi.string(),
+            }).optional(),
+            interval: Joi.string().optional(),
+            params: Joi.object().required(),
+            state: Joi.object().optional(),
+            id: Joi.string().optional(),
+          }),
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        const { task: taskFields } = request.payload;
+        const task = {
+          ...taskFields,
+          scope: [scope],
+        };
+
+        const taskResult = await legacyTaskManager.schedule(task, { request });
+
+        return taskResult;
+      } catch (err) {
+        return err;
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/sample_tasks/run_now',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            id: Joi.string().optional(),
+          }),
+        }),
+      },
+    },
+    async handler(request) {
+      const {
+        task: { id },
+      } = request.payload;
+      try {
+        return await taskManager.runNow(id);
+      } catch (err) {
+        return { id, error: `${err}` };
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/sample_tasks/ensure_scheduled',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            taskType: Joi.string().required(),
+            params: Joi.object().required(),
+            state: Joi.object().optional(),
+            id: Joi.string().optional(),
+          }),
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        const { task: taskFields } = request.payload;
+        const task = {
+          ...taskFields,
+          scope: [scope],
+        };
+
+        const taskResult = await taskManager.ensureScheduled(task, { request });
+
+        return taskResult;
+      } catch (err) {
+        return err;
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/sample_tasks/event',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          event: Joi.string().required(),
+          data: Joi.object()
+            .optional()
+            .default({}),
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        const { event, data } = request.payload;
+        taskTestingEvents.emit(event, data);
+        return { event };
       } catch (err) {
         return err;
       }
@@ -64,7 +190,31 @@ export function initRoutes(server) {
       } catch (err) {
         return err;
       }
-    }
+    },
+  });
+
+  server.route({
+    path: '/api/sample_tasks/task/{taskId}',
+    method: 'GET',
+    async handler(request) {
+      try {
+        return taskManager.fetch({
+          query: {
+            bool: {
+              must: [
+                {
+                  ids: {
+                    values: [`task:${request.params.taskId}`],
+                  },
+                },
+              ],
+            },
+          },
+        });
+      } catch (err) {
+        return err;
+      }
+    },
   });
 
   server.route({
@@ -72,10 +222,15 @@ export function initRoutes(server) {
     method: 'DELETE',
     async handler() {
       try {
-        const { docs: tasks } = await taskManager.fetch({
-          query: taskManagerQuery,
-        });
-        return Promise.all(tasks.map((task) => taskManager.remove(task.id)));
+        let tasksFound = 0;
+        do {
+          const { docs: tasks } = await taskManager.fetch({
+            query: taskManagerQuery,
+          });
+          tasksFound = tasks.length;
+          await Promise.all(tasks.map(task => taskManager.remove(task.id)));
+        } while (tasksFound > 0);
+        return 'OK';
       } catch (err) {
         return err;
       }

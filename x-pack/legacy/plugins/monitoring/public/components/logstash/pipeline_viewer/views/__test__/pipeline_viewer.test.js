@@ -54,7 +54,9 @@ describe('PipelineViewer component', () => {
 
   it('renders DetailDrawer when selected vertex is not null', () => {
     const vertex = { id: 'stdin' };
-    component = <PipelineViewer pipeline={pipeline} setDetailVertexId={jest.fn()} detailVertex={vertex} />;
+    component = (
+      <PipelineViewer pipeline={pipeline} setDetailVertexId={jest.fn()} detailVertex={vertex} />
+    );
 
     const renderedComponent = shallow(component);
 

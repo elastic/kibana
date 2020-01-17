@@ -32,17 +32,56 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
   function deleteCreatedConfigurations() {
     const promises = Promise.all(createdConfigIds.map(deleteConfiguration));
-    createdConfigIds = [];
     return promises;
   }
 
   function deleteConfiguration(configurationId: string) {
     return supertest
       .delete(`/api/apm/settings/agent-configuration/${configurationId}`)
-      .set('kbn-xsrf', 'foo');
+      .set('kbn-xsrf', 'foo')
+      .then((response: any) => {
+        createdConfigIds = createdConfigIds.filter(id => id === configurationId);
+        return response;
+      });
   }
 
   describe('agent configuration', () => {
+    describe('when creating one configuration', () => {
+      let createdConfigId: string;
+
+      const parameters = {
+        service: { name: 'myservice', environment: 'development' },
+        etag: '7312bdcc34999629a3d39df24ed9b2a7553c0c39',
+      };
+
+      before(async () => {
+        log.debug('creating agent configuration');
+
+        // all / all
+        const { body } = await createConfiguration({
+          service: {},
+          settings: { transaction_sample_rate: 0.1 },
+        });
+
+        createdConfigId = body._id;
+      });
+
+      it('returns the created configuration', async () => {
+        const { statusCode, body } = await searchConfigurations(parameters);
+
+        expect(statusCode).to.equal(200);
+        expect(body._id).to.equal(createdConfigId);
+      });
+
+      it('succesfully deletes the configuration', async () => {
+        await deleteConfiguration(createdConfigId);
+
+        const { statusCode } = await searchConfigurations(parameters);
+
+        expect(statusCode).to.equal(404);
+      });
+    });
+
     describe('when creating four configurations', () => {
       before(async () => {
         log.debug('creating agent configuration');

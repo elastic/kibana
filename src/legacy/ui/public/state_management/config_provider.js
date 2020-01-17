@@ -25,21 +25,24 @@
 
 import { uiModules } from '../modules';
 
-uiModules.get('kibana/state_management')
-  .provider('stateManagementConfig', class StateManagementConfigProvider {
-    _enabled = true
+export class StateManagementConfigProvider {
+  _enabled = true;
 
-    $get(/* inject stuff */) {
-      return {
-        enabled: this._enabled,
-      };
-    }
+  $get(/* inject stuff */) {
+    return {
+      enabled: this._enabled,
+    };
+  }
 
-    disable() {
-      this._enabled = false;
-    }
+  disable() {
+    this._enabled = false;
+  }
 
-    enable() {
-      this._enabled = true;
-    }
-  });
+  enable() {
+    this._enabled = true;
+  }
+}
+
+uiModules
+  .get('kibana/state_management')
+  .provider('stateManagementConfig', StateManagementConfigProvider);

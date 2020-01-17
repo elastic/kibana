@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import boom from 'boom';
 import Joi from 'joi';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, RequestFacade, ReportingResponseToolkit } from '../../types';
+import { ServerFacade, ReportingResponseToolkit } from '../../types';
 import {
   getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,
   RouteConfigFactory,
 } from './lib/route_config_factories';
+import { makeRequestFacade } from './lib/make_request_facade';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
@@ -54,7 +56,8 @@ export function registerGenerateFromJobParams(
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     options: getRouteConfig(),
-    handler: async (request: RequestFacade, h: ReportingResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
       let jobParamsRison: string | null;
 
       if (request.payload) {
@@ -76,8 +79,11 @@ export function registerGenerateFromJobParams(
       const { exportType } = request.params;
       let response;
       try {
-        const jobParams = rison.decode(jobParamsRison);
-        response = await handler(exportType, jobParams, request, h);
+        const jobParams = rison.decode(jobParamsRison) as object | null;
+        if (!jobParams) {
+          throw new Error('missing jobParams!');
+        }
+        response = await handler(exportType, jobParams, legacyRequest, h);
       } catch (err) {
         throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
       }

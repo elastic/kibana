@@ -22,7 +22,7 @@ import {
   CLEAR_ADD_CLUSTER_ERRORS,
 } from '../action_types';
 
-export const addCluster = (cluster) => async (dispatch) => {
+export const addCluster = cluster => async dispatch => {
   dispatch({
     type: ADD_CLUSTER_START,
   });
@@ -45,10 +45,13 @@ export const addCluster = (cluster) => async (dispatch) => {
             type: ADD_CLUSTER_FAILURE,
             payload: {
               error: {
-                message: i18n.translate('xpack.remoteClusters.addAction.clusterNameAlreadyExistsErrorMessage', {
-                  defaultMessage: `A cluster with the name '{clusterName}' already exists.`,
-                  values: { clusterName: cluster.name },
-                }),
+                message: i18n.translate(
+                  'xpack.remoteClusters.addAction.clusterNameAlreadyExistsErrorMessage',
+                  {
+                    defaultMessage: `A cluster with the name '{clusterName}' already exists.`,
+                    values: { clusterName: cluster.name },
+                  }
+                ),
               },
             },
           });
@@ -71,24 +74,34 @@ export const addCluster = (cluster) => async (dispatch) => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(error, i18n.translate('xpack.remoteClusters.addAction.errorTitle', {
-      defaultMessage: 'Error adding cluster',
-    }));
+    return fatalError(
+      error,
+      i18n.translate('xpack.remoteClusters.addAction.errorTitle', {
+        defaultMessage: 'Error adding cluster',
+      })
+    );
   }
 
   dispatch({
     type: ADD_CLUSTER_SUCCESS,
   });
 
-  const { history, route: { location: { search } }  } = getRouter();
+  const {
+    history,
+    route: {
+      location: { search },
+    },
+  } = getRouter();
   const { redirect: redirectUrl } = extractQueryParams(search);
 
   if (redirectUrl) {
     // A toast is only needed if we're leaving the app.
-    toasts.addSuccess(i18n.translate('xpack.remoteClusters.addAction.successTitle', {
-      defaultMessage: `Added remote cluster '{name}'`,
-      values: { name: cluster.name },
-    }));
+    toasts.addSuccess(
+      i18n.translate('xpack.remoteClusters.addAction.successTitle', {
+        defaultMessage: `Added remote cluster '{name}'`,
+        values: { name: cluster.name },
+      })
+    );
 
     const decodedRedirect = decodeURIComponent(redirectUrl);
     redirect(`${decodedRedirect}?cluster=${cluster.name}`);
@@ -102,7 +115,7 @@ export const addCluster = (cluster) => async (dispatch) => {
   }
 };
 
-export const clearAddClusterErrors = () => (dispatch) => {
+export const clearAddClusterErrors = () => dispatch => {
   dispatch({
     type: CLEAR_ADD_CLUSTER_ERRORS,
   });

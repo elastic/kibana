@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { RequestFacade, ReportingResponseToolkit, JobDocPayload } from '../../types';
 
 export type HandlerFunction = (
-  exportType: any,
-  jobParams: any,
-  request: RequestFacade,
+  exportType: string,
+  jobParams: object,
+  request: Legacy.Request,
   h: ReportingResponseToolkit
 ) => any;
 
-export type HandlerErrorFunction = (exportType: any, err: Error) => any;
+export type HandlerErrorFunction = (exportType: string, err: Error) => any;
 
-export interface QueuedJobPayload {
+export interface QueuedJobPayload<JobParamsType> {
   error?: boolean;
   source: {
     job: {
-      payload: JobDocPayload;
+      payload: JobDocPayload<JobParamsType>;
     };
   };
 }

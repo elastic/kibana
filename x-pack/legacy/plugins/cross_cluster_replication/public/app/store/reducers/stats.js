@@ -17,10 +17,13 @@ export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.AUTO_FOLLOW_STATS_LOAD): {
       const { recentAutoFollowErrors, ...rest } = action.payload;
-      return { ...state, autoFollow: {
-        ...rest,
-        recentAutoFollowErrors: parseAutoFollowErrors(recentAutoFollowErrors)
-      } };
+      return {
+        ...state,
+        autoFollow: {
+          ...rest,
+          recentAutoFollowErrors: parseAutoFollowErrors(recentAutoFollowErrors),
+        },
+      };
     }
     default:
       return state;

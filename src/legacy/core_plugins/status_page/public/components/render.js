@@ -34,12 +34,9 @@ export function renderStatusPage(buildNum, buildSha) {
 
   render(
     <I18nContext>
-      <StatusApp
-        buildNum={buildNum}
-        buildSha={buildSha}
-      />
+      <StatusApp buildNum={buildNum} buildSha={buildSha} />
     </I18nContext>,
-    node,
+    node
   );
 }
 

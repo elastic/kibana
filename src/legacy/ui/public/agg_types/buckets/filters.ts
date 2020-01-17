@@ -21,16 +21,14 @@ import _ from 'lodash';
 import angular from 'angular';
 
 import { i18n } from '@kbn/i18n';
-import { Storage } from 'ui/storage';
 
 import chrome from 'ui/chrome';
-import { buildEsQuery } from '@kbn/es-query';
 import { FiltersParamEditor, FilterValue } from '../../vis/editors/default/controls/filters';
 import { createFilterFilters } from './create_filter/filters';
-import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
-import { setup as data } from '../../../../core_plugins/data/public/legacy';
+import { BucketAggType } from './_bucket_agg_type';
+import { Storage } from '../../../../../plugins/kibana_utils/public';
+import { getQueryLog, esQuery } from '../../../../../plugins/data/public';
 
-const { getQueryLog } = data.query.helpers;
 const config = chrome.getUiSettingsClient();
 const storage = new Storage(window.localStorage);
 
@@ -50,7 +48,7 @@ export const filtersBucketAgg = new BucketAggType({
       name: 'filters',
       editorComponent: FiltersParamEditor,
       default: [{ input: { query: '', language: config.get('search:queryLanguage') }, label: '' }],
-      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         const inFilters: FilterValue[] = aggConfig.params.filters;
         if (!_.size(inFilters)) return;
 
@@ -69,7 +67,7 @@ export const filtersBucketAgg = new BucketAggType({
               return;
             }
 
-            const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
+            const query = esQuery.buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
 
             if (!query) {
               console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console

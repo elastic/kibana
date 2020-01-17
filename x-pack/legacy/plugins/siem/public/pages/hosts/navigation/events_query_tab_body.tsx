@@ -4,53 +4,75 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
-import { manageQuery } from '../../../components/page/manage_query';
-import { EventsOverTimeHistogram } from '../../../components/page/hosts/events_over_time';
-import { EventsOverTimeQuery } from '../../../containers/events/events_over_time';
 import { hostsModel } from '../../../store/hosts';
+import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
+import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
+import * as i18n from '../translations';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
-const EventsOverTimeManage = manageQuery(EventsOverTimeHistogram);
+const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
+
+export const eventsStackByOptions: MatrixHistogramOption[] = [
+  {
+    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION,
+    value: 'event.action',
+  },
+  {
+    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_DATASET,
+    value: 'event.dataset',
+  },
+];
 
 export const EventsQueryTabBody = ({
+  deleteQuery,
   endDate,
   filterQuery,
   setQuery,
+  skip,
   startDate,
-  timezone,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: EVENTS_HISTOGRAM_ID });
+      }
+    };
+  }, [deleteQuery]);
   return (
     <>
-      <EventsOverTimeQuery
+      <MatrixHistogramContainer
+        dataKey="EventsHistogram"
+        defaultStackByOption={eventsStackByOptions[0]}
+        deleteQuery={deleteQuery}
         endDate={endDate}
+        isEventsHistogram={true}
+        errorMessage={i18n.ERROR_FETCHING_EVENTS_DATA}
         filterQuery={filterQuery}
+        query={MatrixHistogramGqlQuery}
+        setQuery={setQuery}
+        skip={skip}
         sourceId="default"
+        stackByOptions={eventsStackByOptions}
         startDate={startDate}
-        timezone={timezone}
         type={hostsModel.HostsType.page}
-      >
-        {({ eventsOverTime, loading, id, inspect, refetch, totalCount }) => (
-          <EventsOverTimeManage
-            data={eventsOverTime!}
-            endDate={endDate}
-            id={id}
-            inspect={inspect}
-            loading={loading}
-            refetch={refetch}
-            setQuery={setQuery}
-            startDate={startDate}
-            totalCount={totalCount}
-            updateDateRange={updateDateRange}
-          />
-        )}
-      </EventsOverTimeQuery>
+        title={i18n.NAVIGATION_EVENTS_TITLE}
+        updateDateRange={updateDateRange}
+        id={EVENTS_HISTOGRAM_ID}
+      />
       <EuiSpacer size="l" />
-      <StatefulEventsViewer end={endDate} id={HOSTS_PAGE_TIMELINE_ID} start={startDate} />
+      <StatefulEventsViewer
+        defaultModel={eventsDefaultModel}
+        end={endDate}
+        id={HOSTS_PAGE_TIMELINE_ID}
+        start={startDate}
+      />
     </>
   );
 };

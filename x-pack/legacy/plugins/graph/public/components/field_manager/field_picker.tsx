@@ -37,9 +37,9 @@ export function FieldPicker({
       // only update the field options if the popover is not open currently.
       // This is necessary because EuiSelectable assumes options don't change
       // on their own.
-      setFieldOptions(toOptions(allFields));
+      setFieldOptions(toOptions(Object.values(fieldMap)));
     }
-  }, [fieldMap]);
+  }, [fieldMap, open]);
 
   const badgeDescription = i18n.translate('xpack.graph.bar.pickFieldsLabel', {
     defaultMessage: 'Add fields',
@@ -114,9 +114,26 @@ export function FieldPicker({
 function toOptions(
   fields: WorkspaceField[]
 ): Array<{ label: string; checked?: 'on' | 'off'; prepend?: ReactNode }> {
-  return fields.map(field => ({
-    label: field.name,
-    prepend: <FieldIcon type={field.type} size="m" useColor />,
-    checked: field.selected ? 'on' : undefined,
-  }));
+  return (
+    fields
+      // don't show non-aggregatable fields, except for the case when they are already selected.
+      // this is necessary to ensure backwards compatibility with existing workspaces that might
+      // contain non-aggregatable fields.
+      .filter(field => isExplorable(field) || field.selected)
+      .map(field => ({
+        label: field.name,
+        prepend: <FieldIcon type={field.type} size="m" useColor />,
+        checked: field.selected ? 'on' : undefined,
+      }))
+  );
+}
+
+const explorableTypes = ['string', 'number', 'date', 'ip', 'boolean'];
+
+function isExplorable(field: WorkspaceField) {
+  if (!field.aggregatable) {
+    return false;
+  }
+
+  return explorableTypes.includes(field.type);
 }

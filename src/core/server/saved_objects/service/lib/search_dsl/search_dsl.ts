@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { KueryNode } from '@kbn/es-query';
 import Boom from 'boom';
 
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { esKuery } from '../../../../../../plugins/data/server';
 
 interface GetSearchDslOptions {
   type: string | string[];
@@ -37,7 +38,7 @@ interface GetSearchDslOptions {
     type: string;
     id: string;
   };
-  kueryNode?: KueryNode;
+  kueryNode?: esKuery.KueryNode;
 }
 
 export function getSearchDsl(

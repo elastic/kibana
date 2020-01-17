@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`props iconType 1`] = `
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
+  data-test-subj="homeSynopsisLinkgreat tutorial"
+  description="this is a great tutorial about..."
+  href="link_to_item"
+  icon={
+    <EuiIcon
+      size="l"
+      type="logoApache"
+    />
+  }
+  layout="horizontal"
+  title="Great tutorial"
+/>
+`;
+
+exports[`props iconUrl 1`] = `
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
+  data-test-subj="homeSynopsisLinkgreat tutorial"
+  description="this is a great tutorial about..."
+  href="link_to_item"
+  icon={
+    <img
+      alt=""
+      className="synopsisIcon"
+      src="icon_url"
+    />
+  }
+  layout="horizontal"
+  title="Great tutorial"
+/>
+`;
+
+exports[`props isBeta 1`] = `
+<EuiCard
+  betaBadgeLabel="Beta"
+  className="homSynopsis__card homSynopsis__card--noPanel"
+  data-test-subj="homeSynopsisLinkgreat tutorial"
+  description="this is a great tutorial about..."
+  href="link_to_item"
+  layout="horizontal"
+  title="Great tutorial"
+/>
+`;
+
+exports[`render 1`] = `
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
+  data-test-subj="homeSynopsisLinkgreat tutorial"
+  description="this is a great tutorial about..."
+  href="link_to_item"
+  layout="horizontal"
+  title="Great tutorial"
+/>
+`;

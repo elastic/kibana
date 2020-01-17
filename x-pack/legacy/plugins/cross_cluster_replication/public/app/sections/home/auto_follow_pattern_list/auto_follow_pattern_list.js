@@ -24,7 +24,6 @@ import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD } from '../../../constant
 import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
 import { AutoFollowPatternTable, DetailPanel } from './components';
 
-
 const REFRESH_RATE_MS = 30000;
 
 const getQueryParamPattern = ({ location: { search } }) => {
@@ -40,7 +39,7 @@ export class AutoFollowPatternList extends PureComponent {
     autoFollowPatterns: PropTypes.array,
     apiStatus: PropTypes.string,
     apiError: PropTypes.object,
-  }
+  };
 
   static getDerivedStateFromProps({ autoFollowPatternId }, { lastAutoFollowPatternId }) {
     if (autoFollowPatternId !== lastAutoFollowPatternId) {
@@ -58,7 +57,12 @@ export class AutoFollowPatternList extends PureComponent {
   };
 
   componentDidMount() {
-    const { loadAutoFollowPatterns, loadAutoFollowStats, selectAutoFollowPattern, history } = this.props;
+    const {
+      loadAutoFollowPatterns,
+      loadAutoFollowStats,
+      selectAutoFollowPattern,
+      history,
+    } = this.props;
 
     trackUiMetric(METRIC_TYPE.LOADED, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD);
     loadAutoFollowPatterns();
@@ -80,7 +84,7 @@ export class AutoFollowPatternList extends PureComponent {
      * we persist the auto-follow pattern id to query params for deep linking
      */
     if (lastAutoFollowPatternId !== prevState.lastAutoFollowPatternId) {
-      if(!lastAutoFollowPatternId) {
+      if (!lastAutoFollowPatternId) {
         history.replace({
           search: '',
         });
@@ -143,12 +147,12 @@ export class AutoFollowPatternList extends PureComponent {
     if (!isAuthorized) {
       return (
         <SectionUnauthorized
-          title={(
+          title={
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternList.permissionErrorTitle"
               defaultMessage="Permission error"
             />
-          )}
+          }
         >
           <FormattedMessage
             id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
@@ -159,9 +163,12 @@ export class AutoFollowPatternList extends PureComponent {
     }
 
     if (apiError) {
-      const title = i18n.translate('xpack.crossClusterReplication.autoFollowPatternList.loadingErrorTitle', {
-        defaultMessage: 'Error loading auto-follow patterns'
-      });
+      const title = i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternList.loadingErrorTitle',
+        {
+          defaultMessage: 'Error loading auto-follow patterns',
+        }
+      );
 
       return (
         <Fragment>
@@ -193,14 +200,14 @@ export class AutoFollowPatternList extends PureComponent {
     return (
       <EuiEmptyPrompt
         iconType="managementApp"
-        title={(
+        title={
           <h1>
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptTitle"
               defaultMessage="Create your first auto-follow pattern"
             />
           </h1>
-        )}
+        }
         body={
           <Fragment>
             <p>
@@ -231,23 +238,22 @@ export class AutoFollowPatternList extends PureComponent {
   }
 
   renderList() {
-    const {
-      selectAutoFollowPattern,
-      autoFollowPatterns,
-    } = this.props;
+    const { selectAutoFollowPattern, autoFollowPatterns } = this.props;
 
     const { isDetailPanelOpen } = this.state;
 
     return (
       <Fragment>
         <AutoFollowPatternTable autoFollowPatterns={autoFollowPatterns} />
-        {isDetailPanelOpen && <DetailPanel closeDetailPanel={() => selectAutoFollowPattern(null)} />}
+        {isDetailPanelOpen && (
+          <DetailPanel closeDetailPanel={() => selectAutoFollowPattern(null)} />
+        )}
       </Fragment>
     );
   }
 
   render() {
-    const { autoFollowPatterns, apiStatus,  } = this.props;
+    const { autoFollowPatterns, apiStatus } = this.props;
     const isEmpty = apiStatus === API_STATUS.IDLE && !autoFollowPatterns.length;
 
     return (

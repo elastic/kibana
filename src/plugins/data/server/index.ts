@@ -18,14 +18,79 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { DataServerPlugin } from './plugin';
+import { DataServerPlugin, DataPluginSetup } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
 
-export { DataServerPlugin as Plugin };
-
-export * from './search';
-
+/**
+ * Types to be shared externally
+ * @public
+ */
 export { IRequestTypesMap, IResponseTypesMap } from './search';
+export {
+  // field formats
+  FIELD_FORMAT_IDS,
+  IFieldFormat,
+  IFieldFormatId,
+  IFieldFormatType,
+  // index patterns
+  IIndexPattern,
+  IFieldType,
+  IFieldSubType,
+  // kbn field types
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  // query
+  Query,
+  // timefilter
+  RefreshInterval,
+  TimeRange,
+  // utils
+  parseInterval,
+} from '../common';
+
+/**
+ * Static code to be shared externally
+ * @public
+ */
+export {
+  IndexPatternsFetcher,
+  FieldDescriptor,
+  shouldReadFieldFromDocValues,
+  indexPatterns,
+} from './index_patterns';
+export * from './search';
+export {
+  // es query
+  esFilters,
+  esKuery,
+  esQuery,
+  // field formats
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DEFAULT_CONVERTER_COLOR,
+  DurationFormat,
+  FieldFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  StringFormat,
+  TruncateFormat,
+  UrlFormat,
+  // index patterns
+  isFilterable,
+  // kbn field types
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
+} from '../common';
+
+export { DataServerPlugin as Plugin, DataPluginSetup as PluginSetup };

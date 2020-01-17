@@ -5,24 +5,25 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import React from 'react';
 
 import { TestProviders } from '../../mock/test_providers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Ip } from '.';
 
 describe('Port', () => {
+  const mount = useMountAppended();
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders the the ip address', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
       </TestProviders>
@@ -37,7 +38,7 @@ describe('Port', () => {
   });
 
   test('it hyperlinks to the network/ip page', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
       </TestProviders>
@@ -49,6 +50,6 @@ describe('Port', () => {
         .find('a')
         .first()
         .props().href
-    ).toEqual('#/link-to/network/ip/10.1.2.3');
+    ).toEqual('#/link-to/network/ip/10.1.2.3/source');
   });
 });

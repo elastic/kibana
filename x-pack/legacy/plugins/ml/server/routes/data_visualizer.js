@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { DataVisualizer } from '../models/data_visualizer';
-
 
 function getOverallStats(
   callWithRequest,
@@ -20,7 +17,8 @@ function getOverallStats(
   samplerShardSize,
   timeFieldName,
   earliestMs,
-  latestMs) {
+  latestMs
+) {
   const dv = new DataVisualizer(callWithRequest);
   return dv.getOverallStats(
     indexPatternTitle,
@@ -44,7 +42,8 @@ function getStatsForFields(
   earliestMs,
   latestMs,
   interval,
-  maxExamples) {
+  maxExamples
+) {
   const dv = new DataVisualizer(callWithRequest);
   return dv.getStatsForFields(
     indexPatternTitle,
@@ -59,9 +58,7 @@ function getStatsForFields(
   );
 }
 
-
 export function dataVisualizerRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
-
   route({
     method: 'POST',
     path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
@@ -79,12 +76,12 @@ export function dataVisualizerRoutes({ commonRouteConfig, elasticsearchPlugin, r
         payload.earliest,
         payload.latest,
         payload.interval,
-        payload.maxExamples)
-        .catch(resp => wrapError(resp));
+        payload.maxExamples
+      ).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -103,12 +100,11 @@ export function dataVisualizerRoutes({ commonRouteConfig, elasticsearchPlugin, r
         payload.samplerShardSize,
         payload.timeFieldName,
         payload.earliest,
-        payload.latest)
-        .catch(resp => wrapError(resp));
+        payload.latest
+      ).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
 }

@@ -157,6 +157,11 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       });
     }
 
+    public async refreshJobList() {
+      await testSubjects.click('mlRefreshJobListButton');
+      await this.waitForJobsToLoad();
+    }
+
     public async waitForJobsToLoad() {
       await testSubjects.existOrFail('~mlJobListTable', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
@@ -206,7 +211,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async clickActionsMenu(jobId: string) {
-      retry.tryForTime(30 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         if (!(await testSubjects.exists('mlActionButtonDeleteJob'))) {
           await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
           await testSubjects.existOrFail('mlActionButtonDeleteJob', { timeout: 5000 });
@@ -229,6 +234,16 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async confirmDeleteJobModal() {
       await testSubjects.click('mlDeleteJobConfirmModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
+    }
+
+    public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleMetricViewer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageSingleMetricViewer');
+    }
+
+    public async clickOpenJobInAnomalyExplorerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleAnomalyExplorer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageAnomalyExplorer');
     }
   })();
 }

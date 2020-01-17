@@ -22,8 +22,6 @@ import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
 declare global {
   interface Window {
-    corePluginB?: string;
-    hasAccessToInjectedMetadata?: boolean;
     env?: PluginInitializerContext['env'];
   }
 }
@@ -38,9 +36,6 @@ export class CorePluginBPlugin
     window.env = pluginContext.env;
   }
   public setup(core: CoreSetup, deps: CorePluginBDeps) {
-    window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
-    window.hasAccessToInjectedMetadata = 'getInjectedVar' in core.injectedMetadata;
-
     core.application.register({
       id: 'bar',
       title: 'Bar',
@@ -49,6 +44,12 @@ export class CorePluginBPlugin
         return renderApp(context, params);
       },
     });
+
+    return {
+      sayHi() {
+        return `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+      },
+    };
   }
 
   public start() {}

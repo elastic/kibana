@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { buildRangeFilter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../_bucket_agg_type';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 export const createFilterRange = (aggConfig: IBucketAggConfig, params: any) => {
-  return buildRangeFilter(
+  return esFilters.buildRangeFilter(
     aggConfig.params.field,
     params,
     aggConfig.getIndexPattern(),

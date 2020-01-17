@@ -32,8 +32,8 @@ import {
   ColorFormat,
   BoolFormat,
   SourceFormat,
-  StaticLookupFormat
-} from '../../../../../plugins/data/common';
+  StaticLookupFormat,
+} from '../../../../../plugins/data/server';
 
 export function registerFieldFormats(server) {
   server.registerFieldFormat(UrlFormat);
