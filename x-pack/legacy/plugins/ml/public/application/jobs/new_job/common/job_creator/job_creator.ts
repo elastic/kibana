@@ -626,9 +626,6 @@ export class JobCreator {
     if (this._datafeed_config.aggregations?.buckets !== undefined) {
       traverseAggs(this._datafeed_config.aggregations.buckets, this._aggregationFields);
     }
-    // if (this._scriptFields.length) {
-    //   this._fields
-    // }
   }
 }
 
@@ -636,15 +633,16 @@ function traverseAggs(o: any, aggFields: Field[]) {
   for (const i in o) {
     if (o[i] !== null && typeof o[i] === 'object') {
       if (i === 'aggregations' || i === 'aggs') {
-        const aggFieldName = Object.keys(o[i])[0];
-        if (aggFieldName !== undefined) {
-          aggFields.push({
-            id: aggFieldName,
-            name: aggFieldName,
-            type: ES_FIELD_TYPES.KEYWORD,
-            aggregatable: true,
-          });
-        }
+        Object.keys(o[i]).forEach(k => {
+          if (k !== 'aggregations' && i !== 'aggs') {
+            aggFields.push({
+              id: k,
+              name: k,
+              type: ES_FIELD_TYPES.KEYWORD,
+              aggregatable: true,
+            });
+          }
+        });
       }
       traverseAggs(o[i], aggFields);
     }
