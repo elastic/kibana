@@ -23,5 +23,3 @@ exports.REPO_ROOT = dirname(require.resolve('../../../package.json'));
 exports.ASSET_DIR = resolve(exports.REPO_ROOT, 'built_assets/storybook');
 exports.CURRENT_CONFIG = resolve(exports.ASSET_DIR, 'current.config.js');
 exports.STORY_ENTRY_PATH = resolve(exports.ASSET_DIR, 'stories.entry.js');
-exports.DLL_DIST_DIR = resolve(exports.ASSET_DIR, 'dll');
-exports.DLL_NAME = 'storybook_dll';

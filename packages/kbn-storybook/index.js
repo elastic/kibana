@@ -25,12 +25,11 @@ const storybook = require('@storybook/react/standalone');
 const { run } = require('@kbn/dev-utils');
 const { generateStorybookEntry } = require('./lib/storybook_entry');
 const { REPO_ROOT, CURRENT_CONFIG } = require('./lib/constants');
-const { buildDll } = require('./lib/dll');
 
 exports.runStorybookCli = config => {
   const { name, storyGlobs } = config;
   run(
-    async ({ flags, log, procRunner }) => {
+    async ({ log, procRunner }) => {
       log.debug('Global config:\n', require('./lib/constants'));
 
       const currentConfig = JSON.stringify(config, null, 2);
@@ -38,12 +37,6 @@ exports.runStorybookCli = config => {
       await fs.promises.mkdir(currentConfigDir, { recursive: true });
       log.debug('Writing currentConfig:\n', CURRENT_CONFIG + '\n', currentConfig);
       await fs.promises.writeFile(CURRENT_CONFIG, `exports.currentConfig = ${currentConfig};`);
-
-      await buildDll({
-        rebuildDll: flags.rebuildDll,
-        log,
-        procRunner,
-      });
 
       // Build sass and continue when initial build complete
       await procRunner.run('watch sass', {
@@ -76,9 +69,6 @@ exports.runStorybookCli = config => {
       ]);
     },
     {
-      flags: {
-        boolean: ['rebuildDll'],
-      },
       description: `
         Run the storybook examples for ${name}
       `,
