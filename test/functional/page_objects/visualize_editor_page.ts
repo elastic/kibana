@@ -362,10 +362,6 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
 
-    public async clickYAxisAdvancedOptions(axisId: string) {
-      await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
-    }
-
     public async changeYAxisFilterLabelsCheckbox(axisId: string, enabled: boolean) {
       const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
       await testSubjects.setCheckbox(selector, enabled ? 'check' : 'uncheck');
@@ -384,8 +380,9 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async selectYAxisScaleType(axisId: string, scaleType: string) {
-      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[value="${scaleType}"]`);
+      const selector = await find.byCssSelector(
+        `#scaleSelectYAxis-${axisId} > option[value="${scaleType}"]`
+      );
       await selector.click();
     }
 
