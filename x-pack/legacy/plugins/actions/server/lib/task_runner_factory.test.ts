@@ -67,11 +67,15 @@ const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
+  getScopedSavedObjectsClient: jest.fn().mockReturnValue(savedObjectsClientMock.create()),
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
+  taskRunnerFactoryInitializerParams.getScopedSavedObjectsClient.mockReturnValue(
+    savedObjectsClientMock.create()
+  );
 });
 
 test(`throws an error if factory isn't initialized`, () => {
