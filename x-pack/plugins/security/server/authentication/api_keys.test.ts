@@ -142,4 +142,57 @@ describe('API Keys', () => {
       );
     });
   });
+
+  describe('areEnabled()', () => {
+    it('returns false when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const result = await apiKeys.areEnabled();
+      expect(result).toBe(false);
+      expect(mockClusterClient.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    describe('security feature enabled', () => {
+      it(`returns true when _xpack/usage responds with security.api_key_service.enabled: true`, async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockClusterClient.callAsInternalUser.mockResolvedValueOnce({
+          security: {
+            api_key_service: {
+              enabled: true,
+            },
+          },
+        });
+        const result = await apiKeys.areEnabled();
+        expect(result).toBe(true);
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
+          method: 'GET',
+          path: '/_xpack/usage',
+        });
+      });
+
+      it(`returns false when _xpack/usage responds with security.api_key_service.enabled: false`, async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockClusterClient.callAsInternalUser.mockResolvedValueOnce({
+          security: {
+            api_key_service: {
+              enabled: false,
+            },
+          },
+        });
+        const result = await apiKeys.areEnabled();
+        expect(result).toBe(false);
+        expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
+          method: 'GET',
+          path: '/_xpack/usage',
+        });
+      });
+
+      it(`rejects promise when _xpack/usage throws an error`, async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        const testError = new Error('something happened');
+        mockClusterClient.callAsInternalUser.mockRejectedValueOnce(testError);
+
+        await expect(apiKeys.areEnabled()).rejects.toEqual(testError);
+      });
+    });
+  });
 });

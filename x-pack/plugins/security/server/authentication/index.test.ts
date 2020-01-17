@@ -353,6 +353,21 @@ describe('setupAuthentication()', () => {
     });
   });
 
+  describe('apiAPIKeysEnabled', () => {
+    let areAPIKeysEnabled: () => Promise<boolean>;
+    beforeEach(async () => {
+      areAPIKeysEnabled = (await setupAuthentication(mockSetupAuthenticationParams))
+        .areAPIKeysEnabled;
+    });
+
+    it('calls apiKeys.areEnabled', async () => {
+      const apiKeysInstance = jest.requireMock('./api_keys').APIKeys.mock.instances[0];
+      apiKeysInstance.areEnabled.mockResolvedValueOnce(true);
+      await expect(areAPIKeysEnabled()).resolves.toEqual(true);
+      expect(apiKeysInstance.areEnabled).toHaveBeenCalled();
+    });
+  });
+
   describe('createAPIKey()', () => {
     let createAPIKey: (
       request: KibanaRequest,

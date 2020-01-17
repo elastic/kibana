@@ -8,7 +8,11 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineCheckPrivilegesRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineCheckPrivilegesRoutes({
+  authc,
+  router,
+  clusterClient,
+}: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key/privileges',
@@ -22,20 +26,12 @@ export function defineCheckPrivilegesRoutes({ router, clusterClient }: RouteDefi
           {
             cluster: { manage_security: manageSecurity, manage_api_key: manageApiKey },
           },
-          { areApiKeysEnabled },
+          areApiKeysEnabled,
         ] = await Promise.all([
           scopedClusterClient.callAsCurrentUser('shield.hasPrivileges', {
             body: { cluster: ['manage_security', 'manage_api_key'] },
           }),
-          scopedClusterClient.callAsCurrentUser('shield.getAPIKeys', { owner: true }).then(
-            //  If the API returns a truthy result that means it's enabled.
-            result => ({ areApiKeysEnabled: !!result }),
-            // This is a brittle dependency upon message. Tracked by https://github.com/elastic/elasticsearch/issues/47759.
-            e =>
-              e.message.includes('api keys are not enabled')
-                ? Promise.resolve({ areApiKeysEnabled: false })
-                : Promise.reject(e)
-          ),
+          authc.areAPIKeysEnabled(),
         ]);
 
         return response.ok({

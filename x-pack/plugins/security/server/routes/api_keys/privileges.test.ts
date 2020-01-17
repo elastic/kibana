@@ -14,8 +14,12 @@ import { defineCheckPrivilegesRoutes } from './privileges';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;
-  apiResponses?: Array<() => Promise<unknown>>;
-  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
+  hasPrivilegesImpl?: () => Promise<unknown>;
+  areAPIKeysEnabledImpl?: () => Promise<boolean>;
+  asserts: {
+    statusCode: number;
+    result?: Record<string, any>;
+  };
 }
 
 describe('Check API keys privileges', () => {
@@ -23,7 +27,8 @@ describe('Check API keys privileges', () => {
     description: string,
     {
       licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-      apiResponses = [],
+      hasPrivilegesImpl,
+      areAPIKeysEnabledImpl,
       asserts,
     }: TestOptions
   ) => {
@@ -31,8 +36,13 @@ describe('Check API keys privileges', () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-      for (const apiResponse of apiResponses) {
-        mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
+      if (hasPrivilegesImpl) {
+        mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(hasPrivilegesImpl);
+      }
+      if (areAPIKeysEnabledImpl) {
+        mockRouteDefinitionParams.authc.areAPIKeysEnabled.mockImplementationOnce(
+          areAPIKeysEnabledImpl
+        );
       }
 
       defineCheckPrivilegesRoutes(mockRouteDefinitionParams);
@@ -52,17 +62,22 @@ describe('Check API keys privileges', () => {
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
-      if (Array.isArray(asserts.apiArguments)) {
-        for (const apiArguments of asserts.apiArguments) {
-          expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(
-            mockRequest
-          );
-          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
-        }
+      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      if (hasPrivilegesImpl) {
+        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
+          'shield.hasPrivileges',
+          {
+            body: { cluster: ['manage_security', 'manage_api_key'] },
+          }
+        );
       } else {
         expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
       }
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      if (areAPIKeysEnabledImpl) {
+        expect(mockRouteDefinitionParams.authc.areAPIKeysEnabled).toHaveBeenCalled();
+      } else {
+        expect(mockRouteDefinitionParams.authc.areAPIKeysEnabled).not.toHaveBeenCalled();
+      }
     });
   };
 
@@ -73,18 +88,28 @@ describe('Check API keys privileges', () => {
     });
 
     const error = Boom.notAcceptable('test not acceptable message');
-    getPrivilegesTest('returns error from cluster client', {
-      apiResponses: [
-        async () => {
-          throw error;
-        },
-        async () => {},
-      ],
+    getPrivilegesTest('returns error from hasPrivilegesImpl', {
+      hasPrivilegesImpl: async () => {
+        throw error;
+      },
+      areAPIKeysEnabledImpl: async () => true,
       asserts: {
-        apiArguments: [
-          ['shield.hasPrivileges', { body: { cluster: ['manage_security', 'manage_api_key'] } }],
-          ['shield.getAPIKeys', { owner: true }],
-        ],
+        statusCode: 406,
+        result: error,
+      },
+    });
+
+    getPrivilegesTest('returns error from areAPIKeysEnabled', {
+      hasPrivilegesImpl: async () => ({
+        cluster: {
+          manage_security: true,
+          manage_api_key: true,
+        },
+      }),
+      areAPIKeysEnabledImpl: async () => {
+        throw error;
+      },
+      asserts: {
         statusCode: 406,
         result: error,
       },
@@ -93,58 +118,30 @@ describe('Check API keys privileges', () => {
 
   describe('success', () => {
     getPrivilegesTest('returns areApiKeysEnabled and isAdmin', {
-      apiResponses: [
-        async () => ({
-          username: 'elastic',
-          has_all_requested: true,
-          cluster: { manage_api_key: true, manage_security: true },
-          index: {},
-          application: {},
-        }),
-        async () => ({
-          api_keys: [
-            {
-              id: 'si8If24B1bKsmSLTAhJV',
-              name: 'my-api-key',
-              creation: 1574089261632,
-              expiration: 1574175661632,
-              invalidated: false,
-              username: 'elastic',
-              realm: 'reserved',
-            },
-          ],
-        }),
-      ],
+      hasPrivilegesImpl: async () => ({
+        cluster: {
+          manage_security: true,
+          manage_api_key: true,
+        },
+      }),
+      areAPIKeysEnabledImpl: async () => true,
       asserts: {
-        apiArguments: [
-          ['shield.getAPIKeys', { owner: true }],
-          ['shield.hasPrivileges', { body: { cluster: ['manage_security', 'manage_api_key'] } }],
-        ],
         statusCode: 200,
         result: { areApiKeysEnabled: true, isAdmin: true },
       },
     });
 
     getPrivilegesTest(
-      'returns areApiKeysEnabled=false when getAPIKeys error message includes "api keys are not enabled"',
+      'returns areApiKeysEnabled=false when authc.areAPIKeysEnabled returns false"',
       {
-        apiResponses: [
-          async () => ({
-            username: 'elastic',
-            has_all_requested: true,
-            cluster: { manage_api_key: true, manage_security: true },
-            index: {},
-            application: {},
-          }),
-          async () => {
-            throw Boom.unauthorized('api keys are not enabled');
+        hasPrivilegesImpl: async () => ({
+          cluster: {
+            manage_security: true,
+            manage_api_key: true,
           },
-        ],
+        }),
+        areAPIKeysEnabledImpl: async () => false,
         asserts: {
-          apiArguments: [
-            ['shield.getAPIKeys', { owner: true }],
-            ['shield.hasPrivileges', { body: { cluster: ['manage_security', 'manage_api_key'] } }],
-          ],
           statusCode: 200,
           result: { areApiKeysEnabled: false, isAdmin: true },
         },
@@ -152,33 +149,14 @@ describe('Check API keys privileges', () => {
     );
 
     getPrivilegesTest('returns isAdmin=false when user has insufficient privileges', {
-      apiResponses: [
-        async () => ({
-          username: 'elastic',
-          has_all_requested: true,
-          cluster: { manage_api_key: false, manage_security: false },
-          index: {},
-          application: {},
-        }),
-        async () => ({
-          api_keys: [
-            {
-              id: 'si8If24B1bKsmSLTAhJV',
-              name: 'my-api-key',
-              creation: 1574089261632,
-              expiration: 1574175661632,
-              invalidated: false,
-              username: 'elastic',
-              realm: 'reserved',
-            },
-          ],
-        }),
-      ],
+      hasPrivilegesImpl: async () => ({
+        cluster: {
+          manage_security: false,
+          manage_api_key: false,
+        },
+      }),
+      areAPIKeysEnabledImpl: async () => true,
       asserts: {
-        apiArguments: [
-          ['shield.getAPIKeys', { owner: true }],
-          ['shield.hasPrivileges', { body: { cluster: ['manage_security', 'manage_api_key'] } }],
-        ],
         statusCode: 200,
         result: { areApiKeysEnabled: true, isAdmin: false },
       },

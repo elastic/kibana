@@ -164,4 +164,19 @@ export class APIKeys {
 
     return result;
   }
+
+  async areEnabled(): Promise<boolean> {
+    if (!this.license.isEnabled()) {
+      return false;
+    }
+
+    // `transport.request` is potentially unsafe when combined with untrusted user input.
+    // Do not augment with such input.
+    const result = await this.clusterClient.callAsInternalUser('transport.request', {
+      method: 'GET',
+      path: '/_xpack/usage',
+    });
+
+    return result.security?.api_key_service?.enabled === true;
+  }
 }
