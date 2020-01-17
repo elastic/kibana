@@ -46,7 +46,7 @@ def withWorker(machineName, label, Closure closure) {
 }
 
 def intakeWorker(jobName, String script) {
-  return withWorker(machineName, 'linux && immutable') {
+  return withWorker(jobName, 'linux && immutable') {
     withEnv([
       "JOB=${jobName}",
     ]) {
