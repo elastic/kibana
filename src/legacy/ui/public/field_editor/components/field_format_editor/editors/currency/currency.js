@@ -40,6 +40,10 @@ export class CurrencyFormatEditor extends DefaultNumberFormatEditor {
     };
   }
 
+  getCurrencyName(currency) {
+    return `${currency.name} (${currency.code}) ${currency.symbol}`;
+  }
+
   render() {
     const { formatParams } = this.props;
     const { samples } = this.state;
@@ -47,7 +51,7 @@ export class CurrencyFormatEditor extends DefaultNumberFormatEditor {
     const currencyMatch = topCurrencies.find(cur => cur.code === currencyCode);
     let currencyLabel = currencyCode;
     if (currencyMatch) {
-      currencyLabel = `${currencyMatch.name} (${currencyMatch.code}) ${currencyMatch.symbol}`;
+      currencyLabel = this.getCurrencyName(currencyMatch);
     }
 
     const otherLabel = {
@@ -81,7 +85,7 @@ export class CurrencyFormatEditor extends DefaultNumberFormatEditor {
             options={topCurrencies
               .map(cur => ({
                 value: cur.code,
-                label: `${cur.name} (${cur.code}) ${cur.symbol}`,
+                label: this.getCurrencyName(cur),
               }))
               .concat([otherLabel])}
             onChange={choices => {
