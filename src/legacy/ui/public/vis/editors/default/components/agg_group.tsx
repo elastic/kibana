@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useReducer, useMemo } from 'react';
+import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,
@@ -34,7 +34,7 @@ import { AggConfig } from '../../../../agg_types/agg_config';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { DefaultEditorAggCommonProps } from './agg_common_props';
+import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
 import {
   isInvalidAggsTouched,
   isAggRemovable,
@@ -46,8 +46,10 @@ import { Schema } from '../schemas';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];
-  addSchema: (schemas: Schema) => void;
-  reorderAggs: (group: AggConfig[]) => void;
+  addSchema: AddSchema;
+  reorderAggs: ReorderAggs;
+  setValidity(modelName: string, value: boolean): void;
+  setTouched(isTouched: boolean): void;
 }
 
 function DefaultEditorAggGroup({
@@ -58,7 +60,8 @@ function DefaultEditorAggGroup({
   state,
   schemas = [],
   addSchema,
-  onAggParamsChange,
+  setAggParamValue,
+  setStateParamValue,
   onAggTypeChange,
   onToggleEnableAgg,
   removeAgg,
@@ -68,8 +71,10 @@ function DefaultEditorAggGroup({
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = (aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
-  const group: AggConfig[] =
-    state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [];
+  const group: AggConfig[] = useMemo(
+    () => state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [],
+    [state.aggs.aggs]
+  );
 
   const stats = {
     max: 0,
@@ -101,7 +106,7 @@ function DefaultEditorAggGroup({
     // when isAllAggsTouched is true, it means that all invalid aggs are touched and we will set ngModel's touched to true
     // which indicates that Apply button can be changed to Error button (when all invalid ngModels are touched)
     setTouched(isAllAggsTouched);
-  }, [isAllAggsTouched]);
+  }, [isAllAggsTouched, setTouched]);
 
   useEffect(() => {
     // when not all invalid aggs are touched and formIsTouched becomes true, it means that Apply button was clicked.
@@ -118,38 +123,21 @@ function DefaultEditorAggGroup({
   }, [formIsTouched]);
 
   useEffect(() => {
-    setValidity(isGroupValid);
-  }, [isGroupValid]);
+    setValidity(`aggGroup__${groupName}`, isGroupValid);
+  }, [groupName, isGroupValid, setValidity]);
 
-  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
-    if (source && destination) {
-      const orderedGroup = Array.from(group);
-      const [removed] = orderedGroup.splice(source.index, 1);
-      orderedGroup.splice(destination.index, 0, removed);
-
-      reorderAggs(orderedGroup);
-    }
-  };
-
-  const setTouchedHandler = (aggId: string, touched: boolean) => {
-    setAggsState({
-      type: AGGS_ACTION_KEYS.TOUCHED,
-      payload: touched,
-      aggId,
-    });
-  };
-
-  const setValidityHandler = (aggId: string, valid: boolean) => {
-    setAggsState({
-      type: AGGS_ACTION_KEYS.VALID,
-      payload: valid,
-      aggId,
-    });
-  };
+  const onDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        reorderAggs(group[source.index], group[destination.index]);
+      }
+    },
+    [reorderAggs, group]
+  );
 
   return (
     <EuiDragDropContext onDragEnd={onDragEnd}>
-      <EuiPanel paddingSize="s">
+      <EuiPanel data-test-subj={`${groupName}AggGroup`} paddingSize="s">
         <EuiTitle size="xs">
           <h3>{groupNameLabel}</h3>
         </EuiTitle>
@@ -184,12 +172,12 @@ function DefaultEditorAggGroup({
                     lastParentPipelineAggTitle={lastParentPipelineAggTitle}
                     metricAggs={metricAggs}
                     state={state}
-                    onAggParamsChange={onAggParamsChange}
+                    setAggParamValue={setAggParamValue}
+                    setStateParamValue={setStateParamValue}
                     onAggTypeChange={onAggTypeChange}
                     onToggleEnableAgg={onToggleEnableAgg}
                     removeAgg={removeAgg}
-                    setTouched={isTouched => setTouchedHandler(agg.id, isTouched)}
-                    setValidity={isValid => setValidityHandler(agg.id, isValid)}
+                    setAggsState={setAggsState}
                   />
                 )}
               </EuiDraggable>
