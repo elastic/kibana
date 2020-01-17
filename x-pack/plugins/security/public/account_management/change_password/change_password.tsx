@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Component } from 'react';
-import {
-  // @ts-ignore
-  EuiDescribedFormGroup,
-} from '@elastic/eui';
+import { EuiDescribedFormGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsSetup } from 'src/core/public';
 import { AuthenticatedUser, canUserChangePassword } from '../../../common/model';

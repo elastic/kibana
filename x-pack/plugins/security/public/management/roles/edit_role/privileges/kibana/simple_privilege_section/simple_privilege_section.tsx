@@ -6,7 +6,6 @@
 
 import {
   EuiComboBox,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiSuperSelect,

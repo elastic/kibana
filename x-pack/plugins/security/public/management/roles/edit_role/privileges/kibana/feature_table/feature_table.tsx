@@ -98,9 +98,7 @@ export class FeatureTable extends Component<Props, {}> {
     const availablePrivileges = Object.values(rankedFeaturePrivileges)[0];
 
     return (
-      // @ts-ignore missing responsive from typedef
       <EuiInMemoryTable
-        // @ts-ignore missing rowProps from typedef
         responsive={false}
         columns={this.getColumns(availablePrivileges)}
         items={items}
@@ -237,9 +235,7 @@ export class FeatureTable extends Component<Props, {}> {
         });
 
         return (
-          // @ts-ignore missing name from typedef
           <EuiButtonGroup
-            // @ts-ignore missing rowProps from typedef
             name={`featurePrivilege_${featureId}`}
             options={options}
             idSelected={`${featureId}_${actualPrivilegeValue || NO_PRIVILEGE_VALUE}`}

@@ -96,12 +96,30 @@ function useRunAsUsers(
 
 function useIndexPatternsTitles(
   indexPatterns: IndexPatternsContract,
-  fatalErrors: FatalErrorsSetup
+  fatalErrors: FatalErrorsSetup,
+  notifications: NotificationsStart
 ) {
   const [indexPatternsTitles, setIndexPatternsTitles] = useState<string[] | null>(null);
   useEffect(() => {
-    indexPatterns.getTitles().then(setIndexPatternsTitles, err => fatalErrors.add(err));
-  }, [fatalErrors, indexPatterns]);
+    indexPatterns
+      .getTitles()
+      .catch((err: IHttpFetchError) => {
+        // If user doesn't have access to the index patterns they still should be able to create new
+        // or edit existing role.
+        if (err.response?.status === 403) {
+          notifications.toasts.addDanger({
+            title: i18n.translate('xpack.security.management.roles.noIndexPatternsPermission', {
+              defaultMessage: 'You need permission to access the list of available index patterns.',
+            }),
+          });
+          return [];
+        }
+
+        fatalErrors.add(err);
+        throw err;
+      })
+      .then(setIndexPatternsTitles);
+  }, [fatalErrors, indexPatterns, notifications]);
 
   return indexPatternsTitles;
 }
@@ -213,18 +231,25 @@ function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup, spacesEnabled
 function useFeatures(http: HttpStart, fatalErrors: FatalErrorsSetup) {
   const [features, setFeatures] = useState<Feature[] | null>(null);
   useEffect(() => {
-    http.get('/api/features').then(
-      fetchedFeatures => setFeatures(fetchedFeatures),
-      (err: IHttpFetchError) => {
-        // TODO: This check can be removed once all of these `resolve` entries are moved out of Angular and into the React app.
+    http
+      .get('/api/features')
+      .catch((err: IHttpFetchError) => {
+        // Currently, the `/api/features` endpoint effectively requires the "Global All" kibana privilege (e.g., what
+        // the `kibana_user` grants), because it returns information about all registered features (#35841). It's
+        // possible that a user with `manage_security` will attempt to visit the role management page without the
+        // correct Kibana privileges. If that's the case, then they receive a partial view of the role, and the UI does
+        // not allow them to make changes to that role's kibana privileges. When this user visits the edit role page,
+        // this API endpoint will throw a 404, which causes view to fail completely. So we instead attempt to detect the
+        // 404 here, and respond in a way that still allows the UI to render itself.
         const unauthorizedForFeatures = err.response?.status === 404;
         if (unauthorizedForFeatures) {
           return [];
         }
 
         fatalErrors.add(err);
-      }
-    );
+        throw err;
+      })
+      .then(setFeatures);
   }, [http, fatalErrors]);
 
   return features;
@@ -256,7 +281,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
-  const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors);
+  const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors, spacesEnabled);
   const features = useFeatures(http, fatalErrors);

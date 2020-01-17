@@ -8,15 +8,7 @@ import React, { useState, Fragment } from 'react';
 
 import 'brace/mode/json';
 import 'brace/theme/github';
-import {
-  // @ts-ignore
-  EuiCodeEditor,
-  EuiFormRow,
-  EuiButton,
-  EuiSpacer,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { DocumentationLinksService } from '../../documentation_links';

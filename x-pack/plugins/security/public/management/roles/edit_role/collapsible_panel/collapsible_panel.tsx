@@ -50,7 +50,6 @@ export class CollapsiblePanel extends Component<Props, State> {
 
   public getTitle = () => {
     return (
-      // @ts-ignore
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle>

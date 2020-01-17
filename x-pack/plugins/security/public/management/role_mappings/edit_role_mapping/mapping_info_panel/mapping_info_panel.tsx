@@ -10,7 +10,6 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiFieldText,

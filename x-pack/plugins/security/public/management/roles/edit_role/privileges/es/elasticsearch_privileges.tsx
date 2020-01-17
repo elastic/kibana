@@ -7,7 +7,6 @@
 import {
   EuiButton,
   EuiComboBox,
-  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiHorizontalRule,

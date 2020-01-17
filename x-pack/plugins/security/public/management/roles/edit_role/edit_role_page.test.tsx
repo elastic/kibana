@@ -128,7 +128,7 @@ function getProps({
   spacesEnabled = true,
 }: {
   action: 'edit' | 'clone';
-  role: Role;
+  role?: Role;
   canManageSpaces?: boolean;
   spacesEnabled?: boolean;
 }) {
@@ -167,7 +167,7 @@ function getProps({
 
   return {
     action,
-    roleName: role.name,
+    roleName: role?.name,
     license,
     http,
     indexPatterns,
@@ -238,18 +238,7 @@ describe('<EditRolePage />', () => {
     });
 
     it('can render when creating a new role', async () => {
-      const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            role: {
-              metadata: {},
-              elasticsearch: { cluster: [], indices: [], run_as: [] },
-              kibana: [],
-            } as any,
-          })}
-        />
-      );
+      const wrapper = mountWithIntl(<EditRolePage {...getProps({ action: 'edit' })} />);
 
       await act(async () => {
         await nextTick();
@@ -411,17 +400,7 @@ describe('<EditRolePage />', () => {
 
     it('can render when creating a new role', async () => {
       const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            spacesEnabled: false,
-            role: {
-              metadata: {},
-              elasticsearch: { cluster: [], indices: [], run_as: [] },
-              kibana: [],
-            } as any,
-          })}
-        />
+        <EditRolePage {...getProps({ action: 'edit', spacesEnabled: false })} />
       );
 
       await act(async () => {
@@ -526,5 +505,48 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
     });
+  });
+
+  it('can render if features are not available', async () => {
+    const { http } = coreMock.createStart();
+    http.get.mockImplementation(async path => {
+      if (path === '/api/features') {
+        const error = { response: { status: 404 } };
+        throw error;
+      }
+
+      if (path === '/api/spaces/space') {
+        return buildSpaces();
+      }
+    });
+
+    const wrapper = mountWithIntl(<EditRolePage {...{ ...getProps({ action: 'edit' }), http }} />);
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+    expectSaveFormButtons(wrapper);
+  });
+
+  it('can render if index patterns are not available', async () => {
+    const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
+    indexPatterns.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
+
+    const wrapper = mountWithIntl(
+      <EditRolePage {...{ ...getProps({ action: 'edit' }), indexPatterns }} />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
+    expectSaveFormButtons(wrapper);
   });
 });

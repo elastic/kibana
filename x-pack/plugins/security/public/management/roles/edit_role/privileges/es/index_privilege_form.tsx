@@ -164,7 +164,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
           {!isReadOnlyRole && (
             <EuiFlexItem>
               {
-                // @ts-ignore missing "compressed" prop definition
                 <EuiSwitch
                   data-test-subj={`restrictFieldsQuery${this.props.formIndex}`}
                   label={
@@ -256,12 +255,10 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     }
 
     return (
-      // @ts-ignore
       <EuiFlexGroup direction="column">
         {!this.props.isReadOnlyRole && (
           <EuiFlexItem>
             {
-              // @ts-ignore missing "compressed" proptype
               <EuiSwitch
                 data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
                 label={
