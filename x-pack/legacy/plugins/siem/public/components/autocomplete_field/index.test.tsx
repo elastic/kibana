@@ -10,13 +10,13 @@ import { mount, shallow } from 'enzyme';
 import { noop } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
+import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 import { TestProviders } from '../../mock';
 
 import { AutocompleteField } from '.';
 
-const mockAutoCompleteData: AutocompleteSuggestion[] = [
+const mockAutoCompleteData: autocomplete.QuerySuggestion[] = [
   {
     type: 'field',
     text: 'agent.ephemeral_id ',
