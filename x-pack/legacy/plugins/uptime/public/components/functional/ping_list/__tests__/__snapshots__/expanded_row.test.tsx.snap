@@ -2,19 +2,43 @@
 
 exports[`PingListExpandedRow doesn't render list items if the body field is undefined 1`] = `
 <EuiFlexGroup>
-  <EuiFlexItem />
+  <EuiFlexItem>
+    <EuiCallOut
+      color="primary"
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
 </EuiFlexGroup>
 `;
 
 exports[`PingListExpandedRow doesn't render list items if the http field is undefined 1`] = `
 <EuiFlexGroup>
-  <EuiFlexItem />
+  <EuiFlexItem>
+    <EuiCallOut
+      color="primary"
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
 </EuiFlexGroup>
 `;
 
 exports[`PingListExpandedRow doesn't render list items if the response field is undefined 1`] = `
 <EuiFlexGroup>
-  <EuiFlexItem />
+  <EuiFlexItem>
+    <EuiCallOut
+      color="primary"
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
 </EuiFlexGroup>
 `;
 
@@ -23,16 +47,16 @@ exports[`PingListExpandedRow renders error information when an error field is pr
   <EuiFlexItem>
     <EuiCallOut
       color="danger"
-      title="Error"
     >
-      <EuiText>
-        Forbidden
-      </EuiText>
-    </EuiCallOut>
-    <EuiCallOut>
       <EuiDescriptionList
         listItems={
           Array [
+            Object {
+              "description": <EuiText>
+                Forbidden
+              </EuiText>,
+              "title": "Error",
+            },
             Object {
               "description": <React.Fragment>
                 <BodyDescription
@@ -43,6 +67,9 @@ exports[`PingListExpandedRow renders error information when an error field is pr
                       "hash": "testhash",
                     }
                   }
+                />
+                <EuiSpacer
+                  size="s"
                 />
                 <BodyExcerpt
                   content="<http><head><title>The Title</title></head><body></body></http>"
@@ -61,7 +88,9 @@ exports[`PingListExpandedRow renders error information when an error field is pr
 exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
 <EuiFlexGroup>
   <EuiFlexItem>
-    <EuiCallOut>
+    <EuiCallOut
+      color="primary"
+    >
       <EuiDescriptionList
         listItems={
           Array [
@@ -75,6 +104,9 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
                       "hash": "testhash",
                     }
                   }
+                />
+                <EuiSpacer
+                  size="s"
                 />
                 <BodyExcerpt
                   content="<http><head><title>The Title</title></head><body></body></http>"
