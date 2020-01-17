@@ -88,14 +88,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   done
                   wait
 
-                  echo "###  Ingesting Code Coverage"
-                  export ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243
-                  export BUILD_ID=${BUILD_NUMBER}
-                  export TIME_STAMP=\$(date -u +%FT%T)
-                  node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/jest-combined/coverage-summary.json || echo "### target/kibana-coverage/jest-combined/coverage-summary.json not found?"
-                  node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/functional-combined/coverage-summary.json || echo "### target/kibana-coverage/functional-combined/coverage-summary.json not found?"
-                  node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/mocha-combined/coverage-summary.json || echo "### target/kibana-coverage/mocha-combined/coverage-summary.json not found?"
-
                   # merge oss & x-pack reports
                   echo merging coverage reports
                   yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/jest --report-dir target/kibana-coverage/jest-combined --reporter=html --reporter=json-summary
@@ -103,8 +95,16 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   echo copy mocha reports
                   mkdir -p target/kibana-coverage/mocha-combined
                   cp -r /tmp/extracted_coverage/target/kibana-coverage/mocha target/kibana-coverage/mocha-combined
+
+                  echo "###  Ingesting Code Coverage"
+                  export ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243
+                  export BUILD_ID=${BUILD_NUMBER}
+                  export TIME_STAMP=\$(date -u +%FT%T)
+                  node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/jest-combined/coverage-summary.json || echo "### target/kibana-coverage/jest-combined/coverage-summary.json not found?"
+                  node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/functional-combined/coverage-summary.json || echo "### target/kibana-coverage/functional-combined/coverage-summary.json not found?"
+                  node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/mocha-combined/coverage-summary.json || echo "### target/kibana-coverage/mocha-combined/coverage-summary.json not found?"
                 """,
-                "Ingest Code Coverage to ES Cluster and Run `yarn kbn bootstrap && merge coverage`"
+                "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
               )
               sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
               kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
