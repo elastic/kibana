@@ -21,7 +21,7 @@ import Url from 'url';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHeaderLogo } from '@elastic/eui';
-import { NavLink } from './';
+import { NavLink } from './nav_link';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;

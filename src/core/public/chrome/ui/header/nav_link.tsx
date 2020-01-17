@@ -19,20 +19,19 @@
 
 import React from 'react';
 import { EuiImage } from '@elastic/eui';
-import { ChromeNavLink, CoreStart } from '../../../../';
-import { HttpStart } from '../../../../http';
+import { ChromeNavLink, CoreStart } from '../../../';
+import { HttpStart } from '../../../http';
 
 function isModifiedEvent(event: MouseEvent) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
 
-export function LinkIcon({ url }: { url: string }) {
+function LinkIcon({ url }: { url: string }) {
   return <EuiImage size="s" alt="" aria-hidden={true} url={url} />;
 }
 
-export { HeaderLogo } from './header_logo';
-export { RecentLinks } from './recent_links';
 export type NavLink = ReturnType<typeof euiNavLink>;
+
 export function euiNavLink(
   navLink: ChromeNavLink,
   legacyMode: boolean,

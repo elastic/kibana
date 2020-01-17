@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { EuiNavDrawerGroup } from '@elastic/eui';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../../..';
-import { HttpStart } from '../../../../http';
+import { HttpStart } from '../../../http';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters

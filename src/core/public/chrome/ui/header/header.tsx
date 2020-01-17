@@ -18,22 +18,17 @@
  */
 
 import {
-  // TODO: add type annotations
   EuiHeader,
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
-  EuiHorizontalRule,
   EuiIcon,
   // @ts-ignore
   EuiNavDrawer,
   // @ts-ignore
-  EuiNavDrawerGroup,
-  // @ts-ignore
   EuiShowFor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { groupBy, sortBy } from 'lodash';
 import React, { Component, createRef } from 'react';
 import * as Rx from 'rxjs';
 import {
@@ -43,19 +38,19 @@ import {
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
 } from '../..';
-import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { HeaderBadge } from './header_badge';
+import { NavSetting, OnIsLockedUpdate } from './';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
-import { RecentLinks, NavLink, HeaderLogo, euiNavLink } from './header_bits';
+import { euiNavLink } from './nav_link';
+import { HeaderLogo } from './header_logo';
+import { NavDrawer } from './nav_drawer';
 
-export type NavSetting = 'grouped' | 'individual';
-
-interface HeaderProps {
+export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
   appTitle$: Rx.Observable<string>;
@@ -75,7 +70,7 @@ interface HeaderProps {
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
   navSetting$: Rx.Observable<NavSetting>;
-  onIsLockedUpdate?: (isLocked: boolean) => void;
+  onIsLockedUpdate?: OnIsLockedUpdate;
 }
 
 interface State {
@@ -88,26 +83,6 @@ interface State {
   navControlsRight: readonly ChromeNavControl[];
   navSetting: NavSetting;
   currentAppId: string | undefined;
-}
-
-function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
-  const allCategories = {} as Record<string, AppCategory | undefined>;
-
-  for (const [key, value] of Object.entries(allCategorizedLinks)) {
-    allCategories[key] = value[0].category;
-  }
-
-  return allCategories;
-}
-
-function getOrderedCategories(
-  mainCategories: Record<string, NavLink[]>,
-  categoryDictionary: ReturnType<typeof getAllCategories>
-) {
-  return sortBy(
-    Object.keys(mainCategories),
-    categoryName => categoryDictionary[categoryName]?.order
-  );
 }
 
 export class Header extends Component<HeaderProps, State> {
@@ -187,103 +162,6 @@ export class Header extends Component<HeaderProps, State> {
     );
   }
 
-  public renderNavLinks(navLinks: NavLink[]) {
-    const disableGroupedNavSetting = this.state.navSetting === 'individual';
-    const groupedNavLinks = groupBy(navLinks, link => link?.category?.label);
-    const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
-    const { Management: management, ...mainCategories } = allCategorizedLinks;
-    const categoryDictionary = getAllCategories(allCategorizedLinks);
-    const orderedCategories = getOrderedCategories(mainCategories, categoryDictionary);
-    const showUngroupedNav =
-      disableGroupedNavSetting || navLinks.length < 7 || Object.keys(mainCategories).length === 1;
-
-    return (
-      <EuiNavDrawer
-        ref={this.navDrawerRef}
-        data-test-subj="navDrawer"
-        isLocked={this.props.isLocked}
-        onIsLockedUpdate={this.props.onIsLockedUpdate}
-        aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
-          defaultMessage: 'Primary',
-        })}
-      >
-        {RecentLinks({
-          recentlyAccessedItems: this.state.recentlyAccessed,
-          navLinks: this.state.navLinks,
-          basePath: this.props.basePath,
-        })}
-        <EuiHorizontalRule margin="none" />
-        {showUngroupedNav ? (
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerAppsMenu"
-            listItems={navLinks}
-            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-              defaultMessage: 'Primary navigation links',
-            })}
-          />
-        ) : (
-          <>
-            <EuiNavDrawerGroup
-              data-test-subj="navDrawerAppsMenu"
-              aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-                defaultMessage: 'Primary navigation links',
-              })}
-              listItems={[
-                ...orderedCategories.map(categoryName => {
-                  const category = categoryDictionary[categoryName]!;
-                  const links = mainCategories[categoryName];
-
-                  if (links.length === 1) {
-                    return {
-                      ...links[0],
-                      label: category.label,
-                      iconType: category.euiIconType || links[0].iconType,
-                    };
-                  }
-
-                  return {
-                    'data-test-subj': 'navDrawerCategory',
-                    iconType: category.euiIconType,
-                    label: category.label,
-                    flyoutMenu: {
-                      title: category.label,
-                      listItems: sortBy(links, 'order').map(link => {
-                        link['data-test-subj'] = 'navDrawerFlyoutLink';
-                        return link;
-                      }),
-                    },
-                  };
-                }),
-                ...sortBy(unknowns, 'order'),
-              ]}
-            />
-            <EuiHorizontalRule margin="none" />
-            <EuiNavDrawerGroup
-              data-test-subj="navDrawerManagementMenu"
-              aria-label={i18n.translate('core.ui.managementNavList.screenReaderLabel', {
-                defaultMessage: 'Management navigation links',
-              })}
-              listItems={[
-                {
-                  label: categoryDictionary.Management!.label,
-                  iconType: categoryDictionary.Management!.euiIconType,
-                  'data-test-subj': 'navDrawerCategory',
-                  flyoutMenu: {
-                    title: categoryDictionary.Management!.label,
-                    listItems: sortBy(management, 'order').map(link => {
-                      link['data-test-subj'] = 'navDrawerFlyoutLink';
-                      return link;
-                    }),
-                  },
-                },
-              ]}
-            />
-          </>
-        )}
-      </EuiNavDrawer>
-    );
-  }
-
   public render() {
     const { appTitle, isVisible, navControlsLeft, navControlsRight } = this.state;
     const {
@@ -346,8 +224,16 @@ export class Header extends Component<HeaderProps, State> {
             <HeaderNavControls side="right" navControls={navControlsRight} />
           </EuiHeaderSection>
         </EuiHeader>
-
-        {this.renderNavLinks(navLinks)}
+        <NavDrawer
+          navSetting={this.state.navSetting}
+          isLocked={this.props.isLocked}
+          onIsLockedUpdate={this.props.onIsLockedUpdate}
+          navLinks={navLinks}
+          chromeNavLinks={this.state.navLinks}
+          recentlyAccessedItems={this.state.recentlyAccessed}
+          basePath={this.props.basePath}
+          ref={this.navDrawerRef}
+        />
       </header>
     );
   }
