@@ -894,4 +894,14 @@ export const PARAMETERS_DEFINITION = {
     },
     schema: t.string,
   },
+  max_shingle_size: {
+    fieldConfig: {
+      type: FIELD_TYPES.SELECT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.largestShingleSizeFieldLabel', {
+        defaultMessage: 'Max shingle size',
+      }),
+      defaultValue: 3,
+      formatters: [toInt],
+    },
+  },
 };
