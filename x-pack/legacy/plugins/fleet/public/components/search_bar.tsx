@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 // @ts-ignore
-import { EuiSuggest } from '@elastic/eui';
+import { EuiSuggest, EuiSuggestItemProps } from '@elastic/eui';
 import { useDebounce, useLibs } from '../hooks';
 
 const DEBOUNCE_SEARCH_MS = 150;
@@ -32,23 +32,33 @@ interface Props {
 export const SearchBar: React.FC<Props> = ({ value, fieldPrefix, onChange }) => {
   const { suggestions } = useSuggestions(fieldPrefix, value);
 
-  const onAutocompleteClick = (suggestion: Suggestion) => {
+  // TODO fix type when correctly typed in EUI
+  const onAutocompleteClick = (suggestion: any) => {
     onChange(
       [value.slice(0, suggestion.start), suggestion.value, value.slice(suggestion.end, -1)].join('')
     );
   };
-  const onChangeSearch = (s: string) => {
-    onChange(s);
+  // TODO fix type when correctly typed in EUI
+  const onChangeSearch = (e: any) => {
+    onChange(e.value);
   };
 
   return (
     <EuiSuggest
+      // TODO fix when correctly typed
+      // @ts-ignore
       value={value}
       icon={'search'}
       placeholder={'Search'}
       onInputChange={onChangeSearch}
-      suggestions={suggestions}
       onItemClick={onAutocompleteClick}
+      suggestions={suggestions.map(suggestion => {
+        return {
+          ...suggestion,
+          // For type
+          onClick: () => {},
+        };
+      })}
     />
   );
 };

@@ -45,6 +45,7 @@ import { epm } from './legacy/plugins/epm';
 import { lens } from './legacy/plugins/lens';
 import { ingest } from './legacy/plugins/ingest';
 import { fleet } from './legacy/plugins/fleet';
+import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
 
 module.exports = function(kibana) {
   return [
@@ -89,5 +90,6 @@ module.exports = function(kibana) {
     ingest(kibana),
     fleet(kibana),
     epm(kibana),
+    triggersActionsUI(kibana),
   ];
 };

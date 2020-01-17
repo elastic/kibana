@@ -6,7 +6,11 @@
 
 import { MonitorChart } from '../../../../common/graphql/types';
 import { UMElasticsearchQueryFn } from '../framework';
-import { MonitorDetails, MonitorLocations } from '../../../../common/runtime_types';
+import {
+  MonitorDetails,
+  MonitorLocations,
+  OverviewFilters,
+} from '../../../../common/runtime_types';
 
 export interface GetMonitorChartsDataParams {
   /** @member monitorId ID value for the selected monitor */
@@ -20,9 +24,15 @@ export interface GetMonitorChartsDataParams {
 }
 
 export interface GetFilterBarParams {
+  /** @param dateRangeStart timestamp bounds */
   dateRangeStart: string;
   /** @member dateRangeEnd timestamp bounds */
   dateRangeEnd: string;
+  /** @member search this value should correspond to Elasticsearch DSL
+   *  generated from KQL text the user provided.
+   */
+  search?: Record<string, any>;
+  filterOptions: Record<string, string[] | number[]>;
 }
 
 export interface GetMonitorDetailsParams {
@@ -48,10 +58,13 @@ export interface UMMonitorsAdapter {
    * Fetches data used to populate monitor charts
    */
   getMonitorChartsData: UMElasticsearchQueryFn<GetMonitorChartsDataParams, MonitorChart>;
-  getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, any>;
+
   /**
-   * Fetch data for the monitor page title.
+   * Fetch options for the filter bar.
    */
+  getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters>;
+
   getMonitorDetails: UMElasticsearchQueryFn<GetMonitorDetailsParams, MonitorDetails>;
+
   getMonitorLocations: UMElasticsearchQueryFn<GetMonitorLocationsParams, MonitorLocations>;
 }
