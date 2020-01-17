@@ -39,7 +39,7 @@ def doIt() {
     } catch(ex) {
       hadError = true
       catchError {
-        sh 'curl --verbose --connect-timeout 5 https://github.com/elastic/kibana'
+        sh 'curl --verbose --connect-timeout 5 https://github.com/elastic/kibana > /dev/null'
       }
       catchError {
         throw ex
