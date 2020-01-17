@@ -82,7 +82,7 @@ const validateAlertType = (alert: Alert): ValidationResult => {
     timeField: new Array<string>(),
   };
   validationResult.errors = errors;
-  if (!index) {
+  if (!index || index.length === 0) {
     errors.index.push(
       i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredIndexText', {
         defaultMessage: 'Index is required.',
@@ -275,7 +275,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
   setAlertParams,
   setAlertProperty,
   errors,
-  hasErrors,
 }) => {
   const { http } = useAppDependencies();
 
@@ -433,7 +432,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 defaultMessage="Indices to query"
               />
             }
-            isInvalid={hasErrors && index !== undefined}
+            isInvalid={errors.index.length > 0 && index !== undefined}
             error={errors.index}
             helpText={
               <FormattedMessage
@@ -446,7 +445,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               fullWidth
               async
               isLoading={isIndiciesLoading}
-              isInvalid={hasErrors && index !== undefined}
+              isInvalid={errors.index.length > 0 && index !== undefined}
               noSuggestions={!indexOptions.length}
               options={indexOptions}
               data-test-subj="thresholdIndexesComboBox"
@@ -466,8 +465,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 // reset time field and expression fields if indices are deleted
                 if (indices.length === 0) {
                   setTimeFieldOptions([firstFieldOption]);
-                  setAlertParams('timeFields', []);
-
                   setDefaultExpressionValues();
                   return;
                 }
@@ -475,7 +472,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 const timeFields = getTimeFieldOptions(currentEsFields as any);
 
                 setEsFields(currentEsFields);
-                setAlertParams('timeFields', timeFields);
                 setTimeFieldOptions([firstFieldOption, ...timeFields]);
               }}
               onSearchChange={async search => {
@@ -501,12 +497,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 defaultMessage="Time field"
               />
             }
-            isInvalid={hasErrors && timeField !== undefined}
+            isInvalid={errors.timeField.length > 0 && timeField !== undefined}
             error={errors.timeField}
           >
             <EuiSelect
               options={timeFieldOptions}
-              isInvalid={hasErrors && timeField !== undefined}
+              isInvalid={errors.timeField.length > 0 && timeField !== undefined}
               fullWidth
               name="watchTimeField"
               data-test-subj="watchTimeFieldSelect"
@@ -672,12 +668,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
                     <EuiFormRow
-                      isInvalid={hasErrors && aggField !== undefined}
+                      isInvalid={errors.aggField.length > 0 && aggField !== undefined}
                       error={errors.aggField}
                     >
                       <EuiComboBox
                         singleSelection={{ asPlainText: true }}
-                        isInvalid={hasErrors && aggField !== undefined}
+                        isInvalid={errors.aggField.length > 0 && aggField !== undefined}
                         placeholder={firstFieldOption.text}
                         options={esFields.reduce((esFieldOptions: any[], field: any) => {
                           if (
@@ -777,9 +773,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                 {groupByTypes[groupBy || DEFAULT_VALUES.GROUP_BY].sizeRequired ? (
                   <Fragment>
                     <EuiFlexItem grow={false}>
-                      <EuiFormRow isInvalid={hasErrors} error={errors.termSize}>
+                      <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                         <EuiFieldNumber
-                          isInvalid={hasErrors}
+                          isInvalid={errors.termSize.length > 0}
                           value={termSize || 0}
                           onChange={e => {
                             const { value } = e.target;
@@ -792,12 +788,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiFormRow
-                        isInvalid={hasErrors && termField !== undefined}
+                        isInvalid={errors.timeField.length > 0 && termField !== undefined}
                         error={errors.termField}
                       >
                         <EuiSelect
                           value={termField || ''}
-                          isInvalid={hasErrors && termField !== undefined}
+                          isInvalid={errors.timeField.length > 0 && termField !== undefined}
                           onChange={e => {
                             setAlertParams('termField', e.target.value);
                           }}
@@ -896,14 +892,17 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                           className="alertThresholdWatchInBetweenComparatorText"
                         >
                           <EuiText>{andThresholdText}</EuiText>
-                          {hasErrors && <EuiSpacer />}
+                          {errors[`threshold${i}`].length > 0 && <EuiSpacer />}
                         </EuiFlexItem>
                       ) : null}
                       <EuiFlexItem grow={false}>
-                        <EuiFormRow isInvalid={hasErrors} error={errors[`threshold${i}`]}>
+                        <EuiFormRow
+                          isInvalid={errors[`threshold${i}`].length > 0}
+                          error={errors[`threshold${i}`]}
+                        >
                           <EuiFieldNumber
                             data-test-subj="alertThresholdInput"
-                            isInvalid={hasErrors}
+                            isInvalid={errors[`threshold${i}`].length > 0}
                             value={!threshold || threshold[i] === null ? 0 : threshold[i]}
                             min={0}
                             step={0.1}
@@ -963,9 +962,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               </EuiPopoverTitle>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow isInvalid={hasErrors} error={errors.timeWindowSize}>
+                  <EuiFormRow
+                    isInvalid={errors.timeWindowSize.length > 0}
+                    error={errors.timeWindowSize}
+                  >
                     <EuiFieldNumber
-                      isInvalid={hasErrors}
+                      isInvalid={errors.timeWindowSize.length > 0}
                       min={1}
                       value={timeWindowSize ? parseInt(timeWindowSize, 10) : 1}
                       onChange={e => {

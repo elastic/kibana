@@ -52,10 +52,6 @@ import { ACTION_GROUPS } from '../../constants/action_groups';
 import { getTimeOptions } from '../../lib/get_time_options';
 import { SectionLoading } from '../../components/section_loading';
 
-interface Props {
-  refreshList: () => Promise<void>;
-}
-
 function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
   const errors = {
@@ -72,7 +68,7 @@ function validateBaseProperties(alertObject: Alert) {
       })
     );
   }
-  if (!alertObject.interval) {
+  if (!alertObject.schedule.interval) {
     errors.interval.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertAdd.error.requiredIntervalText', {
         defaultMessage: 'Check interval is required.',
@@ -89,20 +85,24 @@ function validateBaseProperties(alertObject: Alert) {
   return validationResult;
 }
 
-export const AlertAdd = ({ refreshList }: Props) => {
+export const AlertAdd = () => {
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
   const initialAlert = {
     params: {},
+    consumer: 'alerting',
     alertTypeId: null,
-    interval: '1m',
+    schedule: {
+      interval: '1m',
+    },
     actions: [],
     tags: [],
   };
 
-  const { alertFlyoutVisible, setAlertFlyoutVisibility } = useAlertsContext();
+  const { alertFlyoutVisible, setAlertFlyoutVisibility, reloadAlerts } = useAlertsContext();
   // hooks
-  const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
+
+  const [alertType, setAlertType] = useState<AlertTypeModel | undefined>(undefined);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('alert');
@@ -110,7 +110,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
   const [alertInterval, setAlertInterval] = useState<number | null>(null);
   const [alertIntervalUnit, setAlertIntervalUnit] = useState<string>('m');
   const [alertThrottle, setAlertThrottle] = useState<number | null>(null);
-  const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('');
+  const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
@@ -138,22 +138,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
         setIsLoadingActionTypes(false);
       }
     })();
-  }, [toastNotifications, http]);
-
-  useEffect(() => {
-    dispatch({
-      command: { type: 'setAlert' },
-      payload: {
-        key: 'alert',
-        value: {
-          params: {},
-          alertTypeId: null,
-          interval: '1m',
-          actions: [],
-          tags: [],
-        },
-      },
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertFlyoutVisible]);
 
   useEffect(() => {
@@ -161,12 +146,20 @@ export const AlertAdd = ({ refreshList }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertFlyoutVisible]);
 
+  const setInitialAlert = (value: any) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
+  };
+
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
   const setAlertParams = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlertParams' }, payload: { key, value } });
+  };
+
+  const setScheduleProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
   const setActionParamsProperty = (key: string, value: any, index: number) => {
@@ -183,7 +176,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
     setIsAddActionPanelOpen(true);
     setSelectedTabId('alert');
     setServerError(null);
-  }, [setAlertFlyoutVisibility]);
+    setInitialAlert(initialAlert);
+  }, [initialAlert, setAlertFlyoutVisibility]);
 
   if (!alertFlyoutVisible) {
     return null;
@@ -367,7 +361,6 @@ export const AlertAdd = ({ refreshList }: Props) => {
           errors={errors}
           setAlertParams={setAlertParams}
           setAlertProperty={setAlertProperty}
-          hasErrors={hasErrors}
         />
       ) : null}
     </Fragment>
@@ -598,12 +591,12 @@ export const AlertAdd = ({ refreshList }: Props) => {
                       defaultMessage="Name"
                     />
                   }
-                  isInvalid={hasErrors && alert.name !== undefined}
+                  isInvalid={errors.name.length > 0 && alert.name !== undefined}
                   error={errors.name}
                 >
                   <EuiFieldText
                     fullWidth
-                    isInvalid={hasErrors && alert.name !== undefined}
+                    isInvalid={errors.name.length > 0 && alert.name !== undefined}
                     compressed
                     name="name"
                     data-test-subj="alertNameInput"
@@ -674,7 +667,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                           const interval =
                             e.target.value !== '' ? parseInt(e.target.value, 10) : null;
                           setAlertInterval(interval);
-                          setAlertProperty('interval', `${e.target.value}${alertIntervalUnit}`);
+                          setScheduleProperty('interval', `${e.target.value}${alertIntervalUnit}`);
                         }}
                       />
                     </EuiFlexItem>
@@ -686,7 +679,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                         options={getTimeOptions((alertInterval ? alertInterval : 1).toString())}
                         onChange={(e: any) => {
                           setAlertIntervalUnit(e.target.value);
-                          setAlertProperty('interval', `${alertInterval}${e.target.value}`);
+                          setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
                         }}
                       />
                     </EuiFlexItem>
@@ -715,8 +708,8 @@ export const AlertAdd = ({ refreshList }: Props) => {
                     <EuiFlexItem grow={false}>
                       <EuiSelect
                         compressed
-                        value={alert.renotifyIntervalUnit}
-                        options={getTimeOptions(alert.renotifyIntervalSize)}
+                        value={alertThrottleUnit}
+                        options={getTimeOptions((alertThrottle ? alertThrottle : 1).toString())}
                         onChange={(e: any) => {
                           setAlertThrottleUnit(e.target.value);
                           setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
@@ -786,7 +779,7 @@ export const AlertAdd = ({ refreshList }: Props) => {
                     return setServerError(savedAlert.error);
                   }
                   closeFlyout();
-                  refreshList();
+                  reloadAlerts();
                 }}
               >
                 <FormattedMessage

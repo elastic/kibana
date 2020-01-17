@@ -82,8 +82,11 @@ export interface Alert {
   name: string;
   tags: string[];
   enabled: boolean;
+  schedule: {
+    interval: string;
+  };
+  consumer: string;
   alertTypeId: string;
-  interval: string;
   actions: AlertAction[];
   params: Record<string, any>;
   scheduledTaskId?: string;
