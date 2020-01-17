@@ -6,7 +6,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { esFilters, IIndexPattern, Query } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
@@ -19,7 +19,6 @@ import { alertsStackByOptions } from '../../../components/alerts_viewer';
 import { getDetectionEngineAlertUrl } from '../../../components/link_to/redirect_to_detection_engine';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
 import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
@@ -68,8 +67,17 @@ export const AlertsByCategory = React.memo<Props>(
     setQuery,
     to,
   }) => {
+    useEffect(() => {
+      return () => {
+        if (deleteQuery) {
+          deleteQuery({ id: ID });
+        }
+      };
+    }, []);
+
     const kibana = useKibana();
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+
     const updateDateRangeCallback = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
@@ -83,10 +91,6 @@ export const AlertsByCategory = React.memo<Props>(
       []
     );
 
-    const getTitle = useCallback(
-      (option: MatrixHistogramOption) => i18n.ALERTS_COUNT_BY(option.text),
-      []
-    );
     const getSubtitle = useCallback(
       (totalCount: number) =>
         `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
@@ -96,7 +100,6 @@ export const AlertsByCategory = React.memo<Props>(
     return (
       <MatrixHistogramContainer
         dataKey="AlertsHistogram"
-        deleteQuery={deleteQuery}
         defaultStackByOption={alertsStackByOptions[0]}
         endDate={to}
         errorMessage={ERROR_FETCHING_ALERTS_DATA}
@@ -115,7 +118,7 @@ export const AlertsByCategory = React.memo<Props>(
         sourceId="default"
         stackByOptions={alertsStackByOptions}
         startDate={from}
-        title={getTitle}
+        title={i18n.ALERTS_TITLE}
         subtitle={getSubtitle}
         type={HostsType.page}
         updateDateRange={updateDateRangeCallback}

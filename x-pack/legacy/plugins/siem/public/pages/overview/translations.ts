@@ -54,3 +54,7 @@ export const VIEW_ALERTS = i18n.translate('xpack.siem.overview.viewAlertsButtonL
 export const VIEW_EVENTS = i18n.translate('xpack.siem.overview.viewEventsButtonLabel', {
   defaultMessage: 'View events',
 });
+
+export const ALERTS_TITLE = i18n.translate('xpack.siem.overview.alertsTitle', {
+  defaultMessage: 'Alert detection frequency',
+});

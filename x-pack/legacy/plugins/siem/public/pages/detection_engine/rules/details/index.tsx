@@ -211,7 +211,9 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
     );
     const ruleError = useMemo(
       () =>
-        rule?.status === 'failed' && ruleDetailTab === 'signal' && rule?.last_failure_at != null ? (
+        rule?.status === 'failed' &&
+        ruleDetailTab === RuleDetailTabs.signals &&
+        rule?.last_failure_at != null ? (
           <RuleStatusFailedCallOut
             message={rule?.last_failure_message ?? ''}
             date={rule?.last_failure_at}
