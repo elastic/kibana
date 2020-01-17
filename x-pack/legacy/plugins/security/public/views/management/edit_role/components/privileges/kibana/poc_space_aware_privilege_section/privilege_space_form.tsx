@@ -162,7 +162,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             options={[
               {
                 value: 'basePrivilege_custom',
-                disabled: false, // !this.canCustomizeFeaturePrivileges(baseExplanation, allowedPrivileges),
+                disabled: !this.canCustomizeFeaturePrivileges(),
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -190,7 +190,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
               {
                 value: 'basePrivilege_read',
-                disabled: false, // !allowedPrivileges.base.privileges.includes('read'),
+                disabled:
+                  // TODO: ugly, maybe incorrect
+                  this.props.privilegeCalculator.explainEffectiveBasePrivilege(
+                    this.props.role,
+                    this.props.editingIndex
+                  )?.privilege.id === 'all',
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -479,6 +484,15 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     }
 
     return `basePrivilege_${CUSTOM_PRIVILEGE_VALUE}`;
+  };
+
+  private canCustomizeFeaturePrivileges = () => {
+    const explanations = this.props.privilegeCalculator.explainAllEffectiveFeaturePrivileges(
+      this.state.role,
+      this.state.editingIndex
+    );
+
+    return explanations.exists((featureId, privilegeId, explanation) => !explanation.isGranted());
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {

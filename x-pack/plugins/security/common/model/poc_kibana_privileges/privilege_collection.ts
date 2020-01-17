@@ -7,10 +7,12 @@
 import { Privilege } from './privilege_instance';
 
 export class PrivilegeCollection {
-  private actions: string[];
+  private actions: ReadonlySet<string>;
 
   constructor(private readonly privileges: Privilege[]) {
-    this.actions = privileges.reduce((acc, priv) => [...acc, ...priv.actions], [] as string[]);
+    this.actions = new Set(
+      privileges.reduce((acc, priv) => [...acc, ...priv.actions], [] as string[])
+    );
   }
 
   public grantsPrivilege(privilege: Privilege) {
@@ -18,7 +20,7 @@ export class PrivilegeCollection {
   }
 
   public getPrivilegesGranting(privilege: Privilege) {
-    return this.privileges.filter(p => p.grantsActions(privilege.actions).hasAllRequested);
+    return this.privileges.filter(p => p.grantsPrivilege(privilege).hasAllRequested);
   }
 
   public without(...privileges: Array<Pick<Privilege, 'type' | 'id'>>) {
@@ -32,8 +34,8 @@ export class PrivilegeCollection {
     );
   }
 
-  private checkActions(knownActions: string[], candidateActions: string[]) {
-    const missing = candidateActions.filter(action => !knownActions.includes(action));
+  private checkActions(knownActions: ReadonlySet<string>, candidateActions: string[]) {
+    const missing = candidateActions.filter(action => !knownActions.has(action));
 
     const hasAllRequested = missing.length === 0;
 

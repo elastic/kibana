@@ -14,4 +14,14 @@ export class ScopedPrivilege extends Privilege {
   public equals(other: ScopedPrivilege) {
     return other.scope === this.scope && super.equals(other);
   }
+
+  public compareTo(other: ScopedPrivilege) {
+    if (this.scope === 'space' && other.scope === 'global') {
+      return -1;
+    }
+    if (this.scope === 'global' && other.scope === 'space') {
+      return 1;
+    }
+    return super.compareTo(other);
+  }
 }

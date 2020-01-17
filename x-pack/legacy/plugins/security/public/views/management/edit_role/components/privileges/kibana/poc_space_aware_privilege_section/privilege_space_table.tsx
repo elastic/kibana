@@ -181,7 +181,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
           // TODO: Reserved
 
-          // TODO: rename explainAll.....
           const explanations = privilegeCalculator.explainAllEffectiveFeaturePrivileges(
             this.props.role,
             record.spacesIndex
@@ -193,26 +192,27 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
           // TODO: Custom assignment value
 
-          if (record.isGlobal) {
-            return (
-              <PrivilegeDisplay privilege={basePrivilege ? basePrivilege.id : NO_PRIVILEGE_VALUE} />
-            );
-          } else {
-            const hasNonSupersededCustomizations = explanations.exists(
-              (featureId, privilegeId, explanation) =>
-                explanation.privilege.type === 'feature' && explanation.isDirectlyAssigned()
-            );
+          const hasNonSupersededCustomizations = explanations.exists(
+            (featureId, privilegeId, explanation) =>
+              explanation.privilege.type === 'feature' && explanation.isDirectlyAssigned()
+          );
 
-            const showCustom = hasNonSupersededCustomizations;
+          const showCustom = hasNonSupersededCustomizations;
 
-            return (
-              <PrivilegeDisplay
-                privilege={
-                  showCustom ? CUSTOM_PRIVILEGE_VALUE : basePrivilege ? basePrivilege.id : 'ON NOES'
-                }
-              />
-            );
-          }
+          console.log({
+            role: this.props.role,
+            basePrivilege,
+            explanations,
+            hasNonSupersededCustomizations,
+          });
+
+          return (
+            <PrivilegeDisplay
+              privilege={
+                showCustom ? CUSTOM_PRIVILEGE_VALUE : basePrivilege ? basePrivilege.id : 'ON NOES'
+              }
+            />
+          );
         },
       },
     ];

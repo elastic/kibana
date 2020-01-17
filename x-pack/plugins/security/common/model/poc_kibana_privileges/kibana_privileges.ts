@@ -18,16 +18,16 @@ function toPrivilege(type: PrivilegeType, entry: [string, string[]]): [string, P
 function recordsToPrivilegeMap(
   type: PrivilegeType,
   record: Record<string, string[]>
-): Map<string, Privilege> {
+): ReadonlyMap<string, Privilege> {
   return new Map(Object.entries(record).map(entry => toPrivilege(type, entry)));
 }
 
 export class KibanaPrivileges {
-  private global: Map<string, Privilege>;
+  private global: ReadonlyMap<string, Privilege>;
 
-  private spaces: Map<string, Privilege>;
+  private spaces: ReadonlyMap<string, Privilege>;
 
-  private feature: Map<string, Map<string, Privilege>>;
+  private feature: ReadonlyMap<string, ReadonlyMap<string, Privilege>>;
 
   constructor(rawKibanaPrivileges: RawKibanaPrivileges) {
     this.global = recordsToPrivilegeMap('global_base', rawKibanaPrivileges.global);

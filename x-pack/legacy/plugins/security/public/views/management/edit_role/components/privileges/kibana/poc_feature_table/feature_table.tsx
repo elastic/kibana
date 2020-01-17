@@ -212,13 +212,6 @@ export class FeatureTable extends Component<Props, State> {
             featureId
           );
 
-          const allowsNone =
-            this.props.privilegeCalculator.getInheritedFeaturePrivileges(
-              this.props.role,
-              this.props.spacesIndex,
-              featureId
-            ).length === 0;
-
           const effectiveFeaturePrivileges = this.props.privilegeCalculator.getEffectiveFeaturePrivileges(
             this.props.role,
             this.props.spacesIndex,
@@ -234,6 +227,15 @@ export class FeatureTable extends Component<Props, State> {
           const selectedPrivilege = effectiveFeaturePrivileges.find(afp =>
             record.feature.privileges?.find(featurePriv => afp.id === featurePriv.id)
           );
+
+          // TODO
+          const allowsNone =
+            !selectedPrivilege ||
+            !featurePrivilegeExplanations.exists((fid, privilegeId, explanation) =>
+              record.feature.privileges!.some(
+                featurePriv => privilegeId === featurePriv.id && explanation.isInherited()
+              )
+            );
 
           const canChangePrivilege =
             !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);

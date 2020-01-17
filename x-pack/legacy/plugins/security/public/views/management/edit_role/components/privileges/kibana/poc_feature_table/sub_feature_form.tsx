@@ -75,6 +75,7 @@ export const SubFeatureForm = (props: Props) => {
       </div>
     );
   }
+
   function renderMutuallyExclusivePrivilegeGroup(
     privilegeGroup: FeatureKibanaPrivilegesGroup,
     index: number

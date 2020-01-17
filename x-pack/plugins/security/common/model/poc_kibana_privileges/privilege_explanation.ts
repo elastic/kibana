@@ -42,4 +42,12 @@ export class PrivilegeExplanation {
 
     return indirectPrivileges.length > 0;
   }
+
+  public getGrantSource() {
+    const rankedSources = [this.calculation.global, this.calculation.space]
+      .flat()
+      .sort((p1, p2) => p1.compareTo(p2));
+
+    return rankedSources.length > 0 ? rankedSources[0] : undefined;
+  }
 }
