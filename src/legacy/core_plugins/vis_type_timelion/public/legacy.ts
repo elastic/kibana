@@ -17,24 +17,21 @@
  * under the License.
  */
 
-import { TimelionFunctionArgs } from '../../../../vis_type_timelion/common/types';
+import { PluginInitializerContext } from 'kibana/public';
 
-export interface TimelionFunctionInterface extends TimelionFunctionConfig {
-  chainable: boolean;
-  originalFn: Function;
-  argsByName: TimelionFunctionArgs[];
-}
+import { npSetup, npStart } from './legacy_imports';
 
-export interface TimelionFunctionConfig {
-  name: string;
-  help: string;
-  extended: boolean;
-  aliases: string[];
-  fn: Function;
-  args: TimelionFunctionArgs[];
-}
+import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
+import { TimelionVisSetupDependencies } from './plugin';
+import { plugin } from '.';
 
-// eslint-disable-next-line import/no-default-export
-export default class TimelionFunction {
-  constructor(name: string, config: TimelionFunctionConfig);
-}
+const setupPlugins: Readonly<TimelionVisSetupDependencies> = {
+  expressions: npSetup.plugins.expressions,
+  data: npSetup.plugins.data,
+  visualizations: visualizationsSetup,
+};
+
+const pluginInstance = plugin({} as PluginInitializerContext);
+
+export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);
