@@ -16,7 +16,7 @@ import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
 } from '../../../components/matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
 import * as i18n from '../translations';
 

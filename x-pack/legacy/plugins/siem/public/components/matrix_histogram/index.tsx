@@ -5,12 +5,14 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScaleType } from '@elastic/charts';
+import { Position, ScaleType } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
@@ -19,7 +21,7 @@ import { useUiSetting$ } from '../../lib/kibana';
 import { Loader } from '../loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from '../../components/matrix_histogram/utils';
-import { useQuery } from '../../containers/matrix_histogram/utils';
+import { useQuery } from '../../containers/matrix_histogram';
 import {
   MatrixHistogramProps,
   MatrixHistogramOption,
@@ -28,6 +30,36 @@ import {
 } from './types';
 import { ChartSeriesData } from '../charts/common';
 import { InspectButtonContainer } from '../inspect';
+
+import { State, inputsSelectors, hostsModel, networkModel } from '../../store';
+
+import {
+  MatrixHistogramMappingTypes,
+  GetTitle,
+  GetSubTitle,
+  HistogramType,
+} from '../../components/matrix_histogram/types';
+import { UpdateDateRange } from '../../components/charts/common';
+import { SetQuery } from '../../pages/hosts/navigation/types';
+import { QueryTemplateProps } from '../../containers/query_template';
+
+export interface OwnProps extends QueryTemplateProps {
+  defaultStackByOption: MatrixHistogramOption;
+  errorMessage: string;
+  headerChildren?: React.ReactNode;
+  hideHistogramIfEmpty?: boolean;
+  histogramType: HistogramType;
+  id: string;
+  legendPosition?: Position;
+  mapping?: MatrixHistogramMappingTypes;
+  setQuery: SetQuery;
+  showLegend?: boolean;
+  stackByOptions: MatrixHistogramOption[];
+  subtitle?: string | GetSubTitle;
+  title: string | GetTitle;
+  type: hostsModel.HostsType | networkModel.NetworkType;
+  updateDateRange: UpdateDateRange;
+}
 
 const MatrixHistogramComponent: React.FC<MatrixHistogramProps & MatrixHistogramQueryProps> = ({
   defaultStackByOption,
@@ -188,3 +220,18 @@ const MatrixHistogramComponent: React.FC<MatrixHistogramProps & MatrixHistogramQ
 };
 
 export const MatrixHistogram = React.memo(MatrixHistogramComponent);
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      isInspected,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const MatrixHistogramContainer = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps)
+)(MatrixHistogram);

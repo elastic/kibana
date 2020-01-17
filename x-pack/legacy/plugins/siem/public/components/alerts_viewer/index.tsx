@@ -11,7 +11,7 @@ import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../containers/matrix_histogram';
+import { MatrixHistogramContainer } from '../../components/matrix_histogram';
 const ID = 'alertsOverTimeQuery';
 export const alertsStackByOptions: MatrixHistogramOption[] = [
   {

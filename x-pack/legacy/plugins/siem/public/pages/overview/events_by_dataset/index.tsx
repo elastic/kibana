@@ -19,7 +19,7 @@ import {
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { eventsStackByOptions } from '../../hosts/navigation';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';

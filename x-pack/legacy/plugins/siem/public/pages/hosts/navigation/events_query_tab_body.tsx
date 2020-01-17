@@ -11,7 +11,7 @@ import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import * as i18n from '../translations';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';

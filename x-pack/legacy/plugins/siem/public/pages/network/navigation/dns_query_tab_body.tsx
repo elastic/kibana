@@ -17,7 +17,7 @@ import { networkModel } from '../../../store';
 
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import * as i18n from '../translations';
-import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 

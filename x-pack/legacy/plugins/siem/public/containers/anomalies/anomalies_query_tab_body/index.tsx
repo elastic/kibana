@@ -12,7 +12,7 @@ import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
 import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
-import { MatrixHistogramContainer } from '../../matrix_histogram';
+import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 
 const ID = 'anomaliesOverTimeQuery';

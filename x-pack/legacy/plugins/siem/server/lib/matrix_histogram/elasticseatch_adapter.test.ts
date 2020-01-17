@@ -15,7 +15,7 @@ import {
   mockAlertsHistogramDataFormattedResponse,
 } from './mock';
 
-jest.mock('./query.dsl', () => {
+jest.mock('./query_alerts.dsl', () => {
   return {
     buildAlertsHistogramQuery: jest.fn(() => mockAlertsHistogramQueryDsl),
   };
