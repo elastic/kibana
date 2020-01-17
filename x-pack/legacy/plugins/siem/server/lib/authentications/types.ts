@@ -4,16 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AuthenticationsData,
-  AuthenticationsOverTimeData,
-  LastSourceHost,
-} from '../../graphql/types';
-import {
-  FrameworkRequest,
-  RequestOptionsPaginated,
-  MatrixHistogramRequestOptions,
-} from '../framework';
+import { AuthenticationsData, LastSourceHost } from '../../graphql/types';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { Hit, SearchHit, TotalHit } from '../types';
 
 export interface AuthenticationsAdapter {
@@ -67,18 +59,4 @@ export interface AuthenticationData extends SearchHit {
       buckets: AuthenticationBucket[];
     };
   };
-}
-
-interface AuthenticationsOverTimeHistogramData {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-}
-
-export interface AuthenticationsActionGroupData {
-  key: number;
-  events: {
-    bucket: AuthenticationsOverTimeHistogramData[];
-  };
-  doc_count: number;
 }

@@ -14,13 +14,8 @@ import {
   NetworkTopCountriesData,
   NetworkTopNFlowData,
   NetworkTopTablesSortField,
-  NetworkDsOverTimeData,
 } from '../../graphql/types';
-import {
-  FrameworkRequest,
-  RequestOptionsPaginated,
-  MatrixHistogramRequestOptions,
-} from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 export * from './elasticsearch_adapter';
 import { NetworkAdapter } from './types';
 

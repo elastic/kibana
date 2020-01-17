@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { esFilters, IIndexPattern, Query } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
+import { Position } from '@elastic/charts';
 import {
   ERROR_FETCHING_ALERTS_DATA,
   SHOWING,
@@ -18,7 +19,6 @@ import {
 import { alertsStackByOptions } from '../../../components/alerts_viewer';
 import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
@@ -105,10 +105,9 @@ export const AlertsByCategory = React.memo<Props>(
           filters,
         })}
         headerChildren={alertsCountViewAlertsButton}
+        histogramType="alerts"
         id={ID}
-        isAlertsHistogram={true}
-        legendPosition={'right'}
-        query={MatrixHistogramGqlQuery}
+        legendPosition={Position.Right}
         setQuery={setQuery}
         sourceId="default"
         stackByOptions={alertsStackByOptions}

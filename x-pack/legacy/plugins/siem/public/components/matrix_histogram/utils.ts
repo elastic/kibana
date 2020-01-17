@@ -7,7 +7,8 @@ import { ScaleType, niceTimeFormatter, Position } from '@elastic/charts';
 import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
-import { MatrixHistogramDataTypes, MatrixHistogramMappingTypes } from './types';
+import { MatrixHistogramMappingTypes } from './types';
+import { MatrixOverTimeHistogramData } from '../../graphql/types';
 
 export const getBarchartConfigs = ({
   from,
@@ -66,14 +67,14 @@ export const getBarchartConfigs = ({
 
 export const formatToChartDataItem = ([key, value]: [
   string,
-  MatrixHistogramDataTypes[]
+  MatrixOverTimeHistogramData[]
 ]): ChartSeriesData => ({
   key,
   value,
 });
 
 export const getCustomChartData = (
-  data: MatrixHistogramDataTypes[] | null,
+  data: MatrixOverTimeHistogramData[] | null,
   mapping?: MatrixHistogramMappingTypes
 ): ChartSeriesData[] => {
   if (!data) return [];

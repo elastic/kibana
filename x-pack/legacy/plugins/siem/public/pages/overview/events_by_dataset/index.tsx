@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { esFilters, IIndexPattern, Query } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
+import { Position } from '@elastic/charts';
 import {
   ERROR_FETCHING_EVENTS_DATA,
   SHOWING,
@@ -19,7 +20,6 @@ import { convertToBuildEsQuery } from '../../../lib/keury';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
 import { MatrixHistogramContainer } from '../../../containers/matrix_histogram';
-import { MatrixHistogramGqlQuery } from '../../../containers/matrix_histogram/index.gql_query';
 import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { eventsStackByOptions } from '../../hosts/navigation';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
@@ -95,8 +95,6 @@ export const EventsByDataset = React.memo<Props>(
 
     return (
       <MatrixHistogramContainer
-        dataKey="EventsHistogram"
-        deleteQuery={deleteQuery}
         defaultStackByOption={eventsStackByOptions[1]}
         endDate={to}
         errorMessage={ERROR_FETCHING_EVENTS_DATA}
@@ -107,10 +105,9 @@ export const EventsByDataset = React.memo<Props>(
           filters,
         })}
         headerChildren={eventsCountViewEventsButton}
+        histogramType="events"
         id={ID}
-        isEventsHistogram={true}
-        legendPosition={'right'}
-        query={MatrixHistogramGqlQuery}
+        legendPosition={Position.Right}
         setQuery={setQuery}
         sourceId="default"
         stackByOptions={eventsStackByOptions}

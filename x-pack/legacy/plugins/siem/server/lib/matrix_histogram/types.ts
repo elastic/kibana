@@ -61,6 +61,40 @@ export interface EventsActionGroupData {
   doc_count: number;
 }
 
+interface DnsHistogramSubBucket {
+  key: string;
+  doc_count: number;
+  orderAgg: {
+    value: number;
+  };
+}
+interface DnsHistogramBucket {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: DnsHistogramSubBucket[];
+}
+
+export interface DnsHistogramGroupData {
+  key: number;
+  doc_count: number;
+  key_as_string: string;
+  histogram: DnsHistogramBucket;
+}
+
+interface AuthenticationsOverTimeHistogramData {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+}
+
+export interface AuthenticationsActionGroupData {
+  key: number;
+  events: {
+    bucket: AuthenticationsOverTimeHistogramData[];
+  };
+  doc_count: number;
+}
+
 export interface MatrixHistogramAdapter {
   getAlertsHistogramData(
     request: FrameworkRequest,

@@ -5,10 +5,7 @@
  */
 import { getOr } from 'lodash/fp';
 import { useEffect, useState } from 'react';
-import {
-  MatrixHistogramDataTypes,
-  MatrixHistogramQueryProps,
-} from '../../components/matrix_histogram/types';
+import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
@@ -17,7 +14,7 @@ import { createFilter } from '../helpers';
 import { useApolloClient } from '../../utils/apollo_context';
 import { inputsModel } from '../../store';
 import { MatrixHistogramGqlQuery } from './index.gql_query';
-import { GetMatrixHistogramQuery } from '../../graphql/types';
+import { GetMatrixHistogramQuery, MatrixOverTimeHistogramData } from '../../graphql/types';
 
 export const useQuery = <Hit, Aggs, TCache = object>({
   endDate,
@@ -32,7 +29,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
   const [, dispatchToaster] = useStateToaster();
   const [refetch, setRefetch] = useState<inputsModel.Refetch>();
   const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<MatrixHistogramDataTypes[] | null>(null);
+  const [data, setData] = useState<MatrixOverTimeHistogramData[] | null>(null);
   const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
   const [totalCount, setTotalCount] = useState(-1);
   const apolloClient = useApolloClient();

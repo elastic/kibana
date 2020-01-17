@@ -5,12 +5,10 @@
  */
 
 import { ScaleType, Position } from '@elastic/charts';
-import { MatrixOverTimeHistogramData, MatrixOverOrdinalHistogramData } from '../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
 import { ESQuery } from '../../../common/typed_json';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
-export type MatrixHistogramDataTypes = MatrixOverTimeHistogramData | MatrixOverOrdinalHistogramData;
 export type MatrixHistogramMappingTypes = Record<
   string,
   { key: string; value: null; color?: string | undefined }

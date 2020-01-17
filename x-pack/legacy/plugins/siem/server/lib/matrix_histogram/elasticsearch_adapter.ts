@@ -15,6 +15,9 @@ import {
   AlertsBucket,
   AnomaliesActionGroupData,
   AnomalyHit,
+  EventsActionGroupData,
+  DnsHistogramGroupData,
+  AuthenticationsActionGroupData,
 } from './types';
 import { TermAggregation } from '../types';
 import { EventHit } from '../events/types';
@@ -26,7 +29,7 @@ import { buildAuthenticationsOverTimeQuery } from './query.authentications_over_
 import { AuthenticationHit } from '../authentications/types';
 
 export class ElasticsearchMatrixHistogramAdapter implements MatrixHistogramAdapter {
-  constructor(private readonly framework: FrameworkAdapter) { }
+  constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getAlertsHistogramData(
     request: FrameworkRequest,
@@ -242,9 +245,9 @@ export const getTotalEventsOverTime = (
 ): MatrixOverTimeHistogramData[] => {
   return data && data.length > 0
     ? data.map<MatrixOverTimeHistogramData>(({ key, doc_count }) => ({
-      x: key,
-      y: doc_count,
-      g: 'total events',
-    }))
+        x: key,
+        y: doc_count,
+        g: 'total events',
+      }))
     : [];
 };

@@ -25,7 +25,7 @@ export class MatrixHistogram {
         return this.adapter.getAuthenticationsHistogram(req, options);
       case 'dns':
         return this.adapter.getDnsHistogram(req, options);
-      case 'events':
+      default:
         return this.adapter.getEventsHistogram(req, options);
     }
   }

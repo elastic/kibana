@@ -168,20 +168,20 @@ const MatrixHistogramComponent: React.FC<MatrixHistogramProps & MatrixHistogramQ
         {loading ? (
           <EuiLoadingContent data-test-subj="initialLoadingPanelMatrixOverTime" lines={10} />
         ) : (
-            <>
-              <BarChart barChart={barChartData} configs={barchartConfigs} />
+          <>
+            <BarChart barChart={barChartData} configs={barchartConfigs} />
 
-              {loading && (
-                <Loader
-                  overlay
-                  overlayBackground={
-                    darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
-                  }
-                  size="xl"
-                />
-              )}
-            </>
-          )}
+            {loading && (
+              <Loader
+                overlay
+                overlayBackground={
+                  darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+                }
+                size="xl"
+              />
+            )}
+          </>
+        )}
       </Panel>
     </InspectButtonContainer>
   ) : null;
