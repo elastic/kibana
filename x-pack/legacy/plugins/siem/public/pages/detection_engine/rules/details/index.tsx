@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiHealth,
   EuiTab,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -60,10 +59,10 @@ import { inputsSelectors } from '../../../../store/inputs';
 import { State } from '../../../../store';
 import { InputsRange } from '../../../../store/inputs/model';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../../store/inputs/actions';
-import { getEmptyTagValue } from '../../../../components/empty_value';
+import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
-import { RuleActionsOverflow } from '../components/rule_actions_overflow';
+import { RuleStatus } from '../components/rule_status';
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -107,6 +106,8 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
     const { ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
     const [ruleDetailTab, setRuleDetailTab] = useState('signal');
+    // This is used to re-trigger api rule status when user de/activate rule
+    const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
       rule,
       detailsView: true,
@@ -175,17 +176,6 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       filters,
     ]);
 
-    const statusColor =
-      rule?.status == null
-        ? 'subdued'
-        : rule?.status === 'succeeded'
-        ? 'success'
-        : rule?.status === 'failed'
-        ? 'danger'
-        : rule?.status === 'executing' || rule?.status === 'going to run'
-        ? 'warning'
-        : 'subdued';
-
     const tabs = useMemo(
       () =>
         ruleDetailTabs.map(tab => (
@@ -216,6 +206,15 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]
+    );
+
+    const handleOnChangeEnabledRule = useCallback(
+      (enabled: boolean) => {
+        if (ruleEnabled == null || enabled !== ruleEnabled) {
+          setRuleEnabled(enabled);
+        }
+      },
+      [ruleEnabled, setRuleEnabled]
     );
 
     return (
@@ -251,34 +250,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                                 </>,
                               ]
                             : []),
-                          <EuiFlexGroup
-                            gutterSize="xs"
-                            alignItems="center"
-                            justifyContent="flexStart"
-                          >
-                            <EuiFlexItem grow={false}>
-                              {i18n.STATUS}
-                              {':'}
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiHealth color={statusColor}>
-                                {rule?.status ?? getEmptyTagValue()}
-                              </EuiHealth>
-                            </EuiFlexItem>
-                            {rule?.status_date && (
-                              <>
-                                <EuiFlexItem grow={false}>
-                                  <>{i18n.STATUS_AT}</>
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={true}>
-                                  <FormattedDate
-                                    value={rule?.status_date}
-                                    fieldName={i18n.STATUS_DATE}
-                                  />
-                                </EuiFlexItem>
-                              </>
-                            )}
-                          </EuiFlexGroup>,
+                          <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
                         ]}
                         title={title}
                       >
@@ -289,6 +261,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                               isDisabled={userHasNoPermissions}
                               enabled={rule?.enabled ?? false}
                               optionLabel={i18n.ACTIVATE_RULE}
+                              onChange={handleOnChangeEnabledRule}
                             />
                           </EuiFlexItem>
 
