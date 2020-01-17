@@ -85,38 +85,6 @@ describe('Fetch', () => {
       });
     });
 
-    it('should not set kbn-system-api header by default', async () => {
-      fetchMock.get('*', {});
-      await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo' },
-      });
-
-      expect(fetchMock.lastOptions()!.headers['kbn-system-api']).toBeUndefined();
-    });
-
-    it('should not set kbn-system-api header when asSystemApi: false', async () => {
-      fetchMock.get('*', {});
-      await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo' },
-        asSystemApi: false,
-      });
-
-      expect(fetchMock.lastOptions()!.headers['kbn-system-api']).toBeUndefined();
-    });
-
-    it('should set kbn-system-api header when asSystemApi: true', async () => {
-      fetchMock.get('*', {});
-      await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo' },
-        asSystemApi: true,
-      });
-
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        'kbn-system-api': 'true',
-        myheader: 'foo',
-      });
-    });
-
     it('should not allow overwriting of kbn-version header', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', {
@@ -129,24 +97,84 @@ describe('Fetch', () => {
       });
     });
 
-    it('should not allow overwriting of kbn-system-api when asSystemApi: true', async () => {
+    it('should not set kbn-system-request header by default', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-        asSystemApi: true,
+        headers: { myHeader: 'foo' },
+      });
+
+      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+    });
+
+    it('should not set kbn-system-request header when asSystemRequest: false', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo' },
+        asSystemRequest: false,
+      });
+
+      expect(fetchMock.lastOptions()!.headers['kbn-system-request']).toBeUndefined();
+    });
+
+    it('should set kbn-system-request header when asSystemRequest: true', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo' },
+        asSystemRequest: true,
       });
 
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        'kbn-system-api': 'true',
+        'kbn-system-request': 'true',
         myheader: 'foo',
       });
     });
 
-    it('should not allow overwriting of kbn-system-api when asSystemApi: false', async () => {
+    it('should not allow overwriting of kbn-system-request when asSystemRequest: true', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
+        asSystemRequest: true,
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'kbn-system-request': 'true',
+        myheader: 'foo',
+      });
+    });
+
+    it('should not allow overwriting of kbn-system-request when asSystemRequest: false', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
+        asSystemRequest: false,
+      });
+
+      expect(fetchMock.lastOptions()!.headers).not.toHaveProperty('kbn-system-request');
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        myheader: 'foo',
+      });
+    });
+
+    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
+    it('should not allow overwriting of kbn-system-api when asSystemRequest: true', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', {
         headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-        asSystemApi: false,
+        asSystemRequest: true,
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'kbn-system-request': 'true',
+        myheader: 'foo',
+      });
+    });
+
+    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
+    it('should not allow overwriting of kbn-system-api when asSystemRequest: false', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
+        asSystemRequest: false,
       });
 
       expect(fetchMock.lastOptions()!.headers).not.toHaveProperty('kbn-system-api');
@@ -209,24 +237,24 @@ describe('Fetch', () => {
       expect(response.body).toEqual({ foo: 'bar' });
     });
 
-    it('should expose asSystemApi: true on detailed response object when asResponse = true', async () => {
+    it('should expose asSystemRequest: true on detailed response object when asResponse = true', async () => {
       fetchMock.get('*', { foo: 'bar' });
 
       const response = await fetchInstance.fetch('/my/path', {
         asResponse: true,
-        asSystemApi: true,
+        asSystemRequest: true,
       });
-      expect(response.fetchOptions.asSystemApi).toBe(true);
+      expect(response.fetchOptions.asSystemRequest).toBe(true);
     });
 
-    it('should expose asSystemApi: false on detailed response object when asResponse = true', async () => {
+    it('should expose asSystemRequest: false on detailed response object when asResponse = true', async () => {
       fetchMock.get('*', { foo: 'bar' });
 
       const response = await fetchInstance.fetch('/my/path', {
         asResponse: true,
-        asSystemApi: false,
+        asSystemRequest: false,
       });
-      expect(response.fetchOptions.asSystemApi).toBe(false);
+      expect(response.fetchOptions.asSystemRequest).toBe(false);
     });
 
     it('should reject on network error', async () => {

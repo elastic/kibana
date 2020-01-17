@@ -9,6 +9,7 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
+import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -595,7 +596,7 @@ export interface HttpErrorResponse extends HttpResponse {
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
-    asSystemApi?: boolean;
+    asSystemRequest?: boolean;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -637,10 +638,10 @@ export interface HttpHeadersInit {
 
 // @public
 export interface HttpInterceptor {
-    request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): Promise<Partial<HttpFetchOptionsWithPath>> | Partial<HttpFetchOptionsWithPath> | void;
-    requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Partial<HttpFetchOptionsWithPath>> | Partial<HttpFetchOptionsWithPath> | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+    request?(fetchOptions: Readonly<HttpFetchOptionsWithPath>, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+    requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
+    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 }
 
 // @public

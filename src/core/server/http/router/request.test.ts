@@ -67,12 +67,37 @@ describe('KibanaRequest', () => {
   });
 
   describe('isSytemApi property', () => {
+    it('is false when no kbn-system-request header is set', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(false);
+    });
+
+    it('is true when kbn-system-request header is set to true', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', 'kbn-system-request': 'true' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(true);
+    });
+
+    it('is false when kbn-system-request header is set to false', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', 'kbn-system-request': 'false' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemRequest).toBe(false);
+    });
+
+    // Remove support for kbn-system-api header in 8.x. Only used by legacy platform.
     it('is false when no kbn-system-api header is set', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one' },
       });
       const kibanaRequest = KibanaRequest.from(request);
-      expect(kibanaRequest.isSystemApi).toBe(false);
+      expect(kibanaRequest.isSystemRequest).toBe(false);
     });
 
     it('is true when kbn-system-api header is set to true', () => {
@@ -80,7 +105,7 @@ describe('KibanaRequest', () => {
         headers: { custom: 'one', 'kbn-system-api': 'true' },
       });
       const kibanaRequest = KibanaRequest.from(request);
-      expect(kibanaRequest.isSystemApi).toBe(true);
+      expect(kibanaRequest.isSystemRequest).toBe(true);
     });
 
     it('is false when kbn-system-api header is set to false', () => {
@@ -88,7 +113,7 @@ describe('KibanaRequest', () => {
         headers: { custom: 'one', 'kbn-system-api': 'false' },
       });
       const kibanaRequest = KibanaRequest.from(request);
-      expect(kibanaRequest.isSystemApi).toBe(false);
+      expect(kibanaRequest.isSystemRequest).toBe(false);
     });
   });
 

@@ -110,7 +110,7 @@ export class Fetch {
       query,
       prependBasePath: shouldPrependBasePath,
       asResponse,
-      asSystemApi,
+      asSystemRequest,
       ...fetchOptions
     } = merge(
       {
@@ -132,10 +132,17 @@ export class Fetch {
       query,
     });
 
-    // Make sure the system API header is only present if `asSystemApi` is true.
-    if (asSystemApi) {
-      fetchOptions.headers['kbn-system-api'] = 'true';
-    } else if ('kbn-system-api' in fetchOptions.headers) {
+    // Make sure the system request header is only present if `asSystemRequest` is true.
+    if (asSystemRequest) {
+      fetchOptions.headers['kbn-system-request'] = 'true';
+    } else {
+      if ('kbn-system-request' in fetchOptions.headers) {
+        Reflect.deleteProperty(fetchOptions.headers, 'kbn-system-request');
+      }
+    }
+
+    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
+    if ('kbn-system-api' in fetchOptions.headers) {
       Reflect.deleteProperty(fetchOptions.headers, 'kbn-system-api');
     }
 

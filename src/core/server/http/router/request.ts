@@ -128,10 +128,10 @@ export class KibanaRequest<
    */
   public readonly headers: Headers;
   /**
-   * Whether or not the request is a "system API" call rather than an application-level call.
-   * Can be set on the client using the `asSystemApi` option.
+   * Whether or not the request is a "system request" rather than an application-level request.
+   * Can be set on the client using the `HttpFetchOptions#asSystemRequest` option.
    */
-  public readonly isSystemApi: boolean;
+  public readonly isSystemRequest: boolean;
 
   /** {@link IKibanaSocket} */
   public readonly socket: IKibanaSocket;
@@ -152,7 +152,10 @@ export class KibanaRequest<
   ) {
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
-    this.isSystemApi = request.headers['kbn-system-api'] === 'true';
+    this.isSystemRequest =
+      request.headers['kbn-system-request'] === 'true' ||
+      // Remove support for `kbn-system-api` in 8.x. Used only by legacy platform.
+      request.headers['kbn-system-api'] === 'true';
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
