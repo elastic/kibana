@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 export { TimeBuckets } from './time_buckets';
 
 export const MANAGEMENT_BREADCRUMB = Object.freeze({
-  text: i18n.translate('common.ui.management.breadcrumb', {
+  text: i18n.translate('xpack.watcher.management.breadcrumb', {
     defaultMessage: 'Management',
   }),
   href: '#/management',

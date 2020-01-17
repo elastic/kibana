@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export class InvalidEsIntervalFormatError extends Error {
   constructor(public readonly interval: string) {
     super(
-      i18n.translate('data.parseEsInterval.invalidEsIntervalFormatErrorMessage', {
+      i18n.translate('xpack.watcher.data.parseEsInterval.invalidEsIntervalFormatErrorMessage', {
         defaultMessage: 'Invalid interval format: {interval}',
         values: { interval },
       })

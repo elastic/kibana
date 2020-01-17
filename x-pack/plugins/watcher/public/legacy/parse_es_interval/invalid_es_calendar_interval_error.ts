@@ -15,7 +15,7 @@ export class InvalidEsCalendarIntervalError extends Error {
     public readonly type: string
   ) {
     super(
-      i18n.translate('data.parseEsInterval.invalidEsCalendarIntervalErrorMessage', {
+      i18n.translate('xpack.watcher.data.parseEsInterval.invalidEsCalendarIntervalErrorMessage', {
         defaultMessage: 'Invalid calendar interval: {interval}, value must be 1',
         values: { interval },
       })
