@@ -17,28 +17,18 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import { expect } from 'chai';
-import { createNumberHandler } from '../create_number_handler';
+import { getAxisLabelString } from './get_axis_label_string';
 
-describe('createNumberHandler()', () => {
-  let handleChange;
-  let changeHandler;
-  let event;
+jest.mock('ui/new_platform');
 
-  beforeEach(() => {
-    handleChange = sinon.spy();
-    changeHandler = createNumberHandler(handleChange);
-    event = { preventDefault: sinon.spy(), target: { value: '1' } };
-    const fn = changeHandler('test');
-    fn(event);
+describe('getAxisLabelString(interval)', () => {
+  test('should return a valid label for 10 seconds', () => {
+    expect(getAxisLabelString(10000)).toEqual('per 10 seconds');
   });
-
-  it('calls handleChange() function with partial', () => {
-    expect(event.preventDefault.calledOnce).to.equal(true);
-    expect(handleChange.calledOnce).to.equal(true);
-    expect(handleChange.firstCall.args[0]).to.eql({
-      test: 1,
-    });
+  test('should return a valid label for 2 minutes', () => {
+    expect(getAxisLabelString(120000)).toEqual('per 2 minutes');
+  });
+  test('should return a valid label for 2 hour', () => {
+    expect(getAxisLabelString(7200000)).toEqual('per 2 hours');
   });
 });
