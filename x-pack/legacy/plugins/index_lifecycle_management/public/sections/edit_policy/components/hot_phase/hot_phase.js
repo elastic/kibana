@@ -292,9 +292,12 @@ export class HotPhase extends PureComponent {
                         },
                         {
                           value: 'ms',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.millisecondsLabel', {
-                            defaultMessage: 'milliseconds',
-                          }),
+                          text: i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.millisecondsLabel',
+                            {
+                              defaultMessage: 'milliseconds',
+                            }
+                          ),
                         },
                         {
                           value: 'micros',
