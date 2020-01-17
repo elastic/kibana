@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { get, isEmpty, omit } from 'lodash';
-import { KIBANA_SYSTEM_ID } from '../../common/constants';
+import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 import { fetchHighLevelStats, handleHighLevelStatsResponse } from './get_high_level_stats';
 
 export function rollUpTotals(rolledUp, addOn, field) {
@@ -88,17 +89,42 @@ export function combineStats(highLevelStats, usageStats = {}) {
   }, {});
 }
 
+/**
+ * Ensure the start and end dates are, at least, TELEMETRY_COLLECTION_INTERVAL apart
+ * because, otherwise, we are sending telemetry with empty Kibana usage data.
+ *
+ * @param {date} [start] The start time from which to get the telemetry data
+ * @param {date} [end] The end time from which to get the telemetry data
+ */
+export function ensureTimeSpan(start, end) {
+  // We only care if we have a start date, because that's the limit that might make us lose the document
+  if (start) {
+    const duration = moment.duration(TELEMETRY_COLLECTION_INTERVAL, 'milliseconds');
+    // If end exists, we need to ensure they are, at least, TELEMETRY_COLLECTION_INTERVAL apart.
+    // Otherwise start should be, at least, TELEMETRY_COLLECTION_INTERVAL apart from now
+    let safeStart = moment().subtract(duration);
+    if (end) {
+      safeStart = moment(end).subtract(duration);
+    }
+    if (safeStart.isBefore(start)) {
+      return { start: safeStart.toISOString(), end };
+    }
+  }
+  return { start, end };
+}
+
 /*
  * Monkey-patch the modules from get_high_level_stats and add in the
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(server, callCluster, clusterUuids, start, end) {
+  const { start: safeStart, end: safeEnd } = ensureTimeSpan(start, end);
   const rawStats = await fetchHighLevelStats(
     server,
     callCluster,
     clusterUuids,
-    start,
-    end,
+    safeStart,
+    safeEnd,
     KIBANA_SYSTEM_ID
   );
   const highLevelStats = handleHighLevelStatsResponse(rawStats, KIBANA_SYSTEM_ID);
