@@ -36,13 +36,13 @@ export function hierarchicalTooltipFormatter(metricFieldFormatter) {
       row.spacer = _.escape(_.repeat('&nbsp;', row.depth));
 
       let percent;
-      if (row.item.percentOfGroup != null) {
+      if (row.item.percentOfGroup !== null && row.item.percentOfGroup !== undefined) {
         percent = row.item.percentOfGroup;
       }
 
       row.metric = metricFieldFormatter ? metricFieldFormatter.convert(row.metric) : row.metric;
 
-      if (percent != null) {
+      if (percent !== null && percent !== undefined) {
         row.metric += ' (' + numeral(percent).format('0.[00]%') + ')';
       }
 

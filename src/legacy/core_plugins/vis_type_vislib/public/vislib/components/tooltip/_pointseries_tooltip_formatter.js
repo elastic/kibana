@@ -35,14 +35,16 @@ export function pointSeriesTooltipFormatter() {
       });
     }
 
-    if (datum.x) {
+    if (datum.x !== null && datum.x !== undefined) {
       addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));
     }
-    if (datum.y) {
+
+    if (datum.y !== null && datum.y !== undefined) {
       const value = datum.yScale ? datum.yScale * datum.y : datum.y;
       addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
     }
-    if (datum.z) {
+
+    if (datum.z !== null && datum.z !== undefined) {
       addDetail(currentSeries.zLabel, currentSeries.zAxisFormatter(datum.z));
     }
     if (datum.series && datum.parent) {
