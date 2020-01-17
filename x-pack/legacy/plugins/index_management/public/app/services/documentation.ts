@@ -5,8 +5,8 @@
  */
 
 import { DocLinksStart } from '../../../../../../../src/core/public';
-import { DataType } from '../components/mappings_editor/types';
-import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
+import { DataType, ParameterName } from '../components/mappings_editor/types';
+import { TYPE_DEFINITION, PARAMETERS_DEFINITION } from '../components/mappings_editor/constants';
 
 class DocumentationService {
   private esDocsBase: string = '';
@@ -40,13 +40,30 @@ class DocumentationService {
     return `${this.kibanaDocsBase}/managing-indices.html`;
   }
 
-  public getTypeDocLink = (type: DataType, uri = 'main'): string | undefined => {
+  public getTypeDocLink = (type: DataType, docType = 'main'): string | undefined => {
     const typeDefinition = TYPE_DEFINITION[type];
 
-    if (!typeDefinition || !typeDefinition.documentation || !typeDefinition.documentation[uri]) {
+    if (
+      !typeDefinition ||
+      !typeDefinition.documentation ||
+      !typeDefinition.documentation[docType]
+    ) {
       return undefined;
     }
-    return `${this.esDocsBase}${typeDefinition.documentation[uri]}`;
+    return `${this.esDocsBase}${typeDefinition.documentation[docType]}`;
+  };
+
+  public getParameterDocLink = (parameter: ParameterName, docType = 'main'): string | undefined => {
+    const typeDefinition = PARAMETERS_DEFINITION[parameter];
+
+    if (
+      !typeDefinition ||
+      !typeDefinition.documentation ||
+      !typeDefinition.documentation[docType]
+    ) {
+      return undefined;
+    }
+    return `${this.esDocsBase}${typeDefinition.documentation[docType]}`;
   };
 
   public getMappingTypesLink() {

@@ -17,7 +17,13 @@ import {
   fieldFormatters,
   FieldConfig,
 } from '../shared_imports';
-import { AliasOption, DataType, ComboBoxOption } from '../types';
+import {
+  AliasOption,
+  DataType,
+  ComboBoxOption,
+  ParameterName,
+  ParameterDefinition,
+} from '../types';
 import { documentationService } from '../../../services/documentation';
 import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
@@ -124,7 +130,7 @@ const analyzerValidations = [
  *
  * As a consequence, if a parameter is *not* declared here, we won't be able to declare it in the Json editor.
  */
-export const PARAMETERS_DEFINITION = {
+export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinition } = {
   name: {
     fieldConfig: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.nameFieldLabel', {
@@ -538,13 +544,12 @@ export const PARAMETERS_DEFINITION = {
   },
   dynamic: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicFieldLabel', {
-        defaultMessage: 'Dynamic',
-      }),
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
     schema: t.boolean,
+    documentation: {
+      main: '/dynamic.html',
+    },
   },
   enabled: {
     fieldConfig: {

@@ -24,6 +24,7 @@ import { SearchAsYouType } from './search_as_you_type';
 import { FlattenedType } from './flattened_type';
 import { ShapeType } from './shape_type';
 import { DenseVectorType } from './dense_vector_type';
+import { ObjectType } from './object_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -44,6 +45,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   flattened: FlattenedType,
   shape: ShapeType,
   dense_vector: DenseVectorType,
+  object: ObjectType,
 };
 
 export const getParametersFormForType = (

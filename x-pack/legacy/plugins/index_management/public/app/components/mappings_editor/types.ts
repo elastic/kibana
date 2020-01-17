@@ -19,6 +19,19 @@ export interface DataTypeDefinition {
   description?: () => ReactNode;
 }
 
+export interface ParameterDefinition {
+  title?: string;
+  description?: JSX.Element | string;
+  fieldConfig: FieldConfig;
+  schema?: any;
+  props?: { [key: string]: ParameterDefinition };
+  documentation?: {
+    main: string;
+    [key: string]: string;
+  };
+  [key: string]: any;
+}
+
 export type MainType =
   | 'text'
   | 'keyword'
