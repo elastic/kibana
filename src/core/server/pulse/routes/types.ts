@@ -17,4 +17,7 @@
  * under the License.
  */
 
+import { IRouter } from '../../http';
+import { PulseChannel } from '../channel';
+
 export type RegisterRoute = (router: IRouter, channels: Map<string, PulseChannel>) => void;
