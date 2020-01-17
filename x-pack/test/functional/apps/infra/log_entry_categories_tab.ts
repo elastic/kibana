@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('Log Entry Categories Tab', function() {
     this.tags('smoke');
 
-    describe('with a basic license', () => {
+    describe('with a trial license', () => {
       it('is visible', async () => {
         await logsUi.logEntryCategoriesPage.navigateTo();
 
