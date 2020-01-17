@@ -300,15 +300,15 @@ export class HotPhase extends PureComponent {
                           ),
                         },
                         {
-                          value: 'micros',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.microsLabel', {
-                            defaultMessage: 'micros',
+                          value: 'microseconds',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.microsecondsLabel', {
+                            defaultMessage: 'microseconds',
                           }),
                         },
                         {
-                          value: 'nanos',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.nanosLabel', {
-                            defaultMessage: 'nanos',
+                          value: 'nanoseconds',
+                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.nanosecondsLabel', {
+                            defaultMessage: 'nanoseconds',
                           }),
                         },
                       ]}
