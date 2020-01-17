@@ -12,19 +12,15 @@ import { start } from '../../../../../../../../../src/legacy/core_plugins/embedd
 import * as i18n from './translations';
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
+import { Location } from '../../../../../common/runtime_types';
 
 import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
 import { UptimeThemeContext } from '../../../../contexts';
 
 export interface EmbeddedMapProps {
-  upPoints: LocationPoint[];
-  downPoints: LocationPoint[];
-}
-
-export interface LocationPoint {
-  lat: string;
-  lon: string;
+  upPoints: Location[];
+  downPoints: Location[];
 }
 
 const EmbeddedPanel = styled.div`

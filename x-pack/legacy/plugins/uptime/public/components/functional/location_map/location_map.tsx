@@ -8,8 +8,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
-import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
-import { MonitorLocations } from '../../../../common/runtime_types';
+import { EmbeddedMap } from './embeddables/embedded_map';
+import { Location, MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 import { LocationMissingWarning } from './location_missing';
 
@@ -26,21 +26,21 @@ interface LocationMapProps {
 }
 
 export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
-  const upPoints: LocationPoint[] = [];
-  const downPoints: LocationPoint[] = [];
+  const upPoints: Location[] = [];
+  const downPoints: Location[] = [];
 
   let isGeoInfoMissing = false;
 
   if (monitorLocations?.locations) {
-    monitorLocations.locations.forEach((item: any) => {
-      if (item.geo?.name !== UNNAMED_LOCATION) {
-        if (item.summary.down === 0) {
+    monitorLocations.locations.forEach((item: MonitorLocation) => {
+      if (item.geo?.name === UNNAMED_LOCATION || !item.geo?.location) {
+        isGeoInfoMissing = true;
+      } else if (item.geo?.name !== UNNAMED_LOCATION) {
+        if (item?.summary?.down === 0) {
           upPoints.push(item.geo.location);
         } else {
           downPoints.push(item.geo.location);
         }
-      } else if (item.geo?.name === UNNAMED_LOCATION) {
-        isGeoInfoMissing = true;
       }
     });
   }
