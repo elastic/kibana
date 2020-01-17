@@ -18,7 +18,11 @@
  */
 
 import { Subject } from 'rxjs';
-import { IClusterClient } from '../elasticsearch';
+import { PulseCollectorConstructor } from './types';
+// import { SavedObjectsServiceSetup } from '../saved_objects';
+import { Logger } from '../logging';
+
+import { IPulseElasticsearchClient } from './client_wrappers/types';
 
 export interface PulseInstruction {
   owner: string;
@@ -26,20 +30,41 @@ export interface PulseInstruction {
   value: unknown;
 }
 
-interface ChannelConfig {
+export interface ChannelConfig {
   id: string;
   instructions$: Subject<PulseInstruction>;
+  logger: Logger;
+}
+export interface ChannelSetupContext {
+  elasticsearch: IPulseElasticsearchClient;
+  // savedObjects: SavedObjectsServiceSetup;
 }
 
-export class PulseChannel {
-  public readonly getRecords: (elasticsearch: IClusterClient) => Promise<Record<string, any>>;
+export class PulseChannel<Payload = any, Rec = Payload> {
+  private readonly collector: any;
 
   constructor(private readonly config: ChannelConfig) {
-    this.getRecords = require(`${__dirname}/collectors/${this.id}`).getRecords;
+    const Collector: PulseCollectorConstructor = require(`${__dirname}/collectors/${this.id}`)
+      .Collector;
+    this.collector = new Collector(this.config.logger);
   }
 
+  public async setup(setupContext: ChannelSetupContext) {
+    return this.collector.setup(setupContext);
+  }
+
+  public async getRecords() {
+    return this.collector.getRecords();
+  }
   public get id() {
     return this.config.id;
+  }
+
+  public async sendPulse<T = any>(payload: T) {
+    if (!this.collector.putRecord) {
+      throw Error(`this.collector.putRecords not implemented for ${this.id}.`);
+    }
+    await this.collector.putRecord(payload);
   }
 
   public instructions$() {

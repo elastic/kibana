@@ -38,7 +38,19 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup): Setup {}
+  public setup(core: CoreSetup): Setup {
+    // TODO: move the following code to an appropriate place to handle pulse_error instructions and to send Pulse error reports to
+    const instructions$ = core.pulse.getChannel('errors').instructions$();
+    core.pulse.getChannel('errors').sendPulse({
+      errorId: 'new_error',
+      message: 'Hey! I failed!',
+    });
+
+    instructions$.subscribe(instruction => {
+      // eslint-disable-next-line no-console
+      console.log('instruction::', instruction);
+    });
+  }
 
   public start(core: CoreStart): Start {
     const api$ = this.fetchNewsfeed(core);

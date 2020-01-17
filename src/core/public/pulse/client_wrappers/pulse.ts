@@ -17,16 +17,34 @@
  * under the License.
  */
 
-import { PulseCollector } from '../types';
-export class Collector extends PulseCollector<unknown, { ping_received: boolean }> {
-  public async putRecord() {}
-  public async getRecords() {
-    return [];
-    // if (this.elasticsearch) {
-    //   const pingResult = await this.elasticsearch.callAsInternalUser('ping');
+export class PulseClient {
 
-    //   return [{ ping_received: pingResult }];
-    // }
-    // throw Error(`Default collector not initialised with an "elasticsearch" client!`);
+  constructor() {}
+
+  public async putRecord(channel: string, doc: any) {
+    await fetch(`/api/pulse_local/${channel}`, {
+      method: 'post',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+      },
+      body: JSON.stringify({
+        payload: doc,
+      }),
+    });
+  }
+  public async getRecords(channel: string) {
+    const response = await fetch(`/api/pulse_local/${channel}`, {
+      method: 'GET',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+      },
+    });
+    if (response.body) {
+      return response.json();
+    } else {
+      return [];
+    }
   }
 }

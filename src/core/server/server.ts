@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { filter, take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
@@ -126,16 +125,34 @@ export class Server {
       http: httpSetup,
     });
 
+    const uiSettingsSetup = await this.uiSettings.setup({
+      http: httpSetup,
+    });
+
+    const savedObjectsSetup = await this.savedObjects.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      legacyPlugins,
+    });
+
     const pulseSetup = await this.pulse.setup({
       elasticsearch: elasticsearchServiceSetup,
+      savedObjects: savedObjectsSetup,
+      http: httpSetup,
     });
 
     // example of retrieving instructions for a specific channel
     const defaultChannelInstructions$ = pulseSetup.getChannel('default').instructions$();
+    const errorChannelInstructions$ = pulseSetup.getChannel('errors').instructions$();
+
+    // doesn't seem to work
+    // const allChannels$ = merge(defaultChannelInstructions$, errorChannelInstructions$);
 
     // example of retrieving only instructions that you "own"
     // use this to only pay attention to pulse instructions you care about
     const coreInstructions$ = defaultChannelInstructions$.pipe(
+      filter(instruction => instruction.owner === 'core')
+    );
+    const coreFixedVersionInstructions$ = errorChannelInstructions$.pipe(
       filter(instruction => instruction.owner === 'core')
     );
 
@@ -143,6 +160,11 @@ export class Server {
     // use this to only pay attention to specific instructions
     const pulseTelemetryInstructions$ = coreInstructions$.pipe(
       filter(instruction => instruction.id === 'pulse_telemetry')
+    );
+
+    // example of retrieving only instructions for fixed-error versions
+    const errorsFixedVersionsInstructions$ = coreFixedVersionInstructions$.pipe(
+      filter(instruction => instruction.id === 'pulse_errors')
     );
 
     // example of retrieving only instructions with a specific value
@@ -155,13 +177,20 @@ export class Server {
       this.log.info(`Received instructions to retry telemetry collection`);
     });
 
-    const uiSettingsSetup = await this.uiSettings.setup({
-      http: httpSetup,
-    });
+    // example of retrieving only instructions for a specific fixed-error value
+    const fixedVersionInstruction$ = errorsFixedVersionsInstructions$.pipe(
+      filter(
+        instruction =>
+          instruction.value ===
+          {
+            error: 'example_error',
+            fixedVersions: ['7.5.1'],
+          }
+      )
+    );
 
-    const savedObjectsSetup = await this.savedObjects.setup({
-      elasticsearch: elasticsearchServiceSetup,
-      legacyPlugins,
+    fixedVersionInstruction$.subscribe(() => {
+      this.log.info(`Received instructions for fixed versions for error`);
     });
 
     const coreSetup: InternalCoreSetup = {
@@ -213,7 +242,7 @@ export class Server {
     await this.http.start();
 
     // Starting it after http because it relies on the the HTTP service
-    await this.pulse.start();
+    // await this.pulse.start();
 
     return coreStart;
   }
@@ -221,7 +250,7 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
-    await this.pulse.stop();
+    // await this.pulse.stop();
     await this.legacy.stop();
     await this.plugins.stop();
     await this.savedObjects.stop();

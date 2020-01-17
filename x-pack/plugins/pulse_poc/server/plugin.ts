@@ -8,6 +8,7 @@ import { readdirSync } from 'fs';
 import { resolve } from 'path';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { take } from 'rxjs/operators';
 
 export class PulsePocPlugin {
   private channels = readdirSync(resolve(__dirname, 'channels'))
@@ -35,6 +36,22 @@ export class PulsePocPlugin {
     logger.info(
       `Starting up POC pulse service, which wouldn't actually be part of Kibana in reality`
     );
+    const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
+    await esClient.callAsInternalUser('indices.putTemplate', {
+      name: 'pulse-poc-raw-template',
+      body: {
+        index_patterns: ['pulse-poc-raw*'],
+        settings: {
+          number_of_shards: 1,
+        },
+        mappings: {
+          properties: {
+            channel_id: { type: 'keyword' },
+            deployment_id: { type: 'keyword' },
+          },
+        },
+      },
+    });
 
     const router = core.http.createRouter();
 
@@ -116,9 +133,11 @@ export class PulsePocPlugin {
       async (context, request, response) => {
         const { deploymentId } = request.params;
         const es = context.core.elasticsearch.adminClient;
-
         const allChannelCheckResults = this.channels.map(async channel => {
-          const channelChecks = channel.checks.map(check => check.check(es, deploymentId));
+          const indexName = `pulse-poc-raw-${channel.id}`;
+          const channelChecks = channel.checks.map(check =>
+            check.check(es, { deploymentId, indexName })
+          );
           const checkResults = await Promise.all(channelChecks);
           const instructions = checkResults.filter((value: any) => Boolean(value));
           return {

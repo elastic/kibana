@@ -16,17 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IRouter } from 'src/core/server';
+import { registerIndexRoute } from './index_route';
+import { PulseChannel } from '../channel';
+import { registerGetRoute } from './get_route';
 
-import { PulseCollector } from '../types';
-export class Collector extends PulseCollector<unknown, { ping_received: boolean }> {
-  public async putRecord() {}
-  public async getRecords() {
-    return [];
-    // if (this.elasticsearch) {
-    //   const pingResult = await this.elasticsearch.callAsInternalUser('ping');
-
-    //   return [{ ping_received: pingResult }];
-    // }
-    // throw Error(`Default collector not initialised with an "elasticsearch" client!`);
-  }
+export function registerPulseRoutes(router: IRouter, channels: Map<string, PulseChannel>) {
+  registerIndexRoute(router, channels);
+  registerGetRoute(router, channels);
 }

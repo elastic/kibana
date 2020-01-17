@@ -16,17 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../http';
+import { PulseChannel } from '../channel';
+import { RegisterRoute } from './types';
 
-import { PulseCollector } from '../types';
-export class Collector extends PulseCollector<unknown, { ping_received: boolean }> {
-  public async putRecord() {}
-  public async getRecords() {
-    return [];
-    // if (this.elasticsearch) {
-    //   const pingResult = await this.elasticsearch.callAsInternalUser('ping');
-
-    //   return [{ ping_received: pingResult }];
-    // }
-    // throw Error(`Default collector not initialised with an "elasticsearch" client!`);
-  }
-}
+export const registerGetRoute: RegisterRoute = (
+  router: IRouter,
+  channels: Map<string, PulseChannel>
+) => {
+  return router.get(
+    {
+      path: '/api/pulse_local/{channel}',
+      validate: {
+        params: schema.object({
+          channel: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { channel } = request.params;
+        const results = await channels.get(channel)?.getRecords();
+        return response.ok({
+          body: results,
+        });
+      } catch (error) {
+        return response.badRequest({ body: error });
+      }
+    }
+  );
+};

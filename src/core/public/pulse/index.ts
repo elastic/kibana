@@ -17,99 +17,61 @@
  * under the License.
  */
 
-import { readdirSync } from 'fs';
-import { resolve, parse } from 'path';
-
 import { Subject } from 'rxjs';
-// @ts-ignore
-import fetch from 'node-fetch';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { ElasticsearchServiceSetup, IClusterClient } from '../elasticsearch';
-import { PulseChannel, PulseInstruction } from './channel';
-import { sendUsageFrom, sendPulse, Fetcher } from './send_pulse';
-import { SavedObjectsServiceSetup } from '../saved_objects';
-import { InternalHttpServiceSetup } from '../http';
-import { PulseElasticsearchClient } from './client_wrappers/elasticsearch';
-import { registerPulseRoutes } from './routes';
 
-export interface InternalPulseService {
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { InstructionsResponse } from '../../server/pulse';
+import { PulseChannel, PulseInstruction } from './channel';
+import { channelNames } from './config';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Fetcher, sendPulse, sendUsageFrom } from '../../server/pulse/send_pulse';
+
+export interface PulseServiceSetup {
   getChannel: (id: string) => PulseChannel;
 }
 
-export interface PulseSetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
-  savedObjects: SavedObjectsServiceSetup;
-  http: InternalHttpServiceSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PulseServiceStart {}
 
-export type PulseServiceSetup = InternalPulseService;
-
-interface ChannelResponse {
-  id: string;
-  instructions: PulseInstruction[];
-}
-
-export interface InstructionsResponse {
-  channels: ChannelResponse[];
-}
-
-const channelNames = readdirSync(resolve(__dirname, 'collectors'))
-  .filter((fileName: string) => !fileName.startsWith('.'))
-  .map((fileName: string) => {
-    // Get the base name without the extension
-    return parse(fileName).name;
-  });
+const logger = {
+  ...console,
+  // eslint-disable-next-line no-console
+  fatal: (...args: any[]) => console.error(...args),
+  get: () => logger,
+};
 
 export class PulseService {
   private retriableErrors = 0;
-  private readonly log: Logger;
   private readonly channels: Map<string, PulseChannel>;
   private readonly instructions$: Map<string, Subject<any>> = new Map();
-  private elasticsearch?: IClusterClient;
 
-  constructor(coreContext: CoreContext) {
-    this.log = coreContext.logger.get('pulse-service');
+  constructor() {
     this.channels = new Map(
       channelNames.map((id): [string, PulseChannel] => {
         const instructions$ = new Subject<PulseInstruction>();
         this.instructions$.set(id, instructions$);
-        const channel = new PulseChannel({ id, instructions$, logger: this.log });
+        const channel = new PulseChannel({ id, instructions$, logger });
         return [channel.id, channel];
       })
     );
   }
 
-  public async setup(deps: PulseSetupDeps): Promise<InternalPulseService> {
-    this.log.debug('Setting up pulse service');
-    this.elasticsearch = deps.elasticsearch.createClient('pulse-service');
-
-    this.log.debug('Setting up pulse service routes');
-
-    const router = deps.http.createRouter('');
-    const pulseElasticsearchClient = new PulseElasticsearchClient(this.elasticsearch!);
-
-    registerPulseRoutes(router, this.channels);
-
-    this.channels.forEach(channel =>
-      channel.setup({
-        elasticsearch: pulseElasticsearchClient,
-        // savedObjects: deps.savedObjects,
-      })
-    );
-    if (sendUsageFrom === 'server') {
+  public async setup(): Promise<PulseServiceSetup> {
+    if (sendUsageFrom === 'browser') {
       // poll for instructions every second for this deployment
       setInterval(() => {
-        this.loadInstructions().catch(err => this.log.error(err.stack));
+        // eslint-disable-next-line no-console
+        this.loadInstructions().catch(err => console.error(err.stack));
       }, 10000);
 
-      this.log.debug('Will attempt first telemetry collection in 5 seconds...');
-
+      // eslint-disable-next-line no-console
+      console.log('Will attempt first telemetry collection in 5 seconds...');
       setTimeout(() => {
         setInterval(() => {
-          this.sendTelemetry().catch(err => this.log.error(err.stack));
+          // eslint-disable-next-line no-console
+          this.sendTelemetry().catch(err => console.error(err.stack));
         }, 5000);
-      }, 5000);
+      }, 1000);
     }
 
     return {
@@ -121,6 +83,24 @@ export class PulseService {
         return channel;
       },
     };
+  }
+
+  private async sendTelemetry() {
+    const fetcher: Fetcher<Response> = async (url, channels) => {
+      return await fetch(url, {
+        method: 'post',
+
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
+        body: JSON.stringify({
+          channels,
+        }),
+      });
+    };
+
+    return await sendPulse(this.channels, fetcher);
   }
 
   private async loadInstructions() {
@@ -162,7 +142,8 @@ export class PulseService {
   private handleRetriableError() {
     this.retriableErrors++;
     if (this.retriableErrors === 1) {
-      this.log.warn(
+      // eslint-disable-next-line no-console
+      console.warn(
         'Kibana is not yet available at http://localhost:5601/api, will continue to check for the next 120 seconds...'
       );
     } else if (this.retriableErrors > 120) {
@@ -170,21 +151,10 @@ export class PulseService {
     }
   }
 
-  private async sendTelemetry() {
-    const fetcher: Fetcher<any> = async (url, channels) => {
-      return await fetch(url, {
-        method: 'post',
-
-        headers: {
-          'content-type': 'application/json',
-          'kbn-xsrf': 'true',
-        },
-        body: JSON.stringify({
-          channels,
-        }),
-      });
-    };
-
-    return await sendPulse(this.channels, fetcher);
+  async start(): Promise<PulseServiceStart> {
+    return {};
+  }
+  public stop() {
+    // nothing to do here currently
   }
 }

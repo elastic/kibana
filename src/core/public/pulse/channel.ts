@@ -17,16 +17,32 @@
  * under the License.
  */
 
-import { PulseCollector } from '../types';
-export class Collector extends PulseCollector<unknown, { ping_received: boolean }> {
-  public async putRecord() {}
-  public async getRecords() {
-    return [];
-    // if (this.elasticsearch) {
-    //   const pingResult = await this.elasticsearch.callAsInternalUser('ping');
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ChannelConfig } from 'src/core/server/pulse/channel';
+import { PulseClient } from './client_wrappers/pulse';
 
-    //   return [{ ping_received: pingResult }];
-    // }
-    // throw Error(`Default collector not initialised with an "elasticsearch" client!`);
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export { PulseInstruction } from '../../server/pulse/channel';
+
+export class PulseChannel<Payload = any> {
+  private readonly pulseClient: PulseClient;
+
+  constructor(private readonly config: ChannelConfig) {
+    this.pulseClient = new PulseClient();
+  }
+
+  public async getRecords() {
+    return this.pulseClient.getRecords(this.id);
+  }
+  public get id() {
+    return this.config.id;
+  }
+
+  public async sendPulse<T = any>(payload: T) {
+    await this.pulseClient.putRecord(this.id, payload);
+  }
+
+  public instructions$() {
+    return this.config.instructions$.asObservable();
   }
 }
