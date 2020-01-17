@@ -90,7 +90,7 @@ export class ValidationResults {
           'xpack.ml.models.jobService.categorization.messages.medianLineLength',
           {
             defaultMessage:
-              'The median length for the field values analysed is over {medianLimit} characters.',
+              'The median length for the field values analyzed is over {medianLimit} characters.',
             values: { medianLimit: MEDIAN_LINE_LENGTH_LIMIT },
           }
         ),
