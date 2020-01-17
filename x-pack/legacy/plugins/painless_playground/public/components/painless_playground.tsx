@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiPanel,
   EuiSelect,
   EuiTabbedContent,
@@ -20,11 +19,17 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiPageContent,
+  EuiFlyout,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
-import { buildRequestPayload, formatJson, getFromLocalStorage } from './helpers';
+import {
+  buildRequestPayload,
+  formatJson,
+  formatExecutionError,
+  getFromLocalStorage,
+} from './helpers';
 import { Request, Response } from './types';
 import { painlessContextOptions } from './constants';
 
@@ -44,6 +49,8 @@ export function PainlessPlayground({
     getFromLocalStorage('painlessPlaygroundContextSetup', {}, true)
   );
 
+  const [showRequestFlyout, setShowRequestFlyout] = useState(false);
+
   const buildRequestPayloadPreview = () => buildRequestPayload(code, context, contextSetup);
 
   const submit = async () => {
@@ -62,131 +69,73 @@ export function PainlessPlayground({
     }
   };
 
-  const renderExecuteBtn = () => (
-    <EuiButton fill onClick={submit} isDisabled={code.trim() === ''} data-test-subj="btnExecute">
-      <FormattedMessage
-        id="xpack.painless_playground.executeButtonLabel"
-        defaultMessage="Execute"
-      />
-    </EuiButton>
+  const toggleViewRequestFlyout = () => {
+    setShowRequestFlyout(!showRequestFlyout);
+  };
+
+  const renderMainControls = () => (
+    <EuiFlexGroup gutter="s">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill
+          onClick={submit}
+          isDisabled={code.trim() === ''}
+          data-test-subj="btnExecute"
+        >
+          <FormattedMessage
+            id="xpack.painless_playground.executeButtonLabel"
+            defaultMessage="Execute"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          fill
+          onClick={toggleViewRequestFlyout}
+          isDisabled={code.trim() === ''}
+          data-test-subj="btnViewRequest"
+        >
+          {i18n.translate('xpack.painless_playground.previewRequestButtonLabel', {
+            defaultMessage: 'Preview Request',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   return (
-    <EuiFlexGroup
-      className="consoleContainer"
-      gutterSize="none"
-      direction="column"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiTitle className="euiScreenReaderOnly">
-          <h1>
-            {i18n.translate('xpack.painless_playground.title', {
-              defaultMessage: 'Painless Playground',
-            })}
-          </h1>
-        </EuiTitle>
+    <>
+      <EuiFlexGroup
+        className="consoleContainer"
+        gutterSize="s"
+        direction="column"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle className="euiScreenReaderOnly">
+            <h1>
+              {i18n.translate('xpack.painless_playground.title', {
+                defaultMessage: 'Painless Playground',
+              })}
+            </h1>
+          </EuiTitle>
 
-        <EuiTabbedContent
-          size="s"
-          tabs={[
-            {
-              id: 'output',
-              name: 'Code',
-              content: (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiPageContent>
-                    <CodeEditor
-                      languageId="painless"
-                      height={250}
-                      value={code}
-                      onChange={setCode}
-                      options={{
-                        fontSize: 12,
-                        minimap: {
-                          enabled: false,
-                        },
-                        scrollBeyondLastLine: false,
-                        wordWrap: 'on',
-                        wrappingIndent: 'indent',
-                      }}
-                    />
-                    <EuiHorizontalRule margin="xs" />
-                    {renderExecuteBtn()}
-                  </EuiPageContent>
-                </>
-              ),
-            },
-            {
-              id: 'request',
-              name: 'Request',
-              content: (
-                <EuiPanel>
-                  <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-                    {'POST _scripts/painless/_execute\n'}
-                    {formatJson(buildRequestPayloadPreview())}
-                  </EuiCodeBlock>
-                  <EuiHorizontalRule margin="xs" />
-                  {renderExecuteBtn()}
-                </EuiPanel>
-              ),
-            },
-            {
-              id: 'settings',
-              name: 'Settings',
-              content: (
-                <EuiPanel>
-                  <EuiForm data-test-subj="painlessPlayground">
-                    <EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.painless_playground.execution_context"
-                          defaultMessage="Execution Context"
-                        />
-                      }
-                      fullWidth
-                    >
-                      <EuiSelect
-                        options={painlessContextOptions}
-                        value={context}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                          setContext(e.target.value)
-                        }
-                      />
-                    </EuiFormRow>
-
-                    <EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.painless_playground.parametersLabel"
-                          defaultMessage="Parameters"
-                        />
-                      }
-                      fullWidth
-                      labelAppend={
-                        <EuiIconTip
-                          aria-label={i18n.translate(
-                            'xpack.painless_playground.helpIconAriaLabel',
-                            {
-                              defaultMessage: 'Help',
-                            }
-                          )}
-                          content={
-                            <FormattedMessage
-                              id="xpack.painless_playground.parametersHelp"
-                              defaultMessage="Enter JSON that's available as 'params' in the code"
-                            />
-                          }
-                        />
-                      }
-                    >
-                      <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+          <EuiTabbedContent
+            size="s"
+            tabs={[
+              {
+                id: 'input',
+                name: 'Code',
+                content: (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiPageContent panelPaddingSize="m">
+                      <EuiPageContent panelPaddingSize="s">
                         <CodeEditor
-                          languageId="javascript"
-                          height={100}
-                          value={contextSetup.params}
-                          onChange={(value: string) => setContextSetup({ params: value })}
+                          languageId="painless"
+                          height={250}
+                          value={code}
+                          onChange={setCode}
                           options={{
                             fontSize: 12,
                             minimap: {
@@ -197,135 +146,235 @@ export function PainlessPlayground({
                             wrappingIndent: 'indent',
                           }}
                         />
-                      </div>
-                    </EuiFormRow>
-
-                    {['filter', 'score'].indexOf(context) !== -1 && (
-                      <EuiFormRow
-                        label={
-                          <FormattedMessage
-                            id="xpack.painless_playground.indexLabel"
-                            defaultMessage="Index"
-                          />
-                        }
-                        fullWidth
-                        labelAppend={
-                          <EuiIconTip
-                            aria-label={i18n.translate(
-                              'xpack.painless_playground.helpIconAriaLabel',
-                              {
-                                defaultMessage: 'Help',
-                              }
-                            )}
-                            content={
-                              <FormattedMessage
-                                id="xpack.painless_playground.indexHelp"
-                                defaultMessage="The name of an index containing a mapping that is compatible with the document being indexed."
-                              />
-                            }
-                          />
-                        }
-                      >
-                        <EuiFieldText
-                          fullWidth
-                          value={contextSetup.index || ''}
-                          onChange={e =>
-                            setContextSetup(
-                              Object.assign({}, contextSetup, { index: e.target.value })
-                            )
-                          }
-                        />
-                      </EuiFormRow>
-                    )}
-                    {['filter', 'score'].indexOf(context) !== -1 && (
-                      <EuiFormRow
-                        label={
-                          <FormattedMessage
-                            id="xpack.painless_playground.codeLabel"
-                            defaultMessage="Document"
-                          />
-                        }
-                        fullWidth
-                        labelAppend={
-                          <EuiIconTip
-                            aria-label={i18n.translate(
-                              'xpack.painless_playground.helpIconAriaLabel',
-                              {
-                                defaultMessage: 'Help',
-                              }
-                            )}
-                            content={
-                              <FormattedMessage
-                                id="xpack.painless_playground.documentHelp"
-                                defaultMessage="Enter document as JSON that's available as 'doc' in the code"
-                              />
-                            }
-                          />
-                        }
-                      >
-                        <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
-                          <CodeEditor
-                            languageId="javascript"
-                            height={100}
-                            value={contextSetup.document}
-                            onChange={(value: string) =>
-                              setContextSetup(Object.assign({}, contextSetup, { document: value }))
-                            }
-                            options={{
-                              fontSize: 12,
-                              minimap: {
-                                enabled: false,
-                              },
-                              scrollBeyondLastLine: false,
-                              wordWrap: 'on',
-                              wrappingIndent: 'indent',
-                            }}
-                          />
-                        </div>
-                      </EuiFormRow>
-                    )}
-                    {renderExecuteBtn()}
-                  </EuiForm>
-                </EuiPanel>
-              ),
-            },
-          ]}
-        />
-      </EuiFlexItem>
-      {response.error || response.result ? (
-        <EuiFlexItem>
-          <EuiTabbedContent
-            size="s"
-            tabs={[
-              {
-                id: 'output',
-                name: 'Output',
-                content: (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiPanel>
-                      <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-                        {response?.result ? response?.result : formatJson(response?.error)}
-                      </EuiCodeBlock>
-                    </EuiPanel>
+                      </EuiPageContent>
+                      <EuiSpacer size="m" />
+                      {renderMainControls()}
+                    </EuiPageContent>
                   </>
                 ),
               },
               {
-                id: 'request',
-                name: 'Response',
+                id: 'settings',
+                name: 'Settings',
                 content: (
-                  <EuiPanel>
-                    <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-                      {formatJson(response)}
-                    </EuiCodeBlock>
-                  </EuiPanel>
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiPanel>
+                      <EuiForm data-test-subj="painlessPlayground">
+                        <EuiFormRow
+                          label={
+                            <FormattedMessage
+                              id="xpack.painless_playground.execution_context"
+                              defaultMessage="Execution Context"
+                            />
+                          }
+                          fullWidth
+                        >
+                          <EuiSelect
+                            options={painlessContextOptions}
+                            value={context}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                              setContext(e.target.value)
+                            }
+                          />
+                        </EuiFormRow>
+
+                        <EuiFormRow
+                          label={
+                            <FormattedMessage
+                              id="xpack.painless_playground.parametersLabel"
+                              defaultMessage="Parameters"
+                            />
+                          }
+                          fullWidth
+                          labelAppend={
+                            <EuiIconTip
+                              aria-label={i18n.translate(
+                                'xpack.painless_playground.helpIconAriaLabel',
+                                {
+                                  defaultMessage: 'Help',
+                                }
+                              )}
+                              content={
+                                <FormattedMessage
+                                  id="xpack.painless_playground.parametersHelp"
+                                  defaultMessage="Enter JSON that's available as 'params' in the code"
+                                />
+                              }
+                            />
+                          }
+                        >
+                          <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+                            <CodeEditor
+                              languageId="javascript"
+                              height={100}
+                              value={contextSetup.params}
+                              onChange={(value: string) => setContextSetup({ params: value })}
+                              options={{
+                                fontSize: 12,
+                                minimap: {
+                                  enabled: false,
+                                },
+                                scrollBeyondLastLine: false,
+                                wordWrap: 'on',
+                                wrappingIndent: 'indent',
+                              }}
+                            />
+                          </div>
+                        </EuiFormRow>
+
+                        {['filter', 'score'].indexOf(context) !== -1 && (
+                          <EuiFormRow
+                            label={
+                              <FormattedMessage
+                                id="xpack.painless_playground.indexLabel"
+                                defaultMessage="Index"
+                              />
+                            }
+                            fullWidth
+                            labelAppend={
+                              <EuiIconTip
+                                aria-label={i18n.translate(
+                                  'xpack.painless_playground.helpIconAriaLabel',
+                                  {
+                                    defaultMessage: 'Help',
+                                  }
+                                )}
+                                content={
+                                  <FormattedMessage
+                                    id="xpack.painless_playground.indexHelp"
+                                    defaultMessage="The name of an index containing a mapping that is compatible with the document being indexed."
+                                  />
+                                }
+                              />
+                            }
+                          >
+                            <EuiFieldText
+                              fullWidth
+                              value={contextSetup.index || ''}
+                              onChange={e =>
+                                setContextSetup(
+                                  Object.assign({}, contextSetup, { index: e.target.value })
+                                )
+                              }
+                            />
+                          </EuiFormRow>
+                        )}
+                        {['filter', 'score'].indexOf(context) !== -1 && (
+                          <EuiFormRow
+                            label={
+                              <FormattedMessage
+                                id="xpack.painless_playground.codeLabel"
+                                defaultMessage="Document"
+                              />
+                            }
+                            fullWidth
+                            labelAppend={
+                              <EuiIconTip
+                                aria-label={i18n.translate(
+                                  'xpack.painless_playground.helpIconAriaLabel',
+                                  {
+                                    defaultMessage: 'Help',
+                                  }
+                                )}
+                                content={
+                                  <FormattedMessage
+                                    id="xpack.painless_playground.documentHelp"
+                                    defaultMessage="Enter document as JSON that's available as 'doc' in the code"
+                                  />
+                                }
+                              />
+                            }
+                          >
+                            <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+                              <CodeEditor
+                                languageId="javascript"
+                                height={100}
+                                value={contextSetup.document}
+                                onChange={(value: string) =>
+                                  setContextSetup(
+                                    Object.assign({}, contextSetup, { document: value })
+                                  )
+                                }
+                                options={{
+                                  fontSize: 12,
+                                  minimap: {
+                                    enabled: false,
+                                  },
+                                  scrollBeyondLastLine: false,
+                                  wordWrap: 'on',
+                                  wrappingIndent: 'indent',
+                                }}
+                              />
+                            </div>
+                          </EuiFormRow>
+                        )}
+                        <EuiSpacer size="m" />
+                        {renderMainControls()}
+                      </EuiForm>
+                    </EuiPanel>
+                  </>
                 ),
               },
             ]}
           />
         </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
+        {response.error || response.result ? (
+          <EuiFlexItem>
+            <EuiTabbedContent
+              size="s"
+              tabs={[
+                {
+                  id: 'output',
+                  name: 'Output',
+                  content: (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiPanel>
+                        <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                          {response.result ?? formatExecutionError(response.error)}
+                        </EuiCodeBlock>
+                      </EuiPanel>
+                    </>
+                  ),
+                },
+                {
+                  id: 'request',
+                  name: 'Response',
+                  content: (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiPanel>
+                        <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                          {formatJson(response)}
+                        </EuiCodeBlock>
+                      </EuiPanel>
+                    </>
+                  ),
+                },
+              ]}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      {showRequestFlyout && (
+        <EuiFlyout onClose={() => setShowRequestFlyout(false)}>
+          <EuiPageContent>
+            <EuiTitle>
+              <h3>
+                {i18n.translate('xpack.painless_playground.flyoutTitle', {
+                  defaultMessage: 'Console Request',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+              {'POST _scripts/painless/_execute\n'}
+              {formatJson(buildRequestPayloadPreview())}
+            </EuiCodeBlock>
+          </EuiPageContent>
+        </EuiFlyout>
+      )}
+    </>
   );
 }
