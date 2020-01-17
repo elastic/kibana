@@ -18,7 +18,6 @@
  */
 
 import { configure, addDecorator, addParameters } from '@storybook/react';
-import { withKnobs } from '@storybook/addon-knobs/react';
 import { withInfo } from '@storybook/addon-info';
 import { create } from '@storybook/theming';
 
@@ -42,9 +41,6 @@ if (process.env.NODE_ENV === 'test') {
       },
     })
   );
-
-  // Add optional knobs to customize each story.
-  addDecorator(withKnobs);
 }
 
 // Set up the Storybook environment with custom settings.

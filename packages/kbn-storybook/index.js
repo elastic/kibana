@@ -70,6 +70,7 @@ exports.runStorybookCli = config => {
             mode: 'dev',
             port: 9001,
             configDir,
+            staticDir: [join(require.resolve('@kbn/ui-shared-deps'), '..', 'target')],
           });
         }),
       ]);

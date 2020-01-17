@@ -17,15 +17,18 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { REPO_ROOT, DLL_DIST_DIR } = require('../lib/constants');
+const UiSharedDeps = require('@kbn/ui-shared-deps');
 // eslint-disable-next-line import/no-unresolved
 const { currentConfig } = require('../../../built_assets/storybook/current.config');
 
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config }) => {
+  config.externals = {
+    ...(config.externals || {}),
+    ...UiSharedDeps.externals,
+  };
+
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
   const cssRule = config.module.rules.find(rule => rule.test.source.includes('.css$'));
@@ -72,25 +75,22 @@ module.exports = async ({ config }) => {
     ],
   });
 
-  // Reference the built DLL file of static(ish) dependencies, which are removed
-  // during kbn:bootstrap and rebuilt if missing.
-  config.plugins.push(
-    new webpack.DllReferencePlugin({
-      manifest: resolve(DLL_DIST_DIR, 'manifest.json'),
-      context: REPO_ROOT,
-    })
-  );
-
   // Copy the DLL files to the Webpack build for use in the Storybook UI
   config.plugins.push(
     new CopyWebpackPlugin([
       {
-        from: resolve(DLL_DIST_DIR, 'dll.js'),
+        from: require.resolve(`@kbn/ui-shared-deps/target/${UiSharedDeps.distFilename}`),
         to: 'dll.js',
+        transform(content) {
+          return content.toString('utf8').replace(UiSharedDeps.PUBLIC_PATH_PLACEHOLDER, '');
+        },
       },
       {
-        from: resolve(DLL_DIST_DIR, 'dll.css'),
+        from: require.resolve(`@kbn/ui-shared-deps/target/${UiSharedDeps.lightCssDistFilename}`),
         to: 'dll.css',
+        transform(content) {
+          return content.toString('utf8').replace(UiSharedDeps.PUBLIC_PATH_PLACEHOLDER, '');
+        },
       },
     ])
   );

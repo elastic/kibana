@@ -19,6 +19,7 @@
 
 const Path = require('path');
 
+exports.PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 exports.distDir = Path.resolve(__dirname, 'target');
 exports.distFilename = 'kbn-ui-shared-deps.js';
 exports.lightCssDistFilename = 'kbn-ui-shared-deps.light.css';

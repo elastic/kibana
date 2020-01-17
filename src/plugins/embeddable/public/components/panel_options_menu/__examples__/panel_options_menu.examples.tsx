@@ -20,6 +20,7 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { withKnobs, boolean } from '@storybook/addon-knobs';
 import { PanelOptionsMenu } from '..';
 
 const euiContextDescriptors = {
@@ -39,8 +40,14 @@ const euiContextDescriptors = {
   ],
 };
 
-storiesOf('components/PanelOptionsMenu', module).add('default', () => (
-  <div style={{ height: 300 }}>
-    <PanelOptionsMenu panelDescriptor={euiContextDescriptors} />
-  </div>
-));
+storiesOf('components/PanelOptionsMenu', module)
+  .addDecorator(withKnobs)
+  .add('default', () => {
+    const isViewMode = boolean('isViewMode', false);
+
+    return (
+      <div style={{ height: 150 }}>
+        <PanelOptionsMenu panelDescriptor={euiContextDescriptors} isViewMode={isViewMode} />
+      </div>
+    );
+  });
