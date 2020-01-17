@@ -21,7 +21,7 @@ describe('transactionGroupsTransformer', () => {
 
   it('should transform response correctly', () => {
     const bucket = {
-      key: 'POST /api/orders',
+      key: { transaction: 'POST /api/orders' },
       doc_count: 180,
       avg: { value: 255966.30555555556 },
       p95: { values: { '95.0': 320238.5 } },
@@ -36,7 +36,7 @@ describe('transactionGroupsTransformer', () => {
 
     const response = ({
       aggregations: {
-        transactions: {
+        transaction_groups: {
           buckets: [bucket]
         }
       }
@@ -58,7 +58,7 @@ describe('transactionGroupsTransformer', () => {
 
   it('should calculate impact from sum', () => {
     const getBucket = (sum: number) => ({
-      key: 'POST /api/orders',
+      key: { transaction: 'POST /api/orders' },
       doc_count: 180,
       avg: { value: 300000 },
       p95: { values: { '95.0': 320000 } },
@@ -68,7 +68,9 @@ describe('transactionGroupsTransformer', () => {
 
     const response = ({
       aggregations: {
-        transactions: { buckets: [getBucket(10), getBucket(20), getBucket(50)] }
+        transaction_groups: {
+          buckets: [getBucket(10), getBucket(20), getBucket(50)]
+        }
       }
     } as unknown) as ESResponse;
 
@@ -76,6 +78,6 @@ describe('transactionGroupsTransformer', () => {
       transactionGroupsTransformer({ response, start: 100, end: 20000 }).map(
         bucket => bucket.impact
       )
-    ).toEqual([0, 25, 100]);
+    ).toEqual([100, 25, 0]);
   });
 });
