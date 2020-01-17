@@ -13,7 +13,6 @@ import {
 
 import { readRulesRoute } from './read_rules_route';
 import { ServerInjectOptions } from 'hapi';
-import { ServerFacade } from '../../../../types';
 
 import {
   getFindResult,
@@ -29,7 +28,7 @@ describe('read_signals', () => {
 
   beforeEach(() => {
     ({ server, alertsClient, savedObjectsClient } = createMockServer());
-    readRulesRoute((server as unknown) as ServerFacade);
+    readRulesRoute(server);
   });
 
   afterEach(() => {
@@ -47,14 +46,14 @@ describe('read_signals', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      readRulesRoute((serverWithoutActionClient as unknown) as ServerFacade);
+      readRulesRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      readRulesRoute((serverWithoutAlertClient as unknown) as ServerFacade);
+      readRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
@@ -63,7 +62,7 @@ describe('read_signals', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      readRulesRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
+      readRulesRoute(serverWithoutActionOrAlertClient);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
