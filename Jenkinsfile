@@ -60,7 +60,7 @@ def gitCheckout() {
   checkout(
     [
       $class: 'GitSCM',
-      branches: 'master',
+      branches: [[name: '*/master']],
       doGenerateSubmoduleConfigurations: false,
       extensions: [
         [
