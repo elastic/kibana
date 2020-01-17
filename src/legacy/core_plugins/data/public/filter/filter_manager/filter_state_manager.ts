@@ -30,12 +30,12 @@ type GetAppStateFunc = () => { filters?: esFilters.Filter[]; save?: () => void }
  * back to the URL.
  **/
 export class FilterStateManager {
-  private subs: Subscription[] = [];
+  private filterManagerUpdatesSubscription: Subscription;
 
   filterManager: FilterManager;
   globalState: State;
   getAppState: GetAppStateFunc;
-  interval: NodeJS.Timeout | undefined;
+  interval: number | undefined;
 
   constructor(globalState: State, getAppState: GetAppStateFunc, filterManager: FilterManager) {
     this.getAppState = getAppState;
@@ -44,24 +44,22 @@ export class FilterStateManager {
 
     this.watchFilterState();
 
-    this.subs.push(
-      this.filterManager.getUpdates$().subscribe(() => {
-        this.updateAppState();
-      })
-    );
+    this.filterManagerUpdatesSubscription = this.filterManager.getUpdates$().subscribe(() => {
+      this.updateAppState();
+    });
   }
 
   destroy() {
     if (this.interval) {
       clearInterval(this.interval);
     }
-    this.subs.forEach(s => s.unsubscribe());
+    this.filterManagerUpdatesSubscription.unsubscribe();
   }
 
   private watchFilterState() {
     // This is a temporary solution to remove rootscope.
     // Moving forward, state should provide observable subscriptions.
-    this.interval = setInterval(() => {
+    this.interval = window.setInterval(() => {
       const appState = this.getAppState();
       const stateUndefined = !appState || !this.globalState;
       if (stateUndefined) return;

@@ -18,6 +18,7 @@
  */
 
 import './np_core.test.mocks';
+import { createBrowserHistory } from 'history';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { getSavedDashboardMock } from '../__tests__';
 import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
@@ -50,6 +51,7 @@ describe('DashboardState', function() {
       useHashedUrl: false,
       hideWriteControls: false,
       kibanaVersion: '7.0.0',
+      history: createBrowserHistory(),
     });
   }
 

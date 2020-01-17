@@ -34,7 +34,6 @@ import {
   showSaveModal,
   State,
   subscribeWithScope,
-  unhashUrl,
 } from '../legacy_imports';
 import { FilterStateManager } from '../../../../data/public';
 import {
@@ -77,7 +76,7 @@ import {
   SavedObjectFinderProps,
   SavedObjectFinderUi,
 } from '../../../../../../plugins/kibana_react/public';
-import { removeQueryParam } from '../../../../../../plugins/kibana_utils/public';
+import { removeQueryParam, unhashUrl } from '../../../../../../plugins/kibana_utils/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -570,28 +569,7 @@ export class DashboardAppController {
       })
     );
 
-    // TODO: find nicer solution for this
-    // this function helps to make just 1 browser history update, when we imperatively changing the dashboard url
-    // It could be that there is pending *dashboardStateManager* updates, which aren't flushed yet to the url.
-    // So to prevent 2 browser updates:
-    // 1. Force flush any pending state updates (syncing state to query)
-    // 2. If url was updated, then apply path change with replace
-    function changeUrl(pathname: string) {
-      // synchronously persist current state to url with push()
-      const updated = dashboardStateManager.saveState({ replace: false });
-      // change pathname
-      history[updated ? 'replace' : 'push']({
-        ...history.location,
-        pathname,
-      });
-    }
-
     function updateViewMode(newMode: ViewMode) {
-      $scope.topNavMenu = getTopNavConfig(
-        newMode,
-        navActions,
-        dashboardConfig.getHideWriteControls()
-      ); // eslint-disable-line no-use-before-define
       dashboardStateManager.switchViewMode(newMode);
     }
 
@@ -610,7 +588,11 @@ export class DashboardAppController {
         // This is only necessary for new dashboards, which will default to Edit mode.
         updateViewMode(ViewMode.VIEW);
 
-        changeUrl(
+        // Angular's $location skips this update because of history updates from syncState which happen simultaneously
+        // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
+        // the update is considered outdated and angular skips it
+        // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
+        dashboardStateManager.changeDashboardUrl(
           dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL
         );
 
@@ -676,12 +658,11 @@ export class DashboardAppController {
             });
 
             if (dash.id !== $routeParams.id) {
-              // kbnUrl.change(createDashboardEditUrl(dash.id))
               // Angular's $location skips this update because of history updates from syncState which happen simultaneously
               // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
               // the update is considered outdated and angular skips it
-
-              changeUrl(createDashboardEditUrl(dash.id));
+              // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
+              dashboardStateManager.changeDashboardUrl(createDashboardEditUrl(dash.id));
             } else {
               chrome.docTitle.change(dash.lastSavedTitle);
               updateViewMode(ViewMode.VIEW);
@@ -884,9 +865,12 @@ export class DashboardAppController {
     });
 
     dashboardStateManager.registerChangeListener(() => {
-      // some angular dependant properties could have changed: e.g. view mode or full screen mode
-      // run digest cycle to be sure, we are not missing those update on UI
-      $scope.$applyAsync();
+      // view mode could have changed, so trigger top nav update
+      $scope.topNavMenu = getTopNavConfig(
+        dashboardStateManager.getViewMode(),
+        navActions,
+        dashboardConfig.getHideWriteControls()
+      );
     });
 
     $scope.$on('$destroy', () => {

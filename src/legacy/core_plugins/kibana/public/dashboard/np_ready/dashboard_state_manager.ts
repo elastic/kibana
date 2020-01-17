@@ -84,6 +84,7 @@ export class DashboardStateManager {
   private readonly STATE_STORAGE_KEY = '_a';
   private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
   private readonly stateSyncRef: ISyncStateRef;
+  private readonly history: History;
 
   /**
    *
@@ -103,8 +104,9 @@ export class DashboardStateManager {
     hideWriteControls: boolean;
     kibanaVersion: string;
     useHashedUrl: boolean;
-    history?: History;
+    history: History;
   }) {
+    this.history = history;
     this.kibanaVersion = kibanaVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
@@ -264,7 +266,10 @@ export class DashboardStateManager {
     // The right way to fix this might be to ensure the defaults object stored on state is a deep
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
-    this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
+    this.stateDefaults = migrateAppState(
+      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
+      this.kibanaVersion
+    );
     // The original query won't be restored by the above because the query on this.savedDashboard is applied
     // in place in order for it to affect the visualizations.
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
@@ -504,7 +509,7 @@ export class DashboardStateManager {
    * Synchronously writes current state to url
    * returned boolean indicates whether the update happened and if history was updated
    */
-  public saveState({ replace = false }: { replace: boolean } = { replace: false }): boolean {
+  private saveState({ replace }: { replace: boolean }): boolean {
     // schedules setting current state to url
     this.kbnUrlStateStorage.set<DashboardAppState>(
       this.STATE_STORAGE_KEY,
@@ -512,6 +517,22 @@ export class DashboardStateManager {
     );
     // immediately forces scheduled updates and changes location
     return this.kbnUrlStateStorage.flush({ replace });
+  }
+
+  // TODO: find nicer solution for this
+  // this function helps to make just 1 browser history update, when we imperatively changing the dashboard url
+  // It could be that there is pending *dashboardStateManager* updates, which aren't flushed yet to the url.
+  // So to prevent 2 browser updates:
+  // 1. Force flush any pending state updates (syncing state to query)
+  // 2. If url was updated, then apply path change with replace
+  public changeDashboardUrl(pathname: string) {
+    // synchronously persist current state to url with push()
+    const updated = this.saveState({ replace: false });
+    // change pathname
+    this.history[updated ? 'replace' : 'push']({
+      ...this.history.location,
+      pathname,
+    });
   }
 
   public setQuery(query: Query) {
