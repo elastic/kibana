@@ -16,12 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IRouter } from 'src/core/server';
-import { registerIndexRoute } from './index_route';
-import { PulseChannel } from '../channel';
-import { registerGetRoute } from './get_route';
 
-export function registerPulseRoutes(router: IRouter, channels: Map<string, PulseChannel>) {
-  registerIndexRoute(router, channels);
-  registerGetRoute(router, channels);
-}
+export type RegisterRoute = (router: IRouter, channels: Map<string, PulseChannel>) => void;

@@ -21,35 +21,25 @@ import { IRouter } from '../../http';
 import { PulseChannel } from '../channel';
 import { RegisterRoute } from './types';
 
-const validate = {
-  params: schema.object({
-    channel: schema.string(),
-  }),
-  body: schema.object({
-    payload: schema.object(
-      { message: schema.string(), errorId: schema.string() },
-      { allowUnknowns: true }
-    ),
-  }),
-};
-
-export const registerIndexRoute: RegisterRoute = (
+export const registerGetRoute: RegisterRoute = (
   router: IRouter,
   channels: Map<string, PulseChannel>
 ) => {
-  return router.post(
-    { path: '/api/pulse_local/{channel}', validate },
+  return router.get(
+    {
+      path: '/api/pulse_local/{channel}',
+      validate: {
+        params: schema.object({
+          channel: schema.string(),
+        }),
+      },
+    },
     async (context, request, response) => {
       try {
         const { channel } = request.params;
-        const { payload } = request.body;
-        const ch = channels.get(channel);
-
-        await ch?.sendPulse(payload);
+        const results = await channels.get(channel)?.getRecords();
         return response.ok({
-          body: {
-            message: `payload: ${payload} received`,
-          },
+          body: results,
         });
       } catch (error) {
         return response.badRequest({ body: error });
