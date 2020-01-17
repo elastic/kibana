@@ -32,7 +32,8 @@ def doIt() {
   for(def i = 0; i < 100; i++) {
     try {
       timeout(time: 3, unit: 'MINUTES') {
-        checkout scm
+        // checkout scm
+        gitCheckout()
       }
       sleep 30
     } catch(ex) {
@@ -53,4 +54,29 @@ def doIt() {
   if (hadError) {
     input("Waiting...")
   }
+}
+
+def gitCheckout() {
+  checkout(
+    [
+      $class: 'GitSCM',
+      branches: 'master',
+      doGenerateSubmoduleConfigurations: false,
+      extensions: [
+        [
+          $class: 'CloneOption',
+          noTags: false,
+          reference: '/var/lib/jenkins/.git-references/kibana.git',
+          shallow: false
+        ]
+      ],
+      submoduleCfg: [],
+      userRemoteConfigs: [[
+        credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
+        name: 'origin',
+        refspec: 'refs/heads/master',
+        url: 'https://github.com/elastic/kibana.git'
+      ]],
+    ]
+  )
 }
