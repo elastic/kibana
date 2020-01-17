@@ -182,6 +182,7 @@ export const getColumns = (
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
+      scope: 'row',
     },
     {
       field: DataFrameAnalyticsListColumn.description,
