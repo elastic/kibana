@@ -7,12 +7,16 @@ $icon-size: 20px;
   border-radius: 4px;
   width: $icon-size;
   height: $icon-size;
-  line-height: $icon-size;;
+  line-height: $icon-size;
   text-align: center;
+  position: relative;
 
   .field-type-icon {
     padding: 0;
-    display: inline !important;
-    vertical-align: initial;
+    display: inline-block !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 }

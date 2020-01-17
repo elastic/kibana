@@ -50,8 +50,24 @@ export class AbstractVectorSource extends AbstractSource {
     );
   }
 
+  /**
+   * factory function creating a new field-instance
+   * @param fieldName
+   * @param label
+   * @returns {ESAggMetricField}
+   */
   createField() {
     throw new Error(`Should implemement ${this.constructor.type} ${this}`);
+  }
+
+  /**
+   * Retrieves a field. This may be an existing instance.
+   * @param fieldName
+   * @param label
+   * @returns {ESAggMetricField}
+   */
+  getFieldByName(name) {
+    return this.createField({ fieldName: name });
   }
 
   _createDefaultLayerDescriptor(options, mapColors) {

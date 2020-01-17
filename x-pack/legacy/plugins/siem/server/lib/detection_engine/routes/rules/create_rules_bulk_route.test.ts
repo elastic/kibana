@@ -9,10 +9,10 @@ import {
   createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
+  getMockEmptyIndex,
 } from '../__mocks__/_mock_server';
 import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
-import { ServerFacade } from '../../../../types';
 import {
   getFindResult,
   getResult,
@@ -29,11 +29,7 @@ describe('create_rules_bulk', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
-    elasticsearch.getCluster = jest.fn().mockImplementation(() => ({
-      callWithRequest: jest.fn().mockImplementation(() => true),
-    }));
-
-    createRulesBulkRoute((server as unknown) as ServerFacade);
+    createRulesBulkRoute(server);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -48,14 +44,14 @@ describe('create_rules_bulk', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      createRulesRoute((serverWithoutActionClient as unknown) as ServerFacade);
+      createRulesRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getReadBulkRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createRulesRoute((serverWithoutAlertClient as unknown) as ServerFacade);
+      createRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getReadBulkRequest());
       expect(statusCode).toBe(404);
     });
@@ -64,13 +60,32 @@ describe('create_rules_bulk', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      createRulesRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
+      createRulesRoute(serverWithoutActionOrAlertClient);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getReadBulkRequest());
       expect(statusCode).toBe(404);
     });
   });
 
   describe('validation', () => {
+    test('it gets a 409 if the index does not exist', async () => {
+      elasticsearch.getCluster = getMockEmptyIndex();
+      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.get.mockResolvedValue(getResult());
+      actionsClient.create.mockResolvedValue(createActionResult());
+      alertsClient.create.mockResolvedValue(getResult());
+      const { payload } = await server.inject(getReadBulkRequest());
+      expect(JSON.parse(payload)).toEqual([
+        {
+          error: {
+            message:
+              'To create a rule, the index must exist first. Index .siem-signals does not exist',
+            status_code: 400,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
     test('returns 200 if rule_id is not given as the id is auto generated from the alert framework', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
