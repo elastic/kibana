@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 export function initEditorConfig(editorConfigProviders) {
   // Limit agg params based on rollup capabilities
-  editorConfigProviders.register((aggType, indexPattern, aggConfig) => {
+  editorConfigProviders.register((indexPattern, aggConfig) => {
     if (indexPattern.type !== 'rollup') {
       return {};
     }
