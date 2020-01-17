@@ -10,6 +10,7 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { npSetup, npStart } from 'ui/new_platform';
 import { registerPainless } from './register_painless';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
+import { ADVANCED_SETTINGS_FLAG_NAME } from '../common/constants';
 
 npSetup.plugins.home.featureCatalogue.register({
   id: 'painless_playground',
@@ -25,6 +26,11 @@ npSetup.plugins.home.featureCatalogue.register({
   category: FeatureCatalogueCategory.ADMIN,
 });
 
+npSetup.core.uiSettings.get$(ADVANCED_SETTINGS_FLAG_NAME, false).subscribe(value => {
+  // eslint-disable-next-line
+  console.log('use this to figure out whether we should register', value);
+});
+
 npSetup.plugins.dev_tools.register({
   order: 7,
   title: i18n.translate('xpack.painless_playground.displayName', {
@@ -33,21 +39,22 @@ npSetup.plugins.dev_tools.register({
   id: 'painless_playground',
   enableRouting: false,
   disabled: false,
-  tooltipContent: xpackInfo.get('features.painless_playground.message'),
+  tooltipContent: xpackInfo.get('features.painlessPlayground.message'),
   async mount(context, { element }) {
     registerPainless();
-    /**
+
     const licenseCheck = {
-      showPage: xpackInfo.get('features.painless_playground.enableLink'),
-      message: xpackInfo.get('features.painless_playground.message'),
+      showPage: xpackInfo.get('features.painlessPlayground.enableLink'),
+      message: xpackInfo.get('features.painlessPlayground.message'),
     };
 
     if (!licenseCheck.showPage) {
       npStart.core.notifications.toasts.addDanger(licenseCheck.message);
       window.location.hash = '/dev_tools';
       return () => {};
-    }**/
+    }
+
     const { renderApp } = await import('./render_app');
-    return renderApp(element, npStart);
+    return renderApp(element, npStart.core);
   },
 });

@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, ADVANCED_SETTINGS_FLAG_NAME } from './common/constants';
 
 import { registerLicenseChecker } from './server/register_license_checker';
 import { registerExecuteRoute } from './server/register_execute_route';
+import { Legacy } from '../../../../kibana';
 
 export const painlessPlayground = (kibana: any) =>
   new kibana.Plugin({
@@ -24,7 +25,24 @@ export const painlessPlayground = (kibana: any) =>
     uiExports: {
       devTools: [resolve(__dirname, 'public/register')],
     },
-    init: (server: any) => {
+    init: (server: Legacy.Server) => {
+      // Register feature flag
+      server.newPlatform.setup.core.uiSettings.register({
+        [ADVANCED_SETTINGS_FLAG_NAME]: {
+          name: i18n.translate('kbn.advancedSettings.devTools.painlessPlaygroundTitle', {
+            defaultMessage: 'Painless Playground',
+          }),
+          description: i18n.translate(
+            'kbn.advancedSettings.devTools.painlessPlaygroundDescription',
+            {
+              defaultMessage: 'Enable experimental Painless Playground.',
+            }
+          ),
+          value: false,
+          category: ['Dev Tools'],
+        },
+      });
+
       registerLicenseChecker(server);
       registerExecuteRoute(server);
     },
