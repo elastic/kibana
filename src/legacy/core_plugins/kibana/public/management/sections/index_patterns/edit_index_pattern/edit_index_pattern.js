@@ -27,12 +27,7 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
-import {
-  fieldWildcardMatcher,
-  createStateContainer,
-  syncState,
-  createKbnUrlStateStorage,
-} from '../../../../../../../../plugins/kibana_utils/public';
+import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
 import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -42,9 +37,10 @@ import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import { npStart } from 'ui/new_platform';
+import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
-import { createHashHistory } from 'history';
+import { createEditIndexPatternPageStateContainer } from './edit_index_pattern_state_container';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
@@ -164,74 +160,21 @@ function destroyIndexedFieldsTable() {
 }
 
 function handleTabChange($scope, newTab) {
-  switch (newTab) {
-    case TAB_SCRIPTED_FIELDS:
-      destroyIndexedFieldsTable();
-      destroySourceFiltersTable();
-      return updateScriptedFieldsTable($scope);
-    case TAB_INDEXED_FIELDS:
-      destroyScriptedFieldsTable();
-      destroySourceFiltersTable();
-      return updateIndexedFieldsTable($scope);
-    case TAB_SOURCE_FILTERS:
-      destroyIndexedFieldsTable();
-      destroyScriptedFieldsTable();
-      return updateSourceFiltersTable($scope);
-  }
+  destroyIndexedFieldsTable();
+  destroySourceFiltersTable();
+  destroyScriptedFieldsTable();
+  updateTables($scope, newTab);
 }
 
-/**
- * Create state container with sync config for tab navigation specific for edit_index_patter page
- */
-function createEditIndexPatternPageStateContainer({ useHashedUrl }) {
-  // until angular is used as shell - use hash history
-  const history = createHashHistory();
-  // query param to store app state at
-  const stateStorageKey = '_a';
-  // default app state, when there is no initial state in the url
-  const defaultState = {
-    tab: TAB_INDEXED_FIELDS,
-  };
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    useHash: useHashedUrl,
-    history,
-  });
-  // extract starting app state from URL and use it as starting app state in state container
-  const initialStateFromUrl = kbnUrlStateStorage.get(stateStorageKey);
-  const stateContainer = createStateContainer(
-    {
-      ...defaultState,
-      ...initialStateFromUrl,
-    },
-    {
-      setTab: state => tab => ({ ...state, tab }),
-    },
-    {
-      tab: state => () => state.tab,
-    }
-  );
-
-  const { start, stop } = syncState({
-    storageKey: stateStorageKey,
-    stateContainer: {
-      ...stateContainer,
-      // state syncing utility requires state containers to handle "null"
-      set: state => state && stateContainer.set(state),
-    },
-    stateStorage: kbnUrlStateStorage,
-  });
-
-  // makes sure initial url is the same as initial state (this is not really required)
-  kbnUrlStateStorage.set(stateStorageKey, stateContainer.getState(), { replace: true });
-
-  // expose api needed for Controller
-  return {
-    startSyncingState: start,
-    stopSyncingState: stop,
-    setCurrentTab: newTab => stateContainer.transitions.setTab(newTab),
-    getCurrentTab: () => stateContainer.selectors.tab(),
-    state$: stateContainer.state$,
-  };
+function updateTables($scope, currentTab) {
+  switch (currentTab) {
+    case TAB_SCRIPTED_FIELDS:
+      return updateScriptedFieldsTable($scope);
+    case TAB_INDEXED_FIELDS:
+      return updateIndexedFieldsTable($scope);
+    case TAB_SOURCE_FILTERS:
+      return updateSourceFiltersTable($scope);
+  }
 }
 
 uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
@@ -266,15 +209,18 @@ uiModules
       state$,
     } = createEditIndexPatternPageStateContainer({
       useHashedUrl: config.get('state:storeInSessionStorage'),
+      defaultTab: TAB_INDEXED_FIELDS,
     });
 
     $scope.getCurrentTab = getCurrentTab;
     $scope.setCurrentTab = setCurrentTab;
 
-    const stateChangedSub = state$.subscribe(({ tab }) => {
-      handleTabChange($scope, tab);
-      $scope.$applyAsync();
+    const stateChangedSub = subscribeWithScope($scope, state$, {
+      next: ({ tab }) => {
+        handleTabChange($scope, tab);
+      },
     });
+
     handleTabChange($scope, getCurrentTab()); // setup initial tab depending on initial tab state
 
     startSyncingState(); // starts syncing state between state container and url
@@ -412,17 +358,7 @@ uiModules
         return;
       }
 
-      switch (getCurrentTab()) {
-        case TAB_INDEXED_FIELDS:
-          updateIndexedFieldsTable($scope);
-          break;
-        case TAB_SCRIPTED_FIELDS:
-          updateScriptedFieldsTable($scope);
-          break;
-        case TAB_SOURCE_FILTERS:
-          updateSourceFiltersTable($scope);
-          break;
-      }
+      updateTables($scope, getCurrentTab());
     });
 
     $scope.$watch('indexedFieldTypeFilter', () => {
