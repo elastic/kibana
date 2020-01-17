@@ -5,9 +5,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isNumber, isString } from 'lodash/fp';
-import * as React from 'react';
+import { isNumber, isString, isEmpty } from 'lodash/fp';
+import React from 'react';
 
+import { DefaultDraggable } from '../../../draggables';
 import { Bytes, BYTES_FORMAT } from '../../../bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue, getEmptyTagValue } from '../../../empty_value';
@@ -23,7 +24,10 @@ import {
   MESSAGE_FIELD_NAME,
 } from './constants';
 
-export const FormattedFieldValue = React.memo<{
+// simple black-list to prevent dragging and dropping fields such as message name
+const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
+
+const FormattedFieldValueComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldFormat?: string;
@@ -31,7 +35,7 @@ export const FormattedFieldValue = React.memo<{
   fieldType: string;
   truncate?: boolean;
   value: string | number | undefined | null;
-}>(({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
+}> = ({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -42,7 +46,16 @@ export const FormattedFieldValue = React.memo<{
       />
     );
   } else if (fieldType === DATE_FIELD_TYPE) {
-    return <FormattedDate fieldName={fieldName} value={value} />;
+    return (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        tooltipContent={null}
+        value={`${value}`}
+      >
+        <FormattedDate fieldName={fieldName} value={value} />
+      </DefaultDraggable>
+    );
   } else if (PORT_NAMES.some(portName => fieldName === portName)) {
     return (
       <Port contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
@@ -55,11 +68,16 @@ export const FormattedFieldValue = React.memo<{
     const hostname = `${value}`;
 
     return isString(value) && hostname.length > 0 ? (
-      <EuiToolTip content={value}>
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        tooltipContent={value}
+        value={value}
+      >
         <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
-          {value}
+          <TruncatableText data-test-subj="draggable-truncatable-content">{value}</TruncatableText>
         </HostDetailsLink>
-      </EuiToolTip>
+      </DefaultDraggable>
     ) : (
       getEmptyTagValue()
     );
@@ -67,35 +85,47 @@ export const FormattedFieldValue = React.memo<{
     return (
       <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );
-  } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
-    return (
-      <>
-        {truncate ? (
-          <TruncatableText data-test-subj="truncatable-message">
-            <EuiToolTip
-              data-test-subj="message-tool-tip"
-              content={
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <span>{fieldName}</span>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <span>{value}</span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-            >
-              <>{value}</>
-            </EuiToolTip>
-          </TruncatableText>
-        ) : (
+  } else if (columnNamesNotDraggable.includes(fieldName)) {
+    return truncate && !isEmpty(value) ? (
+      <TruncatableText data-test-subj="truncatable-message">
+        <EuiToolTip
+          data-test-subj="message-tool-tip"
+          content={
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <span>{fieldName}</span>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span>{value}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
           <>{value}</>
-        )}
-      </>
+        </EuiToolTip>
+      </TruncatableText>
+    ) : (
+      <>{value}</>
     );
   } else {
-    return getOrEmptyTagFromValue(value);
-  }
-});
+    const contentValue = getOrEmptyTagFromValue(value);
+    const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
 
-FormattedFieldValue.displayName = 'FormattedFieldValue';
+    return (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        value={`${value}`}
+        tooltipContent={
+          fieldType === DATE_FIELD_TYPE || fieldType === EVENT_DURATION_FIELD_NAME
+            ? null
+            : fieldName
+        }
+      >
+        {content}
+      </DefaultDraggable>
+    );
+  }
+};
+
+export const FormattedFieldValue = React.memo(FormattedFieldValueComponent);

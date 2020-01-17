@@ -13,6 +13,7 @@ import {
 
 import { findRulesRoute } from './find_rules_route';
 import { ServerInjectOptions } from 'hapi';
+
 import { getFindResult, getResult, getFindRequest } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 

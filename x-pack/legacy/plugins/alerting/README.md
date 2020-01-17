@@ -32,6 +32,14 @@ When security is enabled, an SSL connection to Elasticsearch is required in orde
 
 When security is enabled, users who create alerts will need the `manage_api_key` cluster privilege. There is currently work in progress to remove this requirement.
 
+Note that the `manage_own_api_key` cluster privilege is not enough - it can be used to create API keys, but not invalidate them, and the alerting plugin currently both creates and invalidates APIs keys as part of it's processing.  When using only the `manage_own_api_key` privilege, you will see the following message logged in the server when the alerting plugin attempts to invalidate an API key:
+
+```
+[error][alerting][plugins] Failed to invalidate API Key: [security_exception] \
+    action [cluster:admin/xpack/security/api_key/invalidate] \
+    is unauthorized for user [user-name-here]
+```
+
 ## Alert types
 
 ### Methods
@@ -63,6 +71,13 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |previousStartedAt|The previous date and time the alert type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (example threshold). Use alert type validation to ensure values are set before execution.|
 |state|State returned from previous execution. This is the alert level state. What the executor returns will be serialized and provided here at the next execution.|
+|alertId|The id of this alert.|
+|spaceId|The id of the space of this alert.|
+|namespace|The namespace of the space of this alert; same as spaceId, unless spaceId === 'default', then namespace = undefined.|
+|name|The name of this alert.|
+|tags|The tags associated with this alert.|
+|createdBy|The userid that created this alert.|
+|updatedBy|The userid that last updated this alert.|
 
 ### Example
 

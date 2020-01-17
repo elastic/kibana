@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { combineLatest } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import healthCheck from './lib/health_check';
 import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
@@ -36,19 +34,12 @@ export default function(kibana) {
       // All methods that ES plugin exposes are synchronous so we should get the first
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
-      const [esConfig, adminCluster, dataCluster] = await combineLatest(
-        server.newPlatform.__internals.elasticsearch.legacy.config$,
-        server.newPlatform.setup.core.elasticsearch.adminClient$,
-        server.newPlatform.setup.core.elasticsearch.dataClient$
-      )
-        .pipe(
-          first(),
-          map(([config, adminClusterClient, dataClusterClient]) => [
-            config,
-            new Cluster(adminClusterClient),
-            new Cluster(dataClusterClient),
-          ])
-        )
+      const { adminClient, dataClient } = server.newPlatform.setup.core.elasticsearch;
+      const adminCluster = new Cluster(adminClient);
+      const dataCluster = new Cluster(dataClient);
+
+      const esConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
+        .pipe(first())
         .toPromise();
 
       defaultVars = {

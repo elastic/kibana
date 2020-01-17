@@ -5,6 +5,7 @@
  */
 
 import { ServerInjectOptions } from 'hapi';
+import { SavedObjectsFindResponse } from 'kibana/server';
 import { ActionResult } from '../../../../../../actions/server/types';
 import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
@@ -14,8 +15,9 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   INTERNAL_RULE_ID_KEY,
   INTERNAL_IMMUTABLE_KEY,
+  DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
-import { RuleAlertType } from '../../rules/types';
+import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
 
 export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
@@ -52,6 +54,7 @@ export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
   created_at: '2019-12-13T16:40:33.400Z',
   updated_at: '2019-12-13T16:40:33.400Z',
   timeline_id: 'timeline-id',
+  timeline_title: 'timeline-title',
 });
 
 export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
@@ -155,10 +158,20 @@ export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
 
 export const getPrivilegeRequest = (): ServerInjectOptions => ({
   method: 'GET',
-  url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
+  url: DETECTION_ENGINE_PRIVILEGES_URL,
 });
 
-interface FindHit {
+export const addPrepackagedRulesRequest = (): ServerInjectOptions => ({
+  method: 'PUT',
+  url: DETECTION_ENGINE_PREPACKAGED_URL,
+});
+
+export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
+  method: 'GET',
+  url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+});
+
+export interface FindHit {
   page: number;
   perPage: number;
   total: number;
@@ -175,7 +188,7 @@ export const getFindResult = (): FindHit => ({
 export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
-  total: 0,
+  total: 1,
   data: [getResult()],
 });
 
@@ -271,6 +284,7 @@ export const getResult = (): RuleAlertType => ({
     outputIndex: '.siem-signals',
     savedId: 'some-id',
     timelineId: 'some-timeline-id',
+    timelineTitle: 'some-timeline-title',
     meta: { someMeta: 'someField' },
     filters: [
       {
@@ -283,9 +297,7 @@ export const getResult = (): RuleAlertType => ({
     ],
     riskScore: 50,
     maxSignals: 100,
-    size: 1,
     severity: 'high',
-    tags: [],
     to: 'now',
     type: 'query',
     threats: [
@@ -308,6 +320,8 @@ export const getResult = (): RuleAlertType => ({
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },
+  createdAt: new Date('2019-12-13T16:40:33.400Z'),
+  updatedAt: new Date('2019-12-13T16:40:33.400Z'),
   schedule: { interval: '5m' },
   enabled: true,
   actions: [],
@@ -379,4 +393,12 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
+  isAuthenticated: false,
+});
+
+export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  page: 1,
+  per_page: 1,
+  total: 0,
+  saved_objects: [],
 });

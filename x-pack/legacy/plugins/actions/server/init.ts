@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { Plugin } from './plugin';
-import { shim, Server } from './shim';
+import { shim } from './shim';
 import { ActionsPlugin } from './types';
 
-export async function init(server: Server) {
+export async function init(server: Legacy.Server) {
   const { initializerContext, coreSetup, coreStart, pluginsSetup, pluginsStart } = shim(server);
 
   const plugin = new Plugin(initializerContext);

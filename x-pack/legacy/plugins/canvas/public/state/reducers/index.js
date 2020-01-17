@@ -16,6 +16,7 @@ import { pagesReducer } from './pages';
 import { elementsReducer } from './elements';
 import { assetsReducer } from './assets';
 import { historyReducer } from './history';
+import { embeddableReducer } from './embeddable';
 
 export function getRootReducer(initialState) {
   return combineReducers({
@@ -25,7 +26,7 @@ export function getRootReducer(initialState) {
     persistent: reduceReducers(
       historyReducer,
       combineReducers({
-        workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer),
+        workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer, embeddableReducer),
         schemaVersion: (state = get(initialState, 'persistent.schemaVersion')) => state,
       })
     ),
