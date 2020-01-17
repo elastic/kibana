@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 
-function baseTickFormatter(value: any, axis: any) {
+import { Axis } from './panel_utils';
+
+function baseTickFormatter(value: number, axis: Axis) {
   const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
   const formatted = '' + Math.round(value * factor) / factor;
 
@@ -40,8 +42,8 @@ function baseTickFormatter(value: any, axis: any) {
   return formatted;
 }
 
-function unitFormatter(divisor: any, units: any) {
-  return (val: any) => {
+function unitFormatter(divisor: number, units: string[]) {
+  return (val: number) => {
     let index = 0;
     const isNegative = val < 0;
     val = Math.abs(val);
@@ -55,20 +57,20 @@ function unitFormatter(divisor: any, units: any) {
 }
 
 export function tickFormatters() {
-  const formatters = {
+  return {
     bits: unitFormatter(1000, ['b', 'kb', 'mb', 'gb', 'tb', 'pb']),
     'bits/s': unitFormatter(1000, ['b/s', 'kb/s', 'mb/s', 'gb/s', 'tb/s', 'pb/s']),
     bytes: unitFormatter(1024, ['B', 'KB', 'MB', 'GB', 'TB', 'PB']),
     'bytes/s': unitFormatter(1024, ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s']),
-    currency(val: any, axis: any) {
+    currency(val: number, axis: Axis) {
       return val.toLocaleString('en', {
         style: 'currency',
-        currency: axis.options.units.prefix || 'USD',
+        currency: (axis && axis.options && axis.options.units.prefix) || 'USD',
       });
     },
-    percent(val: any, axis: any) {
+    percent(val: number, axis: Axis) {
       let precision =
-        _.get(axis, 'tickDecimals', 0) - _.get(axis, 'options.units.tickDecimalsShift', 0);
+        get(axis, 'tickDecimals', 0) - get(axis, 'options.units.tickDecimalsShift', 0);
       // toFixed only accepts values between 0 and 20
       if (precision < 0) {
         precision = 0;
@@ -78,13 +80,11 @@ export function tickFormatters() {
 
       return (val * 100).toFixed(precision) + '%';
     },
-    custom(val: any, axis: any) {
+    custom(val: number, axis: Axis) {
       const formattedVal = baseTickFormatter(val, axis);
-      const prefix = axis.options.units.prefix;
-      const suffix = axis.options.units.suffix;
+      const prefix = axis && axis.options && axis.options.units.prefix;
+      const suffix = axis && axis.options && axis.options.units.suffix;
       return prefix + formattedVal + suffix;
     },
   };
-
-  return formatters;
 }

@@ -17,24 +17,6 @@
  * under the License.
  */
 
-import { TimelionFunctionArgs } from '../../../../vis_type_timelion/common/types';
-
-export interface TimelionFunctionInterface extends TimelionFunctionConfig {
-  chainable: boolean;
-  originalFn: Function;
-  argsByName: TimelionFunctionArgs[];
-}
-
-export interface TimelionFunctionConfig {
-  name: string;
-  help: string;
-  extended: boolean;
-  aliases: string[];
-  fn: Function;
-  args: TimelionFunctionArgs[];
-}
-
-// eslint-disable-next-line import/no-default-export
-export default class TimelionFunction {
-  constructor(name: string, config: TimelionFunctionConfig);
-}
+export * from './timelion_expression_input';
+export * from './timelion_interval';
+export * from './timelion_vis';

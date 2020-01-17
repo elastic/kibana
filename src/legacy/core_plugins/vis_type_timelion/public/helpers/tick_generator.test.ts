@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { generateTicksProvider } from '../panels/timechart/tick_generator';
+import { generateTicksProvider } from './tick_generator';
 
 describe('Tick Generator', function() {
-  let generateTicks;
+  let generateTicks: any;
 
   beforeEach(function() {
     generateTicks = generateTicksProvider();
@@ -29,7 +28,7 @@ describe('Tick Generator', function() {
 
   describe('generateTicksProvider()', function() {
     it('should return a function', function() {
-      expect(generateTicks).to.be.a('function');
+      expect(generateTicks).toEqual(expect.any(Function));
     });
   });
 
@@ -58,14 +57,14 @@ describe('Tick Generator', function() {
         let n = 1;
         while (Math.pow(2, n) < axis.delta) n++;
         const expectedDelta = Math.pow(2, n);
-        const expectedNr = parseInt((axis.max - axis.min) / expectedDelta) + 2;
-        expect(ticks instanceof Array).to.be(true);
-        expect(ticks.length).to.be(expectedNr);
-        expect(ticks[0]).to.equal(axis.min);
-        expect(ticks[parseInt(ticks.length / 2)]).to.equal(
-          axis.min + expectedDelta * parseInt(ticks.length / 2)
+        const expectedNr = Math.floor((axis.max - axis.min) / expectedDelta) + 2;
+        expect(ticks instanceof Array).toBeTruthy();
+        expect(ticks.length).toBe(expectedNr);
+        expect(ticks[0]).toEqual(axis.min);
+        expect(ticks[Math.floor(ticks.length / 2)]).toEqual(
+          axis.min + expectedDelta * Math.floor(ticks.length / 2)
         );
-        expect(ticks[ticks.length - 1]).to.equal(axis.min + expectedDelta * (ticks.length - 1));
+        expect(ticks[ticks.length - 1]).toEqual(axis.min + expectedDelta * (ticks.length - 1));
       });
     });
   });
