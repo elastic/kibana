@@ -122,7 +122,7 @@ export class Typeahead extends Component {
   };
 
   onChangeInputValue = event => {
-    const { value, selectionStart } = event.target;
+    const { value = '', selectionStart = 0 } = event.target ?? {};
     const hasValue = Boolean(value.trim());
     this.setState({
       value,
