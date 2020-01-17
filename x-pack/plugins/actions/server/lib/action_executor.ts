@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-import { Logger } from '../../../../../src/core/server';
+import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
   ActionTypeExecutorResult,
@@ -26,7 +25,7 @@ export interface ActionExecutorContext {
 
 export interface ExecuteOptions {
   actionId: string;
-  request: Hapi.Request;
+  request: KibanaRequest;
   params: Record<string, any>;
 }
 

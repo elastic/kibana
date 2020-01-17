@@ -81,14 +81,11 @@ export class LicenseState {
 }
 
 export function verifyApiAccessFactory(licenseState: LicenseState) {
-  function verifyApiAccess() {
-    const licenseCheckResults = licenseState.getLicenseInformation();
+  const licenseCheckResults = licenseState.getLicenseInformation();
 
-    if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
-      return null;
-    }
-
-    throw Boom.forbidden(licenseCheckResults.message);
+  if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
+    return null;
   }
-  return verifyApiAccess;
+
+  throw Boom.forbidden(licenseCheckResults.message);
 }

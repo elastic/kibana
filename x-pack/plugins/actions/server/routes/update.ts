@@ -4,44 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
-import Hapi from 'hapi';
+import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  IRouter,
+  RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from 'kibana/server';
+import { extendRouteWithLicenseCheck } from '../extend_route_with_license_check';
+import { LicenseState } from '../lib/license_state';
 
-interface UpdateRequest extends Hapi.Request {
-  payload: {
-    name: string;
-    config: Record<string, any>;
-    secrets: Record<string, any>;
-  };
-}
+const paramSchema = schema.object({
+  id: schema.string(),
+});
 
-export const updateActionRoute = {
-  method: 'PUT',
-  path: `/api/action/{id}`,
-  config: {
-    tags: ['access:actions-all'],
-    validate: {
-      options: {
-        abortEarly: false,
+const bodySchema = schema.object({
+  name: schema.string(),
+  config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+});
+
+export const updateActionRoute = (router: IRouter, licenseState: LicenseState) => {
+  router.put(
+    {
+      path: `/api/action/{id}`,
+      validate: {
+        body: bodySchema,
+        params: paramSchema,
       },
-      params: Joi.object()
-        .keys({
-          id: Joi.string().required(),
-        })
-        .required(),
-      payload: Joi.object()
-        .keys({
-          name: Joi.string().required(),
-          config: Joi.object().default({}),
-          secrets: Joi.object().default({}),
-        })
-        .required(),
+      options: {
+        tags: ['access:actions-all'],
+      },
     },
-  },
-  async handler(request: UpdateRequest) {
-    const { id } = request.params;
-    const { name, config, secrets } = request.payload;
-    const actionsClient = request.getActionsClient!();
-    return await actionsClient.update({ id, action: { name, config, secrets } });
-  },
+    router.handleLegacyErrors(
+      extendRouteWithLicenseCheck(licenseState, async function(
+        context: RequestHandlerContext,
+        req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
+        res: KibanaResponseFactory
+      ): Promise<IKibanaResponse<any>> {
+        const actionsClient = context.actions.getActionsClient();
+        const { id } = req.params;
+        const { name, config, secrets } = req.body;
+        return res.ok({
+          body: await actionsClient.update({
+            id,
+            action: { name, config, secrets },
+          }),
+        });
+      })
+    )
+  );
 };

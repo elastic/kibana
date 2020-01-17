@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract, SavedObjectAttributes } from '../../../../src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
+import { ActionsClient } from './actions_client';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -17,6 +18,15 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
+}
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    actions: {
+      getActionsClient: () => ActionsClient;
+      listTypes: ActionTypeRegistry['list'];
+    };
+  }
 }
 
 export interface ActionsPlugin {

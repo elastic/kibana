@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import {
@@ -17,6 +15,8 @@ import {
   KibanaRequest,
   Logger,
   SharedGlobalConfig,
+  RequestHandler,
+  IContextProvider,
 } from '../../../../src/core/server';
 
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../security/server';
@@ -39,16 +39,15 @@ import { registerBuiltInActionTypes } from './builtin_action_types';
 
 import { getActionsConfigurationUtilities } from './actions_config';
 
-// import {
-//   createActionRoute,
-//   deleteActionRoute,
-//   findActionRoute,
-//   getActionRoute,
-//   updateActionRoute,
-//   listActionTypesRoute,
-//   getExecuteActionRoute,
-// } from './routes';
-// import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
+import {
+  createActionRoute,
+  deleteActionRoute,
+  findActionRoute,
+  getActionRoute,
+  updateActionRoute,
+  listActionTypesRoute,
+  getExecuteActionRoute,
+} from './routes';
 import { LicenseState } from './lib/license_state';
 
 export interface PluginSetupContract {
@@ -56,9 +55,7 @@ export interface PluginSetupContract {
 }
 
 export interface PluginStartContract {
-  listTypes: ActionTypeRegistry['list'];
   execute(options: ExecuteOptions): Promise<void>;
-  getActionsClientWithRequest(request: Hapi.Request): ActionsClient;
 }
 
 export interface ActionsPluginsSetup {
@@ -141,17 +138,17 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionsConfigUtils,
     });
 
+    core.http.registerRouteHandlerContext('actions', this.createRouteHandlerContext());
+
     // Routes
-    // const router = core.http.createRouter();
-    // core.http.route(extendRouteWithLicenseCheck(createActionRoute, this.licenseState));
-    // core.http.route(extendRouteWithLicenseCheck(deleteActionRoute, this.licenseState));
-    // core.http.route(extendRouteWithLicenseCheck(getActionRoute, this.licenseState));
-    // core.http.route(extendRouteWithLicenseCheck(findActionRoute, this.licenseState));
-    // core.http.route(extendRouteWithLicenseCheck(updateActionRoute, this.licenseState));
-    // core.http.route(extendRouteWithLicenseCheck(listActionTypesRoute, this.licenseState));
-    // core.http.route(
-    //   extendRouteWithLicenseCheck(getExecuteActionRoute(actionExecutor), this.licenseState)
-    // );
+    const router = core.http.createRouter();
+    createActionRoute(router, this.licenseState);
+    deleteActionRoute(router, this.licenseState);
+    getActionRoute(router, this.licenseState);
+    findActionRoute(router, this.licenseState);
+    updateActionRoute(router, this.licenseState);
+    listActionTypesRoute(router, this.licenseState);
+    getExecuteActionRoute(router, this.licenseState, actionExecutor);
 
     return {
       registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
@@ -159,19 +156,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    const {
-      logger,
-      actionExecutor,
-      actionTypeRegistry,
-      adminClient,
-      taskRunnerFactory,
-      defaultKibanaIndex,
-    } = this;
+    const { logger, actionExecutor, actionTypeRegistry, adminClient, taskRunnerFactory } = this;
 
-    function getServices(request: any): Services {
+    function getServices(request: KibanaRequest): Services {
       return {
-        callCluster: (...args) =>
-          adminClient!.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
+        callCluster: (...args) => adminClient!.asScoped(request).callAsCurrentUser(...args),
         savedObjectsClient: core.savedObjects.getScopedClient(request),
       };
     }
@@ -183,6 +172,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       actionTypeRegistry: actionTypeRegistry!,
     });
+
     taskRunnerFactory!.initialize({
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
@@ -197,18 +187,28 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     return {
       execute: executeFn,
-      listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
-      getActionsClientWithRequest(request: Hapi.Request) {
-        const savedObjectsClient = request.getSavedObjectsClient();
-        return new ActionsClient({
-          savedObjectsClient,
-          actionTypeRegistry: actionTypeRegistry!,
-          defaultKibanaIndex: defaultKibanaIndex!,
-          scopedClusterClient: adminClient!.asScoped(request),
-        });
-      },
     };
   }
+
+  private createRouteHandlerContext = (): IContextProvider<
+    RequestHandler<any, any, any>,
+    'actions'
+  > => {
+    const { actionTypeRegistry, adminClient, defaultKibanaIndex } = this;
+    return async function actionsRouteHandlerContext(context, request) {
+      return {
+        getActionsClient: () => {
+          return new ActionsClient({
+            savedObjectsClient: context.core!.savedObjects.client,
+            actionTypeRegistry: actionTypeRegistry!,
+            defaultKibanaIndex: defaultKibanaIndex!,
+            scopedClusterClient: adminClient!.asScoped(request),
+          });
+        },
+        listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
+      };
+    };
+  };
 
   private spaceIdToNamespace = (spaceId?: string): string | undefined => {
     return this.spaces && spaceId ? this.spaces.spaceIdToNamespace(spaceId) : undefined;

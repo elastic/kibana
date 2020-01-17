@@ -13,7 +13,7 @@ export function getActionsPlugin(server: Legacy.Server): PluginStartContract | u
 
 export async function init(server: Legacy.Server) {
   server.decorate('request', 'getActionsClient', function() {
-    const actions = getActionsPlugin(server);
-    return actions?.getActionsClientWithRequest(this);
+    // const actions = getActionsPlugin(server);
+    // return actions?.getActionsClientWithRequest(this);
   });
 }
