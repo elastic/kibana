@@ -49,7 +49,7 @@ export function TraceOverview() {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localUIFiltersConfig} />
+        <LocalUIFilters {...localUIFiltersConfig} showCount={false} />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiPanel>

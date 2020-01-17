@@ -88,6 +88,8 @@ xpack.security.session.lifespan: "8h"
 
 . Optional: <<configuring-tls,Configure {kib} to encrypt communications>>. 
 
+. Optional: <<elasticsearch-mutual-tls,Configure {kib} to authenticate to {es} with a client certificate>>.
+
 . Restart {kib}.
 
 . [[kibana-roles]]Choose an authentication mechanism and grant users the privileges they need to
@@ -141,4 +143,5 @@ NOTE: This must be a user who has been assigned <<kibana-privileges, Kibana priv
 
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
+include::securing-communications/elasticsearch-mutual-tls.asciidoc[]
 include::audit-logging.asciidoc[]

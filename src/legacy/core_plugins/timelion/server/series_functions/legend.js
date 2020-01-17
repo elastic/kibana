@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
-import { DEFAULT_TIME_FORMAT } from '../../common/lib';
+import { DEFAULT_TIME_FORMAT } from '../../../vis_type_timelion/common/lib';
 
 export default new Chainable('legend', {
   args: [

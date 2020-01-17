@@ -14,6 +14,10 @@ import { ResultsTable } from './results_table';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
+import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
+import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
@@ -31,6 +35,21 @@ export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   </EuiTitle>
 );
 
+const jobConfigErrorTitle = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.jobConfigurationFetchError',
+  {
+    defaultMessage:
+      'Unable to fetch results. An error occurred loading the job configuration data.',
+  }
+);
+
+const jobCapsErrorTitle = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.jobCapsFetchError',
+  {
+    defaultMessage: "Unable to fetch results. An error occurred loading the index's field data.",
+  }
+);
+
 interface Props {
   jobId: string;
   jobStatus: DATA_FRAME_TASK_STATE;
@@ -39,8 +58,13 @@ interface Props {
 export const ClassificationExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
+  const [jobCapsServiceErrorMessage, setJobCapsServiceErrorMessage] = useState<undefined | string>(
+    undefined
+  );
   const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
+  const kibanaContext = useKibanaContext();
 
   const loadJobConfig = async () => {
     setIsLoadingJobConfig(true);
@@ -78,23 +102,41 @@ export const ClassificationExploration: FC<Props> = ({ jobId, jobStatus }) => {
     loadJobConfig();
   }, []);
 
-  if (jobConfigErrorMessage !== undefined) {
+  const initializeJobCapsService = async () => {
+    if (jobConfig !== undefined) {
+      try {
+        const sourceIndex = jobConfig.source.index[0];
+        const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+        const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+        if (indexPattern !== undefined) {
+          await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+        }
+        setIsInitialized(true);
+      } catch (e) {
+        if (e.message !== undefined) {
+          setJobCapsServiceErrorMessage(e.message);
+        } else {
+          setJobCapsServiceErrorMessage(JSON.stringify(e));
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    initializeJobCapsService();
+  }, [JSON.stringify(jobConfig)]);
+
+  if (jobConfigErrorMessage !== undefined || jobCapsServiceErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false}>
         <ExplorationTitle jobId={jobId} />
         <EuiSpacer />
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.ml.dataframe.analytics.classificationExploration.jobConfigurationFetchError',
-            {
-              defaultMessage:
-                'Unable to fetch results. An error occurred loading the job configuration data.',
-            }
-          )}
+          title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}
           color="danger"
           iconType="cross"
         >
-          <p>{jobConfigErrorMessage}</p>
+          <p>{jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage}</p>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -103,12 +145,12 @@ export const ClassificationExploration: FC<Props> = ({ jobId, jobStatus }) => {
   return (
     <Fragment>
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && (
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
       <EuiSpacer />
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && (
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <ResultsTable
           jobConfig={jobConfig}
           jobStatus={jobStatus}

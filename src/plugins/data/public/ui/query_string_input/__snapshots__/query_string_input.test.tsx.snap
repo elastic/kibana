@@ -276,6 +276,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -292,7 +295,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                   "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
                   "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
                 },
-                "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                "siem": Object {
+                  "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+                  "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                },
                 "winlogbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                 },
@@ -346,6 +352,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -895,6 +902,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -911,7 +921,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                           "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
                           "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
                         },
-                        "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        "siem": Object {
+                          "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+                          "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        },
                         "winlogbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                         },
@@ -965,6 +978,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -1068,11 +1082,9 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={false}
-                        compressed={false}
                         data-test-subj="queryInput"
                         fullWidth={true}
                         inputRef={[Function]}
-                        isLoading={false}
                         onChange={[Function]}
                         onClick={[Function]}
                         onKeyDown={[Function]}
@@ -1090,9 +1102,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                               onSelectLanguage={[Function]}
                             />
                           }
-                          compressed={false}
                           fullWidth={true}
-                          isLoading={false}
                         >
                           <div
                             className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
@@ -1119,9 +1129,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                                   value="response:200"
                                 />
                               </EuiValidatableControl>
-                              <EuiFormControlLayoutIcons
-                                isLoading={false}
-                              />
+                              <EuiFormControlLayoutIcons />
                             </div>
                             <QueryLanguageSwitcher
                               className="euiFormControlLayout__append"
@@ -1502,6 +1510,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -1518,7 +1529,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                   "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
                   "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
                 },
-                "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                "siem": Object {
+                  "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+                  "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                },
                 "winlogbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                 },
@@ -1572,6 +1586,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -2118,6 +2133,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -2134,7 +2152,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                           "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
                           "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
                         },
-                        "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        "siem": Object {
+                          "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+                          "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        },
                         "winlogbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                         },
@@ -2188,6 +2209,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -2291,11 +2313,9 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={true}
-                        compressed={false}
                         data-test-subj="queryInput"
                         fullWidth={true}
                         inputRef={[Function]}
-                        isLoading={false}
                         onChange={[Function]}
                         onClick={[Function]}
                         onKeyDown={[Function]}
@@ -2313,9 +2333,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                               onSelectLanguage={[Function]}
                             />
                           }
-                          compressed={false}
                           fullWidth={true}
-                          isLoading={false}
                         >
                           <div
                             className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
@@ -2342,9 +2360,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                                   value="response:200"
                                 />
                               </EuiValidatableControl>
-                              <EuiFormControlLayoutIcons
-                                isLoading={false}
-                              />
+                              <EuiFormControlLayoutIcons />
                             </div>
                             <QueryLanguageSwitcher
                               className="euiFormControlLayout__append"
@@ -2725,6 +2741,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "logstash": Object {
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
+                "management": Object {
+                  "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                },
                 "metricbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                 },
@@ -2741,7 +2760,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                   "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
                   "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
                 },
-                "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                "siem": Object {
+                  "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+                  "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                },
                 "winlogbeat": Object {
                   "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                 },
@@ -2795,6 +2817,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
             },
@@ -3341,6 +3364,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "logstash": Object {
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
+                        "management": Object {
+                          "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+                        },
                         "metricbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
                         },
@@ -3357,7 +3383,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                           "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
                           "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
                         },
-                        "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        "siem": Object {
+                          "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+                          "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+                        },
                         "winlogbeat": Object {
                           "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                         },
@@ -3411,6 +3440,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "remove": [MockFunction],
                         "replace": [MockFunction],
                       },
+                      "openConfirm": [MockFunction],
                       "openFlyout": [MockFunction],
                       "openModal": [MockFunction],
                     },
@@ -3514,11 +3544,9 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         aria-label="Start typing to search and filter the test page"
                         autoComplete="off"
                         autoFocus={true}
-                        compressed={false}
                         data-test-subj="queryInput"
                         fullWidth={true}
                         inputRef={[Function]}
-                        isLoading={false}
                         onChange={[Function]}
                         onClick={[Function]}
                         onKeyDown={[Function]}
@@ -3536,9 +3564,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                               onSelectLanguage={[Function]}
                             />
                           }
-                          compressed={false}
                           fullWidth={true}
-                          isLoading={false}
                         >
                           <div
                             className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
@@ -3565,9 +3591,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                                   value="response:200"
                                 />
                               </EuiValidatableControl>
-                              <EuiFormControlLayoutIcons
-                                isLoading={false}
-                              />
+                              <EuiFormControlLayoutIcons />
                             </div>
                             <QueryLanguageSwitcher
                               className="euiFormControlLayout__append"

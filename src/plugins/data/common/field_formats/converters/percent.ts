@@ -26,6 +26,7 @@ export class PercentFormat extends NumeralFormat {
 
   id = PercentFormat.id;
   title = PercentFormat.title;
+  allowsNumericalAggregations = true;
 
   getParamDefaults = () => ({
     pattern: this.getConfig!('format:percent:defaultPattern'),
