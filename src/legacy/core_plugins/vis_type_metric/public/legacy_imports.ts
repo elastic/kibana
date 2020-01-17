@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { KbnVislibVisTypesPlugin as Plugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
-
-export { ColorModes } from './utils/collections';
+export { Vis, VisParams } from 'ui/vis';
+export { vislibColorMaps, colorSchemas, ColorSchemas } from 'ui/color_maps';
+export { getHeatmapColors } from 'ui/color_maps';
+export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+export { VisOptionsProps } from 'ui/vis/editors/default';
+// @ts-ignore
+export { Schemas } from 'ui/vis/editors/default/schemas';
+export { AggGroupNames } from 'ui/vis/editors/default';
