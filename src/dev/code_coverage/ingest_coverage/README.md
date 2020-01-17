@@ -94,10 +94,10 @@ PUT kibana_coverage
 Run with custom delay
    
 Mocha  
-`DELAY=500 node scripts/convert_and_send_json_summary.js --path target/kibana-coverage/mocha/coverage-summary.json --verbose`  
+`DELAY=500 node scripts/ingest_coverage.js --path target/kibana-coverage/mocha/coverage-summary.json --verbose`  
 
 Jest  
-`DELAY=500 node scripts/convert_and_send_json_summary.js --path target/kibana-coverage/jest/coverage-summary.json --verbose`  
+`DELAY=500 node scripts/ingest_coverage.js --path target/kibana-coverage/jest/coverage-summary.json --verbose`  
 
 Functional  
 ```javascript
@@ -111,13 +111,13 @@ yarn cover:functional:merge
 
 // Finally, index all the coverage into ES
 // merged functional tests coverage
-DELAY=40 node scripts/convert_and_send_json_summary.js --verbose --path target/coverage/report/functional/coverage-summary.json
+DELAY=40 node scripts/ingest_coverage.js --verbose --path target/coverage/report/functional/coverage-summary.json
 // jest
-DELAY=10 node scripts/convert_and_send_json_summary.js --path target/kibana-coverage/jest/coverage-summary.json --verbose
+DELAY=10 node scripts/ingest_coverage.js --path target/kibana-coverage/jest/coverage-summary.json --verbose
 // mocha
-DELAY=0 node scripts/convert_and_send_json_summary.js --path target/kibana-coverage/mocha/coverage-summary.json --verbose
+DELAY=0 node scripts/ingest_coverage.js --path target/kibana-coverage/mocha/coverage-summary.json --verbose
 ```
 
 Run with TIME_STAMP and DISTRO from cli
- - OSS: `time TIME_STAMP=$(node -pe "require('moment')().format()") DELAY=0 node scripts/convert_and_send_json_summary.js --verbose --path target/kibana-coverage/mocha/coverage-summary.json` _mocha_
- - X-PACK: `time TIME_STAMP=$(node -pe "require('moment')().format()") DISTRO=x-pack DELAY=0 node scripts/convert_and_send_json_summary.js --verbose --path target/coverage/report/functional/coverage-summary.json` _functional_
+ - OSS: `time TIME_STAMP=$(node -pe "require('moment')().format()") DELAY=0 node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/mocha/coverage-summary.json` _mocha_
+ - X-PACK: `time TIME_STAMP=$(node -pe "require('moment')().format()") DISTRO=x-pack DELAY=0 node scripts/ingest_coverage.js --verbose --path target/coverage/report/functional/coverage-summary.json` _functional_

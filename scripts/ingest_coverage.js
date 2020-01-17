@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/code_coverage/convert_and_send_json_summary').runCodeCoverageConverterCli();
+require('../src/dev/code_coverage/ingest_coverage').runCoverageIngestionCli();

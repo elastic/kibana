@@ -19,30 +19,46 @@
 
 import { resolve } from 'path';
 import convert from './convert';
-import send from './send';
+import send from './ingest';
 import { run, createFlagError } from '@kbn/dev-utils';
 
 const ROOT = resolve(__dirname, '../../../..');
 const flags = {
-  string: ['path'],
+  string: ['path', 'verbose'],
   help: `
-          --path             Required, path to the file to extract coverage data
+--path             Required, path to the file to extract coverage data
         `,
 };
 
-export function runCodeCoverageConverterCli() {
+export function runCoverageIngestionCli() {
   run(
     ({ flags, log }) => {
-      if (flags.path === '') {
-        throw createFlagError('please provide a single --path flag');
-      }
+      if (flags.path === '') throw createFlagError('please provide a single --path flag');
+      if (flags.verbose) log.verbose(`Verbose logging enabled`);
 
       const coveragePath = resolve(ROOT, flags.path);
       send(convert({ coveragePath }, log), log);
     },
     {
       description: `
-        Post code coverage in json-summary format to an ES index.
+
+Post code coverage in json-summary format to an ES index.
+Note: You probably should create the index first.
+Two indexes are needed, see README.md.
+
+Examples:
+export TIME_STAMP=\\$(date -u +%FT%T)
+export BUILD_ID=JOB_NUMBER_FROM_CI
+export ES_HOST=https://SOME_ES_CLUSTER
+
+# *** Ingest Mocha Coverage Summary ***
+node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/mocha/coverage-summary.json
+
+# *** Ingest Jest Coverage Summary ***
+node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/jest/coverage-summary.json
+
+# *** Ingest Functional Coverage Summary ***
+node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/functional/coverage-summary.json
       `,
       flags,
     }
