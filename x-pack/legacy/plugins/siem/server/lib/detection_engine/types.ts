@@ -109,7 +109,7 @@ export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & 
   immutable: boolean;
 };
 
-export type PrePackagedRules = Omit<
+export type PrepackagedRules = Omit<
   RuleAlertParamsRest,
   | 'status'
   | 'status_date'

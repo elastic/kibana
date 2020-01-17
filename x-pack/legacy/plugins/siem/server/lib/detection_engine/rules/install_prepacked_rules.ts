@@ -7,12 +7,12 @@
 import { ActionsClient } from '../../../../../actions';
 import { AlertsClient } from '../../../../../alerting';
 import { createRules } from './create_rules';
-import { PrePackagedRules } from '../types';
+import { PrepackagedRules } from '../types';
 
 export const installPrepackagedRules = async (
   alertsClient: AlertsClient,
   actionsClient: ActionsClient,
-  rules: PrePackagedRules[],
+  rules: PrepackagedRules[],
   outputIndex: string
 ): Promise<void> => {
   await rules.forEach(async rule => {

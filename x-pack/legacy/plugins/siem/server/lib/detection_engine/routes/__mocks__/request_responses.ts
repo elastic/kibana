@@ -18,9 +18,9 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
-import { RuleAlertParamsRest, PrePackagedRules } from '../../types';
+import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
 
-export const mockPrepackagedRule = (): PrePackagedRules => ({
+export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
