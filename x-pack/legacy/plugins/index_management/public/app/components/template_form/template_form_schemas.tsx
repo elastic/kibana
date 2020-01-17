@@ -69,14 +69,6 @@ export const schemas: Record<string, FormSchema> = {
           }),
         },
         {
-          validator: startsWithField({
-            char: '.',
-            message: i18n.translate('xpack.idxMgmt.templateValidation.templateNamePeriodError', {
-              defaultMessage: 'A template name must not start with a period.',
-            }),
-          }),
-        },
-        {
           validator: containsCharsField({
             chars: INVALID_TEMPLATE_NAME_CHARS,
             message: ({ charsFound }) =>
