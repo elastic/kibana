@@ -301,15 +301,21 @@ export class HotPhase extends PureComponent {
                         },
                         {
                           value: 'microseconds',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.microsecondsLabel', {
-                            defaultMessage: 'microseconds',
-                          }),
+                          text: i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.microsecondsLabel',
+                            {
+                              defaultMessage: 'microseconds',
+                            }
+                          ),
                         },
                         {
                           value: 'nanoseconds',
-                          text: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.nanosecondsLabel', {
-                            defaultMessage: 'nanoseconds',
-                          }),
+                          text: i18n.translate(
+                            'xpack.indexLifecycleMgmt.hotPhase.nanosecondsLabel',
+                            {
+                              defaultMessage: 'nanoseconds',
+                            }
+                          ),
                         },
                       ]}
                     />
