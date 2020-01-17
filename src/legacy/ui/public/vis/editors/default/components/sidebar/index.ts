@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export const DefaultEditorSize = {
-  SMALL: 'small',
-  MEDIUM: 'medium',
-  LARGE: 'large',
-};
+export { DefaultEditorSideBar } from './sidebar';
+export { DefaultEditorDataTab } from './data_tab';
+export { OptionTab } from './navbar';
