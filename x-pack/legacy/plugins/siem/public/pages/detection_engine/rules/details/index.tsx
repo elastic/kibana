@@ -112,7 +112,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
     } = useUserInfo();
     const { ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
-    const [ruleDetailTab, setRuleDetailTab] = useState('signal');
+    const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
       rule,
       detailsView: true,
