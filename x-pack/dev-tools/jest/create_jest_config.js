@@ -17,6 +17,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
     moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
     moduleNameMapper: {
       '^ui/(.*)': `${kibanaDirectory}/src/legacy/ui/public/$1`,
+      '^fixtures/(.*)': `${kibanaDirectory}/src/fixtures/$1`,
       'uiExports/(.*)': fileMockPath,
       '^src/core/(.*)': `${kibanaDirectory}/src/core/$1`,
       '^src/legacy/(.*)': `${kibanaDirectory}/src/legacy/$1`,
