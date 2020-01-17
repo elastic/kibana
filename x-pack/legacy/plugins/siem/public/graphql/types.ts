@@ -493,6 +493,8 @@ export interface Source {
 
   NetworkDns: NetworkDnsData;
 
+  NetworkDnsHistogram: NetworkDsOverTimeData;
+
   NetworkHttp: NetworkHttpData;
 
   OverviewNetwork?: Maybe<OverviewNetworkData>;
@@ -1722,6 +1724,14 @@ export interface MatrixOverOrdinalHistogramData {
   g: string;
 }
 
+export interface NetworkDsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
 export interface NetworkHttpData {
   edges: NetworkHttpEdges[];
 
@@ -2374,6 +2384,15 @@ export interface NetworkDnsSourceArgs {
   timerange: TimerangeInput;
 
   defaultIndex: string[];
+}
+export interface NetworkDnsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+
+  stackByField?: Maybe<string>;
 }
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;

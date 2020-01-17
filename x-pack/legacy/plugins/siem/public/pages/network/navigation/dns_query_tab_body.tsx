@@ -61,13 +61,13 @@ export const DnsQueryTabBody = ({
         histogramType="dns"
         id={HISTOGRAM_ID}
         setQuery={setQuery}
+        showLegend={true}
         sourceId="default"
         startDate={startDate}
         stackByOptions={dnsStackByOptions}
         title={getTitle}
         type={networkModel.NetworkType.page}
         updateDateRange={updateDateRange}
-        showLegend={false}
       />
       <EuiSpacer />
       <NetworkDnsQuery
