@@ -299,7 +299,6 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
     },
-    schema: t.string,
   },
   null_value_ip: {
     fieldConfig: {
