@@ -70,7 +70,7 @@ describe('getTransactionBreakdown', () => {
 
     expect(response.kpis[0]).toEqual({
       name: 'app',
-      color: '#5bbaa0',
+      color: '#54b399',
       percentage: 0.5408550899466306
     });
 

@@ -128,9 +128,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                           to={to}
                           updateDateRange={updateDateRangeCallback}
                         />
-
                         <EuiSpacer />
-
                         <SignalsTable
                           loading={loading}
                           hasIndexWrite={hasIndexWrite ?? false}

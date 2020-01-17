@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { difference, first, values } from 'lodash';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 export enum MetricsExplorerColor {
   color0 = 'color0',
@@ -31,17 +32,19 @@ export interface MetricsExplorerPalette {
   [MetricsExplorerColor.color9]: string;
 }
 
+const euiPalette = euiPaletteColorBlind();
+
 export const defaultPalette: MetricsExplorerPalette = {
-  [MetricsExplorerColor.color0]: '#3185FC', // euiColorVis1 (blue)
-  [MetricsExplorerColor.color1]: '#DB1374', // euiColorVis2 (red-ish)
-  [MetricsExplorerColor.color2]: '#00B3A4', // euiColorVis0 (green-ish)
-  [MetricsExplorerColor.color3]: '#490092', // euiColorVis3 (purple)
-  [MetricsExplorerColor.color4]: '#FEB6DB', // euiColorVis4 (pink)
-  [MetricsExplorerColor.color5]: '#E6C220', // euiColorVis5 (yellow)
-  [MetricsExplorerColor.color6]: '#BFA180', // euiColorVis6 (tan)
-  [MetricsExplorerColor.color7]: '#F98510', // euiColorVis7 (orange)
-  [MetricsExplorerColor.color8]: '#461A0A', // euiColorVis8 (brown)
-  [MetricsExplorerColor.color9]: '#920000', // euiColorVis9 (maroon)
+  [MetricsExplorerColor.color0]: euiPalette[1], // (blue)
+  [MetricsExplorerColor.color1]: euiPalette[2], // (pink)
+  [MetricsExplorerColor.color2]: euiPalette[0], // (green-ish)
+  [MetricsExplorerColor.color3]: euiPalette[3], // (purple)
+  [MetricsExplorerColor.color4]: euiPalette[4], // (light pink)
+  [MetricsExplorerColor.color5]: euiPalette[5], // (yellow)
+  [MetricsExplorerColor.color6]: euiPalette[6], // (tan)
+  [MetricsExplorerColor.color7]: euiPalette[7], // (orange)
+  [MetricsExplorerColor.color8]: euiPalette[8], // (brown)
+  [MetricsExplorerColor.color9]: euiPalette[9], // (red)
 };
 
 export const createPaletteTransformer = (palette: MetricsExplorerPalette) => (

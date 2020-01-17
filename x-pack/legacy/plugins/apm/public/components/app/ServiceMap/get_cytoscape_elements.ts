@@ -101,7 +101,17 @@ export function getCytoscapeElements(
             `/services/${node['service.name']}/service-map`,
             search
           ),
-          agentName: node['agent.name'] || node['agent.name']
+          agentName: node['agent.name'] || node['agent.name'],
+          type: 'service'
+        };
+      }
+
+      if ('span.type' in node) {
+        data = {
+          // For nodes with span.type "db", convert it to "database". Otherwise leave it as-is.
+          type: node['span.type'] === 'db' ? 'database' : node['span.type'],
+          // Externals should not have a subtype so make it undefined if the type is external.
+          subtype: node['span.type'] !== 'external' && node['span.subtype']
         };
       }
 
