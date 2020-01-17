@@ -16,7 +16,7 @@ import {
   TaskStatus,
   TaskLifecycleResult,
 } from './task';
-import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
+import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
 import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
 import {
   SavedObjectsSerializer,
@@ -175,7 +175,7 @@ describe('TaskStore', () => {
   });
 
   describe('fetch', () => {
-    async function testFetch(opts?: FetchOpts, hits: any[] = []) {
+    async function testFetch(opts?: SearchOpts, hits: any[] = []) {
       const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
       const store = new TaskStore({
         index: 'tasky',
@@ -203,7 +203,7 @@ describe('TaskStore', () => {
       expect(args).toMatchObject({
         index: 'tasky',
         body: {
-          sort: [{ 'task.runAt': 'asc' }, { _id: 'desc' }],
+          sort: [{ 'task.runAt': 'asc' }],
           query: { term: { type: 'task' } },
         },
       });
@@ -224,122 +224,6 @@ describe('TaskStore', () => {
             },
           },
         },
-      });
-    });
-
-    test('sorts by id if custom sort does not have an id sort in it', async () => {
-      const { args } = await testFetch({
-        sort: [{ 'task.taskType': 'desc' }],
-      });
-
-      expect(args).toMatchObject({
-        body: {
-          sort: [{ 'task.taskType': 'desc' }, { _id: 'desc' }],
-        },
-      });
-    });
-
-    test('allows custom sort by id', async () => {
-      const { args } = await testFetch({
-        sort: [{ _id: 'asc' }],
-      });
-
-      expect(args).toMatchObject({
-        body: {
-          sort: [{ _id: 'asc' }],
-        },
-      });
-    });
-
-    test('allows specifying pagination', async () => {
-      const now = new Date();
-      const searchAfter = [now, '143243sdafa32'];
-      const { args } = await testFetch({
-        searchAfter,
-      });
-
-      expect(args).toMatchObject({
-        body: {
-          search_after: searchAfter,
-        },
-      });
-    });
-
-    test('returns paginated tasks', async () => {
-      const runAt = new Date();
-      const { result } = await testFetch(undefined, [
-        {
-          _id: 'aaa',
-          _source: {
-            type: 'task',
-            task: {
-              runAt,
-              taskType: 'foo',
-              schedule: undefined,
-              attempts: 0,
-              status: 'idle',
-              params: '{ "hello": "world" }',
-              state: '{ "baby": "Henhen" }',
-              user: 'jimbo',
-              scope: ['reporting'],
-            },
-          },
-          sort: ['a', 1],
-        },
-        {
-          _id: 'bbb',
-          _source: {
-            type: 'task',
-            task: {
-              runAt,
-              taskType: 'bar',
-              schedule: { interval: '5m' },
-              attempts: 2,
-              status: 'running',
-              params: '{ "shazm": 1 }',
-              state: '{ "henry": "The 8th" }',
-              user: 'dabo',
-              scope: ['reporting', 'ceo'],
-            },
-          },
-          sort: ['b', 2],
-        },
-      ]);
-
-      expect(result).toEqual({
-        docs: [
-          {
-            attempts: 0,
-            id: 'aaa',
-            schedule: undefined,
-            params: { hello: 'world' },
-            runAt,
-            scheduledAt: mockedDate,
-            scope: ['reporting'],
-            state: { baby: 'Henhen' },
-            status: 'idle',
-            taskType: 'foo',
-            user: 'jimbo',
-            retryAt: undefined,
-            startedAt: undefined,
-          },
-          {
-            attempts: 2,
-            id: 'bbb',
-            schedule: { interval: '5m' },
-            params: { shazm: 1 },
-            runAt,
-            scheduledAt: mockedDate,
-            scope: ['reporting', 'ceo'],
-            state: { henry: 'The 8th' },
-            status: 'running',
-            taskType: 'bar',
-            user: 'dabo',
-            retryAt: undefined,
-            startedAt: undefined,
-          },
-        ],
-        searchAfter: ['b', 2],
       });
     });
   });
@@ -450,121 +334,6 @@ describe('TaskStore', () => {
                 must: [
                   {
                     bool: {
-                      should: [
-                        {
-                          bool: {
-                            must: [
-                              { term: { 'task.status': 'idle' } },
-                              { range: { 'task.runAt': { lte: 'now' } } },
-                            ],
-                          },
-                        },
-                        {
-                          bool: {
-                            must: [
-                              {
-                                bool: {
-                                  should: [
-                                    { term: { 'task.status': 'running' } },
-                                    { term: { 'task.status': 'claiming' } },
-                                  ],
-                                },
-                              },
-                              { range: { 'task.retryAt': { lte: 'now' } } },
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      should: [
-                        { exists: { field: 'task.schedule' } },
-                        {
-                          bool: {
-                            must: [
-                              { term: { 'task.taskType': 'foo' } },
-                              {
-                                range: {
-                                  'task.attempts': {
-                                    lt: maxAttempts,
-                                  },
-                                },
-                              },
-                            ],
-                          },
-                        },
-                        {
-                          bool: {
-                            must: [
-                              { term: { 'task.taskType': 'bar' } },
-                              {
-                                range: {
-                                  'task.attempts': {
-                                    lt: customMaxAttempts,
-                                  },
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-    });
-
-    test('it supports claiming specific tasks by id', async () => {
-      const maxAttempts = _.random(2, 43);
-      const customMaxAttempts = _.random(44, 100);
-      const {
-        args: {
-          updateByQuery: {
-            body: { query, sort },
-          },
-        },
-      } = await testClaimAvailableTasks({
-        opts: {
-          maxAttempts,
-          definitions: {
-            foo: {
-              type: 'foo',
-              title: '',
-              createTaskRunner: jest.fn(),
-            },
-            bar: {
-              type: 'bar',
-              title: '',
-              maxAttempts: customMaxAttempts,
-              createTaskRunner: jest.fn(),
-            },
-          },
-        },
-        claimingOpts: {
-          claimOwnershipUntil: new Date(),
-          size: 10,
-          claimTasksById: [
-            '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-            'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
-          ],
-        },
-      });
-
-      expect(query).toMatchObject({
-        bool: {
-          must: [
-            { term: { type: 'task' } },
-            {
-              bool: {
-                should: [
-                  {
-                    bool: {
                       must: [
                         {
                           bool: {
@@ -633,25 +402,166 @@ describe('TaskStore', () => {
                       ],
                     },
                   },
+                ],
+                filter: [
                   {
                     bool: {
-                      must: [
+                      must_not: [
                         {
                           bool: {
                             should: [
-                              { term: { 'task.status': 'idle' } },
-                              { term: { 'task.status': 'failed' } },
+                              { term: { 'task.status': 'running' } },
+                              { term: { 'task.status': 'claiming' } },
                             ],
                           },
                         },
+                        { range: { 'task.retryAt': { gt: 'now' } } },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    test('it supports claiming specific tasks by id', async () => {
+      const maxAttempts = _.random(2, 43);
+      const customMaxAttempts = _.random(44, 100);
+      const {
+        args: {
+          updateByQuery: {
+            body: { query, sort },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          maxAttempts,
+          definitions: {
+            foo: {
+              type: 'foo',
+              title: '',
+              createTaskRunner: jest.fn(),
+            },
+            bar: {
+              type: 'bar',
+              title: '',
+              maxAttempts: customMaxAttempts,
+              createTaskRunner: jest.fn(),
+            },
+          },
+        },
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+          size: 10,
+          claimTasksById: [
+            '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+            'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+          ],
+        },
+      });
+
+      expect(query).toMatchObject({
+        bool: {
+          must: [
+            { term: { type: 'task' } },
+            {
+              bool: {
+                must: [
+                  {
+                    pinned: {
+                      ids: [
+                        'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+                        'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+                      ],
+                      organic: {
+                        bool: {
+                          must: [
+                            {
+                              bool: {
+                                should: [
+                                  {
+                                    bool: {
+                                      must: [
+                                        { term: { 'task.status': 'idle' } },
+                                        { range: { 'task.runAt': { lte: 'now' } } },
+                                      ],
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      must: [
+                                        {
+                                          bool: {
+                                            should: [
+                                              { term: { 'task.status': 'running' } },
+                                              { term: { 'task.status': 'claiming' } },
+                                            ],
+                                          },
+                                        },
+                                        { range: { 'task.retryAt': { lte: 'now' } } },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            {
+                              bool: {
+                                should: [
+                                  { exists: { field: 'task.schedule' } },
+                                  {
+                                    bool: {
+                                      must: [
+                                        { term: { 'task.taskType': 'foo' } },
+                                        {
+                                          range: {
+                                            'task.attempts': {
+                                              lt: maxAttempts,
+                                            },
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      must: [
+                                        { term: { 'task.taskType': 'bar' } },
+                                        {
+                                          range: {
+                                            'task.attempts': {
+                                              lt: customMaxAttempts,
+                                            },
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                ],
+                filter: [
+                  {
+                    bool: {
+                      must_not: [
                         {
-                          ids: {
-                            values: [
-                              'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-                              'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+                          bool: {
+                            should: [
+                              { term: { 'task.status': 'running' } },
+                              { term: { 'task.status': 'claiming' } },
                             ],
                           },
                         },
+                        { range: { 'task.retryAt': { gt: 'now' } } },
                       ],
                     },
                   },
@@ -662,34 +572,26 @@ describe('TaskStore', () => {
         },
       });
 
-      expect(sort).toMatchObject({
-        _script: {
-          type: 'number',
-          order: 'asc',
-          script: {
-            lang: 'painless',
-            source: `
-if(params.ids.contains(doc['_id'].value)){
-  return 0;
-}
-
+      expect(sort).toMatchObject([
+        '_score',
+        {
+          _script: {
+            type: 'number',
+            order: 'asc',
+            script: {
+              lang: 'painless',
+              source: `
 if (doc['task.retryAt'].size()!=0) {
   return doc['task.retryAt'].value.toInstant().toEpochMilli();
 }
 if (doc['task.runAt'].size()!=0) {
   return doc['task.runAt'].value.toInstant().toEpochMilli();
 }
-    
-`,
-            params: {
-              ids: [
-                'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-                'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
-              ],
+    `,
             },
           },
         },
-      });
+      ]);
     });
 
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
