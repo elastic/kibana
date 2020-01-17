@@ -23,11 +23,11 @@ src/plugins
 ### Explicit dependencies
 Each plugin should declare dependencies on the other plugins explicitly. Plugins cannot have circular dependencies. Plugins shouldn't have hidden dependencies.
 ```json
-"requiredPlugins": ["b"],
-"optionalPlugins": ["c"],
+"requiredPlugins": ["search"],
+"optionalPlugins": ["apm"],
 ```
 ### Explicit API declaration
-Each plugins defines API & extension points explicitly. Any other API that not declared explicitly as public should be considered private. HTTP endpoints belonging to other plugins are considered private. Plugins should expose JavaScript interfaces on top of these HTTP endpoints for other plugins to consume.
+Each plugin has to define an explicit API. Any other API's that has not been declared explicitly as public should be considered private. HTTP endpoints belonging to other plugins are considered private. Plugins should expose a JavaScript client on top of these HTTP endpoints for other plugins to consume.
 ```js
 // GOOD
 deps.plugin.getData();
