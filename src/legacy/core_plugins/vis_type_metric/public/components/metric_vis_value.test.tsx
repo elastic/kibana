@@ -21,34 +21,32 @@ import { shallow } from 'enzyme';
 
 import { MetricVisValue } from './metric_vis_value';
 
+const baseMetric = { label: 'Foo', value: 'foo' } as any;
+
 describe('MetricVisValue', () => {
   it('should be wrapped in EuiKeyboardAccessible if having a click listener', () => {
     const component = shallow(
-      <MetricVisValue fontSize={12} metric={{ label: 'Foo', value: 'foo' }} onFilter={() => {}} />
+      <MetricVisValue fontSize={12} metric={baseMetric} onFilter={() => {}} />
     );
     expect(component.find('EuiKeyboardAccessible').exists()).toBe(true);
   });
 
   it('should not be wrapped in EuiKeyboardAccessible without having a click listener', () => {
-    const component = shallow(
-      <MetricVisValue fontSize={12} metric={{ label: 'Foo', value: 'foo' }} />
-    );
+    const component = shallow(<MetricVisValue fontSize={12} metric={baseMetric} />);
     expect(component.find('EuiKeyboardAccessible').exists()).toBe(false);
   });
 
   it('should add -isfilterable class if onFilter is provided', () => {
     const onFilter = jest.fn();
     const component = shallow(
-      <MetricVisValue fontSize={12} metric={{ label: 'Foo', value: 'foo' }} onFilter={onFilter} />
+      <MetricVisValue fontSize={12} metric={baseMetric} onFilter={onFilter} />
     );
     component.simulate('click');
     expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(1);
   });
 
   it('should not add -isfilterable class if onFilter is not provided', () => {
-    const component = shallow(
-      <MetricVisValue fontSize={12} metric={{ label: 'Foo', value: 'foo' }} onFilter={null} />
-    );
+    const component = shallow(<MetricVisValue fontSize={12} metric={baseMetric} />);
     component.simulate('click');
     expect(component.find('.mtrVis__container-isfilterable')).toHaveLength(0);
   });
@@ -56,9 +54,9 @@ describe('MetricVisValue', () => {
   it('should call onFilter callback if provided', () => {
     const onFilter = jest.fn();
     const component = shallow(
-      <MetricVisValue fontSize={12} metric={{ label: 'Foo', value: 'foo' }} onFilter={onFilter} />
+      <MetricVisValue fontSize={12} metric={baseMetric} onFilter={onFilter} />
     );
     component.find('.mtrVis__container-isfilterable').simulate('click');
-    expect(onFilter).toHaveBeenCalledWith({ label: 'Foo', value: 'foo' });
+    expect(onFilter).toHaveBeenCalledWith(baseMetric);
   });
 });
