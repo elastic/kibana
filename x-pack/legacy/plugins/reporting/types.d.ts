@@ -355,5 +355,3 @@ export interface InterceptedRequest {
   frameId: string;
   resourceType: string;
 }
-
-export { ServerFacade };
