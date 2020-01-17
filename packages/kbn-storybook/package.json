@@ -13,6 +13,7 @@
     "@storybook/addon-knobs": "^5.3.6",
     "@storybook/addon-options": "^5.3.6",
     "@storybook/addon-storyshots": "^5.3.6",
+    "@storybook/core": "^5.3.6",
     "@storybook/react": "^5.3.6",
     "@storybook/theming": "^5.3.6",
     "copy-webpack-plugin": "5.0.3",
