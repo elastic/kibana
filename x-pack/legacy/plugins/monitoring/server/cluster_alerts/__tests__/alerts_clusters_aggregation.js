@@ -73,34 +73,37 @@ describe('Alerts Clusters Aggregation', () => {
 
     it('aggregates alert count summary by cluster', () => {
       const { mockReq } = createStubs(mockQueryResult, featureStub);
-      return alertsClustersAggregation(mockReq, '.monitoring-alerts', clusters, checkLicense).then(
-        result => {
-          expect(result).to.eql({
-            alertsMeta: { enabled: true },
-            'cluster-abc0': undefined,
-            'cluster-abc1': {
-              count: 1,
-              high: 0,
-              low: 1,
-              medium: 0,
-            },
-            'cluster-abc2': {
-              count: 2,
-              high: 0,
-              low: 0,
-              medium: 2,
-            },
-            'cluster-abc3': {
-              count: 3,
-              high: 3,
-              low: 0,
-              medium: 0,
-            },
-            'cluster-no-license': undefined,
-            'cluster-invalid': undefined,
-          });
-        }
-      );
+      return alertsClustersAggregation(
+        mockReq,
+        '.monitoring-alerts,monitoring-alerts',
+        clusters,
+        checkLicense
+      ).then(result => {
+        expect(result).to.eql({
+          alertsMeta: { enabled: true },
+          'cluster-abc0': undefined,
+          'cluster-abc1': {
+            count: 1,
+            high: 0,
+            low: 1,
+            medium: 0,
+          },
+          'cluster-abc2': {
+            count: 2,
+            high: 0,
+            low: 0,
+            medium: 2,
+          },
+          'cluster-abc3': {
+            count: 3,
+            high: 3,
+            low: 0,
+            medium: 0,
+          },
+          'cluster-no-license': undefined,
+          'cluster-invalid': undefined,
+        });
+      });
     });
 
     it('aggregates alert count summary by cluster include static alert', () => {
@@ -113,7 +116,7 @@ describe('Alerts Clusters Aggregation', () => {
 
       return alertsClustersAggregation(
         mockReq,
-        '.monitoring-alerts',
+        '.monitoring-alerts,monitoring-alerts',
         newClusters,
         checkLicense
       ).then(result => {
@@ -163,13 +166,16 @@ describe('Alerts Clusters Aggregation', () => {
       const checkLicense = () => ({ clusterAlerts: { enabled: true } });
       const { mockReq } = createStubs(mockQueryResult, featureStub);
 
-      return alertsClustersAggregation(mockReq, '.monitoring-alerts', clusters, checkLicense).then(
-        result => {
-          expect(result).to.eql({
-            alertsMeta: { enabled: false, message: 'monitoring cluster license is fail' },
-          });
-        }
-      );
+      return alertsClustersAggregation(
+        mockReq,
+        '.monitoring-alerts,monitoring-alerts',
+        clusters,
+        checkLicense
+      ).then(result => {
+        expect(result).to.eql({
+          alertsMeta: { enabled: false, message: 'monitoring cluster license is fail' },
+        });
+      });
     });
 
     it('returns the input set if disabled because production cluster checks', () => {
@@ -181,53 +187,56 @@ describe('Alerts Clusters Aggregation', () => {
       const checkLicense = () => ({ clusterAlerts: { enabled: false } });
       const { mockReq } = createStubs(mockQueryResult, featureStub);
 
-      return alertsClustersAggregation(mockReq, '.monitoring-alerts', clusters, checkLicense).then(
-        result => {
-          expect(result).to.eql({
-            alertsMeta: { enabled: true },
-            'cluster-abc0': {
-              clusterMeta: {
-                enabled: false,
-                message:
-                  'Cluster [cluster-abc0-name] license type [test_license] does not support Cluster Alerts',
-              },
+      return alertsClustersAggregation(
+        mockReq,
+        '.monitoring-alerts,monitoring-alerts',
+        clusters,
+        checkLicense
+      ).then(result => {
+        expect(result).to.eql({
+          alertsMeta: { enabled: true },
+          'cluster-abc0': {
+            clusterMeta: {
+              enabled: false,
+              message:
+                'Cluster [cluster-abc0-name] license type [test_license] does not support Cluster Alerts',
             },
-            'cluster-abc1': {
-              clusterMeta: {
-                enabled: false,
-                message:
-                  'Cluster [cluster-abc1-name] license type [test_license] does not support Cluster Alerts',
-              },
+          },
+          'cluster-abc1': {
+            clusterMeta: {
+              enabled: false,
+              message:
+                'Cluster [cluster-abc1-name] license type [test_license] does not support Cluster Alerts',
             },
-            'cluster-abc2': {
-              clusterMeta: {
-                enabled: false,
-                message:
-                  'Cluster [cluster-abc2-name] license type [test_license] does not support Cluster Alerts',
-              },
+          },
+          'cluster-abc2': {
+            clusterMeta: {
+              enabled: false,
+              message:
+                'Cluster [cluster-abc2-name] license type [test_license] does not support Cluster Alerts',
             },
-            'cluster-abc3': {
-              clusterMeta: {
-                enabled: false,
-                message:
-                  'Cluster [cluster-abc3-name] license type [test_license] does not support Cluster Alerts',
-              },
+          },
+          'cluster-abc3': {
+            clusterMeta: {
+              enabled: false,
+              message:
+                'Cluster [cluster-abc3-name] license type [test_license] does not support Cluster Alerts',
             },
-            'cluster-no-license': {
-              clusterMeta: {
-                enabled: false,
-                message: `Cluster [cluster-no-license-name] license type [undefined] does not support Cluster Alerts`,
-              },
+          },
+          'cluster-no-license': {
+            clusterMeta: {
+              enabled: false,
+              message: `Cluster [cluster-no-license-name] license type [undefined] does not support Cluster Alerts`,
             },
-            'cluster-invalid': {
-              clusterMeta: {
-                enabled: false,
-                message: `Cluster [cluster-invalid-name] license type [undefined] does not support Cluster Alerts`,
-              },
+          },
+          'cluster-invalid': {
+            clusterMeta: {
+              enabled: false,
+              message: `Cluster [cluster-invalid-name] license type [undefined] does not support Cluster Alerts`,
             },
-          });
-        }
-      );
+          },
+        });
+      });
     });
   });
 });

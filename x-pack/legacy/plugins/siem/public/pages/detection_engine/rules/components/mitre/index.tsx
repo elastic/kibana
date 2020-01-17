@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFormRow,
   EuiSuperSelect,
@@ -24,6 +23,7 @@ import * as Rulei18n from '../../translations';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
 import { threatsDefault } from '../step_about_rule/default_value';
 import { IMitreEnterpriseAttack } from '../../types';
+import { MyAddItemButton } from '../add_item_form';
 import { isMitreAttackInvalid } from './helpers';
 import * as i18n from './translations';
 
@@ -134,13 +134,19 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
 
   const getSelectTechniques = (item: IMitreEnterpriseAttack, index: number, disabled: boolean) => {
     const invalid = isMitreAttackInvalid(item.tactic.name, item.techniques);
+    const options = techniquesOptions.filter(t => t.tactics.includes(kebabCase(item.tactic.name)));
+    const selectedOptions = item.techniques.map(technic => ({
+      ...technic,
+      label: `${technic.name} (${technic.id})`, // API doesn't allow for label field
+    }));
+
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow>
           <EuiComboBox
             placeholder={item.tactic.name === 'none' ? '' : i18n.TECHNIQUES_PLACEHOLDER}
-            options={techniquesOptions.filter(t => t.tactics.includes(kebabCase(item.tactic.name)))}
-            selectedOptions={item.techniques}
+            options={options}
+            selectedOptions={selectedOptions}
             onChange={updateTechniques.bind(null, index)}
             isDisabled={disabled || item.tactic.name === 'none'}
             fullWidth={true}
@@ -202,9 +208,9 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
           {values.length - 1 !== index && <EuiSpacer size="s" />}
         </div>
       ))}
-      <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled} iconType="plusInCircle">
+      <MyAddItemButton onClick={addItem} isDisabled={isDisabled}>
         {i18n.ADD_MITRE_ATTACK}
-      </EuiButtonEmpty>
+      </MyAddItemButton>
     </MitreContainer>
   );
 };

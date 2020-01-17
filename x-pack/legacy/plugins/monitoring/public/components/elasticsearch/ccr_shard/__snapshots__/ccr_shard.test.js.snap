@@ -45,6 +45,7 @@ exports[`CcrShard that is renders an exception properly 1`] = `
     }
     noItemsMessage="No items found"
     responsive={true}
+    tableLayout="fixed"
   />
 </EuiPanel>
 `;

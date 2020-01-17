@@ -36,7 +36,7 @@ export const authenticationsSchema = gql`
 
   type AuthenticationsOverTimeData {
     inspect: Inspect
-    authenticationsOverTime: [MatrixOverTimeHistogramData!]!
+    matrixHistogramData: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 
@@ -48,10 +48,11 @@ export const authenticationsSchema = gql`
       filterQuery: String
       defaultIndex: [String!]!
     ): AuthenticationsData!
-    AuthenticationsOverTime(
+    AuthenticationsHistogram(
       timerange: TimerangeInput!
       filterQuery: String
       defaultIndex: [String!]!
+      stackByField: String
     ): AuthenticationsOverTimeData!
   }
 `;

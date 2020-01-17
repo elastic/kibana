@@ -13,6 +13,7 @@ import {
 
 import { updateRulesRoute } from './update_rules_route';
 import { ServerInjectOptions } from 'hapi';
+
 import {
   getFindResult,
   getResult,
