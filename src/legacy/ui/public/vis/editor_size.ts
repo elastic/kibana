@@ -17,6 +17,20 @@
  * under the License.
  */
 
-export interface AggParams {
-  [key: string]: unknown;
+export enum DefaultEditorSize {
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
 }
+
+export const getInitialWidth = (size: DefaultEditorSize) => {
+  switch (size) {
+    case DefaultEditorSize.SMALL:
+      return 15;
+    case DefaultEditorSize.LARGE:
+      return 50;
+    case DefaultEditorSize.MEDIUM:
+    default:
+      return 30;
+  }
+};
