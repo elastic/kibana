@@ -67,11 +67,9 @@ export class Fetch {
 
   public fetch: HttpHandler = async <TResponseBody>(
     pathOrOptions: string | HttpFetchOptionsWithPath,
-    options: HttpFetchOptions = {}
+    options?: HttpFetchOptions
   ) => {
-    const optionsWithPath: HttpFetchOptionsWithPath =
-      typeof pathOrOptions === 'string' ? { ...options, path: pathOrOptions } : pathOrOptions;
-
+    const optionsWithPath = validateFetchArguments(pathOrOptions, options);
     const controller = new HttpInterceptController();
 
     // We wrap the interception in a separate promise to ensure that when
@@ -91,7 +89,7 @@ export class Fetch {
           controller
         );
 
-        if (options.asResponse) {
+        if (optionsWithPath.asResponse) {
           resolve(interceptedResponse);
         } else {
           resolve(interceptedResponse.body);
@@ -192,10 +190,27 @@ export class Fetch {
   }
 
   private shorthand(method: string): HttpHandler {
-    return (pathOrOptions: string | HttpFetchOptionsWithPath, options: HttpFetchOptions = {}) => {
-      const optionsWithPath: HttpFetchOptionsWithPath =
-        typeof pathOrOptions === 'string' ? { ...options, path: pathOrOptions } : pathOrOptions;
+    return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
+      const optionsWithPath = validateFetchArguments(pathOrOptions, options);
       return this.fetch({ ...optionsWithPath, method });
     };
   }
 }
+
+/**
+ * Ensure that the overloaded arguments to `HttpHandler` are valid.
+ */
+const validateFetchArguments = (
+  pathOrOptions: string | HttpFetchOptionsWithPath,
+  options?: HttpFetchOptions
+): HttpFetchOptionsWithPath => {
+  if (typeof pathOrOptions === 'string' && (typeof options === 'object' || options === undefined)) {
+    return { ...options, path: pathOrOptions };
+  } else if (typeof pathOrOptions === 'object' && options === undefined) {
+    return pathOrOptions;
+  } else {
+    throw new Error(
+      `Invalid fetch arguments, must either be (string, object) or (object, undefined), received (${typeof pathOrOptions}, ${typeof options})`
+    );
+  }
+};

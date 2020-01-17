@@ -40,6 +40,19 @@ describe('Fetch', () => {
   });
 
   describe('http requests', () => {
+    it('should fail with invalid arguments', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch(
+          // @ts-ignore
+          { path: '/', headers: { hello: 'world' } },
+          { headers: { hello: 'mars' } }
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch arguments, must either be (string, object) or (object, undefined), received (object, object)"`
+      );
+    });
+
     it('should use supplied request method', async () => {
       fetchMock.post('*', {});
       await fetchInstance.fetch('/my/path', { method: 'POST' });
