@@ -72,7 +72,6 @@ const detectionsTabs = [
 const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
   ({ filters, query, setAbsoluteRangeDatePicker }) => {
     const { tabName = DetectionEngineTab.signals } = useParams();
-    const [selectedTab, setSelectedTab] = useState(tabName);
     const {
       loading,
       isSignalIndexExists,
@@ -108,18 +107,12 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
       );
     }
 
-    useEffect(() => {
-      if (selectedTab !== tabName) {
-        setSelectedTab(tabName);
-      }
-    }, [selectedTab, setSelectedTab, tabName]);
-
     const tabs = useMemo(
       () => (
         <EuiTabs>
           {detectionsTabs.map(tab => (
             <EuiTab
-              isSelected={tab.id === selectedTab}
+              isSelected={tab.id === tabName}
               disabled={tab.disabled}
               key={tab.id}
               href={`#/${DETECTION_ENGINE_PAGE_NAME}/${tab.id}`}
@@ -129,7 +122,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
           ))}
         </EuiTabs>
       ),
-      [detectionsTabs, selectedTab]
+      [detectionsTabs, tabName]
     );
 
     return (
@@ -165,7 +158,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                       <>
                         {tabs}
                         <EuiSpacer />
-                        {selectedTab === DetectionEngineTab.signals && (
+                        {tabName === DetectionEngineTab.signals && (
                           <>
                             <SignalsHistogramPanel
                               filters={filters}
@@ -187,7 +180,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                             />
                           </>
                         )}
-                        {selectedTab === DetectionEngineTab.alerts && (
+                        {tabName === DetectionEngineTab.alerts && (
                           <>
                             <AlertsByCategory
                               deleteQuery={deleteQuery}
@@ -237,8 +230,13 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const DetectionEngine = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(DetectionEngineComponent);
+};
+
+export const DetectionEngine = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(DetectionEngineComponent);
 
 DetectionEngine.displayName = 'DetectionEngine';

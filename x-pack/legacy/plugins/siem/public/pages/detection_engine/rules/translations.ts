@@ -25,6 +25,10 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageT
   defaultMessage: 'Rules',
 });
 
+export const EDIT_PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.editPageTitle', {
+  defaultMessage: 'Edit',
+});
+
 export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules.refreshTitle', {
   defaultMessage: 'Refresh',
 });

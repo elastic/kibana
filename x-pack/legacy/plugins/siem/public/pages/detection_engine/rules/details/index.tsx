@@ -110,7 +110,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       hasIndexWrite,
       signalIndexName,
     } = useUserInfo();
-    const { ruleId } = useParams();
+    const { detailName: ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
     const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
@@ -407,7 +407,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
           }}
         </WithSource>
 
-        <SpyRoute />
+        <SpyRoute state={{ ruleName: rule?.name }} />
       </>
     );
   }
@@ -428,8 +428,10 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const RuleDetails = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(RuleDetailsComponent);
+};
+
+export const RuleDetails = connect(makeMapStateToProps, mapDispatchToProps)(RuleDetailsComponent);
 
 RuleDetails.displayName = 'RuleDetails';

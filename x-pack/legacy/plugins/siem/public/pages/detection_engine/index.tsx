@@ -35,10 +35,10 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
       <Route exact path={`${detectionEnginePath}/rules/create`}>
         <CreateRuleComponent />
       </Route>
-      <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/`}>
+      <Route exact path={`${detectionEnginePath}/rules/id/:detailName`}>
         <RuleDetails />
       </Route>
-      <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
+      <Route exact path={`${detectionEnginePath}/rules/id/:detailName/edit`}>
         <EditRuleComponent />
       </Route>
       <Route

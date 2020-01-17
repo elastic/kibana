@@ -21,6 +21,7 @@ export interface RouteSpyState {
   pathName: string;
   history?: H.History;
   flowTarget?: FlowTarget;
+  state?: Record<string, string | undefined>;
 }
 
 export interface HostRouteSpyState extends RouteSpyState {
@@ -38,7 +39,10 @@ export type RouteSpyAction =
     }
   | {
       type: 'updateRouteWithOutSearch';
-      route: Pick<RouteSpyState, 'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history'>;
+      route: Pick<
+        RouteSpyState,
+        'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history' & 'state'
+      >;
     }
   | {
       type: 'updateRoute';
@@ -55,4 +59,6 @@ export type SpyRouteProps = RouteComponentProps<{
   tabName: HostsTableType | undefined;
   search: string;
   flowTarget: FlowTarget | undefined;
-}>;
+}> & {
+  state?: Record<string, string | undefined>;
+};
