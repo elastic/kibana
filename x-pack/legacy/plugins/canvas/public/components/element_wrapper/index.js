@@ -58,7 +58,9 @@ function selectorFactory(dispatch) {
 export const ElementWrapper = compose(
   connectAdvanced(selectorFactory),
   withPropsOnChange(
-    (props, nextProps) => !isEqual(props.element, nextProps.element),
+    (props, nextProps) =>
+      !isEqual(props.element, nextProps.element) ||
+      !isEqual(props.selectedPage, nextProps.selectedPage),
     props => {
       const { element, createHandlers } = props;
       const handlers = createHandlers(element, props.selectedPage);
