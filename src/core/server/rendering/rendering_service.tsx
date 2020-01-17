@@ -27,10 +27,10 @@ import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
+  IRenderOptions,
   RenderingSetupDeps,
   RenderingServiceSetup,
   RenderingMetadata,
-  LegacyRenderOptions,
 } from './types';
 
 /** @internal */
@@ -56,7 +56,7 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
           app = { getId: () => 'core' },
           includeUserSettings = true,
           vars = {},
-        }: LegacyRenderOptions = {}
+        }: IRenderOptions = {}
       ) => {
         const { env } = this.coreContext;
         const basePath = http.basePath.get(request);
