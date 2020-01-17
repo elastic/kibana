@@ -124,7 +124,6 @@ export class Fetch {
           'Content-Type': 'application/json',
           ...options.headers,
           'kbn-version': this.params.kibanaVersion,
-          'kbn-system-api': options.asSystemApi ? 'true' : undefined,
         },
       }
     );
@@ -132,6 +131,13 @@ export class Fetch {
       pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
       query,
     });
+
+    // Make sure the system API header is only present if `asSystemApi` is true.
+    if (asSystemApi) {
+      fetchOptions.headers['kbn-system-api'] = 'true';
+    } else if ('kbn-system-api' in fetchOptions.headers) {
+      Reflect.deleteProperty(fetchOptions.headers, 'kbn-system-api');
+    }
 
     return new Request(url, fetchOptions);
   }

@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { MaybePromise } from '@kbn/utility-types';
 
 /** @public */
 export interface HttpSetup {
@@ -327,7 +328,7 @@ export interface HttpInterceptor {
   request?(
     fetchOptions: Readonly<HttpFetchOptionsWithPath>,
     controller: IHttpInterceptController
-  ): Promise<Partial<HttpFetchOptionsWithPath>> | Partial<HttpFetchOptionsWithPath> | void;
+  ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 
   /**
    * Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise.
@@ -337,7 +338,7 @@ export interface HttpInterceptor {
   requestError?(
     httpErrorRequest: HttpErrorRequest,
     controller: IHttpInterceptController
-  ): Promise<Partial<HttpFetchOptionsWithPath>> | Partial<HttpFetchOptionsWithPath> | void;
+  ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 
   /**
    * Define an interceptor to be executed after a response is received.
@@ -347,7 +348,7 @@ export interface HttpInterceptor {
   response?(
     httpResponse: HttpResponse,
     controller: IHttpInterceptController
-  ): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+  ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
@@ -357,7 +358,7 @@ export interface HttpInterceptor {
   responseError?(
     httpErrorResponse: HttpErrorResponse,
     controller: IHttpInterceptController
-  ): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+  ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 }
 
 /**

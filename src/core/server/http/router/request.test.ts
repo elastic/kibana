@@ -75,12 +75,20 @@ describe('KibanaRequest', () => {
       expect(kibanaRequest.isSystemApi).toBe(false);
     });
 
-    it('is true when kbn-system-api header is set', () => {
+    it('is true when kbn-system-api header is set to true', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', 'kbn-system-api': 'true' },
       });
       const kibanaRequest = KibanaRequest.from(request);
       expect(kibanaRequest.isSystemApi).toBe(true);
+    });
+
+    it('is false when kbn-system-api header is set to false', () => {
+      const request = httpServerMock.createRawRequest({
+        headers: { custom: 'one', 'kbn-system-api': 'false' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.isSystemApi).toBe(false);
     });
   });
 

@@ -117,17 +117,40 @@ describe('Fetch', () => {
       });
     });
 
-    it('should not allow overwriting of internal headers', async () => {
+    it('should not allow overwriting of kbn-version header', async () => {
       fetchMock.get('*', {});
       await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!', 'kbn-system-api': 'ANOTHER!' },
+        headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'kbn-version': 'VERSION',
+        myheader: 'foo',
+      });
+    });
+
+    it('should not allow overwriting of kbn-system-api when asSystemApi: true', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
         asSystemApi: true,
       });
 
-      expect(fetchMock.lastOptions()!.headers).toEqual({
-        'content-type': 'application/json',
-        'kbn-version': 'VERSION',
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'kbn-system-api': 'true',
+        myheader: 'foo',
+      });
+    });
+
+    it('should not allow overwriting of kbn-system-api when asSystemApi: false', async () => {
+      fetchMock.get('*', {});
+      await fetchInstance.fetch('/my/path', {
+        headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
+        asSystemApi: false,
+      });
+
+      expect(fetchMock.lastOptions()!.headers).not.toHaveProperty('kbn-system-api');
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
         myheader: 'foo',
       });
     });
@@ -186,7 +209,7 @@ describe('Fetch', () => {
       expect(response.body).toEqual({ foo: 'bar' });
     });
 
-    it('should expose asSystemApi on detailed response object when asResponse = true', async () => {
+    it('should expose asSystemApi: true on detailed response object when asResponse = true', async () => {
       fetchMock.get('*', { foo: 'bar' });
 
       const response = await fetchInstance.fetch('/my/path', {
@@ -194,6 +217,16 @@ describe('Fetch', () => {
         asSystemApi: true,
       });
       expect(response.fetchOptions.asSystemApi).toBe(true);
+    });
+
+    it('should expose asSystemApi: false on detailed response object when asResponse = true', async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      const response = await fetchInstance.fetch('/my/path', {
+        asResponse: true,
+        asSystemApi: false,
+      });
+      expect(response.fetchOptions.asSystemApi).toBe(false);
     });
 
     it('should reject on network error', async () => {
