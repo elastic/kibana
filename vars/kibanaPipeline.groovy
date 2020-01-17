@@ -2,7 +2,7 @@ def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
   return {
     jobRunner('tests-xl', true) {
       withGcsArtifactUpload(machineName, {
-        try {
+        withPostBuildReporting {
           doSetup()
           preWorkerClosure()
 
@@ -26,20 +26,49 @@ def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
           }
 
           parallel(workers)
-        } finally {
-          catchError {
-            runErrorReporter()
-          }
-
-          catchError {
-            runbld.junit()
-          }
-
-          catchError {
-            publishJunit()
-          }
         }
       })
+    }
+  }
+}
+
+def withWorker(machineName, label, Closure closure) {
+  return {
+    jobRunner(label, false) {
+      withGcsArtifactUpload(machineName) {
+        withPostBuildReporting {
+          doSetup()
+          closure()
+        }
+      }
+    }
+  }
+}
+
+def intakeWorker(jobName, String script) {
+  return withWorker(machineName, 'linux && immutable') {
+    withEnv([
+      "JOB=${jobName}",
+    ]) {
+      runbld(script, "Execute ${jobName}")
+    }
+  }
+}
+
+def withPostBuildReporting(Closure closure) {
+  try {
+    closure()
+  } finally {
+    catchError {
+      runErrorReporter()
+    }
+
+    catchError {
+      runbld.junit()
+    }
+
+    catchError {
+      publishJunit()
     }
   }
 }
@@ -84,34 +113,6 @@ def getXpackCiGroupWorker(ciGroup) {
       runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
     }
   })
-}
-
-def legacyJobRunner(name) {
-  return {
-    parallel([
-      "${name}": {
-        withEnv([
-          "JOB=${name}",
-        ]) {
-          jobRunner('linux && immutable', false) {
-            withGcsArtifactUpload(name, {
-              try {
-                runbld('.ci/run.sh', "Execute ${name}", true)
-              } finally {
-                catchError {
-                  runErrorReporter()
-                }
-
-                catchError {
-                  publishJunit()
-                }
-              }
-            })
-          }
-        }
-      }
-    ])
-  }
 }
 
 def jobRunner(label, useRamDisk, closure) {
@@ -163,8 +164,6 @@ def jobRunner(label, useRamDisk, closure) {
     }
   }
 }
-
-// TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
 
 def uploadGcsArtifact(uploadPrefix, pattern) {
   googleStorageUpload(

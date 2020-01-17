@@ -10,8 +10,8 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
         githubPr.withDefaultPrComments {
           catchError {
             parallel([
-              // 'kibana-intake-agent': kibanaPipeline.legacyJobRunner('kibana-intake'),
-              // 'x-pack-intake-agent': kibanaPipeline.legacyJobRunner('x-pack-intake'),
+              'kibana-intake-agent': kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh'),
+              'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
               'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
                 'oss-firefoxSmoke': kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke') }),
                 'oss-ciGroup1': kibanaPipeline.getOssCiGroupWorker(1),
