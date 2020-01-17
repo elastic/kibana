@@ -553,13 +553,12 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
   },
   enabled: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.enabledFieldLabel', {
-        defaultMessage: 'Enabled',
-      }),
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
     schema: t.boolean,
+    documentation: {
+      main: '/enabled.html',
+    },
   },
   format: {
     fieldConfig: {

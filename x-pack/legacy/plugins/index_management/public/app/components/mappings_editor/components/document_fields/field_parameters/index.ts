@@ -53,3 +53,5 @@ export * from './split_queries_on_whitespace_parameter';
 export * from './locale_parameter';
 
 export * from './dynamic_parameter';
+
+export * from './enabled_parameter';

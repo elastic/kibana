@@ -7,13 +7,15 @@ import React from 'react';
 
 import { BasicParametersSection } from '../edit_field';
 
-import { DynamicParameter } from '../../field_parameters';
+import { DynamicParameter, EnabledParameter } from '../../field_parameters';
 
 export const ObjectType = () => {
   return (
     <>
       <BasicParametersSection>
         <DynamicParameter />
+
+        <EnabledParameter />
       </BasicParametersSection>
     </>
   );
