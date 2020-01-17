@@ -50,16 +50,16 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {
               defaultMessage: '{metric} max',
               values: {
-                metric: metricVal(maxVal, format, isPercent, units)
-              }
+                metric: metricVal(maxVal, format, isPercent, units),
+              },
             })}
           </EuiText>
           <EuiText size="xs">
             {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.minText', {
               defaultMessage: '{metric} min',
               values: {
-                metric: metricVal(minVal, format, isPercent, units)
-              }
+                metric: metricVal(minVal, format, isPercent, units),
+              },
             })}
           </EuiText>
         </EuiFlexItem>
