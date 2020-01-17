@@ -36,6 +36,7 @@ import { SetColorSchemaOptionsValue } from '../../common/color_schema';
 import { HeatmapVisParams } from '../../../heatmap';
 import { ValueAxis } from '../../../types';
 import { LabelsPanel } from './labels_panel';
+import { SetColorRangeValue } from '../../common/color_ranges';
 
 function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
@@ -170,7 +171,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
           <ColorRanges
             data-test-subj="heatmapColorRange"
             colorsRange={stateParams.colorsRange}
-            setValue={setValue}
+            setValue={setValue as SetColorRangeValue}
             setTouched={setTouched}
             setValidity={setIsColorRangesValid}
           />

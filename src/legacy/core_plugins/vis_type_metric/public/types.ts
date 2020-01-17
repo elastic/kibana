@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ColorSchemas } from 'ui/color_maps';
-import { RangeValues } from 'ui/vis/editors/default/controls/ranges';
+import { ColorSchemas } from './legacy_imports';
+import { Range } from '../../../../plugins/expressions/public';
 import { SchemaConfig } from '../../visualizations/public';
 import { ColorModes, Labels, Style } from '../../vis_type_vislib/public';
 
@@ -26,7 +26,7 @@ export const visType = 'metric';
 
 export interface DimensionsVisParam {
   metrics: SchemaConfig[];
-  bucket?: SchemaConfig[];
+  bucket?: SchemaConfig;
 }
 
 export interface MetricVisParam {
@@ -34,7 +34,7 @@ export interface MetricVisParam {
   useRanges: boolean;
   colorSchema: ColorSchemas;
   metricColorMode: ColorModes;
-  colorsRange: RangeValues[];
+  colorsRange: Range[];
   labels: Labels;
   invertColors: boolean;
   style: Style;
@@ -46,4 +46,13 @@ export interface VisParams {
   dimensions: DimensionsVisParam;
   metric: MetricVisParam;
   type: typeof visType;
+}
+
+export interface MetricVisMetric {
+  value: any;
+  label: string;
+  color?: string;
+  bgColor?: string;
+  lightText: boolean;
+  rowIndex: number;
 }

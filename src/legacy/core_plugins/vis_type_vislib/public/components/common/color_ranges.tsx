@@ -24,10 +24,12 @@ import { i18n } from '@kbn/i18n';
 
 import { RangeValues, RangesParamEditor } from '../../legacy_imports';
 
+export type SetColorRangeValue = (paramName: string, value: RangeValues[]) => void;
+
 interface ColorRangesProps {
   'data-test-subj'?: string;
   colorsRange: RangeValues[];
-  setValue(paramName: string, value: RangeValues[]): void;
+  setValue: SetColorRangeValue;
   setValidity?(isValid: boolean): void;
   setTouched?(isTouched: boolean): void;
 }
