@@ -13,7 +13,7 @@ jest.mock('ui/new_platform', () => ({
     plugins: {
       data: {
         autocomplete: {
-          getFieldSuggestions: jest.fn(({ field }) => {
+          getValueSuggestions: jest.fn(({ field }) => {
             let res;
             if (field.type === 'boolean') {
               res = [true, false];
@@ -54,7 +54,7 @@ describe('Kuery value suggestions', function() {
     const suggestions = await getSuggestions({ fieldName, prefix, suffix });
     expect(suggestions.map(({ text }) => text)).toEqual([]);
 
-    expect(npStart.plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(0);
+    expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(0);
   });
 
   test('should format suggestions', async () => {
@@ -89,7 +89,7 @@ describe('Kuery value suggestions', function() {
       const suggestions = await getSuggestions({ fieldName: 'ssl', prefix: '', suffix: '' });
 
       expect(suggestions.map(({ text }) => text)).toEqual(['true ', 'false ']);
-      expect(npStart.plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(1);
+      expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(1);
     });
 
     test('should filter out boolean suggestions', async () => {
@@ -106,8 +106,8 @@ describe('Kuery value suggestions', function() {
 
       await getSuggestions({ fieldName: 'machine.os.raw', prefix, suffix });
 
-      expect(npStart.plugins.data.autocomplete.getFieldSuggestions).toHaveBeenCalledTimes(1);
-      expect(npStart.plugins.data.autocomplete.getFieldSuggestions).toBeCalledWith(
+      expect(npStart.plugins.data.autocomplete.getValueSuggestions).toHaveBeenCalledTimes(1);
+      expect(npStart.plugins.data.autocomplete.getValueSuggestions).toBeCalledWith(
         expect.objectContaining({
           field: expect.any(Object),
           query: prefix + suffix,

@@ -18,23 +18,26 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { QuerySuggestionsGet } from './providers/query_suggestion_provider';
+import { QuerySuggestionsGetFn } from './providers/query_suggestion_provider';
 import {
-  setupFieldSuggestionProvider,
-  FieldSuggestionsGet,
-} from './providers/field_suggestion_provider';
+  setupValueSuggestionProvider,
+  ValueSuggestionsGetFn,
+} from './providers/value_suggestion_provider';
 
 export class AutocompleteService {
-  private readonly querySuggestionProviders: Map<string, QuerySuggestionsGet> = new Map();
-  private getFieldSuggestions?: FieldSuggestionsGet;
+  private readonly querySuggestionProviders: Map<string, QuerySuggestionsGetFn> = new Map();
+  private getValueSuggestions?: ValueSuggestionsGetFn;
 
-  private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionsGet): void => {
+  private addQuerySuggestionProvider = (
+    language: string,
+    provider: QuerySuggestionsGetFn
+  ): void => {
     if (language && provider) {
       this.querySuggestionProviders.set(language, provider);
     }
   };
 
-  private getQuerySuggestions: QuerySuggestionsGet = args => {
+  private getQuerySuggestions: QuerySuggestionsGetFn = args => {
     const { language } = args;
     const provider = this.querySuggestionProviders.get(language);
 
@@ -47,7 +50,7 @@ export class AutocompleteService {
 
   /** @public **/
   public setup(core: CoreSetup) {
-    this.getFieldSuggestions = setupFieldSuggestionProvider(core);
+    this.getValueSuggestions = setupValueSuggestionProvider(core);
 
     return {
       addQuerySuggestionProvider: this.addQuerySuggestionProvider,
@@ -63,7 +66,7 @@ export class AutocompleteService {
     return {
       getQuerySuggestions: this.getQuerySuggestions,
       hasQuerySuggestions: this.hasQuerySuggestions,
-      getFieldSuggestions: this.getFieldSuggestions!,
+      getValueSuggestions: this.getValueSuggestions!,
     };
   }
 

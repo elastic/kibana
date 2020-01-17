@@ -18,4 +18,4 @@
  */
 
 export { AutocompleteService } from './autocomplete_service';
-export { QuerySuggestion, QuerySuggestionType, QuerySuggestionsGet } from './types';
+export { QuerySuggestion, QuerySuggestionType, QuerySuggestionsGetFn } from './types';

@@ -70,7 +70,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component
     }
     this.setState({ isLoading: true });
 
-    const suggestions = await this.services.data.autocomplete.getFieldSuggestions({
+    const suggestions = await this.services.data.autocomplete.getValueSuggestions({
       indexPattern,
       field,
       query,

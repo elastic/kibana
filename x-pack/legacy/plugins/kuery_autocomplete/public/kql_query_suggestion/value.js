@@ -27,10 +27,10 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
     const fields = allFields.filter(field => field.name === fullFieldName);
     const query = `${prefix}${suffix}`.trim();
-    const { getFieldSuggestions } = npStart.plugins.data.autocomplete;
+    const { getValueSuggestions } = npStart.plugins.data.autocomplete;
 
     const suggestionsByField = fields.map(field =>
-      getFieldSuggestions({
+      getValueSuggestions({
         indexPattern: field.indexPattern,
         field,
         query,

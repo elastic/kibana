@@ -28,6 +28,6 @@ export type AutocompleteStart = ReturnType<AutocompleteService['start']>;
 /** @public **/
 export {
   QuerySuggestion,
-  QuerySuggestionsGet,
+  QuerySuggestionsGetFn,
   QuerySuggestionType,
 } from './providers/query_suggestion_provider';

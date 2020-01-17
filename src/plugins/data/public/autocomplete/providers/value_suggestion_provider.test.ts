@@ -18,11 +18,11 @@
  */
 
 import { stubIndexPattern, stubFields } from '../../stubs';
-import { setupFieldSuggestionProvider, FieldSuggestionsGet } from './field_suggestion_provider';
+import { setupValueSuggestionProvider, ValueSuggestionsGetFn } from './value_suggestion_provider';
 import { IUiSettingsClient, CoreSetup } from 'kibana/public';
 
 describe('FieldSuggestions', () => {
-  let getFieldSuggestions: FieldSuggestionsGet;
+  let getValueSuggestions: ValueSuggestionsGetFn;
   let http: any;
   let shouldSuggestValues: boolean;
 
@@ -30,12 +30,12 @@ describe('FieldSuggestions', () => {
     const uiSettings = { get: (key: string) => shouldSuggestValues } as IUiSettingsClient;
     http = { fetch: jest.fn() };
 
-    getFieldSuggestions = setupFieldSuggestionProvider({ http, uiSettings } as CoreSetup);
+    getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup);
   });
 
   describe('with value suggestions disabled', () => {
     it('should return an empty array', async () => {
-      const suggestions = await getFieldSuggestions({
+      const suggestions = await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field: stubFields[0],
         query: '',
@@ -51,7 +51,7 @@ describe('FieldSuggestions', () => {
 
     it('should return true/false for boolean fields', async () => {
       const [field] = stubFields.filter(({ type }) => type === 'boolean');
-      const suggestions = await getFieldSuggestions({
+      const suggestions = await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field,
         query: '',
@@ -63,7 +63,7 @@ describe('FieldSuggestions', () => {
 
     it('should return an empty array if the field type is not a string or boolean', async () => {
       const [field] = stubFields.filter(({ type }) => type !== 'string' && type !== 'boolean');
-      const suggestions = await getFieldSuggestions({
+      const suggestions = await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field,
         query: '',
@@ -75,7 +75,7 @@ describe('FieldSuggestions', () => {
 
     it('should return an empty array if the field is not aggregatable', async () => {
       const [field] = stubFields.filter(({ aggregatable }) => !aggregatable);
-      const suggestions = await getFieldSuggestions({
+      const suggestions = await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field,
         query: '',
@@ -90,7 +90,7 @@ describe('FieldSuggestions', () => {
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
 
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field,
         query: '',
@@ -109,8 +109,8 @@ describe('FieldSuggestions', () => {
         query: '',
       };
 
-      await getFieldSuggestions(args);
-      await getFieldSuggestions(args);
+      await getValueSuggestions(args);
+      await getValueSuggestions(args);
 
       expect(http.fetch).toHaveBeenCalledTimes(1);
     });
@@ -128,10 +128,10 @@ describe('FieldSuggestions', () => {
       const { now } = Date;
       Date.now = jest.fn(() => 0);
 
-      await getFieldSuggestions(args);
+      await getValueSuggestions(args);
 
       Date.now = jest.fn(() => 60 * 1000);
-      await getFieldSuggestions(args);
+      await getValueSuggestions(args);
       Date.now = now;
 
       expect(http.fetch).toHaveBeenCalledTimes(2);
@@ -142,22 +142,22 @@ describe('FieldSuggestions', () => {
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
 
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field: fields[0],
         query: '',
       });
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field: fields[0],
         query: 'query',
       });
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field: fields[1],
         query: '',
       });
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field: fields[1],
         query: 'query',
@@ -168,22 +168,22 @@ describe('FieldSuggestions', () => {
         title: 'customIndexPattern',
       };
 
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: customIndexPattern,
         field: fields[0],
         query: '',
       });
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: customIndexPattern,
         field: fields[0],
         query: 'query',
       });
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: customIndexPattern,
         field: fields[1],
         query: '',
       });
-      await getFieldSuggestions({
+      await getValueSuggestions({
         indexPattern: customIndexPattern,
         field: fields[1],
         query: 'query',

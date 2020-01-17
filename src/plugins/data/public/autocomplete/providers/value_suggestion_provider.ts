@@ -28,9 +28,9 @@ function resolver(title: string, field: IFieldType, query: string, boolFilter: a
   return [ttl, query, title, field.name, JSON.stringify(boolFilter)].join('|');
 }
 
-export type FieldSuggestionsGet = (args: FieldSuggestionsGetArgs) => Promise<any[]>;
+export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
-interface FieldSuggestionsGetArgs {
+interface ValueSuggestionsGetFnArgs {
   indexPattern: IIndexPattern;
   field: IFieldType;
   query: string;
@@ -38,7 +38,7 @@ interface FieldSuggestionsGetArgs {
   signal?: AbortSignal;
 }
 
-export const setupFieldSuggestionProvider = (core: CoreSetup): FieldSuggestionsGet => {
+export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsGetFn => {
   const requestSuggestions = memoize(
     (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>
       core.http.fetch(`/api/kibana/suggestions/values/${index}`, {
@@ -55,7 +55,7 @@ export const setupFieldSuggestionProvider = (core: CoreSetup): FieldSuggestionsG
     query,
     boolFilter,
     signal,
-  }: FieldSuggestionsGetArgs): Promise<any[]> => {
+  }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
     const shouldSuggestValues = core!.uiSettings.get<boolean>('filterEditor:suggestValues');
     const { title } = indexPattern;
 
