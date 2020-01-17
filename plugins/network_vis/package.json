@@ -2,7 +2,7 @@
   "name": "network_vis",
   "version": "5.5.0-1",
   "kibana": {
-    "version": "7.2.0"
+    "version": "kibana"
   },
   "authors": [
   "David Moreno Lumbreras <dmorenolumb@gmail.com>"
