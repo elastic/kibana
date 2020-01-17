@@ -37,12 +37,12 @@ export default function({ getService }) {
         })
       );
 
-      const isDistributable = await kibanaServer.status.isDistributable();
+      const isDist = await kibanaServer.status.isDistributable();
       const entries = Array.from(parsed.entries());
       expect(entries).to.eql([
         ['script-src', ["'unsafe-eval'", "'self'"]],
         ['worker-src', ['blob:', "'self'"]],
-        ['style-src', [...(isDistributable ? [] : ['blob:']), "'unsafe-inline'", "'self'"]],
+        ['style-src', [...(isDist ? [] : ['blob:']), "'unsafe-inline'", "'self'"]],
       ]);
     });
   });
