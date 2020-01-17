@@ -12,6 +12,7 @@ import {
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../../common/constants/aggregation_types';
 import { MLCATEGORY, DOC_COUNT } from '../../../../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 import {
   EVENT_RATE_FIELD_ID,
   Field,
@@ -313,5 +314,28 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
       });
     default:
       return '';
+  }
+}
+
+// recurse through a datafeed aggregation object,
+// adding top level keys from each nested agg to an array
+// of fields
+export function collectAggs(o: any, aggFields: Field[]) {
+  for (const i in o) {
+    if (o[i] !== null && typeof o[i] === 'object') {
+      if (i === 'aggregations' || i === 'aggs') {
+        Object.keys(o[i]).forEach(k => {
+          if (k !== 'aggregations' && i !== 'aggs') {
+            aggFields.push({
+              id: k,
+              name: k,
+              type: ES_FIELD_TYPES.KEYWORD,
+              aggregatable: true,
+            });
+          }
+        });
+      }
+      collectAggs(o[i], aggFields);
+    }
   }
 }

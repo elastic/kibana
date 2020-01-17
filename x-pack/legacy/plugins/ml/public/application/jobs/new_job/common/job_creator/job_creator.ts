@@ -19,7 +19,7 @@ import {
   CREATED_BY_LABEL,
   SHARED_RESULTS_INDEX_NAME,
 } from '../../../../../../common/constants/new_job';
-import { isSparseDataJob } from './util/general';
+import { isSparseDataJob, collectAggs } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
@@ -624,27 +624,7 @@ export class JobCreator {
 
     this._aggregationFields = [];
     if (this._datafeed_config.aggregations?.buckets !== undefined) {
-      traverseAggs(this._datafeed_config.aggregations.buckets, this._aggregationFields);
-    }
-  }
-}
-
-function traverseAggs(o: any, aggFields: Field[]) {
-  for (const i in o) {
-    if (o[i] !== null && typeof o[i] === 'object') {
-      if (i === 'aggregations' || i === 'aggs') {
-        Object.keys(o[i]).forEach(k => {
-          if (k !== 'aggregations' && i !== 'aggs') {
-            aggFields.push({
-              id: k,
-              name: k,
-              type: ES_FIELD_TYPES.KEYWORD,
-              aggregatable: true,
-            });
-          }
-        });
-      }
-      traverseAggs(o[i], aggFields);
+      collectAggs(this._datafeed_config.aggregations.buckets, this._aggregationFields);
     }
   }
 }
