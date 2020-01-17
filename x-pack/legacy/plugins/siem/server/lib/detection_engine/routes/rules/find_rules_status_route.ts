@@ -13,6 +13,7 @@ import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
 import {
   FindRulesStatusesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
+  RuleStatusResponse,
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
@@ -53,7 +54,7 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
             "anotherAlertId": ...
         }
     */
-    const statuses = await query.ids.reduce(async (acc, id) => {
+    const statuses: RuleStatusResponse = await query.ids.reduce(async (acc, id) => {
       const lastFiveErrorsForId = await savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({
@@ -64,13 +65,14 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
         search: id,
         searchFields: ['alertId'],
       });
-      const toDisplay =
-        lastFiveErrorsForId.saved_objects.length <= 5
-          ? lastFiveErrorsForId.saved_objects
-          : lastFiveErrorsForId.saved_objects.slice(1);
       return {
         ...(await acc),
-        [id]: toDisplay.map(errorItem => convertToSnakeCase(errorItem.attributes)),
+        [id]: {
+          current_status: convertToSnakeCase(lastFiveErrorsForId.saved_objects[0].attributes),
+          failures: lastFiveErrorsForId.saved_objects
+            .slice(1)
+            .map(errorItem => convertToSnakeCase(errorItem.attributes)),
+        },
       };
     }, {});
     return statuses;

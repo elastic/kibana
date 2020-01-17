@@ -56,6 +56,13 @@ export interface IRuleStatusAttributes {
   status: RuleStatusString | null | undefined;
 }
 
+export interface RuleStatusResponse {
+  [key: string]: {
+    current_status: IRuleStatusAttributes;
+    failures: IRuleStatusAttributes[];
+  };
+}
+
 export interface IRuleSavedAttributesSavedObjectAttributes
   extends IRuleStatusAttributes,
     SavedObjectAttributes {}
