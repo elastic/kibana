@@ -1,0 +1,1100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Color/ColorPalette interactive 1`] = `
+<div
+  className="canvasColorPalette"
+>
+  <div
+    className="item-grid-row"
+  >
+    <button
+      aria-label="white"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#fff",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#666"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#666",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="black"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#000",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#abc"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abc",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#def"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#def",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#abcdef"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abcdef",
+            }
+          }
+        />
+      </div>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Color/ColorPalette six colors 1`] = `
+Array [
+  <div
+    className="canvasColorPalette"
+  >
+    <div
+      className="item-grid-row"
+    >
+      <button
+        aria-label="white"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#fff",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="#666"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#666",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="black"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#000",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="#abc"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#abc",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="#def"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#def",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="#abcdef"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#abcdef",
+              }
+            }
+          />
+        </div>
+      </button>
+    </div>
+  </div>,
+  <div
+    className="canvasColorPalette"
+  >
+    <div
+      className="item-grid-row"
+    >
+      <button
+        aria-label="white"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#fff",
+              }
+            }
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
+              focusable="false"
+              height={16}
+              role="img"
+              style={
+                Object {
+                  "fill": "#333",
+                }
+              }
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </div>
+        </div>
+      </button>
+      <button
+        aria-label="#666"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#666",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="black"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#000",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="#abc"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#abc",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="#def"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#def",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="#abcdef"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#abcdef",
+              }
+            }
+          />
+        </div>
+      </button>
+    </div>
+  </div>,
+]
+`;
+
+exports[`Storyshots components/Color/ColorPalette six colors, value missing 1`] = `
+<div
+  className="canvasColorPalette"
+>
+  <div
+    className="item-grid-row"
+  >
+    <button
+      aria-label="white"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#fff",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#666"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#666",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="black"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#000",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#abc"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abc",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#def"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#def",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#abcdef"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abcdef",
+            }
+          }
+        />
+      </div>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Color/ColorPalette six colors, wrap at 4 1`] = `
+<div
+  className="canvasColorPalette"
+>
+  <div
+    className="item-grid-row"
+  >
+    <button
+      aria-label="white"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#fff",
+            }
+          }
+        >
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
+            focusable="false"
+            height={16}
+            role="img"
+            style={
+              Object {
+                "fill": "#333",
+              }
+            }
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </div>
+      </div>
+    </button>
+    <button
+      aria-label="#666"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#666",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="black"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#000",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#abc"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abc",
+            }
+          }
+        />
+      </div>
+    </button>
+  </div>
+  <div
+    className="item-grid-row"
+  >
+    <button
+      aria-label="#def"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#def",
+            }
+          }
+        />
+      </div>
+    </button>
+    <button
+      aria-label="#abcdef"
+      className="euiLink euiLink--primary canvasColorPalette__dot"
+      onClick={[Function]}
+      style={
+        Object {
+          "fontSize": 0,
+        }
+      }
+      type="button"
+    >
+      <div
+        className="canvasColorDot"
+      >
+        <div
+          className="canvasColorDot__background canvasCheckered"
+        />
+        <div
+          className="canvasColorDot__foreground"
+          style={
+            Object {
+              "background": "#abcdef",
+            }
+          }
+        />
+      </div>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Color/ColorPalette three colors 1`] = `
+Array [
+  <div
+    className="canvasColorPalette"
+  >
+    <div
+      className="item-grid-row"
+    >
+      <button
+        aria-label="white"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#fff",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="#666"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#666",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="black"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#000",
+              }
+            }
+          />
+        </div>
+      </button>
+    </div>
+  </div>,
+  <div
+    className="canvasColorPalette"
+  >
+    <div
+      className="item-grid-row"
+    >
+      <button
+        aria-label="white"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#fff",
+              }
+            }
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading selected-color"
+              focusable="false"
+              height={16}
+              role="img"
+              style={
+                Object {
+                  "fill": "#333",
+                }
+              }
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </div>
+        </div>
+      </button>
+      <button
+        aria-label="#666"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#666",
+              }
+            }
+          />
+        </div>
+      </button>
+      <button
+        aria-label="black"
+        className="euiLink euiLink--primary canvasColorPalette__dot"
+        onClick={[Function]}
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+        type="button"
+      >
+        <div
+          className="canvasColorDot"
+        >
+          <div
+            className="canvasColorDot__background canvasCheckered"
+          />
+          <div
+            className="canvasColorDot__foreground"
+            style={
+              Object {
+                "background": "#000",
+              }
+            }
+          />
+        </div>
+      </button>
+    </div>
+  </div>,
+]
+`;

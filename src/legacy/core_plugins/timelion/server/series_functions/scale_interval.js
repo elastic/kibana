@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
-import toMS from '../lib/to_milliseconds.js';
+import { toMS } from '../../../vis_type_timelion/common/lib';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 

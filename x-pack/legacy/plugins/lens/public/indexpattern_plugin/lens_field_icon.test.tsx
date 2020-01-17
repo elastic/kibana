@@ -20,10 +20,10 @@ test('LensFieldIcon renders properly', () => {
 
 test('LensFieldIcon getColorForDataType for a valid type', () => {
   const color = getColorForDataType('date');
-  expect(color).toEqual('#B0916F');
+  expect(color).toEqual('#DA8B45');
 });
 
 test('LensFieldIcon getColorForDataType for an invalid type', () => {
   const color = getColorForDataType('invalid');
-  expect(color).toEqual('#1EA593');
+  expect(color).toEqual('#54B399');
 });
