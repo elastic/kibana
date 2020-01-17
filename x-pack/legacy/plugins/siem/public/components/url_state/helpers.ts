@@ -78,7 +78,7 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'host';
   } else if (pageName === SiemPageName.network) {
     return 'network';
-  } else if (pageName === SiemPageName.detectionEngine) {
+  } else if (pageName === SiemPageName.detections) {
     return 'detections';
   } else if (pageName === SiemPageName.timelines) {
     return 'timeline';
@@ -111,8 +111,8 @@ export const getCurrentLocation = (
       return CONSTANTS.networkDetails;
     }
     return CONSTANTS.networkPage;
-  } else if (pageName === SiemPageName.detectionEngine) {
-    return CONSTANTS.detectionEnginePage;
+  } else if (pageName === SiemPageName.detections) {
+    return CONSTANTS.detectionsPage;
   } else if (pageName === SiemPageName.timelines) {
     return CONSTANTS.timelinePage;
   }
@@ -129,7 +129,8 @@ export const isKqlForRoute = (
     (currentLocation === CONSTANTS.hostsPage && queryLocation === CONSTANTS.hostsPage) ||
     (currentLocation === CONSTANTS.networkPage && queryLocation === CONSTANTS.networkPage) ||
     (currentLocation === CONSTANTS.hostsDetails && queryLocation === CONSTANTS.hostsDetails) ||
-    (currentLocation === CONSTANTS.networkDetails && queryLocation === CONSTANTS.networkDetails)
+    (currentLocation === CONSTANTS.networkDetails && queryLocation === CONSTANTS.networkDetails) ||
+    (currentLocation === CONSTANTS.detectionsPage && queryLocation === CONSTANTS.detectionsPage)
   ) {
     return true;
   }

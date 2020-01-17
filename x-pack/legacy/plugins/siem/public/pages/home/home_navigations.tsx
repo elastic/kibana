@@ -36,8 +36,8 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: 'network',
   },
-  [SiemPageName.detectionEngine]: {
-    id: SiemPageName.detectionEngine,
+  [SiemPageName.detections]: {
+    id: SiemPageName.detections,
     name: i18n.DETECTION_ENGINE,
     href: getDetectionEngineUrl(),
     disabled: false,
