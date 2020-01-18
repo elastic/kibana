@@ -19,19 +19,19 @@
 
 import React, { Fragment, PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import {
   // @ts-ignore
   EuiSearchBar,
   EuiFormErrorText,
 } from '@elastic/eui';
+import { IQuery } from '../../types';
 
 import { getCategoryName } from '../../lib';
 
 interface SearchProps {
   categories: string[];
-  query: any; // todo
-  onQueryChange: ({ query }: { query: any }) => void;
+  query: IQuery;
+  onQueryChange: ({ query }: { query: IQuery }) => void;
 }
 
 export class Search extends PureComponent<SearchProps> {
@@ -53,7 +53,7 @@ export class Search extends PureComponent<SearchProps> {
     parseErrorMessage: null,
   };
 
-  onChange = ({ query, error }: { query: any; error: { message: string } }) => {
+  onChange = ({ query, error }: { query: IQuery; error: { message: string } }) => {
     if (error) {
       this.setState({
         isSearchTextValid: false,

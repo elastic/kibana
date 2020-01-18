@@ -23,6 +23,7 @@ import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzym
 import { mount } from 'enzyme';
 import { Setting } from '../../types';
 import { StringValidation } from '../../types';
+import { UiSettingsType } from '../../../../../../../../../core/server';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -386,7 +387,7 @@ describe('Field', () => {
         const fieldUserValue = userValue;
 
         it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onCodeEditorChange(fieldUserValue);
+          (component.instance() as Field).onCodeEditorChange(fieldUserValue as UiSettingsType);
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
             'click'
@@ -398,7 +399,7 @@ describe('Field', () => {
         });
 
         it('should be able to change value and save', async () => {
-          (component.instance() as Field).onCodeEditorChange(fieldUserValue);
+          (component.instance() as Field).onCodeEditorChange(fieldUserValue as UiSettingsType);
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
             'click'
@@ -416,7 +417,7 @@ describe('Field', () => {
 
         if (type === 'json') {
           it('should be able to clear value and have empty object populate', async () => {
-            (component.instance() as Field).onCodeEditorChange('');
+            (component.instance() as Field).onCodeEditorChange('' as UiSettingsType);
             wrapper.update();
             expect((component.instance() as Field).state.unsavedValue).toEqual('{}');
           });
@@ -439,7 +440,7 @@ describe('Field', () => {
           // @ts-ignore
           const invalidUserValue = invalidUserValues[type];
           it('should display an error when validation fails', async () => {
-            (component.instance() as Field).onFieldChange({ target: { value: invalidUserValue } });
+            (component.instance() as Field).onFieldChange(invalidUserValue);
             const updated = wrapper.update();
             const errorMessage = updated.find('.euiFormErrorText').text();
             expect(errorMessage).toEqual((setting.validation as StringValidation).message);
@@ -447,7 +448,7 @@ describe('Field', () => {
         }
 
         it('should be able to change value and cancel', async () => {
-          (component.instance() as Field).onFieldChange({ target: { value: fieldUserValue } });
+          (component.instance() as Field).onFieldChange(fieldUserValue);
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
             'click'
@@ -459,7 +460,7 @@ describe('Field', () => {
         });
 
         it('should be able to change value and save', async () => {
-          (component.instance() as Field).onFieldChange({ target: { value: fieldUserValue } });
+          (component.instance() as Field).onFieldChange(fieldUserValue);
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
             'click'

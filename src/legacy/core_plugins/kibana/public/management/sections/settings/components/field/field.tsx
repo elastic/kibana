@@ -53,16 +53,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Setting } from '../../types';
-import { StringValidation, ImageValidation } from '../../types';
-// import { UiSettingsParams } from '../../../../../../../../../core/server/ui_settings';
-
+import { Setting, StringValidation, ImageValidation } from '../../types';
 import { isDefaultValue } from '../../lib';
+import { UiSettingsType } from '../../../../../../../../../core/server/';
 
 interface FieldProps {
   setting: Setting;
-  save: (name: string, value: string) => Promise<void>;
-  clear: (name: string) => Promise<void>;
+  save: (name: string, value: string) => Promise<boolean>;
+  clear: (name: string) => Promise<boolean>;
   enableSaving: boolean;
 }
 
@@ -105,7 +103,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     });
   }
 
-  getEditableValue(type: string, value: Setting['value'], defVal: Setting['defVal']) {
+  getEditableValue(type: UiSettingsType, value: Setting['value'], defVal: Setting['defVal']) {
     const val = value === null || value === undefined ? defVal : value;
     switch (type) {
       case 'array':
@@ -122,9 +120,9 @@ export class Field extends PureComponent<FieldProps, FieldState> {
   }
 
   getDisplayedDefaultValue(
-    type: string,
+    type: UiSettingsType,
     defVal: Setting['defVal'],
-    optionLabels: { [key: string]: any } = {}
+    optionLabels: Record<string, any> = {}
   ) {
     if (defVal === undefined || defVal === null || defVal === '') {
       return 'null';
@@ -154,7 +152,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     });
   }
 
-  onCodeEditorChange = (value: string) => {
+  onCodeEditorChange = (value: UiSettingsType) => {
     const { type } = this.props.setting;
     const { isJsonArray } = this.state;
 

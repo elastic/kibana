@@ -41,8 +41,8 @@ interface FormProps {
   categories: Category[];
   categoryCounts: Record<string, number>;
   clearQuery: () => void;
-  save: (key: string, value: any) => Promise<void>;
-  clear: (key: string) => Promise<void>;
+  save: (key: string, value: any) => Promise<boolean>;
+  clear: (key: string) => Promise<boolean>;
   showNoResultsMessage: boolean;
   enableSaving: boolean;
 }

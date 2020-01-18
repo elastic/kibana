@@ -19,8 +19,8 @@
 
 import { FunctionComponent } from 'react';
 
-const registry: Record<string, FunctionComponent> = {};
 type Id = string;
+const registry: Record<Id, FunctionComponent> = {};
 
 /**
  * Attempts to register the provided component.

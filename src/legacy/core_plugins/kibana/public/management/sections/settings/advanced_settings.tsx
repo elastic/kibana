@@ -28,7 +28,7 @@ import { IUiSettingsClient } from '../../../../../../../core/public/';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
-import { Setting } from './types';
+import { Setting, IQuery } from './types';
 
 import {
   registerDefaultComponents,
@@ -46,7 +46,7 @@ interface AdvancedSettingsProps {
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
-  query: any;
+  query: IQuery;
   filteredSettings: Record<string, Setting[]>;
 }
 
@@ -113,6 +113,14 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     });
   }
 
+  saveConfig = (name: string, value: any) => {
+    return this.props.config.set(name, value);
+  };
+
+  clearConfig = (name: string) => {
+    return this.props.config.remove(name);
+  };
+
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     return Object.entries(all)
@@ -140,7 +148,6 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     }, {});
   }
 
-  // todo
   onQueryChange = ({ query }: { query: any }) => {
     this.setState({
       query,
@@ -191,12 +198,8 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}
-          save={async (key, value) => {
-            this.props.config.set(key, value);
-          }}
-          clear={async (key: string) => {
-            this.props.config.remove(key);
-          }}
+          save={this.saveConfig}
+          clear={this.clearConfig}
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
         />

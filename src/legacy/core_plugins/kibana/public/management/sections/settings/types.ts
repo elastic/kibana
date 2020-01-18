@@ -55,3 +55,9 @@ export interface Setting {
     docLinksKey: string;
   };
 }
+
+export interface IQuery {
+  ast: any; // incomplete
+  text: string;
+  syntax: any; // incomplete
+}
