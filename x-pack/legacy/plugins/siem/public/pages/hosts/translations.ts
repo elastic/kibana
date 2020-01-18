@@ -28,13 +28,6 @@ export const NAVIGATION_AUTHENTICATIONS_TITLE = i18n.translate(
   }
 );
 
-export const NAVIGATION_AUTHENTICATIONS_STACK_BY_EVENT_TYPE = i18n.translate(
-  'xpack.siem.hosts.navigation.authentications.stackByEventType',
-  {
-    defaultMessage: 'event type',
-  }
-);
-
 export const NAVIGATION_UNCOMMON_PROCESSES_TITLE = i18n.translate(
   'xpack.siem.hosts.navigation.uncommonProcessesTitle',
   {
@@ -52,20 +45,6 @@ export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
 export const NAVIGATION_EVENTS_TITLE = i18n.translate('xpack.siem.hosts.navigation.eventsTitle', {
   defaultMessage: 'Events',
 });
-
-export const NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION = i18n.translate(
-  'xpack.siem.hosts.navigation.eventsStackByEventAction',
-  {
-    defaultMessage: 'action',
-  }
-);
-
-export const NAVIGATION_EVENTS_STACK_BY_EVENT_DATASET = i18n.translate(
-  'xpack.siem.hosts.navigation.eventsStackByEventDataset',
-  {
-    defaultMessage: 'dataset',
-  }
-);
 
 export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.hosts.navigation.alertsTitle', {
   defaultMessage: 'Alerts',
