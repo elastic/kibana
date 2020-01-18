@@ -322,7 +322,7 @@ export const getRuleStatusById = async ({
 }: {
   id: string;
   signal: AbortSignal;
-}): Promise<Record<string, RuleStatus[]>> => {
+}): Promise<Record<string, RuleStatus>> => {
   const response = await fetch(
     `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_STATUS}?ids=${encodeURIComponent(
       JSON.stringify([id])
