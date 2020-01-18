@@ -248,7 +248,6 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
                           text: i18n.BACK_TO_RULES,
                         }}
-                        badgeOptions={{ text: i18n.EXPERIMENTAL }}
                         border
                         subtitle={subTitle}
                         subtitle2={[
