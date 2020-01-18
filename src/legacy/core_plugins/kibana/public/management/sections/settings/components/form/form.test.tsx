@@ -85,8 +85,8 @@ const categoryCounts = {
   dashboard: 1,
   'x-pack': 10,
 };
-const save = (key: string, value: any) => Promise.resolve();
-const clear = (key: string) => Promise.resolve();
+const save = (key: string, value: any) => Promise.resolve(true);
+const clear = (key: string) => Promise.resolve(true);
 const clearQuery = () => {};
 
 describe('Form', () => {

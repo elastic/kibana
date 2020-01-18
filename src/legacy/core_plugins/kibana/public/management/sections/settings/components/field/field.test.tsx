@@ -187,8 +187,8 @@ const userValues = {
 const invalidUserValues = {
   stringWithValidation: 'invalidUserValue',
 };
-const save = jest.fn(() => Promise.resolve());
-const clear = jest.fn(() => Promise.resolve());
+const save = jest.fn(() => Promise.resolve(true));
+const clear = jest.fn(() => Promise.resolve(true));
 
 describe('Field', () => {
   Object.keys(settings).forEach(type => {
