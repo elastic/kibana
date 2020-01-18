@@ -49,7 +49,6 @@ module.exports = async ({ config }) => {
   // Parse props data for .tsx files
   // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
   // See: https://github.com/storybookjs/storybook/issues/7998
-  // 
   // config.module.rules.push({
   //   test: /\.tsx$/,
   //   // Exclude example files, as we don't display props info for them
@@ -100,6 +99,11 @@ module.exports = async ({ config }) => {
         loader: 'sass-loader',
       },
     ],
+  });
+
+  config.module.rules.push({
+    test: path.resolve(__dirname, '../canvas_plugin_src/renderers/embeddable.tsx'),
+    use: 'null-loader',
   });
 
   // Ensure jQuery is global for Storybook, specifically for the runtime.
@@ -178,12 +182,17 @@ module.exports = async ({ config }) => {
   config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');
   config.resolve.alias['plugins/interpreter/interpreter'] = path.resolve(
     KIBANA_ROOT,
-    'packages/kbn-interpreter/target/common'
+    'src/legacy/core_plugins/interpreter/public/interpreter'
   );
   config.resolve.alias['plugins/interpreter/registries'] = path.resolve(
     KIBANA_ROOT,
     'packages/kbn-interpreter/target/common/registries'
   );
+  config.resolve.alias['plugins/interpreter/canvas'] = path.resolve(
+    KIBANA_ROOT, 
+    'src/legacy/core_plugins/interpreter/public/canvas',
+  );
+  config.resolve.alias['src/plugins/expressions'] = path.resolve(KIBANA_ROOT, 'src/legacy/core_plugins/interpreter')
 
   return config;
 };

@@ -37,40 +37,98 @@ export interface InterpreterConfig {
   functions: FunctionsRegistry;
   types: any;
   handlers: any;
+  debug?: boolean;
 }
+
+export interface InterpreterResult {
+  args: { [key: string]: InterpreterResult | any };
+  context: InterpreterResult | any;
+  fn: AnyExpressionFunction;
+  out: any;
+  ast: ExpressionAST;
+  next: ExpressionAST[];
+}
+
+export interface InterpreterError {
+  type: string;
+  error: {
+    name: string;
+    stack?: string;
+    message?: string;
+  };
+}
+
+export const isInterpreterResult = (
+  result: InterpreterResult | any
+): result is InterpreterResult => {
+  return result && (result as InterpreterResult).fn !== undefined;
+};
+
+export const isInterpreterError = (result: InterpreterError | any): result is InterpreterError => {
+  return result && (result as InterpreterError).error !== undefined;
+};
 
 export type ExpressionInterpret = (ast: ExpressionAST, context?: any) => any;
 
 export function interpreterProvider(config: InterpreterConfig): ExpressionInterpret {
-  const { functions, types } = config;
+  const { functions, types, debug } = config;
   const handlers = { ...config.handlers, types };
 
   function cast(node: any, toTypeNames: any) {
+    const isResult = isInterpreterResult(node);
+    const nd = isResult ? node.out : node;
+
     // If you don't give us anything to cast to, you'll get your input back
-    if (!toTypeNames || toTypeNames.length === 0) return node;
+    if (!toTypeNames || toTypeNames.length === 0) {
+      return node;
+    }
 
     // No need to cast if node is already one of the valid types
-    const fromTypeName = getType(node);
-    if (toTypeNames.includes(fromTypeName)) return node;
+    const fromTypeName = getType(nd);
+    if (toTypeNames.includes(fromTypeName)) {
+      return node;
+    }
 
     const fromTypeDef = types[fromTypeName];
 
     for (let i = 0; i < toTypeNames.length; i++) {
       // First check if the current type can cast to this type
       if (fromTypeDef && fromTypeDef.castsTo(toTypeNames[i])) {
-        return fromTypeDef.to(node, toTypeNames[i], types);
+        const def = fromTypeDef.to(nd, toTypeNames[i], types);
+        if (isResult) {
+          node.out = def;
+          return node;
+        } else {
+          return def;
+        }
       }
 
       // If that isn't possible, check if this type can cast from the current type
       const toTypeDef = types[toTypeNames[i]];
-      if (toTypeDef && toTypeDef.castsFrom(fromTypeName)) return toTypeDef.from(node, types);
+      if (toTypeDef && toTypeDef.castsFrom(fromTypeName)) {
+        const def = toTypeDef.from(node, types);
+        if (isResult) {
+          node.out = def;
+          return node;
+        } else {
+          return def;
+        }
+      }
     }
 
     throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   }
 
-  async function invokeChain(chainArr: ExpressionFunctionAST[], context: any): Promise<any> {
-    if (!chainArr.length) return context;
+  async function invokeChain(
+    chainArr: ExpressionFunctionAST[],
+    context: any
+  ): Promise<InterpreterResult | InterpreterError> {
+    if (!chainArr.length) {
+      return context;
+    }
+
+    const ctx = isInterpreterResult(context) ? context.out : context;
+
     // if execution was aborted return error
     if (handlers.abortSignal && handlers.abortSignal.aborted) {
       return createError({
@@ -78,10 +136,15 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
         name: 'AbortError',
       });
     }
+
     const chain = clone(chainArr);
-    const link = chain.shift(); // Every thing in the chain will always be a function right?
-    if (!link) throw Error('Function chain is empty.');
-    const { function: fnName, arguments: fnArgs } = link;
+    const ast = chain.shift(); // Every thing in the chain will always be a function right?
+
+    if (!ast) {
+      throw Error('Function chain is empty.');
+    }
+
+    const { function: fnName, arguments: fnArgs } = ast;
     const fnDef = getByAlias(functions.toJS(), fnName);
 
     if (!fnDef) {
@@ -92,14 +155,30 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
       // Resolve arguments before passing to function
       // resolveArgs returns an object because the arguments themselves might
       // actually have a 'then' function which would be treated as a promise
-      const { resolvedArgs } = await resolveArgs(fnDef, context, fnArgs);
-      const newContext = await invokeFunction(fnDef, context, resolvedArgs);
-
+      const { resolvedArgs } = await resolveArgs(fnDef, ctx, fnArgs);
+      const newArgs: { [key: string]: any } = {};
+      Object.keys(resolvedArgs).forEach(key => {
+        newArgs[key] = isInterpreterResult(resolvedArgs[key])
+          ? resolvedArgs[key].out
+          : resolvedArgs[key];
+      });
+      const output = await invokeFunction(fnDef, ctx, newArgs);
       // if something failed, just return the failure
-      if (getType(newContext) === 'error') return newContext;
+      if (getType(output) === 'error') {
+        return output;
+      }
+
+      const result = {
+        args: resolvedArgs,
+        context,
+        fn: fnDef,
+        out: output,
+        ast,
+        next: chain,
+      };
 
       // Continue re-invoking chain until it's empty
-      return invokeChain(chain, newContext);
+      return invokeChain(chain, result);
     } catch (e) {
       // Everything that throws from a function will hit this
       // The interpreter should *never* fail. It should always return a `{type: error}` on failure
@@ -202,10 +281,20 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
       return asts.map((item: any) => {
         return async (ctx = context) => {
-          const newContext = await interpret(item, ctx);
+          const newContext = await _interpret(item, ctx);
+          const isResult = isInterpreterResult(newContext);
+          const newCtx = isResult ? newContext.out : newContext;
           // This is why when any sub-expression errors, the entire thing errors
-          if (getType(newContext) === 'error') throw newContext.error;
-          return cast(newContext, argDefs[argName as any].types);
+          if (getType(newCtx) === 'error') {
+            throw newCtx.error;
+          }
+          const c = cast(newCtx, argDefs[argName as any].types);
+          // if (isResult) {
+          //   newContext.out = c;
+          //   console.log(newContext);
+          //   return newContext;
+          // }
+          return c;
         };
       });
     });
@@ -234,11 +323,11 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
     return { resolvedArgs };
   }
 
-  const interpret: ExpressionInterpret = async function interpret(ast, context = null) {
+  const _interpret: ExpressionInterpret = async (ast, context = null) => {
     const type = getType(ast);
     switch (type) {
       case 'expression':
-        return invokeChain(ast.chain, context);
+        return await invokeChain(ast.chain, context);
       case 'string':
       case 'number':
       case 'null':
@@ -247,6 +336,14 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
       default:
         throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
     }
+  };
+
+  const interpret: ExpressionInterpret = async (ast, context = null) => {
+    const result = await _interpret(ast, context);
+    if (!debug && isInterpreterResult(result)) {
+      return result.out;
+    }
+    return result;
   };
 
   return interpret;

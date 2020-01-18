@@ -30,6 +30,7 @@ export type ExpressionInterpretWithHandlers = (
 
 export interface ExpressionInterpreter {
   interpretAst: ExpressionInterpretWithHandlers;
+  debugAst: ExpressionInterpretWithHandlers;
 }
 
 export interface ExpressionExecutor {
@@ -67,6 +68,7 @@ export interface IInterpreterHandlers {
   inspectorAdapters?: Adapters;
   variables?: Record<string, any>;
   abortSignal?: AbortSignal;
+  debug?: (data: any) => void;
 }
 
 export interface IInterpreterRenderHandlers {

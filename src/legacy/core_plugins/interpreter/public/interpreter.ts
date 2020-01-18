@@ -50,3 +50,9 @@ export const interpretAst: ExpressionInterpretWithHandlers = async (ast, context
   const { interpreter } = await getInterpreter();
   return await interpreter.interpretAst(ast, context, handlers);
 };
+
+// TODO: This function will be left behind in the legacy platform.
+export const debugAst: ExpressionInterpretWithHandlers = async (ast, context, handlers) => {
+  const { interpreter } = await getInterpreter();
+  return await interpreter.debugAst(ast, context, handlers);
+};

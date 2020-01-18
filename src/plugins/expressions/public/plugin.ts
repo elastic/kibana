@@ -79,7 +79,7 @@ export interface ExpressionsSetup {
     functions: FunctionsRegistry;
     renderers: RenderFunctionsRegistry;
     types: TypesRegistry;
-    getExecutor: () => ExpressionExecutor;
+    getExecutor: (debug?: boolean) => ExpressionExecutor;
     loadLegacyServerFunctionWrappers: () => Promise<void>;
   };
 }
@@ -145,7 +145,16 @@ export class ExpressionsPublicPlugin
         });
         return interpret(ast, context);
       };
-      const executor: ExpressionExecutor = { interpreter: { interpretAst } };
+      const debugAst: ExpressionInterpretWithHandlers = (ast, context, handlers) => {
+        const debug = interpreterProvider({
+          debug: true,
+          types: types.toJS(),
+          handlers: { ...handlers, ...createHandlers() },
+          functions,
+        });
+        return debug(ast, context);
+      };
+      const executor: ExpressionExecutor = { interpreter: { interpretAst, debugAst } };
       return executor;
     };
 

@@ -342,6 +342,7 @@
     "typescript-fsa-reducers": "^0.4.5",
     "ui-select": "0.19.8",
     "unstated": "^2.1.1",
+    "use-query-params": "0.6.0",
     "uuid": "3.3.2",
     "venn.js": "0.2.20",
     "vscode-languageserver": "^5.2.1",

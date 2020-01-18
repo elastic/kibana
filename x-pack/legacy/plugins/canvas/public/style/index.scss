@@ -8,6 +8,7 @@
 @import '../apps/home/home_app/home_app';
 @import '../apps/workpad/workpad_app/workpad_app';
 @import '../apps/export/export/export_app';
+@import '../apps/element_builder/element_builder_app/components/editor';
 
 // Canvas components
 @import '../components/alignment_guide/alignment_guide';
@@ -68,3 +69,5 @@
 @import '../../canvas_plugin_src/renderers/time_filter/components/time_picker/time_picker.scss';
 @import '../../canvas_plugin_src/renderers/time_filter/components/time_picker_popover/time_picker_popover.scss';
 @import '../../canvas_plugin_src/uis/arguments/image_upload/image_upload.scss';
+
+@import '../apps/element_builder/element_builder_app/components/editor.scss';

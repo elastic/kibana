@@ -37,10 +37,8 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 // Add New Platform Context for any stories that need it
-const settings = new Map();
-settings.set('darkMode', true);
 const platform = {
-  uiSettings: settings,
+  uiSettings: new Map([['darkMode', true]]),
 };
 addDecorator(fn => <KibanaContextProvider services={platform}>{fn()}</KibanaContextProvider>);
 
