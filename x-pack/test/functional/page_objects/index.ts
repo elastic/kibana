@@ -67,7 +67,6 @@ export const pageObjects = {
   maps: GisPageProvider,
   statusPage: StatusPagePageProvider,
   upgradeAssistant: UpgradeAssistantProvider,
-  code: CodeHomePageProvider,
   uptime: UptimePageProvider,
   rollup: RollupPageProvider,
   licenseManagement: LicenseManagementPageProvider,
