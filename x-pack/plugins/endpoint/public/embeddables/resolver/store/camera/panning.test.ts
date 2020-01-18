@@ -58,4 +58,66 @@ describe('panning interaction', () => {
       });
     });
   });
+  describe('panning controls', () => {
+    describe('when user clicks on pan north button', () => {
+      beforeEach(() => {
+        const action: CameraAction = { type: 'userClickedPanControl', payload: 'north' };
+        store.dispatch(action);
+      });
+      it('translation should be updated north', () => {
+        const actual = translation(store.getState());
+        expect(actual).toMatchInlineSnapshot(`
+          Array [
+            0,
+            -32.49906769231164,
+          ]
+        `);
+      });
+    });
+    describe('when user clicks on pan south button', () => {
+      beforeEach(() => {
+        const action: CameraAction = { type: 'userClickedPanControl', payload: 'south' };
+        store.dispatch(action);
+      });
+      it('translation should be updated south', () => {
+        const actual = translation(store.getState());
+        expect(actual).toMatchInlineSnapshot(`
+          Array [
+            0,
+            32.49906769231164,
+          ]
+        `);
+      });
+    });
+    describe('when user clicks on pan east button', () => {
+      beforeEach(() => {
+        const action: CameraAction = { type: 'userClickedPanControl', payload: 'east' };
+        store.dispatch(action);
+      });
+      it('translation should be updated east', () => {
+        const actual = translation(store.getState());
+        expect(actual).toMatchInlineSnapshot(`
+          Array [
+            32.49906769231164,
+            0,
+          ]
+        `);
+      });
+    });
+    describe('when user clicks on pan west button', () => {
+      beforeEach(() => {
+        const action: CameraAction = { type: 'userClickedPanControl', payload: 'west' };
+        store.dispatch(action);
+      });
+      it('translation should be updated west', () => {
+        const actual = translation(store.getState());
+        expect(actual).toMatchInlineSnapshot(`
+          Array [
+            -32.49906769231164,
+            0,
+          ]
+        `);
+      });
+    });
+  });
 });

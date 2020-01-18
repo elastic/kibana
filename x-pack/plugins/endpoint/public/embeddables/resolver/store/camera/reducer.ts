@@ -9,7 +9,7 @@ import { applyMatrix3, subtract } from '../../lib/vector2';
 import { userIsPanning, translation, projectionMatrix, inverseProjectionMatrix } from './selectors';
 import { clamp } from '../../lib/math';
 
-import { CameraState, ResolverAction } from '../../types';
+import { CameraState, ResolverAction, Vector2 } from '../../types';
 import { scaleToZoom } from './scale_to_zoom';
 
 function initialState(): CameraState {
@@ -113,11 +113,11 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
   } else if (action.type === 'userClickedPanControl') {
     const panDirection = action.payload;
     const deltaAmount = (1 + state.scalingFactor) * 20;
-    let delta: Vector;
+    let delta: Vector2;
     if (panDirection === 'north') {
-      delta = [0, deltaAmount];
-    } else if (panDirection === 'south') {
       delta = [0, -deltaAmount];
+    } else if (panDirection === 'south') {
+      delta = [0, deltaAmount];
     } else if (panDirection === 'east') {
       delta = [deltaAmount, 0];
     } else if (panDirection === 'west') {

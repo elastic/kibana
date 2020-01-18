@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, ChangeEvent } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiRange, EuiPanel, EuiIcon } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
@@ -28,8 +28,10 @@ export const GraphControls = styled(
       const scalingFactor = useSelector(selectors.scalingFactor);
 
       const handleZoomAmountChange = useCallback(
-        (event: ChangeEvent<HTMLInputElement>) => {
-          const valueAsNumber = parseFloat(event.target.value);
+        (event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
+          const valueAsNumber = parseFloat(
+            (event as React.ChangeEvent<HTMLInputElement>).target.value
+          );
           if (isNaN(valueAsNumber) === false) {
             dispatch({
               type: 'userSetZoomLevel',
@@ -59,17 +61,14 @@ export const GraphControls = styled(
         });
       }, [dispatch]);
 
-      const handlePanClick = useCallback(
-        (panDirection: PanDirection) => {
-          return () => {
-            dispatch({
-              type: 'userClickedPanControl',
-              payload: panDirection,
-            });
-          };
-        },
-        [dispatch]
-      );
+      const handlePanClick = (panDirection: PanDirection) => {
+        return () => {
+          dispatch({
+            type: 'userClickedPanControl',
+            payload: panDirection,
+          });
+        };
+      };
 
       return (
         <div className={className}>
