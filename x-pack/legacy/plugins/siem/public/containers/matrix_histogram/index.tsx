@@ -26,7 +26,6 @@ import { SetQuery } from '../../pages/hosts/navigation/types';
 export interface OwnProps extends QueryTemplateProps {
   dataKey: string | string[];
   defaultStackByOption: MatrixHistogramOption;
-  deleteQuery?: ({ id }: { id: string }) => void;
   errorMessage: string;
   headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
