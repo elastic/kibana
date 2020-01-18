@@ -101,11 +101,16 @@ describe('CspConfig', () => {
     } as any);
 
     expect(cspConfig).toMatchInlineSnapshot(`
-      Array [
-        "script-src 'unsafe-eval' 'self'",
-        "worker-src blob: 'self'",
-        "style-src blob: 'unsafe-inline' 'self'",
-      ]
+      CspConfig {
+        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src blob: 'unsafe-inline' 'self'",
+        "rules": Array [
+          "script-src 'unsafe-eval' 'self'",
+          "worker-src blob: 'self'",
+          "style-src blob: 'unsafe-inline' 'self'",
+        ],
+        "strict": true,
+        "warnLegacyBrowsers": true,
+      }
     `);
   });
 
@@ -115,11 +120,16 @@ describe('CspConfig', () => {
     } as any);
 
     expect(cspConfig).toMatchInlineSnapshot(`
-      Array [
-        "script-src 'unsafe-eval' 'self'",
-        "worker-src blob: 'self'",
-        "style-src 'unsafe-inline' 'self'",
-      ]
+      CspConfig {
+        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "rules": Array [
+          "script-src 'unsafe-eval' 'self'",
+          "worker-src blob: 'self'",
+          "style-src 'unsafe-inline' 'self'",
+        ],
+        "strict": true,
+        "warnLegacyBrowsers": true,
+      }
     `);
   });
 });
