@@ -33,7 +33,6 @@ import { GisPageProvider } from './gis_page';
 import { StatusPagePageProvider } from './status_page';
 // @ts-ignore not ts yet
 import { UpgradeAssistantProvider } from './upgrade_assistant';
-import { CodeHomePageProvider } from './code_page';
 // @ts-ignore not ts yet
 import { RollupPageProvider } from './rollup_page';
 import { UptimePageProvider } from './uptime_page';
