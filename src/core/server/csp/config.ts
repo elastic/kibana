@@ -18,7 +18,6 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../../legacy/utils/artifact_type';
 
 /**
  * @internal
@@ -34,7 +33,7 @@ export const config = {
       defaultValue: [
         `script-src 'unsafe-eval' 'self'`,
         `worker-src blob: 'self'`,
-        `style-src ${IS_KIBANA_DISTRIBUTABLE ? '' : 'blob: '}'unsafe-inline' 'self'`,
+        `style-src 'unsafe-inline' 'self'`,
       ],
     }),
     strict: schema.boolean({ defaultValue: true }),

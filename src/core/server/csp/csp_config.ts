@@ -18,6 +18,7 @@
  */
 
 import { config } from './config';
+import { Env } from '../config';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
@@ -66,10 +67,18 @@ export class CspConfig implements ICspConfig {
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}) {
+  constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}, env?: Env) {
     const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
 
     this.rules = source.rules;
+    if (!env?.packageInfo.dist) {
+      for (const [i, rule] of this.rules.entries()) {
+        if (rule.startsWith('style-src ')) {
+          this.rules[i] = rule.replace(/^style-src /, 'style-src blob:');
+        }
+      }
+    }
+
     this.strict = source.strict;
     this.warnLegacyBrowsers = source.warnLegacyBrowsers;
     this.header = source.rules.join('; ');
