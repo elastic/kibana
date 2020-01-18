@@ -14,13 +14,8 @@ import {
   NetworkTopCountriesData,
   NetworkTopNFlowData,
   NetworkTopTablesSortField,
-  NetworkDsOverTimeData,
 } from '../../graphql/types';
-import {
-  FrameworkRequest,
-  RequestOptionsPaginated,
-  MatrixHistogramRequestOptions,
-} from '../framework';
+import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 export * from './elasticsearch_adapter';
 import { NetworkAdapter } from './types';
 
@@ -71,13 +66,6 @@ export class Network {
     options: NetworkDnsRequestOptions
   ): Promise<NetworkDnsData> {
     return this.adapter.getNetworkDns(req, options);
-  }
-
-  public async getNetworkDnsHistogramData(
-    req: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<NetworkDsOverTimeData> {
-    return this.adapter.getNetworkDnsHistogramData(req, options);
   }
 
   public async getNetworkHttp(

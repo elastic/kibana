@@ -20,12 +20,7 @@ import {
   NetworkTopNFlowEdges,
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
-import {
-  DatabaseSearchResponse,
-  FrameworkAdapter,
-  FrameworkRequest,
-  MatrixHistogramRequestOptions,
-} from '../framework';
+import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
@@ -36,7 +31,6 @@ import {
   NetworkTopNFlowRequestOptions,
 } from './index';
 import { buildDnsQuery } from './query_dns.dsl';
-import { buildDnsHistogramQuery } from '../matrix_histogram/query_dns_histogram.dsl';
 import { buildTopNFlowQuery, getOppositeField } from './query_top_n_flow.dsl';
 import { buildHttpQuery } from './query_http.dsl';
 import { buildTopCountriesQuery } from './query_top_countries.dsl';
@@ -46,9 +40,7 @@ import {
   NetworkTopCountriesBuckets,
   NetworkHttpBuckets,
   NetworkTopNFlowBuckets,
-  DnsHistogramGroupData,
 } from './types';
-import { EventHit } from '../events/types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
