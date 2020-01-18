@@ -23,8 +23,10 @@
  * @returns {string} the type to use for determining the display and editor
  */
 
+import { Setting } from '../types';
+
 // todo
-export function getValType(def: any, value?: any): string {
+export function getValType(def: Partial<Setting>, value?: any): string {
   if (def.type) {
     return def.type;
   }
