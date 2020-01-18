@@ -75,10 +75,10 @@ export const BATCH_ACTION_EXPORT_SELECTED = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_EDIT_INDEX_PATTERNS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.batchActions.editIndexPatternsTitle',
+export const BATCH_ACTION_DUPLICATE_SELECTED = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.batchActions.duplicateSelectedTitle',
   {
-    defaultMessage: 'Edit selected index patterns…',
+    defaultMessage: 'Duplicate selected…',
   }
 );
 
