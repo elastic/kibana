@@ -5,6 +5,7 @@
  */
 
 import { indexPatternService } from './kibana_services';
+import { isNestedField } from '../../../../../src/plugins/data/common';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
@@ -20,7 +21,11 @@ export async function getIndexPatternsFromIds(indexPatternIds = []) {
 
 export function getTermsFields(fields) {
   return fields.filter(field => {
-    return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
+    return (
+      field.aggregatable &&
+      !isNestedField(field) &&
+      ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
+    );
   });
 }
 
