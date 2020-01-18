@@ -18,7 +18,7 @@ import React, { Dispatch } from 'react';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import {
   deleteRulesAction,
-  duplicateRuleAction,
+  duplicateRulesAction,
   editRuleAction,
   exportRulesAction,
 } from './actions';
@@ -48,7 +48,7 @@ const getActions = (
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
     onClick: (rowItem: TableData) =>
-      duplicateRuleAction(rowItem.sourceRule, dispatch, dispatchToaster),
+      duplicateRulesAction([rowItem.sourceRule], dispatch, dispatchToaster),
   },
   {
     description: i18n.EXPORT_RULE,
@@ -62,7 +62,6 @@ const getActions = (
     icon: 'trash',
     name: i18n.DELETE_RULE,
     onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, dispatchToaster),
-    enabled: (rowItem: TableData) => !rowItem.immutable,
   },
 ];
 
