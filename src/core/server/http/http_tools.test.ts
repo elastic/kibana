@@ -120,6 +120,7 @@ describe('getServerOptions', () => {
           certificate: 'some-certificate-path',
         },
       }),
+      {} as any,
       {} as any
     );
 
@@ -149,6 +150,7 @@ describe('getServerOptions', () => {
           clientAuthentication: 'required',
         },
       }),
+      {} as any,
       {} as any
     );
 

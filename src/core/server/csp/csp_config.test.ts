@@ -94,4 +94,32 @@ describe('CspConfig', () => {
       }
     `);
   });
+
+  test(`includes blob: style-src if env specified and it indicates we're running from source`, () => {
+    const cspConfig = new CspConfig({}, {
+      packageInfo: { dist: false },
+    } as any);
+
+    expect(cspConfig).toMatchInlineSnapshot(`
+      Array [
+        "script-src 'unsafe-eval' 'self'",
+        "worker-src blob: 'self'",
+        "style-src blob: 'unsafe-inline' 'self'",
+      ]
+    `);
+  });
+
+  test(`does not include blob: style-src if env specified and it indicates we're running the dist`, () => {
+    const cspConfig = new CspConfig({}, {
+      packageInfo: { dist: true },
+    } as any);
+
+    expect(cspConfig).toMatchInlineSnapshot(`
+      Array [
+        "script-src 'unsafe-eval' 'self'",
+        "worker-src blob: 'self'",
+        "style-src 'unsafe-inline' 'self'",
+      ]
+    `);
+  });
 });

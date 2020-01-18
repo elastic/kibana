@@ -149,7 +149,7 @@ export class HttpConfig {
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType, env?: Env) {
+  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType, env: Env) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
