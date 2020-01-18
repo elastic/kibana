@@ -113,14 +113,6 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     });
   }
 
-  saveConfig = (name: string, value: any) => {
-    return this.props.config.set(name, value);
-  };
-
-  clearConfig = (name: string) => {
-    return this.props.config.remove(name);
-  };
-
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     return Object.entries(all)
@@ -198,8 +190,8 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}
-          save={this.saveConfig}
-          clear={this.clearConfig}
+          save={this.props.config.set.bind(this.props.config)}
+          clear={this.props.config.remove.bind(this.props.config)}
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
         />
