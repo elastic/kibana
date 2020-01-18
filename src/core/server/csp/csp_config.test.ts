@@ -19,10 +19,6 @@
 
 import { CspConfig } from '.';
 
-jest.mock('../../../legacy/utils/artifact_type.ts', () => ({
-  IS_KIBANA_DISTRIBUTABLE: true,
-}));
-
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
 // we test the default rules exactly so any change to those rules gets flagged

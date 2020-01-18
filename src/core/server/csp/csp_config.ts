@@ -70,11 +70,13 @@ export class CspConfig implements ICspConfig {
   constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}, env?: Env) {
     const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
 
-    this.rules = source.rules;
-    if (!env?.packageInfo.dist) {
+    this.rules = Array.from(source.rules);
+
+    // if we receive an env, and it indicates that this isn't a distributable, add `blob:` to the style csp rules
+    if (env && !env.packageInfo.dist) {
       for (const [i, rule] of this.rules.entries()) {
         if (rule.startsWith('style-src ')) {
-          this.rules[i] = rule.replace(/^style-src /, 'style-src blob:');
+          this.rules[i] = rule.replace(/^style-src /, 'style-src blob: ');
         }
       }
     }
