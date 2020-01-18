@@ -14,7 +14,7 @@ export const updatePrepackagedRules = async (
   alertsClient: AlertsClient,
   actionsClient: ActionsClient,
   savedObjectsClient: SavedObjectsClientContract,
-  rules: RuleAlertParamsRest[],
+  rules: PrepackagedRules[],
   outputIndex: string
 ): Promise<void> => {
   await rules.forEach(async rule => {
