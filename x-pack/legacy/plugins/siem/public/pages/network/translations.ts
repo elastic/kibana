@@ -22,10 +22,6 @@ export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.network.navigatio
   defaultMessage: 'DNS',
 });
 
-export const STACK_BY_DOMAIN = i18n.translate('xpack.siem.hosts.dns.stackByDomain', {
-  defaultMessage: 'unique domains',
-});
-
 export const ERROR_FETCHING_DNS_DATA = i18n.translate(
   'xpack.siem.hosts.navigation.dns.histogram.errorFetchingDnsData',
   {
