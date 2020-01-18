@@ -58,6 +58,11 @@ interface ConfigurationFormState extends OnFormUpdateArg<MappingsConfiguration> 
   submitForm?: FormHook<MappingsConfiguration>['submit'];
 }
 
+interface TemplatesFormState extends OnFormUpdateArg<MappingsTemplates> {
+  defaultValue: MappingsTemplates;
+  submitForm?: FormHook<MappingsTemplates>['submit'];
+}
+
 export interface State {
   isValid: boolean | undefined;
   configuration: ConfigurationFormState;
@@ -72,12 +77,7 @@ export interface State {
     term: string;
     result: SearchResult[];
   };
-  templates: {
-    defaultValue: {
-      dynamic_templates: MappingsTemplates['dynamic_templates'];
-    };
-    form?: FormHook<MappingsTemplates>;
-  } & OnFormUpdateArg<MappingsTemplates>;
+  templates: TemplatesFormState;
 }
 
 export type Action =

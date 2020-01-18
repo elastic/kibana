@@ -11,8 +11,9 @@ export const MatrixHistogramGqlQuery = gql`
     $isAlertsHistogram: Boolean!
     $isAnomaliesHistogram: Boolean!
     $isAuthenticationsHistogram: Boolean!
+    $isDnsHistogram: Boolean!
     $defaultIndex: [String!]!
-    $isEventsType: Boolean!
+    $isEventsHistogram: Boolean!
     $filterQuery: String
     $inspect: Boolean!
     $sourceId: ID!
@@ -77,7 +78,24 @@ export const MatrixHistogramGqlQuery = gql`
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
         stackByField: $stackByField
-      ) @include(if: $isEventsType) {
+      ) @include(if: $isEventsHistogram) {
+        matrixHistogramData {
+          x
+          y
+          g
+        }
+        totalCount
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
+      }
+      NetworkDnsHistogram(
+        timerange: $timerange
+        filterQuery: $filterQuery
+        defaultIndex: $defaultIndex
+        stackByField: $stackByField
+      ) @include(if: $isDnsHistogram) {
         matrixHistogramData {
           x
           y

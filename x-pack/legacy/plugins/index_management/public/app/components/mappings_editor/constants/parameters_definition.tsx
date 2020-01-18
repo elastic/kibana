@@ -100,14 +100,10 @@ const fielddataFrequencyFilterParam = {
       },
     },
   },
-  schema: t.intersection([
-    t.partial({
-      min: t.number,
-      max: t.number,
-      min_segment_size: t.number,
-    }),
-    t.brand(t.UnknownRecord, (v: any): v is any => !Array.isArray(v), 'Array'),
-  ]),
+  schema: t.record(
+    t.union([t.literal('min'), t.literal('max'), t.literal('min_segment_size')]),
+    t.number
+  ),
 };
 
 const analyzerValidations = [
@@ -303,7 +299,6 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
     },
-    schema: t.string,
   },
   null_value_ip: {
     fieldConfig: {

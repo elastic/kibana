@@ -74,7 +74,7 @@ interface TimeSeriesExplorerUrlStateManager {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
+export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
   config,
   jobsWithTimeRange,
 }) => {
@@ -102,22 +102,26 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
     timefilter.enableAutoRefreshSelector();
   }, []);
 
+  // We cannot simply infer bounds from the globalState's `time` attribute
+  // with `moment` since it can contain custom strings such as `now-15m`.
+  // So when globalState's `time` changes, we update the timefilter and use
+  // `timefilter.getBounds()` to update `bounds` in this component's state.
+  const [bounds, setBounds] = useState<TimeRangeBounds | undefined>(undefined);
   useEffect(() => {
     if (globalState?.time !== undefined) {
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
       });
+
+      const timefilterBounds = timefilter.getBounds();
+      // Only if both min/max bounds are valid moment times set the bounds.
+      // An invalid string restored from globalState might return `undefined`.
+      if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
+        setBounds(timefilter.getBounds());
+      }
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
-
-  let bounds: TimeRangeBounds | undefined;
-  if (globalState?.time !== undefined) {
-    bounds = {
-      min: moment(globalState.time.from),
-      max: moment(globalState.time.to),
-    };
-  }
 
   const selectedJobIds = globalState?.ml?.jobIds;
   // Sort selectedJobIds so we can be sure comparison works when stringifying.
@@ -140,14 +144,17 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
   }, [JSON.stringify(selectedJobIds)]);
 
   // Next we get globalState and appState information to pass it on as props later.
-  // If a job change is going on, we fall back to defaults (as if appState was already cleard),
+  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
   // otherwise the page could break.
   const selectedDetectorIndex = isJobChange
     ? 0
     : +appState?.mlTimeSeriesExplorer?.detectorIndex || 0;
   const selectedEntities = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.forecastId;
-  const zoom = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
+  const zoom: {
+    from: string;
+    to: string;
+  } = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
 
   const selectedJob = selectedJobIds && mlJobService.getJob(selectedJobIds[0]);
 
