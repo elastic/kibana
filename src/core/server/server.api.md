@@ -582,7 +582,7 @@ export interface CoreStart {
 // @public
 export class CspConfig implements ICspConfig {
     // @internal
-    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>, env?: Env);
     // (undocumented)
     static readonly DEFAULT: CspConfig;
     // (undocumented)
