@@ -85,6 +85,7 @@ function getColumns() {
       }),
       render: id => <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`}>{id}</EuiLink>,
       sortable: true,
+      scope: 'row',
     },
     {
       field: 'description',

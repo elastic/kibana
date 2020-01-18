@@ -20,7 +20,7 @@ import { Rule } from '../../../../../containers/detection_engine/rules';
 import * as i18n from './translations';
 import * as i18nActions from '../../../rules/translations';
 import { displaySuccessToast, useStateToaster } from '../../../../../components/toasters';
-import { deleteRulesAction, duplicateRuleAction } from '../../all/actions';
+import { deleteRulesAction, duplicateRulesAction } from '../../all/actions';
 import { RuleDownloader } from '../rule_downloader';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../../components/link_to/redirect_to_detection_engine';
 
@@ -66,7 +66,7 @@ const RuleActionsOverflowComponent = ({
               disabled={userHasNoPermissions}
               onClick={async () => {
                 setIsPopoverOpen(false);
-                await duplicateRuleAction(rule, noop, dispatchToaster);
+                await duplicateRulesAction([rule], noop, dispatchToaster);
               }}
             >
               {i18nActions.DUPLICATE_RULE}

@@ -13,6 +13,7 @@ import {
   EuiHealth,
   EuiTab,
   EuiText,
+  EuiTabs,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -79,14 +80,19 @@ export interface DispatchProps {
   }>;
 }
 
+enum RuleDetailTabs {
+  signals = 'signals',
+  failures = 'failures',
+}
+
 const ruleDetailTabs = [
   {
-    id: 'signal',
+    id: RuleDetailTabs.signals,
     name: detectionI18n.SIGNAL,
     disabled: false,
   },
   {
-    id: 'failure',
+    id: RuleDetailTabs.failures,
     name: i18n.FAILURE_HISTORY_TAB,
     disabled: false,
   },
@@ -107,7 +113,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
     } = useUserInfo();
     const { ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
-    const [ruleDetailTab, setRuleDetailTab] = useState('signal');
+    const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
       rule,
       detailsView: true,
@@ -188,22 +194,27 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
         : 'subdued';
 
     const tabs = useMemo(
-      () =>
-        ruleDetailTabs.map(tab => (
-          <EuiTab
-            onClick={() => setRuleDetailTab(tab.id)}
-            isSelected={tab.id === ruleDetailTab}
-            disabled={tab.disabled}
-            key={tab.name}
-          >
-            {tab.name}
-          </EuiTab>
-        )),
+      () => (
+        <EuiTabs>
+          {ruleDetailTabs.map(tab => (
+            <EuiTab
+              onClick={() => setRuleDetailTab(tab.id)}
+              isSelected={tab.id === ruleDetailTab}
+              disabled={tab.disabled}
+              key={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ),
       [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
     );
     const ruleError = useMemo(
       () =>
-        rule?.status === 'failed' && ruleDetailTab === 'signal' && rule?.last_failure_at != null ? (
+        rule?.status === 'failed' &&
+        ruleDetailTab === RuleDetailTabs.signals &&
+        rule?.last_failure_at != null ? (
           <RuleStatusFailedCallOut
             message={rule?.last_failure_message ?? ''}
             date={rule?.last_failure_at}
@@ -316,7 +327,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                       {ruleError}
                       {tabs}
                       <EuiSpacer />
-                      {ruleDetailTab === 'signal' && (
+                      {ruleDetailTab === RuleDetailTabs.signals && (
                         <>
                           <EuiFlexGroup>
                             <EuiFlexItem component="section" grow={1}>
@@ -381,7 +392,9 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           )}
                         </>
                       )}
-                      {ruleDetailTab === 'failure' && <FailureHistory id={rule?.id} />}
+                      {ruleDetailTab === RuleDetailTabs.failures && (
+                        <FailureHistory id={rule?.id} />
+                      )}
                     </WrapperPage>
                   </StickyContainer>
                 )}

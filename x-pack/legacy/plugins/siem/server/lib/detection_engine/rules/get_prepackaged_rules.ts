@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertParamsRest } from '../types';
+import { PrepackagedRules } from '../types';
 import { addPrepackagedRulesSchema } from '../routes/schemas/add_prepackaged_rules_schema';
 import { rawRules } from './prepackaged_rules';
 
@@ -13,9 +13,7 @@ import { rawRules } from './prepackaged_rules';
  * that they are adding incorrect schema rules. Also this will auto-flush in all the default
  * aspects such as default interval of 5 minutes, default arrays, etc...
  */
-export const validateAllPrepackagedRules = (
-  rules: RuleAlertParamsRest[]
-): RuleAlertParamsRest[] => {
+export const validateAllPrepackagedRules = (rules: PrepackagedRules[]): PrepackagedRules[] => {
   return rules.map(rule => {
     const validatedRule = addPrepackagedRulesSchema.validate(rule);
     if (validatedRule.error != null) {
@@ -35,6 +33,6 @@ export const validateAllPrepackagedRules = (
   });
 };
 
-export const getPrepackagedRules = (rules = rawRules): RuleAlertParamsRest[] => {
+export const getPrepackagedRules = (rules = rawRules): PrepackagedRules[] => {
   return validateAllPrepackagedRules(rules);
 };
