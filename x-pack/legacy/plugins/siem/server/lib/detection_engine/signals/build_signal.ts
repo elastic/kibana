@@ -4,17 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit, Signal } from './types';
+import { SignalSourceHit, Signal, Ancestor } from './types';
 import { OutputRuleAlertRest } from '../types';
 
-export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleAlertRest>): Signal => {
-  const signal: Signal = {
-    parent: {
+export const buildAncestor = (
+  doc: SignalSourceHit,
+  rule: Partial<OutputRuleAlertRest>
+): Ancestor => {
+  const existingSignal = doc._source.signal?.parent;
+  if (existingSignal != null) {
+    return {
+      rule: rule.id != null ? rule.id : '',
+      id: doc._id,
+      type: 'signal',
+      index: doc._index,
+      depth: existingSignal.depth + 1,
+    };
+  } else {
+    return {
+      rule: rule.id != null ? rule.id : '',
       id: doc._id,
       type: 'event',
       index: doc._index,
       depth: 1,
-    },
+    };
+  }
+};
+
+export const buildAncestorsSignal = (
+  doc: SignalSourceHit,
+  rule: Partial<OutputRuleAlertRest>
+): Signal['ancestors'] => {
+  const newAncestor = buildAncestor(doc, rule);
+  const existingAncestors = doc._source.signal?.ancestors;
+  if (existingAncestors != null) {
+    return [...existingAncestors, newAncestor];
+  } else {
+    return [newAncestor];
+  }
+};
+
+export const buildSignal = (doc: SignalSourceHit, rule: Partial<OutputRuleAlertRest>): Signal => {
+  const parent = buildAncestor(doc, rule);
+  const ancestors = buildAncestorsSignal(doc, rule);
+  const signal: Signal = {
+    parent,
+    ancestors,
     original_time: doc._source['@timestamp'],
     status: 'open',
     rule,

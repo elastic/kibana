@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { countBy, isEmpty } from 'lodash';
+import { countBy, isEmpty, isArray } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSearchResponse, BulkResponse } from './types';
@@ -43,6 +43,20 @@ export const singleBulkCreate = async ({
   enabled,
   tags,
 }: SingleBulkCreateParams): Promise<boolean> => {
+  // This is for signals on signals to work correctly.
+  // If our id already exists in the parent id, then we do not
+  // want to create another signal based on something we have
+  // already written out.
+  someResult.hits.hits = someResult.hits.hits.filter(doc => {
+    if (doc._source.signal?.parent.id == null) {
+      return true;
+    } else {
+      return !doc._source.signal.ancestors.some(ancestor => {
+        return ancestor.rule === id;
+      });
+    }
+  });
+
   if (someResult.hits.hits.length === 0) {
     return true;
   }

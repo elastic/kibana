@@ -246,7 +246,7 @@ export const signalRulesAlertType = ({
           // TODO: Error handling and writing of errors into a signal that has error
           // handling/conditions
           logger.error(
-            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", ${err.message}`
           );
           const sDate = new Date().toISOString();
           currentStatusSavedObject.attributes.status = 'failed';

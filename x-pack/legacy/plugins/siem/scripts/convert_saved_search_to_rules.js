@@ -114,7 +114,6 @@ async function main() {
         );
         return [...accum, parsedLine];
       } catch (err) {
-        console.log('error parsing a line in this file:', json, line);
         return accum;
       }
     }, []);
