@@ -46,7 +46,8 @@ export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
 
-export interface IRuleStatusAttributes {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface IRuleStatusAttributes extends Record<string, any> {
   alertId: string; // created alert id.
   statusDate: string;
   lastFailureAt: string | null | undefined;
