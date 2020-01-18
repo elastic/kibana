@@ -24,10 +24,6 @@ import { UiSettingsType } from '../../../../../../../../core/server/types';
 describe('Settings', function() {
   describe('Advanced', function() {
     describe('getCategoryName(category)', function() {
-      it('should be a function', function() {
-        expect(isDefaultValue).to.be.a(Function);
-      });
-
       describe('when given a setting definition object', function() {
         const setting = {
           isCustom: false,

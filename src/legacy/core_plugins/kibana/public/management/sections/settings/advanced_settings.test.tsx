@@ -26,6 +26,7 @@ import {
   UserProvidedValues,
   UiSettingsType,
 } from '../../../../../../../core/server/';
+import { Setting } from './types';
 
 import { AdvancedSettings } from './advanced_settings';
 
@@ -47,7 +48,7 @@ jest.mock('./components/search', () => ({
   },
 }));
 
-const defaultConfig = {
+const defaultConfig: Partial<Setting> = {
   displayName: 'defaultName',
   requiresPageReload: false,
   isOverridden: false,
