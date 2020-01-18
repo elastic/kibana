@@ -86,7 +86,7 @@ export const getColumns = (
       field: 'method',
       name: i18n.COLUMN_METHOD,
       truncateText: true,
-      width: '16%',
+      width: '14%',
     },
     {
       field: 'severity',
@@ -161,7 +161,7 @@ export const getColumns = (
         />
       ),
       sortable: true,
-      width: '85px',
+      width: '95px',
     },
   ];
   const actions: RulesColumns[] = [

@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiHealth,
   EuiTab,
+  EuiText,
   EuiTabs,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -249,7 +250,6 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
                           text: i18n.BACK_TO_RULES,
                         }}
-                        badgeOptions={{ text: i18n.EXPERIMENTAL }}
                         border
                         subtitle={subTitle}
                         subtitle2={[
@@ -273,7 +273,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
                               <EuiHealth color={statusColor}>
-                                {rule?.status ?? getEmptyTagValue()}
+                                <EuiText size="xs">{rule?.status ?? getEmptyTagValue()}</EuiText>
                               </EuiHealth>
                             </EuiFlexItem>
                             {rule?.status_date && (
