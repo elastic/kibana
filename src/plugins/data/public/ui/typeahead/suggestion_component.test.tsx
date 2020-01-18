@@ -19,14 +19,14 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { AutocompleteSuggestion } from '../..';
+import { autocomplete } from '../..';
 import { SuggestionComponent } from './suggestion_component';
 
 const noop = () => {
   return;
 };
 
-const mockSuggestion: AutocompleteSuggestion = {
+const mockSuggestion: autocomplete.QuerySuggestion = {
   description: 'This is not a helpful suggestion',
   end: 0,
   start: 42,
