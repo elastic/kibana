@@ -22,7 +22,7 @@ export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.add
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Signal detection rules',
 });
 
 export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules.refreshTitle', {
