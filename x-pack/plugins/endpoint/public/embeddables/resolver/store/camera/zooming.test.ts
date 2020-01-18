@@ -152,7 +152,7 @@ describe('zooming', () => {
     });
   });
   describe('zoom controls', () => {
-    let previousScalingFactor;
+    let previousScalingFactor: CameraState['scalingFactor'];
     describe('when user clicks on zoom in button', () => {
       beforeEach(() => {
         previousScalingFactor = scalingFactor(store.getState());
