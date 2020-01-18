@@ -143,14 +143,6 @@ export default async function({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
-      code: {
-        pathname: '/app/code',
-        hash: '/admin',
-      },
-      codeSearch: {
-        pathname: '/app/code',
-        hash: '/search',
-      },
       uptime: {
         pathname: '/app/uptime',
       },
