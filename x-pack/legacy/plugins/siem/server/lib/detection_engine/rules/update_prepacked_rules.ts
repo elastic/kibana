@@ -8,7 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { ActionsClient } from '../../../../../actions';
 import { AlertsClient } from '../../../../../alerting';
 import { updateRules } from './update_rules';
-import { RuleAlertParamsRest } from '../types';
+import { PrepackagedRules } from '../types';
 
 export const updatePrepackagedRules = async (
   alertsClient: AlertsClient,

@@ -146,7 +146,7 @@ export interface DeleteRulesProps {
 }
 
 export interface DuplicateRulesProps {
-  rules: Rules;
+  rules: Rule[];
 }
 
 export interface BasicFetchProps {
