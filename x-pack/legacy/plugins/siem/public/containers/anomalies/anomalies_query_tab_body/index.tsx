@@ -38,6 +38,14 @@ export const AnomaliesQueryTabBody = ({
   flowTarget,
   ip,
 }: AnomaliesQueryTabBodyProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
+
   const [, siemJobs] = useSiemJobs(true);
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
@@ -49,14 +57,6 @@ export const AnomaliesQueryTabBody = ({
     flowTarget,
     ip
   );
-
-  useEffect(() => {
-    return () => {
-      if (deleteQuery) {
-        deleteQuery({ id: ID });
-      }
-    };
-  }, []);
 
   return (
     <>

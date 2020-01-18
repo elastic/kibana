@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { getOr } from 'lodash/fp';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { useStateToaster } from '../../components/toasters';
@@ -27,7 +27,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
 }: MatrixHistogramQueryProps) => {
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [, dispatchToaster] = useStateToaster();
-  const [refetch, setRefetch] = useState<inputsModel.Refetch>();
+  const refetch = useRef<inputsModel.Refetch>();
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<MatrixOverTimeHistogramData[] | null>(null);
   const [inspect, setInspect] = useState<inputsModel.InspectQuery | null>(null);
@@ -59,7 +59,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
       return apolloClient
         .query<GetMatrixHistogramQuery.Query, GetMatrixHistogramQuery.Variables>({
           query: MatrixHistogramGqlQuery,
-          fetchPolicy: 'cache-first',
+          fetchPolicy: 'network-only',
           variables: matrixHistogramVariables,
           context: {
             fetchOptions: {
@@ -88,9 +88,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
           }
         );
     }
-    setRefetch(() => {
-      fetchData();
-    });
+    refetch.current = fetchData;
     fetchData();
     return () => {
       isSubscribed = false;
@@ -98,5 +96,5 @@ export const useQuery = <Hit, Aggs, TCache = object>({
     };
   }, [defaultIndex, filterQuery, isInspected, stackByField, startDate, endDate, data]);
 
-  return { data, loading, inspect, totalCount, refetch };
+  return { data, loading, inspect, totalCount, refetch: refetch.current };
 };

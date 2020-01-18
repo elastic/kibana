@@ -24,7 +24,7 @@ const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
 const authStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.NAVIGATION_AUTHENTICATIONS_STACK_BY_EVENT_TYPE,
+    text: 'event.type',
     value: 'event.type',
   },
 ];

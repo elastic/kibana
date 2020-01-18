@@ -168,6 +168,7 @@ const MatrixHistogramComponent: React.FC<MatrixHistogramProps & MatrixHistogramQ
     loading,
     refetch,
     data,
+    refetch,
   ]);
 
   return !hideHistogram ? (
