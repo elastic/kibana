@@ -5,9 +5,10 @@
  */
 
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { isEqual, get } from 'lodash/fp';
+import { isEqual } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 
+import { setFieldValue } from '../../helpers';
 import { RuleStep, RuleStepProps, ScheduleStepRule } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
@@ -67,12 +68,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
         isNew: false,
       };
       setMyStepData(myDefaultValues);
-      Object.keys(schema).forEach(key => {
-        const val = get(key, myDefaultValues);
-        if (val != null) {
-          form.setFieldValue(key, val);
-        }
-      });
+      setFieldValue(form, schema, myDefaultValues);
     }
   }, [defaultValues]);
 

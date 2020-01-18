@@ -21,11 +21,13 @@ interface UseCreatePackagedRules {
 /**
  * Hook for creating the packages rules
  *
+ * @param canUserCRUD boolean
  * @param hasIndexManage boolean
  * @param hasManageApiKey boolean
  * @param isAuthenticated boolean
  * @param isSignalIndexExists boolean
  *
+ *  @returns [loading, hasCreatedPackageRules]
  */
 export const useCreatePackagedRules = ({
   canUserCRUD,

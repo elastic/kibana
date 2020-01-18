@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const BACK_TO_DETECTION_ENGINE = i18n.translate(
   'xpack.siem.detectionEngine.rules.backOptionsHeader',
   {
-    defaultMessage: 'Back to detection engine',
+    defaultMessage: 'Back to detections',
   }
 );
 

@@ -232,7 +232,7 @@ export const CreateRuleComponent = React.memo(() => {
     <>
       <WrapperPage restrictWidth>
         <HeaderPage
-          backOptions={{ href: '#detections/rules', text: 'Back to rules' }}
+          backOptions={{ href: '#detections/rules', text: i18n.BACK_TO_RULES }}
           border
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
