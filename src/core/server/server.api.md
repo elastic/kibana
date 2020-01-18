@@ -1947,7 +1947,9 @@ export interface StringValidation {
     // (undocumented)
     message: string;
     // (undocumented)
-    regexString: string;
+    regex?: RegExp;
+    // (undocumented)
+    regexString?: string;
 }
 
 // @public

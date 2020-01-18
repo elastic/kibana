@@ -15,5 +15,6 @@ export interface StringValidation
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [message](./kibana-plugin-server.stringvalidation.message.md) | <code>string</code> |  |
+|  [regex](./kibana-plugin-server.stringvalidation.regex.md) | <code>RegExp</code> |  |
 |  [regexString](./kibana-plugin-server.stringvalidation.regexstring.md) | <code>string</code> |  |
 
