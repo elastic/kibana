@@ -18,7 +18,7 @@ import { useHistory } from 'react-router-dom';
 import { Rule } from '../../../../../containers/detection_engine/rules';
 import * as i18n from './translations';
 import * as i18nActions from '../../../rules/translations';
-import { deleteRulesAction, duplicateRuleAction } from '../../all/actions';
+import { deleteRulesAction, duplicateRulesAction } from '../../all/actions';
 import { displaySuccessToast, useStateToaster } from '../../../../../components/toasters';
 import { RuleDownloader } from '../rule_downloader';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../../components/link_to/redirect_to_detection_engine';
@@ -54,7 +54,7 @@ const RuleActionsOverflowComponent = ({
               disabled={userHasNoPermissions}
               onClick={async () => {
                 setIsPopoverOpen(false);
-                await duplicateRuleAction(rule, noop, dispatchToaster);
+                await duplicateRulesAction([rule], noop, dispatchToaster);
               }}
             >
               {i18nActions.DUPLICATE_RULE}
@@ -73,7 +73,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
-              disabled={userHasNoPermissions || rule.immutable}
+              disabled={userHasNoPermissions}
               onClick={async () => {
                 setIsPopoverOpen(false);
                 await deleteRulesAction([rule.id], noop, dispatchToaster, onRuleDeletedCallback);

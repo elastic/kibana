@@ -12,10 +12,11 @@ describe('queryRulesSchema', () => {
     expect(queryRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({}).error).toBeTruthy();
   });
 
-  test('both rule_id and id being supplied dot not validate', () => {
+  test('both rule_id and id being supplied do not validate', () => {
     expect(
       queryRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({ rule_id: '1', id: '1' }).error
-    ).toBeTruthy();
+        .message
+    ).toEqual('"value" contains a conflict between exclusive peers [id, rule_id]');
   });
 
   test('only id validates', () => {

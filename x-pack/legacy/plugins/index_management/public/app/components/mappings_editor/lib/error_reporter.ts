@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ValidationError, Validation } from 'io-ts';
+import { ValidationError } from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { Reporter } from 'io-ts/lib/Reporter';
 
 export type ReporterResult = Array<{ path: string[]; message: string }>;
 
-export const failure = (validation: any): ReporterResult => {
-  return validation.map((e: ValidationError) => {
+const failure = (validation: ValidationError[]): ReporterResult => {
+  return validation.map(e => {
     const path: string[] = [];
     let validationName = '';
 
@@ -37,6 +37,6 @@ export const failure = (validation: any): ReporterResult => {
 const empty: never[] = [];
 const success = () => empty;
 
-export const ErrorReporter: Reporter<ReporterResult> = {
-  report: (validation: Validation<any>) => fold(failure, success)(validation as any),
+export const errorReporter: Reporter<ReporterResult> = {
+  report: fold(failure, success),
 };

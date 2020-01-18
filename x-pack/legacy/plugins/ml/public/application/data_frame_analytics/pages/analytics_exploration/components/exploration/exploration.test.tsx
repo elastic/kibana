@@ -7,6 +7,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { KibanaContext } from '../../../../../contexts/kibana';
+import { kibanaContextValueMock } from '../../../../../contexts/kibana/__mocks__/kibana_context_value';
 
 jest.mock('../../../../../contexts/ui/use_ui_chrome_context');
 jest.mock('ui/new_platform');
@@ -22,7 +24,9 @@ jest.mock('react', () => {
 describe('Data Frame Analytics: <Exploration />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(
-      <Exploration jobId="the-job-id" jobStatus={DATA_FRAME_TASK_STATE.STOPPED} />
+      <KibanaContext.Provider value={kibanaContextValueMock}>
+        <Exploration jobId="the-job-id" jobStatus={DATA_FRAME_TASK_STATE.STOPPED} />
+      </KibanaContext.Provider>
     );
     // Without the jobConfig being loaded, the component will just return empty.
     expect(wrapper.text()).toMatch('');

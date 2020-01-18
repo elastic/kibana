@@ -22,13 +22,6 @@ export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.network.navigatio
   defaultMessage: 'DNS',
 });
 
-export const NAVIGATION_DNS_STACK_BY_DOMAIN = i18n.translate(
-  'xpack.siem.hosts.navigation.dns.stackByDomain',
-  {
-    defaultMessage: 'domain',
-  }
-);
-
 export const ERROR_FETCHING_DNS_DATA = i18n.translate(
   'xpack.siem.hosts.navigation.dns.histogram.errorFetchingDnsData',
   {
@@ -54,3 +47,9 @@ export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
 export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.network.navigation.alertsTitle', {
   defaultMessage: 'Alerts',
 });
+
+export const DOMAINS_COUNT_BY = (groupByField: string) =>
+  i18n.translate('xpack.siem.network.dns.stackByUniqueSubdomain', {
+    values: { groupByField },
+    defaultMessage: 'Top domains by {groupByField}',
+  });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trunc } from 'lodash';
+import { trunc, map } from 'lodash';
 import open from 'opn';
 import { parse as parseUrl } from 'url';
 import { Page, SerializableOrJSHandle, EvaluateFn } from 'puppeteer';
@@ -15,6 +15,7 @@ import {
   ConditionalHeaders,
   ConditionalHeadersConditions,
   ElementPosition,
+  InterceptedRequest,
   NetworkPolicy,
 } from '../../../../types';
 
@@ -59,35 +60,57 @@ export class HeadlessChromiumDriver {
     }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string },
     logger: LevelLogger
   ) {
-    await this.page.setRequestInterception(true);
     logger.info(`opening url ${url}`);
+    // @ts-ignore
+    const client = this.page._client;
     let interceptedCount = 0;
 
-    this.page.on('request', interceptedRequest => {
-      const interceptedUrl = interceptedRequest.url();
+    await this.page.setRequestInterception(true);
+
+    // We have to reach into the Chrome Devtools Protocol to apply headers as using
+    // puppeteer's API will cause map tile requests to hang indefinitely:
+    //    https://github.com/puppeteer/puppeteer/issues/5003
+    // Docs on this client/protocol can be found here:
+    //    https://chromedevtools.github.io/devtools-protocol/tot/Fetch
+    client.on('Fetch.requestPaused', (interceptedRequest: InterceptedRequest) => {
+      const {
+        requestId,
+        request: { url: interceptedUrl },
+      } = interceptedRequest;
       const allowed = !interceptedUrl.startsWith('file://');
       const isData = interceptedUrl.startsWith('data:');
 
       // We should never ever let file protocol requests go through
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
-        interceptedRequest.abort('blockedbyclient');
+        client.send('Fetch.failRequest', {
+          errorReason: 'Aborted',
+          requestId,
+        });
         this.page.browser().close();
         throw new Error(`Received disallowed outgoing URL: "${interceptedUrl}", exiting`);
       }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
         logger.debug(`Using custom headers for ${interceptedUrl}`);
-        interceptedRequest.continue({
-          headers: {
-            ...interceptedRequest.headers(),
+        const headers = map(
+          {
+            ...interceptedRequest.request.headers,
             ...conditionalHeaders.headers,
           },
+          (value, name) => ({
+            name,
+            value,
+          })
+        );
+        client.send('Fetch.continueRequest', {
+          requestId,
+          headers,
         });
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
         logger.debug(`No custom headers for ${loggedUrl}`);
-        interceptedRequest.continue();
+        client.send('Fetch.continueRequest', { requestId });
       }
       interceptedCount = interceptedCount + (isData ? 0 : 1);
     });
