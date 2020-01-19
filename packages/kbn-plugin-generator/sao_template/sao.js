@@ -17,21 +17,18 @@
  * under the License.
  */
 
-const { resolve, relative, dirname } = require('path');
+const { relative } = require('path');
 
 const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
 const snakeCase = require('lodash.snakecase');
-const execa = require('execa');
 const chalk = require('chalk');
 
 const pkg = require('../package.json');
 const kibanaPkgPath = require.resolve('../../../package.json');
 const kibanaPkg = require(kibanaPkgPath); // eslint-disable-line import/no-dynamic-require
 
-const KBN_DIR = dirname(kibanaPkgPath);
-
-module.exports = function({ name }) {
+module.exports = function({ name, targetPath, isKibanaPlugin }) {
   return {
     prompts: {
       description: {
@@ -52,11 +49,6 @@ module.exports = function({ name }) {
         message: 'Should translation files be generated?',
         default: true,
       },
-      generateHack: {
-        type: 'confirm',
-        message: 'Should a hack component be generated?',
-        default: true,
-      },
       generateApi: {
         type: 'confirm',
         message: 'Should a server API be generated?',
@@ -73,7 +65,6 @@ module.exports = function({ name }) {
       'public/**/*': 'generateApp',
       'translations/**/*': 'generateTranslations',
       '.i18nrc.json': 'generateTranslations',
-      'public/hack.js': 'generateHack',
       'server/**/*': 'generateApi',
       'public/app.scss': 'generateScss',
       '.kibana-plugin-helpers.json': 'generateScss',
@@ -91,28 +82,33 @@ module.exports = function({ name }) {
           camelCase,
           snakeCase,
           name,
+          kbnVersion: answers.kbnVersion,
+          camelCaseName: name.charAt(0).toUpperCase() + camelCase(name).slice(1),
+          hasUi: !!answers.generateApp,
+          hasServer: !!answers.generateApi,
+          relRoot: isKibanaPlugin ? '../../../..' : '../../..',
         },
         answers
       ),
     enforceNewFolder: true,
     installDependencies: false,
-    gitInit: true,
+    gitInit: !isKibanaPlugin,
     async post({ log }) {
-      await execa('yarn', ['kbn', 'bootstrap'], {
-        cwd: KBN_DIR,
-        stdio: 'inherit',
-      });
+      // await execa('yarn', ['kbn', 'bootstrap'], {
+      //   cwd: KBN_DIR,
+      //   stdio: 'inherit',
+      // });
 
-      const dir = relative(process.cwd(), resolve(KBN_DIR, 'plugins', snakeCase(name)));
+      const dir = relative(process.cwd(), targetPath);
 
-      try {
-        await execa('yarn', ['lint', '--fix'], {
-          cwd: dir,
-          all: true,
-        });
-      } catch (error) {
-        throw new Error(`Failure when running prettier on the generated output: ${error.all}`);
-      }
+      // try {
+      //   await execa('yarn', ['lint', '--fix'], {
+      //     cwd: dir,
+      //     all: true,
+      //   });
+      // } catch (error) {
+      //   throw new Error(`Failure when running prettier on the generated output: ${error.all}`);
+      // }
 
       log.success(chalk`🎉
 
