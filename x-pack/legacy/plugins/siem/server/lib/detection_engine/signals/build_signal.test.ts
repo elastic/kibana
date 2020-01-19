@@ -6,7 +6,6 @@
 
 import { sampleDocNoSortId, sampleRule } from './__mocks__/es_results';
 import { buildSignal, buildAncestor, buildAncestorsSignal } from './build_signal';
-import { OutputRuleAlertRest } from '../types';
 import { Signal, Ancestor } from './types';
 
 describe('buildSignal', () => {
