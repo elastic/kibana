@@ -32,12 +32,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getCategoryName } from '../../lib';
 import { Field } from '../field';
-import { Setting } from '../../types';
+import { FieldSetting } from '../../types';
 
 type Category = string;
 
 interface FormProps {
-  settings: Record<string, Setting[]>;
+  settings: Record<string, FieldSetting[]>;
   categories: Category[];
   categoryCounts: Record<string, number>;
   clearQuery: () => void;
@@ -80,7 +80,7 @@ export class Form extends PureComponent<FormProps> {
     return null;
   }
 
-  renderCategory(category: Category, settings: Setting[], totalSettings: number) {
+  renderCategory(category: Category, settings: FieldSetting[], totalSettings: number) {
     return (
       <Fragment key={category}>
         <EuiPanel paddingSize="l">

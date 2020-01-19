@@ -21,7 +21,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { mount } from 'enzyme';
-import { Setting } from '../../types';
+import { FieldSetting } from '../../types';
 import { StringValidation } from '../../types';
 import { UiSettingsType } from '../../../../../../../../../core/server';
 
@@ -47,7 +47,7 @@ const defaults = {
   category: ['category'],
 };
 
-const settings: Record<string, Setting> = {
+const settings: Record<string, FieldSetting> = {
   array: {
     name: 'array:test:setting',
     ariaName: 'array test setting',

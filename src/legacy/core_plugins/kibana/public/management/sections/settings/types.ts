@@ -34,7 +34,7 @@ export interface ImageValidation {
 }
 
 // todo consider whether this is needed
-export interface Setting {
+export interface FieldSetting {
   displayName: string;
   name: string;
   value: SavedObjectAttribute;

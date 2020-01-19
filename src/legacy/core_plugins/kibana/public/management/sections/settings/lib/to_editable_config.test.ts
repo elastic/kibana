@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsParams, UserProvidedValues, StringValidation } from 'src/core/server/types';
+import { UiSettingsParams, StringValidation } from 'src/core/server/types';
 import expect from '@kbn/expect';
 import { toEditableConfig } from './to_editable_config';
 
@@ -30,7 +30,7 @@ function invoke({
   name = 'woah',
   value = 'forreal',
 }: {
-  def?: UiSettingsParams & UserProvidedValues; // todo
+  def?: UiSettingsParams & { isOverridden?: boolean };
   name?: string;
   value?: any;
 }) {
@@ -55,7 +55,7 @@ describe('Settings', function() {
       });
 
       describe('when given a setting definition object', function() {
-        let def: UiSettingsParams & UserProvidedValues;
+        let def: UiSettingsParams & { isOverridden?: boolean };
         beforeEach(function() {
           def = {
             value: 'the original',

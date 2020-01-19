@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Setting } from '../types';
+import { FieldSetting } from '../types';
 
-export function isDefaultValue(setting: Setting) {
+export function isDefaultValue(setting: FieldSetting) {
   return (
     setting.isCustom ||
     setting.value === undefined ||

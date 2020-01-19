@@ -40,11 +40,11 @@
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiScreenReaderOnly, EuiDelayRender } from '@elastic/eui';
-import { Setting } from '../../types';
+import { FieldSetting } from '../../types';
 
 interface Props {
   queryText: string;
-  settings: Record<string, Setting[]>;
+  settings: Record<string, FieldSetting[]>;
 }
 
 export class AdvancedSettingsVoiceAnnouncement extends Component<Props> {

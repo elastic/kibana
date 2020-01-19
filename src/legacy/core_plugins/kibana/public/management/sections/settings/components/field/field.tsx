@@ -53,12 +53,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Setting, StringValidation, ImageValidation } from '../../types';
+import { FieldSetting, StringValidation, ImageValidation } from '../../types';
 import { isDefaultValue } from '../../lib';
 import { UiSettingsType } from '../../../../../../../../../core/server/';
 
 interface FieldProps {
-  setting: Setting;
+  setting: FieldSetting;
   save: (name: string, value: string) => Promise<boolean>;
   clear: (name: string) => Promise<boolean>;
   enableSaving: boolean;
@@ -103,7 +103,11 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     });
   }
 
-  getEditableValue(type: UiSettingsType, value: Setting['value'], defVal: Setting['defVal']) {
+  getEditableValue(
+    type: UiSettingsType,
+    value: FieldSetting['value'],
+    defVal: FieldSetting['defVal']
+  ) {
     const val = value === null || value === undefined ? defVal : value;
     switch (type) {
       case 'array':
@@ -121,7 +125,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
 
   getDisplayedDefaultValue(
     type: UiSettingsType,
-    defVal: Setting['defVal'],
+    defVal: FieldSetting['defVal'],
     optionLabels: Record<string, any> = {}
   ) {
     if (defVal === undefined || defVal === null || defVal === '') {
@@ -422,7 +426,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     this.setLoading(false);
   };
 
-  renderField(setting: Setting) {
+  renderField(setting: FieldSetting) {
     const { enableSaving } = this.props;
     const { loading, changeImage, unsavedValue } = this.state;
     const { name, value, type, options, optionLabels = {}, isOverridden, ariaName } = setting;
@@ -539,11 +543,11 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     }
   }
 
-  renderLabel(setting: Setting) {
+  renderLabel(setting: FieldSetting) {
     return setting.name;
   }
 
-  renderHelpText(setting: Setting) {
+  renderHelpText(setting: FieldSetting) {
     if (setting.isOverridden) {
       return (
         <EuiText size="xs">
@@ -571,7 +575,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     return null;
   }
 
-  renderTitle(setting: Setting) {
+  renderTitle(setting: FieldSetting) {
     return (
       <h3>
         {setting.displayName || setting.name}
@@ -596,7 +600,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     );
   }
 
-  renderDescription(setting: Setting) {
+  renderDescription(setting: FieldSetting) {
     let description;
     let deprecation;
 
@@ -652,7 +656,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     );
   }
 
-  renderDefaultValue(setting: Setting) {
+  renderDefaultValue(setting: FieldSetting) {
     const { type, defVal, optionLabels } = setting;
     if (isDefaultValue(setting)) {
       return;
@@ -697,7 +701,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     );
   }
 
-  renderResetToDefaultLink(setting: Setting) {
+  renderResetToDefaultLink(setting: FieldSetting) {
     const { ariaName, name } = setting;
     if (isDefaultValue(setting)) {
       return;
@@ -724,7 +728,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     );
   }
 
-  renderChangeImageLink(setting: Setting) {
+  renderChangeImageLink(setting: FieldSetting) {
     const { changeImage } = this.state;
     const { type, value, ariaName, name } = setting;
     if (type !== 'image' || !value || changeImage) {
@@ -751,7 +755,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     );
   }
 
-  renderActions(setting: Setting) {
+  renderActions(setting: FieldSetting) {
     const { ariaName, name } = setting;
     const { loading, isInvalid, changeImage, savedValue, unsavedValue } = this.state;
     const isDisabled = loading || setting.isOverridden;

@@ -28,7 +28,7 @@ import { IUiSettingsClient } from '../../../../../../../core/public/';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
-import { Setting, IQuery } from './types';
+import { FieldSetting, IQuery } from './types';
 
 import {
   registerDefaultComponents,
@@ -47,13 +47,13 @@ interface AdvancedSettingsProps {
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
   query: IQuery;
-  filteredSettings: Record<string, Setting[]>;
+  filteredSettings: Record<string, FieldSetting[]>;
 }
 
-type GroupedSettings = Record<string, Setting[]>;
+type GroupedSettings = Record<string, FieldSetting[]>;
 
 export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
-  private settings: Setting[];
+  private settings: FieldSetting[];
   private groupedSettings: GroupedSettings;
   private categoryCounts: Record<string, number>;
   private categories: string[] = [];
@@ -129,7 +129,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
       .sort(Comparators.property('name', Comparators.default('asc')));
   }
 
-  mapSettings(settings: Setting[]) {
+  mapSettings(settings: FieldSetting[]) {
     // Group settings by category
     return settings.reduce((groupedSettings: GroupedSettings, setting) => {
       // We will want to change this logic when we put each category on its
