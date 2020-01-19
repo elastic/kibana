@@ -25,7 +25,7 @@ const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
 const authStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.NAVIGATION_AUTHENTICATIONS_STACK_BY_EVENT_TYPE,
+    text: 'event.type',
     value: 'event.type',
   },
 ];
@@ -71,7 +71,6 @@ export const AuthenticationsQueryTabBody = ({
         isAuthenticationsHistogram={true}
         dataKey="AuthenticationsHistogram"
         defaultStackByOption={authStackByOptions[0]}
-        deleteQuery={deleteQuery}
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA}
         filterQuery={filterQuery}
