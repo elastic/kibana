@@ -18,24 +18,24 @@
  */
 
 import uuid from 'uuid';
-import { expect } from 'chai';
-import { reIdSeries } from '../re_id_series';
+
+import { reIdSeries } from './re_id_series';
 
 describe('reIdSeries()', () => {
-  it('reassign ids for series with just basic metrics', () => {
+  test('reassign ids for series with just basic metrics', () => {
     const series = {
       id: uuid.v1(),
       metrics: [{ id: uuid.v1() }, { id: uuid.v1() }],
     };
     const newSeries = reIdSeries(series);
-    expect(newSeries).to.not.equal(series);
-    expect(newSeries.id).to.not.equal(series.id);
+    expect(newSeries).not.toEqual(series);
+    expect(newSeries.id).not.toEqual(series.id);
     newSeries.metrics.forEach((val, key) => {
-      expect(val.id).to.not.equal(series.metrics[key].id);
+      expect(val.id).not.toEqual(series.metrics[key].id);
     });
   });
 
-  it('reassign ids for series with just basic metrics and group by', () => {
+  test('reassign ids for series with just basic metrics and group by', () => {
     const firstMetricId = uuid.v1();
     const series = {
       id: uuid.v1(),
@@ -43,27 +43,27 @@ describe('reIdSeries()', () => {
       terms_order_by: firstMetricId,
     };
     const newSeries = reIdSeries(series);
-    expect(newSeries).to.not.equal(series);
-    expect(newSeries.id).to.not.equal(series.id);
+    expect(newSeries).not.toEqual(series);
+    expect(newSeries.id).not.toEqual(series.id);
     newSeries.metrics.forEach((val, key) => {
-      expect(val.id).to.not.equal(series.metrics[key].id);
+      expect(val.id).not.toEqual(series.metrics[key].id);
     });
-    expect(newSeries.terms_order_by).to.equal(newSeries.metrics[0].id);
+    expect(newSeries.terms_order_by).toEqual(newSeries.metrics[0].id);
   });
 
-  it('reassign ids for series with pipeline metrics', () => {
+  test('reassign ids for series with pipeline metrics', () => {
     const firstMetricId = uuid.v1();
     const series = {
       id: uuid.v1(),
       metrics: [{ id: firstMetricId }, { id: uuid.v1(), field: firstMetricId }],
     };
     const newSeries = reIdSeries(series);
-    expect(newSeries).to.not.equal(series);
-    expect(newSeries.id).to.not.equal(series.id);
-    expect(newSeries.metrics[0].id).to.equal(newSeries.metrics[1].field);
+    expect(newSeries).not.toEqual(series);
+    expect(newSeries.id).not.toEqual(series.id);
+    expect(newSeries.metrics[0].id).toEqual(newSeries.metrics[1].field);
   });
 
-  it('reassign ids for series with calculation vars', () => {
+  test('reassign ids for series with calculation vars', () => {
     const firstMetricId = uuid.v1();
     const series = {
       id: uuid.v1(),
@@ -77,8 +77,8 @@ describe('reIdSeries()', () => {
       ],
     };
     const newSeries = reIdSeries(series);
-    expect(newSeries).to.not.equal(series);
-    expect(newSeries.id).to.not.equal(series.id);
-    expect(newSeries.metrics[1].variables[0].field).to.equal(newSeries.metrics[0].id);
+    expect(newSeries).not.toEqual(series);
+    expect(newSeries.id).not.toEqual(series.id);
+    expect(newSeries.metrics[1].variables[0].field).toEqual(newSeries.metrics[0].id);
   });
 });

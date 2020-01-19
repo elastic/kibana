@@ -3232,7 +3232,6 @@
     "visTypeTimeseries.addDeleteButtons.deleteButtonDefaultTooltip": "删除",
     "visTypeTimeseries.addDeleteButtons.reEnableTooltip": "重新启用",
     "visTypeTimeseries.addDeleteButtons.temporarilyDisableTooltip": "暂时禁用",
-    "visTypeTimeseries.aggLookup.addPipelineAggDescription": "{label}（使用“+”按钮添加此管道聚合）",
     "visTypeTimeseries.aggLookup.averageLabel": "平均值",
     "visTypeTimeseries.aggLookup.calculationLabel": "计算",
     "visTypeTimeseries.aggLookup.cardinalityLabel": "基数",

@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { calculateSiblings } from '../calculate_siblings';
-import { expect } from 'chai';
+import { calculateSiblings } from './calculate_siblings';
 
 describe('calculateSiblings(metrics, metric)', () => {
-  it('should return all siblings', () => {
+  test('should return all siblings', () => {
     const metrics = [
       { id: 1, type: 'max', field: 'network.bytes' },
       { id: 2, type: 'derivative', field: 1 },
@@ -30,7 +29,7 @@ describe('calculateSiblings(metrics, metric)', () => {
       { id: 5, type: 'count' },
     ];
     const siblings = calculateSiblings(metrics, { id: 2 });
-    expect(siblings).to.eql([
+    expect(siblings).toEqual([
       { id: 1, type: 'max', field: 'network.bytes' },
       { id: 5, type: 'count' },
     ]);
