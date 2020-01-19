@@ -338,7 +338,7 @@ Since it wrote that document, the first signal to signal 161fa5b8-0b96-4985-b066
 ```
 
 You will be "halted" at this point as the signal ancestry and de-duplication ensures that we do not report twice on signals and that we do not 
-create additional duplications. So what happens if create a 3rd rule which does a signal on a signal?
+create additional duplications. So what happens if we create a 3rd rule which does a signal on a signal?
 
 ```sh
 ./post_rule.sh ./rules/test_cases/signals_on_signals/halting_test/signal_on_signal.json

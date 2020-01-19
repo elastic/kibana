@@ -371,7 +371,7 @@ export const getMockPrivileges = () => ({
     create_snapshot: true,
   },
   index: {
-    '.siem-signals-frank-hassanabad-test-space': {
+    '.siem-signals-test-space': {
       all: false,
       manage_ilm: true,
       read: false,
