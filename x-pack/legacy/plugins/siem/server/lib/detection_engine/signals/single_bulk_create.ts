@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { countBy, isEmpty, isArray } from 'lodash';
+import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerting/server/types';
 import { SignalSearchResponse, BulkResponse } from './types';
