@@ -17,24 +17,26 @@
  * under the License.
  */
 
-import { filter } from 'lodash';
 import { esFilters } from '../../../../common';
-import { compareFilters, COMPARE_FILTER_STATE } from './compare_filters';
-
-const isEnabled = (f: esFilters.Filter) => f && f.meta && !f.meta.disabled;
 
 /**
- * Checks to see if only disabled filters have been changed
+ * Sort filters according to their store - gloval filters go first
  *
- * @returns {bool} Only disabled filters
+ * @param {object} first The first filter to compare
+ * @param {object} second The second filter to compare
+ *
+ * @returns {number} Sorting order of filters
  */
-export const onlyDisabledFiltersChanged = (
-  newFilters?: esFilters.Filter[],
-  oldFilters?: esFilters.Filter[]
-) => {
-  // If it's the same - compare only enabled filters
-  const newEnabledFilters = filter(newFilters || [], isEnabled);
-  const oldEnabledFilters = filter(oldFilters || [], isEnabled);
-
-  return compareFilters(oldEnabledFilters, newEnabledFilters, COMPARE_FILTER_STATE);
+export const sortFilters = (
+  { $state: a }: esFilters.Filter,
+  { $state: b }: esFilters.Filter
+): number => {
+  if (a!.store === b!.store) {
+    return 0;
+  } else {
+    return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
+      b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
+      ? -1
+      : 1;
+  }
 };

@@ -17,32 +17,53 @@
  * under the License.
  */
 
-import { defaults, isEqual, omit } from 'lodash';
+import { defaults, isEqual, omit, map, sortBy } from 'lodash';
 import { esFilters } from '../../../../common';
+
+/**
+ * Include disabled, negate and store when comparing filters
+ */
+export const COMPARE_FILTER_STATE = {
+  disabled: true,
+  negate: true,
+  state: true,
+};
+
+const mapFilter = (filter: esFilters.Filter, comparators: any, excludedAttributes: string[]) => {
+  const cleaned: esFilters.FilterMeta = omit(filter, excludedAttributes);
+
+  if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
+  if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
+
+  return cleaned;
+};
+
+const mapFilterArray = (
+  filters: esFilters.Filter[],
+  comparators: any,
+  excludedAttributes: string[]
+) => {
+  return sortBy(
+    map(filters, (filter: esFilters.Filter) => mapFilter(filter, comparators, excludedAttributes))
+  );
+};
 
 /**
  * Compare two filters to see if they match
  *
- * @param {object} first The first filter to compare
- * @param {object} second The second filter to compare
+ * @param {esFilters.Filter | esFilters.Filter[]} first The first filter or filter array to compare
+ * @param {esFilters.Filter | esFilters.Filter[]} second The second filter or filter array to compare
  * @param {object} comparatorOptions Parameters to use for comparison
  *
  * @returns {bool} Filters are the same
  */
 export const compareFilters = (
-  first: esFilters.Filter,
-  second: esFilters.Filter,
+  first: esFilters.Filter | esFilters.Filter[],
+  second: esFilters.Filter | esFilters.Filter[],
   comparatorOptions: any = {}
 ) => {
   let comparators: any = {};
-  const mapFilter = (filter: esFilters.Filter) => {
-    const cleaned: esFilters.FilterMeta = omit(filter, excludedAttributes);
 
-    if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
-    if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
-
-    return cleaned;
-  };
   const excludedAttributes: string[] = ['$$hashKey', 'meta'];
 
   comparators = defaults(comparatorOptions || {}, {
@@ -53,5 +74,17 @@ export const compareFilters = (
 
   if (!comparators.state) excludedAttributes.push('$state');
 
-  return isEqual(mapFilter(first), mapFilter(second));
+  if (Array.isArray(first) && Array.isArray(second)) {
+    return isEqual(
+      mapFilterArray(first, comparators, excludedAttributes),
+      mapFilterArray(second, comparators, excludedAttributes)
+    );
+  } else if (!Array.isArray(first) && !Array.isArray(second)) {
+    return isEqual(
+      mapFilter(first, comparators, excludedAttributes),
+      mapFilter(second, comparators, excludedAttributes)
+    );
+  } else {
+    return false;
+  }
 };
