@@ -28,12 +28,24 @@ interface SingleBulkCreateParams {
   tags: string[];
 }
 
-export const filterDuplicateRules = (id: string, signalSearchResponse: SignalSearchResponse) => {
+/**
+ * This is for signals on signals to work correctly. If given a rule id this will check if
+ * that rule id already exists in the ancestor tree of each signal search response and remove
+ * those documents so they cannot be created as a signal since we do not want a rule id to
+ * ever be capable of re-writing the same signal continuously if both the _input_ and _output_
+ * of the signals index happens to be the same index.
+ * @param ruleId The rule id
+ * @param signalSearchResponse The search response that has all the documents
+ */
+export const filterDuplicateRules = (
+  ruleId: string,
+  signalSearchResponse: SignalSearchResponse
+) => {
   return signalSearchResponse.hits.hits.filter(doc => {
     if (doc._source.signal == null) {
       return true;
     } else {
-      return !doc._source.signal.ancestors.some(ancestor => ancestor.rule === id);
+      return !doc._source.signal.ancestors.some(ancestor => ancestor.rule === ruleId);
     }
   });
 };
@@ -53,10 +65,6 @@ export const singleBulkCreate = async ({
   enabled,
   tags,
 }: SingleBulkCreateParams): Promise<boolean> => {
-  // This is for signals on signals to work correctly.
-  // If our id already exists in the parent id, then we do not
-  // want to create another signal based on something we have
-  // already written out.
   someResult.hits.hits = filterDuplicateRules(id, someResult);
 
   if (someResult.hits.hits.length === 0) {
