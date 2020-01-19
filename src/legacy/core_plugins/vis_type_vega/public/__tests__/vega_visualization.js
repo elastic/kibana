@@ -73,7 +73,7 @@ describe('VegaVisualizations', () => {
               },
             },
             __LEGACY: {
-              esClient: npStart.plugins.data.__LEGACY.esClient,
+              esClient: npStart.plugins.data.search.__LEGACY.esClient,
             },
           },
         },

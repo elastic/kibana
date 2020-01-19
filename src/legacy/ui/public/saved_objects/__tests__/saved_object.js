@@ -111,7 +111,7 @@ describe('Saved Object', function() {
     ngMock.inject(function($window) {
       savedObjectsClientStub = npStart.core.savedObjects.client;
       SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
-      esDataStub = npStart.plugins.data.__LEGACY.esClient;
+      esDataStub = npStart.plugins.data.search.__LEGACY.esClient;
       window = $window;
     })
   );
