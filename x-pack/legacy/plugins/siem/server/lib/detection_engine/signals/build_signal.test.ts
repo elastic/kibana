@@ -21,11 +21,21 @@ describe('buildSignal', () => {
     const signal = buildSignal(doc, rule);
     const expected: Signal = {
       parent: {
+        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
         index: 'myFakeSignalIndex',
         depth: 1,
       },
+      ancestors: [
+        {
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+      ],
       original_time: 'someTimeStamp',
       status: 'open',
       rule: {
@@ -70,11 +80,21 @@ describe('buildSignal', () => {
     const signal = buildSignal(doc, rule);
     const expected: Signal = {
       parent: {
+        rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
         type: 'event',
         index: 'myFakeSignalIndex',
         depth: 1,
       },
+      ancestors: [
+        {
+          rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 1,
+        },
+      ],
       original_time: 'someTimeStamp',
       original_event: {
         action: 'socket_opened',
