@@ -153,7 +153,7 @@ export {
   SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
-export { RenderingServiceSetup, IRenderOptions, LegacyRenderOptions } from './rendering';
+export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -217,6 +217,9 @@ export {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UserProvidedValues,
+  ImageValidation,
+  DeprecationSettings,
+  StringValidation,
 } from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
