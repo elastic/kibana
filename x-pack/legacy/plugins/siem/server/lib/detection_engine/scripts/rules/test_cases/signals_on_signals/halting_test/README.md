@@ -214,7 +214,7 @@ The first signal to signal rule 161fa5b8-0b96-4985-b066-0d99b2bcb904 (signal -> 
   "rule" : "161fa5b8-0b96-4985-b066-0d99b2bcb904",
   "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
   "type" : "signal",
-  "index" : ".siem-signals-hassanabad-frank-default-000001",
+  "index" : ".siem-signals-default-000001",
   "depth" : 2
 },
 "ancestors" : [
@@ -229,7 +229,7 @@ The first signal to signal rule 161fa5b8-0b96-4985-b066-0d99b2bcb904 (signal -> 
     "rule" : "161fa5b8-0b96-4985-b066-0d99b2bcb904",
     "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
 ],
@@ -237,13 +237,14 @@ The first signal to signal rule 161fa5b8-0b96-4985-b066-0d99b2bcb904 (signal -> 
 
 Then our second signal to signal rule f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406 (signal -> event) which finds the same thing as the first
 signal to signal
+
 ```json
 "signal" : {
   "parent" : {
     "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
     "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   },
   "ancestors" : [
@@ -258,7 +259,7 @@ signal to signal
       "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
       "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
       "type" : "signal",
-      "index" : ".siem-signals-hassanabad-frank-default-000001",
+      "index" : ".siem-signals-default-000001",
       "depth" : 2
     }
   ],
@@ -271,7 +272,7 @@ and writes that document out with a depth of 3. (signal -> signal -> event)
   "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
   "id" : "c627e5e2576f1b10952c6c57249947e89b6153b763a59fb9e391d0b56be8e7fe",
   "type" : "signal",
-  "index" : ".siem-signals-hassanabad-frank-default-000001",
+  "index" : ".siem-signals-default-000001",
   "depth" : 3
 },
 "ancestors" : [
@@ -286,14 +287,14 @@ and writes that document out with a depth of 3. (signal -> signal -> event)
     "rule" : "161fa5b8-0b96-4985-b066-0d99b2bcb904",
     "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   },
   {
     "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
     "id" : "c627e5e2576f1b10952c6c57249947e89b6153b763a59fb9e391d0b56be8e7fe",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 3
   }
 ]
@@ -307,7 +308,7 @@ Since it wrote that document, the first signal to signal 161fa5b8-0b96-4985-b066
   "rule" : "161fa5b8-0b96-4985-b066-0d99b2bcb904",
   "id" : "efbe514e8d806a5ef3da7658cfa73961e25befefc84f622e963b45dcac798868",
   "type" : "signal",
-  "index" : ".siem-signals-hassanabad-frank-default-000001",
+  "index" : ".siem-signals-default-000001",
   "depth" : 3
 },
 "ancestors" : [
@@ -322,14 +323,14 @@ Since it wrote that document, the first signal to signal 161fa5b8-0b96-4985-b066
     "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
     "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   },
   {
     "rule" : "161fa5b8-0b96-4985-b066-0d99b2bcb904",
     "id" : "efbe514e8d806a5ef3da7658cfa73961e25befefc84f622e963b45dcac798868",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 3
   }
 ],

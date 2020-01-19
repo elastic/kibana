@@ -9,5 +9,5 @@
   "to": "now",
   "query": "_id: *",
   "enabled": true,
-  "index": ".siem-signals-hassanabad-frank-default"
+  "index": ".siem-signals-default"
 }

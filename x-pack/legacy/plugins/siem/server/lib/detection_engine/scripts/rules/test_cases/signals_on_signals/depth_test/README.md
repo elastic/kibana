@@ -165,7 +165,7 @@ and the second document is a signal on top of a signal like so:
   "rule" : "1d3b3735-66ef-4e53-b7f5-4340026cc40c",
   "id" : "4cc69c1cbecdd2ace4075fd1d8a5c28e7d46e4bf31aecc8d2da39252c50c96b4",
   "type" : "signal",
-  "index" : ".siem-signals-hassanabad-frank-default-000001",
+  "index" : ".siem-signals-default-000001",
   "depth" : 2
 },
 "ancestors" : [
@@ -180,7 +180,7 @@ and the second document is a signal on top of a signal like so:
     "rule" : "1d3b3735-66ef-4e53-b7f5-4340026cc40c",
     "id" : "4cc69c1cbecdd2ace4075fd1d8a5c28e7d46e4bf31aecc8d2da39252c50c96b4",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
 ],
@@ -238,7 +238,7 @@ The first signal to signal rule 1d3b3735-66ef-4e53-b7f5-4340026cc40c (signal -> 
   "rule" : "1d3b3735-66ef-4e53-b7f5-4340026cc40c",
   "id" : "4cc69c1cbecdd2ace4075fd1d8a5c28e7d46e4bf31aecc8d2da39252c50c96b4",
   "type" : "signal",
-  "index" : ".siem-signals-hassanabad-frank-default-000001",
+  "index" : ".siem-signals-default-000001",
   "depth" : 2
 },
 "ancestors" : [
@@ -253,7 +253,7 @@ The first signal to signal rule 1d3b3735-66ef-4e53-b7f5-4340026cc40c (signal -> 
     "rule" : "1d3b3735-66ef-4e53-b7f5-4340026cc40c",
     "id" : "4cc69c1cbecdd2ace4075fd1d8a5c28e7d46e4bf31aecc8d2da39252c50c96b4",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
 ],
@@ -267,7 +267,7 @@ signal to signal
   "rule" : "c93ddb57-e7e9-4973-9886-72ddefb4d22e",
   "id" : "4cc69c1cbecdd2ace4075fd1d8a5c28e7d46e4bf31aecc8d2da39252c50c96b4",
   "type" : "signal",
-  "index" : ".siem-signals-hassanabad-frank-default-000001",
+  "index" : ".siem-signals-default-000001",
   "depth" : 2
 },
 "ancestors" : [
@@ -282,7 +282,7 @@ signal to signal
     "rule" : "c93ddb57-e7e9-4973-9886-72ddefb4d22e",
     "id" : "4cc69c1cbecdd2ace4075fd1d8a5c28e7d46e4bf31aecc8d2da39252c50c96b4",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
 ],
@@ -304,7 +304,7 @@ depth 1 rules running then the signals at depth 2 will produce two new ones and 
   "rule" : "a1f7b520-5bfd-451d-af59-428f60753fee",
   "id" : "365236ce5e77770508152403b4e16613f407ae4b1a135a450dcfec427f2a3231",
   "type" : "signal",
-  "index" : ".siem-signals-hassanabad-frank-default-000001",
+  "index" : ".siem-signals-default-000001",
   "depth" : 3
 },
 "ancestors" : [
@@ -319,14 +319,14 @@ depth 1 rules running then the signals at depth 2 will produce two new ones and 
     "rule" : "1d3b3735-66ef-4e53-b7f5-4340026cc40c",
     "id" : "4cc69c1cbecdd2ace4075fd1d8a5c28e7d46e4bf31aecc8d2da39252c50c96b4",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   },
   {
     "rule" : "a1f7b520-5bfd-451d-af59-428f60753fee",
     "id" : "365236ce5e77770508152403b4e16613f407ae4b1a135a450dcfec427f2a3231",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 3
   }
 ],
@@ -337,7 +337,7 @@ depth 1 rules running then the signals at depth 2 will produce two new ones and 
   "rule" : "a1f7b520-5bfd-451d-af59-428f60753fee",
   "id" : "e8b1f1adb40fd642fa524dea89ef94232e67b05e99fb0b2683f1e47e90b759fb",
   "type" : "signal",
-  "index" : ".siem-signals-hassanabad-frank-default-000001",
+  "index" : ".siem-signals-default-000001",
   "depth" : 3
 },
 "ancestors" : [
@@ -352,14 +352,14 @@ depth 1 rules running then the signals at depth 2 will produce two new ones and 
     "rule" : "c93ddb57-e7e9-4973-9886-72ddefb4d22e",
     "id" : "4cc69c1cbecdd2ace4075fd1d8a5c28e7d46e4bf31aecc8d2da39252c50c96b4",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 2
   },
   {
     "rule" : "a1f7b520-5bfd-451d-af59-428f60753fee",
     "id" : "e8b1f1adb40fd642fa524dea89ef94232e67b05e99fb0b2683f1e47e90b759fb",
     "type" : "signal",
-    "index" : ".siem-signals-hassanabad-frank-default-000001",
+    "index" : ".siem-signals-default-000001",
     "depth" : 3
   }
 ],
