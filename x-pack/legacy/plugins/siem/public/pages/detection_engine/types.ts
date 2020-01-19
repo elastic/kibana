@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
-export * from './fetch_index_patterns';
-export * from './persist_rule';
-export * from './types';
-export * from './use_rule';
-export * from './use_rules';
-export * from './use_rule_status';
+export enum DetectionEngineTab {
+  signals = 'signals',
+  alerts = 'alerts',
+}

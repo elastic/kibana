@@ -24,7 +24,7 @@ export const formatRules = (rules: Rule[], selectedIds?: string[]): TableData[] 
     immutable: rule.immutable,
     rule_id: rule.rule_id,
     rule: {
-      href: `#/detection-engine/rules/id/${encodeURIComponent(rule.id)}`,
+      href: `#/detections/rules/id/${encodeURIComponent(rule.id)}`,
       name: rule.name,
       status: 'Status Placeholder',
     },
