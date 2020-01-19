@@ -87,6 +87,7 @@ Check your parent section of the signal and you will see something like this:
     "index" : "filebeat-8.0.0-2019.12.18-000001",
     "depth" : 1
   }
+]
 ```
 
 The parent and ancestors structure is defined as:
@@ -132,6 +133,7 @@ documents in the signals index. The first signal is our original (signal -> even
     "index" : "filebeat-8.0.0-2019.12.18-000001",
     "depth" : 1
   }
+]
 ```
 
 and the second document is a signal on top of a signal like so:
@@ -160,7 +162,7 @@ and the second document is a signal on top of a signal like so:
     "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
-],
+]
 ```
 
 Notice that the depth indicates it is at level 2 and its parent is that of a signal. Also notice that the ancestors is an array of size 2
@@ -205,7 +207,7 @@ The original event rule ded57b36-9c4e-4ee4-805d-be4e92033e41 (event -> signal)
     "index" : "filebeat-8.0.0-2019.12.18-000001",
     "depth" : 1
   }
-],
+]
 ```
 
 The first signal to signal rule 161fa5b8-0b96-4985-b066-0d99b2bcb904 (signal -> event)
@@ -232,37 +234,36 @@ The first signal to signal rule 161fa5b8-0b96-4985-b066-0d99b2bcb904 (signal -> 
     "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
-],
+]
 ```
 
 Then our second signal to signal rule f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406 (signal -> event) which finds the same thing as the first
 signal to signal
 
 ```json
-"signal" : {
-  "parent" : {
+"parent" : {
+  "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
+  "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
+  "type" : "signal",
+  "index" : ".siem-signals-default-000001",
+  "depth" : 2
+},
+"ancestors" : [
+  {
+    "rule" : "ded57b36-9c4e-4ee4-805d-be4e92033e41",
+    "id" : "o8G7vm8BvLT8jmu5B1-M",
+    "type" : "event",
+    "index" : "filebeat-8.0.0-2019.12.18-000001",
+    "depth" : 1
+  },
+  {
     "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
     "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
     "type" : "signal",
     "index" : ".siem-signals-default-000001",
     "depth" : 2
-  },
-  "ancestors" : [
-    {
-      "rule" : "ded57b36-9c4e-4ee4-805d-be4e92033e41",
-      "id" : "o8G7vm8BvLT8jmu5B1-M",
-      "type" : "event",
-      "index" : "filebeat-8.0.0-2019.12.18-000001",
-      "depth" : 1
-    },
-    {
-      "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
-      "id" : "9d8710925adbf1a9c469621805407e74334dd08ca2c2ea414840fe971a571938",
-      "type" : "signal",
-      "index" : ".siem-signals-default-000001",
-      "depth" : 2
-    }
-  ],
+  }
+]
 ```
 
 But then f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406 also finds the first signal to signal rule from 161fa5b8-0b96-4985-b066-0d99b2bcb904
@@ -333,7 +334,7 @@ Since it wrote that document, the first signal to signal 161fa5b8-0b96-4985-b066
     "index" : ".siem-signals-default-000001",
     "depth" : 3
   }
-],
+]
 ```
 
 You will be "halted" at this point as the signal ancestry and de-duplication ensures that we do not report twice on signals and that we do not 

@@ -110,7 +110,7 @@ Check your parent section of the signal and you will see something like this:
     "index" : "filebeat-8.0.0-2019.12.18-000001",
     "depth" : 1
   }
-],
+]
 ```
 
 The parent and ancestors structure is defined as:
@@ -155,7 +155,7 @@ documents in the signals index. The first signal is our original (signal -> even
     "index" : "filebeat-8.0.0-2019.12.18-000001",
     "depth" : 1
   }
-],
+]
 ```
 
 and the second document is a signal on top of a signal like so:
@@ -183,7 +183,7 @@ and the second document is a signal on top of a signal like so:
     "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
-],
+]
 ```
 
 Notice that the depth indicates it is at level 2 and its parent is that of a signal. Also notice that the ancestors is an array of size 2
@@ -228,7 +228,7 @@ The original event rule 74e0dd0c-4609-416f-b65e-90f8b2564612 (event -> signal)
     "index" : "filebeat-8.0.0-2019.12.18-000001",
     "depth" : 1
   }
-],
+]
 ```
 
 The first signal to signal rule 1d3b3735-66ef-4e53-b7f5-4340026cc40c (signal -> event)
@@ -256,7 +256,7 @@ The first signal to signal rule 1d3b3735-66ef-4e53-b7f5-4340026cc40c (signal -> 
     "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
-],
+]
 ```
 
 Then our second signal to signal rule c93ddb57-e7e9-4973-9886-72ddefb4d22e (signal -> event) which finds the same thing as the first
@@ -285,7 +285,7 @@ signal to signal
     "index" : ".siem-signals-default-000001",
     "depth" : 2
   }
-],
+]
 ```
 
 We should be able to post this depth level as many times as we want and get only 1 new document each time. If we decide though to
@@ -329,7 +329,7 @@ depth 1 rules running then the signals at depth 2 will produce two new ones and 
     "index" : ".siem-signals-default-000001",
     "depth" : 3
   }
-],
+]
 ```
 
 ```json
@@ -362,7 +362,7 @@ depth 1 rules running then the signals at depth 2 will produce two new ones and 
     "index" : ".siem-signals-default-000001",
     "depth" : 3
   }
-],
+]
 ```
 
 The total number of documents should be 5 at this point. If you were to post this same rule a second time to get a second instance
