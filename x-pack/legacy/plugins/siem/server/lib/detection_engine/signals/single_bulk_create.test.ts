@@ -14,10 +14,11 @@ import {
   sampleEmptyDocSearchResults,
   sampleBulkCreateDuplicateResult,
   sampleBulkCreateErrorResult,
+  sampleDocWithAncestors,
 } from './__mocks__/es_results';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
-import { singleBulkCreate } from './single_bulk_create';
+import { singleBulkCreate, filterDuplicateRules } from './single_bulk_create';
 
 export const mockService = {
   callCluster: jest.fn(),
@@ -131,9 +132,9 @@ describe('singleBulkCreate', () => {
       expect(firstHash).not.toEqual(secondHash);
     });
   });
+
   test('create successful bulk create', async () => {
     const sampleParams = sampleRuleAlertParams();
-    const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.callCluster.mockReturnValueOnce({
       took: 100,
       errors: false,
@@ -144,7 +145,7 @@ describe('singleBulkCreate', () => {
       ],
     });
     const successfulsingleBulkCreate = await singleBulkCreate({
-      someResult: sampleSearchResult(),
+      someResult: sampleDocSearchResultsNoSortId(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -159,9 +160,9 @@ describe('singleBulkCreate', () => {
     });
     expect(successfulsingleBulkCreate).toEqual(true);
   });
+
   test('create successful bulk create with docs with no versioning', async () => {
     const sampleParams = sampleRuleAlertParams();
-    const sampleSearchResult = sampleDocSearchResultsNoSortIdNoVersion;
     mockService.callCluster.mockReturnValueOnce({
       took: 100,
       errors: false,
@@ -172,7 +173,7 @@ describe('singleBulkCreate', () => {
       ],
     });
     const successfulsingleBulkCreate = await singleBulkCreate({
-      someResult: sampleSearchResult(),
+      someResult: sampleDocSearchResultsNoSortIdNoVersion(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -187,12 +188,12 @@ describe('singleBulkCreate', () => {
     });
     expect(successfulsingleBulkCreate).toEqual(true);
   });
+
   test('create unsuccessful bulk create due to empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
-    const sampleSearchResult = sampleEmptyDocSearchResults;
     mockService.callCluster.mockReturnValue(false);
     const successfulsingleBulkCreate = await singleBulkCreate({
-      someResult: sampleSearchResult,
+      someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -252,5 +253,72 @@ describe('singleBulkCreate', () => {
 
     expect(mockLogger.error).toHaveBeenCalled();
     expect(successfulsingleBulkCreate).toEqual(true);
+  });
+
+  test('filter duplicate rules will return an empty array given an empty array', () => {
+    const filtered = filterDuplicateRules(
+      '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+      sampleEmptyDocSearchResults()
+    );
+    expect(filtered).toEqual([]);
+  });
+
+  test('filter duplicate rules will return nothing filtered when the two rule ids do not match with each other', () => {
+    const filtered = filterDuplicateRules('some id', sampleDocWithAncestors());
+    expect(filtered).toEqual([
+      {
+        _index: 'myFakeSignalIndex',
+        _type: 'doc',
+        _score: 100,
+        _version: 1,
+        _id: 'e1e08ddc-5e37-49ff-a258-5393aa44435a',
+        _source: {
+          someKey: 'someValue',
+          '@timestamp': 'someTimeStamp',
+          signal: {
+            parent: {
+              rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+              id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+              type: 'event',
+              index: 'myFakeSignalIndex',
+              depth: 1,
+            },
+            ancestors: [
+              {
+                rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+                type: 'event',
+                index: 'myFakeSignalIndex',
+                depth: 1,
+              },
+            ],
+          },
+        },
+      },
+    ]);
+  });
+
+  test('filters duplicate rules will return empty array when the two rule ids match each other', () => {
+    const filtered = filterDuplicateRules(
+      '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+      sampleDocWithAncestors()
+    );
+    expect(filtered).toEqual([]);
+  });
+
+  test('filter duplicate rules will return back search responses if they do not have a signal and will NOT filter the source out', () => {
+    const ancestors = sampleDocWithAncestors();
+    ancestors.hits.hits[0]._source = { '@timestamp': 'some timestamp' };
+    const filtered = filterDuplicateRules('04128c15-0d1b-4716-a4c5-46997ac7f3bd', ancestors);
+    expect(filtered).toEqual([
+      {
+        _index: 'myFakeSignalIndex',
+        _type: 'doc',
+        _score: 100,
+        _version: 1,
+        _id: 'e1e08ddc-5e37-49ff-a258-5393aa44435a',
+        _source: { '@timestamp': 'some timestamp' },
+      },
+    ]);
   });
 });

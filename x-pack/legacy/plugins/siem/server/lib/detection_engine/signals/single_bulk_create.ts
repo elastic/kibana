@@ -28,6 +28,16 @@ interface SingleBulkCreateParams {
   tags: string[];
 }
 
+export const filterDuplicateRules = (id: string, signalSearchResponse: SignalSearchResponse) => {
+  return signalSearchResponse.hits.hits.filter(doc => {
+    if (doc._source.signal == null) {
+      return true;
+    } else {
+      return !doc._source.signal.ancestors.some(ancestor => ancestor.rule === id);
+    }
+  });
+};
+
 // Bulk Index documents.
 export const singleBulkCreate = async ({
   someResult,
@@ -47,15 +57,7 @@ export const singleBulkCreate = async ({
   // If our id already exists in the parent id, then we do not
   // want to create another signal based on something we have
   // already written out.
-  someResult.hits.hits = someResult.hits.hits.filter(doc => {
-    if (doc._source.signal?.parent.id == null) {
-      return true;
-    } else {
-      return !doc._source.signal.ancestors.some(ancestor => {
-        return ancestor.rule === id;
-      });
-    }
-  });
+  someResult.hits.hits = filterDuplicateRules(id, someResult);
 
   if (someResult.hits.hits.length === 0) {
     return true;
