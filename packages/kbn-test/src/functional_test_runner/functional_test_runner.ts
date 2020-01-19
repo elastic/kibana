@@ -81,6 +81,7 @@ export class FunctionalTestRunner {
       if (config.get('testRunner')) {
         throw new Error('Unable to get test stats for config that uses a custom test runner');
       }
+
       // replace the function of custom service providers so that they return
       // promise-like objects which never resolve, essentially disabling them
       // allowing us to load the test files and populate the mocha suites
@@ -124,10 +125,6 @@ export class FunctionalTestRunner {
         !config.get('testRunner')
       ) {
         throw new Error('No tests defined.');
-      }
-
-      if (config.get('testFiles').length === 0) {
-        throw new Error('No test files defined.');
       }
 
       // base level services that functional_test_runner exposes

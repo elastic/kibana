@@ -114,7 +114,7 @@ export async function runTests(options, testRunner) {
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function startServers(options) {
-  const log = options.createLogger();
+  const log = options.log || options.createLogger();
   const opts = {
     ...options,
     log,
