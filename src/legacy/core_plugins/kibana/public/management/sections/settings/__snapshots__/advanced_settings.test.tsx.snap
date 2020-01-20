@@ -107,7 +107,6 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
         "elasticsearch": 2,
       }
     }
-    clear={[Function]}
     clearQuery={[Function]}
     enableSaving={false}
     save={[Function]}
@@ -290,7 +289,6 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
         "elasticsearch": 2,
       }
     }
-    clear={[Function]}
     clearQuery={[Function]}
     enableSaving={true}
     save={[Function]}
