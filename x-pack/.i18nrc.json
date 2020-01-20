@@ -1,7 +1,7 @@
 {
   "prefix": "xpack",
   "paths": {
-    "xpack.actions": "legacy/plugins/actions",
+    "xpack.actions": "plugins/actions",
     "xpack.advancedUiActions": "plugins/advanced_ui_actions",
     "xpack.alerting": "legacy/plugins/alerting",
     "xpack.triggersActionsUI": "legacy/plugins/triggers_actions_ui",
