@@ -7,6 +7,7 @@
 import { EsNames } from './names';
 import mappings from '../../generated/mappings.json';
 
+// returns the body of an index template used in an ES indices.putTemplate call
 export function getIndexTemplate(esNames: EsNames, ilmExists: boolean) {
   const indexTemplateBody: any = {
     index_patterns: [esNames.indexPattern],
@@ -30,6 +31,7 @@ export function getIndexTemplate(esNames: EsNames, ilmExists: boolean) {
   return indexTemplateBody;
 }
 
+// returns the body of an ilm policy used in an ES PUT _ilm/policy call
 export function getIlmPolicy() {
   return {
     policy: {

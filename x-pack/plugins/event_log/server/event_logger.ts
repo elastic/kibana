@@ -48,14 +48,13 @@ export class EventLogger implements IEventLogger {
 
   startTiming(event: IEvent): void {
     if (event == null) return;
-    if (event.event == null) event.event = {};
+    event.event = event.event || {};
 
     event.event.start = new Date().toISOString();
   }
 
   stopTiming(event: IEvent): void {
-    if (event == null) return;
-    if (event.event == null) return;
+    if (event?.event == null) return;
 
     const start = getEventStart(event);
     if (start == null || isNaN(start)) return;
@@ -76,11 +75,10 @@ export class EventLogger implements IEventLogger {
 
     // add fixed properties
     event['@timestamp'] = new Date().toISOString();
-    if (event.ecs == null) event.ecs = {};
+    event.ecs = event.ecs || {};
     event.ecs.version = ECS_VERSION;
 
     // TODO add kibana server uuid
-    // if (event.kibana == null) event.kibana = {};
     // event.kibana.server_uuid = NP version of config.get('server.uuid');
 
     let validatedEvent: IValidatedEvent;
@@ -108,7 +106,7 @@ export class EventLogger implements IEventLogger {
 
 // return the epoch millis of the start date, or null; may be NaN if garbage
 function getEventStart(event: IEvent): number | null {
-  if (event == null || event.event == null || event.event.start == null) return null;
+  if (event?.event?.start == null) return null;
 
   return Date.parse(event.event.start);
 }
@@ -119,7 +117,7 @@ const RequiredEventSchema = schema.object({
 });
 
 function validateEvent(eventLogService: IEventLogService, event: IEvent): IValidatedEvent {
-  if (event == null || event.event == null) {
+  if (event?.event == null) {
     throw new Error(`no "event" property`);
   }
 

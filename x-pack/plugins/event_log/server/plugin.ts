@@ -71,13 +71,17 @@ export class Plugin implements CorePlugin<IEventLogService> {
   async start(core: CoreStart) {
     this.systemLogger.debug('starting plugin');
 
+    if (!this.esContext) throw new Error('esContext not initialized');
+    if (!this.eventLogger) throw new Error('eventLogger not initialized');
+    if (!this.eventLogService) throw new Error('eventLogService not initialized');
+
     // launches initialization async
-    if (this.eventLogService!.isIndexingEntries()) {
-      this.esContext!.initialize();
+    if (this.eventLogService.isIndexingEntries()) {
+      this.esContext.initialize();
     }
 
     // will log the event after initialization
-    this.eventLogger!.logEvent({
+    this.eventLogger.logEvent({
       event: { action: ACTIONS.starting },
       message: 'event_log starting',
     });
@@ -86,9 +90,11 @@ export class Plugin implements CorePlugin<IEventLogService> {
   stop() {
     this.systemLogger.debug('stopping plugin');
 
+    if (!this.eventLogger) throw new Error('eventLogger not initialized');
+
     // note that it's unlikely this event would ever be written,
     // when Kibana is actuaelly stopping, as it's written asynchronously
-    this.eventLogger!.logEvent({
+    this.eventLogger.logEvent({
       event: { action: ACTIONS.stopping },
       message: 'event_log stopping',
     });

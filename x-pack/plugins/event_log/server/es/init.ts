@@ -45,9 +45,7 @@ interface AddTemplateOpts {
 }
 
 class EsInitializationSteps {
-  private esContext: EsContext;
-
-  constructor(esContext: EsContext) {
+  constructor(private readonly esContext: EsContext) {
     this.esContext = esContext;
   }
 

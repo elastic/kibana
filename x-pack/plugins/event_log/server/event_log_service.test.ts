@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IEventLogConfig } from './types';
 import { EventLogService } from './event_log_service';
 import { getEsNames } from './es/names';
 import { createMockEsContext } from './es/context.mock';
@@ -18,54 +19,51 @@ describe('EventLogService', () => {
     logger: systemLogger,
   });
 
-  test('config', () => {
-    let service: EventLogService;
-
-    const params = {
+  function getService(config: IEventLogConfig) {
+    const { enabled, logEntries, indexEntries } = config;
+    return new EventLogService({
       esContext,
       systemLogger,
       config: {
-        enabled: true,
-        logEntries: true,
-        indexEntries: true,
+        enabled,
+        logEntries,
+        indexEntries,
       },
-    };
+    });
+  }
 
-    service = new EventLogService(params);
+  test('returns config values from service methods', () => {
+    let service;
+
+    service = getService({ enabled: true, logEntries: true, indexEntries: true });
     expect(service.isEnabled()).toEqual(true);
     expect(service.isLoggingEntries()).toEqual(true);
     expect(service.isIndexingEntries()).toEqual(true);
 
-    params.config.logEntries = false;
-    service = new EventLogService(params);
+    service = getService({ enabled: true, logEntries: false, indexEntries: true });
     expect(service.isEnabled()).toEqual(true);
     expect(service.isLoggingEntries()).toEqual(false);
     expect(service.isIndexingEntries()).toEqual(true);
 
-    params.config.logEntries = true;
-    params.config.indexEntries = false;
-    service = new EventLogService(params);
+    service = getService({ enabled: true, logEntries: true, indexEntries: false });
     expect(service.isEnabled()).toEqual(true);
     expect(service.isLoggingEntries()).toEqual(true);
     expect(service.isIndexingEntries()).toEqual(false);
 
-    params.config.logEntries = false;
-    params.config.indexEntries = false;
-    service = new EventLogService(params);
+    service = getService({ enabled: true, logEntries: false, indexEntries: false });
     expect(service.isEnabled()).toEqual(true);
     expect(service.isLoggingEntries()).toEqual(false);
     expect(service.isIndexingEntries()).toEqual(false);
 
-    params.config.enabled = false;
-    params.config.logEntries = true;
-    params.config.indexEntries = true;
-    service = new EventLogService(params);
+    // this is the only non-obvious one; when enabled is false,
+    // logging/indexing will be false as well.
+    service = getService({ enabled: false, logEntries: true, indexEntries: true });
     expect(service.isEnabled()).toEqual(false);
     expect(service.isLoggingEntries()).toEqual(false);
     expect(service.isIndexingEntries()).toEqual(false);
   });
 
-  test('provider actions', () => {
+  test('handles registering provider actions correctly', () => {
     const params = {
       esContext,
       systemLogger,
@@ -101,7 +99,7 @@ describe('EventLogService', () => {
     expect(service.isProviderActionRegistered('invalid', 'foo')).toEqual(false);
   });
 
-  test('getLogger()', () => {
+  test('returns a non-null logger from getLogger()', () => {
     const params = {
       esContext,
       systemLogger,

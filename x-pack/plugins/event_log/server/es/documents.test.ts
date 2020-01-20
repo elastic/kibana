@@ -8,15 +8,19 @@ import { getIndexTemplate, getIlmPolicy } from './documents';
 import { getEsNames } from './names';
 
 describe('getIlmPolicy()', () => {
-  test('works as expected', () => {
-    expect(getIlmPolicy()).toMatchObject({});
+  test('returns the basic structure of an ilm policy', () => {
+    expect(getIlmPolicy()).toMatchObject({
+      policy: {
+        phases: {},
+      },
+    });
   });
 });
 
 describe('getIndexTemplate()', () => {
   const esNames = getEsNames('XYZ');
 
-  test('works as expected generally', () => {
+  test('returns the correct details of the index template', () => {
     const indexTemplate = getIndexTemplate(esNames, true);
     expect(indexTemplate.index_patterns).toEqual([esNames.indexPattern]);
     expect(indexTemplate.aliases[esNames.alias]).toEqual({});
@@ -25,13 +29,13 @@ describe('getIndexTemplate()', () => {
     expect(indexTemplate.mappings).toMatchObject({});
   });
 
-  test('works as expected with ilm', () => {
+  test('returns correct index template bits for ilm when ilm is supported', () => {
     const indexTemplate = getIndexTemplate(esNames, true);
     expect(indexTemplate.settings['index.lifecycle.name']).toBe(esNames.ilmPolicy);
     expect(indexTemplate.settings['index.lifecycle.rollover_alias']).toBe(esNames.alias);
   });
 
-  test('works as expected with ilm off', () => {
+  test('returns correct index template bits for ilm when ilm is not supported', () => {
     const indexTemplate = getIndexTemplate(esNames, false);
     expect(indexTemplate.settings['index.lifecycle.name']).toBeUndefined();
     expect(indexTemplate.settings['index.lifecycle.rollover_alias']).toBeUndefined();

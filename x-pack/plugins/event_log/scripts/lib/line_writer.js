@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const INDENT_LENGTH = 2;
+const INDENT = ''.padStart(INDENT_LENGTH);
+
 module.exports = {
   createLineWriter,
 };
@@ -19,11 +22,11 @@ class LineWriter {
   }
 
   indent() {
-    this._indent = `${this._indent}  `;
+    this._indent = `${this._indent}${INDENT}`;
   }
 
   dedent() {
-    this._indent = this._indent.substr(2);
+    this._indent = this._indent.substr(INDENT_LENGTH);
   }
 
   getContent() {
