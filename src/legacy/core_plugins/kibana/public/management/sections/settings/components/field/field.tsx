@@ -61,9 +61,9 @@ import {
 interface FieldProps {
   setting: FieldSetting;
   handleChange: (name: string, value: FieldState) => void;
-  clearChange: (name: string) => void;
   enableSaving: boolean;
-  unsavedChanges: FieldState;
+  clearChange?: (name: string) => void;
+  unsavedChanges?: FieldState;
   loading?: boolean;
 }
 
@@ -638,6 +638,7 @@ export class Field extends PureComponent<FieldProps> {
       <EuiFlexGroup className={className}>
         <EuiFlexItem>
           <EuiDescribedFormGroup
+            className="mgtAdvancedSettings__fieldWrapper"
             title={this.renderTitle(setting)}
             description={this.renderDescription(setting)}
             idAria={`${setting.name}-aria`}
