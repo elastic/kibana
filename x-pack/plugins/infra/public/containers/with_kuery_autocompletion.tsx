@@ -5,11 +5,7 @@
  */
 
 import React from 'react';
-import {
-  AutocompleteSuggestion,
-  IIndexPattern,
-  DataPublicPluginStart,
-} from 'src/plugins/data/public';
+import { IIndexPattern, DataPublicPluginStart, autocomplete } from 'src/plugins/data/public';
 import {
   withKibana,
   KibanaReactContextValue,
@@ -22,7 +18,7 @@ interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: AutocompleteSuggestion[];
+    suggestions: autocomplete.QuerySuggestion[];
   }>;
   indexPattern: IIndexPattern;
 }
@@ -34,7 +30,7 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: AutocompleteSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
 }
 
 class WithKueryAutocompletionComponent extends React.Component<
@@ -56,30 +52,20 @@ class WithKueryAutocompletionComponent extends React.Component<
     });
   }
 
-  private getAutocompleteProvider = (language: string) => {
-    return this.props.kibana.services.data.autocomplete.getProvider(language);
-  };
-
   private loadSuggestions = async (
     expression: string,
     cursorPosition: number,
     maxSuggestions?: number
   ) => {
     const { indexPattern } = this.props;
-    const autocompletionProvider = this.getAutocompleteProvider('kuery');
-    const config = {
-      get: () => true,
-    };
+    const language = 'kuery';
+    const hasQuerySuggestions = this.props.kibana.services.data.autocomplete.hasQuerySuggestions(
+      language
+    );
 
-    if (!autocompletionProvider) {
+    if (!hasQuerySuggestions) {
       return;
     }
-
-    const getSuggestions = autocompletionProvider({
-      config,
-      indexPatterns: [indexPattern],
-      boolFilter: [],
-    });
 
     this.setState({
       currentRequest: {
@@ -89,11 +75,15 @@ class WithKueryAutocompletionComponent extends React.Component<
       suggestions: [],
     });
 
-    const suggestions = await getSuggestions({
-      query: expression,
-      selectionStart: cursorPosition,
-      selectionEnd: cursorPosition,
-    });
+    const suggestions =
+      (await this.props.kibana.services.data.autocomplete.getQuerySuggestions({
+        language,
+        query: expression,
+        selectionStart: cursorPosition,
+        selectionEnd: cursorPosition,
+        indexPatterns: [indexPattern],
+        boolFilter: [],
+      })) || [];
 
     this.setState(state =>
       state.currentRequest &&
