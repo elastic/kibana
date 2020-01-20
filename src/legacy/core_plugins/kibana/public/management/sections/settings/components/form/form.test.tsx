@@ -21,11 +21,19 @@ import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../../../../core/public';
 
+import { SettingsChanges } from '../../types';
 import { Form } from './form';
 
 jest.mock('../field', () => ({
   Field: () => {
     return 'field';
+  },
+}));
+
+jest.mock('ui/notify', () => ({
+  toastNotifications: {
+    addDanger: () => {},
+    add: jest.fn(),
   },
 }));
 
@@ -85,8 +93,7 @@ const categoryCounts = {
   dashboard: 1,
   'x-pack': 10,
 };
-const save = (key: string, value: any) => Promise.resolve(true);
-const clear = (key: string) => Promise.resolve(true);
+const save = (changes: SettingsChanges) => Promise.resolve([true]);
 const clearQuery = () => {};
 
 describe('Form', () => {
@@ -97,7 +104,6 @@ describe('Form', () => {
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
-        clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={true}
@@ -114,7 +120,6 @@ describe('Form', () => {
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
-        clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={false}
@@ -131,7 +136,6 @@ describe('Form', () => {
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
-        clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={true}
@@ -148,7 +152,6 @@ describe('Form', () => {
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
-        clear={clear}
         clearQuery={clearQuery}
         showNoResultsMessage={false}
         enableSaving={true}
