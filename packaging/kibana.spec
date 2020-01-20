@@ -32,6 +32,10 @@ fi
 #installs dependencies and runs the build
 cd %{name}
 /usr/bin/yarn
+cd plugins/network_vis/
+/usr/bin/yarn
+
+cd %{name}
 /usr/bin/yarn kbn bootstrap
 node scripts/build --rpm --oss --skip-archives --release --verbose
 
