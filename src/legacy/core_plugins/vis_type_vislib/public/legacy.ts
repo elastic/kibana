@@ -31,11 +31,6 @@ import {
   getPointSeriesTooltipFormatter,
   // @ts-ignore
 } from 'ui/vis/components/tooltip/_pointseries_tooltip_formatter';
-import {
-  vislibSeriesResponseHandlerProvider,
-  vislibSlicesResponseHandlerProvider,
-  // @ts-ignore
-} from 'ui/vis/response_handlers/vislib';
 // @ts-ignore
 import { vislibColor } from 'ui/vis/components/color/color';
 
@@ -57,8 +52,6 @@ const setupPlugins: Readonly<KbnVislibVisTypesPluginSetupDependencies> = {
     getHierarchicalTooltipFormatter,
     initializePointSeriesTooltipFormatter,
     getPointSeriesTooltipFormatter,
-    vislibSeriesResponseHandlerProvider,
-    vislibSlicesResponseHandlerProvider,
     vislibColor,
   },
 };

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tableVisResponseHandler } from './table_vis_request_handler';
+import { tableVisResponseHandler } from './table_vis_response_handler';
 
 import {
   ExpressionFunction,
@@ -28,7 +28,7 @@ import {
 
 const name = 'kibana_table';
 
-type Context = KibanaDatatable;
+export type Context = KibanaDatatable;
 
 interface Arguments {
   visConfig: string | null;

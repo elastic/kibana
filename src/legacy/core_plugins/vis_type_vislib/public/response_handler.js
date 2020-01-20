@@ -17,11 +17,59 @@
  * under the License.
  */
 
-import { buildHierarchicalData } from '../../agg_response/hierarchical/build_hierarchical_data';
-import { buildPointSeriesData } from '../../agg_response/point_series/point_series';
-import { legacyResponseHandlerProvider } from './legacy';
+import { buildHierarchicalData, buildPointSeriesData, getFormat } from './legacy_imports';
 
-const tableResponseHandler = legacyResponseHandlerProvider().handler;
+function tableResponseHandler(table, dimensions) {
+  return new Promise(resolve => {
+    const converted = { tables: [] };
+
+    const split = dimensions.splitColumn || dimensions.splitRow;
+
+    if (split) {
+      converted.direction = dimensions.splitRow ? 'row' : 'column';
+      const splitColumnIndex = split[0].accessor;
+      const splitColumnFormatter = getFormat(split[0].format);
+      const splitColumn = table.columns[splitColumnIndex];
+      const splitMap = {};
+      let splitIndex = 0;
+
+      table.rows.forEach((row, rowIndex) => {
+        const splitValue = row[splitColumn.id];
+
+        if (!splitMap.hasOwnProperty(splitValue)) {
+          splitMap[splitValue] = splitIndex++;
+          const tableGroup = {
+            $parent: converted,
+            title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
+            name: splitColumn.name,
+            key: splitValue,
+            column: splitColumnIndex,
+            row: rowIndex,
+            table,
+            tables: [],
+          };
+          tableGroup.tables.push({
+            $parent: tableGroup,
+            columns: table.columns,
+            rows: [],
+          });
+
+          converted.tables.push(tableGroup);
+        }
+
+        const tableIndex = splitMap[splitValue];
+        converted.tables[tableIndex].tables[0].rows.push(row);
+      });
+    } else {
+      converted.tables.push({
+        columns: table.columns,
+        rows: table.rows,
+      });
+    }
+
+    resolve(converted);
+  });
+}
 
 function convertTableGroup(tableGroup, convertTable) {
   const tables = tableGroup.tables;
@@ -77,16 +125,6 @@ const handlerFunction = function(convertTable) {
   };
 };
 
-export const vislibSeriesResponseHandlerProvider = function() {
-  return {
-    name: 'vislib_series',
-    handler: handlerFunction(buildPointSeriesData),
-  };
-};
+export const vislibSeriesResponseHandler = handlerFunction(buildPointSeriesData);
 
-export const vislibSlicesResponseHandlerProvider = function() {
-  return {
-    name: 'vislib_slices',
-    handler: handlerFunction(buildHierarchicalData),
-  };
-};
+export const vislibSlicesResponseHandler = handlerFunction(buildHierarchicalData);
