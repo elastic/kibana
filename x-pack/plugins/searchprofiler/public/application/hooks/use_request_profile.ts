@@ -19,6 +19,19 @@ interface ReturnValue {
   error?: string;
 }
 
+const extractProfilerErrorMessage = async (e: any): Promise<string | undefined> => {
+  if (e.body?.attributes?.error?.reason) {
+    const { reason, line, col } = e.body.attributes.error;
+    return `${reason} at line: ${line - 1} col: ${col}`;
+  }
+
+  if (e.body?.message) {
+    return e.body.message;
+  }
+
+  return;
+};
+
 export const useRequestProfile = () => {
   const { http, notifications, getLicenseStatus } = useAppContext();
   const licenseEnabled = getLicenseStatus().valid;
@@ -60,10 +73,13 @@ export const useRequestProfile = () => {
 
       return { data: resp.resp.profile.shards };
     } catch (e) {
-      try {
-        // Is this a known error type?
-        notifications.addError(e, { title: e.message });
-      } catch (_) {
+      const profilerErrorMessage = await extractProfilerErrorMessage(e);
+      if (profilerErrorMessage) {
+        notifications.addError(e, {
+          title: e.message,
+          toastMessage: profilerErrorMessage,
+        });
+      } else {
         // Otherwise just report the original error
         notifications.addError(e, {
           title: i18n.translate('xpack.searchProfiler.errorSomethingWentWrongTitle', {

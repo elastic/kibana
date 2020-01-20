@@ -55,7 +55,15 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
         });
       } catch (err) {
         log.error(err);
-        return response.internalError(err);
+        return response.customError({
+          statusCode: err.status || 500,
+          body: err.body
+            ? {
+                message: err.message,
+                attributes: err.body,
+              }
+            : err,
+        });
       }
     }
   );

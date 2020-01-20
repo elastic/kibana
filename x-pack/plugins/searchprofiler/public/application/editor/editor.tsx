@@ -10,10 +10,7 @@ import { Editor as AceEditor } from 'brace';
 import { initializeEditor } from './init_editor';
 import { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
 
-interface EditorShim {
-  getValue(): string;
-  focus(): void;
-}
+type EditorShim = ReturnType<typeof createEditorShim>;
 
 export type EditorInstance = EditorShim;
 
@@ -23,7 +20,7 @@ export interface Props {
   onEditorReady: (editor: EditorShim) => void;
 }
 
-const createEditorShim = (aceEditor: AceEditor): EditorShim => {
+const createEditorShim = (aceEditor: AceEditor) => {
   return {
     getValue() {
       return aceEditor.getValue();
