@@ -81,8 +81,7 @@ class TimelineQueryComponent extends QueryTemplate<
       sourceId,
       sortField,
     } = this.props;
-    // I needed to do that to avoid test to yell at me since there is no good way yet to mock withKibana
-    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY) ?? [];
+    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const defaultIndex = isEmpty(indexPattern)
       ? [...defaultKibanaIndex, ...indexToAdd]
       : indexPattern?.title.split(',') ?? [];

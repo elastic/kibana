@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as i18n from './translations';
 import { SignalsHistogramOption } from './types';
 
 export const signalsHistogramOptions: SignalsHistogramOption[] = [
-  { text: i18n.STACK_BY_RISK_SCORES, value: 'signal.rule.risk_score' },
-  { text: i18n.STACK_BY_SEVERITIES, value: 'signal.rule.severity' },
-  { text: i18n.STACK_BY_DESTINATION_IPS, value: 'destination.ip' },
-  { text: i18n.STACK_BY_ACTIONS, value: 'event.action' },
-  { text: i18n.STACK_BY_CATEGORIES, value: 'event.category' },
-  { text: i18n.STACK_BY_HOST_NAMES, value: 'host.name' },
-  { text: i18n.STACK_BY_RULE_TYPES, value: 'signal.rule.type' },
-  { text: i18n.STACK_BY_RULE_NAMES, value: 'signal.rule.name' },
-  { text: i18n.STACK_BY_SOURCE_IPS, value: 'source.ip' },
-  { text: i18n.STACK_BY_USERS, value: 'user.name' },
+  { text: 'signal.rule.risk_score', value: 'signal.rule.risk_score' },
+  { text: 'signal.rule.severity', value: 'signal.rule.severity' },
+  { text: 'destination.ip', value: 'destination.ip' },
+  { text: 'event.action', value: 'event.action' },
+  { text: 'event.category', value: 'event.category' },
+  { text: 'host.name', value: 'host.name' },
+  { text: 'signal.rule.type', value: 'signal.rule.type' },
+  { text: 'signal.rule.name', value: 'signal.rule.name' },
+  { text: 'source.ip', value: 'source.ip' },
+  { text: 'user.name', value: 'user.name' },
 ];
