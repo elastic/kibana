@@ -44,6 +44,7 @@ export enum VALIDATION_RESULT {
   NULL_VALUES,
   TOO_MANY_TOKENS,
   FAILED_TO_TOKENIZE,
+  INSUFFICIENT_PRIVILEGES,
 }
 
 export interface FieldExampleCheck {

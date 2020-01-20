@@ -114,14 +114,18 @@ export class ValidationResults {
   }
 
   public createTooManyTokensResult(error: any, sampleSize: number) {
-    // expecting error reason:
+    // expecting error message:
     // The number of tokens produced by calling _analyze has exceeded the allowed maximum of [10000].
     // This limit can be set by changing the [index.analyze.max_token_count] index level setting.
 
-    const reason: string = error?.body?.error?.reason;
-    if (reason) {
+    if (error.statusCode === 403) {
+      this.createPrivilegesErrorResult(error);
+      return;
+    }
+    const message: string = error.message;
+    if (message) {
       const rxp = /exceeded the allowed maximum of \[(\d+?)\]/;
-      const match = rxp.exec(reason);
+      const match = rxp.exec(message);
       if (match?.length === 2) {
         const tokenLimit = match[1];
         this._results.push({
@@ -140,10 +144,29 @@ export class ValidationResults {
       }
       return;
     }
-    this.createFailureToTokenize(reason);
+    this.createFailureToTokenize(message);
   }
 
-  public createFailureToTokenize(reason: string | undefined) {
+  public createPrivilegesErrorResult(error: any) {
+    const message: string = error.message;
+    if (message) {
+      this._results.push({
+        id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,
+        valid: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
+        message: i18n.translate(
+          'xpack.ml.models.jobService.categorization.messages.tooManyTokens',
+          {
+            defaultMessage:
+              'Tokenization of field value examples could not be performed due to insufficient privileges. {message}',
+            values: { message },
+          }
+        ),
+      });
+      return;
+    }
+  }
+
+  public createFailureToTokenize(message: string | undefined) {
     this._results.push({
       id: VALIDATION_RESULT.FAILED_TO_TOKENIZE,
       valid: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
@@ -151,8 +174,8 @@ export class ValidationResults {
         'xpack.ml.models.jobService.categorization.messages.failureToGetTokens',
         {
           defaultMessage:
-            'It was not possible to tokenize a sample of example field values. {reason}',
-          values: { reason: reason || '' },
+            'It was not possible to tokenize a sample of example field values. {message}',
+          values: { message: message || '' },
         }
       ),
     });
