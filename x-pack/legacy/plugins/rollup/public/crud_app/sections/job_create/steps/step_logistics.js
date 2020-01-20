@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -35,7 +35,7 @@ import { indexPatterns } from '../../../../../../../../../src/plugins/data/publi
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
-export class StepLogisticsUi extends Component {
+class StepLogistics extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -523,4 +523,4 @@ export class StepLogisticsUi extends Component {
   };
 }
 
-export const StepLogistics = injectI18n(StepLogisticsUi);
+export { StepLogistics };

@@ -54,14 +54,14 @@ describe('<JobList />', () => {
     const { component, exists } = initTestBed({ isLoading: true });
 
     expect(exists('jobListLoading')).toBeTruthy();
-    expect(component.find('JobTableUi').length).toBeFalsy();
+    expect(component.find('JobTable').length).toBeFalsy();
   });
 
   it('should display the <JobTable /> when there are jobs', () => {
     const { component, exists } = initTestBed({ hasJobs: true });
 
     expect(exists('jobListLoading')).toBeFalsy();
-    expect(component.find('JobTableUi').length).toBeTruthy();
+    expect(component.find('JobTable').length).toBeTruthy();
   });
 
   describe('when there is an API error', () => {

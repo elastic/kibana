@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -23,7 +23,7 @@ import { FieldList } from '../../components';
 
 import { FieldChooser } from './components';
 
-export class StepTermsUi extends Component {
+class StepTerms extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -141,4 +141,4 @@ export class StepTermsUi extends Component {
   }
 }
 
-export const StepTerms = injectI18n(StepTermsUi);
+export { StepTerms };

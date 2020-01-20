@@ -6,11 +6,12 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
-class ConfirmDeleteModalUi extends Component {
+class ConfirmDeleteModal extends Component {
   static propTypes = {
     isSingleSelection: PropTypes.bool.isRequired,
     jobs: PropTypes.array.isRequired,
@@ -19,12 +20,14 @@ class ConfirmDeleteModalUi extends Component {
   };
 
   renderJobs() {
-    const { jobs, intl } = this.props;
+    const { jobs } = this.props;
     const jobItems = jobs.map(({ id, status }) => {
-      const startedMessage = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.startedMessage',
-        defaultMessage: 'started',
-      });
+      const startedMessage = i18n.translate(
+        'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.startedMessage',
+        {
+          defaultMessage: 'started',
+        }
+      );
       const statusText = status === 'started' ? ` (${startedMessage})` : null;
       return (
         <li key={id}>
@@ -109,4 +112,4 @@ class ConfirmDeleteModalUi extends Component {
   }
 }
 
-export const ConfirmDeleteModal = injectI18n(ConfirmDeleteModalUi);
+export { ConfirmDeleteModal };

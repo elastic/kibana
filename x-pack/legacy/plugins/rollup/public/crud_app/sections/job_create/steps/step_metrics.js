@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import get from 'lodash/object/get';
 
@@ -64,7 +64,7 @@ const metricTypesConfig = (function() {
   });
 })();
 
-export class StepMetricsUi extends Component {
+class StepMetrics extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -247,7 +247,7 @@ export class StepMetricsUi extends Component {
   }
 
   getListColumns() {
-    return StepMetricsUi.chooserColumns.concat({
+    return StepMetrics.chooserColumns.concat({
       type: 'metrics',
       name: i18n.translate('xpack.rollupJobs.create.stepMetrics.metricsColumnHeader', {
         defaultMessage: 'Metrics',
@@ -421,7 +421,7 @@ export class StepMetricsUi extends Component {
                       defaultMessage="Add metrics fields"
                     />
                   }
-                  columns={StepMetricsUi.chooserColumns}
+                  columns={StepMetrics.chooserColumns}
                   fields={metricsFields}
                   selectedFields={metrics}
                   onSelectField={this.onSelectField}
@@ -473,4 +473,4 @@ export class StepMetricsUi extends Component {
   ];
 }
 
-export const StepMetrics = injectI18n(StepMetricsUi);
+export { StepMetrics };

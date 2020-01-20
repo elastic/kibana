@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 
 import {
@@ -35,7 +35,7 @@ const timeZoneOptions = moment.tz.names().map(name => ({
   text: name,
 }));
 
-export class StepDateHistogramUi extends Component {
+class StepDateHistogram extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -319,4 +319,4 @@ export class StepDateHistogramUi extends Component {
   };
 }
 
-export const StepDateHistogram = injectI18n(StepDateHistogramUi);
+export { StepDateHistogram };
