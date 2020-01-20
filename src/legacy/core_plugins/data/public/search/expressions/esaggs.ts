@@ -289,6 +289,11 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
         const cleanedColumn: KibanaDatatableColumn = {
           id: column.id,
           name: column.name,
+          _meta: {
+            type: column.aggConfig.type,
+            indexPattern: column.aggConfig.getIndexPattern(),
+            params: column.aggConfig.params,
+          },
         };
         if (args.includeFormatHints) {
           cleanedColumn.formatHint = createFormat(column.aggConfig);

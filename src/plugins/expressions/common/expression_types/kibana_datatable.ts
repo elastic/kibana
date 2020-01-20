@@ -26,6 +26,7 @@ const name = 'kibana_datatable';
 export interface KibanaDatatableColumn {
   id: string;
   name: string;
+  _meta: Record<string, string>;
   formatHint?: SerializedFieldFormat;
 }
 
