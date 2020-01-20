@@ -19,6 +19,7 @@
 
 import { onBrushEvent } from './brush_event';
 import { esFilters } from '../../../../../../../plugins/data/public';
+import { AggConfigs } from '../../../legacy_imports';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -63,11 +64,16 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
  * @param  {string} cellValue - value of the current cell
  * @return {array|string} - filter or list of filters to provide to queryFilter.addFilters()
  */
-const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
+const createFilter = (table, columnIndex, rowIndex) => {
   const column = table.columns[columnIndex];
-  const aggConfig = aggConfigs[columnIndex];
+  const aggConfigs = new AggConfigs();
+  aggConfigs.indexPattern = column._meta.indexPattern;
+  const aggConfig = aggConfigs.createAggConfig({
+    type: column._meta.type,
+    params: column._meta.params,
+  });
   let filter = [];
-  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : cellValue;
+  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
@@ -92,8 +98,8 @@ const createFiltersFromEvent = event => {
   dataPoints
     .filter(point => point)
     .forEach(val => {
-      const { table, column, row, value } = val;
-      const filter = createFilter(event.aggConfigs, table, column, row, value);
+      const { table, column, row } = val;
+      const filter = createFilter(table, column, row);
       if (filter) {
         filter.forEach(f => {
           if (event.negate) {
@@ -107,4 +113,4 @@ const createFiltersFromEvent = event => {
   return filters;
 };
 
-export { createFilter, createFiltersFromEvent, onBrushEvent };
+export { createFiltersFromEvent, onBrushEvent };

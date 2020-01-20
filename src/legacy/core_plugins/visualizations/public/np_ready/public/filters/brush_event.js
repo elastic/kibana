@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { esFilters } from '../../../../../../../plugins/data/public';
+import { AggConfigs } from '../../../legacy_imports';
 
 export function onBrushEvent(event) {
   const isNumber = event.data.ordered;
@@ -29,8 +30,12 @@ export function onBrushEvent(event) {
   if (!xRaw) return [];
   const column = xRaw.table.columns[xRaw.column];
   if (!column) return [];
-  const aggConfig = event.aggConfigs[xRaw.column];
-  if (!aggConfig) return [];
+  if (!column._meta) return [];
+  const aggConfigs = new AggConfigs(column._meta.indexPattern);
+  const aggConfig = aggConfigs.createAggConfig({
+    type: column._meta.type,
+    params: column._meta.params,
+  });
   const indexPattern = aggConfig.getIndexPattern();
   const field = aggConfig.params.field;
   if (!field) return [];

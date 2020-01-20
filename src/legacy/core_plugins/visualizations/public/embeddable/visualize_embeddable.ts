@@ -25,7 +25,6 @@ import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
 import { SavedObject } from 'ui/saved_objects/types';
 import { Vis } from 'ui/vis';
 import { queryGeohashBounds } from 'ui/visualize/loader/utils';
-import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
@@ -302,7 +301,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
         if (this.actions[event.name]) {
-          event.data.aggConfigs = getTableAggs(this.vis);
           const filters: esFilters.Filter[] = this.actions[event.name](event.data) || [];
           const mappedFilters = mapAndFlattenFilters(filters);
           const timeFieldName = this.vis.indexPattern.timeFieldName;
