@@ -40,7 +40,7 @@ const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =
   spyState != null && spyState.pageName === SiemPageName.hosts;
 
 const isDetectionsRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SiemPageName.detectionEngine;
+  spyState != null && spyState.pageName === SiemPageName.detections;
 
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps
@@ -81,7 +81,7 @@ export const getBreadcrumbsForRoute = (
     ];
   }
   if (isDetectionsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'detection-engine', isDetailPage: false };
+    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];

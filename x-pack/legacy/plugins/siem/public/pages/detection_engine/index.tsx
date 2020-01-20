@@ -51,4 +51,4 @@ const DetectionEngineContainerComponent: React.FC<Props> = () => (
   </ManageUserInfo>
 );
 
-export const DetectionEngineContainer = React.memo(DetectionEngineContainer);
+export const DetectionEngineContainer = React.memo(DetectionEngineContainerComponent);
