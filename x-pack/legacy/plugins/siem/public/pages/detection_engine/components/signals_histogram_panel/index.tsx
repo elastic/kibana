@@ -46,7 +46,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     filters,
     query,
     from,
-    legendPosition = 'bottom',
+    legendPosition = 'right',
     loadingInitial = false,
     showLinkToSignals = false,
     showTotalSignalsCount = false,
