@@ -23,6 +23,10 @@ export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.case.pageBadgeToolt
     'Case Workflow is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
 });
 
+export const BACK_LABEL = i18n.translate('xpack.siem.case.pageBackLabel', {
+  defaultMessage: '< Back to all cases',
+});
+
 export const EMPTY_TITLE = i18n.translate('xpack.siem.case.emptyTitle', {
   defaultMessage: 'It looks like you don’t have any indices relevant to the SIEM application',
 });
