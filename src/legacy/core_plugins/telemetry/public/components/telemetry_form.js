@@ -34,6 +34,7 @@ import { OptInExampleFlyout } from './opt_in_details_component';
 import { Field } from '../../../kibana/public/management/sections/settings/components/field/field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
@@ -50,6 +51,7 @@ export class TelemetryForm extends Component {
     processing: false,
     showExample: false,
     queryMatches: null,
+    enabled: this.props.telemetryOptInProvider.getOptIn() || false,
   };
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -72,8 +74,7 @@ export class TelemetryForm extends Component {
 
   render() {
     const { telemetryOptInProvider } = this.props;
-
-    const { showExample, queryMatches } = this.state;
+    const { showExample, queryMatches, enabled } = this.state;
 
     if (!telemetryOptInProvider.canChangeOptInStatus()) {
       return null;
@@ -108,15 +109,15 @@ export class TelemetryForm extends Component {
             <Field
               setting={{
                 type: 'boolean',
-                value: telemetryOptInProvider.getOptIn() || false,
+                value: enabled,
                 description: this.renderDescription(),
                 defVal: true,
                 ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', {
                   defaultMessage: 'Provide usage statistics',
                 }),
               }}
-              save={this.toggleOptIn}
-              clear={this.toggleOptIn}
+              loading={this.state.processing}
+              handleChange={this.toggleOptIn}
               enableSaving={this.props.enableSaving}
             />
           </EuiForm>
@@ -186,23 +187,40 @@ export class TelemetryForm extends Component {
   );
 
   toggleOptIn = async () => {
-    const newOptInValue = !this.props.telemetryOptInProvider.getOptIn();
+    const { telemetryOptInProvider } = this.props;
+    const { enabled } = this.state;
 
     return new Promise((resolve, reject) => {
       this.setState(
         {
-          enabled: newOptInValue,
+          enabled: !enabled,
           processing: true,
         },
         () => {
-          this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(
+          telemetryOptInProvider.setOptIn(this.state.enabled).then(
             () => {
               this.setState({ processing: false });
+              // TODO: COPY NEEDED
+              toastNotifications.addSuccess(
+                i18n.translate('telemetry.optInSuccess', {
+                  defaultMessage: 'Data usage collection setting saved.',
+                })
+              );
               resolve();
             },
             e => {
               // something went wrong
-              this.setState({ processing: false });
+              this.setState({
+                enabled: telemetryOptInProvider.getOptIn(),
+                processing: false,
+              });
+              // TODO: COPY NEEDED
+              toastNotifications.addSuccess(
+                i18n.translate('telemetry.optInFailed', {
+                  defaultMessage: 'Data usage collection saving failed',
+                })
+              );
+
               reject(e);
             }
           );

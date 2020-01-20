@@ -2,17 +2,19 @@
   + * {
     margin-top: $euiSize;
   }
-
-  &Wrapper {
-    width: 640px;
-
-    @include internetExplorerOnly() {
-      min-height: 1px;
-    }
+  &--unsaved {
+    // Simulates a left side border without shifting content
+    box-shadow: -$euiSizeXS 0px $euiColorSecondary;
   }
-
-  &Actions {
-    padding-top: $euiSizeM;
+  &--invalid {
+    // Simulates a left side border without shifting content
+    box-shadow: -$euiSizeXS 0px $euiColorDanger;
+  }
+  @include internetExplorerOnly() {
+    min-height: 1px;
+  }
+  &Row {
+    padding-left: $euiSizeS;
   }
 
   @include internetExplorerOnly {
@@ -20,4 +22,9 @@
       min-height: 1px;
     }
   }
+}
+.mgtAdvancedSettingsForm__unsavedCount {
+  // Simulates a left side border without shifting content
+  box-shadow: -$euiSizeXS 0px $euiColorSecondary;
+  padding-left: $euiSizeS;
 }

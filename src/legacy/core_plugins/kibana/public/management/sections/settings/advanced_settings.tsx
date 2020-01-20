@@ -29,7 +29,7 @@ import { IUiSettingsClient } from '../../../../../../../core/public/';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
-import { FieldSetting, IQuery } from './types';
+import { FieldSetting, IQuery, SettingsChanges } from './types';
 
 import {
   registerDefaultComponents,
@@ -164,6 +164,11 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     });
   };
 
+  saveConfig = async (changes: SettingsChanges) => {
+    const arr = Object.entries(changes).map(([key, value]) => this.config.set(key, value));
+    return Promise.all(arr);
+  };
+
   render() {
     const { filteredSettings, query, footerQueryMatched } = this.state;
 
@@ -193,8 +198,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}
-          save={this.config.set.bind(this.config)}
-          clear={this.config.remove.bind(this.config)}
+          save={this.saveConfig}
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
         />
