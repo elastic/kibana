@@ -58,64 +58,66 @@ const <%= upperCamelCaseName %>App = ({ basename, notifications, http, navigatio
   return (
     <Router basename={basename}>
       <I18nProvider>
-        <navigation.ui.TopNavMenu
-          appName={ PLUGIN_ID }
-          showSearchBar={true}
-        />
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageHeader>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage
-                    id="<%= camelCase(name) %>.helloWorldText"
-                    defaultMessage="Hello {name}!"
-                    values={{ name: PLUGIN_NAME }}
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageHeader>
-            <EuiPageContent>
-              <EuiPageContentHeader>
-                <EuiTitle>
-                  <h2>
+        <>
+          <navigation.ui.TopNavMenu
+            appName={ PLUGIN_ID }
+            showSearchBar={true}
+          />
+          <EuiPage>
+            <EuiPageBody>
+              <EuiPageHeader>
+                <EuiTitle size="l">
+                  <h1>
                     <FormattedMessage
-                      id="<%= camelCase(name) %>.congratulationsTitle"
-                      defaultMessage="Congratulations"
+                      id="<%= camelCase(name) %>.helloWorldText"
+                      defaultMessage="Hello {name}!"
+                      values={{ name: PLUGIN_NAME }}
                     />
-                  </h2>
+                  </h1>
                 </EuiTitle>
-              </EuiPageContentHeader>
-              <EuiPageContentBody>
-                <EuiText>
-                  <h3>
-                    <FormattedMessage
-                      id="<%= camelCase(name) %>.congratulationsText"
-                      defaultMessage="You have successfully created your first Kibana Plugin!"
-                    />
-                  </h3>
-                  <p>
-                    <FormattedMessage
-                      id="banana.serverTimeText"
-                      defaultMessage="Last response from server: {time}"
-                      values={{ time: timestamp ? timestamp : 'Unknown' }}
+              </EuiPageHeader>
+              <EuiPageContent>
+                <EuiPageContentHeader>
+                  <EuiTitle>
+                    <h2>
+                      <FormattedMessage
+                        id="<%= camelCase(name) %>.congratulationsTitle"
+                        defaultMessage="Congratulations"
                       />
-                  </p>
-                  <EuiButton 
-                    type="primary" 
-                    size="s" 
-                    onClick={fetchData}
-                  >
-                    <FormattedMessage
-                      id="<%= camelCase(name) %>.buttonText"
-                      defaultMessage="Fetch data"
-                    />
-                  </EuiButton>
-                </EuiText>
-              </EuiPageContentBody>
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+                    </h2>
+                  </EuiTitle>
+                </EuiPageContentHeader>
+                <EuiPageContentBody>
+                  <EuiText>
+                    <h3>
+                      <FormattedMessage
+                        id="<%= camelCase(name) %>.congratulationsText"
+                        defaultMessage="You have successfully created your first Kibana Plugin!"
+                      />
+                    </h3>
+                    <p>
+                      <FormattedMessage
+                        id="banana.serverTimeText"
+                        defaultMessage="Last response from server: {time}"
+                        values={{ time: timestamp ? timestamp : 'Unknown' }}
+                        />
+                    </p>
+                    <EuiButton 
+                      type="primary" 
+                      size="s" 
+                      onClick={fetchData}
+                    >
+                      <FormattedMessage
+                        id="<%= camelCase(name) %>.buttonText"
+                        defaultMessage="Fetch data"
+                      />
+                    </EuiButton>
+                  </EuiText>
+                </EuiPageContentBody>
+              </EuiPageContent>
+            </EuiPageBody>
+          </EuiPage>
+        </>
       </I18nProvider>
     </Router>
   );
