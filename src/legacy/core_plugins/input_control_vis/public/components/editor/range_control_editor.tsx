@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { Component, Fragment, ChangeEvent, ComponentType } from 'react';
+import React, { Component, Fragment, ComponentType } from 'react';
 
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -37,10 +37,10 @@ interface RangeControlEditorProps {
   getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
   handleFieldNameChange: (fieldName: string) => void;
   handleIndexPatternChange: (indexPatternId: string) => void;
-  handleNumberOptionChange: (
+  handleOptionsChange: <T extends keyof ControlParamsOptions>(
     controlIndex: number,
-    optionName: keyof ControlParamsOptions,
-    event: ChangeEvent<HTMLInputElement>
+    optionName: T,
+    value: ControlParamsOptions[T]
   ) => void;
   deps: InputControlVisDependencies;
 }
@@ -109,7 +109,11 @@ export class RangeControlEditor extends Component<
           <EuiFieldNumber
             value={this.props.controlParams.options.step}
             onChange={event => {
-              this.props.handleNumberOptionChange(this.props.controlIndex, 'step', event);
+              this.props.handleOptionsChange(
+                this.props.controlIndex,
+                'step',
+                event.target.valueAsNumber
+              );
             }}
             data-test-subj={`rangeControlSizeInput${this.props.controlIndex}`}
           />
@@ -128,7 +132,11 @@ export class RangeControlEditor extends Component<
             min={0}
             value={this.props.controlParams.options.decimalPlaces}
             onChange={event => {
-              this.props.handleNumberOptionChange(this.props.controlIndex, 'decimalPlaces', event);
+              this.props.handleOptionsChange(
+                this.props.controlIndex,
+                'decimalPlaces',
+                event.target.valueAsNumber
+              );
             }}
             data-test-subj={`rangeControlDecimalPlacesInput${this.props.controlIndex}`}
           />
