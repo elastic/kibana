@@ -92,10 +92,6 @@ export type SavedDashboardPanelTo60 = Pick<
   readonly type: string;
 };
 
-export type DashboardAppStateDefaults = DashboardAppState & {
-  description?: string;
-};
-
 export interface DashboardAppState {
   panels: SavedDashboardPanel[];
   fullScreenMode: boolean;
@@ -111,6 +107,10 @@ export interface DashboardAppState {
   viewMode: ViewMode;
   savedQuery?: string;
 }
+
+export type DashboardAppStateDefaults = DashboardAppState & {
+  description?: string;
+};
 
 export interface DashboardAppStateTransitions {
   set: (
