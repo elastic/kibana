@@ -20,6 +20,7 @@
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import angular from 'angular';
 
 import { Subscription } from 'rxjs';
@@ -44,6 +45,7 @@ import {
   SavedQuery,
   syncAppFilters,
   syncQuery,
+  TimeRange,
 } from '../../../../../../plugins/data/public';
 
 import {
@@ -83,12 +85,14 @@ import {
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
+  navigation: NavigationStart;
   dashboardConfig: any;
   config: any;
   confirmModal: ConfirmModalFn;
@@ -119,6 +123,7 @@ export class DashboardAppController {
     core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
     history,
     kbnUrlStateStorage,
+    navigation,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
@@ -183,7 +188,6 @@ export class DashboardAppController {
       if (!container || isErrorEmbeddable(container)) {
         return;
       }
-
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach(id => {
         const embeddable = container.getChild(id);
@@ -261,6 +265,42 @@ export class DashboardAppController {
       };
     };
 
+    $scope.showFilterBar = () =>
+      $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
+
+    const getNavBarProps = () => {
+      const isFullScreenMode = dashboardStateManager.getFullScreenMode();
+      return {
+        appName: 'dashboard',
+        config: isFullScreenMode ? undefined : $scope.topNavMenu,
+        showSearchBar: !isFullScreenMode,
+        showFilterBar: $scope.showFilterBar() && !isFullScreenMode,
+        showSaveQuery: $scope.showSaveQuery,
+        noPadding: isFullScreenMode,
+        query: $scope.model.query,
+        savedQuery: $scope.savedQuery,
+        screenTitle: $scope.screenTitle,
+        onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
+          if (!payload.query) {
+            $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
+          } else {
+            $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
+          }
+        },
+        indexPatterns: $scope.indexPatterns,
+        filters: $scope.model.filters,
+        onFiltersUpdated: $scope.onFiltersUpdated,
+        isRefreshPaused: $scope.model.refreshInterval.pause,
+        refreshInterval: $scope.model.refreshInterval.value,
+        onSaved: $scope.onQuerySaved,
+        onSavedQueryUpdated: $scope.onSavedQueryUpdated,
+        onClearSavedQuery: $scope.onClearSavedQuery,
+        onRefreshChange: $scope.onRefreshChange,
+        timeHistory: queryService.timefilter.history,
+        filterBarPopoverHasOwnFocus: false,
+      };
+    };
+    const dashboardNavBar = document.getElementById('dashboardChrome');
     const updateState = () => {
       // Following the "best practice" of always have a '.' in your ng-models –
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
@@ -277,13 +317,19 @@ export class DashboardAppController {
       $scope.screenTitle = dashboardStateManager.getTitle();
     };
 
+    const updateNavBar = () => {
+      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
+    };
+
     updateState();
+    updateNavBar();
 
     let dashboardContainer: DashboardContainer | undefined;
     let inputSubscription: Subscription | undefined;
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
+
     const dashboardFactory = embeddables.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
@@ -335,6 +381,7 @@ export class DashboardAppController {
             $scope.$evalAsync(() => {
               if (dirty) {
                 updateState();
+                updateNavBar();
               }
             });
           });
@@ -370,6 +417,7 @@ export class DashboardAppController {
     dashboardStateManager.registerChangeListener(status => {
       this.appStatus.dirty = status.dirty || !dash.id;
       updateState();
+      updateNavBar();
     });
 
     dashboardStateManager.applyFilters(
@@ -448,22 +496,25 @@ export class DashboardAppController {
       }
     };
 
-    $scope.updateQueryAndFetch = function({ query, dateRange }) {
+    $scope.updateQueryAndFetch = function(payload) {
+      const dateRange = payload.dateRange;
+      const newQuery = payload.query;
       if (dateRange) {
         timefilter.setTime(dateRange);
       }
 
       const oldQuery = $scope.model.query;
-      if (_.isEqual(oldQuery, query)) {
+      if (_.isEqual(oldQuery, newQuery)) {
         // The user can still request a reload in the query bar, even if the
         // query is the same, and in that case, we have to explicitly ask for
         // a reload, since no state changes will cause it.
         lastReloadRequestTime = new Date().getTime();
         refreshDashboardContainer();
       } else {
-        $scope.model.query = query;
+        $scope.model.query = newQuery;
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
       }
+      updateNavBar();
     };
 
     $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
@@ -480,14 +531,18 @@ export class DashboardAppController {
 
     $scope.onQuerySaved = savedQuery => {
       $scope.savedQuery = savedQuery;
+      updateNavBar();
     };
 
     $scope.onSavedQueryUpdated = savedQuery => {
       $scope.savedQuery = { ...savedQuery };
+      updateState();
+      updateNavBar();
     };
 
     $scope.onClearSavedQuery = () => {
       delete $scope.savedQuery;
+      delete $scope.model.query;
       dashboardStateManager.setSavedQueryId(undefined);
       dashboardStateManager.applyFilters(
         {
@@ -497,11 +552,10 @@ export class DashboardAppController {
         },
         queryFilter.getGlobalFilters()
       );
-      // Making this method sync broke the updates.
-      // Temporary fix, until we fix the complex state in this file.
       setTimeout(() => {
         queryFilter.setFilters(queryFilter.getGlobalFilters());
       }, 0);
+      updateNavBar();
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
@@ -524,6 +578,7 @@ export class DashboardAppController {
       setTimeout(() => {
         queryFilter.setFilters(allFilters);
       }, 0);
+      updateNavBar();
     };
 
     $scope.$watch('savedQuery', (newSavedQuery: SavedQuery) => {
@@ -531,6 +586,10 @@ export class DashboardAppController {
       dashboardStateManager.setSavedQueryId(newSavedQuery.id);
 
       updateStateFromSavedQuery(newSavedQuery);
+    });
+
+    $scope.$watch('indexPatterns', () => {
+      updateNavBar();
     });
 
     $scope.$watch(
@@ -556,8 +615,8 @@ export class DashboardAppController {
     $scope.indexPatterns = [];
 
     $scope.$watch('model.query', (newQuery: Query) => {
-      const query = migrateLegacyQuery(newQuery) as Query;
-      $scope.updateQueryAndFetch({ query });
+      const legacyQuery = migrateLegacyQuery(newQuery) as Query;
+      $scope.updateQueryAndFetch({ query: legacyQuery });
     });
 
     $scope.$watch(
@@ -574,6 +633,7 @@ export class DashboardAppController {
         next: () => {
           updateState();
           refreshDashboardContainer();
+          updateNavBar();
         },
       })
     );
@@ -583,6 +643,7 @@ export class DashboardAppController {
         next: () => {
           updateState();
           refreshDashboardContainer();
+          updateNavBar();
         },
       })
     );
@@ -703,9 +764,6 @@ export class DashboardAppController {
         });
     }
 
-    $scope.showFilterBar = () =>
-      $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
-
     $scope.showAddPanel = () => {
       dashboardStateManager.setFullScreenMode(false);
       /*
@@ -768,7 +826,6 @@ export class DashboardAppController {
           return response;
         });
       };
-
       const dashboardSaveModal = (
         <DashboardSaveModal
           onSave={onSave}

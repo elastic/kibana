@@ -31,8 +31,6 @@ import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
   confirmModalFactory,
-  createTopNavDirective,
-  createTopNavHelper,
   EventsProvider,
   IPrivate,
   KbnUrlProvider,
@@ -114,7 +112,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalKbnUrlModule();
   createLocalStateModule();
   createLocalPersistedStateModule();
-  createLocalTopNavModule(navigation);
   createLocalConfirmModalModule();
   createLocalIconModule();
 
@@ -124,7 +121,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/I18n',
     'app/dashboard/Private',
     'app/dashboard/PersistedState',
-    'app/dashboard/TopNav',
     'app/dashboard/State',
     'app/dashboard/ConfirmModal',
     'app/dashboard/icon',
@@ -194,13 +190,6 @@ function createLocalPromiseModule() {
 
 function createLocalPrivateModule() {
   angular.module('app/dashboard/Private', []).provider('Private', PrivateProvider);
-}
-
-function createLocalTopNavModule(navigation: NavigationStart) {
-  angular
-    .module('app/dashboard/TopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

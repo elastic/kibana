@@ -22,7 +22,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { get, isEqual } from 'lodash';
+import { get } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 import {
@@ -84,6 +84,9 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+
+  // should EuiPopover in FilterBar have its own focus
+  filterBarPopoverHasOwnFocus?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -105,58 +108,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showFilterBar: true,
     showDatePicker: true,
     showAutoRefreshOnly: false,
+    filterBarPopoverHasOwnFocus: true,
   };
 
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
-
-  public static getDerivedStateFromProps(nextProps: SearchBarProps, prevState: State) {
-    if (isEqual(prevState.currentProps, nextProps)) {
-      return null;
-    }
-
-    let nextQuery = null;
-    if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
-      nextQuery = {
-        query: nextProps.query.query,
-        language: nextProps.query.language,
-      };
-    } else if (
-      nextProps.query &&
-      prevState.query &&
-      nextProps.query.language !== prevState.query.language
-    ) {
-      nextQuery = {
-        query: '',
-        language: nextProps.query.language,
-      };
-    }
-
-    let nextDateRange = null;
-    if (
-      nextProps.dateRangeFrom !== get(prevState, 'currentProps.dateRangeFrom') ||
-      nextProps.dateRangeTo !== get(prevState, 'currentProps.dateRangeTo')
-    ) {
-      nextDateRange = {
-        dateRangeFrom: nextProps.dateRangeFrom,
-        dateRangeTo: nextProps.dateRangeTo,
-      };
-    }
-
-    const nextState: any = {
-      currentProps: nextProps,
-    };
-    if (nextQuery) {
-      nextState.query = nextQuery;
-    }
-    if (nextDateRange) {
-      nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
-      nextState.dateRangeTo = nextDateRange.dateRangeTo;
-    }
-    return nextState;
-  }
 
   /*
    Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
@@ -365,10 +323,55 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: SearchBarProps, prevState: State) {
     if (this.filterBarRef) {
       this.setFilterBarHeight();
       this.ro.unobserve(this.filterBarRef);
+    }
+    let nextState: State | null = null;
+    if (!this.props.query && prevProps.query) {
+      nextState = {
+        ...this.state,
+        query: {
+          query: '',
+          language: prevProps.query.language,
+        },
+      };
+    } else if (
+      this.props.query &&
+      prevProps.query &&
+      (this.props.query.language !== prevProps.query.language ||
+        this.props.query.query !== prevProps.query.query)
+    ) {
+      nextState = {
+        ...this.state,
+        query: this.props.query,
+      };
+    } else if (!this.props.savedQuery && prevProps.savedQuery) {
+      // clear the query bar if saved query was cleared
+      nextState = {
+        ...this.state,
+        query: {
+          query: '',
+          language: prevProps.savedQuery.attributes.query.language,
+        },
+      };
+    }
+
+    const { dateRangeFrom, dateRangeTo } = this.props;
+    if (
+      dateRangeFrom &&
+      dateRangeTo &&
+      (dateRangeFrom !== prevProps.dateRangeFrom || dateRangeTo !== prevProps.dateRangeTo)
+    ) {
+      nextState = {
+        ...this.state,
+        dateRangeFrom,
+        dateRangeTo,
+      };
+    }
+    if (nextState) {
+      this.setState(nextState);
     }
   }
 
@@ -438,6 +441,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
+              popoverHasOwnFocus={this.props.filterBarPopoverHasOwnFocus}
             />
           </div>
         </div>
