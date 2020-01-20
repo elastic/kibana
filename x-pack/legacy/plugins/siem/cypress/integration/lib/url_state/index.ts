@@ -40,7 +40,7 @@ export const ABSOLUTE_DATE_RANGE = {
   urlKqlHostsNetwork: `/app/siem#/hosts/allHosts?query=(language:kuery,query:'source.ip:%20"10.142.0.9"')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
   urlKqlHostsHosts: `/app/siem#/hosts/allHosts?query=(language:kuery,query:'source.ip:%20"10.142.0.9"')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))`,
   urlHost:
-    '/app/siem#/hosts/authentications?timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))',
+    '/app/siem#/hosts/authentications?timerange=(global:(linkTo:!(timeline),timerange:(from:1546376609186,kind:absolute,to:1577828009186)),timeline:(linkTo:!(global),timerange:(from:1546376609186,kind:absolute,to:1577828009186)))',
 };
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON =
   'div[data-test-subj="globalDatePicker"] button[data-test-subj="superDatePickerstartDatePopoverButton"]';

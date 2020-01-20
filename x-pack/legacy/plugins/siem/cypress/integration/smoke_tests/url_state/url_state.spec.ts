@@ -19,7 +19,11 @@ import {
   HOST_DETAIL_SIEM_KIBANA,
   BREADCRUMBS,
 } from '../../lib/url_state';
-import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
+import {
+  DEFAULT_TIMEOUT,
+  loginAndWaitForPage,
+  loginAndWaitForPageUrlState,
+} from '../../lib/util/helpers';
 import {
   assertAtLeastOneEventMatchesSearch,
   executeKQL,
@@ -33,7 +37,7 @@ import { NAVIGATION_HOSTS_ALL_HOSTS, NAVIGATION_HOSTS_ANOMALIES } from '../../li
 
 describe('url state', () => {
   it('sets the global start and end dates from the url', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
       'have.attr',
       'title',
@@ -47,7 +51,7 @@ describe('url state', () => {
   });
 
   it('sets the url state when start and end date are set', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
 
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).click({ force: true });
 
@@ -88,7 +92,7 @@ describe('url state', () => {
   });
 
   it('sets the timeline start and end dates from the url when locked to global time', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
     toggleTimelineVisibility();
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE).should(
       'have.attr',
@@ -103,7 +107,7 @@ describe('url state', () => {
   });
 
   it('sets the timeline start and end dates independently of the global start and end dates when times are unlocked', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlUnlinked);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlUnlinked);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
       'have.attr',
       'title',
@@ -129,7 +133,7 @@ describe('url state', () => {
   });
 
   it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlUnlinked);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlUnlinked);
 
     toggleTimelineVisibility();
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE, { timeout: DEFAULT_TIMEOUT }).click({
@@ -167,23 +171,23 @@ describe('url state', () => {
   });
 
   it('sets kql on network page', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
     cy.url().should('include', `query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')`);
   });
 
   it('sets the url state when kql is set and check if href reflect this change', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
     cy.get(NAVIGATION_HOSTS)
       .first()
@@ -196,7 +200,7 @@ describe('url state', () => {
   });
 
   it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlHost);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlHost);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('host.name: "siem-kibana" {enter}');
     cy.get(NAVIGATION_HOSTS_ALL_HOSTS, { timeout: 5000 })
       .first()
@@ -205,12 +209,12 @@ describe('url state', () => {
     cy.get(NAVIGATION_HOSTS).should(
       'have.attr',
       'href',
-      "#/link-to/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+      "#/link-to/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1546376609186,kind:absolute,to:1577828009186)),timeline:(linkTo:!(global),timerange:(from:1546376609186,kind:absolute,to:1577828009186)))"
     );
     cy.get(NAVIGATION_NETWORK).should(
       'have.attr',
       'href',
-      "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+      "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1546376609186,kind:absolute,to:1577828009186)),timeline:(linkTo:!(global),timerange:(from:1546376609186,kind:absolute,to:1577828009186)))"
     );
     cy.get(HOST_DETAIL_SIEM_KIBANA, { timeout: 5000 })
       .first()
@@ -224,26 +228,26 @@ describe('url state', () => {
     cy.get(NAVIGATION_HOSTS_ANOMALIES).should(
       'have.attr',
       'href',
-      "#/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+      "#/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1546376609186,kind:absolute,to:1577828009186)),timeline:(linkTo:!(global),timerange:(from:1546376609186,kind:absolute,to:1577828009186)))"
     );
     cy.get(BREADCRUMBS)
       .eq(1)
       .should(
         'have.attr',
         'href',
-        "#/link-to/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+        "#/link-to/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1546376609186,kind:absolute,to:1577828009186)),timeline:(linkTo:!(global),timerange:(from:1546376609186,kind:absolute,to:1577828009186)))"
       );
     cy.get(BREADCRUMBS)
       .eq(2)
       .should(
         'have.attr',
         'href',
-        "#/link-to/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+        "#/link-to/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1546376609186,kind:absolute,to:1577828009186)),timeline:(linkTo:!(global),timerange:(from:1546376609186,kind:absolute,to:1577828009186)))"
       );
   });
 
   it('Do not clears kql when navigating to a new page', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
+    loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(NAVIGATION_NETWORK).click({ force: true });
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
