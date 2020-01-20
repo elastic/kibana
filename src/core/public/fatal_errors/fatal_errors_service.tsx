@@ -117,7 +117,9 @@ export class FatalErrorsService {
 
   public start() {
     const { fatalErrors } = this;
-    if (!fatalErrors) throw new Error('FatalErrorsService#setup() must be invoked before start.');
+    if (!fatalErrors) {
+      throw new Error('FatalErrorsService#setup() must be invoked before start.');
+    }
     return fatalErrors;
   }
 
