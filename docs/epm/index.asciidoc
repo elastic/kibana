@@ -45,3 +45,38 @@ A user-specified string that will be used to part of the index name in Elasticse
 ==== Package
 
 A package contains all the assets for the Elastic Stack. A more detailed definition of a package can be found under https://github.com/elastic/package-registry .
+
+
+== Indexing Strategy
+
+Ingest Management enforces an indexing strategy to allow the system to automically detect indices and run queries on it. In short the indexing stategy looks as following:
+
+```
+{type}-{namespace}-{dataset}
+```
+
+The `{type}` can be `logs` or `metrics`. The `{namespace}` is the part where the user can use free form. The only requirement here is that it is a valid in Elasticsearch indices and does NOT contain a `-`. The `dataset` is defined by the data that is indexed. A `dataset` must also be a valid for Elasticsearch indices and not contain `-`. It is expected that the fields for type, namespace and dataset are part of each event and are constant keywords.
+
+Note: More `{type}`s might be added in the future like `apm` and `endpoint`.
+
+This indexing strategy has a few advantages:
+
+* Each index contains only the fields which are relevant for the dataset. This leads to more dense indices and better field completion.
+* ILM policies can be applied per namespace per dataset.
+* Rollups can be specified per namespace per dataset.
+* Having the namespace user configurable makes setting security permissions possible.
+* Having a global metrics and logs template, allows to create new indices on demand which still follow the convention. This is common in the case of k8s as an example.
+* Constant keywords allow to narrow down the indices we need to access for querying very efficiently. This is especially relevant in environments which a large number of indices or with indices on slower nodes.
+
+
+=== Templates & ILM Policies
+
+To make the above strategy possible, alias templates are required. For each type there is a basic alias template with a default ILM policy. This default templates apply to all indices which follow the indexing strategy and do not have a more specific dataset alias template. 
+
+The `metrics` and `logs` alias template contain all the basic fields. Dynamic fields are disabled to keep the number of fields low. The fields which are not part of the mapping will be available in `_source` but can't be queried. 
+
+Each type template contains an ILM policy. Modifying this default ILM policy will affect all data covered by the default templates.
+
+=== Defaults
+
+If the Elastic Agent is used to ingest data and only the type is specified, `default` for the namespace is used and `generic` for the dataset.
