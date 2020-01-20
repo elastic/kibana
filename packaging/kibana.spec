@@ -35,7 +35,7 @@ cd %{name}
 cd plugins/network_vis/
 /usr/bin/yarn
 
-cd %{name}
+cd ../../
 /usr/bin/yarn kbn bootstrap
 node scripts/build --rpm --oss --skip-archives --release --verbose
 
