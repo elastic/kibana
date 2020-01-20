@@ -36,8 +36,10 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -45,21 +47,27 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
         const callWithRequest = callWithRequestFactory(request, server);
         const rulesFromFileSystem = getPrepackagedRules();
 
-        const prepackedRules = await getExistingPrepackagedRules({ alertsClient });
-        const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackedRules);
-        const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackedRules);
+        const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
+        const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
+        const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
         const spaceIndex = getIndex(request, server);
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
           const spaceIndexExists = await getIndexExists(callWithRequest, spaceIndex);
           if (!spaceIndexExists) {
-            throw new Boom(
+            return Boom.badRequest(
               `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`
             );
           }
         }
         await installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex);
-        await updatePrepackagedRules(alertsClient, actionsClient, rulesToUpdate, spaceIndex);
+        await updatePrepackagedRules(
+          alertsClient,
+          actionsClient,
+          savedObjectsClient,
+          rulesToUpdate,
+          spaceIndex
+        );
         return {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,
