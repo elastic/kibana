@@ -6,14 +6,14 @@
 
 import React from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButtonEmpty,
+  EuiToolTip,
   EuiButtonIcon,
   EuiSpacer,
-  EuiTextAlign,
   EuiCallOut,
   EuiLink,
+  EuiBasicTable,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   UseField,
   UseArray,
+  ArrayItem,
   FieldConfig,
   fieldValidators,
   TextField,
@@ -86,9 +87,6 @@ export const relationsDeserializer = (field: Field): Field => {
 };
 
 const parentConfig: FieldConfig = {
-  // label: i18n.translate('xpack.idxMgmt.mappingsEditor.joinType.relations.parentFieldLabel', {
-  //   defaultMessage: 'Parent',
-  // }),
   validations: [
     {
       validator: fieldValidators.emptyField(
@@ -104,22 +102,19 @@ const parentConfig: FieldConfig = {
 };
 
 const childConfig: FieldConfig = {
-  // label: i18n.translate('xpack.idxMgmt.mappingsEditor.joinType.relations.childrenFieldLabel', {
-  //   defaultMessage: 'Children',
-  // }),
   defaultValue: [],
-  // validations: [
-  //   {
-  //     validator: fieldValidators.emptyField(
-  //       i18n.translate(
-  //         'xpack.idxMgmt.mappingsEditor.joinType.validations.childIsRequiredErrorMessage',
-  //         {
-  //           defaultMessage: 'Specify a child',
-  //         }
-  //       )
-  //     ),
-  //   },
-  // ],
+  validations: [
+    {
+      validator: fieldValidators.emptyField(
+        i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.joinType.validations.childIsRequiredErrorMessage',
+          {
+            defaultMessage: 'Specify at least one child',
+          }
+        )
+      ),
+    },
+  ],
 };
 
 export const RelationsParameter = () => {
@@ -161,6 +156,83 @@ export const RelationsParameter = () => {
     >
       <UseArray path="relations">
         {({ items, addItem, removeItem }) => {
+          const columns: Array<EuiBasicTableColumn<any>> = [
+            // Parent column
+            {
+              name: i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.parentColumnTitle',
+                {
+                  defaultMessage: 'Parent',
+                }
+              ),
+              render: (item: ArrayItem) => {
+                // By adding ".parent" to the path, we are saying that we want an **object**
+                // to be created for each array item.
+                // This object will have a "parent" property with the field value.
+                return (
+                  <div style={{ width: '100%' }}>
+                    <UseField
+                      path={`${item.path}.parent`}
+                      config={parentConfig}
+                      component={TextField}
+                      // For a newly created relation, we don't want to read
+                      // its default value provided to the form because... it is new! :)
+                      readDefaultValueOnForm={!item.isNew}
+                    />
+                  </div>
+                );
+              },
+            },
+            // Children column (ComboBox)
+            {
+              name: i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.childrenColumnTitle',
+                {
+                  defaultMessage: 'Children',
+                }
+              ),
+              render: (item: ArrayItem) => {
+                return (
+                  <div style={{ width: '100%' }}>
+                    <UseField
+                      path={`${item.path}.children`}
+                      config={childConfig}
+                      component={ComboBoxField}
+                      readDefaultValueOnForm={!item.isNew}
+                    />
+                  </div>
+                );
+              },
+            },
+            // Actions column
+            {
+              width: '48px',
+              actions: [
+                {
+                  render: ({ id }: ArrayItem) => {
+                    const label = i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.removeRelationshipTooltipLabel',
+                      {
+                        defaultMessage: 'Remove relationship',
+                      }
+                    );
+                    return (
+                      <EuiToolTip content={label} delay="long">
+                        <EuiButtonIcon
+                          data-test-subj="removeRelationshipButton"
+                          aria-label={label}
+                          iconType="minusInCircle"
+                          color="danger"
+                          onClick={() => removeItem(id)}
+                        />
+                      </EuiToolTip>
+                    );
+                  },
+                },
+              ],
+            },
+          ];
+
           return (
             <>
               {items.length > 1 && (
@@ -170,62 +242,19 @@ export const RelationsParameter = () => {
                 </>
               )}
 
-              {items.length > 0 && (
-                <EuiFlexGroup>
-                  <EuiFlexItem>Parent</EuiFlexItem>
-                  <EuiFlexItem>Children</EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '24px' }} />
-                </EuiFlexGroup>
-              )}
-              {/* Extra div to be able to target the :last-child selector */}
-              <div>
-                {items.map(({ id: relationId, path: relationPath, isNew: isNewRelation }) => {
-                  return (
-                    <EuiFlexGroup key={relationId} className="mappingsEditor__dynamicItem">
-                      {/* Parent */}
-                      <EuiFlexItem>
-                        {/* By adding ".parent" to the path, we are saying that we want an **object**
-                            to be created for each array item.
-                            This object will have a "parent" property with the field value.*/}
-                        <UseField
-                          path={`${relationPath}.parent`}
-                          config={parentConfig}
-                          component={TextField}
-                          // For a newly created relation, we don't want to read
-                          // its default value provided to the form because... it is new! :)
-                          readDefaultValueOnForm={!isNewRelation}
-                        />
-                      </EuiFlexItem>
+              <EuiBasicTable
+                items={items}
+                itemId="id"
+                columns={columns}
+                noItemsMessage={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.emptyTableMessage',
+                  {
+                    defaultMessage: 'No relationship defined',
+                  }
+                )}
+                hasActions
+              />
 
-                      {/* Children */}
-                      <EuiFlexItem>
-                        <UseField
-                          path={`${relationPath}.children`}
-                          config={childConfig}
-                          component={ComboBoxField}
-                          readDefaultValueOnForm={!isNewRelation}
-                        />
-                      </EuiFlexItem>
-
-                      {/* Row actions */}
-                      <EuiFlexItem grow={false} className="mappingsEditor__dynamicItem__actions">
-                        <EuiButtonIcon
-                          className="mappingsEditor__dynamicItem__removeButton"
-                          color="danger"
-                          onClick={() => removeItem(relationId)}
-                          iconType="minusInCircle"
-                          aria-label={i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.joinType.removeRelationshipButtonLabel',
-                            {
-                              defaultMessage: 'Remove join relationship',
-                            }
-                          )}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  );
-                })}
-              </div>
               {/* Add relation button */}
               <EuiButtonEmpty
                 onClick={addItem}

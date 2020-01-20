@@ -17,6 +17,7 @@ export {
   SerializerFunc,
   UseField,
   UseArray,
+  ArrayItem,
   useForm,
   useFormContext,
   UseMultiFields,
