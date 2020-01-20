@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, isEqual, omit, map, sortBy } from 'lodash';
+import { defaults, isEqual, omit, map } from 'lodash';
 import { esFilters } from '../../../../common';
 
 export interface FilterCompareOptions {
@@ -53,13 +53,14 @@ const mapFilterArray = (
   comparators: FilterCompareOptions,
   excludedAttributes: string[]
 ) => {
-  return sortBy(
-    map(filters, (filter: esFilters.Filter) => mapFilter(filter, comparators, excludedAttributes))
+  return map(filters, (filter: esFilters.Filter) =>
+    mapFilter(filter, comparators, excludedAttributes)
   );
 };
 
 /**
- * Compare two filters to see if they match
+ * Compare two filters or filter arrays to see if they match.
+ * For filter arrays, the assumption is they are sorted.
  *
  * @param {esFilters.Filter | esFilters.Filter[]} first The first filter or filter array to compare
  * @param {esFilters.Filter | esFilters.Filter[]} second The second filter or filter array to compare
