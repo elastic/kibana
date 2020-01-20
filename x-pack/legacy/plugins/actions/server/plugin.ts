@@ -86,6 +86,7 @@ export class Plugin {
     plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',
       attributesToEncrypt: new Set(['apiKey']),
+      attributesToExcludeFromAAD: new Set(['createdAt']),
     });
 
     const actionExecutor = new ActionExecutor();

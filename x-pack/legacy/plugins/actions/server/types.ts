@@ -93,4 +93,5 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   actionId: string;
   params: Record<string, any>;
   apiKey?: string;
+  createdAt: string;
 }

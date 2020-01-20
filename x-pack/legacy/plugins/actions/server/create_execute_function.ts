@@ -56,6 +56,7 @@ export function createExecuteFunction({
       actionId: id,
       params,
       apiKey,
+      createdAt: new Date().toISOString(),
     });
 
     await taskManager.schedule({
