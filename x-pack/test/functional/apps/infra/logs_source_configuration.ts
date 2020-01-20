@@ -35,7 +35,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can change the log indices to a pattern that matches nothing', async () => {
         await pageObjects.infraLogs.navigateToTab('settings');
-        await infraSourceConfigurationForm.getForm();
+
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
 
         const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });
@@ -50,12 +53,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the no indices screen when no indices match the pattern', async () => {
         await logsUi.logStreamPage.navigateTo();
-        await logsUi.logStreamPage.getNoLogsIndicesPrompt();
+
+        await retry.try(async () => {
+          await logsUi.logStreamPage.getNoLogsIndicesPrompt();
+        });
       });
 
       it('can change the log indices back to a pattern that matches something', async () => {
         await pageObjects.infraLogs.navigateToTab('settings');
-        await infraSourceConfigurationForm.getForm();
+
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
 
         const logIndicesInput = await infraSourceConfigurationForm.getLogIndicesInput();
         await logIndicesInput.clearValueWithKeyboard({ charByChar: true });
@@ -86,7 +95,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can change the log columns', async () => {
         await pageObjects.infraLogs.navigateToTab('settings');
-        await infraSourceConfigurationForm.getForm();
+
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
 
         await infraSourceConfigurationForm.removeAllLogColumns();
         await infraSourceConfigurationForm.addTimestampLogColumn();
