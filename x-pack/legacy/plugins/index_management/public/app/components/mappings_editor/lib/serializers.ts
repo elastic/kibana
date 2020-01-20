@@ -6,8 +6,8 @@
 
 import { SerializerFunc } from '../shared_imports';
 import {
-  relationsSerializer,
-  relationsDeserializer,
+  PARAMETER_SERIALIZERS,
+  PARAMETER_DESERIALIZERS,
 } from '../components/document_fields/field_parameters';
 import { Field, DataType, MainType, SubType } from '../types';
 import { INDEX_DEFAULT, MAIN_DATA_TYPE_DEFINITION } from '../constants';
@@ -26,20 +26,20 @@ const sanitizeField = (field: Field): Field =>
     );
 
 /**
- * Run custom parameter serializers on field. Each serializer takes the field as input
- * and returns the field in output in an immutable way.
+ * Run custom parameter serializers on field.
+ * Each serializer takes the field as single argument and returns it serialized in an immutable way.
  * @param field The field we are serializing
  */
 const runParametersSerializers = (field: Field): Field =>
-  [relationsSerializer].reduce((fieldSerialized, serializer) => serializer(fieldSerialized), field);
+  PARAMETER_SERIALIZERS.reduce((fieldSerialized, serializer) => serializer(fieldSerialized), field);
 
 /**
- * Run custom parameter deserializers on field. Each deserializer takes the field as input
- * and returns the field in output in an immutable way.
+ * Run custom parameter deserializers on field.
+ * Each deserializer takes the field as single argument and returns it deserialized in an immutable way.
  * @param field The field we are deserializing
  */
 const runParametersDeserializers = (field: Field): Field =>
-  [relationsDeserializer].reduce(
+  PARAMETER_DESERIALIZERS.reduce(
     (fieldDeserialized, serializer) => serializer(fieldDeserialized),
     field
   );
