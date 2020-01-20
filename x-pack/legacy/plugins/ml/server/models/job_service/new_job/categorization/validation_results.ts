@@ -186,17 +186,6 @@ export class ValidationResults {
       this._results.push({
         id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,
         valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
-        message: i18n.translate(
-          'xpack.ml.models.jobService.categorization.messages.insufficientPrivilegesExtra',
-          {
-            defaultMessage: 'Please ensure ac',
-            values: { message },
-          }
-        ),
-      });
-      this._results.push({
-        id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,
-        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
         message,
       });
       return;
