@@ -43,7 +43,7 @@ export class SearchProfilerServerPlugin implements Plugin {
           message:
             message ||
             // Ensure that there is a message when license check fails
-            i18n.translate('xpack.searchprofiler.licenseCheckErrorMessage', {
+            i18n.translate('xpack.searchProfiler.licenseCheckErrorMessage', {
               defaultMessage: 'License check failed',
             }),
         };
