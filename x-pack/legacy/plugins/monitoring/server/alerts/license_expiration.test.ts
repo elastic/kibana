@@ -5,7 +5,6 @@
  */
 
 import moment from 'moment-timezone';
-import { Legacy } from 'kibana';
 import { getLicenseExpiration } from './license_expiration';
 import {
   ALERT_TYPE_LICENSE_EXPIRATION,
@@ -70,7 +69,7 @@ const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
 
 describe('getLicenseExpiration', () => {
   const emailAddress = 'foo@foo.com';
-  const server: Legacy.Server | any = {
+  const server: any = {
     newPlatform: {
       __internals: {
         uiSettings: {
@@ -126,7 +125,7 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should log a warning if no email is provided', async () => {
-    const customServer: Legacy.Server | any = {
+    const customServer: any = {
       newPlatform: {
         __internals: {
           uiSettings: {

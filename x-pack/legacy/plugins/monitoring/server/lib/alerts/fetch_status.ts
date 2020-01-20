@@ -15,6 +15,9 @@ export async function fetchStatus(
   clusterUuid: string,
   server: any
 ): Promise<any[]> {
+  // TODO: this shouldn't query task manager directly but rather
+  // use an api exposed by the alerting/actions plugin
+  // See https://github.com/elastic/kibana/issues/48442
   const statuses = await Promise.all(
     ALERT_TYPES.map(
       type =>
