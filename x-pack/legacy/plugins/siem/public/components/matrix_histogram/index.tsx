@@ -46,12 +46,12 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   isDnsHistogram,
   isEventsHistogram,
   isInspected,
-  legendPosition,
+  legendPosition = 'right',
   mapping,
   query,
   scaleType = ScaleType.Time,
   setQuery,
-  showLegend,
+  showLegend = true,
   skip,
   stackByOptions,
   startDate,
@@ -151,6 +151,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     isInspected,
     loading,
     data,
+    refetch,
   ]);
 
   return !hideHistogram ? (

@@ -15,7 +15,7 @@ import { CancellationToken } from './common/cancellation_token';
 import { LevelLogger } from './server/lib/level_logger';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
-import { ServerFacade } from './index';
+import { LegacySetup } from './server/plugin';
 
 export type ReportingPlugin = object; // For Plugin contract
 
@@ -68,6 +68,8 @@ interface GenerateExportTypePayload {
 /*
  * Legacy System
  */
+
+export type ServerFacade = LegacySetup;
 
 export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
 
@@ -339,4 +341,17 @@ export interface AbsoluteURLFactoryOptions {
   port: string | number;
 }
 
-export { ServerFacade };
+export interface InterceptedRequest {
+  requestId: string;
+  request: {
+    url: string;
+    method: string;
+    headers: {
+      [key: string]: string;
+    };
+    initialPriority: string;
+    referrerPolicy: string;
+  };
+  frameId: string;
+  resourceType: string;
+}

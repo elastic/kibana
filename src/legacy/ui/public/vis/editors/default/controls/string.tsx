@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { AggParamEditorProps } from '..';
@@ -37,6 +37,8 @@ function StringParamEditor({
     setValidity(isValid);
   }, [isValid]);
 
+  const onChange = useCallback(ev => setValue(ev.target.value), [setValue]);
+
   return (
     <EuiFormRow
       className="visEditorAggParam__string"
@@ -48,7 +50,7 @@ function StringParamEditor({
       <EuiFieldText
         value={value || ''}
         data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
-        onChange={ev => setValue(ev.target.value)}
+        onChange={onChange}
         fullWidth={true}
         compressed
         onBlur={setTouched}
