@@ -1496,6 +1496,9 @@ export type SavedObjectsClientFactory<Request = unknown> = ({ request, }: {
 }) => SavedObjectsClientContract;
 
 // @public
+export type SavedObjectsClientFactoryProvider<Request = unknown> = (repositoryFactory: SavedObjectsRepositoryFactory) => SavedObjectsClientFactory<Request>;
+
+// @public
 export interface SavedObjectsClientProviderOptions {
     // (undocumented)
     excludedWrappers?: string[];
@@ -1830,6 +1833,12 @@ export class SavedObjectsRepository {
     }
 
 // @public
+export interface SavedObjectsRepositoryFactory {
+    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+}
+
+// @public
 export interface SavedObjectsResolveImportErrorsOptions {
     // (undocumented)
     namespace?: string;
@@ -1872,13 +1881,13 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory<KibanaRequest>) => void;
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
-    setClientFactory: (customClientFactory: SavedObjectsClientFactory<KibanaRequest>) => void;
+    setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider<KibanaRequest>) => void;
 }
 
 // @public
 export interface SavedObjectsServiceStart {
+    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
 }
 
