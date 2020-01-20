@@ -80,7 +80,7 @@ describe('getLicenseExpiration', () => {
   // }
 
   const emailAddress = 'foo@foo.com';
-  const server: jest.Mocked<Partial<Legacy.Server>> = {
+  const server: any = {
     newPlatform: {
       __internals: {
         uiSettings: {
@@ -136,7 +136,7 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should log a warning if no email is provided', async () => {
-    const customServer: jest.Mock<Legacy.Server> = {
+    const customServer: any = {
       newPlatform: {
         __internals: {
           uiSettings: {

@@ -28,7 +28,7 @@ import { executeActions, getUiMessage } from '../lib/alerts/license_expiration.l
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export const getLicenseExpiration = (
-  server: Legacy.Server,
+  server: Legacy.Server | any,
   getMonitoringCluster: any,
   getLogger: (contexts: string[]) => Logger,
   ccsEnabled: boolean
