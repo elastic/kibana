@@ -14,7 +14,7 @@ export const DynamicParameter = () => {
   return (
     <EditFieldFormRow
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicParameter.fieldTitle', {
-        defaultMessage: 'Dynamically add new properies',
+        defaultMessage: 'Dynamically add new properties',
       })}
       description={i18n.translate(
         'xpack.idxMgmt.mappingsEditor.dynamicParameter.fieldDescription',
