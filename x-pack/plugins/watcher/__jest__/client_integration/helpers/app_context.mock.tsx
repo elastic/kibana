@@ -27,6 +27,9 @@ class MockTimeBuckets {
   }
 }
 export const mockContextValue = {
+  getLicenseStatus: () => ({
+    valid: true,
+  }),
   docLinks: docLinksServiceMock.createStartContract(),
   chrome: chromeServiceMock.createStartContract(),
   MANAGEMENT_BREADCRUMB: { text: 'test' },
