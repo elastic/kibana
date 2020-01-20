@@ -23,7 +23,6 @@ import { LogFilterState } from '../../../containers/logs/log_filter';
 import { LogPositionState } from '../../../containers/logs/log_position';
 import { Source } from '../../../containers/source';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
-import euiStyled from '../../../../../../common/eui_styled_components';
 
 export const LogsToolbar = () => {
   const { createDerivedIndexPattern } = useContext(Source.Context);
