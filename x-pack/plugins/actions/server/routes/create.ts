@@ -13,10 +13,10 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { ActionResult } from '../types';
-import { extendRouteWithLicenseCheck } from '../extend_route_with_license_check';
 import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
-const bodySchema = schema.object({
+export const bodySchema = schema.object({
   name: schema.string(),
   actionTypeId: schema.string(),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
@@ -34,19 +34,19 @@ export const createActionRoute = (router: IRouter, licenseState: LicenseState) =
         tags: ['access:actions-all'],
       },
     },
-    router.handleLegacyErrors(
-      extendRouteWithLicenseCheck(licenseState, async function(
-        context: RequestHandlerContext,
-        req: KibanaRequest<any, any, TypeOf<typeof bodySchema>, any>,
-        res: KibanaResponseFactory
-      ): Promise<IKibanaResponse<any>> {
-        const actionsClient = context.actions.getActionsClient();
-        const action = req.body;
-        const actionRes: ActionResult = await actionsClient.create({ action });
-        return res.ok({
-          body: actionRes,
-        });
-      })
-    )
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, TypeOf<typeof bodySchema>, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+
+      const actionsClient = context.actions.getActionsClient();
+      const action = req.body;
+      const actionRes: ActionResult = await actionsClient.create({ action });
+      return res.ok({
+        body: actionRes,
+      });
+    })
   );
 };

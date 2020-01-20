@@ -17,8 +17,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { extendRouteWithLicenseCheck } from '../extend_route_with_license_check';
 import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -35,17 +35,16 @@ export const deleteActionRoute = (router: IRouter, licenseState: LicenseState) =
         tags: ['access:actions-all'],
       },
     },
-    router.handleLegacyErrors(
-      extendRouteWithLicenseCheck(licenseState, async function(
-        context: RequestHandlerContext,
-        req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
-        res: KibanaResponseFactory
-      ): Promise<IKibanaResponse<any>> {
-        const actionsClient = context.actions.getActionsClient();
-        const { id } = req.params;
-        await actionsClient.delete({ id });
-        return res.noContent();
-      })
-    )
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const actionsClient = context.actions.getActionsClient();
+      const { id } = req.params;
+      await actionsClient.delete({ id });
+      return res.noContent();
+    })
   );
 };

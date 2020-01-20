@@ -13,8 +13,8 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { FindOptions } from '../../../../legacy/plugins/alerting/server/alerts_client';
-import { extendRouteWithLicenseCheck } from '../extend_route_with_license_check';
 import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
 // config definition
 const querySchema = schema.object({
@@ -51,41 +51,40 @@ export const findActionRoute = (router: IRouter, licenseState: LicenseState) => 
         tags: ['access:actions-read'],
       },
     },
-    router.handleLegacyErrors(
-      extendRouteWithLicenseCheck(licenseState, async function(
-        context: RequestHandlerContext,
-        req: KibanaRequest<any, TypeOf<typeof querySchema>, any, any>,
-        res: KibanaResponseFactory
-      ): Promise<IKibanaResponse<any>> {
-        const actionsClient = context.actions.getActionsClient();
-        const query = req.query;
-        const options: FindOptions['options'] = {
-          perPage: query.per_page,
-          page: query.page,
-          search: query.search,
-          defaultSearchOperator: query.default_search_operator,
-          sortField: query.sort_field,
-          fields: query.fields,
-          filter: query.filter,
-        };
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, TypeOf<typeof querySchema>, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const actionsClient = context.actions.getActionsClient();
+      const query = req.query;
+      const options: FindOptions['options'] = {
+        perPage: query.per_page,
+        page: query.page,
+        search: query.search,
+        defaultSearchOperator: query.default_search_operator,
+        sortField: query.sort_field,
+        fields: query.fields,
+        filter: query.filter,
+      };
 
-        if (query.search_fields) {
-          options.searchFields = Array.isArray(query.search_fields)
-            ? query.search_fields
-            : [query.search_fields];
-        }
+      if (query.search_fields) {
+        options.searchFields = Array.isArray(query.search_fields)
+          ? query.search_fields
+          : [query.search_fields];
+      }
 
-        if (query.has_reference) {
-          options.hasReference = query.has_reference;
-        }
+      if (query.has_reference) {
+        options.hasReference = query.has_reference;
+      }
 
-        const findResult = await actionsClient.find({
-          options,
-        });
-        return res.ok({
-          body: findResult,
-        });
-      })
-    )
+      const findResult = await actionsClient.find({
+        options,
+      });
+      return res.ok({
+        body: findResult,
+      });
+    })
   );
 };

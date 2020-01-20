@@ -3,58 +3,133 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { createMockServer } from './_mock_server';
 import { createActionRoute } from './create';
+import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { mockLicenseState } from '../lib/license_state.mock';
+import { verifyApiAccess } from '../lib/license_api_access';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 
-const { server, actionsClient } = createMockServer();
-server.route(createActionRoute);
+jest.mock('../lib/license_api_access.ts', () => ({
+  verifyApiAccess: jest.fn(),
+}));
 
 beforeEach(() => {
   jest.resetAllMocks();
 });
 
-it('creates an action with proper parameters', async () => {
-  const request = {
-    method: 'POST',
-    url: '/api/action',
-    payload: {
+describe('createActionRoute', () => {
+  it('creates an action with proper parameters', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    createActionRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/action"`);
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "tags": Array [
+          "access:actions-all",
+        ],
+      }
+    `);
+
+    const createResult = {
+      id: '1',
       name: 'My name',
       actionTypeId: 'abc',
       config: { foo: true },
-      secrets: {},
-    },
-  };
-  const createResult = {
-    id: '1',
-    name: 'My name',
-    actionTypeId: 'abc',
-    config: { foo: true },
-  };
+    };
+    const actionsClient = {
+      create: jest.fn().mockResolvedValueOnce(createResult),
+    };
 
-  actionsClient.create.mockResolvedValueOnce(createResult);
-  const { payload, statusCode } = await server.inject(request);
-  expect(statusCode).toBe(200);
-  const response = JSON.parse(payload);
-  expect(response).toEqual({
-    id: '1',
-    name: 'My name',
-    actionTypeId: 'abc',
-    config: { foo: true },
-  });
-  expect(actionsClient.create).toHaveBeenCalledTimes(1);
-  expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "action": Object {
-          "actionTypeId": "abc",
-          "config": Object {
-            "foo": true,
-          },
-          "name": "My name",
-          "secrets": Object {},
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'My name',
+          actionTypeId: 'abc',
+          config: { foo: true },
+          secrets: {},
         },
       },
-    ]
-  `);
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toEqual({ body: createResult });
+
+    expect(actionsClient.create).toHaveBeenCalledTimes(1);
+    expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": Object {
+            "actionTypeId": "abc",
+            "config": Object {
+              "foo": true,
+            },
+            "name": "My name",
+            "secrets": Object {},
+          },
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: createResult,
+    });
+  });
+
+  it('ensures the license allows creating actions', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    createActionRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    const actionsClient = {
+      create: jest.fn().mockResolvedValueOnce({
+        id: '1',
+        name: 'My name',
+        actionTypeId: 'abc',
+        config: { foo: true },
+      }),
+    };
+
+    const [context, req, res] = mockHandlerArguments(actionsClient, {});
+
+    await handler(context, req, res);
+
+    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('ensures the license check prevents creating actions', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    createActionRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    const actionsClient = {
+      create: jest.fn().mockResolvedValueOnce({
+        id: '1',
+        name: 'My name',
+        actionTypeId: 'abc',
+        config: { foo: true },
+      }),
+    };
+
+    const [context, req, res] = mockHandlerArguments(actionsClient, {});
+
+    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
+
+    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
 });

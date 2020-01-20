@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { KibanaRequest } from '../../../../../src/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
@@ -29,20 +29,7 @@ const executeParams = {
   params: {
     foo: true,
   },
-  request: {
-    headers: {},
-    getBasePath: () => '',
-    path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as Hapi.Request,
+  request: {} as KibanaRequest,
 };
 
 actionExecutor.initialize({

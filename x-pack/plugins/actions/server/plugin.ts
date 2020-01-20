@@ -46,7 +46,7 @@ import {
   getActionRoute,
   updateActionRoute,
   listActionTypesRoute,
-  getExecuteActionRoute,
+  executeActionRoute,
 } from './routes';
 import { LicenseState } from './lib/license_state';
 
@@ -148,7 +148,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     findActionRoute(router, this.licenseState);
     updateActionRoute(router, this.licenseState);
     listActionTypesRoute(router, this.licenseState);
-    getExecuteActionRoute(router, this.licenseState, actionExecutor);
+    executeActionRoute(router, this.licenseState, actionExecutor);
 
     return {
       registerType: actionTypeRegistry.register.bind(actionTypeRegistry),

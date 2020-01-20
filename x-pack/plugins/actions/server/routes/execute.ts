@@ -12,8 +12,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { extendRouteWithLicenseCheck } from '../extend_route_with_license_check';
 import { LicenseState } from '../lib/license_state';
+import { verifyApiAccess } from '../lib/license_api_access';
 
 import { ActionExecutorContract } from '../lib';
 
@@ -35,7 +35,7 @@ const bodySchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any()),
 });
 
-export const getExecuteActionRoute = (
+export const executeActionRoute = (
   router: IRouter,
   licenseState: LicenseState,
   actionExecutor: ActionExecutorContract
@@ -51,22 +51,21 @@ export const getExecuteActionRoute = (
         tags: ['access:actions-read'],
       },
     },
-    router.handleLegacyErrors(
-      extendRouteWithLicenseCheck(licenseState, async function(
-        context: RequestHandlerContext,
-        req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
-        res: KibanaResponseFactory
-      ): Promise<IKibanaResponse<any>> {
-        const { params } = req.body;
-        const { id } = req.params;
-        return res.ok({
-          body: await actionExecutor.execute({
-            params,
-            request: req,
-            actionId: id,
-          }),
-        });
-      })
-    )
+    router.handleLegacyErrors(async function(
+      context: RequestHandlerContext,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      verifyApiAccess(licenseState);
+      const { params } = req.body;
+      const { id } = req.params;
+      return res.ok({
+        body: await actionExecutor.execute({
+          params,
+          request: req,
+          actionId: id,
+        }),
+      });
+    })
   );
 };

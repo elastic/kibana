@@ -10,4 +10,4 @@ export { findActionRoute } from './find';
 export { getActionRoute } from './get';
 export { updateActionRoute } from './update';
 export { listActionTypesRoute } from './list_action_types';
-export { getExecuteActionRoute } from './execute';
+export { executeActionRoute } from './execute';

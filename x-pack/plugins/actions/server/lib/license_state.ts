@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { assertNever } from '../../../../../src/core/utils';
@@ -78,14 +77,4 @@ export class LicenseState {
         return assertNever(check.state);
     }
   }
-}
-
-export function verifyApiAccessFactory(licenseState: LicenseState) {
-  const licenseCheckResults = licenseState.getLicenseInformation();
-
-  if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
-    return null;
-  }
-
-  throw Boom.forbidden(licenseCheckResults.message);
 }
