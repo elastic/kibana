@@ -53,7 +53,7 @@ export const ExplorerChartSingleMetric = injectI18n(
     static propTypes = {
       tooManyBuckets: PropTypes.bool,
       seriesConfig: PropTypes.object,
-      severity: PropTypes.number,
+      severity: PropTypes.number.isRequired,
     };
 
     componentDidMount() {
@@ -312,13 +312,16 @@ export const ExplorerChartSingleMetric = injectI18n(
           })
           .on('mouseout', () => mlChartTooltipService.hide());
 
+        const isAnomalyVisible = d =>
+          _.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity;
+
         // Update all dots to new positions.
         dots
           .attr('cx', d => lineChartXScale(d.date))
           .attr('cy', d => lineChartYScale(d.value))
           .attr('class', d => {
             let markerClass = 'metric-value';
-            if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity) {
+            if (isAnomalyVisible(d)) {
               markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
             }
             return markerClass;
@@ -328,9 +331,7 @@ export const ExplorerChartSingleMetric = injectI18n(
         const multiBucketMarkers = lineChartGroup
           .select('.chart-markers')
           .selectAll('.multi-bucket')
-          .data(
-            data.filter(d => d.anomalyScore !== null && showMultiBucketAnomalyMarker(d) === true)
-          );
+          .data(data.filter(d => isAnomalyVisible(d) && showMultiBucketAnomalyMarker(d) === true));
 
         // Remove multi-bucket markers that are no longer needed
         multiBucketMarkers.exit().remove();
