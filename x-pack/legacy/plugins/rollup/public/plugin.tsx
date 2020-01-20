@@ -10,7 +10,11 @@ import { Provider } from 'react-redux';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { EditorConfigProviderRegistry } from 'ui/vis/editors/config/editor_config_providers';
+import {
+  EditorConfigProviderRegistry,
+  AggTypeFilters,
+  AggTypeFieldFilters,
+} from './legacy_imports';
 import { SearchStrategyProvider } from '../../../../../src/legacy/core_plugins/data/public/search/search_strategy/types';
 import { ManagementSetup } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
@@ -39,12 +43,12 @@ import { ManagementStart } from '../../../../../src/plugins/management/public';
 import { rollupJobsStore } from './crud_app/store';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
-import { setHttp, setApiPrefix, setEsBaseAndXPackBase } from './crud_app/services';
+import { setEsBaseAndXPackBase } from './crud_app/services';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
-    aggTypeFilters: any;
-    aggTypeFieldFilters: any;
+    aggTypeFilters: AggTypeFilters;
+    aggTypeFieldFilters: AggTypeFieldFilters;
     editorConfigProviders: EditorConfigProviderRegistry;
     addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
     management: ManagementSetup;
@@ -105,8 +109,6 @@ export class RollupPlugin implements Plugin {
   }
 
   start(core: CoreStart, { management }: RollupPluginStartDependencies) {
-    setHttp(core.http);
-    setApiPrefix(core.http.basePath.prepend('/api/rollup'));
     setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
 
     const esSection = management.sections.getSection('elasticsearch');

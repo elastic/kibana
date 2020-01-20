@@ -28,6 +28,8 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async clickOpenAddPanel() {
       log.debug('DashboardAddPanel.clickOpenAddPanel');
       await testSubjects.click('dashboardAddPanelButton');
+      // Give some time for the animation to complete
+      await PageObjects.common.sleep(500);
     }
 
     async clickAddNewEmbeddableLink(type) {
@@ -96,8 +98,8 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       if (!isOpen) {
         await retry.try(async () => {
           await this.clickOpenAddPanel();
-          const isOpen = await this.isAddPanelOpen();
-          if (!isOpen) {
+          const isNowOpen = await this.isAddPanelOpen();
+          if (!isNowOpen) {
             throw new Error('Add panel still not open, trying again.');
           }
         });

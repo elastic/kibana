@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
+import { npSetup } from '../legacy_imports';
 
 import { RollupPrompt } from './components/rollup_prompt';
 import { IndexPatternCreationConfig } from '../../../../../../src/legacy/core_plugins/management/public';

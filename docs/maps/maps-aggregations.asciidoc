@@ -24,12 +24,12 @@ The *Grid aggregation* source uses {ref}/search-aggregations-bucket-geotilegrid-
 
 You can symbolize grid aggregation metrics as:
 
-*Points*:: Creates a <<vector-layer, vector layer>> with a point for each gridded cell.
-The point location is the weighted centroid for all geo-points in the gridded cell.
-
 *Grid rectangles*:: Creates a <<vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
 
 *Heat map*:: Creates a <<heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
+
+*Clusters*:: Creates a <<vector-layer, vector layer>> with a cluster symbol for each gridded cell.
+The cluster location is the weighted centroid for all geo-points in the gridded cell.
 
 
 [role="xpack"]

@@ -20,6 +20,7 @@ import {
   getDeleteBulkRequestById,
   getDeleteAsPostBulkRequest,
   getDeleteAsPostBulkRequestById,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
@@ -27,10 +28,10 @@ import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 import { BulkError } from '../utils';
 
 describe('delete_rules', () => {
-  let { server, alertsClient } = createMockServer();
+  let { server, alertsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient } = createMockServer());
+    ({ server, alertsClient, savedObjectsClient } = createMockServer());
     deleteRulesBulkRoute(server);
   });
 
@@ -83,6 +84,8 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      savedObjectsClient.delete.mockResolvedValue({});
       const { payload } = await server.inject(getDeleteBulkRequest());
       const parsed: BulkError[] = JSON.parse(payload);
       const expected: BulkError[] = [

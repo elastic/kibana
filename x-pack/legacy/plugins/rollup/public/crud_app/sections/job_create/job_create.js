@@ -14,6 +14,8 @@ import first from 'lodash/array/first';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { npSetup } from '../../../legacy_imports';
+
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 
 import {
@@ -26,8 +28,6 @@ import {
   EuiStepsHorizontal,
   EuiTitle,
 } from '@elastic/eui';
-
-import { fatalError } from 'ui/notify';
 
 import {
   validateIndexPattern,
@@ -298,9 +298,9 @@ export class JobCreateUi extends Component {
           return;
         }
 
-        // Expect an error in the shape provided by Angular's $http service.
-        if (error && error.data) {
-          const { error: errorString, statusCode } = error.data;
+        // Expect an error in the shape provided by http service.
+        if (error && error.body) {
+          const { error: errorString, statusCode } = error.body;
 
           const indexPatternAsyncErrors = [
             <FormattedMessage
@@ -324,7 +324,7 @@ export class JobCreateUi extends Component {
 
         // This error isn't an HTTP error, so let the fatal error screen tell the user something
         // unexpected happened.
-        fatalError(
+        npSetup.core.fatalErrors.add(
           error,
           i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
             defaultMessage: 'Rollup Job Wizard index pattern validation',

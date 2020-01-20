@@ -7,14 +7,14 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../plugins/task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { TaskStatus } from '../../task_manager/server';
+import { TaskStatus } from '../../../../plugins/task_manager/server';
 import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
 
-const taskManager = taskManagerMock.create();
+const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
@@ -883,7 +883,6 @@ describe('enable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        scheduledTaskId: 'task-123',
         updatedBy: 'elastic',
         apiKey: null,
         apiKeyOwner: null,
@@ -892,6 +891,9 @@ describe('enable()', () => {
         version: '123',
       }
     );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      scheduledTaskId: 'task-123',
+    });
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
       params: {
@@ -964,7 +966,6 @@ describe('enable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        scheduledTaskId: 'task-123',
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
@@ -973,6 +974,9 @@ describe('enable()', () => {
         version: '123',
       }
     );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      scheduledTaskId: 'task-123',
+    });
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
       params: {

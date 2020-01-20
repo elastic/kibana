@@ -40,8 +40,10 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -85,7 +87,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             if (!indexExists) {
               return createBulkErrorObject({
                 ruleId: ruleIdOrUuid,
-                statusCode: 409,
+                statusCode: 400,
                 message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
               });
             }

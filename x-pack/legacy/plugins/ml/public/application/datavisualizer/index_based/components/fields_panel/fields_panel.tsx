@@ -7,15 +7,17 @@
 import React, { FC } from 'react';
 
 import {
-  EuiCheckbox,
+  EuiBadge,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   // @ts-ignore
   EuiSearchBar,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -78,51 +80,62 @@ export const FieldsPanel: FC<Props> = ({
   }
 
   return (
-    <EuiPanel data-test-subj={`mlDataVisualizerFieldsPanel ${fieldTypes}`}>
-      <EuiTitle>
-        <h2>{title}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <span>
-            {showAllFields === true ? (
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.fieldsPanel.showAllCountDescription"
-                defaultMessage="{wrappedCardsCount} {cardsCount, plural, one {field} other {fields}} ({wrappedPopulatedFieldCount} {populatedFieldCount, plural, one {exists} other {exist}} in documents)"
-                values={{
-                  cardsCount: fieldVisConfigs.length,
-                  wrappedCardsCount: <b>{fieldVisConfigs.length}</b>,
-                  populatedFieldCount,
-                  wrappedPopulatedFieldCount: <b>{populatedFieldCount}</b>,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.fieldsPanel.fieldsCountDescription"
-                defaultMessage="{wrappedCardsCount} {cardsCount, plural, one {field exists} other {fields exist}} in documents ({wrappedTotalFieldCount} in total)"
-                values={{
-                  cardsCount: fieldVisConfigs.length,
-                  wrappedCardsCount: <b>{fieldVisConfigs.length}</b>,
-                  wrappedTotalFieldCount: <b>{totalFieldCount}</b>,
-                }}
-              />
+    <div data-test-subj={`mlDataVisualizerFieldsPanel ${fieldTypes}`}>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2>{title}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.fieldsPanel.countDescription"
+                    defaultMessage="{cardsCount} {cardsCount, plural, one {field exists} other {fields exist}} in documents sampled"
+                    values={{ cardsCount: populatedFieldCount }}
+                  />
+                }
+              >
+                <EuiBadge title="">
+                  <b>{populatedFieldCount}</b>
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.fieldsPanel.totalFieldLabel"
+                  defaultMessage="Total fields: {wrappedTotalFields}"
+                  values={{
+                    wrappedTotalFields: <b>{totalFieldCount}</b>,
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            {populatedFieldCount < totalFieldCount && (
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  id={`${title}_show_empty_fields`}
+                  label={i18n.translate(
+                    'xpack.ml.datavisualizer.fieldsPanel.showEmptyFieldsLabel',
+                    {
+                      defaultMessage: 'Show empty fields',
+                    }
+                  )}
+                  checked={showAllFields}
+                  onChange={onShowAllFieldsChange}
+                  data-test-subj="mlDataVisualizerShowEmptyFieldsCheckbox"
+                  compressed
+                />
+              </EuiFlexItem>
             )}
-          </span>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        {populatedFieldCount < totalFieldCount && (
-          <EuiFlexItem>
-            <EuiCheckbox
-              id={`${title}_show_empty_fields`}
-              label={i18n.translate('xpack.ml.datavisualizer.fieldsPanel.showEmptyFieldsLabel', {
-                defaultMessage: 'show empty fields',
-              })}
-              checked={showAllFields}
-              onChange={onShowAllFieldsChange}
-              data-test-subj="mlDataVisualizerShowEmptyFieldsCheckbox"
-            />
-          </EuiFlexItem>
-        )}
+
         <EuiFlexItem grow={true}>
           <EuiFlexGroup alignItems="center" gutterSize="m" direction="rowReverse">
             <EuiFlexItem
@@ -135,9 +148,7 @@ export const FieldsPanel: FC<Props> = ({
                 box={{
                   placeholder: i18n.translate(
                     'xpack.ml.datavisualizer.fieldsPanel.filterFieldsPlaceholder',
-                    {
-                      defaultMessage: 'filter',
-                    }
+                    { defaultMessage: 'Filter {type}', values: { type: title } }
                   ),
                 }}
                 onChange={onSearchBarChange}
@@ -156,14 +167,19 @@ export const FieldsPanel: FC<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiFlexGrid gutterSize="m">
-        {fieldVisConfigs.map((visConfig, i) => (
-          <EuiFlexItem key={`card_${i}`} style={{ minWidth: '360px' }}>
-            <FieldDataCard config={visConfig} />
-          </EuiFlexItem>
-        ))}
+        {fieldVisConfigs
+          .filter(({ stats }) => stats !== undefined)
+          .map((visConfig, i) => (
+            <EuiFlexItem
+              key={`${visConfig.fieldName}_${visConfig.stats.count}`}
+              style={{ minWidth: '360px' }}
+            >
+              <FieldDataCard config={visConfig} />
+            </EuiFlexItem>
+          ))}
       </EuiFlexGrid>
-    </EuiPanel>
+    </div>
   );
 };

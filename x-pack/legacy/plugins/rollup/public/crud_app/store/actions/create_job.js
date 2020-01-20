@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fatalError } from 'ui/notify';
+import { npSetup } from '../../../legacy_imports';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
@@ -39,12 +39,12 @@ export const createJob = jobConfig => async dispatch => {
     ]);
   } catch (error) {
     if (error) {
-      const { statusCode, data } = error;
+      const { statusCode, body } = error;
 
-      // Expect an error in the shape provided by Angular's $http service.
-      if (data) {
+      // Expect an error in the shape provided by http service.
+      if (body) {
         // Some errors have statusCode directly available but some are under a data property.
-        if ((statusCode || (data && data.statusCode)) === 409) {
+        if ((statusCode || (body && body.statusCode)) === 409) {
           return dispatch({
             type: CREATE_JOB_FAILURE,
             payload: {
@@ -67,9 +67,9 @@ export const createJob = jobConfig => async dispatch => {
             error: {
               message: i18n.translate('xpack.rollupJobs.createAction.failedDefaultErrorMessage', {
                 defaultMessage: 'Request failed with a {statusCode} error. {message}',
-                values: { statusCode, message: data.message },
+                values: { statusCode: body.statusCode, message: body.message },
               }),
-              cause: data.cause,
+              cause: body.error,
             },
           },
         });
@@ -78,7 +78,7 @@ export const createJob = jobConfig => async dispatch => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(
+    return npSetup.core.fatalErrors.add(
       error,
       i18n.translate('xpack.rollupJobs.createAction.errorTitle', {
         defaultMessage: 'Error creating rollup job',
