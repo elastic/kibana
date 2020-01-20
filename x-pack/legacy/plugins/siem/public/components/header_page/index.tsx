@@ -95,7 +95,7 @@ export interface HeaderPageProps extends HeaderProps {
   title: string | React.ReactNode;
 }
 
-const HeaderPageComponent: React.memo<HeaderPageProps> = ({
+const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   backOptions,
   badgeOptions,
   border,
