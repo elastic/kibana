@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
@@ -256,6 +256,11 @@ export class ApplicationService {
       )
       .subscribe(apps => applications$.next(apps));
 
+    const applicationStatuses$ = applications$.pipe(
+      map(apps => new Map([...apps.entries()].map(([id, app]) => [id, app.status!]))),
+      shareReplay(1)
+    );
+
     return {
       applications$,
       capabilities,
@@ -264,11 +269,6 @@ export class ApplicationService {
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        const app = applications$.value.get(appId);
-        if (app && app.status !== AppStatus.accessible) {
-          // should probably redirect to the error page instead
-          throw new Error(`Trying to navigate to an inaccessible application: ${appId}`);
-        }
         if (await this.shouldNavigate(overlays)) {
           this.appLeaveHandlers.delete(this.currentAppId$.value!);
           this.navigate!(getAppUrl(availableMounters, appId, path), state);
@@ -283,6 +283,7 @@ export class ApplicationService {
           <AppRouter
             history={this.history}
             mounters={availableMounters}
+            appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
           />
         );
