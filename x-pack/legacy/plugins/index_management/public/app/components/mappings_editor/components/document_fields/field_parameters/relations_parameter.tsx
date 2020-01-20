@@ -175,6 +175,16 @@ export const RelationsParameter = () => {
                       path={`${item.path}.parent`}
                       config={parentConfig}
                       component={TextField}
+                      componentProps={{
+                        euiFieldProps: {
+                          'aria-label': i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.parentFieldAriaLabel',
+                            {
+                              defaultMessage: 'Parent field',
+                            }
+                          ),
+                        },
+                      }}
                       // For a newly created relation, we don't want to read
                       // its default value provided to the form because... it is new! :)
                       readDefaultValueOnForm={!item.isNew}
@@ -198,6 +208,16 @@ export const RelationsParameter = () => {
                       path={`${item.path}.children`}
                       config={childConfig}
                       component={ComboBoxField}
+                      componentProps={{
+                        euiFieldProps: {
+                          'aria-label': i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.joinType.relationshipTable.childrenFieldAriaLabel',
+                            {
+                              defaultMessage: 'Children field',
+                            }
+                          ),
+                        },
+                      }}
                       readDefaultValueOnForm={!item.isNew}
                     />
                   </div>
