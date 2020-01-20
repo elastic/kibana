@@ -53,65 +53,35 @@ export function validateJobSelection(
   }
 
   if (validSelectedJobIds.length > 1) {
-    // if more than one job or a group has been loaded from the URL
-    if (validSelectedJobIds.length > 1) {
-      // if more than one job, select the first job from the selection.
-      toastNotifications.addWarning(
-        i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
-          defaultMessage: 'You can only view one job at a time in this dashboard',
-        })
-      );
-      setGlobalState('ml', { jobIds: [validSelectedJobIds[0]] });
-      return true;
-    } else {
-      // if a group has been loaded
-      if (selectedJobIds.length > 0) {
-        // if the group contains valid jobs, select the first
-        toastNotifications.addWarning(
-          i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
-            defaultMessage: 'You can only view one job at a time in this dashboard',
-          })
-        );
-        setGlobalState('ml', { jobIds: [validSelectedJobIds[0]] });
-        return true;
-      } else if (jobs.length > 0) {
-        // if there are no valid jobs in the group but there are valid jobs
-        // in the list of all jobs, select the first
-        const jobIds = [jobs[0].id];
-        const time = getTimeRangeFromSelection(jobsWithTimeRange, jobIds);
-        setGlobalState({
-          ...{ ml: { jobIds } },
-          ...(time !== undefined ? { time } : {}),
-        });
-        return true;
-      } else {
-        // if there are no valid jobs left.
-        return false;
-      }
-    }
+    // if more than one job, select the first job from the selection.
+    toastNotifications.addWarning(
+      i18n.translate('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+        defaultMessage: 'You can only view one job at a time in this dashboard',
+      })
+    );
+    setGlobalState('ml', { jobIds: [validSelectedJobIds[0]] });
+    return true;
   } else if (invalidIds.length > 0 && validSelectedJobIds.length > 0) {
     // if some ids have been filtered out because they were invalid.
     // refresh the URL with the first valid id
     setGlobalState('ml', { jobIds: [validSelectedJobIds[0]] });
     return true;
-  } else if (validSelectedJobIds.length > 0) {
+  } else if (validSelectedJobIds.length === 1) {
     // normal behavior. a job ID has been loaded from the URL
     // Clear the detectorIndex, entities and forecast info.
     return validSelectedJobIds[0];
+  } else if (validSelectedJobIds.length === 0 && jobs.length > 0) {
+    // no jobs were loaded from the URL, so add the first job
+    // from the full jobs list.
+    const jobIds = [jobs[0].id];
+    const time = getTimeRangeFromSelection(jobsWithTimeRange, jobIds);
+    setGlobalState({
+      ...{ ml: { jobIds } },
+      ...(time !== undefined ? { time } : {}),
+    });
+    return true;
   } else {
-    if (validSelectedJobIds.length === 0 && jobs.length > 0) {
-      // no jobs were loaded from the URL, so add the first job
-      // from the full jobs list.
-      const jobIds = [jobs[0].id];
-      const time = getTimeRangeFromSelection(jobsWithTimeRange, jobIds);
-      setGlobalState({
-        ...{ ml: { jobIds } },
-        ...(time !== undefined ? { time } : {}),
-      });
-      return true;
-    } else {
-      // Jobs exist, but no time series jobs.
-      return false;
-    }
+    // Jobs exist, but no time series jobs.
+    return false;
   }
 }
