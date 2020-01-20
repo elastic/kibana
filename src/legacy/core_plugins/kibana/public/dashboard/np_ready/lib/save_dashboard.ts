@@ -42,8 +42,13 @@ export function saveDashboard(
   updateSavedDashboard(savedDashboard, appState, timeFilter, toJson);
 
   return savedDashboard.save(saveOptions).then((id: string) => {
-    dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
-    dashboardStateManager.resetState();
+    if (id) {
+      // reset state only when save() was successful
+      // e.g. save() could be interrupted if title is duplicated and not confirmed
+      dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
+      dashboardStateManager.resetState();
+    }
+
     return id;
   });
 }
