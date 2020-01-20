@@ -91,6 +91,7 @@ export class TaskRunnerFactory {
           actionId,
           request: fakeRequest,
         });
+
         if (executorResult.status === 'error') {
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
@@ -99,17 +100,17 @@ export class TaskRunnerFactory {
             executorResult.data,
             executorResult.retry == null ? false : executorResult.retry
           );
-        } else if (executorResult.status === 'ok') {
-          // Cleanup action_task_params object now that we're done with it
-          try {
-            const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-            await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
-          } catch (e) {
-            // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
-            logger.error(
-              `Failed to cleanup action_task_params object [id="${actionTaskParamsId}"]: ${e.message}`
-            );
-          }
+        }
+
+        // Cleanup action_task_params object now that we're done with it
+        try {
+          const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
+          await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
+        } catch (e) {
+          // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
+          logger.error(
+            `Failed to cleanup action_task_params object [id="${actionTaskParamsId}"]: ${e.message}`
+          );
         }
       },
     };
