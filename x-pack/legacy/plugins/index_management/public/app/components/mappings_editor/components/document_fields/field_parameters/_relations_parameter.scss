@@ -1,15 +1,14 @@
 
 .mappingsEditor__dynamicItem {
-  position: relative;
+  border-bottom: $euiBorderThin;
   margin-bottom: $euiSize;
 
   &:last-child {
     margin-bottom: 0;
+    border-bottom: none;
   }
 
-  &__removeButton {
-    position: absolute;
-    right: 0;
-    top: 0;
+  &__actions {
+    justify-content: center;
   }
 }
