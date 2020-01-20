@@ -16,7 +16,7 @@ export const DocLinkForBody = () => {
   const docsLink = (
     <EuiLink href={bodyDocsLink} target="_blank">
       {i18n.translate('xpack.uptime.pingList.drawer.body.docsLink', {
-        defaultMessage: 'Docs',
+        defaultMessage: 'docs',
         description: 'Docs link to set response body',
       })}
       &nbsp;
