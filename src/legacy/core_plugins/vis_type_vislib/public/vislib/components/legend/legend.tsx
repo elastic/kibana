@@ -24,7 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
 // @ts-ignore
-import { createFiltersFromEvent } from '../../../../../visualizations/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createFiltersFromEvent } from '../../../../../../../plugins/data/public/actions/filters/create_filters_from_event';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';

@@ -44,7 +44,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public static code */
 export { Vis, VisParams, VisState } from './vis';
-export * from './filters';
 export { TypesService } from './types/types_service';
 
 export { Status } from './legacy/update_status';

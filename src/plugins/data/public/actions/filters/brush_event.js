@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { esFilters } from '../../../../../../../plugins/data/public';
-import { AggConfigs } from '../../../legacy_imports';
+import { esFilters } from '..';
+import { AggConfigs } from '../../../../../legacy/ui/public/agg_types';
 
 export function onBrushEvent(event) {
   const isNumber = event.data.ordered;

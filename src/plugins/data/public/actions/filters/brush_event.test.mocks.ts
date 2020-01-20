@@ -17,5 +17,12 @@
  * under the License.
  */
 
-// @ts-ignore
-export * from './vis_filters';
+import { chromeServiceMock } from '../../../../../core/public/mocks';
+
+jest.doMock('ui/new_platform', () => ({
+  npStart: {
+    core: {
+      chrome: chromeServiceMock.createStartContract(),
+    },
+  },
+}));

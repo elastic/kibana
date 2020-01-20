@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { onBrushEvent } from './brush_event';
-import { esFilters } from '../../../../../../../plugins/data/public';
-import { AggConfigs } from '../../../legacy_imports';
+import { esFilters } from '..';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
@@ -65,6 +63,8 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
  * @return {array|string} - filter or list of filters to provide to queryFilter.addFilters()
  */
 const createFilter = (table, columnIndex, rowIndex) => {
+  // hack until AggConfigs are migrated to the new platform
+  const { AggConfigs } = require('../../../../../legacy/ui/public/agg_types/agg_configs');
   const column = table.columns[columnIndex];
   const aggConfigs = new AggConfigs();
   aggConfigs.indexPattern = column._meta.indexPattern;
@@ -113,4 +113,4 @@ const createFiltersFromEvent = event => {
   return filters;
 };
 
-export { createFiltersFromEvent, onBrushEvent };
+export { createFiltersFromEvent };

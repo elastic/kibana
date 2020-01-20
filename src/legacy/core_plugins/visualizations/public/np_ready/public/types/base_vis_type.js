@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 
-import { createFiltersFromEvent, onBrushEvent } from '../filters';
 import { DefaultEditorController } from '../../../legacy_imports';
 
 export class BaseVisType {
@@ -59,15 +58,6 @@ export class BaseVisType {
         showFilterBar: true,
         showIndexSelection: true,
         hierarchicalData: false, // we should get rid of this i guess ?
-      },
-      events: {
-        filterBucket: {
-          defaultAction: createFiltersFromEvent,
-        },
-        brush: {
-          defaultAction: onBrushEvent,
-          disabled: true,
-        },
       },
       stage: 'production',
       feedbackMessage: '',

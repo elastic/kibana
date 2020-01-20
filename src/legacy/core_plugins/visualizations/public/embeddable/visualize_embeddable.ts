@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _, { forEach } from 'lodash';
+import _ from 'lodash';
 import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
@@ -35,7 +35,6 @@ import {
   Query,
   onlyDisabledFiltersChanged,
   esFilters,
-  mapAndFlattenFilters,
   ISearchSource,
 } from '../../../../../plugins/data/public';
 import {
@@ -104,7 +103,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private visCustomizations: VisualizeInput['vis'];
   private subscriptions: Subscription[] = [];
   private expression: string = '';
-  private actions: any = {};
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
@@ -254,15 +252,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.savedVisualization.vis._setUiState(this.uiState);
     this.uiState = this.savedVisualization.vis.getUiState();
 
-    // init default actions
-    forEach(this.vis.type.events, (event, eventName) => {
-      if (event.disabled || !eventName) {
-        return;
-      } else {
-        this.actions[eventName] = event.defaultAction;
-      }
-    });
-
     // This is a hack to give maps visualizations access to data in the
     // globalState, since they can no longer access it via searchSource.
     // TODO: Remove this as a part of elastic/kibana#30593
@@ -300,17 +289,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
-        if (this.actions[event.name]) {
-          const filters: esFilters.Filter[] = this.actions[event.name](event.data) || [];
-          const mappedFilters = mapAndFlattenFilters(filters);
-          const timeFieldName = this.vis.indexPattern.timeFieldName;
+        const eventName = event.name === 'brush' ? 'BRUSH_TRIGGER' : APPLY_FILTER_TRIGGER;
 
-          npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-            embeddable: this,
-            filters: mappedFilters,
-            timeFieldName,
-          });
-        }
+        npStart.plugins.uiActions.executeTriggerActions(eventName, {
+          embeddable: this,
+          timeField: this.vis.indexPattern.timeFieldName,
+          data: event.data,
+        });
       })
     );
 
