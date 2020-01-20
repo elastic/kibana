@@ -903,6 +903,6 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: [] as any, // Needed for FieldParams typing
     },
-    schema: Joi.object(),
+    schema: t.record(t.string, t.union([t.string, t.array(t.string)])),
   },
 };
