@@ -50,7 +50,7 @@ export class Plugin
       }),
       euiIconType: 'logsApp',
       order: 8001,
-      appRoute: '/app/infra#/logs',
+      appRoute: '/app/infra/logs',
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { startApp } = await import('./apps/start_app');
@@ -70,7 +70,7 @@ export class Plugin
       }),
       euiIconType: 'metricsApp',
       order: 8000,
-      appRoute: '/app/infra#/infrastructure',
+      appRoute: '/app/infra/infrastructure',
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { startApp } = await import('./apps/start_app');

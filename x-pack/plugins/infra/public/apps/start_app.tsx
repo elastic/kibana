@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHashHistory } from 'history';
+import { createBrowserHistory } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
@@ -27,14 +27,23 @@ import {
   KibanaContextProvider,
 } from '../../../../../src/plugins/kibana_react/public';
 
+// Get the basePath with space ID etc, but without the actual route.
+const getRouterBasePath = (appBasePath: string) => {
+  let basePath: string = '';
+  const basePathParts: string[] = appBasePath.split('/');
+  basePathParts.pop();
+  basePath = basePathParts.join('/');
+  return basePath;
+};
+
 export async function startApp(
   libs: InfraFrontendLibs,
   core: CoreStart,
   plugins: object,
   params: AppMountParameters
 ) {
-  const { element } = params;
-  const history = createHashHistory();
+  const { element, appBasePath } = params;
+  const history = createBrowserHistory({ basename: getRouterBasePath(appBasePath) });
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
     apolloClient: libs$.pipe(pluck('apolloClient')),

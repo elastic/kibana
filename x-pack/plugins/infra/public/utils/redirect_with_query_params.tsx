@@ -18,27 +18,45 @@ export const RedirectWithQueryParams: React.FunctionComponent<RedirectWithQueryP
   from,
   to,
   ...rest
-}) => (
-  <Route
-    path={from}
-    render={({ location }: RouteProps) =>
-      location ? (
-        <Redirect
-          {...rest}
-          from={from}
-          to={
-            typeof to === 'string'
-              ? {
-                  ...location,
-                  pathname: to,
-                }
-              : {
-                  ...location,
-                  ...to,
-                }
-          }
-        />
-      ) : null
-    }
-  />
-);
+}) => {
+  return (
+    <Route
+      path={from}
+      render={({ location }: RouteProps) => {
+        // Make sure we support our legacy routes from when we used
+        // a hash based router. This will attempt to redirect anything
+        // after the hash to a normal route.
+        if (location && location.hash) {
+          const toWithHashRemoved = location.hash.replace('#', '');
+          return (
+            <Redirect
+              {...rest}
+              to={{
+                ...location,
+                pathname: toWithHashRemoved,
+                hash: undefined,
+              }}
+            />
+          );
+        }
+        return location ? (
+          <Redirect
+            {...rest}
+            from={from}
+            to={
+              typeof to === 'string'
+                ? {
+                    ...location,
+                    pathname: to,
+                  }
+                : {
+                    ...location,
+                    ...to,
+                  }
+            }
+          />
+        ) : null;
+      }}
+    />
+  );
+};
