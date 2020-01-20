@@ -4,13 +4,13 @@
 
 ## GetAuthState type
 
-Get authentication state for a request. Returned by `auth` interceptor.
+Gets authentication state for a request. Returned by `auth` interceptor.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type GetAuthState = (request: KibanaRequest | LegacyRequest) => {
+export declare type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
     status: AuthStatus;
-    state: unknown;
+    state: T;
 };
 ```
