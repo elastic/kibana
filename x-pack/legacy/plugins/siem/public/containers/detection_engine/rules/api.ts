@@ -154,14 +154,15 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule
 /**
  * Duplicates provided Rules
  *
- * @param rule to duplicate
+ * @param rules to duplicate
  */
 export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Rule[]> => {
-  const responses = await Promise.all(
-    rules.map(rule =>
-      npStart.core.http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
-        method: 'POST',
-        body: JSON.stringify({
+  const response = await npStart.core.http.fetch<Rule[]>(
+    `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    {
+      method: 'POST',
+      body: JSON.stringify(
+        rules.map(rule => ({
           ...rule,
           name: `${rule.name} [${i18n.DUPLICATE}]`,
           created_at: undefined,
@@ -171,19 +172,19 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Ru
           updated_at: undefined,
           updated_by: undefined,
           enabled: rule.enabled,
-          immutable: false,
+          immutable: undefined,
           last_success_at: undefined,
           last_success_message: undefined,
           status: undefined,
           status_date: undefined,
-        }),
-        asResponse: true,
-      })
-    )
+        }))
+      ),
+      asResponse: true,
+    }
   );
 
-  await Promise.all(responses.map(response => throwIfNotOk(response.response)));
-  return responses.map(response => response.body!);
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 /**

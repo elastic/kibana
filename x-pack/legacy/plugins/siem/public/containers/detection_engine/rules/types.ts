@@ -145,7 +145,7 @@ export interface DeleteRulesProps {
 }
 
 export interface DuplicateRulesProps {
-  rules: Rules;
+  rules: Rule[];
 }
 
 export interface BasicFetchProps {
@@ -180,13 +180,19 @@ export interface ExportRulesProps {
 }
 
 export interface RuleStatus {
+  current_status: RuleInfoStatus;
+  failures: RuleInfoStatus[];
+}
+
+export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
+export interface RuleInfoStatus {
   alert_id: string;
   status_date: string;
-  status: string;
+  status: RuleStatusType | null;
   last_failure_at: string | null;
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
 }
 
-export type RuleStatusResponse = Record<string, RuleStatus[]>;
+export type RuleStatusResponse = Record<string, RuleStatus>;
