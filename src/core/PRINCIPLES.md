@@ -1,7 +1,7 @@
 ## Common dictionary
 Plugin - a piece of software expressing specific subject of the business unit within the code.
 
-Platform - a set of plugins required to run all other Kibana plugins.
+Platform - functionality required to run all the Kibana plugins.
 
 ## New platform principles
 ### Explicit business domains separation
@@ -21,7 +21,7 @@ src/plugins
   - search
 ```
 ### Explicit dependencies
-Each plugin should declare dependencies on the other plugins explicitly. Plugins cannot have circular dependencies. Plugins shouldn't have hidden dependencies.
+Each plugin should declare dependencies on the other plugins explicitly. Plugins cannot have circular dependencies. Plugins shouldn't access runtime objects, HTTP endpoints, DOM nodes, etc. created by a third party plugin without declaring a dependency on this plugin.
 ```json
 "requiredPlugins": ["search"],
 "optionalPlugins": ["apm"],
