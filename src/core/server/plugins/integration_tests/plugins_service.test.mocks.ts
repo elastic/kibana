@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
-import { CoreAppStatusPlugin, CoreAppStatusPluginStart } from './plugin';
+export const mockPackage = new Proxy(
+  { raw: { __dirname: '/tmp' } as any },
+  { get: (obj, prop) => obj.raw[prop] }
+);
+jest.mock('../../../../core/server/utils/package_json', () => ({ pkg: mockPackage }));
 
-export const plugin: PluginInitializer<{}, CoreAppStatusPluginStart> = () =>
-  new CoreAppStatusPlugin();
+export const mockDiscover = jest.fn();
+jest.mock('../discovery/plugins_discovery', () => ({ discover: mockDiscover }));
