@@ -71,7 +71,7 @@ This indexing strategy has a few advantages:
 
 === Templates & ILM Policies
 
-To make the above strategy possible, alias templates are required. For each type there is a basic alias template with a default ILM policy. This default templates apply to all indices which follow the indexing strategy and do not have a more specific dataset alias template. 
+To make the above strategy possible, alias templates are required. For each type there is a basic alias template with a default ILM policy. These default templates apply to all indices which follow the indexing strategy and do not have a more specific dataset alias template. 
 
 The `metrics` and `logs` alias template contain all the basic fields. Dynamic fields are disabled to keep the number of fields low. The fields which are not part of the mapping will be available in `_source` but can't be queried. 
 
