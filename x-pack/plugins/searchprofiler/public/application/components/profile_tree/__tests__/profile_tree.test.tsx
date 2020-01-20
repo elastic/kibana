@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../../../../../test_utils';
+import { registerTestBed } from '../../../../../../../test_utils';
 import { searchResponse } from './fixtures/search_response';
 import { ProfileTree, Props } from '../profile_tree';
 
