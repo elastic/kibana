@@ -149,8 +149,8 @@ export const RelationsParameter = () => {
 
   return (
     <EditFieldFormRow
-      title={i18n.translate('xpack.idxMgmt.mappingsEditor.relationsTitle', {
-        defaultMessage: 'Relations',
+      title={i18n.translate('xpack.idxMgmt.mappingsEditor.relationshipsTitle', {
+        defaultMessage: 'Relationships',
       })}
       withToggle={false}
     >
@@ -261,9 +261,12 @@ export const RelationsParameter = () => {
                 iconType="plusInCircleFilled"
                 data-test-subj="addRelationButton"
               >
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.joinType.addRelationButtonLabel', {
-                  defaultMessage: 'Add relation',
-                })}
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.joinType.addRelationshipButtonLabel',
+                  {
+                    defaultMessage: 'Add relationship',
+                  }
+                )}
               </EuiButtonEmpty>
             </>
           );
