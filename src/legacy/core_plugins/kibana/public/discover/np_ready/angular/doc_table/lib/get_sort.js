@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-function isSortable(field, indexPattern) {
+export function isSortable(field, indexPattern) {
   return indexPattern.fields.getByName(field) && indexPattern.fields.getByName(field).sortable;
 }
 
@@ -39,10 +39,9 @@ function createSortObject(sortPair, indexPattern) {
  * @param {array} sort two dimensional array [[fieldToSort, directionToSort]]
  *  or an array of objects [{fieldToSort: directionToSort}]
  * @param {object} indexPattern used for determining default sort
- * @param {string} defaultSortOrder
  * @returns {object} a sort object suitable for returning to elasticsearch
  */
-export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
+export function getSort(sort, indexPattern) {
   let sortObjects;
   if (Array.isArray(sort)) {
     sortObjects = _.compact(sort.map(sortPair => createSortObject(sortPair, indexPattern)));
@@ -50,15 +49,12 @@ export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
 
   if (!_.isEmpty(sortObjects)) {
     return sortObjects;
-  } else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
-    return [{ [indexPattern.timeFieldName]: defaultSortOrder }];
-  } else {
-    return [];
   }
+  return [];
 }
 
-getSort.array = function(sort, indexPattern, defaultSortOrder) {
-  return getSort(sort, indexPattern, defaultSortOrder).map(sortPair =>
+getSort.array = function(sort, indexPattern, defaultSortOrder, useDefault = true) {
+  return getSort(sort, indexPattern, defaultSortOrder, useDefault).map(sortPair =>
     _(sortPair)
       .pairs()
       .pop()
