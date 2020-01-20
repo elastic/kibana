@@ -7,11 +7,13 @@
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { ActionsCoreStart } from '../shim';
+import { Logger } from '../../../../../../src/core/server';
 import { RunContext } from '../../../../../plugins/task_manager/server';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
 import { ActionTaskParams, GetBasePathFunction, SpaceIdToNamespaceFunction } from '../types';
 
 export interface TaskRunnerContext {
+  logger: Logger;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
@@ -42,6 +44,7 @@ export class TaskRunnerFactory {
 
     const { actionExecutor } = this;
     const {
+      logger,
       encryptedSavedObjectsPlugin,
       spaceIdToNamespace,
       getBasePath,
@@ -98,8 +101,15 @@ export class TaskRunnerFactory {
           );
         } else if (executorResult.status === 'ok') {
           // Cleanup action_task_params object now that we're done with it
-          const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-          await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
+          try {
+            const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
+            await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
+          } catch (e) {
+            // Log error only, we shouldn't make the action type execute again because of an error here
+            logger.error(
+              `Failed to cleanup action_task_params object [id="${actionTaskParamsId}"]: ${e.message}`
+            );
+          }
         }
       },
     };

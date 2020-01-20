@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import sinon from 'sinon';
 import { taskManagerMock } from '../../../../plugins/task_manager/server/task_manager.mock';
 import { createExecuteFunction } from './create_execute_function';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
+let fakeTimer: sinon.SinonFakeTimers;
 const mockTaskManager = taskManagerMock.start();
 const savedObjectsClient = savedObjectsClientMock.create();
 const getBasePath = jest.fn();
+
+beforeAll(() => {
+  fakeTimer = sinon.useFakeTimers();
+});
+afterAll(() => fakeTimer.restore());
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -62,6 +69,7 @@ describe('execute()', () => {
       actionId: '123',
       params: { baz: false },
       apiKey: Buffer.from('123:abc').toString('base64'),
+      createdAt: '1970-01-01T00:00:00.000Z',
     });
   });
 
