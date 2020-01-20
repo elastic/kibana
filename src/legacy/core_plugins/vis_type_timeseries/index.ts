@@ -21,7 +21,6 @@ import { resolve } from 'path';
 import { Legacy } from 'kibana';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
-import { VisTypeTimeseriesSetup } from '../../../plugins/vis_type_timeseries/server';
 
 const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
@@ -46,11 +45,6 @@ const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlu
           isNamespaceAgnostic: true,
         },
       },
-    },
-    init: (server: Legacy.Server) => {
-      const visTypeTimeSeriesPlugin = server.newPlatform.setup.plugins
-        .metrics as VisTypeTimeseriesSetup;
-      visTypeTimeSeriesPlugin.__legacy.registerLegacyAPI({ server });
     },
     config(Joi: any) {
       return Joi.object({
