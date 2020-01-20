@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers } from './helpers';
+import { pageHelpers, mockHttpRequest } from './helpers';
 import { first } from 'lodash';
 import { JOBS } from './helpers/constants';
 
@@ -15,8 +15,6 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 6: Review', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let find;
   let exists;
   let actions;
@@ -24,19 +22,22 @@ describe('Create Rollup Job, step 6: Review', () => {
   let goToStep;
   let table;
   let form;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
   });
 
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+    mockHttpRequest(npStart.core.http);
     ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, form } = setup());
+  });
+
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
+    npStart.core.http.post.mockClear();
+    npStart.core.http.put.mockClear();
   });
 
   describe('layout', () => {
@@ -81,7 +82,7 @@ describe('Create Rollup Job, step 6: Review', () => {
     });
 
     it('should have a "Summary", "Terms" & "Request" tab if a term aggregation was added', async () => {
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['my-field'] });
+      mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields: ['my-field'] } });
       await goToStep(3);
       selectFirstField('Terms');
 
@@ -93,7 +94,7 @@ describe('Create Rollup Job, step 6: Review', () => {
     });
 
     it('should have a "Summary", "Histogram" & "Request" tab if a histogram field was added', async () => {
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields: ['a-field'] });
+      mockHttpRequest(npStart.core.http, { indxPatternVldtResp: { numericFields: ['a-field'] } });
       await goToStep(4);
       selectFirstField('Histogram');
       form.setInputValue('rollupJobCreateHistogramInterval', 3); // set an interval
@@ -105,9 +106,11 @@ describe('Create Rollup Job, step 6: Review', () => {
     });
 
     it('should have a "Summary", "Metrics" & "Request" tab if a histogram field was added', async () => {
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({
-        numericFields: ['a-field'],
-        dateFields: ['b-field'],
+      mockHttpRequest(npStart.core.http, {
+        indxPatternVldtResp: {
+          numericFields: ['a-field'],
+          dateFields: ['b-field'],
+        },
       });
       await goToStep(5);
       selectFirstField('Metrics');
@@ -125,27 +128,30 @@ describe('Create Rollup Job, step 6: Review', () => {
 
     describe('without starting job after creation', () => {
       it('should call the "create" Api server endpoint', async () => {
-        httpRequestsMockHelpers.setCreateJobResponse(first(JOBS.jobs));
+        mockHttpRequest(npStart.core.http, {
+          createdJob: first(JOBS.jobs),
+        });
 
         await goToStep(6);
 
-        expect(server.requests.find(r => r.url === jobCreateApiPath)).toBe(undefined); // make sure it hasn't been called
-        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // make sure it hasn't been called
+        expect(npStart.core.http.put).not.toHaveBeenCalledWith(jobCreateApiPath); // make sure it hasn't been called
+        expect(npStart.core.http.get).not.toHaveBeenCalledWith(jobStartApiPath); // make sure it hasn't been called
 
         actions.clickSave();
         // Given the following anti-jitter sleep x-pack/legacy/plugins/rollup/public/crud_app/store/actions/create_job.js
         // we add a longer sleep here :(
         await new Promise(res => setTimeout(res, 750));
 
-        expect(server.requests.find(r => r.url === jobCreateApiPath)).not.toBe(undefined); // It has been called!
-        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // It has still not been called!
+        expect(npStart.core.http.put).toHaveBeenCalledWith(jobCreateApiPath, expect.anything()); // It has been called!
+        expect(npStart.core.http.get).not.toHaveBeenCalledWith(jobStartApiPath); // It has still not been called!
       });
     });
 
     describe('with starting job after creation', () => {
       it('should call the "create" and "start" Api server endpoints', async () => {
-        httpRequestsMockHelpers.setCreateJobResponse(first(JOBS.jobs));
-        httpRequestsMockHelpers.setStartJobResponse();
+        mockHttpRequest(npStart.core.http, {
+          createdJob: first(JOBS.jobs),
+        });
 
         await goToStep(6);
 
@@ -153,14 +159,14 @@ describe('Create Rollup Job, step 6: Review', () => {
           target: { checked: true },
         });
 
-        expect(server.requests.find(r => r.url === jobStartApiPath)).toBe(undefined); // make sure it hasn't been called
+        expect(npStart.core.http.post).not.toHaveBeenCalledWith(jobStartApiPath); // make sure it hasn't been called
 
         actions.clickSave();
         // Given the following anti-jitter sleep x-pack/legacy/plugins/rollup/public/crud_app/store/actions/create_job.js
         // we add a longer sleep here :(
         await new Promise(res => setTimeout(res, 750));
 
-        expect(server.requests.find(r => r.url === jobStartApiPath)).not.toBe(undefined); // It has been called!
+        expect(npStart.core.http.post).toHaveBeenCalledWith(jobStartApiPath, expect.anything()); // It has been called!
       });
     });
   });

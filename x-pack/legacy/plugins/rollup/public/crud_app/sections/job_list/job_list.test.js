@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { registerTestBed } from '../../../../../../../test_utils';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
+
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
+const startMock = coreMock.createStart();
 
 jest.mock('ui/new_platform');
 
@@ -27,7 +32,16 @@ const defaultProps = {
   isLoading: false,
 };
 
-const initTestBed = registerTestBed(JobList, { defaultProps, store: rollupJobsStore });
+const services = {
+  setBreadcrumbs: startMock.chrome.setBreadcrumbs,
+};
+const Component = props => (
+  <KibanaContextProvider services={services}>
+    <JobList {...props} />
+  </KibanaContextProvider>
+);
+
+const initTestBed = registerTestBed(Component, { defaultProps, store: rollupJobsStore });
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
@@ -54,7 +68,7 @@ describe('<JobList />', () => {
     const { exists, find } = initTestBed({
       jobLoadError: {
         status: 400,
-        data: { statusCode: 400, error: 'Houston we got a problem.' },
+        body: { statusCode: 400, error: 'Houston we got a problem.' },
       },
     });
 

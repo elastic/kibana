@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers } from './helpers';
+import { pageHelpers, mockHttpRequest } from './helpers';
 
 jest.mock('ui/new_platform');
 
@@ -13,28 +13,27 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 const { setup } = pageHelpers.jobCreate;
 
 describe('Create Rollup Job, step 3: Terms', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let find;
   let exists;
   let actions;
   let getEuiStepsHorizontalActive;
   let goToStep;
   let table;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
   });
 
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+    mockHttpRequest(npStart.core.http);
 
     ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table } = setup());
+  });
+
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
   });
 
   const numericFields = ['a-numericField', 'c-numericField'];
@@ -108,9 +107,11 @@ describe('Create Rollup Job, step 3: Terms', () => {
 
     describe('when no terms are available', () => {
       it('should indicate it to the user', async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({
-          numericFields: [],
-          keywordFields: [],
+        mockHttpRequest(npStart.core.http, {
+          indxPatternVldtResp: {
+            numericFields: [],
+            keywordFields: [],
+          },
         });
         await goToStepAndOpenFieldChooser();
 
@@ -122,7 +123,12 @@ describe('Create Rollup Job, step 3: Terms', () => {
 
     describe('when terms are available', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, keywordFields });
+        mockHttpRequest(npStart.core.http, {
+          indxPatternVldtResp: {
+            numericFields,
+            keywordFields,
+          },
+        });
         await goToStepAndOpenFieldChooser();
       });
 
@@ -163,7 +169,12 @@ describe('Create Rollup Job, step 3: Terms', () => {
 
     it('should have a delete button on each row to remove a term', async () => {
       // First let's add a term to the list
-      httpRequestsMockHelpers.setIndexPatternValidityResponse({ numericFields, keywordFields });
+      mockHttpRequest(npStart.core.http, {
+        indxPatternVldtResp: {
+          numericFields,
+          keywordFields,
+        },
+      });
       await goToStepAndOpenFieldChooser();
       const { rows: fieldChooserRows } = table.getMetaData('rollupJobTermsFieldChooser-table');
       fieldChooserRows[0].reactWrapper.simulate('click');

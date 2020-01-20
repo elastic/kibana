@@ -10,7 +10,9 @@ import { JobCreate } from '../../../public/crud_app/sections';
 
 import { JOB_TO_CREATE } from './constants';
 
-const initTestBed = registerTestBed(JobCreate, { store: rollupJobsStore });
+import { wrapComponent } from './setup_context';
+
+const initTestBed = registerTestBed(wrapComponent(JobCreate), { store: rollupJobsStore });
 
 export const setup = props => {
   const testBed = initTestBed(props);

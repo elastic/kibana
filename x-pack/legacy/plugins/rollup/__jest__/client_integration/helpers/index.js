@@ -10,7 +10,9 @@ import { setup as jobCloneSetup } from './job_clone.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../../test_utils';
 
-export { setupEnvironment } from './setup_environment';
+export { mockHttpRequest } from './setup_environment';
+
+export { wrapComponent } from './setup_context';
 
 export const pageHelpers = {
   jobCreate: { setup: jobCreateSetup },
