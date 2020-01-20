@@ -33,25 +33,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiListGroup,
-  EuiListGroupItem,
   EuiLoadingSpinner,
   EuiPagination,
   EuiPopover,
   EuiSpacer,
   EuiTablePagination,
+  EuiSelectable,
   IconType,
+  EuiIcon,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
+import { Option } from '@elastic/eui/src/components/selectable/types';
 
 import { SavedObjectAttributes } from '../../../../core/public';
 import { SimpleSavedObject, CoreStart } from '../../../../core/public';
 import { useKibana } from '../context';
-
-// TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
-const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
-  CommonProps & { maxWidth: boolean }
->;
 
 // TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
 const FixedEuiContextMenuPanel = (EuiContextMenuPanel as any) as React.FunctionComponent<
@@ -209,7 +206,7 @@ class SavedObjectFinderUi extends React.Component<
   public render() {
     return (
       <React.Fragment>
-        {this.renderSearchBar()}
+        {false && this.renderSearchBar()}
         {this.renderListing()}
       </React.Fragment>
     );
@@ -455,47 +452,50 @@ class SavedObjectFinderUi extends React.Component<
 
     return (
       <>
-        {this.state.isFetchingItems && this.state.items.length === 0 && (
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiSpacer />
-              <EuiLoadingSpinner data-test-subj="savedObjectFinderLoadingIndicator" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
         {items.length > 0 ? (
-          <FixedEuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false}>
-            {items.map(item => {
-              const currentSavedObjectMetaData = savedObjectMetaData.find(
-                metaData => metaData.type === item.type
-              )!;
-              const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
-                ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
-                : `${item.title} (${currentSavedObjectMetaData!.name})`;
-              const iconType = (
-                currentSavedObjectMetaData ||
-                ({
-                  getIconForSavedObject: () => 'document',
-                } as Pick<SavedObjectMetaData<SavedObjectAttributes>, 'getIconForSavedObject'>)
-              ).getIconForSavedObject(item.savedObject);
+          <EuiSelectable
+            searchable
+            data-test-subj="savedObjectFinderItemList"
+            height="full"
+            isLoading={this.state.isFetchingItems && this.state.items.length === 0}
+            options={
+              items.map(item => {
+                const currentSavedObjectMetaData = savedObjectMetaData.find(
+                  metaData => metaData.type === item.type
+                )!;
+                const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
+                  ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
+                  : `${item.title} (${currentSavedObjectMetaData!.name})`;
+                const iconType = (
+                  currentSavedObjectMetaData ||
+                  ({
+                    getIconForSavedObject: () => 'document',
+                  } as Pick<SavedObjectMetaData<SavedObjectAttributes>, 'getIconForSavedObject'>)
+                ).getIconForSavedObject(item.savedObject);
+                return {
+                  key: item.id,
+                  prepend: <EuiIcon className="euiListGroupItem__icon" type={iconType} />,
+                  label: item.title,
+                  onClick: onChoose
+                    ? () => {
+                        onChoose(item.id, item.type, fullName, item.savedObject);
+                      }
+                    : undefined,
+                  title: fullName,
+                  'data-test-subj': `savedObjectTitle${(item.title || '').split(' ').join('-')}`,
+                };
+              }) as Option[]
+            }
+          >
+            {(list, search) => {
               return (
-                <EuiListGroupItem
-                  key={item.id}
-                  iconType={iconType}
-                  label={item.title}
-                  onClick={
-                    onChoose
-                      ? () => {
-                          onChoose(item.id, item.type, fullName, item.savedObject);
-                        }
-                      : undefined
-                  }
-                  title={fullName}
-                  data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
-                />
+                <>
+                  {search}
+                  {list}
+                </>
               );
-            })}
-          </FixedEuiListGroup>
+            }}
+          </EuiSelectable>
         ) : (
           !this.state.isFetchingItems && <EuiEmptyPrompt body={this.props.noItemsMessage} />
         )}
