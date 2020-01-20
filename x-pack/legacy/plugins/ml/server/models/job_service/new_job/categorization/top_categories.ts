@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { CategoryId, Category } from '../../../../../common/types/categories';
 import { callWithRequestType } from '../../../../../common/types/kibana';
@@ -36,7 +37,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const top = await callWithRequest('search', {
+    const top: SearchResponse<any> = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -98,7 +99,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
             field: 'category_id',
           },
         };
-    const result = await callWithRequest('search', {
+    const result: SearchResponse<any> = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size,
       body: {

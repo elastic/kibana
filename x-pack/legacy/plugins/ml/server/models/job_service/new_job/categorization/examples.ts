@@ -5,6 +5,7 @@
  */
 
 import { chunk } from 'lodash';
+import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/new_job';
 import {
   Token,
@@ -53,7 +54,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       }
     }
 
-    const results = await callWithRequest('search', {
+    const results: SearchResponse<{ [id: string]: string }> = await callWithRequest('search', {
       index: indexPatternTitle,
       size,
       body: {
@@ -63,9 +64,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       },
     });
 
-    const tempExamples: string[] = results.hits?.hits?.map(
-      (doc: any) => doc._source[categorizationFieldName]
-    );
+    const tempExamples = results.hits.hits.map(({ _source }) => _source[categorizationFieldName]);
 
     validationResults.createNullValueResult(tempExamples);
 
@@ -90,7 +89,7 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
         return { examples: examplesWithTokens };
       } catch (error) {
         validationResults.createTooManyTokensResult(error, halfChunkSize);
-        return { examples: halfExamples.map((e, i) => ({ text: e, tokens: [] })) };
+        return { examples: halfExamples.map(e => ({ text: e, tokens: [] })) };
       }
     }
   }

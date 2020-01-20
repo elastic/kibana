@@ -72,9 +72,9 @@ const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
   let analyzer = '';
 
   if (categorizationAnalyzer?.tokenizer !== undefined) {
-    analyzer = categorizationAnalyzer?.tokenizer!;
+    analyzer = categorizationAnalyzer.tokenizer;
   } else if (categorizationAnalyzer?.analyzer !== undefined) {
-    analyzer = categorizationAnalyzer?.analyzer!;
+    analyzer = categorizationAnalyzer.analyzer;
   }
 
   return (
