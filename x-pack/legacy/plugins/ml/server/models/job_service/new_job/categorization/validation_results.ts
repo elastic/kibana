@@ -42,9 +42,19 @@ export class ValidationResults {
     return this._results.some(r => r.id === id);
   }
 
-  public createTokenCountResult(sortedExamples: CategoryFieldExample[], sampleSize: number) {
-    const validExamplesSize = sortedExamples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT)
-      .length;
+  public createTokenCountResult(examples: CategoryFieldExample[], sampleSize: number) {
+    if (examples.length === 0) {
+      this.createNoExamplesResult();
+      return;
+    }
+
+    if (this._resultExists(VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES) === true) {
+      // if tokenizing has failed due to insufficient privileges, don't show
+      // the message about token count
+      return;
+    }
+
+    const validExamplesSize = examples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT).length;
     const percentValid = sampleSize === 0 ? 0 : validExamplesSize / sampleSize;
 
     let valid = CATEGORY_EXAMPLES_VALID_STATUS.VALID;
@@ -96,6 +106,17 @@ export class ValidationResults {
         ),
       });
     }
+  }
+
+  public createNoExamplesResult() {
+    this._results.push({
+      id: VALIDATION_RESULT.NULL_VALUES,
+      valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+      message: i18n.translate('xpack.ml.models.jobService.categorization.messages.noDataFound', {
+        defaultMessage:
+          'No examples for this field could be found. Please ensure the selected date range contains data.',
+      }),
+    });
   }
 
   public createNullValueResult(examples: Array<string | null | undefined>) {
@@ -152,15 +173,31 @@ export class ValidationResults {
     if (message) {
       this._results.push({
         id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,
-        valid: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
+        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
         message: i18n.translate(
-          'xpack.ml.models.jobService.categorization.messages.tooManyTokens',
+          'xpack.ml.models.jobService.categorization.messages.insufficientPrivileges',
           {
             defaultMessage:
-              'Tokenization of field value examples could not be performed due to insufficient privileges. {message}',
+              'Tokenization of field value examples could not be performed due to insufficient privileges. Field values cannot therefore be checked to see if they are appropriate for use in a categorization job.',
             values: { message },
           }
         ),
+      });
+      this._results.push({
+        id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,
+        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+        message: i18n.translate(
+          'xpack.ml.models.jobService.categorization.messages.insufficientPrivilegesExtra',
+          {
+            defaultMessage: 'Please ensure ac',
+            values: { message },
+          }
+        ),
+      });
+      this._results.push({
+        id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,
+        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+        message,
       });
       return;
     }
