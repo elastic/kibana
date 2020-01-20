@@ -5,7 +5,7 @@
  */
 
 import { getRulesToInstall } from './get_rules_to_install';
-import { getResult, fullRuleAlertParamsRest } from '../routes/__mocks__/request_responses';
+import { getResult, mockPrepackagedRule } from '../routes/__mocks__/request_responses';
 
 describe('get_rules_to_install', () => {
   test('should return empty array if both rule sets are empty', () => {
@@ -14,7 +14,7 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return empty array if the two rule ids match', () => {
-    const ruleFromFileSystem = fullRuleAlertParamsRest();
+    const ruleFromFileSystem = mockPrepackagedRule();
     ruleFromFileSystem.rule_id = 'rule-1';
 
     const installedRule = getResult();
@@ -24,7 +24,7 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return the rule to install if the id of the two rules do not match', () => {
-    const ruleFromFileSystem = fullRuleAlertParamsRest();
+    const ruleFromFileSystem = mockPrepackagedRule();
     ruleFromFileSystem.rule_id = 'rule-1';
 
     const installedRule = getResult();
@@ -34,10 +34,10 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return two rules to install if both the ids of the two rules do not match', () => {
-    const ruleFromFileSystem1 = fullRuleAlertParamsRest();
+    const ruleFromFileSystem1 = mockPrepackagedRule();
     ruleFromFileSystem1.rule_id = 'rule-1';
 
-    const ruleFromFileSystem2 = fullRuleAlertParamsRest();
+    const ruleFromFileSystem2 = mockPrepackagedRule();
     ruleFromFileSystem2.rule_id = 'rule-2';
 
     const installedRule = getResult();
@@ -47,13 +47,13 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return two rules of three to install if both the ids of the two rules do not match but the third does', () => {
-    const ruleFromFileSystem1 = fullRuleAlertParamsRest();
+    const ruleFromFileSystem1 = mockPrepackagedRule();
     ruleFromFileSystem1.rule_id = 'rule-1';
 
-    const ruleFromFileSystem2 = fullRuleAlertParamsRest();
+    const ruleFromFileSystem2 = mockPrepackagedRule();
     ruleFromFileSystem2.rule_id = 'rule-2';
 
-    const ruleFromFileSystem3 = fullRuleAlertParamsRest();
+    const ruleFromFileSystem3 = mockPrepackagedRule();
     ruleFromFileSystem3.rule_id = 'rule-3';
 
     const installedRule = getResult();
