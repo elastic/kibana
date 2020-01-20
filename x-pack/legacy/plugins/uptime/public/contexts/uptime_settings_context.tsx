@@ -37,7 +37,7 @@ const defaultContext: UptimeSettingsContextValues = {
 export const UptimeSettingsContext = createContext(defaultContext);
 
 export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ children, ...props }) => {
-  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable } = props;
+  const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges } = props;
 
   const { dateRangeStart, dateRangeEnd } = useParams();
 
@@ -47,10 +47,19 @@ export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ childr
       isApmAvailable,
       isInfraAvailable,
       isLogsAvailable,
+      commonlyUsedRanges,
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
     };
-  }, [basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, dateRangeStart, dateRangeEnd]);
+  }, [
+    basePath,
+    isApmAvailable,
+    isInfraAvailable,
+    isLogsAvailable,
+    dateRangeStart,
+    dateRangeEnd,
+    commonlyUsedRanges,
+  ]);
 
   return <UptimeSettingsContext.Provider value={value} children={children} />;
 };
