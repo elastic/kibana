@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import cloneDeep from 'lodash.clonedeep';
 import { RouteDependencies } from '../types';
 
-export const register = ({ router, getLicenseStatus }: RouteDependencies) => {
+export const register = ({ router, getLicenseStatus, log }: RouteDependencies) => {
   router.post(
     {
       path: '/api/searchprofiler/profile',
@@ -15,7 +14,6 @@ export const register = ({ router, getLicenseStatus }: RouteDependencies) => {
         body: schema.object({
           query: schema.object({}, { allowUnknowns: true }),
           index: schema.string(),
-          type: schema.string({ defaultValue: '' }),
         }),
       },
     },
@@ -24,7 +22,7 @@ export const register = ({ router, getLicenseStatus }: RouteDependencies) => {
       if (!currentLicenseStatus.valid) {
         return response.forbidden({
           body: {
-            message: currentLicenseStatus.message ?? '',
+            message: currentLicenseStatus.message!,
           },
         });
       }
@@ -33,13 +31,19 @@ export const register = ({ router, getLicenseStatus }: RouteDependencies) => {
         core: { elasticsearch },
       } = ctx;
 
-      let parsed = cloneDeep(request.body.query);
-      parsed.profile = true;
-      parsed = JSON.stringify(parsed, null, 2);
+      const {
+        body: { query, index },
+      } = request;
+
+      const parsed = {
+        // Activate profiler mode for this query.
+        profile: true,
+        ...query,
+      };
 
       const body = {
-        index: request.body.index,
-        body: parsed,
+        index,
+        body: JSON.stringify(parsed, null, 2),
       };
       try {
         const resp = await elasticsearch.dataClient.callAsCurrentUser('search', body);
@@ -50,7 +54,8 @@ export const register = ({ router, getLicenseStatus }: RouteDependencies) => {
           },
         });
       } catch (err) {
-        return response.internalError({ body: err });
+        log.error(err);
+        return response.internalError(err);
       }
     }
   );

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
 import { LICENSE_CHECK_STATE } from '../../licensing/common/types';
@@ -24,17 +25,27 @@ export class SearchProfilerServerPlugin implements Plugin {
 
   async setup({ http }: CoreSetup, { licensing, elasticsearch }: AppServerPluginDependencies) {
     const router = http.createRouter();
-    profileRoute.register({ elasticsearch, router, getLicenseStatus: () => this.licenseStatus });
+    profileRoute.register({
+      elasticsearch,
+      router,
+      getLicenseStatus: () => this.licenseStatus,
+      log: this.log,
+    });
 
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
       const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
-      if (hasRequiredLicense && license.getFeature(PLUGIN.id).isAvailable) {
+      if (hasRequiredLicense) {
         this.licenseStatus = { valid: true };
       } else {
         this.licenseStatus = {
           valid: false,
-          message,
+          message:
+            message ||
+            // Ensure that there is a message when license check fails
+            i18n.translate('xpack.searchprofiler.licenseCheckErrorMessage', {
+              defaultMessage: 'License check failed',
+            }),
         };
         if (message) {
           this.log.info(message);

@@ -62,9 +62,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
 
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
-      const isAvailable =
-        state === LICENSE_CHECK_STATE.Valid && license.getFeature(PLUGIN.id).isAvailable;
-
+      const isAvailable = state === LICENSE_CHECK_STATE.Valid;
       if (isAvailable) {
         this.licenseStatus = { valid: true };
       } else {

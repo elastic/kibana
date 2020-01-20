@@ -40,7 +40,7 @@ export const useRequestProfile = () => {
       return { data: parsed.profile.shards };
     }
 
-    const payload: Record<string, any> = { query };
+    const payload: Record<string, any> = { query: parsed };
 
     if (index == null || index === '') {
       payload.index = '_all';
