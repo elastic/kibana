@@ -5,7 +5,7 @@
  */
 
 import { IndexPatternMapping } from '../types';
-import { IndexPatternSavedObject } from '../../ml_popover/types';
+import { IndexPatternSavedObject } from '../../../hooks/types';
 
 export const mockIndexPatternIds: IndexPatternMapping[] = [
   { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
@@ -401,8 +401,7 @@ export const mockLayerListMixed = [
 export const mockAPMIndexPattern: IndexPatternSavedObject = {
   id: 'apm-*',
   type: 'index-pattern',
-  updated_at: '',
-  version: 'abc',
+  _version: 'abc',
   attributes: {
     title: 'apm-*',
   },
@@ -411,8 +410,7 @@ export const mockAPMIndexPattern: IndexPatternSavedObject = {
 export const mockAPMRegexIndexPattern: IndexPatternSavedObject = {
   id: 'apm-7.*',
   type: 'index-pattern',
-  updated_at: '',
-  version: 'abc',
+  _version: 'abc',
   attributes: {
     title: 'apm-7.*',
   },
@@ -421,8 +419,7 @@ export const mockAPMRegexIndexPattern: IndexPatternSavedObject = {
 export const mockFilebeatIndexPattern: IndexPatternSavedObject = {
   id: 'filebeat-*',
   type: 'index-pattern',
-  updated_at: '',
-  version: 'abc',
+  _version: 'abc',
   attributes: {
     title: 'filebeat-*',
   },
@@ -431,8 +428,7 @@ export const mockFilebeatIndexPattern: IndexPatternSavedObject = {
 export const mockAuditbeatIndexPattern: IndexPatternSavedObject = {
   id: 'auditbeat-*',
   type: 'index-pattern',
-  updated_at: '',
-  version: 'abc',
+  _version: 'abc',
   attributes: {
     title: 'auditbeat-*',
   },
@@ -441,8 +437,7 @@ export const mockAuditbeatIndexPattern: IndexPatternSavedObject = {
 export const mockAPMTransactionIndexPattern: IndexPatternSavedObject = {
   id: 'apm-*-transaction*',
   type: 'index-pattern',
-  updated_at: '',
-  version: 'abc',
+  _version: 'abc',
   attributes: {
     title: 'apm-*-transaction*',
   },
@@ -451,8 +446,7 @@ export const mockAPMTransactionIndexPattern: IndexPatternSavedObject = {
 export const mockGlobIndexPattern: IndexPatternSavedObject = {
   id: '*',
   type: 'index-pattern',
-  updated_at: '',
-  version: 'abc',
+  _version: 'abc',
   attributes: {
     title: '*',
   },
