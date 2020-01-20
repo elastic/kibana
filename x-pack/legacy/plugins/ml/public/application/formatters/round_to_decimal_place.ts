@@ -5,6 +5,11 @@
  */
 
 export function roundToDecimalPlace(num: number, dp: number = 2): number | string {
+  if (num % 1 === 0) {
+    // no decimal place
+    return num;
+  }
+
   if (Math.abs(num) < Math.pow(10, -dp)) {
     return Number.parseFloat(String(num)).toExponential(2);
   }
