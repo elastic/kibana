@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { TimeCache } from '../time_cache';
+import { TimeCache } from './time_cache';
 
 describe(`TimeCache`, () => {
   class FauxTimefilter {
@@ -70,29 +69,29 @@ describe(`TimeCache`, () => {
     let filterAccess = 0;
 
     // first call - gets bounds
-    expect(tc.getTimeBounds()).to.eql({ min: 10000, max: 20000 });
-    expect(time._accessCount).to.be(++timeAccess);
-    expect(timefilter._accessCount).to.be(++filterAccess);
+    expect(tc.getTimeBounds()).toEqual({ min: 10000, max: 20000 });
+    expect(time._accessCount).toBe(++timeAccess);
+    expect(timefilter._accessCount).toBe(++filterAccess);
 
     // short diff, same result
     time.increment(10);
     timefilter.setTime(10010, 20010);
-    expect(tc.getTimeBounds()).to.eql({ min: 10000, max: 20000 });
-    expect(time._accessCount).to.be(++timeAccess);
-    expect(timefilter._accessCount).to.be(filterAccess);
+    expect(tc.getTimeBounds()).toEqual({ min: 10000, max: 20000 });
+    expect(time._accessCount).toBe(++timeAccess);
+    expect(timefilter._accessCount).toBe(filterAccess);
 
     // longer diff, gets bounds but returns original
     time.increment(200);
     timefilter.setTime(10210, 20210);
-    expect(tc.getTimeBounds()).to.eql({ min: 10000, max: 20000 });
-    expect(time._accessCount).to.be(++timeAccess);
-    expect(timefilter._accessCount).to.be(++filterAccess);
+    expect(tc.getTimeBounds()).toEqual({ min: 10000, max: 20000 });
+    expect(time._accessCount).toBe(++timeAccess);
+    expect(timefilter._accessCount).toBe(++filterAccess);
 
     // long diff, new result
     time.increment(10000);
     timefilter.setTime(20220, 30220);
-    expect(tc.getTimeBounds()).to.eql({ min: 20220, max: 30220 });
-    expect(time._accessCount).to.be(++timeAccess);
-    expect(timefilter._accessCount).to.be(++filterAccess);
+    expect(tc.getTimeBounds()).toEqual({ min: 20220, max: 30220 });
+    expect(time._accessCount).toBe(++timeAccess);
+    expect(timefilter._accessCount).toBe(++filterAccess);
   });
 });
