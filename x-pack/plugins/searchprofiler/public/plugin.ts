@@ -56,7 +56,6 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
           el: params.element,
           I18nContext: i18nDep.Context,
           notifications: notifications.toasts,
-          formatAngularHttpError,
         });
       },
     });

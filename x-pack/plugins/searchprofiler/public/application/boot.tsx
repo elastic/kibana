@@ -15,7 +15,6 @@ export interface Dependencies {
   getLicenseStatus: () => LicenseStatus;
   I18nContext: any;
   notifications: ToastsSetup;
-  formatAngularHttpError: any;
 }
 
 export type AppDependencies = Omit<Dependencies, 'el'>;
