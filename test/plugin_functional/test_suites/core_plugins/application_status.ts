@@ -34,7 +34,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   const testSubjects = getService('testSubjects');
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
-    await browser.executeAsync(async (status: Partial<AppUpdatableFields>, cb: Function) => {
+    return browser.executeAsync(async (status: Partial<AppUpdatableFields>, cb: Function) => {
       window.__coreAppStatus.setAppStatus(status);
       cb();
     }, s);
