@@ -305,7 +305,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
     },
-    schema: t.string,
   },
   null_value_ip: {
     fieldConfig: {

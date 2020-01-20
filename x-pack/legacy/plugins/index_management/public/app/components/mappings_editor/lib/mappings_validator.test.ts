@@ -220,7 +220,6 @@ describe('Properties validator', () => {
         coerce: 1234,
         coerce_shape: '',
         ignore_malformed: 0,
-        null_value: {},
         null_value_numeric: 'abc',
         null_value_boolean: [],
         copy_to: [],

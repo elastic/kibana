@@ -53,9 +53,10 @@ discover-app .discover-table-footer {
  *  Visualize Editor Tweaks
  */
 
-/* hide unusable controls */
-visualization-editor .visEditor--default > :not(.visEditor__canvas) {
-  display: none;
+/* hide unusable controls
+*  !important is required to override resizable panel inline display */
+visualization-editor .visEditor--default > :not(.visEditor__visualization) {
+  display: none !important;
 }
 
 /** THIS IS FOR TSVB UNTIL REFACTOR **/
