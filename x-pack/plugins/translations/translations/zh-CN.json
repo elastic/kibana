@@ -12884,6 +12884,8 @@
     "xpack.uptime.snapshotHistogram.yAxis.title": "Ping",
     "xpack.uptime.snapshotHistogram.yAxisId": "快照 Y 轴",
     "xpack.uptime.uptimeFeatureCatalogueTitle": "运行时间",
+    "xpack.watcher.app.licenseErrorLinkText": "管理您的许可。",
+    "xpack.watcher.app.licenseErrorTitle": "许可错误",
     "xpack.watcher.appName": "Watcher",
     "xpack.watcher.breadcrumb.createLabel": "创建",
     "xpack.watcher.breadcrumb.editLabel": "缂栬緫",

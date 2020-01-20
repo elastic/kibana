@@ -12885,6 +12885,8 @@
     "xpack.uptime.snapshotHistogram.yAxis.title": "ピング",
     "xpack.uptime.snapshotHistogram.yAxisId": "スナップショットY軸",
     "xpack.uptime.uptimeFeatureCatalogueTitle": "起動時間",
+    "xpack.watcher.app.licenseErrorLinkText": "ライセンスを管理します。",
+    "xpack.watcher.app.licenseErrorTitle": "ライセンスエラー",
     "xpack.watcher.appName": "Watcher",
     "xpack.watcher.breadcrumb.createLabel": "作成",
     "xpack.watcher.breadcrumb.editLabel": "編集",

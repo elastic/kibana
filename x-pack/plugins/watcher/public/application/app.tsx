@@ -21,6 +21,12 @@ import {
   withRouter,
   RouteComponentProps,
 } from 'react-router-dom';
+
+import { EuiCallOut, EuiLink } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { LicenseStatus } from '../../common/types/license_status';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
 import { WatchList } from './sections/watch_list/components/watch_list';
@@ -41,10 +47,35 @@ export interface AppDeps {
   uiSettings: IUiSettingsClient;
   euiUtils: any;
   createTimeBuckets: () => any;
+  getLicenseStatus: () => LicenseStatus;
   MANAGEMENT_BREADCRUMB: any;
 }
 
 export const App = (deps: AppDeps) => {
+  const { valid, message } = deps.getLicenseStatus();
+
+  if (!valid) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.watcher.app.licenseErrorTitle"
+            defaultMessage="License error"
+          />
+        }
+        color="danger"
+        iconType="help"
+      >
+        {message}{' '}
+        <EuiLink href="#/management/elasticsearch/license_management/home">
+          <FormattedMessage
+            id="xpack.watcher.app.licenseErrorLinkText"
+            defaultMessage="Manage your license."
+          />
+        </EuiLink>
+      </EuiCallOut>
+    );
+  }
   return (
     <HashRouter>
       <ShareRouter>
