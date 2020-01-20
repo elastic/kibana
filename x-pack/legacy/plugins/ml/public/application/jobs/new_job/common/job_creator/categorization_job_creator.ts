@@ -140,7 +140,7 @@ export class CategorizationJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
-    const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
+    const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
 
     const dtr = detectors[0];
     if (detectors.length && dtr.agg !== null && dtr.field !== null) {
