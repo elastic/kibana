@@ -28,13 +28,16 @@ export const RedirectWithQueryParams: React.FunctionComponent<RedirectWithQueryP
         // after the hash to a normal route.
         if (location && location.hash) {
           const toWithHashRemoved = location.hash.replace('#', '');
+          const containsSearch = toWithHashRemoved.indexOf('?');
+
           return (
             <Redirect
               {...rest}
               to={{
                 ...location,
-                pathname: toWithHashRemoved,
+                pathname: !containsSearch ? toWithHashRemoved : toWithHashRemoved.split('?')[0],
                 hash: undefined,
+                search: containsSearch ? toWithHashRemoved.split('?')[1] : undefined,
               }}
             />
           );

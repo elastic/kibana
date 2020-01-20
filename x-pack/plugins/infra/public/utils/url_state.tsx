@@ -155,10 +155,16 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   const previousQueryValues = qs.parse(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return qs.stringify({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+  return qs
+    .stringify({
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    })
+    .replace(/%40/gi, '@')
+    .replace(/%3A/gi, ':')
+    .replace(/%24/g, '$')
+    .replace(/%2C/gi, ',')
+    .replace(/%20/g, '%20');
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
