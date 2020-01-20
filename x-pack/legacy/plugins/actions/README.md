@@ -202,12 +202,16 @@ server.plugins.actions.execute({
 
 Kibana ships with a set of built-in action types:
 
-- server log: logs messages to the Kibana log using `server.log()`
-- email: send an email
-- slack: post a message to a slack channel
-- index: index document(s) into elasticsearch
+|Type|Id|Description|
+|---|---|---|
+|Server log|`.log`|Logs messages to the Kibana log using `server.log()`|
+|Email|`.email`|Sends an email using SMTP|
+|Slack|`.slack`|Posts a message to a slack channel|
+|Index|`.index`|Indexes document(s) into Elasticsearch|
+|Webhook|`.webhook`|Send a payload to a web service using HTTP POST or PUT|
+|PagerDuty|`.pagerduty`|Trigger, resolve, or acknowlege an incident to a PagerDuty service|
 
-## server log, action id: `.log`
+## Server log, action id: `.log`
 
 The params properties are modelled after the arguments to the [Hapi.server.log()](https://hapijs.com/api#-serverlogtags-data-timestamp) function.
 
@@ -224,7 +228,7 @@ The params properties are modelled after the arguments to the [Hapi.server.log()
 |message|The message to log.|string|
 |tags|Tags associated with the message to log.|string[] _(optional)_|
 
-## email, action id: `.email`
+## Email, action id: `.email`
 
 This action type uses [nodemailer](https://nodemailer.com/about/) to send emails.
 
@@ -262,7 +266,7 @@ The `to`, `cc`, and `bcc` array entries can be in the same format as the `from` 
 |subject|the subject line of the email|string|
 |message|the message text|string|
 
-## slack, action id: `.slack`
+## Slack, action id: `.slack`
 
 This action type interfaces with the [Slack Incoming Webhooks feature](https://api.slack.com/incoming-webhooks).  Currently the params property `message` will be used as the `text` property of the Slack incoming message.  Additional function may be provided later.
 
@@ -279,7 +283,7 @@ This action type interfaces with the [Slack Incoming Webhooks feature](https://a
 |message|the message text|string|
 
 
-## index, action id: `.index`
+## Index, action id: `.index`
 
 The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elasticsearch/reference/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
 
@@ -298,6 +302,53 @@ The config and params properties are modelled after the [Watcher Index Action](h
 |execution_time_field|The field that will store/index the action execution time.|string _(optional)_|
 |refresh|Setting of the refresh policy for the write request|boolean _(optional)_|
 |body|The documument body/bodies to index.|object or object[]|
+
+## Webhook, action id: `.webhook`
+
+The webhook action uses [axios](https://github.com/axios/axios) to send a POST or PUT request to a web service.
+
+#### config properties
+
+|Property|Description|Type|
+|---|---|---|
+|url|Request URL|string|
+|user|Username for HTTP Basic authentication|string|
+|password|Password for HTTP Basic authentication|string|
+|method|HTTP request method, either `post`_(default)_ or `put`|string _(optional)_|
+|headers|Key-value pairs of the headers to send with the request|object, keys and values are strings _(optional)_|
+
+#### params properties
+
+|Property|Description|Type|
+|---|---|---|
+|body|The HTTP request body|string _(optional)_|
+
+## PagerDuty, action id: `.pagerduty`
+
+The PagerDuty action uses the [V2 Events API](https://v2.developer.pagerduty.com/docs/events-api-v2) to trigger, acknowlege, and resolve PagerDuty alerts. 
+
+#### config properties
+
+|Property|Description|Type|
+|---|---|---|
+|routingKey|This is the 32 character PagerDuty Integration Key for an integration on a service or on a global ruleset.|string|
+|apiUrl|PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`|string _(optional)_|
+
+#### params properties
+
+|Property|Description|Type|
+|---|---|---|
+|eventAction|One of `trigger` _(default)_, `resolve`, or `acknowlege`. See [event action](https://v2.developer.pagerduty.com/docs/events-api-v2#event-action) for more details.| string _(optional)_|
+|dedupKey|All actions sharing this key will be associated with the same PagerDuty alert. Used to correlate trigger and resolution. Defaults to `action:<action id>`.  The maximum length is **255** characters. See [alert deduplication](https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication) for details. | string _(optional)_|
+|summary|A text summary of the event, defaults to `No summary provided`.  The maximum length is **1024** characters. | string _(optional)_|
+|source|The affected system, preferably a hostname or fully qualified domain name. Defaults to `Kibana Action <action id>`.| string _(optional)_|
+|severity|The perceived severity of on the affected system. This can be one of `critical`, `error`, `warning` or `info`_(default)_.| string _(optional)_|
+|timestamp|An [ISO-8601 format date-time](https://v2.developer.pagerduty.com/v2/docs/types#datetime), indicating the time the event was detected or generated.| string _(optional)_|
+|component|The component of the source machine that is responsible for the event, for example `mysql` or `eth0`.| string _(optional)_|
+|group|Logical grouping of components of a service, for example `app-stack`.| string _(optional)_|
+|class|The class/type of the event, for example `ping failure` or `cpu load`.| string _(optional)_|
+
+For more details see [PagerDuty v2 event parameters](https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2).
 
 # Command Line Utility
 
