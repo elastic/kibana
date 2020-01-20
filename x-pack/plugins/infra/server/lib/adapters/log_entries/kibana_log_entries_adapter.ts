@@ -8,7 +8,7 @@
 
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
-import { first, get, has, zip } from 'lodash';
+import { compact, first, get, has, zip } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
@@ -404,8 +404,8 @@ function mapHitsToLogEntryDocuments(
   return hits.map(hit => {
     const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
       (flattenedFields, field) => {
-        if (_.has(field, hit._source)) {
-          flattenedFields[field] = _.get(field, hit._source);
+        if (has(hit._source, field)) {
+          flattenedFields[field] = get(hit._source, field);
         }
         return flattenedFields;
       },
@@ -481,7 +481,7 @@ const createFilterClauses = (
     return [{ bool: { filter: [filterQuery, highlightQuery] } }];
   }
 
-  return _.compact([filterQuery, highlightQuery]) as LogEntryQuery[];
+  return compact([filterQuery, highlightQuery]) as LogEntryQuery[];
 };
 
 const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
