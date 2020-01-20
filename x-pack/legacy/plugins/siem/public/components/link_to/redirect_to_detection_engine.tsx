@@ -52,14 +52,15 @@ export const RedirectToEditRulePage = ({ location: { search } }: DetectionEngine
   );
 };
 
-export const getDetectionEngineUrl = () => `#/${DETECTION_ENGINE_PAGE_NAME}`;
+const baseDetectionEngineUrl = `#/link-to/${DETECTION_ENGINE_PAGE_NAME}`;
+
+export const getDetectionEngineUrl = () => `${baseDetectionEngineUrl}`;
 export const getDetectionEngineAlertUrl = () =>
-  `#/${DETECTION_ENGINE_PAGE_NAME}/${DetectionEngineTab.alerts}`;
-export const getDetectionEngineTabUrl = (tabPath: string) =>
-  `#/${DETECTION_ENGINE_PAGE_NAME}/${tabPath}`;
-export const getRulesUrl = () => `#/${DETECTION_ENGINE_PAGE_NAME}/rules`;
-export const getCreateRuleUrl = () => `#/${DETECTION_ENGINE_PAGE_NAME}/rules/create`;
+  `${baseDetectionEngineUrl}/${DetectionEngineTab.alerts}`;
+export const getDetectionEngineTabUrl = (tabPath: string) => `${baseDetectionEngineUrl}/${tabPath}`;
+export const getRulesUrl = () => `${baseDetectionEngineUrl}/rules`;
+export const getCreateRuleUrl = () => `${baseDetectionEngineUrl}/rules/create`;
 export const getRuleDetailsUrl = (detailName: string) =>
-  `#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${detailName}`;
+  `${baseDetectionEngineUrl}/rules/id/${detailName}`;
 export const getEditRuleUrl = (detailName: string) =>
-  `#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${detailName}/edit`;
+  `${baseDetectionEngineUrl}/rules/id/${detailName}/edit`;
