@@ -22,7 +22,6 @@ import { ActionCreator } from 'typescript-fsa';
 import { connect } from 'react-redux';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
-import { HeaderPage } from '../../../../components/header_page';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../components/search_bar';
 import { WrapperPage } from '../../../../components/wrapper_page';
@@ -34,6 +33,7 @@ import {
 } from '../../../../containers/source';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 
+import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { SignalsHistogramPanel } from '../../components/signals_histogram_panel';
 import { SignalsTable } from '../../components/signals';
 import { useUserInfo } from '../../components/user_info';
@@ -243,7 +243,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                     </FiltersGlobal>
 
                     <WrapperPage>
-                      <HeaderPage
+                      <DetectionEngineHeaderPage
                         backOptions={{
                           href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
                           text: i18n.BACK_TO_RULES,
@@ -295,7 +295,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                             </EuiFlexGroup>
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                      </HeaderPage>
+                      </DetectionEngineHeaderPage>
                       {ruleError}
                       {tabs}
                       <EuiSpacer />

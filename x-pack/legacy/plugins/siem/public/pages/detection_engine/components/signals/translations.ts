@@ -53,6 +53,13 @@ export const SIGNALS_HEADERS_RULE = i18n.translate(
   }
 );
 
+export const SIGNALS_HEADERS_VERSION = i18n.translate(
+  'xpack.siem.eventsViewer.signals.defaultHeaders.versionTitle',
+  {
+    defaultMessage: 'Version',
+  }
+);
+
 export const SIGNALS_HEADERS_METHOD = i18n.translate(
   'xpack.siem.eventsViewer.signals.defaultHeaders.methodTitle',
   {

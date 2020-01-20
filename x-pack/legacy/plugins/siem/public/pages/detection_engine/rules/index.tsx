@@ -12,7 +12,7 @@ import { Redirect } from 'react-router-dom';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect_to_detection_engine';
 import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
 import { getEmptyTagValue } from '../../../components/empty_value';
-import { HeaderPage } from '../../../components/header_page';
+import { DetectionEngineHeaderPage } from '../components/detection_engine_header_page';
 import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
 
@@ -52,7 +52,7 @@ export const RulesComponent = React.memo(() => {
         importComplete={() => setImportCompleteToggle(!importCompleteToggle)}
       />
       <WrapperPage>
-        <HeaderPage
+        <DetectionEngineHeaderPage
           backOptions={{
             href: `#${DETECTION_ENGINE_PAGE_NAME}`,
             text: i18n.BACK_TO_DETECTION_ENGINE,
@@ -95,7 +95,7 @@ export const RulesComponent = React.memo(() => {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </HeaderPage>
+        </DetectionEngineHeaderPage>
         <AllRules
           loading={loading}
           hasNoPermissions={userHasNoPermissions}

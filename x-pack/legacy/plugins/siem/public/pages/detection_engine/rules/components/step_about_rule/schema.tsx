@@ -95,7 +95,7 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateLabel',
       {
-        defaultMessage: 'Timeline template',
+        defaultMessage: 'Investigate detections using this timeline template',
       }
     ),
   },

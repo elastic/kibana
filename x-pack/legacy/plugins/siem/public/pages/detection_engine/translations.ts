@@ -19,11 +19,11 @@ export const TOTAL_SIGNAL = i18n.translate('xpack.siem.detectionEngine.totalSign
 });
 
 export const SIGNAL = i18n.translate('xpack.siem.detectionEngine.signalTitle', {
-  defaultMessage: 'Signals',
+  defaultMessage: 'Signals (SIEM Detections)',
 });
 
 export const ALERT = i18n.translate('xpack.siem.detectionEngine.alertTitle', {
-  defaultMessage: 'Third-party alerts',
+  defaultMessage: 'External alerts',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate('xpack.siem.detectionEngine.buttonManageRules', {

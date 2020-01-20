@@ -10,7 +10,7 @@ import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { usePersistRule } from '../../../../containers/detection_engine/rules';
-import { HeaderPage } from '../../../../components/header_page';
+
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
@@ -21,6 +21,7 @@ import { FormData, FormHook } from '../components/shared_imports';
 import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
+import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
 import { AboutStepRule, DefineStepRule, RuleStep, RuleStepData, ScheduleStepRule } from '../types';
 import { formatRule } from './helpers';
@@ -231,7 +232,7 @@ export const CreateRuleComponent = React.memo(() => {
   return (
     <>
       <WrapperPage restrictWidth>
-        <HeaderPage
+        <DetectionEngineHeaderPage
           backOptions={{ href: '#detections/rules', text: i18n.BACK_TO_RULES }}
           border
           isLoading={isLoading || loading}

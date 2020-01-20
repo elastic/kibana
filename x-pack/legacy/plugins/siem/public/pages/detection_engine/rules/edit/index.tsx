@@ -18,12 +18,12 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { Redirect, useParams } from 'react-router-dom';
 
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
-import { HeaderPage } from '../../../../components/header_page';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
+import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { FormHook, FormData } from '../components/shared_imports';
 import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
@@ -280,7 +280,7 @@ export const EditRuleComponent = memo(() => {
   return (
     <>
       <WrapperPage restrictWidth>
-        <HeaderPage
+        <DetectionEngineHeaderPage
           backOptions={{
             href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`,
             text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,

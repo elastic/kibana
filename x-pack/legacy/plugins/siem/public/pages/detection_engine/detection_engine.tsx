@@ -18,7 +18,6 @@ import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { AlertsTable } from '../../components/alerts_viewer/alerts_table';
 import { FiltersGlobal } from '../../components/filters_global';
-import { HeaderPage } from '../../components/header_page';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
@@ -37,6 +36,7 @@ import { signalsHistogramOptions } from './components/signals_histogram_panel/co
 import { useUserInfo } from './components/user_info';
 import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
+import { DetectionEngineHeaderPage } from './components/detection_engine_header_page';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 import { DetectionEngineTab } from './types';
@@ -136,7 +136,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                   <SiemSearchBar id="global" indexPattern={indexPattern} />
                 </FiltersGlobal>
                 <WrapperPage>
-                  <HeaderPage
+                  <DetectionEngineHeaderPage
                     subtitle={
                       lastSignals != null && (
                         <>
@@ -151,7 +151,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                     <EuiButton fill href="#/detections/rules" iconType="gear">
                       {i18n.BUTTON_MANAGE_RULES}
                     </EuiButton>
-                  </HeaderPage>
+                  </DetectionEngineHeaderPage>
 
                   <GlobalTime>
                     {({ to, from, deleteQuery, setQuery }) => (
