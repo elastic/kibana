@@ -23,6 +23,7 @@ import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from 
 /* eslint-disable */
 import { coreMock } from '../../../core/public/mocks';
 import { inspectorPluginMock } from '../../inspector/public/mocks';
+import { bfetchPluginMock } from '../../bfetch/public/mocks';
 /* eslint-enable */
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
@@ -48,6 +49,7 @@ const createSetupContract = (): Setup => {
           interpretAst: () => {},
         },
       }),
+      loadLegacyServerFunctionWrappers: () => Promise.resolve(),
     },
   };
   return setupContract;
@@ -71,6 +73,7 @@ const createPlugin = async () => {
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
   const setup = await plugin.setup(coreSetup, {
+    bfetch: bfetchPluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
   });
 
@@ -82,6 +85,7 @@ const createPlugin = async () => {
     setup,
     doStart: async () =>
       await plugin.start(coreStart, {
+        bfetch: bfetchPluginMock.createStartContract(),
         inspector: inspectorPluginMock.createStartContract(),
       }),
   };

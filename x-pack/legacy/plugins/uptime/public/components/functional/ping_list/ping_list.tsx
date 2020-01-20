@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment, useState } from 'react';
+import styled from 'styled-components';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { Ping, PingResults } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
@@ -68,6 +69,10 @@ export const toggleDetails = (
   newItemIdToExpandedRowMap[ping.id] = <PingListExpandedRowComponent ping={ping} />;
   setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
 };
+
+const SpanWithMargin = styled.span`
+  margin-right: 16px;
+`;
 
 export const PingListComponent = ({
   data,
@@ -185,10 +190,18 @@ export const PingListComponent = ({
     columns.push({
       field: 'http.response.status_code',
       align: 'right',
-      name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-        defaultMessage: 'Response code',
-      }),
-      render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
+      name: (
+        <SpanWithMargin>
+          {i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+            defaultMessage: 'Response code',
+          })}
+        </SpanWithMargin>
+      ),
+      render: (statusCode: string) => (
+        <SpanWithMargin>
+          <EuiBadge>{statusCode}</EuiBadge>{' '}
+        </SpanWithMargin>
+      ),
     });
   }
 

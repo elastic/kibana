@@ -6,7 +6,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import Joi from 'joi';
+import * as t from 'io-ts';
 
 import { EuiLink, EuiCode } from '@elastic/eui';
 import {
@@ -100,11 +100,10 @@ const fielddataFrequencyFilterParam = {
       },
     },
   },
-  schema: Joi.object().keys({
-    min: Joi.number(),
-    max: Joi.number(),
-    min_segment_size: Joi.number(),
-  }),
+  schema: t.record(
+    t.union([t.literal('min'), t.literal('max'), t.literal('min_segment_size')]),
+    t.number
+  ),
 };
 
 const analyzerValidations = [
@@ -178,40 +177,40 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   store: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   index: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   doc_values: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   doc_values_binary: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   fielddata: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   fielddata_frequency_filter: fielddataFrequencyFilterParam,
   fielddata_frequency_filter_percentage: {
@@ -280,19 +279,19 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   coerce_shape: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   ignore_malformed: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   null_value: {
     fieldConfig: {
@@ -300,7 +299,6 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
     },
-    schema: Joi.string(),
   },
   null_value_ip: {
     fieldConfig: {
@@ -323,7 +321,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   null_value_boolean: {
     fieldConfig: {
@@ -332,7 +330,7 @@ export const PARAMETERS_DEFINITION = {
       deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
       serializer: (value: number) => mapIndexToValue[value],
     },
-    schema: Joi.any().valid([true, false, 'true', 'false']),
+    schema: t.union([t.literal(true), t.literal(false), t.literal('true'), t.literal('false')]),
   },
   null_value_geo_point: {
     fieldConfig: {
@@ -376,7 +374,7 @@ export const PARAMETERS_DEFINITION = {
         }
       },
     },
-    schema: Joi.any(),
+    schema: t.any,
   },
   copy_to: {
     fieldConfig: {
@@ -398,7 +396,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   max_input_length: {
     fieldConfig: {
@@ -421,7 +419,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   locale: {
     fieldConfig: {
@@ -454,7 +452,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   orientation: {
     fieldConfig: {
@@ -464,7 +462,7 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Orientation',
       }),
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   boost: {
     fieldConfig: {
@@ -484,7 +482,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     } as FieldConfig,
-    schema: Joi.number(),
+    schema: t.number,
   },
   scaling_factor: {
     title: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldTitle', {
@@ -535,7 +533,7 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Value must be greater than 0.',
       }),
     } as FieldConfig,
-    schema: Joi.number(),
+    schema: t.number,
   },
   dynamic: {
     fieldConfig: {
@@ -545,7 +543,7 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   enabled: {
     fieldConfig: {
@@ -555,7 +553,7 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   format: {
     fieldConfig: {
@@ -577,7 +575,7 @@ export const PARAMETERS_DEFINITION = {
         />
       ),
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   analyzer: {
     fieldConfig: {
@@ -587,7 +585,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: analyzerValidations,
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   search_analyzer: {
     fieldConfig: {
@@ -597,7 +595,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: analyzerValidations,
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   search_quote_analyzer: {
     fieldConfig: {
@@ -607,7 +605,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: analyzerValidations,
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   normalizer: {
     fieldConfig: {
@@ -636,34 +634,34 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: `The name of a normalizer defined in the index's settings.`,
       }),
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   index_options: {
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'positions',
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   index_options_keyword: {
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'docs',
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   index_options_flattened: {
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'docs',
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   eager_global_ordinals: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   eager_global_ordinals_join: {
     fieldConfig: {
@@ -674,43 +672,43 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   preserve_separators: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   preserve_position_increments: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   ignore_z_value: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   points_only: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   norms: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   norms_keyword: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   term_vector: {
     fieldConfig: {
@@ -720,7 +718,7 @@ export const PARAMETERS_DEFINITION = {
       }),
       defaultValue: 'no',
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   path: {
     fieldConfig: {
@@ -746,7 +744,7 @@ export const PARAMETERS_DEFINITION = {
       serializer: (value: AliasOption[]) => (value.length === 0 ? '' : value[0].id),
     } as FieldConfig<any, string>,
     targetTypesNotAllowed: ['object', 'nested', 'alias'] as DataType[],
-    schema: Joi.string(),
+    schema: t.string,
   },
   position_increment_gap: {
     fieldConfig: {
@@ -776,7 +774,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   index_prefixes: {
     fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing
@@ -796,9 +794,9 @@ export const PARAMETERS_DEFINITION = {
         } as FieldConfig,
       },
     },
-    schema: Joi.object().keys({
-      min_chars: Joi.number(),
-      max_chars: Joi.number(),
+    schema: t.partial({
+      min_chars: t.number,
+      max_chars: t.number,
     }),
   },
   similarity: {
@@ -809,13 +807,13 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Similarity algorithm',
       }),
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   split_queries_on_whitespace: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   ignore_above: {
     fieldConfig: {
@@ -847,13 +845,13 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   enable_position_increments: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   depth_limit: {
     fieldConfig: {
@@ -873,7 +871,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   dims: {
     fieldConfig: {
@@ -899,7 +897,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   relations: {
     fieldConfig: {
