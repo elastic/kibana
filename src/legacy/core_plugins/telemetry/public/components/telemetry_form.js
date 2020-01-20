@@ -34,6 +34,7 @@ import { OptInExampleFlyout } from './opt_in_details_component';
 import { Field } from '../../../../../plugins/advanced_settings/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
@@ -50,6 +51,7 @@ export class TelemetryForm extends Component {
     processing: false,
     showExample: false,
     queryMatches: null,
+    enabled: this.props.telemetryOptInProvider.getOptIn() || false,
   };
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -72,8 +74,7 @@ export class TelemetryForm extends Component {
 
   render() {
     const { telemetryOptInProvider } = this.props;
-
-    const { showExample, queryMatches } = this.state;
+    const { showExample, queryMatches, enabled, processing } = this.state;
 
     if (!telemetryOptInProvider.canChangeOptInStatus()) {
       return null;
@@ -108,15 +109,15 @@ export class TelemetryForm extends Component {
             <Field
               setting={{
                 type: 'boolean',
-                value: telemetryOptInProvider.getOptIn() || false,
+                value: enabled,
                 description: this.renderDescription(),
                 defVal: true,
                 ariaName: i18n.translate('telemetry.provideUsageStatisticsLabel', {
                   defaultMessage: 'Provide usage statistics',
                 }),
               }}
-              save={this.toggleOptIn}
-              clear={this.toggleOptIn}
+              loading={processing}
+              handleChange={this.toggleOptIn}
               enableSaving={this.props.enableSaving}
             />
           </EuiForm>
@@ -137,13 +138,13 @@ export class TelemetryForm extends Component {
           <p>
             <FormattedMessage
               id="telemetry.callout.appliesSettingTitle"
-              defaultMessage="This setting applies to {allOfKibanaText}"
+              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
               values={{
                 allOfKibanaText: (
                   <strong>
                     <FormattedMessage
                       id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      defaultMessage="all of Kibana."
+                      defaultMessage="all of Kibana"
                     />
                   </strong>
                 ),
@@ -186,23 +187,43 @@ export class TelemetryForm extends Component {
   );
 
   toggleOptIn = async () => {
-    const newOptInValue = !this.props.telemetryOptInProvider.getOptIn();
+    const { telemetryOptInProvider } = this.props;
+    const { enabled } = this.state;
 
     return new Promise((resolve, reject) => {
       this.setState(
         {
-          enabled: newOptInValue,
+          enabled: !enabled,
           processing: true,
         },
         () => {
-          this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(
+          telemetryOptInProvider.setOptIn(enabled).then(
             () => {
               this.setState({ processing: false });
+              toastNotifications.addSuccess(
+                enabled
+                  ? i18n.translate('telemetry.optInSuccessOn', {
+                      defaultMessage: 'Usage data collection turned on.',
+                    })
+                  : i18n.translate('telemetry.optInSuccessOff', {
+                      defaultMessage: 'Usage data collection turned off.',
+                    })
+              );
               resolve();
             },
             e => {
               // something went wrong
-              this.setState({ processing: false });
+              this.setState({
+                enabled: telemetryOptInProvider.getOptIn(),
+                processing: false,
+              });
+              toastNotifications.addSuccess(
+                i18n.translate('telemetry.optInErrorToastText', {
+                  defaultMessage:
+                    'An error occurred while trying to set the usage statistics preference.',
+                })
+              );
+
               reject(e);
             }
           );

@@ -38,7 +38,7 @@ import { ComponentRegistry } from '../';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
-import { FieldSetting, IQuery } from './types';
+import { FieldSetting, IQuery, SettingsChanges } from './types';
 
 interface AdvancedSettingsProps {
   enableSaving: boolean;
@@ -177,6 +177,13 @@ export class AdvancedSettingsComponent extends Component<
     });
   };
 
+  saveConfig = async (changes: SettingsChanges) => {
+    const arr = Object.entries(changes).map(([key, value]) =>
+      this.props.uiSettings.set(key, value)
+    );
+    return Promise.all(arr);
+  };
+
   render() {
     const { filteredSettings, query, footerQueryMatched } = this.state;
     const componentRegistry = this.props.componentRegistry;
@@ -209,8 +216,7 @@ export class AdvancedSettingsComponent extends Component<
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}
-          save={this.props.uiSettings.set.bind(this.props.uiSettings)}
-          clear={this.props.uiSettings.remove.bind(this.props.uiSettings)}
+          save={this.saveConfig}
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
           dockLinks={this.props.dockLinks}
