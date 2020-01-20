@@ -16,10 +16,7 @@ exports[`Step2 should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       disabled={false}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="test@test.com"
     />
@@ -43,10 +40,7 @@ exports[`Step2 should show form errors 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       disabled={false}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="test@test.com"
     />

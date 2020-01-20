@@ -42,10 +42,7 @@ exports[`Configuration shallow view should render step 2 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       disabled={true}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value="test@elastic.co"
     />
