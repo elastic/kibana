@@ -16,11 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IFieldType } from '../../common';
 
-export type IGetSuggestions = (
-  index: string,
-  field: IFieldType,
-  query: string,
-  boolFilter?: any
-) => any;
+export { AutocompleteService } from './autocomplete_service';
+export { QuerySuggestion, QuerySuggestionType, QuerySuggestionsGetFn } from './types';
