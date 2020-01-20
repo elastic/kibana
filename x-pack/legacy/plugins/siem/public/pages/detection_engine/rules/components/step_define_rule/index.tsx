@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { isEmpty, isEqual, get } from 'lodash/fp';
+import { isEmpty, isEqual } from 'lodash/fp';
 import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -19,6 +19,7 @@ import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/pu
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
 import { useUiSetting$ } from '../../../../../lib/kibana';
+import { setFieldValue } from '../../helpers';
 import * as RuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
@@ -121,14 +122,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       if (!isEqual(myDefaultValues, myStepData)) {
         setMyStepData(myDefaultValues);
         setLocalUseIndicesConfig(isEqual(myDefaultValues.index, indicesConfig));
-        if (!isReadOnlyView) {
-          Object.keys(schema).forEach(key => {
-            const val = get(key, myDefaultValues);
-            if (val != null) {
-              form.setFieldValue(key, val);
-            }
-          });
-        }
+        setFieldValue(form, schema, myDefaultValues);
       }
     }
   }, [defaultValues, indicesConfig]);
@@ -152,7 +146,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setOpenTimelineSearch(false);
   }, []);
 
-  return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView && myStepData?.queryBar != null ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription
         direction={descriptionDirection}

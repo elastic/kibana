@@ -52,8 +52,10 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
       const { filename } = request.payload.file.hapi;
@@ -161,6 +163,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
               const updatedRule = await updateRules({
                 alertsClient,
                 actionsClient,
+                savedObjectsClient,
                 description,
                 enabled,
                 falsePositives,
