@@ -9,6 +9,7 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { Monospace } from '../metricbeat_migration/instruction_steps/components/monospace/monospace';
 
 export const Reason = ({ reason }) => {
   let title = i18n.translate('xpack.monitoring.logs.reason.defaultTitle', {
@@ -91,6 +92,29 @@ export const Reason = ({ reason }) => {
         }}
       />
     );
+  } else if (false === reason.usingStructuredLogs) {
+    title = i18n.translate('xpack.monitoring.logs.reason.notUsingStructuredLogsTitle', {
+      defaultMessage: 'No structured logs found',
+    });
+    message = (
+      <FormattedMessage
+        id="xpack.monitoring.logs.reason.notUsingStructuredLogsMessage"
+        defaultMessage="Check if the {varPaths} setting {link}."
+        values={{
+          varPaths: <Monospace>var.paths</Monospace>,
+          link: (
+            <EuiLink
+              target="_blank"
+              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`}
+            >
+              {i18n.translate('xpack.monitoring.logs.reason.notUsingStructuredLogsLink', {
+                defaultMessage: 'points to JSON logs',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    );
   } else if (false === reason.clusterExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noClusterTitle', {
       defaultMessage: 'No logs for this cluster',
@@ -103,7 +127,7 @@ export const Reason = ({ reason }) => {
           link: (
             <EuiLink
               target="_blank"
-              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}
+              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`}
             >
               {i18n.translate('xpack.monitoring.logs.reason.noClusterLink', {
                 defaultMessage: 'setup',
@@ -125,7 +149,7 @@ export const Reason = ({ reason }) => {
           link: (
             <EuiLink
               target="_blank"
-              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}
+              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`}
             >
               {i18n.translate('xpack.monitoring.logs.reason.noNodeLink', {
                 defaultMessage: 'setup',
@@ -147,7 +171,7 @@ export const Reason = ({ reason }) => {
           link: (
             <EuiLink
               target="_blank"
-              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`}
+              href={`${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`}
             >
               {i18n.translate('xpack.monitoring.logs.reason.noIndexLink', {
                 defaultMessage: 'setup',

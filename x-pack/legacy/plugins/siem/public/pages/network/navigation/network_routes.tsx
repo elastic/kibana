@@ -21,6 +21,7 @@ import { ConditionalFlexGroup } from './conditional_flex_group';
 import { NetworkRoutesProps, NetworkRouteType } from './types';
 import { TlsQueryTabBody } from './tls_query_tab_body';
 import { Anomaly } from '../../../components/ml/types';
+import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
 
 export const NetworkRoutes = ({
   networkPagePath,
@@ -42,13 +43,13 @@ export const NetworkRoutes = ({
         to: fromTo.to,
       });
     },
-    [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
+    [setAbsoluteRangeDatePicker]
   );
   const updateDateRange = useCallback(
     (min: number, max: number) => {
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
-    [from, to]
+    [setAbsoluteRangeDatePicker]
   );
 
   const networkAnomaliesFilterQuery = {
@@ -142,6 +143,10 @@ export const NetworkRoutes = ({
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         )}
+      />
+      <Route
+        path={`${networkPagePath}/:tabName(${NetworkRouteType.alerts})`}
+        render={() => <NetworkAlertsQueryTabBody {...tabProps} />}
       />
     </Switch>
   );

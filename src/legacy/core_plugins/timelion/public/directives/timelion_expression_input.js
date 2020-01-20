@@ -43,7 +43,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
-import grammar from 'raw-loader!../chain.peg';
+import grammar from 'raw-loader!../../../vis_type_timelion/public/chain.peg';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,
@@ -52,11 +52,11 @@ import {
   insertAtLocation,
 } from './timelion_expression_input_helpers';
 import { comboBoxKeyCodes } from '@elastic/eui';
-import { ArgValueSuggestionsProvider } from './timelion_expression_suggestions/arg_value_suggestions';
+import { getArgValueSuggestions } from '../../../vis_type_timelion/public/helpers/arg_value_suggestions';
 
 const Parser = PEG.generate(grammar);
 
-export function TimelionExpInput($http, $timeout, Private) {
+export function TimelionExpInput($http, $timeout) {
   return {
     restrict: 'E',
     scope: {
@@ -68,7 +68,7 @@ export function TimelionExpInput($http, $timeout, Private) {
     replace: true,
     template: timelionExpressionInputTemplate,
     link: function(scope, elem) {
-      const argValueSuggestions = Private(ArgValueSuggestionsProvider);
+      const argValueSuggestions = getArgValueSuggestions();
       const expressionInput = elem.find('[data-expression-input]');
       const functionReference = {};
       let suggestibleFunctionLocation = {};

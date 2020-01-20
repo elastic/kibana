@@ -5,20 +5,20 @@
  */
 
 import boom from 'boom';
+import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import {
   ServerFacade,
   ExportTypesRegistry,
   HeadlessChromiumDriverFactory,
-  RequestFacade,
   ReportingResponseToolkit,
   Logger,
 } from '../../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
-import { registerLegacy } from './legacy';
 import { createQueueFactory, enqueueJobFactory } from '../lib';
+import { makeRequestFacade } from './lib/make_request_facade';
 
 export function registerJobGenerationRoutes(
   server: ServerFacade,
@@ -40,9 +40,10 @@ export function registerJobGenerationRoutes(
   async function handler(
     exportTypeId: string,
     jobParams: object,
-    request: RequestFacade,
+    legacyRequest: Legacy.Request,
     h: ReportingResponseToolkit
   ) {
+    const request = makeRequestFacade(legacyRequest);
     const user = request.pre.user;
     const headers = request.headers;
 
@@ -73,7 +74,6 @@ export function registerJobGenerationRoutes(
   }
 
   registerGenerateFromJobParams(server, handler, handleError);
-  registerLegacy(server, handler, handleError);
 
   // Register beta panel-action download-related API's
   if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {

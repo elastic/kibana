@@ -23,10 +23,12 @@ import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
+import { Alerts } from './alerts';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
+  alerts: Alerts;
   anomalies: Anomalies;
   authentications: Authentications;
   events: Events;

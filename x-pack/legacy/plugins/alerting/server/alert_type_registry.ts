@@ -6,9 +6,8 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { TaskRunnerFactory } from './lib';
-import { RunContext } from '../../task_manager';
-import { TaskManagerSetupContract } from './shim';
+import { RunContext, TaskManagerSetupContract } from '../../../../plugins/task_manager/server';
+import { TaskRunnerFactory } from './task_runner';
 import { AlertType } from './types';
 
 interface ConstructorOptions {

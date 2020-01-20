@@ -16,30 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  IUiSettingsClient,
-} from '../../../../core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
+import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
+import { setNotifications, setData, setSavedObjects } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 
 /** @internal */
 export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  uiSettings: IUiSettingsClient;
+  core: CoreSetup;
+  plugins: {
+    data: ReturnType<DataPublicPlugin['setup']>;
+  };
 }
 
 /** @internal */
 export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  data: ReturnType<DataPublicPlugin['setup']>;
   __LEGACY: LegacyDependenciesPlugin;
+}
+
+/** @internal */
+export interface VegaPluginStartDependencies {
+  data: ReturnType<DataPublicPlugin['start']>;
 }
 
 /** @internal */
@@ -52,10 +57,13 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, __LEGACY }: VegaPluginSetupDependencies
+    { data, expressions, visualizations, __LEGACY }: VegaPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
-      uiSettings: core.uiSettings,
+      core,
+      plugins: {
+        data,
+      },
       ...(await __LEGACY.setup()),
     };
 
@@ -66,7 +74,9 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     );
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
+    setNotifications(core.notifications);
+    setSavedObjects(core.savedObjects);
+    setData(data);
   }
 }

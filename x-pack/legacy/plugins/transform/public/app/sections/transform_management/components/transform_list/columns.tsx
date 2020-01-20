@@ -6,12 +6,14 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
@@ -87,7 +89,7 @@ export const getColumns = (
   }
 
   const columns: [
-    ExpanderColumnType,
+    ExpanderColumnType<TransformListRow>,
     FieldDataColumnType<TransformListRow>,
     FieldDataColumnType<TransformListRow>,
     FieldDataColumnType<TransformListRow>,
@@ -98,6 +100,16 @@ export const getColumns = (
     ActionsColumnType<TransformListRow>
   ] = [
     {
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            <FormattedMessage
+              id="xpack.transform.transformList.showDetailsColumn.screenReaderDescription"
+              defaultMessage="This column contains clickable controls for showing more details on each transform"
+            />
+          </p>
+        </EuiScreenReaderOnly>
+      ),
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
@@ -126,6 +138,7 @@ export const getColumns = (
       name: 'ID',
       sortable: true,
       truncateText: true,
+      scope: 'row',
     },
     {
       field: TRANSFORM_LIST_COLUMN.DESCRIPTION,

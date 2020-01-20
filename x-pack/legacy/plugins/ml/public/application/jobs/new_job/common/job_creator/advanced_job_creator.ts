@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
@@ -15,6 +14,7 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
 import { ml } from '../../../../services/ml_api_service';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 export interface RichDetector {
   agg: Aggregation | null;
@@ -183,7 +183,7 @@ export class AdvancedJobCreator extends JobCreator {
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
-    const detectors = getRichDetectors(job, datafeed, this.scriptFields, true);
+    const detectors = getRichDetectors(job, datafeed, this.additionalFields, true);
 
     // keep track of the custom rules for each detector
     const customRules = this._detectors.map(d => d.custom_rules);

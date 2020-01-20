@@ -31,6 +31,8 @@ export const SnapshotPageContent: React.FC = () => (
                       changeView,
                       autoBounds,
                       boundsOverride,
+                      accountId,
+                      region,
                     }) => (
                       <Layout
                         currentTime={currentTime}
@@ -50,6 +52,8 @@ export const SnapshotPageContent: React.FC = () => (
                         onViewChange={changeView}
                         autoBounds={autoBounds}
                         boundsOverride={boundsOverride}
+                        accountId={accountId}
+                        region={region}
                       />
                     )}
                   </WithWaffleOptions>

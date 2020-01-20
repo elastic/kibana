@@ -19,8 +19,8 @@ import {
   IEmbeddable,
   CONTEXT_MENU_TRIGGER,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/constants';
-import { ISearchEmbeddable } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/types';
+import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
+import { ISearchEmbeddable } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/types';
 
 import { API_BASE_URL_V1 } from '../../common/constants';
 

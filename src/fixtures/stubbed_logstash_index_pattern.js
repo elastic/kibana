@@ -21,7 +21,7 @@ import StubIndexPattern from 'test_utils/stub_index_pattern';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 
 import { getKbnFieldType } from '../plugins/data/common';
-import { mockUiSettings } from '../legacy/ui/public/new_platform/new_platform.karma_mock';
+import { npSetup } from '../legacy/ui/public/new_platform/new_platform.karma_mock';
 
 export default function stubbedLogstashIndexPatternService() {
   const mockLogstashFields = stubbedLogstashFields();
@@ -41,13 +41,8 @@ export default function stubbedLogstashIndexPatternService() {
     };
   });
 
-  const indexPattern = new StubIndexPattern(
-    'logstash-*',
-    cfg => cfg,
-    'time',
-    fields,
-    mockUiSettings
-  );
+  const indexPattern = new StubIndexPattern('logstash-*', cfg => cfg, 'time', fields, npSetup.core);
+
   indexPattern.id = 'logstash-*';
   indexPattern.isTimeNanosBased = () => false;
 

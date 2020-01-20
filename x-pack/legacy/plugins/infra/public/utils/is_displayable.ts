@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FieldType } from 'ui/index_patterns';
+import { IFieldType } from 'src/plugins/data/public';
 import { startsWith, uniq } from 'lodash';
 import { getAllowedListForPrefix } from '../../common/ecs_allowed_list';
 
-interface DisplayableFieldType extends FieldType {
+interface DisplayableFieldType extends IFieldType {
   displayable?: boolean;
 }
 

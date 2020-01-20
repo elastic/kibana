@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 export const indexPatternMock = ({
   id: 'the-index-pattern-id',

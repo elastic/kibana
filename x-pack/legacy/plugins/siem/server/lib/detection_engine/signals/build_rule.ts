@@ -33,6 +33,8 @@ export const buildRule = ({
     rule_id: ruleParams.ruleId,
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
+    timeline_id: ruleParams.timelineId,
+    timeline_title: ruleParams.timelineTitle,
     meta: ruleParams.meta,
     max_signals: ruleParams.maxSignals,
     risk_score: ruleParams.riskScore,
@@ -55,6 +57,7 @@ export const buildRule = ({
     created_by: createdBy,
     updated_by: updatedBy,
     threats: ruleParams.threats,
+    version: ruleParams.version,
     created_at: ruleParams.createdAt,
     updated_at: ruleParams.updatedAt,
   });

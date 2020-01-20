@@ -56,7 +56,7 @@ import { metadata } from 'ui/metadata';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 // metadata.branch corresponds to the version used in documentation links.
-const docsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-rules.html`;
+const docsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-rules.html`;
 
 export const RuleEditorFlyout = injectI18n(
   class RuleEditorFlyout extends Component {
@@ -510,7 +510,7 @@ export const RuleEditorFlyout = injectI18n(
                 <h1 id="flyoutTitle">
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
-                    defaultMessage="Edit Rules"
+                    defaultMessage="Edit rules"
                   />
                 </h1>
               </EuiTitle>
@@ -569,12 +569,12 @@ export const RuleEditorFlyout = injectI18n(
                   {isCreate === true ? (
                     <FormattedMessage
                       id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
-                      defaultMessage="Create Rule"
+                      defaultMessage="Create rule"
                     />
                   ) : (
                     <FormattedMessage
                       id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
-                      defaultMessage="Edit Rule"
+                      defaultMessage="Edit rule"
                     />
                   )}
                 </h1>

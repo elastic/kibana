@@ -30,8 +30,17 @@ export class StaticColorProperty extends StaticStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
-  syncCircleStrokeWithMb(pointLayerId, mbMap, alpha) {
-    mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', this._options.color);
-    mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
+  syncCircleStrokeWithMb(mbLayerId, mbMap, alpha) {
+    mbMap.setPaintProperty(mbLayerId, 'circle-stroke-color', this._options.color);
+    mbMap.setPaintProperty(mbLayerId, 'circle-stroke-opacity', alpha);
+  }
+
+  syncLabelColorWithMb(mbLayerId, mbMap, alpha) {
+    mbMap.setPaintProperty(mbLayerId, 'text-color', this._options.color);
+    mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
+  }
+
+  syncLabelBorderColorWithMb(mbLayerId, mbMap) {
+    mbMap.setPaintProperty(mbLayerId, 'text-halo-color', this._options.color);
   }
 }

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 
 import { asArrayIfExists } from '../../lib/helpers';
@@ -56,8 +55,6 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../source_destination/field_names';
 import { useMountAppended } from '../../utils/use_mount_appended';
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 const getNetflowInstance = () => (
   <Netflow
@@ -125,7 +122,7 @@ describe('Netflow', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(getNetflowInstance());
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders a destination label', () => {

@@ -42,8 +42,10 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
         await Promise.all(
           indices.map(async index => {
             const fieldCaps = await framework.callWithRequest(requestContext, 'fieldCaps', {
-              index,
+              allow_no_indices: true,
               fields: fields.map(field => field.name),
+              ignore_unavailable: true,
+              index,
             });
 
             if (fieldCaps.indices.length === 0) {

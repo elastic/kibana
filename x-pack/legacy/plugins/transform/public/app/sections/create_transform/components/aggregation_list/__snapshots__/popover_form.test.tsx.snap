@@ -21,11 +21,8 @@ exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       defaultValue="the-group-by-agg-name"
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
     />
   </EuiFormRow>

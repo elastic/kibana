@@ -21,7 +21,6 @@
     }
   ],
   "enabled": false,
-  "immutable": true,
   "index": ["auditbeat-*", "filebeat-*"],
   "interval": "5m",
   "query": "user.name: root or user.name: admin",
@@ -76,5 +75,8 @@
   "references": [
     "http://www.example.com/some-article-about-attack",
     "Some plain text string here explaining why this is a valid thing to look out for"
-  ]
+  ],
+  "timeline_id": "timeline_id",
+  "timeline_title": "timeline_title",
+  "version": 1
 }

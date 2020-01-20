@@ -24,12 +24,12 @@ The *Grid aggregation* source uses {ref}/search-aggregations-bucket-geotilegrid-
 
 You can symbolize grid aggregation metrics as:
 
-*Points*:: Creates a <<vector-layer, vector layer>> with a point for each gridded cell.
-The point location is the weighted centroid for all geo-points in the gridded cell.
-
 *Grid rectangles*:: Creates a <<vector-layer, vector layer>> with a bounding box polygon for each gridded cell.
 
 *Heat map*:: Creates a <<heatmap-layer, heat map layer>> that clusters the weighted centroids for each gridded cell.
+
+*Clusters*:: Creates a <<vector-layer, vector layer>> with a cluster symbol for each gridded cell.
+The cluster location is the weighted centroid for all geo-points in the gridded cell.
 
 
 [role="xpack"]
@@ -47,6 +47,7 @@ To enable top hits:
 . Set *Entity* to the field that identifies entities in your documents.
 This field will be used in the terms aggregation to group your documents into entity buckets.
 . Set *Documents per entity* to configure the maximum number of documents accumulated per entity.
+This setting is limited to the `index.max_inner_result_window` index setting, which defaults to 100.
 
 [role="screenshot"]
 image::maps/images/top_hits.png[]

@@ -1,0 +1,17 @@
+{
+  "description": "EQL - Local Scheduled Task Commands",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "EQL - Local Scheduled Task Commands",
+  "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:schtasks.exe and process.args:(\"/create\" or \"-create\" or \"/S\" or \"-s\" or \"/run\" or \"-run\" or \"/change\" or \"-change\")",
+  "risk_score": 50,
+  "rule_id": "afcce5ad-65de-4ed2-8516-5e093d3ac99a",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

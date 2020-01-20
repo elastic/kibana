@@ -208,7 +208,11 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   <EuiFlexItem>
                     <EuiFieldNumber
                       data-test-subj="lensDateHistogramValue"
-                      value={interval.value}
+                      value={
+                        typeof interval.value === 'number' || interval.value === ''
+                          ? interval.value
+                          : parseInt(interval.value, 10)
+                      }
                       disabled={calendarOnlyIntervals.has(interval.unit)}
                       isInvalid={!isValid}
                       onChange={e => {
@@ -318,7 +322,7 @@ function parseInterval(currentInterval: string) {
   };
 }
 
-function restrictedInterval(aggregationRestrictions?: AggregationRestrictions) {
+function restrictedInterval(aggregationRestrictions?: Partial<AggregationRestrictions>) {
   if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
     return;
   }

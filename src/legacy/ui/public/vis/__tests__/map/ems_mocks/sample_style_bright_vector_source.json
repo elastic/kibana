@@ -1,6 +1,6 @@
 {
   "tiles": [
-    "https://tiles.maps.elastic.co/data/v3/{z}/{x}/{y}.pbf"
+    "/data/v3/{z}/{x}/{y}.pbf"
   ],
   "name": "OpenMapTiles",
   "format": "pbf",

@@ -13,7 +13,6 @@ import {
   false_positives,
   filters,
   from,
-  immutable,
   index,
   rule_id,
   interval,
@@ -21,6 +20,8 @@ import {
   language,
   output_index,
   saved_id,
+  timeline_id,
+  timeline_title,
   meta,
   risk_score,
   max_signals,
@@ -31,6 +32,7 @@ import {
   type,
   threats,
   references,
+  version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -43,7 +45,6 @@ export const createRulesSchema = Joi.object({
   filters,
   from: from.required(),
   rule_id,
-  immutable: immutable.default(false),
   index,
   interval: interval.default('5m'),
   query: query.allow('').default(''),
@@ -54,6 +55,8 @@ export const createRulesSchema = Joi.object({
     then: Joi.required(),
     otherwise: Joi.forbidden(),
   }),
+  timeline_id,
+  timeline_title,
   meta,
   risk_score: risk_score.required(),
   max_signals: max_signals.default(DEFAULT_MAX_SIGNALS),
@@ -64,4 +67,5 @@ export const createRulesSchema = Joi.object({
   type: type.required(),
   threats: threats.default([]),
   references: references.default([]),
+  version: version.default(1),
 });

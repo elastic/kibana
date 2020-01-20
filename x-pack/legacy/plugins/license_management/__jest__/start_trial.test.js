@@ -6,6 +6,7 @@
 
 import { StartTrial } from '../public/np_ready/application/sections/license_dashboard/start_trial';
 import { createMockLicense, getComponent } from './util';
+jest.mock('ui/new_platform');
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
 describe('StartTrial component when trial is allowed', () => {

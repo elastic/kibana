@@ -16,21 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npStart } from 'ui/new_platform';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/saved_objects';
 import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
-// @ts-ignore
-import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 import { createSavedSearchClass } from './_saved_search';
-
-// Register this service with the saved object registry so it can be
-// edited by the object editor.
-savedObjectManagementRegistry.register({
-  service: 'savedSearches',
-  title: 'searches',
-});
 
 export function createSavedSearchesService(services: SavedObjectKibanaServices) {
   const SavedSearchClass = createSavedSearchClass(services);
@@ -50,14 +38,3 @@ export function createSavedSearchesService(services: SavedObjectKibanaServices) 
 
   return savedSearchLoader;
 }
-// this is needed for saved object management
-const module = uiModules.get('discover/saved_searches');
-module.service('savedSearches', () => {
-  const services = {
-    savedObjectsClient: npStart.core.savedObjects.client,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
-  return createSavedSearchesService(services);
-});

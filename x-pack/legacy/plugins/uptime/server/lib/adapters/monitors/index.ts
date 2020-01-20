@@ -5,4 +5,4 @@
  */
 
 export * from './adapter_types';
-export { ElasticsearchMonitorsAdapter } from './elasticsearch_monitors_adapter';
+export { elasticsearchMonitorsAdapter } from './elasticsearch_monitors_adapter';

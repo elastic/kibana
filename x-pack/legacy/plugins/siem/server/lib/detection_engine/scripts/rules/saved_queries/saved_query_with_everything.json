@@ -21,7 +21,6 @@
     }
   ],
   "enabled": false,
-  "immutable": true,
   "index": ["auditbeat-*", "filebeat-*"],
   "interval": "5m",
   "query": "user.name: root or user.name: admin",
@@ -77,5 +76,7 @@
     "http://www.example.com/some-article-about-attack",
     "Some plain text string here explaining why this is a valid thing to look out for"
   ],
-  "saved_id": "test-saved-id"
+  "saved_id": "test-saved-id",
+  "timeline_id": "test-timeline-id",
+  "timeline_title": "test-timeline-title"
 }

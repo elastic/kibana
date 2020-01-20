@@ -15,6 +15,8 @@ import {
 import { getRouter } from '../../public/app/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
+jest.mock('ui/new_platform');
+
 const { setup } = pageHelpers.remoteClustersList;
 
 describe('<RemoteClusterList />', () => {

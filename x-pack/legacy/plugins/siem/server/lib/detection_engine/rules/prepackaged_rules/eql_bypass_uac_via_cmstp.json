@@ -1,0 +1,17 @@
+{
+  "description": "EQL - Bypass UAC via CMSTP",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "EQL - Bypass UAC via CMSTP",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:\"cmstp.exe\" and process.parent.args:(\"/s\" and \"/au\")",
+  "risk_score": 50,
+  "rule_id": "2f7403da-1a4c-46bb-8ecc-c1a596e10cd0",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

@@ -74,6 +74,17 @@ export interface UserProvidedValues<T = any> {
 }
 
 /**
+ * UiSettings deprecation field options.
+ * @public
+ * */
+export interface DeprecationSettings {
+  /** Deprecation message */
+  message: string;
+  /** Key to documentation links */
+  docLinksKey: string;
+}
+
+/**
  * UI element type to represent the settings.
  * @public
  * */
@@ -102,6 +113,25 @@ export interface UiSettingsParams {
   readonly?: boolean;
   /** defines a type of UI element {@link UiSettingsType} */
   type?: UiSettingsType;
+  /** optional deprecation information. Used to generate a deprecation warning. */
+  deprecation?: DeprecationSettings;
+  /*
+   * Allows defining a custom validation applicable to value change on the client.
+   * @deprecated
+   */
+  validation?: ImageValidation | StringValidation;
+}
+
+export interface StringValidation {
+  regexString: string;
+  message: string;
+}
+
+export interface ImageValidation {
+  maxSize: {
+    length: number;
+    description: string;
+  };
 }
 
 /** @internal */
@@ -125,6 +155,7 @@ export interface UiSettingsServiceSetup {
    * @param settings
    *
    * @example
+   * ```ts
    * setup(core: CoreSetup){
    *  core.uiSettings.register([{
    *   foo: {
@@ -134,6 +165,29 @@ export interface UiSettingsServiceSetup {
    *   },
    *  }]);
    * }
+   * ```
    */
   register(settings: Record<string, UiSettingsParams>): void;
 }
+
+/** @public */
+export interface UiSettingsServiceStart {
+  /**
+   * Creates a {@link IUiSettingsClient} with provided *scoped* saved objects client.
+   *
+   * This should only be used in the specific case where the client needs to be accessed
+   * from outside of the scope of a {@link RequestHandler}.
+   *
+   * @example
+   * ```ts
+   * start(core: CoreStart) {
+   *  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
+   *  const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+   * }
+   * ```
+   */
+  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+}
+
+/** @internal */
+export type InternalUiSettingsServiceStart = UiSettingsServiceStart;

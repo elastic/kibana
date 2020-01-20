@@ -18,12 +18,22 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SimpleSavedObject](./kibana-plugin-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-public.toastsapi.md) | Methods for adding and removing global toast messages. |
 
+## Enumerations
+
+|  Enumeration | Description |
+|  --- | --- |
+|  [AppLeaveActionType](./kibana-plugin-public.appleaveactiontype.md) | Possible type of actions on application leave. |
+|  [AppNavLinkStatus](./kibana-plugin-public.appnavlinkstatus.md) | Status of the application's navLink. |
+|  [AppStatus](./kibana-plugin-public.appstatus.md) | Accessibility status of an application. |
+
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
 |  [App](./kibana-plugin-public.app.md) | Extension of [common app properties](./kibana-plugin-public.appbase.md) with the mount function. |
 |  [AppBase](./kibana-plugin-public.appbase.md) |  |
+|  [AppLeaveConfirmAction](./kibana-plugin-public.appleaveconfirmaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) to show a confirmation message when trying to leave an application.<!-- -->See  |
+|  [AppLeaveDefaultAction](./kibana-plugin-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
 |  [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-public.applicationstart.md) |  |
 |  [AppMountContext](./kibana-plugin-public.appmountcontext.md) | The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-public.coresetup.getstartservices.md)<!-- -->. |
@@ -56,7 +66,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) |  |
 |  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) | An object that may define global interceptor functions for different parts of the request and response lifecycle. See [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md)<!-- -->. |
 |  [HttpRequestInit](./kibana-plugin-public.httprequestinit.md) | Fetch API options available to [HttpHandler](./kibana-plugin-public.httphandler.md)<!-- -->s. |
-|  [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |  |
+|  [HttpSetup](./kibana-plugin-public.httpsetup.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [IAnonymousPaths](./kibana-plugin-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
 |  [IBasePath](./kibana-plugin-public.ibasepath.md) | APIs for manipulating the basePath on URL segments. |
@@ -105,9 +115,13 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AppLeaveAction](./kibana-plugin-public.appleaveaction.md) | Possible actions to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md)<!-- -->See [AppLeaveConfirmAction](./kibana-plugin-public.appleaveconfirmaction.md) and [AppLeaveDefaultAction](./kibana-plugin-public.appleavedefaultaction.md) |
+|  [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-public.appmountparameters.md) for detailed usage examples. |
 |  [AppMount](./kibana-plugin-public.appmount.md) | A mount function called when the user navigates to this app's route. |
 |  [AppMountDeprecated](./kibana-plugin-public.appmountdeprecated.md) | A mount function called when the user navigates to this app's route. |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
+|  [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-public.appupdater.md)<!-- -->. |
+|  [AppUpdater](./kibana-plugin-public.appupdater.md) | Updater for applications. see [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-public.chromehelpextensionmenucustomlink.md) |  |
 |  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-public.chromehelpextensionmenudiscusslink.md) |  |
@@ -118,8 +132,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-public.handlercontexttype.md)<!-- -->. |
-|  [HttpSetup](./kibana-plugin-public.httpsetup.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
-|  [HttpStart](./kibana-plugin-public.httpstart.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
+|  [HttpStart](./kibana-plugin-public.httpstart.md) | See [HttpSetup](./kibana-plugin-public.httpsetup.md) |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-public.toastsapi.md)<!-- -->. |
 |  [MountPoint](./kibana-plugin-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |

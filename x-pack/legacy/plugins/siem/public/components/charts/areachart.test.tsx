@@ -5,11 +5,13 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
 import { ChartSeriesData } from './common';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
+
+jest.mock('../../lib/kibana');
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -23,7 +25,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: null },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
         ],
-        color: '#DB1374',
+        color: '#D36086',
       },
       {
         key: 'uniqueDestinationIpsHistogram',
@@ -32,7 +34,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
         ],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -45,7 +47,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
         ],
-        color: '#DB1374',
+        color: '#D36086',
       },
       {
         key: 'uniqueDestinationIpsHistogram',
@@ -54,7 +56,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
         ],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -67,7 +69,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: {} },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
         ],
-        color: '#DB1374',
+        color: '#D36086',
       },
       {
         key: 'uniqueDestinationIpsHistogram',
@@ -76,7 +78,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
         ],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -85,7 +87,7 @@ const chartDataSets = [
       {
         key: 'uniqueSourceIpsHistogram',
         value: [],
-        color: '#DB1374',
+        color: '#D36086',
       },
       {
         key: 'uniqueDestinationIpsHistogram',
@@ -94,7 +96,7 @@ const chartDataSets = [
           { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
           { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
         ],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -107,12 +109,12 @@ const chartHolderDataSets = [
     {
       key: 'uniqueSourceIpsHistogram',
       value: null,
-      color: '#DB1374',
+      color: '#D36086',
     },
     {
       key: 'uniqueDestinationIpsHistogram',
       value: null,
-      color: '#490092',
+      color: '#9170B8',
     },
   ],
   [
@@ -123,7 +125,7 @@ const chartHolderDataSets = [
         { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
         { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
       ],
-      color: '#DB1374',
+      color: '#D36086',
     },
     {
       key: 'uniqueDestinationIpsHistogram',
@@ -132,7 +134,7 @@ const chartHolderDataSets = [
         { x: new Date('2019-05-04T01:00:00.000Z').valueOf() },
         { x: new Date('2019-05-04T13:00:00.000Z').valueOf() },
       ],
-      color: '#490092',
+      color: '#9170B8',
     },
   ],
 ];
@@ -146,7 +148,7 @@ describe('AreaChartBaseComponent', () => {
         { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
         { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
       ],
-      color: '#DB1374',
+      color: '#D36086',
     },
     {
       key: 'uniqueDestinationIpsHistogram',
@@ -155,7 +157,7 @@ describe('AreaChartBaseComponent', () => {
         { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
         { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
       ],
-      color: '#490092',
+      color: '#9170B8',
     },
   ];
 

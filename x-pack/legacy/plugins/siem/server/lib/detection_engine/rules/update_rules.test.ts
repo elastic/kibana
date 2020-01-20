@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { calculateInterval, calculateName } from './update_rules';
+import { calculateInterval, calculateName, calculateVersion } from './update_rules';
 
 describe('update_rules', () => {
   describe('#calculateInterval', () => {
@@ -21,6 +21,24 @@ describe('update_rules', () => {
     test('given both an undefined ruleInterval and a undefined interval, it returns 5m', () => {
       const interval = calculateInterval(undefined, undefined);
       expect(interval).toEqual('5m');
+    });
+  });
+
+  describe('#calculateVersion', () => {
+    test('given preVersion and nextVersion numbers being null it will return a 1', () => {
+      expect(calculateVersion(null, null)).toEqual(1);
+    });
+
+    test('given preVersion and nextVersion numbers being undefined it will return a 1', () => {
+      expect(calculateVersion(undefined, undefined)).toEqual(1);
+    });
+
+    test('given prevVersion as null and nextVersion being defined, nextVersion will be returned', () => {
+      expect(calculateVersion(undefined, 5)).toEqual(5);
+    });
+
+    test('given prevVersion as being defined but nextVersion is not, prevVersion will be incremented by 1', () => {
+      expect(calculateVersion(5, undefined)).toEqual(6);
     });
   });
 

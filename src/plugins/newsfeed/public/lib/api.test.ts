@@ -21,7 +21,7 @@ import { take, tap, toArray } from 'rxjs/operators';
 import { interval, race } from 'rxjs';
 import sinon, { stub } from 'sinon';
 import moment from 'moment';
-import { HttpServiceBase } from 'src/core/public';
+import { HttpSetup } from 'src/core/public';
 import { NEWSFEED_HASH_SET_STORAGE_KEY, NEWSFEED_LAST_FETCH_STORAGE_KEY } from '../../constants';
 import { ApiItem, NewsfeedItem, NewsfeedPluginInjectedConfig } from '../../types';
 import { NewsfeedApiDriver, getApi } from './api';
@@ -444,7 +444,7 @@ describe('getApi', () => {
   const mockHttpGet = jest.fn();
   let httpMock = ({
     fetch: mockHttpGet,
-  } as unknown) as HttpServiceBase;
+  } as unknown) as HttpSetup;
   const getHttpMockWithItems = (mockApiItems: ApiItem[]) => (
     arg1: string,
     arg2: { method: string }
@@ -478,7 +478,7 @@ describe('getApi', () => {
     };
     httpMock = ({
       fetch: mockHttpGet,
-    } as unknown) as HttpServiceBase;
+    } as unknown) as HttpSetup;
   });
 
   it('creates a result', done => {

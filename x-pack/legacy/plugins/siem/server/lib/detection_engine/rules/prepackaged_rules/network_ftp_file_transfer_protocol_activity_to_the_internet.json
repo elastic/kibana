@@ -1,0 +1,17 @@
+{
+  "description": "Network - FTP (File Transfer Protocol) Activity to the Internet\t",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Network - FTP (File Transfer Protocol) Activity to the Internet\t",
+  "query": "(destination.port:20 or destination.port:21) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "risk_score": 50,
+  "rule_id": "87ec6396-9ac4-4706-bcf0-2ebb22002f43",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

@@ -39,6 +39,7 @@ export interface CanvasStartDeps {
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
+    QueryString: any;
     setRootController: Chrome['setRootController'];
     storage: typeof Storage;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
@@ -77,7 +78,7 @@ export class CanvasPlugin
     initLocationProvider(core, plugins);
     initStore(core, plugins);
     initClipboard(plugins.__LEGACY.storage);
-    initLoadingIndicator(core.http.addLoadingCount);
+    initLoadingIndicator(core.http.addLoadingCountSource);
 
     const CanvasRootController = CanvasRootControllerFactory(core, plugins);
     plugins.__LEGACY.setRootController('canvas', CanvasRootController);

@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
+import { ApmRoute } from '@elastic/apm-rum-react';
 import styled from 'styled-components';
 import { metadata } from 'ui/metadata';
 import {
@@ -16,6 +17,7 @@ import {
   Plugin,
   PluginInitializerContext
 } from '../../../../../../src/core/public';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
@@ -31,7 +33,6 @@ import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { px, unit, units } from '../style/variables';
 import { history } from '../utils/history';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
@@ -52,7 +53,7 @@ const App = () => {
       <Route component={ScrollToTopOnPathChange} />
       <Switch>
         {routes.map((route, i) => (
-          <Route key={i} {...route} />
+          <ApmRoute key={i} {...route} />
         ))}
       </Switch>
     </MainContainer>

@@ -5,10 +5,11 @@
  */
 
 import { defaults } from 'lodash/fp';
-import { AlertAction } from '../../../../../alerting/server/types';
+import { AlertAction, IntervalSchedule } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
-import { UpdateRuleParams } from './types';
-import { updateTags } from './update_tags';
+import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
+import { addTags } from './add_tags';
+import { ruleStatusSavedObjectType } from './saved_object_mappings';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -20,6 +21,27 @@ export const calculateInterval = (
     return ruleInterval;
   } else {
     return '5m';
+  }
+};
+
+export const calculateVersion = (
+  prevVersion: number | null | undefined,
+  nextVersion: number | null | undefined
+) => {
+  if (nextVersion == null) {
+    if (prevVersion != null) {
+      return prevVersion + 1;
+    } else {
+      // really should never hit this code but to just be
+      // safe let us always check the prev version and if
+      // its null or undefined return a 1
+      return 1;
+    }
+  } else {
+    // The user wants to custom update their version number which
+    // means this could be in the past. Up to the user if they want
+    // to do this
+    return nextVersion;
   }
 };
 
@@ -45,6 +67,7 @@ export const calculateName = ({
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
+  savedObjectsClient,
   description,
   falsePositives,
   enabled,
@@ -52,6 +75,8 @@ export const updateRules = async ({
   language,
   outputIndex,
   savedId,
+  timelineId,
+  timelineTitle,
   meta,
   filters,
   from,
@@ -69,6 +94,7 @@ export const updateRules = async ({
   to,
   type,
   references,
+  version,
 }: UpdateRuleParams) => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -94,6 +120,8 @@ export const updateRules = async ({
       language,
       outputIndex,
       savedId,
+      timelineId,
+      timelineTitle,
       meta,
       filters,
       index,
@@ -105,20 +133,66 @@ export const updateRules = async ({
       type,
       updatedAt: new Date().toISOString(),
       references,
+      version: calculateVersion(rule.params.version, version),
     }
   );
 
-  if (rule.enabled && !enabled) {
+  const ruleCurrentStatus = savedObjectsClient
+    ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
+        type: ruleStatusSavedObjectType,
+        perPage: 1,
+        sortField: 'statusDate',
+        sortOrder: 'desc',
+        search: rule.id,
+        searchFields: ['alertId'],
+      })
+    : null;
+
+  if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
-  } else if (!rule.enabled && enabled) {
+    // set current status for this rule to null to represent disabled,
+    // but keep last_success_at / last_failure_at properties intact for
+    // use on frontend while rule is disabled.
+    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
+      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
+      currentStatusToDisable.attributes.status = null;
+      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+        ...currentStatusToDisable.attributes,
+      });
+    }
+  } else if (!rule.enabled && enabled === true) {
     await alertsClient.enable({ id: rule.id });
+    // set current status for this rule to be 'going to run'
+    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
+      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
+      currentStatusToDisable.attributes.status = 'going to run';
+      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+        ...currentStatusToDisable.attributes,
+      });
+    }
+  } else {
+    // enabled is null or undefined and we do not touch the rule
   }
+
   return alertsClient.update({
     id: rule.id,
     data: {
-      tags: updateTags(rule.tags, tags),
+      tags: addTags(
+        tags,
+        rule.params.ruleId,
+        immutable != null ? immutable : rule.params.immutable // Add new one if it exists, otherwise re-use old one
+      ),
       name: calculateName({ updatedName: name, originalName: rule.name }),
-      interval: calculateInterval(interval, rule.interval),
+      schedule: {
+        interval: calculateInterval(
+          interval,
+          // TODO: we assume the schedule is an interval schedule due to a problem
+          // in the Alerting api, which should be addressed by the following
+          // issue: https://github.com/elastic/kibana/issues/49703
+          // Once this issue is closed, the type should be correctly returned by alerting
+          (rule.schedule as IntervalSchedule).interval
+        ),
+      },
       actions,
       params: nextParams,
     },
