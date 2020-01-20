@@ -48,6 +48,7 @@ import {
 } from './legacy_imports';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
+import { SavedVisualizations } from './np_ready/types';
 
 export interface LegacyAngularInjectedDependencies {
   legacyChrome: any;
@@ -80,6 +81,8 @@ export class VisualizePlugin implements Plugin {
     share: SharePluginStart;
     visualizations: VisualizationsStart;
   } | null = null;
+  private getSavedVisualizations?: () => SavedVisualizations;
+  private savedVisualizations?: SavedVisualizations;
 
   public async setup(
     core: CoreSetup,
@@ -94,7 +97,7 @@ export class VisualizePlugin implements Plugin {
       id: 'visualize',
       title: 'Visualize',
       mount: async ({ core: contextCore }, params) => {
-        if (this.startDependencies === null) {
+        if (this.startDependencies === null || !this.getSavedVisualizations) {
           throw new Error('not started yet');
         }
 
@@ -108,12 +111,7 @@ export class VisualizePlugin implements Plugin {
         } = this.startDependencies;
 
         const angularDependencies = await getAngularDependencies();
-        const savedVisualizations = createSavedVisLoader({
-          savedObjectsClient,
-          indexPatterns: data.indexPatterns,
-          chrome: contextCore.chrome,
-          overlays: contextCore.overlays,
-        });
+        const savedVisualizations = this.getSavedVisualizations();
         const deps: VisualizeKibanaServices = {
           ...angularDependencies,
           addBasePath: contextCore.http.basePath.prepend,
@@ -159,7 +157,7 @@ export class VisualizePlugin implements Plugin {
   }
 
   public start(
-    { savedObjects: { client: savedObjectsClient } }: CoreStart,
+    { savedObjects: { client: savedObjectsClient }, chrome, overlays }: CoreStart,
     { embeddables, navigation, data, share, visualizations }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
@@ -170,8 +168,23 @@ export class VisualizePlugin implements Plugin {
       share,
       visualizations,
     };
+    this.getSavedVisualizations = () => {
+      if (!this.savedVisualizations) {
+        const services = {
+          savedObjectsClient,
+          indexPatterns: data.indexPatterns,
+          chrome,
+          overlays,
+        };
+        this.savedVisualizations = createSavedVisLoader(services);
+      }
+      return this.savedVisualizations;
+    };
 
-    const embeddableFactory = new VisualizeEmbeddableFactory(visualizations.types);
+    const embeddableFactory = new VisualizeEmbeddableFactory(
+      visualizations.types,
+      this.getSavedVisualizations
+    );
     embeddables.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
   }
 }

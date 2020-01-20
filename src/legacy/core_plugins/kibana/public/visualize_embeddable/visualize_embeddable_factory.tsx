@@ -35,7 +35,6 @@ import 'uiExports/visualize';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectLoader } from 'ui/saved_objects';
 import { Legacy } from 'kibana';
 import { SavedObjectAttributes } from 'kibana/server';
 import {
@@ -44,8 +43,7 @@ import {
   Container,
   EmbeddableOutput,
 } from '../../../../../plugins/embeddable/public';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
-import { createSavedVisLoader, showNewVisModal } from '../visualize';
+import { showNewVisModal } from '../visualize';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import {
@@ -56,6 +54,7 @@ import {
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { TypesStart } from '../../../visualizations/public/np_ready/public/types';
+import { SavedVisualizations } from '../visualize/np_ready/types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -69,13 +68,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private readonly visTypes: TypesStart;
-  private savedVisualizations?: SavedObjectLoader;
 
-  static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    return new VisualizeEmbeddableFactory(visualizations.types);
-  }
-
-  constructor(visTypes: TypesStart) {
+  constructor(visTypes: TypesStart, private getSavedVisualizations: () => SavedVisualizations) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.visualize.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -125,19 +119,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     return i18n.translate('kbn.embeddable.visualizations.displayName', {
       defaultMessage: 'visualization',
     });
-  }
-
-  public getSavedVisualizations() {
-    if (!this.savedVisualizations) {
-      const services = {
-        savedObjectsClient: npStart.core.savedObjects.client,
-        indexPatterns: npStart.plugins.data.indexPatterns,
-        chrome: npStart.core.chrome,
-        overlays: npStart.core.overlays,
-      };
-      this.savedVisualizations = createSavedVisLoader(services);
-    }
-    return this.savedVisualizations;
   }
 
   public async createFromObject(
