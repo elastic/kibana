@@ -13,6 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const logsUi = getService('logsUi');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'infraLogs']);
+  const retry = getService('retry');
 
   describe('Logs Source Configuration', function() {
     this.tags('smoke');
@@ -65,9 +66,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the default log columns with their headers', async () => {
         await logsUi.logStreamPage.navigateTo();
-        const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-        expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
+        await retry.try(async () => {
+          const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
+
+          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
+        });
 
         const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
         expect(logStreamEntries.length).to.be.greaterThan(0);
@@ -88,18 +92,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await infraSourceConfigurationForm.addTimestampLogColumn();
         await infraSourceConfigurationForm.addFieldLogColumn('host.name');
 
-        // await infraSourceConfigurationForm.moveLogColumn(0, 1);
-
         await infraSourceConfigurationForm.saveConfiguration();
       });
 
       it('renders the changed log columns with their headers', async () => {
         await logsUi.logStreamPage.navigateTo();
-        const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-        // TODO: make test more robust
-        // expect(columnHeaderLabels).to.eql(['host.name', 'Timestamp']);
-        expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'host.name']);
+        await retry.try(async () => {
+          const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
+
+          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'host.name']);
+        });
 
         const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
 
