@@ -24,6 +24,7 @@ import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
 import { SourceConfiguration } from '../../utils/source_configuration';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   options: MetricsExplorerOptions;
@@ -60,13 +61,15 @@ export const createNodeDetailLink = (
   nodeType: InventoryItemType,
   nodeId: string,
   from: string,
-  to: string
+  to: string,
+  prefixPathWithBasePath: (path?: string) => string
 ) => {
   return getNodeDetailUrl({
     nodeType,
     nodeId,
     from: dateMathExpressionToEpoch(from),
     to: dateMathExpressionToEpoch(to, true),
+    prefixPathWithBasePath,
   });
 };
 
@@ -79,6 +82,17 @@ export const MetricsExplorerChartContextMenu = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
+  const getUrlForApp = useKibana().services.application?.getUrlForApp;
+  const prependBasePath = useKibana().services.http?.basePath.prepend;
+  const prefixPathWithBasePath = useCallback(
+    (path?: string) => {
+      if (!getUrlForApp || !prependBasePath) {
+        return;
+      }
+      return prependBasePath(getUrlForApp('infra', { path }));
+    },
+    [getUrlForApp, prependBasePath]
+  );
   const [isPopoverOpen, setPopoverState] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
   const handleFilter = useCallback(() => {
@@ -115,7 +129,13 @@ export const MetricsExplorerChartContextMenu = ({
             values: { name: nodeType },
           }),
           icon: 'metricsApp',
-          href: createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to),
+          href: createNodeDetailLink(
+            nodeType,
+            series.id,
+            timeRange.from,
+            timeRange.to,
+            prefixPathWithBasePath
+          ),
           'data-test-subj': 'metricsExplorerAction-ViewNodeMetrics',
         },
       ]

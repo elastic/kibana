@@ -8,16 +8,17 @@ import { get } from 'lodash';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../lib/lib';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 
-const BASE_URL = '../app/uptime#/?search=';
-
 export const createUptimeLink = (
   options: InfraWaffleMapOptions,
   nodeType: InventoryItemType,
-  node: InfraWaffleMapNode
+  node: InfraWaffleMapNode,
+  prefixPathWithBasePath: (path?: string, app?: string) => string | undefined
 ) => {
   if (nodeType === 'host' && node.ip) {
-    return `${BASE_URL}host.ip:"${node.ip}"`;
+    const path = `#/?search=host.ip:"${node.ip}"`;
+    return prefixPathWithBasePath(path, 'uptime');
   }
   const field = get(options, ['fields', nodeType], '');
-  return `${BASE_URL}${field ? field + ':' : ''}"${node.id}"`;
+  const path = `#/?search=${field ? field + ':' : ''}"${node.id}"`;
+  return prefixPathWithBasePath(path, 'uptime');
 };

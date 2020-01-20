@@ -12,6 +12,10 @@ import {
 } from '../../../lib/lib';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 
+const prefixPathWithBasePath = (path?: string) => {
+  return `uptime/${path}`;
+};
+
 const options: InfraWaffleMapOptions = {
   fields: {
     container: 'container.id',
@@ -46,8 +50,8 @@ describe('createUptimeLink()', () => {
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, 'host', node)).toBe(
-      '../app/uptime#/?search=host.ip:"10.0.1.2"'
+    expect(createUptimeLink(options, 'host', node, prefixPathWithBasePath)).toBe(
+      'uptime/#/?search=host.ip:"10.0.1.2"'
     );
   });
 
@@ -64,8 +68,8 @@ describe('createUptimeLink()', () => {
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, 'host', node)).toBe(
-      '../app/uptime#/?search=host.name:"host-01"'
+    expect(createUptimeLink(options, 'host', node, prefixPathWithBasePath)).toBe(
+      'uptime/#/?search=host.name:"host-01"'
     );
   });
 
@@ -82,8 +86,8 @@ describe('createUptimeLink()', () => {
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, 'pod', node)).toBe(
-      '../app/uptime#/?search=kubernetes.pod.uid:"29193-pod-02939"'
+    expect(createUptimeLink(options, 'pod', node, prefixPathWithBasePath)).toBe(
+      'uptime/#/?search=kubernetes.pod.uid:"29193-pod-02939"'
     );
   });
 
@@ -100,8 +104,8 @@ describe('createUptimeLink()', () => {
         avg: 0.6,
       },
     };
-    expect(createUptimeLink(options, 'container', node)).toBe(
-      '../app/uptime#/?search=container.id:"docker-1234"'
+    expect(createUptimeLink(options, 'container', node, prefixPathWithBasePath)).toBe(
+      'uptime/#/?search=container.id:"docker-1234"'
     );
   });
 });

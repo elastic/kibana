@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
@@ -42,6 +42,17 @@ export const NodeContextMenu = ({
   popoverPosition,
 }: Props) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+  const getUrlForApp = useKibana().services.application?.getUrlForApp;
+  const prependBasePath = useKibana().services.http?.basePath.prepend;
+  const prefixPathWithBasePath = useCallback(
+    (path?: string, app?: string) => {
+      if (!getUrlForApp || !prependBasePath) {
+        return;
+      }
+      return prependBasePath(getUrlForApp(app ? app : 'infra', { path }));
+    },
+    [getUrlForApp, prependBasePath]
+  );
   const inventoryModel = findInventoryModel(nodeType);
   // Due to the changing nature of the fields between APM and this UI,
   // We need to have some exceptions until 7.0 & ECS is finalized. Reference
@@ -57,6 +68,7 @@ export const NodeContextMenu = ({
       nodeType,
       nodeId: node.id,
       time: currentTime,
+      prefixPathWithBasePath,
     }),
     'data-test-subj': 'viewLogsContextMenuItem',
   };
@@ -71,6 +83,7 @@ export const NodeContextMenu = ({
       nodeId: node.id,
       from: nodeDetailFrom,
       to: currentTime,
+      prefixPathWithBasePath,
     }),
   };
 
@@ -78,7 +91,7 @@ export const NodeContextMenu = ({
     name: i18n.translate('xpack.infra.nodeContextMenu.viewAPMTraces', {
       defaultMessage: 'View APM traces',
     }),
-    href: `../app/apm#/traces?_g=()&kuery=${apmField}:"${node.id}"`,
+    href: prefixPathWithBasePath(`#traces?_g=()&kuery=${apmField}:"${node.id}"`, 'apm'),
     'data-test-subj': 'viewApmTracesContextMenuItem',
   };
 
@@ -86,7 +99,7 @@ export const NodeContextMenu = ({
     name: i18n.translate('xpack.infra.nodeContextMenu.viewUptimeLink', {
       defaultMessage: 'View in Uptime',
     }),
-    href: createUptimeLink(options, nodeType, node),
+    href: createUptimeLink(options, nodeType, node, prefixPathWithBasePath),
   };
 
   const showDetail = inventoryModel.crosslinkSupport.details;

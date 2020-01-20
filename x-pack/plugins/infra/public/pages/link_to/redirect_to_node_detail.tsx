@@ -35,12 +35,15 @@ export const getNodeDetailUrl = ({
   nodeId,
   to,
   from,
+  prefixPathWithBasePath,
 }: {
   nodeType: InventoryItemType;
   nodeId: string;
   to?: number;
   from?: number;
+  prefixPathWithBasePath: (path?: string, app?: string) => string | undefined;
 }) => {
   const args = to && from ? `?to=${to}&from=${from}` : '';
-  return `#/link-to/${nodeType}-detail/${nodeId}${args}`;
+  const path = `link-to/${nodeType}-detail/${nodeId}${args}`;
+  return prefixPathWithBasePath(path);
 };
