@@ -188,13 +188,13 @@ export const getSignalsActions = ({
   updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 }): TimelineAction[] => [
   {
-    getAction: ({ eventId, ecsData }: TimelineActionProps): JSX.Element => (
+    getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
       <EuiToolTip
         data-test-subj="send-signal-to-timeline-tool-tip"
         content={i18n.ACTION_VIEW_IN_TIMELINE}
       >
         <EuiButtonIcon
-          data-test-subj={'send-signal-to-timeline-button'}
+          data-test-subj="send-signal-to-timeline-button"
           onClick={() =>
             sendSignalToTimelineAction({
               apolloClient,
@@ -203,7 +203,7 @@ export const getSignalsActions = ({
               updateTimelineIsLoading,
             })
           }
-          iconType="tableDensityNormal"
+          iconType="timeline"
           aria-label="Next"
         />
       </EuiToolTip>
@@ -228,7 +228,7 @@ export const getSignalsActions = ({
             })
           }
           isDisabled={!canUserCRUD || !hasIndexWrite}
-          iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
+          iconType={status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved'}
           aria-label="Next"
         />
       </EuiToolTip>
