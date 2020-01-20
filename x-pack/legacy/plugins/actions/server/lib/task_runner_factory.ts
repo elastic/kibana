@@ -105,7 +105,7 @@ export class TaskRunnerFactory {
             const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
             await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
           } catch (e) {
-            // Log error only, we shouldn't make the action type execute again because of an error here
+            // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
             logger.error(
               `Failed to cleanup action_task_params object [id="${actionTaskParamsId}"]: ${e.message}`
             );
