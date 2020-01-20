@@ -29,9 +29,9 @@ exports[`TelemetryForm renders as expected when allows to change optIn status 1`
         size="s"
       />
       <Field
-        clear={[Function]}
         enableSaving={true}
-        save={[Function]}
+        handleChange={[Function]}
+        loading={false}
         setting={
           Object {
             "ariaName": "Provide usage statistics",
