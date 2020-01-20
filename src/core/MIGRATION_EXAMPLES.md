@@ -15,6 +15,7 @@ APIs to their New Platform equivalents.
       - [4. New Platform plugin](#4-new-platform-plugin)
     - [Accessing Services](#accessing-services)
   - [Chrome](#chrome)
+    - [Updating an application navlink](#updating-application-navlink)
   
 ## Configuration
 
@@ -462,7 +463,59 @@ elsewhere.
 | `chrome.setVisible`                                   | [`core.chrome.setIsVisible`](/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md)                        |                                                                                                                                                                                  |
 | `chrome.getInjected`                                  | [`core.injectedMetadata.getInjected`](/docs/development/core/public/kibana-plugin-public.coresetup.injectedmetadata.md) (temporary) | A temporary API is available to read injected vars provided by legacy plugins. This will be removed after [#41990](https://github.com/elastic/kibana/issues/41990) is completed. |
 | `chrome.setRootTemplate` / `chrome.setRootController` | --                                                                                                                                  | Use application mounting via `core.application.register` (not currently avaiable to legacy plugins).                                                                             |
+| `chrome.navLinks.update`                              | [`core.appbase.updater`](/docs/development/core/public/kibana-plugin-public.appbase.updater_.md)                                    | Use the `updater$` property when registering your application via `core.application.register`                                                                                    |
 
 In most cases, the most convenient way to access these APIs will be via the
 [AppMountContext](/docs/development/core/public/kibana-plugin-public.appmountcontext.md)
 object passed to your application when your app is mounted on the page.
+
+### Updating an application navlink
+
+In the legacy platform, the navlink could be updated using `chrome.navLinks.update`
+
+```ts
+uiModules.get('xpack/ml').run(() => {
+  const showAppLink = xpackInfo.get('features.ml.showLinks', false);
+  const isAvailable = xpackInfo.get('features.ml.isAvailable', false);
+
+  const navLinkUpdates = {
+    // hide by default, only show once the xpackInfo is initialized
+    hidden: !showAppLink,
+    disabled: !showAppLink || (showAppLink && !isAvailable),
+  };
+
+  npStart.core.chrome.navLinks.update('ml', navLinkUpdates);
+});
+```
+
+In the new platform, navlinks should not be updated directly. Instead, it is now possible to add an `updater` when 
+registering an application to change the application or the navlink state at runtime.
+
+```ts
+// my_plugin has a required dependencie to the `licensing` plugin
+interface MyPluginSetupDeps {
+  licensing: LicensingPluginSetup;
+}
+
+export class MyPlugin implements Plugin {
+  setup({ application }, { licensing }: MyPluginSetupDeps) {
+    const updater$ = licensing.license$.pipe(
+      map(license => {
+        const { hidden, disabled } = calcStatusFor(license);
+        if (hidden) return { navLinkStatus: AppNavLinkStatus.hidden };
+        if (disabled) return { navLinkStatus: AppNavLinkStatus.disabled };
+        return { navLinkStatus: AppNavLinkStatus.default };
+      })
+    );
+
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      updater$,
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+```
