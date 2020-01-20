@@ -30,7 +30,7 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
         const index = getIndex(request, server);
         const permissions = await readPrivileges(callWithRequest, index);
         return merge(permissions, {
-          isAuthenticated: request?.auth?.isAuthenticated ?? false,
+          is_authenticated: request?.auth?.isAuthenticated ?? false,
         });
       } catch (err) {
         return transformError(err);
