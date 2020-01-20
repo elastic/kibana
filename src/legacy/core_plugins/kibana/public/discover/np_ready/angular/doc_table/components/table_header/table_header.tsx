@@ -25,7 +25,7 @@ import { getDefaultSort } from '../../lib/get_default_sort';
 
 interface Props {
   columns: string[];
-  defaultSortOrder: 'asc' | 'desc';
+  defaultSortOrder: string;
   hideTimeColumn: boolean;
   indexPattern: IndexPattern;
   isShortDots: boolean;

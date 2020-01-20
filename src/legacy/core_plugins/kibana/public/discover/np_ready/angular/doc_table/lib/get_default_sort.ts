@@ -27,7 +27,7 @@ import { SortOrder } from '../components/table_header/helpers';
  */
 export function getDefaultSort(
   indexPattern: IndexPattern,
-  defaultSortOrder: 'desc' | 'asc' = 'desc'
+  defaultSortOrder: string = 'desc'
 ): SortOrder[] {
   if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
     return [[indexPattern.timeFieldName, defaultSortOrder]];

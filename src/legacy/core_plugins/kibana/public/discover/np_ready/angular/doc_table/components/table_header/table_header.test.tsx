@@ -59,6 +59,7 @@ function getMockProps(props = {}) {
     indexPattern: getMockIndexPattern(),
     hideTimeColumn: false,
     columns: ['first', 'middle', 'last'],
+    defaultSortOrder: 'desc',
     sortOrder: [['time', 'asc']] as SortOrder[],
     isShortDots: true,
     onRemoveColumn: jest.fn(),

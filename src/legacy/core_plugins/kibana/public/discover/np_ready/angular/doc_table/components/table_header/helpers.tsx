@@ -20,7 +20,7 @@ import { IndexPattern } from '../../../../../kibana_services';
 // @ts-ignore
 import { shortenDottedString } from '../../../../../../../common/utils/shorten_dotted_string';
 
-export type SortOrder = [string, 'asc' | 'desc'];
+export type SortOrder = [string, string];
 export interface ColumnProps {
   name: string;
   displayName: string;
