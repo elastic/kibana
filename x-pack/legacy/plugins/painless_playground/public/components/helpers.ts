@@ -60,3 +60,16 @@ export function formatJson(json: any): string {
     return `Invalid JSON ${String(json)}`;
   }
 }
+
+export function formatExecutionError(json: object) {
+  if (json.script_stack && json.caused_by) {
+    return `Unhandled Exception ${json.caused_by.type}
+
+${json.caused_by.reason}
+
+Located at:
+${formatJson(json.script_stack)}
+`;
+  }
+  return formatJson(json);
+}

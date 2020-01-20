@@ -7,3 +7,5 @@
 export const PLUGIN_ID = 'painless_playground';
 
 export const API_ROUTE_EXECUTE = '/api/painless_playground/execute';
+
+export const ADVANCED_SETTINGS_FLAG_NAME = 'devTools:enablePainlessPlayground';

@@ -5,19 +5,22 @@
  */
 
 import React from 'react';
+import { CoreStart } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { PainlessPlayground } from './components/painless_playground';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 import { executeCode } from './lib/execute_code';
 
-export function renderApp(element: any, npStart: any) {
+export function renderApp(element: any, { http, i18n, uiSettings }: CoreStart) {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-    uiSettings: npStart.core.uiSettings,
+    uiSettings,
   });
   render(
-    <KibanaReactContextProvider>
-      <PainlessPlayground executeCode={payload => executeCode(npStart.core.http, payload)} />
-    </KibanaReactContextProvider>,
+    <i18n.Context>
+      <KibanaReactContextProvider>
+        <PainlessPlayground executeCode={payload => executeCode(http, payload)} />
+      </KibanaReactContextProvider>
+    </i18n.Context>,
     element
   );
   return () => unmountComponentAtNode(element);
