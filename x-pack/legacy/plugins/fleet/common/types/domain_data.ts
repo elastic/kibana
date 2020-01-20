@@ -60,6 +60,7 @@ export const RuntimeAgentEventSubtype = t.union([
   t.literal('IN_PROGRESS'),
   t.literal('CONFIG'),
   t.literal('FAILED'),
+  t.literal('STOPPING'),
   t.literal('STOPPED'),
   // Action results
   t.literal('DATA_DUMP'),
