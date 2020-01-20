@@ -19,8 +19,8 @@
 
 import { Url } from 'url';
 import { Request } from 'hapi';
-import { Observable, fromEvent } from 'rxjs';
-import { first, takeUntil } from 'rxjs/operators';
+import { Observable, fromEvent, merge } from 'rxjs';
+import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
@@ -160,9 +160,12 @@ export class KibanaRequest<
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
-    const end$ = fromEvent<void>(request.raw.req, 'end').pipe(first());
+    const finish$ = merge(
+      fromEvent(request.raw.req, 'end'), // all data consumed
+      fromEvent(request.raw.req, 'close') // connection was closed
+    ).pipe(shareReplay(1), first());
     return {
-      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(end$)),
+      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$)),
     } as const;
   }
 
