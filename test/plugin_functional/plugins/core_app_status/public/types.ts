@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
-import { CoreAppStatusPlugin, CoreAppStatusPluginStart } from './plugin';
+import { CoreAppStatusPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<{}, CoreAppStatusPluginStart> = () =>
-  new CoreAppStatusPlugin();
+declare global {
+  interface Window {
+    __coreAppStatus: CoreAppStatusPluginStart;
+  }
+}
