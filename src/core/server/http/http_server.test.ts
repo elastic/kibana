@@ -1142,7 +1142,7 @@ describe('setup contract', () => {
 
       const router = new Router('', logger, enhanceWithContext);
       router.get({ path: '/', validate: false }, (context, req, res) =>
-        res.ok({ body: auth.get(req) })
+        res.ok({ body: auth.get<{ id: string }>(req) })
       );
       registerRouter(router);
       await server.start();

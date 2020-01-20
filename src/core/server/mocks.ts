@@ -101,6 +101,10 @@ function createCoreSetupMock() {
     isTlsEnabled: httpService.isTlsEnabled,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
+    auth: {
+      get: httpService.auth.get,
+      isAuthenticated: httpService.auth.isAuthenticated,
+    },
   };
   httpMock.createRouter.mockImplementation(() => httpService.createRouter(''));
 
