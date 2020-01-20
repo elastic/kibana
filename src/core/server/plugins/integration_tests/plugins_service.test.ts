@@ -107,7 +107,7 @@ describe('PluginsService', () => {
   });
 
   it("properly resolves `getStartServices` in plugin's lifecycle", async () => {
-    expect.assertions(3);
+    expect.assertions(5);
 
     const pluginPath = 'plugin-path';
 
@@ -122,15 +122,19 @@ describe('PluginsService', () => {
     });
 
     let startDependenciesResolved = false;
+    let contextFromStart: any = null;
+    let contextFromStartService: any = null;
 
     const pluginInitializer = () =>
       ({
-        setup: async (core, deps) => {
-          core.getStartServices().then(([coreStart, pluginDeps]) => {
+        setup: async (coreSetup, deps) => {
+          coreSetup.getStartServices().then(([core, plugins]) => {
             startDependenciesResolved = true;
+            contextFromStartService = { core, plugins };
           });
         },
-        start: async (core, deps) => {
+        start: async (core, plugins) => {
+          contextFromStart = { core, plugins };
           await new Promise(resolve => setTimeout(resolve, 10));
           expect(startDependenciesResolved).toBe(false);
         },
@@ -157,5 +161,7 @@ describe('PluginsService', () => {
     await pluginsService.start(startDeps);
 
     expect(startDependenciesResolved).toBe(true);
+    expect(contextFromStart!.core).toEqual(contextFromStartService!.core);
+    expect(contextFromStart!.plugins).toEqual(contextFromStartService!.plugins);
   });
 });
