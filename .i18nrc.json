@@ -33,7 +33,7 @@
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": "src/legacy/core_plugins/telemetry",
     "tileMap": "src/legacy/core_plugins/tile_map",
-    "timelion": "src/legacy/core_plugins/timelion",
+    "timelion": ["src/legacy/core_plugins/timelion", "src/legacy/core_plugins/vis_type_timelion"],
     "uiActions": "src/plugins/ui_actions",
     "visTypeMarkdown": "src/legacy/core_plugins/vis_type_markdown",
     "visTypeMetric": "src/legacy/core_plugins/vis_type_metric",
