@@ -19,7 +19,8 @@
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
-
+import { Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
@@ -60,6 +61,9 @@ export class PluginWrapper<
 
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
+  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart]>();
+  public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
+
   constructor(
     public readonly params: {
       readonly path: string;
@@ -88,12 +92,12 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: CoreSetup, plugins: TPluginsSetup) {
+  public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
     this.instance = this.createPluginInstance();
 
     this.log.info('Setting up plugin');
 
-    return await this.instance.setup(setupContext, plugins);
+    return this.instance.setup(setupContext, plugins);
   }
 
   /**
@@ -108,7 +112,9 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    return await this.instance.start(startContext, plugins);
+    const startContract = await this.instance.start(startContext, plugins);
+    this.startDependencies$.next([startContext, plugins]);
+    return startContract;
   }
 
   /**
