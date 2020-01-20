@@ -71,7 +71,11 @@ export class Plugin {
       )
     );
 
-    this.savedObjectsSetup = setupSavedObjects({ service, savedObjects: core.savedObjects });
+    this.savedObjectsSetup = setupSavedObjects({
+      service,
+      savedObjects: core.savedObjects,
+      getStartServices: core.getStartServices,
+    });
 
     return {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>

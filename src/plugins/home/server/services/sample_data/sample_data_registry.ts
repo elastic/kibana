@@ -51,7 +51,7 @@ export class SampleDataRegistry {
       makeSampleDataUsageCollector(usageCollections, this.initContext);
     }
     const usageTracker = usage(
-      core.savedObjects,
+      core.getStartServices().then(start => start[0].savedObjects),
       this.initContext.logger.get('sample_data', 'telemetry')
     );
     const router = core.http.createRouter();
