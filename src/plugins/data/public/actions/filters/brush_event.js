@@ -19,8 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { esFilters } from '..';
-import { AggConfigs } from '../../../../../legacy/ui/public/agg_types';
+import { esFilters } from '../..';
 
 export function onBrushEvent(event) {
   const isNumber = event.data.ordered;
@@ -31,6 +30,8 @@ export function onBrushEvent(event) {
   const column = xRaw.table.columns[xRaw.column];
   if (!column) return [];
   if (!column._meta) return [];
+  // hack until AggConfigs are migrated to the new platform
+  const { AggConfigs } = require('../../../../../legacy/ui/public/agg_types/agg_configs');
   const aggConfigs = new AggConfigs(column._meta.indexPattern);
   const aggConfig = aggConfigs.createAggConfig({
     type: column._meta.type,

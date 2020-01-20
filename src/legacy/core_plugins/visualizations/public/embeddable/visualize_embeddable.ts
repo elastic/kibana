@@ -43,6 +43,7 @@ import {
   Embeddable,
   Container,
   APPLY_FILTER_TRIGGER,
+  SELECT_RANGE_TRIGGER,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
@@ -289,11 +290,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
-        const eventName = event.name === 'brush' ? 'BRUSH_TRIGGER' : APPLY_FILTER_TRIGGER;
+        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : APPLY_FILTER_TRIGGER;
 
         npStart.plugins.uiActions.executeTriggerActions(eventName, {
           embeddable: this,
-          timeField: this.vis.indexPattern.timeFieldName,
+          timeFieldName: this.vis.indexPattern.timeFieldName,
           data: event.data,
         });
       })

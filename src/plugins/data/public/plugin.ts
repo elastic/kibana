@@ -44,8 +44,13 @@ import {
   setIndexPatterns,
   setUiSettings,
 } from './services';
-import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
-import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
+import {
+  createFilterAction,
+  GLOBAL_APPLY_FILTER_ACTION,
+  SELECT_RANGE_ACTION,
+  selectRangeAction,
+} from './actions';
+import { APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
@@ -73,6 +78,9 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
+    uiActions.registerAction(
+      selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
+    );
 
     return {
       autocomplete: this.autocomplete.setup(core),
@@ -94,6 +102,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setIndexPatterns(indexPatternsService);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
+    uiActions.attachAction(SELECT_RANGE_TRIGGER, SELECT_RANGE_ACTION);
 
     const dataServices = {
       autocomplete: this.autocomplete.start(),
