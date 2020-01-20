@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
+  EuiButton,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -33,61 +34,94 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { AppMountContext, AppMountParameters } from '<%= relRoot %>/../src/core/public';
+import { AppMountParameters, CoreStart } from '<%= relRoot %>/../src/core/public';
 
-const FooApp = ({ basename, context }: { basename: string; context: AppMountContext }) => (
-  <Router basename={basename}>
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageHeader>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="liz.helloWorldText"
-                  defaultMessage="Hello World!"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageHeader>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiTitle>
-                <h2>
+import { PLUGIN_NAME } from '../../common';
+
+interface <%= upperCamelCaseName %>AppDeps { 
+  basename: string;
+  notifications: CoreStart['notifications'];
+  http: CoreStart['http'];
+};
+
+const <%= upperCamelCaseName %>App = ({ basename, notifications, http }: <%= upperCamelCaseName %>AppDeps) => {
+  const [timestamp, setTimestamp] = useState<string | undefined>();
+
+  const fetchData = () => {
+    http.get('/api/<%= snakeCase(name) %>/example').then((res) => {
+      setTimestamp(res.time);
+      notifications.toasts.addSuccess(PLUGIN_NAME);
+    });
+  };
+
+  return (
+    <Router basename={basename}>
+      <I18nProvider>
+        <EuiPage>
+          <EuiPageBody>
+            <EuiPageHeader>
+              <EuiTitle size="l">
+                <h1>
                   <FormattedMessage
-                    id="liz.congratulationsTitle"
-                    defaultMessage="Congratulations"
+                    id="<%= camelCase(name) %>.helloWorldText"
+                    defaultMessage="Hello {name}!"
+                    values={{ name: PLUGIN_NAME }}
                   />
-                </h2>
+                </h1>
               </EuiTitle>
-            </EuiPageContentHeader>
-            <EuiPageContentBody>
-              <EuiText>
-                <h3>
-                  <FormattedMessage
-                    id="liz.congratulationsText"
-                    defaultMessage="You have successfully created your first Kibana Plugin!"
-                  />
-                </h3>
-                <p>
-                  <FormattedMessage
-                    id="liz.serverTimeText"
-                    defaultMessage="The server time (via API call) is {time}"
-                    values={{ time: 'NO API CALL YET' }}
-                  />
-                </p>
-              </EuiText>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-  </Router>
-);
+            </EuiPageHeader>
+            <EuiPageContent>
+              <EuiPageContentHeader>
+                <EuiTitle>
+                  <h2>
+                    <FormattedMessage
+                      id="<%= camelCase(name) %>.congratulationsTitle"
+                      defaultMessage="Congratulations"
+                    />
+                  </h2>
+                </EuiTitle>
+              </EuiPageContentHeader>
+              <EuiPageContentBody>
+                <EuiText>
+                  <h3>
+                    <FormattedMessage
+                      id="<%= camelCase(name) %>.congratulationsText"
+                      defaultMessage="You have successfully created your first Kibana Plugin!"
+                    />
+                  </h3>
+                  <p>
+                    <FormattedMessage
+                      id="banana.serverTimeText"
+                      defaultMessage="Last response from server: {time}"
+                      values={{ time: timestamp ? timestamp : 'Unknown' }}
+                      />
+                  </p>
+                  <EuiButton 
+                    type="primary" 
+                    size="s" 
+                    onClick={fetchData}
+                  >
+                    <FormattedMessage
+                      id="<%= camelCase(name) %>.buttonText"
+                      defaultMessage="Fetch data"
+                    />
+                  </EuiButton>
+                </EuiText>
+              </EuiPageContentBody>
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      </I18nProvider>
+    </Router>
+  );
+};
 
 export const renderApp = (
-  context: AppMountContext,
+  { notifications, http }: CoreStart,
+  {}: any,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<FooApp basename={appBasePath} context={context} />, element);
+  ReactDOM.render(<<%= upperCamelCaseName %>App basename={appBasePath} notifications={notifications} http={http}/>, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

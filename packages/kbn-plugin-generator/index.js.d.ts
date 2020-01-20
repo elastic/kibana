@@ -20,5 +20,5 @@ interface PluginGenerator {
   /**
    * Run plugin generator.
    */
-  run: any;
+  run: (...args: any[]) => any;
 }

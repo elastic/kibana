@@ -1,32 +1,39 @@
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, AppMountContext } from '<%= relRoot %>/src/core/public';
+import { CoreSetup, CoreStart, Plugin } from '<%= relRoot %>/src/core/public';
 import {
-  <%= camelCaseName %>PublicPluginSetup,
-  <%= camelCaseName %>PublicPluginStart,
+  <%= upperCamelCaseName %>PublicPluginSetup,
+  <%= upperCamelCaseName %>PublicPluginStart,
 } from './types';
+import { i18n } from '@kbn/i18n';
 import { PLUGIN_NAME } from '../common';
 
-export class <%= camelCaseName %>PublicPlugin implements Plugin<<%= camelCaseName %>PublicPluginSetup, <%= camelCaseName %>PublicPluginStart> {
-  constructor(initializerContext: PluginInitializerContext) {
-  }
-
-  public setup(core: CoreSetup): <%= camelCaseName %>PublicPluginSetup {
+export class <%= upperCamelCaseName %>PublicPlugin implements Plugin<<%= upperCamelCaseName %>PublicPluginSetup, <%= upperCamelCaseName %>PublicPluginStart> {
+  public setup(core: CoreSetup): <%= upperCamelCaseName %>PublicPluginSetup {
     core.application.register({
       id: '<%= camelCase(name) %>',
       title: PLUGIN_NAME,
-      async mount(context: AppMountContext, params: any) {
+      async mount(params) {
+        // Load application bundle
         const { renderApp } = await import('./components/app');
-        return renderApp(context, params);
-      },
+        // Get start services
+        const [coreStart, depsStart] = await core.getStartServices();
+        return renderApp(coreStart, depsStart, params);
+      }
     });
 
+    // Return any methods that should be available to other plugins
     return {
       getGreeting() {
-        return 'Hello from Plugin A!';
+        return i18n.translate('<%= camelCase(name) %>.greetingText', {
+          defaultMessage: 'Hello from {name}!',
+          values: { 
+            name: PLUGIN_NAME,
+           },
+        });
       },
     };
   }
 
-  public start(core: CoreStart): <%= camelCaseName %>PublicPluginStart {
+  public start(core: CoreStart): <%= upperCamelCaseName %>PublicPluginStart {
     return {}
   }  
 

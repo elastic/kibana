@@ -1,13 +1,10 @@
-
-
-import { PluginInitializerContext } from '<%= relRoot %>/src/core/public';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new <%= camelCaseName %>PublicPlugin(initializerContext);
+export function plugin() {
+  return new <%= upperCamelCaseName %>PublicPlugin();
 }
 
 export * from '../common';
 export * from './types';
 
 // Export plugin after all other imports
-import { <%= camelCaseName %>PublicPlugin } from './plugin';
-export { <%= camelCaseName %>PublicPlugin as Plugin };
+import { <%= upperCamelCaseName %>PublicPlugin } from './plugin';
+export { <%= upperCamelCaseName %>PublicPlugin as Plugin };

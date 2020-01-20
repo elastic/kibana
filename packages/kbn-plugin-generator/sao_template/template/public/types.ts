@@ -1,3 +1,5 @@
 
-export interface <%= camelCaseName %>PublicPluginSetup {}
-export interface <%= camelCaseName %>PublicPluginStart {}
+export interface <%= upperCamelCaseName %>PublicPluginSetup {
+    getGreeting: () => string;
+}
+export interface <%= upperCamelCaseName %>PublicPluginStart {}

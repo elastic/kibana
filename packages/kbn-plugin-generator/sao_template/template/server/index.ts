@@ -1,9 +1,9 @@
 import { PluginInitializerContext } from '<%= relRoot %>/src/core/server';
-import { <%= camelCaseName %>ServerPlugin } from './plugin';
+import { <%= upperCamelCaseName %>ServerPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new <%= camelCaseName %>ServerPlugin(initializerContext);
+  return new <%= upperCamelCaseName %>ServerPlugin(initializerContext);
 }
 
-export { <%= camelCaseName %>ServerPlugin as Plugin };
+export { <%= upperCamelCaseName %>ServerPlugin as Plugin };
 export * from '../common';

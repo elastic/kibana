@@ -83,7 +83,7 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
           snakeCase,
           name,
           kbnVersion: answers.kbnVersion,
-          camelCaseName: name.charAt(0).toUpperCase() + camelCase(name).slice(1),
+          upperCamelCaseName: name.charAt(0).toUpperCase() + camelCase(name).slice(1),
           hasUi: !!answers.generateApp,
           hasServer: !!answers.generateApi,
           relRoot: isKibanaPlugin ? '../../../..' : '../../..',
