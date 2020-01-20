@@ -53,8 +53,8 @@ export function getSort(sort, indexPattern) {
   return [];
 }
 
-getSort.array = function(sort, indexPattern, defaultSortOrder, useDefault = true) {
-  return getSort(sort, indexPattern, defaultSortOrder, useDefault).map(sortPair =>
+getSort.array = function(sort, indexPattern) {
+  return getSort(sort, indexPattern).map(sortPair =>
     _(sortPair)
       .pairs()
       .pop()
