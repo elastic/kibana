@@ -55,7 +55,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
                     display="condensed"
                     navTabs={
                       hideDetectionEngine
-                        ? pickBy((_, key) => key !== SiemPageName.detectionEngine, navTabs)
+                        ? pickBy((_, key) => key !== SiemPageName.detections, navTabs)
                         : navTabs
                     }
                   />
