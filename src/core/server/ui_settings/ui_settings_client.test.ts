@@ -26,11 +26,10 @@ import { SavedObjectsClient } from '../saved_objects';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
 import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
-import { UiSettingsType } from './types';
 
 const logger = loggingServiceMock.create().get();
 
-const TYPE = 'config' as UiSettingsType;
+const TYPE = 'config';
 const ID = 'kibana-version';
 const BUILD_NUM = 1234;
 const chance = new Chance();
