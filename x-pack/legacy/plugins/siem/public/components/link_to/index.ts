@@ -13,4 +13,4 @@ export { getOverviewUrl, RedirectToOverviewPage } from './redirect_to_overview';
 export { getHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, getIPDetailsUrl, RedirectToNetworkPage } from './redirect_to_network';
 export { getTimelinesUrl, RedirectToTimelinesPage } from './redirect_to_timelines';
-export { getCaseUrl, RedirectToCasePage } from './redirect_to_case';
+export { getCaseUrl, getCaseDetailsUrl, RedirectToCasePage } from './redirect_to_case';

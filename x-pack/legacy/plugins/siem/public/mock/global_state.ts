@@ -11,6 +11,7 @@ import {
   HostsFields,
   NetworkDnsFields,
   NetworkTopTablesFields,
+  SortFieldCase,
   TlsFields,
   UsersFields,
 } from '../graphql/types';
@@ -31,6 +32,20 @@ export const mockGlobalState: State = {
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
+  },
+  case: {
+    page: {
+      queries: {
+        cases: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            direction: Direction.desc,
+            field: SortFieldCase.created_at,
+          },
+        },
+      },
+    },
   },
   hosts: {
     page: {

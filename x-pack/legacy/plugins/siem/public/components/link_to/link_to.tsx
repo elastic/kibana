@@ -32,7 +32,15 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
       component={RedirectToOverviewPage}
       path={`${match.url}/:pageName(${SiemPageName.overview})`}
     />
-    <Route component={RedirectToCasePage} path={`${match.url}/:pageName(${SiemPageName.case})`} />
+    <Route
+      exact
+      component={RedirectToCasePage}
+      path={`${match.url}/:pageName(${SiemPageName.case})`}
+    />
+    <Route
+      component={RedirectToCasePage}
+      path={`${match.url}/:pageName(${SiemPageName.case})/:detailName`}
+    />
     <Route
       component={RedirectToHostsPage}
       exact

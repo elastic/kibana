@@ -8,6 +8,7 @@ import { getEmptyTagValue } from '../../../empty_value';
 import { Columns } from '../../../paginated_table';
 import { CaseSavedObject } from '../../../../graphql/types';
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
+import { CaseDetailsLink } from '../../../links';
 
 export type CasesColumns = [
   Columns<CaseSavedObject['attributes']['title']>,
@@ -29,7 +30,12 @@ export const getCasesColumns = (): CasesColumns => [
   {
     field: 'id',
     name: 'Case Id',
-    render: id => renderStringField(id),
+    render: id => {
+      if (id != null) {
+        return <CaseDetailsLink detailName={id} />;
+      }
+      return getEmptyTagValue();
+    },
   },
   {
     field: 'attributes.created_at',

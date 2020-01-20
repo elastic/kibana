@@ -10,11 +10,20 @@ import { RedirectWrapper } from './redirect_wrapper';
 import { SiemPageName } from '../../pages/home/types';
 
 export type CaseComponentProps = RouteComponentProps<{
-  search: string;
+  detailName: string;
 }>;
 
-export const RedirectToCasePage = ({ location: { search } }: CaseComponentProps) => (
-  <RedirectWrapper to={`/${SiemPageName.case}${search}`} />
+export const RedirectToCasePage = ({
+  match: {
+    params: { detailName },
+  },
+}: CaseComponentProps) => (
+  <RedirectWrapper
+    to={detailName ? `/${SiemPageName.case}/${detailName}` : `/${SiemPageName.case}`}
+  />
 );
 
-export const getCaseUrl = () => `#/link-to/${SiemPageName.case}`;
+const baseCaseUrl = `#/link-to/${SiemPageName.case}`;
+
+export const getCaseUrl = () => baseCaseUrl;
+export const getCaseDetailsUrl = (detailName: string) => `${baseCaseUrl}/${detailName}`;

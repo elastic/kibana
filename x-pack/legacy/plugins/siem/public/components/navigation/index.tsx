@@ -21,6 +21,7 @@ export const SiemNavigationComponent = React.memo<
 >(
   ({ detailName, display, navTabs, pageName, pathName, search, tabName, urlState, flowTarget }) => {
     useEffect(() => {
+      console.log('pathName', pathName)
       if (pathName) {
         setBreadcrumbs({
           query: urlState.query,

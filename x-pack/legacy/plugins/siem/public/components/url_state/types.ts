@@ -57,6 +57,8 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
 };
 
 export type LocationTypes =
+  | CONSTANTS.caseDetails
+  | CONSTANTS.casePage
   | CONSTANTS.detectionEnginePage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage

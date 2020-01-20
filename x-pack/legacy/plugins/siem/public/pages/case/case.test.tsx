@@ -39,7 +39,7 @@ describe('Case', () => {
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
             <MemoryRouter>
-              <Case />
+              <Case url={'case.com'} />
             </MemoryRouter>
           </MockedProvider>
         </TestProviders>
@@ -56,7 +56,7 @@ describe('Case', () => {
         <TestProviders>
           <MockedProvider mocks={localSource} addTypename={false}>
             <MemoryRouter>
-              <Case />
+              <Case url={'case.com'} />
             </MemoryRouter>
           </MockedProvider>
         </TestProviders>

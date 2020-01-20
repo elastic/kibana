@@ -128,7 +128,10 @@ export const HomePage: React.FC = () => (
                       <MlNetworkConditionalContainer location={location} url={match.url} />
                     )}
                   />
-                  <Route path={`/:pageName(${SiemPageName.case})`} render={() => <Case />} />
+                  <Route
+                    path={`/:pageName(${SiemPageName.case})`}
+                    render={({ match }) => <Case url={match.url} />}
+                  />
                   <Route render={() => <NotFoundPage />} />
                 </Switch>
               </DragDropContextWrapper>

@@ -24,8 +24,8 @@ export interface CaseArgs {
 }
 
 export interface CaseProps extends QueryTemplateProps {
-  caseId: string;
   children: (args: CaseArgs) => React.ReactNode;
+  caseId: string;
 }
 
 const CaseComponentQuery = React.memo<CaseProps>(({ children, skip, caseId }) => (

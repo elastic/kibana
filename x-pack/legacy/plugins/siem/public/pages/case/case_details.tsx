@@ -13,15 +13,18 @@ import { EmptyPage } from '../../components/empty_page';
 import { HeaderPage } from '../../components/header_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
-import { CasesTable } from '../../components/page/case/cases_table';
-import { SpyRoute } from '../../utils/route/spy_routes';
+import { CaseView } from '../../components/page/case/case_view';
 import * as i18n from './translations';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 const basePath = chrome.getBasePath();
 
-export const CaseComponent = React.memo(() => {
-  const docLinks = useKibana().services.docLinks;
+interface Props {
+  caseId: string;
+}
 
+export const CaseDetails = React.memo(({ caseId }: Props) => {
+  const docLinks = useKibana().services.docLinks;
   return (
     <>
       <WrapperPage>
@@ -32,15 +35,15 @@ export const CaseComponent = React.memo(() => {
             tooltip: i18n.PAGE_BADGE_TOOLTIP,
           }}
           border
-          subtitle={i18n.PAGE_SUBTITLE}
-          title={i18n.PAGE_TITLE}
+          subtitle={caseId}
+          title="OMG ITS CASE DETAILS!!!!!!!"
         />
 
         <WithSource sourceId="default">
           {({ indicesExist }) =>
             indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <EuiFlexGroup>
-                <CasesTable />
+                <CaseView caseId={caseId} />
               </EuiFlexGroup>
             ) : (
               <EmptyPage
@@ -62,4 +65,5 @@ export const CaseComponent = React.memo(() => {
     </>
   );
 });
-CaseComponent.displayName = 'CaseComponent';
+
+CaseDetails.displayName = 'CaseDetails';

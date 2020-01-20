@@ -54,7 +54,6 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
   useEffect(() => {
     const currentTabSelected = mapLocationToTab();
-
     if (currentTabSelected !== selectedTabId) {
       setSelectedTabId(currentTabSelected);
     }

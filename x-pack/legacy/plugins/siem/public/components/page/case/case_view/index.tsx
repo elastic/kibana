@@ -10,9 +10,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { CaseQuery } from '../../../../containers/case/get_case';
 
-export const CaseView = React.memo(() => (
+interface Props {
+  caseId: string;
+}
+export const CaseView = React.memo(({ caseId }: Props) => (
   <EuiFlexItem>
-    <CaseQuery sourceId="default" caseId="9ffef520-20e4-11ea-8f80-690fedc74682">
+    <CaseQuery sourceId="default" caseId={caseId}>
       {children => (
         <EuiText>
           <h2>{children.case.attributes.title}</h2>

@@ -4,10 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 
+import { Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { SiemPageName } from '../home/types';
 import { CaseComponent } from './case';
+import { CaseDetails } from './case_details';
 
-export const Case = memo(() => <CaseComponent />);
+type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
+const casesPagePath = `/:pageName(${SiemPageName.case})`;
+const caseDetailsPagePath = `${casesPagePath}/:detailName`;
+
+const CaseContainerComponent: React.FC<Props> = () => {
+  return (
+    <Switch>
+      <Route strict path={casesPagePath} render={() => <CaseComponent />} />
+      <Route
+        path={caseDetailsPagePath}
+        render={({
+          match: {
+            params: { detailName },
+          },
+        }) => <CaseDetails caseId={detailName} />}
+      />
+    </Switch>
+  );
+};
+
+export const Case = React.memo(CaseContainerComponent);
 Case.displayName = 'Case';
