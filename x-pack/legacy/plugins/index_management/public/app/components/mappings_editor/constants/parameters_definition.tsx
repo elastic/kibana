@@ -546,9 +546,14 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     fieldConfig: {
       defaultValue: true,
     },
-    schema: t.boolean,
+    schema: t.union([t.boolean, t.literal('strict')]),
     documentation: {
       main: '/dynamic.html',
+    },
+  },
+  dynamic_strict: {
+    fieldConfig: {
+      defaultValue: '', // Needed for FieldParams typing
     },
   },
   enabled: {

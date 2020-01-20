@@ -5,14 +5,18 @@
  */
 import React from 'react';
 
+import { NormalizedField } from '../../../../types';
+import { DynamicParameter, EnabledParameter } from '../../field_parameters';
 import { BasicParametersSection } from '../edit_field';
 
-import { DynamicParameter, EnabledParameter } from '../../field_parameters';
+interface Props {
+  field: NormalizedField;
+}
 
-export const ObjectType = () => {
+export const ObjectType = ({ field }: Props) => {
   return (
     <BasicParametersSection>
-      <DynamicParameter />
+      <DynamicParameter field={field} />
 
       <EnabledParameter />
     </BasicParametersSection>

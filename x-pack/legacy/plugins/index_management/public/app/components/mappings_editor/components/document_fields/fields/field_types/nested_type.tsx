@@ -5,14 +5,18 @@
  */
 import React from 'react';
 
+import { NormalizedField } from '../../../../types';
+import { DynamicParameter } from '../../field_parameters';
 import { BasicParametersSection } from '../edit_field';
 
-import { DynamicParameter } from '../../field_parameters';
+interface Props {
+  field: NormalizedField;
+}
 
-export const NestedType = () => {
+export const NestedType = ({ field }: Props) => {
   return (
     <BasicParametersSection>
-      <DynamicParameter />
+      <DynamicParameter field={field} />
     </BasicParametersSection>
   );
 };
