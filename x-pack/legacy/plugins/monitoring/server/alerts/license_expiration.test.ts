@@ -69,18 +69,8 @@ const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
 };
 
 describe('getLicenseExpiration', () => {
-  // interface MockServer extends Legacy.Server {
-  //   newPlatform: {
-  //     __internals: {
-  //       uiSettings: {
-  //         asScopedToClient: () => { get: Promise<string> };
-  //       };
-  //     };
-  //   };
-  // }
-
   const emailAddress = 'foo@foo.com';
-  const server: any = {
+  const server: Legacy.Server | any = {
     newPlatform: {
       __internals: {
         uiSettings: {
@@ -136,7 +126,7 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should log a warning if no email is provided', async () => {
-    const customServer: any = {
+    const customServer: Legacy.Server | any = {
       newPlatform: {
         __internals: {
           uiSettings: {
