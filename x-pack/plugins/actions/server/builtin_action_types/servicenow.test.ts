@@ -11,7 +11,7 @@ jest.mock('./lib/post_servicenow', () => ({
 import { getActionType } from './servicenow';
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { postServiceNow } from './lib/post_servicenow';
 import { createActionTypeRegistry } from './index.test';
 import { configUtilsMock } from '../actions_config.mock';
