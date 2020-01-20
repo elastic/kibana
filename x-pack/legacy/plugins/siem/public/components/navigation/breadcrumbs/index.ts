@@ -10,6 +10,7 @@ import { getOr, omit } from 'lodash/fp';
 import { APP_NAME } from '../../../../common/constants';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
+import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../pages/case/utils';
 import { SiemPageName } from '../../../pages/home/types';
 import { RouteSpyState, HostRouteSpyState, NetworkRouteSpyState } from '../../../utils/route/types';
 import { getOverviewUrl } from '../../link_to';
@@ -37,6 +38,9 @@ const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpySt
 
 const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
   spyState != null && spyState.pageName === SiemPageName.hosts;
+
+const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
+  spyState != null && spyState.pageName === SiemPageName.case;
 
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps
@@ -75,6 +79,14 @@ export const getBreadcrumbsForRoute = (
         )
       ),
     ];
+  }
+  if (isCaseRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'network', isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
+    }
+    return [...siemRootBreadcrumb, ...getCaseDetailsBreadcrumbs(spyState)];
   }
   if (
     spyState != null &&

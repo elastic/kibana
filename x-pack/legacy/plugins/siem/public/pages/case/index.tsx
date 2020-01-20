@@ -19,8 +19,9 @@ const caseDetailsPagePath = `${casesPagePath}/:detailName`;
 const CaseContainerComponent: React.FC<Props> = () => {
   return (
     <Switch>
-      <Route strict path={casesPagePath} render={() => <CaseComponent />} />
+      <Route strict exact path={casesPagePath} render={() => <CaseComponent />} />
       <Route
+        strict
         path={caseDetailsPagePath}
         render={({
           match: {
