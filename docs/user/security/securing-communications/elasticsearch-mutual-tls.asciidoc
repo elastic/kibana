@@ -1,0 +1,120 @@
+[role="xpack"]
+[[elasticsearch-mutual-tls]]
+=== Mutual TLS authentication between {kib} and {es}
+++++
+<titleabbrev>Mutual TLS with {es}</titleabbrev>
+++++
+
+In a standard Transport Layer Security (TLS/SSL) configuration, the server presents a signed certificate to authenticate itself to the
+client. In a mutual TLS configuration, the client also presents a signed certificate to authenticate itself to the server.
+
+When {security} is enabled on your cluster, each request that {kib} makes to {es} must be authenticated. Most requests made through {kib} to
+{es} are authenticated by using the credentials of the logged-in user. There are, however, a few internal requests that the {kib} server
+needs to make to the {es} cluster. For this reason, you must configure credentials for the {kib} server to use for those requests.
+
+If {kib} has `elasticsearch.username` and `elasticsearch.password` configured, it will attempt to use these to authenticate to {es} via the
+{ref}/native-realm.html[Native realm]. However, {kib} also supports mutual TLS authentication with {es} via a {ref}/pki-realm.html[Public
+Key Infrastructure (PKI) realm]. To do so, {es} needs to verify the signature on the {kib} client certificate, and it also needs to map the
+certificate's distinguished name (DN) to the appropriate `kibana_system` role.
+
+NOTE: Using a PKI realm is a gold feature. For a comparison of the Elastic license levels, see https://www.elastic.co/subscriptions[the
+subscription page].
+
+To configure {kib} and {es} to use mutual TLS authentication:
+
+. <<using-kibana-with-security,Set up {kib} to work with {security}>> with a username and password.
+
+. <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>. At a minimum, this requires a server certificate for {es}.
+
+. Create a client certificate and private key for {kib} to use when connecting to {es}.
++ 
+--
+NOTE: This is not the same as the <<configuring-tls-browser-kib,server certificate>> that {kib} will present to web browsers.
+
+You may choose to generate a certificate and private key using {ref}/certutil.html[the {es} certutil tool]. At this point, you will have
+already set up a certificate authority (CA) to sign the {es} server certificate. You may choose to use the same CA to sign the {kib} client
+certificate. You would do this like so:
+
+[source,sh]
+--------------------------------------------------------------------------------
+bin/elasticsearch-certutil cert -ca elastic-stack-ca.p12 -name kibana-client
+--------------------------------------------------------------------------------
+
+This will generate a certificate and private key in a PKCS #12 keystore named `kibana-client.p12`. The certificate has a Common Name (CN) of
+"kibana-client".
+
+You will also need to use the CA certificate when setting up the PKI realm in {es}. While you could use the CA keystore in the above example
+for this purpose, it is bad practice to expose the CA's private key in such a manner. Instead, you can extract the CA certificate (without
+its private key) like so:
+
+[source,sh]
+--------------------------------------------------------------------------------
+openssl pkcs12 -in kibana-client.p12 -cacerts -nokeys -out ca.crt
+--------------------------------------------------------------------------------
+--
+
+. Configure a PKI realm and a Native realm in your {es} cluster:
++
+--
+By default, {es} provides a Native realm. However, to support both a PKI realm (for {kib}) and a Native realm (for end users), you must
+configure each realm in `elasticsearch.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.realms.pki.realm1.order: 1
+xpack.security.authc.realms.pki.realm1.certificate_authorities: "/path/to/ca.crt"
+xpack.security.authc.realms.native.realm2.order: 2
+--------------------------------------------------------------------------------
+
+--
+
+. Configure your {es} cluster to request client certificates:
++
+--
+By default, {es} will not request a client certificate when establishing a TLS connection. To change this, you must set up optional client
+certificate authentication in `elasticsearch.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.http.ssl.client_authentication: "optional"
+--------------------------------------------------------------------------------
+--
+
+. Restart your {es} cluster.
+
+. Use {kib} to create a <<role-mappings,role mapping>> for your new client certificate:
++
+--
+This role mapping will assign the `kibana_system` role to any user that matches the included mapping rule, which is set to equal the client
+certificate's DN attribute:
+
+[role="screenshot"]
+image:user/security/images/mutual-tls-role-mapping.png["Role mapping for the {kib} client certificate"]
+--
+
+. Configure {kib} to use the client certificate:
++
+--
+Assuming you used the {es} certutil tool to generate a certificate and private key in a PKCS #12 keystore, add the following values to
+`kibana.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+elasticsearch.ssl.keystore.path: "/path/to/kibana-client.p12"
+elasticsearch.ssl.keystore.password: "decryption password"
+--------------------------------------------------------------------------------
+
+The decryption password should match what you entered when prompted by the {es} certutil tool.
+
+You must also remove the `elasticsearch.username` and `elasticsearch.password` values from the configuration file. Otherwise, {kib} will
+attempt to use those to authenticate via the Native realm.
+
+TIP: Alternatively, {kib} also supports using a client certificate and private key in PEM format with the `elasticsearch.ssl.certificate`
+and `elasticsearch.ssl.key` settings. For more information, see <<settings,{kib} configuration settings>>.
+--
+
+. Restart {kib}.
+
+NOTE: The steps above enable {kib} to authenticate to {es} using a certificate. However, end users will only be able to authenticate to
+{kib} with a username and password. To allow end users to authenticate to {kib} using certificates, see <<pki-authentication,{kib} PKI
+authentication>>.

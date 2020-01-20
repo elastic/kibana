@@ -39,7 +39,7 @@ const requestTypeOptions = [
   },
   {
     label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
-      defaultMessage: 'points',
+      defaultMessage: 'clusters',
     }),
     value: RENDER_AS.POINT,
   },

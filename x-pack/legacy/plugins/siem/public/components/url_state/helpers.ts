@@ -78,8 +78,8 @@ export const getUrlType = (pageName: string): UrlStateType => {
     return 'host';
   } else if (pageName === SiemPageName.network) {
     return 'network';
-  } else if (pageName === SiemPageName.detectionEngine) {
-    return 'detection-engine';
+  } else if (pageName === SiemPageName.detections) {
+    return 'detections';
   } else if (pageName === SiemPageName.timelines) {
     return 'timeline';
   } else if (pageName === SiemPageName.case) {
@@ -113,8 +113,8 @@ export const getCurrentLocation = (
       return CONSTANTS.networkDetails;
     }
     return CONSTANTS.networkPage;
-  } else if (pageName === SiemPageName.detectionEngine) {
-    return CONSTANTS.detectionEnginePage;
+  } else if (pageName === SiemPageName.detections) {
+    return CONSTANTS.detectionsPage;
   } else if (pageName === SiemPageName.timelines) {
     return CONSTANTS.timelinePage;
   } else if (pageName === SiemPageName.case) {
@@ -124,23 +124,6 @@ export const getCurrentLocation = (
     return CONSTANTS.casePage;
   }
   return CONSTANTS.unknown;
-};
-
-export const isKqlForRoute = (
-  pageName: string,
-  detailName: string | undefined,
-  queryLocation: LocationTypes | null = null
-): boolean => {
-  const currentLocation = getCurrentLocation(pageName, detailName);
-  if (
-    (currentLocation === CONSTANTS.hostsPage && queryLocation === CONSTANTS.hostsPage) ||
-    (currentLocation === CONSTANTS.networkPage && queryLocation === CONSTANTS.networkPage) ||
-    (currentLocation === CONSTANTS.hostsDetails && queryLocation === CONSTANTS.hostsDetails) ||
-    (currentLocation === CONSTANTS.networkDetails && queryLocation === CONSTANTS.networkDetails)
-  ) {
-    return true;
-  }
-  return false;
 };
 
 export const makeMapStateToProps = () => {
