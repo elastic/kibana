@@ -49,13 +49,13 @@ A package contains all the assets for the Elastic Stack. A more detailed definit
 
 == Indexing Strategy
 
-Ingest Management enforces an indexing strategy to allow the system to automically detect indices and run queries on it. In short the indexing stategy looks as following:
+Ingest Management enforces an indexing strategy to allow the system to automically detect indices and run queries on it. In short the indexing strategy looks as following:
 
 ```
 {type}-{namespace}-{dataset}
 ```
 
-The `{type}` can be `logs` or `metrics`. The `{namespace}` is the part where the user can use free form. The only requirement here is that it is a valid in Elasticsearch indices and does NOT contain a `-`. The `dataset` is defined by the data that is indexed. A `dataset` must also be a valid for Elasticsearch indices and not contain `-`. It is expected that the fields for type, namespace and dataset are part of each event and are constant keywords.
+The `{type}` can be `logs` or `metrics`. The `{namespace}` is the part where the user can use free form. The only requirement is that it is valid in an Elasticsearch index and does NOT contain a `-`. The `dataset` is defined by the data that is indexed. A `dataset` must also be valid in an Elasticsearch index and not contain `-`. It is expected that the fields for type, namespace and dataset are part of each event and are constant keywords.
 
 Note: More `{type}`s might be added in the future like `apm` and `endpoint`.
 
