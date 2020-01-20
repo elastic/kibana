@@ -100,16 +100,17 @@ export class AxisLabels {
       if (!config.get('labels.filter')) return;
 
       const el = $(config.get('rootEl')).find(config.get('elSelector'));
-      const maxSize = config.isHorizontal() ? el.width() : el.height();
+      const upperBound = config.isHorizontal() ? el.width() : el.height();
+      const lowerBound = 0;
       const scaleRange = self.axisScale.scale.range();
       const scaleWidth = Math.abs(scaleRange[scaleRange.length - 1] - scaleRange[0]);
-      const scaleStartPad = 0.5 * (maxSize - scaleWidth);
+      const scaleStartPad = 0.5 * (upperBound - scaleWidth);
 
       selection.selectAll('.tick text').text(function(d) {
         const parentNode = d3.select(this.parentNode).node();
         const currentTickCenter =
           scaleStartPad +
-          (config.isHorizontal() ? self.axisScale.scale(d) : maxSize - self.axisScale.scale(d));
+          (config.isHorizontal() ? self.axisScale.scale(d) : upperBound - self.axisScale.scale(d));
         const currentTickSize =
           (config.isHorizontal() ? parentNode.getBBox().width : parentNode.getBBox().height) *
           padding;
@@ -117,8 +118,8 @@ export class AxisLabels {
         const currentTickStartEdge = currentTickCenter - currentTickHalfSize;
         const currentTickEndEdge = currentTickCenter + currentTickHalfSize;
 
-        const outsideUpperBound = currentTickEndEdge > maxSize;
-        const outsideLowerBound = currentTickStartEdge < 0;
+        const outsideUpperBound = currentTickEndEdge > upperBound;
+        const outsideLowerBound = currentTickStartEdge < lowerBound;
         const overlapsLastTick =
           currentTickEndEdge >= lastTickStartEdge && currentTickStartEdge <= lastTickEndEdge;
 
