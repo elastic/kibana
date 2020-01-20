@@ -170,7 +170,7 @@ export class Form extends PureComponent<FormProps> {
       }
     } catch (e) {
       toastNotifications.addDanger(
-        i18n.translate('kbn.management.settings.field.saveFieldErrorMessage', {
+        i18n.translate('kbn.management.settings.form.saveErrorMessage', {
           defaultMessage: 'Unable to save',
         })
       );
@@ -330,12 +330,9 @@ export class Form extends PureComponent<FormProps> {
                   size="s"
                   iconType="cross"
                   onClick={this.clearUnsaved}
-                  aria-label={i18n.translate(
-                    'kbn.management.settings.field.cancelButtonAriaLabel',
-                    {
-                      defaultMessage: 'Cancel all changes',
-                    }
-                  )}
+                  aria-label={i18n.translate('kbn.management.settings.form.cancelButtonAriaLabel', {
+                    defaultMessage: 'Cancel all changes',
+                  })}
                 >
                   Cancel all changes
                 </EuiButtonEmpty>
@@ -359,12 +356,9 @@ export class Form extends PureComponent<FormProps> {
                     size="s"
                     iconType="check"
                     onClick={this.saveAll}
-                    aria-label={i18n.translate(
-                      'kbn.management.settings.field.saveButtonAriaLabel',
-                      {
-                        defaultMessage: 'Save changes',
-                      }
-                    )}
+                    aria-label={i18n.translate('kbn.management.settings.form.saveButtonAriaLabel', {
+                      defaultMessage: 'Save changes',
+                    })}
                     isLoading={this.state.loading}
                   >
                     Save changes
