@@ -17,26 +17,36 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
 import { EuiKeyboardAccessible, keyCodes } from '@elastic/eui';
 
-class MetricVisValue extends Component {
+import { MetricVisMetric } from '../types';
+
+interface MetricVisValueProps {
+  metric: MetricVisMetric;
+  fontSize: number;
+  onFilter?: (metric: MetricVisMetric) => void;
+  showLabel?: boolean;
+}
+
+export class MetricVisValue extends Component<MetricVisValueProps> {
   onClick = () => {
-    this.props.onFilter(this.props.metric);
+    if (this.props.onFilter) {
+      this.props.onFilter(this.props.metric);
+    }
   };
 
-  onKeyPress = e => {
-    if (e.keyCode === keyCodes.ENTER) {
+  onKeyPress = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.keyCode === keyCodes.ENTER) {
       this.onClick();
     }
   };
 
   render() {
     const { fontSize, metric, onFilter, showLabel } = this.props;
-    const hasFilter = !!onFilter;
+    const hasFilter = Boolean(onFilter);
 
     const metricValueStyle = {
       fontSize: `${fontSize}pt`,
@@ -52,10 +62,10 @@ class MetricVisValue extends Component {
       <div
         className={containerClassName}
         style={{ backgroundColor: metric.bgColor }}
-        onClick={hasFilter ? this.onClick : null}
-        onKeyPress={hasFilter ? this.onKeyPress : null}
-        tabIndex={hasFilter ? 0 : null}
-        role={hasFilter ? 'button' : null}
+        onClick={hasFilter ? this.onClick : undefined}
+        onKeyPress={hasFilter ? this.onKeyPress : undefined}
+        tabIndex={hasFilter ? 0 : undefined}
+        role={hasFilter ? 'button' : undefined}
       >
         <div
           className="mtrVis__value"
@@ -68,7 +78,7 @@ class MetricVisValue extends Component {
            * `metric.value` is set by the MetricVisComponent, so this component must make sure this value never contains
            * any unsafe HTML (e.g. by bypassing the field formatter).
            */
-          dangerouslySetInnerHTML={{ __html: metric.value }} //eslint-disable-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: metric.value }} // eslint-disable-line react/no-danger
         />
         {showLabel && <div>{metric.label}</div>}
       </div>
@@ -81,12 +91,3 @@ class MetricVisValue extends Component {
     return metricComponent;
   }
 }
-
-MetricVisValue.propTypes = {
-  fontSize: PropTypes.number.isRequired,
-  metric: PropTypes.object.isRequired,
-  onFilter: PropTypes.func,
-  showLabel: PropTypes.bool,
-};
-
-export { MetricVisValue };

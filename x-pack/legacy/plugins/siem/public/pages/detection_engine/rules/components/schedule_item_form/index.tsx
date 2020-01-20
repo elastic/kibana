@@ -150,7 +150,13 @@ export const ScheduleItem = ({
           />
         }
       >
-        <EuiFieldNumber fullWidth min={0} onChange={onChangeTimeVal} value={timeVal} {...rest} />
+        <EuiFieldNumber
+          fullWidth
+          min={minimumValue}
+          onChange={onChangeTimeVal}
+          value={timeVal}
+          {...rest}
+        />
       </EuiFormControlLayout>
     </StyledEuiFormRow>
   );

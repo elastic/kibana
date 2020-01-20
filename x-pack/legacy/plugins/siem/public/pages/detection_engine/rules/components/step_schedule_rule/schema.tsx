@@ -14,13 +14,14 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldIntervalLabel',
       {
-        defaultMessage: 'Rule run interval & look-back',
+        defaultMessage: 'Runs every',
       }
     ),
     helpText: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldIntervalHelpText',
       {
-        defaultMessage: 'How often and how far back this rule will search specified indices.',
+        defaultMessage:
+          'Rules run periodically and detect signals within the specified time frame.',
       }
     ),
   },
@@ -28,15 +29,14 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldAdditionalLookBackLabel',
       {
-        defaultMessage: 'Additional look-back',
+        defaultMessage: 'Additional look-back time',
       }
     ),
     labelAppend: OptionalFieldLabel,
     helpText: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldAdditionalLookBackHelpText',
       {
-        defaultMessage:
-          'Add more time to the look-back range in order to prevent potential gaps in signal reporting.',
+        defaultMessage: 'Adds time to the look-back period to prevent missed signals.',
       }
     ),
   },
