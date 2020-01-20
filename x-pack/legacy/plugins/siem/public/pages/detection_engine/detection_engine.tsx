@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect } from 'react-redux';
@@ -148,7 +148,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
                     }
                     title={i18n.PAGE_TITLE}
                   >
-                    <EuiButton fill href="#/detection-engine/rules" iconType="gear">
+                    <EuiButton fill href="#/detections/rules" iconType="gear">
                       {i18n.BUTTON_MANAGE_RULES}
                     </EuiButton>
                   </HeaderPage>
