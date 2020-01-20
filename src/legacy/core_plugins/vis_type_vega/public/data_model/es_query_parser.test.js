@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import expect from '@kbn/expect';
-import sinon from 'sinon';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import { EsQueryParser } from '../es_query_parser';
+import { EsQueryParser } from './es_query_parser';
+
+jest.mock('../helpers', () => ({
+  getEsShardTimeout: jest.fn(() => '10000'),
+}));
 
 const second = 1000;
 const minute = 60 * second;
@@ -39,41 +41,57 @@ function create(min, max, dashboardCtx) {
       getTimeBounds: () => ({ min, max }),
     },
     () => {},
-    _.cloneDeep(dashboardCtx),
+    cloneDeep(dashboardCtx),
     () => (inst.$$$warnCount = (inst.$$$warnCount || 0) + 1)
   );
   return inst;
 }
 
 describe(`EsQueryParser time`, () => {
-  it(`roundInterval(4s)`, () => expect(EsQueryParser._roundInterval(4 * second)).to.be(`1s`));
-  it(`roundInterval(4hr)`, () => expect(EsQueryParser._roundInterval(4 * hour)).to.be(`3h`));
-  it(`getTimeBound`, () => expect(create(1000, 2000)._getTimeBound({}, `min`)).to.be(1000));
-  it(`getTimeBound(shift 2d)`, () =>
-    expect(create(5, 2000)._getTimeBound({ shift: 2 }, `min`)).to.be(5 + 2 * day));
-  it(`getTimeBound(shift -2hr)`, () =>
-    expect(create(10 * day, 20 * day)._getTimeBound({ shift: -2, unit: `h` }, `min`)).to.be(
-      10 * day - 2 * hour
-    ));
-  it(`createRangeFilter({})`, () => {
-    const obj = {};
-    expect(create(1000, 2000)._createRangeFilter(obj))
-      .to.eql({
-        format: 'strict_date_optional_time',
-        gte: moment(1000).toISOString(),
-        lte: moment(2000).toISOString(),
-      })
-      .and.to.be(obj);
+  test(`roundInterval(4s)`, () => {
+    expect(EsQueryParser._roundInterval(4 * second)).toBe(`1s`);
   });
-  it(`createRangeFilter(shift 1s)`, () => {
+
+  test(`roundInterval(4hr)`, () => {
+    expect(EsQueryParser._roundInterval(4 * hour)).toBe(`3h`);
+  });
+
+  test(`getTimeBound`, () => {
+    expect(create(1000, 2000)._getTimeBound({}, `min`)).toBe(1000);
+  });
+
+  test(`getTimeBound(shift 2d)`, () => {
+    expect(create(5, 2000)._getTimeBound({ shift: 2 }, `min`)).toBe(5 + 2 * day);
+  });
+
+  test(`getTimeBound(shift -2hr)`, () => {
+    expect(create(10 * day, 20 * day)._getTimeBound({ shift: -2, unit: `h` }, `min`)).toBe(
+      10 * day - 2 * hour
+    );
+  });
+
+  test(`createRangeFilter({})`, () => {
+    const obj = {};
+    const result = create(1000, 2000)._createRangeFilter(obj);
+
+    expect(result).toEqual({
+      format: 'strict_date_optional_time',
+      gte: moment(1000).toISOString(),
+      lte: moment(2000).toISOString(),
+    });
+    expect(result).toBe(obj);
+  });
+
+  test(`createRangeFilter(shift 1s)`, () => {
     const obj = { shift: 5, unit: 's' };
-    expect(create(1000, 2000)._createRangeFilter(obj))
-      .to.eql({
-        format: 'strict_date_optional_time',
-        gte: moment(6000).toISOString(),
-        lte: moment(7000).toISOString(),
-      })
-      .and.to.be(obj);
+    const result = create(1000, 2000)._createRangeFilter(obj);
+
+    expect(result).toEqual({
+      format: 'strict_date_optional_time',
+      gte: moment(6000).toISOString(),
+      lte: moment(7000).toISOString(),
+    });
+    expect(result).toBe(obj);
   });
 });
 
@@ -82,79 +100,78 @@ describe('EsQueryParser.populateData', () => {
   let parser;
 
   beforeEach(() => {
-    searchStub = sinon.stub();
+    searchStub = jest.fn(() => Promise.resolve([{}, {}]));
     parser = new EsQueryParser({}, { search: searchStub }, undefined, undefined);
-
-    searchStub.returns(Promise.resolve([{}, {}]));
   });
-  it('should set the timeout for each request', async () => {
+
+  test('should set the timeout for each request', async () => {
     await parser.populateData([
       { url: { body: {} }, dataObject: {} },
       { url: { body: {} }, dataObject: {} },
     ]);
-    expect(searchStub.firstCall.args[0][0].body.timeout).to.be.defined;
+    expect(searchStub.mock.calls[0][0][0].body.timeout).toBe.defined;
   });
 
-  it('should remove possible timeout parameters on a request', async () => {
+  test('should remove possible timeout parameters on a request', async () => {
     await parser.populateData([
       { url: { timeout: '500h', body: { timeout: '500h' } }, dataObject: {} },
     ]);
-    expect(searchStub.firstCall.args[0][0].body.timeout).to.be.defined;
-    expect(searchStub.firstCall.args[0][0].timeout).to.be(undefined);
+    expect(searchStub.mock.calls[0][0][0].body.timeout).toBe.defined;
+    expect(searchStub.mock.calls[0][0][0].timeout).toBe(undefined);
   });
 });
 
 describe(`EsQueryParser.injectQueryContextVars`, () => {
-  function test(obj, expected, ctx) {
+  function check(obj, expected, ctx) {
     return () => {
       create(rangeStart, rangeEnd, ctx)._injectContextVars(obj, true);
-      expect(obj).to.eql(expected);
+      expect(obj).toEqual(expected);
     };
   }
 
-  it(`empty`, test({}, {}));
-  it(`simple`, () => {
+  test(`empty`, check({}, {}));
+  test(`simple`, () => {
     const obj = { a: { c: 10 }, b: [{ d: 2 }, 4, 5], c: [], d: {} };
-    test(obj, _.cloneDeep(obj));
+    check(obj, cloneDeep(obj));
   });
-  it(`must clause empty`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [] }, {}));
-  it(
+  test(`must clause empty`, check({ arr: ['%dashboard_context-must_clause%'] }, { arr: [] }, {}));
+  test(
     `must clause arr`,
-    test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [...ctxArr.bool.must] }, ctxArr)
+    check({ arr: ['%dashboard_context-must_clause%'] }, { arr: [...ctxArr.bool.must] }, ctxArr)
   );
-  it(
+  test(
     `must clause obj`,
-    test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [ctxObj.bool.must] }, ctxObj)
+    check({ arr: ['%dashboard_context-must_clause%'] }, { arr: [ctxObj.bool.must] }, ctxObj)
   );
-  it(
+  test(
     `mixed clause arr`,
-    test(
+    check(
       { arr: [1, '%dashboard_context-must_clause%', 2, '%dashboard_context-must_not_clause%'] },
       { arr: [1, ...ctxArr.bool.must, 2, ...ctxArr.bool.must_not] },
       ctxArr
     )
   );
-  it(
+  test(
     `mixed clause obj`,
-    test(
+    check(
       { arr: ['%dashboard_context-must_clause%', 1, '%dashboard_context-must_not_clause%', 2] },
       { arr: [ctxObj.bool.must, 1, ctxObj.bool.must_not, 2] },
       ctxObj
     )
   );
-  it(
+  test(
     `%autointerval% = true`,
-    test({ interval: { '%autointerval%': true } }, { interval: `1h` }, ctxObj)
+    check({ interval: { '%autointerval%': true } }, { interval: `1h` }, ctxObj)
   );
-  it(
+  test(
     `%autointerval% = 10`,
-    test({ interval: { '%autointerval%': 10 } }, { interval: `3h` }, ctxObj)
+    check({ interval: { '%autointerval%': 10 } }, { interval: `3h` }, ctxObj)
   );
-  it(`%timefilter% = min`, test({ a: { '%timefilter%': 'min' } }, { a: rangeStart }));
-  it(`%timefilter% = max`, test({ a: { '%timefilter%': 'max' } }, { a: rangeEnd }));
-  it(
+  test(`%timefilter% = min`, check({ a: { '%timefilter%': 'min' } }, { a: rangeStart }));
+  test(`%timefilter% = max`, check({ a: { '%timefilter%': 'max' } }, { a: rangeEnd }));
+  test(
     `%timefilter% = true`,
-    test(
+    check(
       { a: { '%timefilter%': true } },
       {
         a: {
@@ -168,24 +185,24 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
 });
 
 describe(`EsQueryParser.parseEsRequest`, () => {
-  function test(req, ctx, expected) {
+  function check(req, ctx, expected) {
     return () => {
       create(rangeStart, rangeEnd, ctx).parseUrl({}, req);
-      expect(req).to.eql(expected);
+      expect(req).toEqual(expected);
     };
   }
 
-  it(
+  test(
     `%context_query%=true`,
-    test({ index: '_all', '%context_query%': true }, ctxArr, {
+    check({ index: '_all', '%context_query%': true }, ctxArr, {
       index: '_all',
       body: { query: ctxArr },
     })
   );
 
-  it(
+  test(
     `%context%=true`,
-    test({ index: '_all', '%context%': true }, ctxArr, { index: '_all', body: { query: ctxArr } })
+    check({ index: '_all', '%context%': true }, ctxArr, { index: '_all', body: { query: ctxArr } })
   );
 
   const expectedForCtxAndTimefield = {
@@ -211,23 +228,23 @@ describe(`EsQueryParser.parseEsRequest`, () => {
     },
   };
 
-  it(
+  test(
     `%context_query%='abc'`,
-    test({ index: '_all', '%context_query%': 'abc' }, ctxArr, expectedForCtxAndTimefield)
+    check({ index: '_all', '%context_query%': 'abc' }, ctxArr, expectedForCtxAndTimefield)
   );
 
-  it(
+  test(
     `%context%=true, %timefield%='abc'`,
-    test(
+    check(
       { index: '_all', '%context%': true, '%timefield%': 'abc' },
       ctxArr,
       expectedForCtxAndTimefield
     )
   );
 
-  it(
+  test(
     `%timefield%='abc'`,
-    test({ index: '_all', '%timefield%': 'abc' }, ctxArr, {
+    check({ index: '_all', '%timefield%': 'abc' }, ctxArr, {
       index: '_all',
       body: {
         query: {
@@ -243,11 +260,11 @@ describe(`EsQueryParser.parseEsRequest`, () => {
     })
   );
 
-  it(`no esRequest`, test({ index: '_all' }, ctxArr, { index: '_all', body: {} }));
+  test(`no esRequest`, check({ index: '_all' }, ctxArr, { index: '_all', body: {} }));
 
-  it(
+  test(
     `esRequest`,
-    test({ index: '_all', body: { query: 2 } }, ctxArr, {
+    check({ index: '_all', body: { query: 2 } }, ctxArr, {
       index: '_all',
       body: { query: 2 },
     })
