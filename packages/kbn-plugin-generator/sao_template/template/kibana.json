@@ -3,6 +3,6 @@
   "version": "<%= kbnVersion %>",
   "server": <%= hasServer %>,
   "ui": <%= hasUi %>,
-  "requiredPlugins": [],
+  "requiredPlugins": ["navigation"],
   "optionalPlugins": []
 }

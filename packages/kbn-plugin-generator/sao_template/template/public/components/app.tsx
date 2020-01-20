@@ -35,18 +35,19 @@ import {
 } from '@elastic/eui';
 
 import { AppMountParameters, CoreStart } from '<%= relRoot %>/../src/core/public';
+import { NavigationPublicPluginStart } from '<%= relRoot %>/../src/plugins/navigation/public';
 
-import { PLUGIN_NAME } from '../../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 
 interface <%= upperCamelCaseName %>AppDeps { 
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
+  navigation: NavigationPublicPluginStart;
 };
 
-const <%= upperCamelCaseName %>App = ({ basename, notifications, http }: <%= upperCamelCaseName %>AppDeps) => {
+const <%= upperCamelCaseName %>App = ({ basename, notifications, http, navigation }: <%= upperCamelCaseName %>AppDeps) => {
   const [timestamp, setTimestamp] = useState<string | undefined>();
-
   const fetchData = () => {
     http.get('/api/<%= snakeCase(name) %>/example').then((res) => {
       setTimestamp(res.time);
@@ -57,6 +58,10 @@ const <%= upperCamelCaseName %>App = ({ basename, notifications, http }: <%= upp
   return (
     <Router basename={basename}>
       <I18nProvider>
+        <navigation.ui.TopNavMenu
+          appName={ PLUGIN_ID }
+          showSearchBar={true}
+        />
         <EuiPage>
           <EuiPageBody>
             <EuiPageHeader>
@@ -118,10 +123,10 @@ const <%= upperCamelCaseName %>App = ({ basename, notifications, http }: <%= upp
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  {}: any,
+  { navigation }: any,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<<%= upperCamelCaseName %>App basename={appBasePath} notifications={notifications} http={http}/>, element);
+  ReactDOM.render(<<%= upperCamelCaseName %>App basename={appBasePath} notifications={notifications} http={http} navigation={navigation}/>, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
