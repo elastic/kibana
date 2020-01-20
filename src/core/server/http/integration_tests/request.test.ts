@@ -47,7 +47,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 describe('KibanaRequest', () => {
   describe('events', () => {
     describe('aborted$', () => {
-      it('emits once and competes when request aborted', async done => {
+      it('emits once and completes when request aborted', async done => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
@@ -76,7 +76,7 @@ describe('KibanaRequest', () => {
         setTimeout(() => incomingRequest.abort(), 50);
       });
 
-      it('does not emit when request handled', async () => {
+      it('completes & does not emit when request handled', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
@@ -99,7 +99,7 @@ describe('KibanaRequest', () => {
         expect(completeSpy).toHaveBeenCalledTimes(1);
       });
 
-      it('does not emit when request rejected', async () => {
+      it('completes & does not emit when request rejected', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
