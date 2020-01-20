@@ -27,6 +27,7 @@ import {
   registerTelemetryUsageCollector,
   registerLocalizationUsageCollector,
   registerTelemetryPluginUsageCollector,
+  registerManagementUsageCollector,
 } from './collectors';
 
 export interface PluginsSetup {
@@ -50,5 +51,6 @@ export class TelemetryPlugin {
     registerLocalizationUsageCollector(usageCollection, server);
     registerTelemetryUsageCollector(usageCollection, server);
     registerUiMetricUsageCollector(usageCollection, server);
+    registerManagementUsageCollector(usageCollection, server);
   }
 }

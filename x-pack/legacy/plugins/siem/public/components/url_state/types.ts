@@ -24,7 +24,13 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  'detection-engine': [],
+  detections: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   host: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
@@ -39,12 +45,18 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
-  overview: [CONSTANTS.timeline, CONSTANTS.timerange],
+  overview: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
 };
 
 export type LocationTypes =
-  | CONSTANTS.detectionEnginePage
+  | CONSTANTS.detectionsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
   | CONSTANTS.networkDetails

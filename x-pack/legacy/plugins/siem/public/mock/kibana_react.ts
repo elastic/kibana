@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React from 'react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -20,7 +22,7 @@ import {
   DEFAULT_TO,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_TIMEZONE_BROWSER,
+  DEFAULT_BYTES_FORMAT,
 } from '../../common/constants';
 import { defaultIndexPattern } from '../../default_index_pattern';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
@@ -38,8 +40,8 @@ export const mockUiSettings: Record<string, any> = {
     value: DEFAULT_INTERVAL_VALUE,
   },
   [DEFAULT_INDEX_KEY]: defaultIndexPattern,
+  [DEFAULT_BYTES_FORMAT]: '0,0.[0]b',
   [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-  [DEFAULT_TIMEZONE_BROWSER]: 'America/New_York',
   [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
   [DEFAULT_DARK_MODE]: false,
 };
@@ -69,7 +71,18 @@ export const createUseUiSetting$Mock = () => {
 };
 
 export const createUseKibanaMock = () => {
-  const services = { ...createKibanaCoreStartMock(), ...createKibanaPluginsStartMock() };
+  const core = createKibanaCoreStartMock();
+  const plugins = createKibanaPluginsStartMock();
+  const useUiSetting = createUseUiSettingMock();
+
+  const services = {
+    ...core,
+    ...plugins,
+    uiSettings: {
+      ...core.uiSettings,
+      get: useUiSetting,
+    },
+  };
 
   return () => ({ services });
 };

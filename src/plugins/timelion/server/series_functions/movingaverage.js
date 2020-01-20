@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
-import toMS from '../../common/lib/to_milliseconds.js';
+import { toMS } from '../../common/lib/to_milliseconds';
 
 const validPositions = ['left', 'right', 'center'];
 const defaultPosition = 'center';
