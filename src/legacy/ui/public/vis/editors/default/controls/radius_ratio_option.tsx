@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { EuiFormRow, EuiIconTip, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,7 +26,7 @@ import { AggControlProps } from './agg_control_props';
 const DEFAULT_VALUE = 50;
 const PARAM_NAME = 'radiusRatio';
 
-function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlProps) {
+function RadiusRatioOptionControl({ editorStateParams, setStateParamValue }: AggControlProps) {
   const label = (
     <>
       <FormattedMessage
@@ -45,9 +45,15 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
 
   useEffect(() => {
     if (!editorStateParams.radiusRatio) {
-      setValue(editorStateParams, PARAM_NAME, DEFAULT_VALUE);
+      setStateParamValue(PARAM_NAME, DEFAULT_VALUE);
     }
   }, []);
+
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) =>
+      setStateParamValue(PARAM_NAME, parseFloat(e.currentTarget.value)),
+    [setStateParamValue]
+  );
 
   return (
     <>
@@ -58,9 +64,7 @@ function RadiusRatioOptionControl({ editorStateParams, setValue }: AggControlPro
           min={1}
           max={100}
           value={editorStateParams.radiusRatio || DEFAULT_VALUE}
-          onChange={(
-            e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
-          ) => setValue(editorStateParams, PARAM_NAME, parseFloat(e.currentTarget.value))}
+          onChange={onChange}
           showRange
           showValue
           valueAppend="%"

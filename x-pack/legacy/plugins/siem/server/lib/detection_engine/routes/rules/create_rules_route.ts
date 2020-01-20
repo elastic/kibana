@@ -39,7 +39,6 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         enabled,
         false_positives: falsePositives,
         from,
-        immutable,
         query,
         language,
         output_index: outputIndex,
@@ -78,17 +77,14 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, finalIndex);
         if (!indexExists) {
-          return new Boom(
-            `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-            {
-              statusCode: 400,
-            }
+          return Boom.badRequest(
+            `To create a rule, the index must exist first. Index ${finalIndex} does not exist`
           );
         }
         if (ruleId != null) {
           const rule = await readRules({ alertsClient, ruleId });
           if (rule != null) {
-            return new Boom(`rule_id: "${ruleId}" already exists`, { statusCode: 409 });
+            return Boom.conflict(`rule_id: "${ruleId}" already exists`);
           }
         }
         const createdRule = await createRules({
@@ -99,7 +95,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           enabled,
           falsePositives,
           from,
-          immutable,
+          immutable: false,
           query,
           language,
           outputIndex: finalIndex,
