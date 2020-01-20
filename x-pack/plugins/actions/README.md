@@ -92,7 +92,7 @@ This is the primary function for an action type. Whenever the action needs to ex
 ### Example
 
 The built-in email action type provides a good example of creating an action type with non-trivial configuration and params: 
-[x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts](server/builtin_action_types/email.ts)
+[x-pack/plugins/actions/server/builtin_action_types/email.ts](server/builtin_action_types/email.ts)
 
 
 ## RESTful API
