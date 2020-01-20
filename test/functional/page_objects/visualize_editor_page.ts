@@ -364,7 +364,11 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
     public async changeYAxisFilterLabelsCheckbox(axisId: string, enabled: boolean) {
       const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
-      await testSubjects.setCheckbox(selector, enabled ? 'check' : 'uncheck');
+      const button = await find.byCssSelector(selector);
+      const isEnabled = (await button.getAttribute('aria-checked')) === 'true';
+      if (enabled !== isEnabled) {
+        await button.click();
+      }
     }
 
     public async setSize(newValue: string, aggId: string) {
