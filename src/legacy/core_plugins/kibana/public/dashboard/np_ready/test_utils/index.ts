@@ -17,29 +17,5 @@
  * under the License.
  */
 
-import { searchSourceMock } from 'ui/courier/search_source/mocks';
-import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-
-export function getSavedDashboardMock(
-  config?: Partial<SavedObjectDashboard>
-): SavedObjectDashboard {
-  return {
-    id: '123',
-    title: 'my dashboard',
-    panelsJSON: '[]',
-    searchSource: searchSourceMock,
-    copyOnSave: false,
-    timeRestore: false,
-    timeTo: 'now',
-    timeFrom: 'now-15m',
-    optionsJSON: '',
-    lastSavedTitle: '',
-    destroy: () => {},
-    save: () => {
-      return Promise.resolve('123');
-    },
-    getQuery: () => ({ query: '', language: 'kuery' }),
-    getFilters: () => [],
-    ...config,
-  } as SavedObjectDashboard;
-}
+export { getAppStateMock } from './get_app_state_mock';
+export { getSavedDashboardMock } from './get_saved_dashboard_mock';

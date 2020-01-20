@@ -17,6 +17,32 @@
  * under the License.
  */
 
-export { getAppStateMock } from './get_app_state_mock';
-export { getSavedDashboardMock } from './get_saved_dashboard_mock';
-export { getEmbeddableFactoryMock } from './get_embeddable_factories_mock';
+import { AppStateClass } from '../../legacy_imports';
+
+/**
+ * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
+ * This could be improved if we extract the appState and state classes externally of their angular providers.
+ * @return {AppStateMock}
+ */
+export function getAppStateMock(): AppStateClass {
+  class AppStateMock {
+    constructor(defaults: any) {
+      Object.assign(this, defaults);
+    }
+
+    on() {}
+    off() {}
+    toJSON() {
+      return '';
+    }
+    save() {}
+    translateHashToRison(stateHashOrRison: string | string[]) {
+      return stateHashOrRison;
+    }
+    getQueryParamName() {
+      return '';
+    }
+  }
+
+  return AppStateMock;
+}

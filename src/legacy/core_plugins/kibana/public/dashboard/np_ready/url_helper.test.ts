@@ -47,7 +47,7 @@ import {
   addEmbeddableToDashboardUrl,
   getLensUrlFromDashboardAbsoluteUrl,
   getUrlVars,
-} from '../np_ready/url_helper';
+} from './url_helper';
 
 describe('Dashboard URL Helper', () => {
   beforeEach(() => {
