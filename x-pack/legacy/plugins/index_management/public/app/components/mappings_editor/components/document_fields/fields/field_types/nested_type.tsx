@@ -11,10 +11,8 @@ import { DynamicParameter } from '../../field_parameters';
 
 export const NestedType = () => {
   return (
-    <>
-      <BasicParametersSection>
-        <DynamicParameter />
-      </BasicParametersSection>
-    </>
+    <BasicParametersSection>
+      <DynamicParameter />
+    </BasicParametersSection>
   );
 };

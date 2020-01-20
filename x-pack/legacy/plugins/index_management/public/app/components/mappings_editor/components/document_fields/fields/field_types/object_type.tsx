@@ -11,12 +11,10 @@ import { DynamicParameter, EnabledParameter } from '../../field_parameters';
 
 export const ObjectType = () => {
   return (
-    <>
-      <BasicParametersSection>
-        <DynamicParameter />
+    <BasicParametersSection>
+      <DynamicParameter />
 
-        <EnabledParameter />
-      </BasicParametersSection>
-    </>
+      <EnabledParameter />
+    </BasicParametersSection>
   );
 };
