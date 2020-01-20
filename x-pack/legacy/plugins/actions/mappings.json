@@ -27,9 +27,6 @@
       },
       "apiKey": {
         "type": "binary"
-      },
-      "createdAt": {
-        "type": "date"
       }
     }
   }

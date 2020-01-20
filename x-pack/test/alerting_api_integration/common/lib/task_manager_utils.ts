@@ -59,7 +59,7 @@ export class TaskManagerUtils {
                 },
                 {
                   range: {
-                    'action_task_params.createdAt': {
+                    updated_at: {
                       gte: createdAtFilter,
                     },
                   },
