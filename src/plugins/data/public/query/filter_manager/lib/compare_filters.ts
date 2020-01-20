@@ -20,16 +20,26 @@
 import { defaults, isEqual, omit, map, sortBy } from 'lodash';
 import { esFilters } from '../../../../common';
 
+export interface FilterCompareOptions {
+  disabled?: boolean;
+  negate?: boolean;
+  state?: boolean;
+}
+
 /**
  * Include disabled, negate and store when comparing filters
  */
-export const COMPARE_FILTER_STATE = {
+export const COMPARE_ALL_OPTIONS: FilterCompareOptions = {
   disabled: true,
   negate: true,
   state: true,
 };
 
-const mapFilter = (filter: esFilters.Filter, comparators: any, excludedAttributes: string[]) => {
+const mapFilter = (
+  filter: esFilters.Filter,
+  comparators: FilterCompareOptions,
+  excludedAttributes: string[]
+) => {
   const cleaned: esFilters.FilterMeta = omit(filter, excludedAttributes);
 
   if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
@@ -40,7 +50,7 @@ const mapFilter = (filter: esFilters.Filter, comparators: any, excludedAttribute
 
 const mapFilterArray = (
   filters: esFilters.Filter[],
-  comparators: any,
+  comparators: FilterCompareOptions,
   excludedAttributes: string[]
 ) => {
   return sortBy(
@@ -53,16 +63,16 @@ const mapFilterArray = (
  *
  * @param {esFilters.Filter | esFilters.Filter[]} first The first filter or filter array to compare
  * @param {esFilters.Filter | esFilters.Filter[]} second The second filter or filter array to compare
- * @param {object} comparatorOptions Parameters to use for comparison
+ * @param {FilterCompareOptions} comparatorOptions Parameters to use for comparison
  *
  * @returns {bool} Filters are the same
  */
 export const compareFilters = (
   first: esFilters.Filter | esFilters.Filter[],
   second: esFilters.Filter | esFilters.Filter[],
-  comparatorOptions: any = {}
+  comparatorOptions: FilterCompareOptions = {}
 ) => {
-  let comparators: any = {};
+  let comparators: FilterCompareOptions = {};
 
   const excludedAttributes: string[] = ['$$hashKey', 'meta'];
 

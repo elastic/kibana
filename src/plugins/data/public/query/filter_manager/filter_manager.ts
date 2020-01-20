@@ -22,7 +22,7 @@ import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 
-import { compareFilters, COMPARE_FILTER_STATE } from './lib/compare_filters';
+import { compareFilters, COMPARE_ALL_OPTIONS } from './lib/compare_filters';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
@@ -79,7 +79,7 @@ export class FilterManager {
   private handleStateUpdate(newFilters: esFilters.Filter[]) {
     newFilters.sort(sortFilters);
 
-    const filtersUpdated = !compareFilters(this.filters, newFilters, COMPARE_FILTER_STATE);
+    const filtersUpdated = !compareFilters(this.filters, newFilters, COMPARE_ALL_OPTIONS);
     const updatedOnlyDisabledFilters = onlyDisabledFiltersChanged(newFilters, this.filters);
 
     this.filters = newFilters;

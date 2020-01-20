@@ -23,7 +23,7 @@ import { FilterManager, esFilters } from '../../../../../../plugins/data/public'
 
 import {
   compareFilters,
-  COMPARE_FILTER_STATE,
+  COMPARE_ALL_OPTIONS,
   // this whole file will soon be deprecated by new state management.
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/data/public/query/filter_manager/lib/compare_filters';
@@ -73,12 +73,12 @@ export class FilterStateManager {
       const globalFilterChanged = !compareFilters(
         this.filterManager.getGlobalFilters(),
         globalFilters,
-        COMPARE_FILTER_STATE
+        COMPARE_ALL_OPTIONS
       );
       const appFilterChanged = !compareFilters(
         this.filterManager.getAppFilters(),
         appFilters,
-        COMPARE_FILTER_STATE
+        COMPARE_ALL_OPTIONS
       );
       const filterStateChanged = globalFilterChanged || appFilterChanged;
 

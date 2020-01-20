@@ -19,7 +19,7 @@
 
 import { filter } from 'lodash';
 import { esFilters } from '../../../../common';
-import { compareFilters, COMPARE_FILTER_STATE } from './compare_filters';
+import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
 
 const isEnabled = (f: esFilters.Filter) => f && f.meta && !f.meta.disabled;
 
@@ -36,5 +36,5 @@ export const onlyDisabledFiltersChanged = (
   const newEnabledFilters = filter(newFilters || [], isEnabled);
   const oldEnabledFilters = filter(oldFilters || [], isEnabled);
 
-  return compareFilters(oldEnabledFilters, newEnabledFilters, COMPARE_FILTER_STATE);
+  return compareFilters(oldEnabledFilters, newEnabledFilters, COMPARE_ALL_OPTIONS);
 };

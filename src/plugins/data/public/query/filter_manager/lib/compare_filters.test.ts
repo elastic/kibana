@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { compareFilters, COMPARE_FILTER_STATE } from './compare_filters';
+import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
 import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
@@ -168,7 +168,7 @@ describe('filter manager utilities', () => {
       expect(compareFilters([f1], [f2])).toBeTruthy();
     });
 
-    test('should compare duplicates with COMPARE_FILTER_STATE should check store', () => {
+    test('should compare duplicates with COMPARE_ALL_OPTIONS should check store', () => {
       const f1 = {
         $state: { store: esFilters.FilterStateStore.APP_STATE },
         ...esFilters.buildQueryFilter(
@@ -186,10 +186,10 @@ describe('filter manager utilities', () => {
         ),
       };
 
-      expect(compareFilters([f1], [f2], COMPARE_FILTER_STATE)).toBeFalsy();
+      expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeFalsy();
     });
 
-    test('should compare duplicates with COMPARE_FILTER_STATE should not check key and value ', () => {
+    test('should compare duplicates with COMPARE_ALL_OPTIONS should not check key and value ', () => {
       const f1 = {
         $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
         ...esFilters.buildQueryFilter(
@@ -210,7 +210,7 @@ describe('filter manager utilities', () => {
       f2.meta.key = 'wassup';
       f2.meta.value = 'dog';
 
-      expect(compareFilters([f1], [f2], COMPARE_FILTER_STATE)).toBeTruthy();
+      expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeTruthy();
     });
   });
 });
