@@ -22,7 +22,6 @@ export const IPsQueryTabBody = ({
   skip,
   startDate,
   setQuery,
-  indexPattern,
   flowTarget,
 }: IPsQueryTabBodyProps) => (
   <NetworkTopNFlowQuery
@@ -50,7 +49,6 @@ export const IPsQueryTabBody = ({
         fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
         flowTargeted={flowTarget}
         id={id}
-        indexPattern={indexPattern}
         inspect={inspect}
         isInspect={isInspected}
         loading={loading}

@@ -45,11 +45,25 @@ const MyEuiFlexItem = styled(EuiFlexItem)`
   white-space: nowrap;
 `;
 
-const EuiSelectableContainer = styled.div`
+const EuiSelectableContainer = styled.div<{ loading: boolean }>`
   .euiSelectable {
     .euiFormControlLayout__childrenWrapper {
       display: flex;
     }
+    ${({ loading }) => `${
+      loading
+        ? `
+      .euiFormControlLayoutIcons {
+        display: none;
+      }
+      .euiFormControlLayoutIcons.euiFormControlLayoutIcons--right {
+        display: block;
+        left: 12px;
+        top: 12px;
+      }`
+        : ''
+    }
+    `}
   }
 `;
 
@@ -74,6 +88,7 @@ const basicSuperSelectOptions = [
 const getBasicSelectableOptions = (timelineId: string) => [
   {
     description: i18n.DEFAULT_TIMELINE_DESCRIPTION,
+    favorite: [],
     label: i18n.DEFAULT_TIMELINE_TITLE,
     id: null,
     title: i18n.DEFAULT_TIMELINE_TITLE,
@@ -143,7 +158,11 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={`${option.favorite ? 'starFilled' : 'starEmpty'}`} />
+          <EuiIcon
+            type={`${
+              option.favorite != null && isEmpty(option.favorite) ? 'starEmpty' : 'starFilled'
+            }`}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -260,7 +279,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onlyUserFavorite={onlyFavorites}
       >
         {({ timelines, loading, totalCount }) => (
-          <EuiSelectableContainer>
+          <EuiSelectableContainer loading={loading}>
             <EuiSelectable
               height={POPOVER_HEIGHT}
               isLoading={loading && timelines.length === 0}
@@ -293,7 +312,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                   (t, index) =>
                     ({
                       description: t.description,
-                      favorite: !isEmpty(t.favorite),
+                      favorite: t.favorite,
                       label: t.title,
                       id: t.savedObjectId,
                       key: `${t.title}-${index}`,

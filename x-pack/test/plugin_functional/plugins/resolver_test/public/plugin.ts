@@ -23,31 +23,35 @@ export class ResolverTestPlugin
       ResolverTestPluginSetupDependencies,
       ResolverTestPluginStartDependencies
     > {
-  private resolveEmbeddable!: (
-    value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
-  ) => void;
-  private embeddablePromise: Promise<IEmbeddable | undefined> = new Promise<
-    IEmbeddable | undefined
-  >(resolve => {
-    this.resolveEmbeddable = resolve;
-  });
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<ResolverTestPluginStartDependencies>) {
     core.application.register({
       id: 'resolver_test',
       title: i18n.translate('xpack.resolver_test.pluginTitle', {
         defaultMessage: 'Resolver Test',
       }),
       mount: async (_context, params) => {
+        let resolveEmbeddable: (
+          value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
+        ) => void;
+
+        const promise = new Promise<IEmbeddable | undefined>(resolve => {
+          resolveEmbeddable = resolve;
+        });
+
+        (async () => {
+          const [, { embeddable }] = await core.getStartServices();
+          const factory = embeddable.getEmbeddableFactory('resolver');
+          resolveEmbeddable!(factory.create({ id: 'test basic render' }));
+        })();
+
         const { renderApp } = await import('./applications/resolver_test');
-        return renderApp(params, this.embeddablePromise);
+        /**
+         * Pass a promise which resolves to the Resolver embeddable.
+         */
+        return renderApp(params, promise);
       },
     });
   }
 
-  public start(...args: [unknown, { embeddable: IEmbeddableStart }]) {
-    const [, plugins] = args;
-    const factory = plugins.embeddable.getEmbeddableFactory('resolver');
-    this.resolveEmbeddable(factory.create({ id: 'test basic render' }));
-  }
-  public stop() {}
+  public start() {}
 }

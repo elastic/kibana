@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
@@ -52,6 +60,10 @@ import { inputsSelectors } from '../../../../store/inputs';
 import { State } from '../../../../store';
 import { InputsRange } from '../../../../store/inputs/model';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../../store/inputs/actions';
+import { RuleActionsOverflow } from '../components/rule_actions_overflow';
+import { RuleStatusFailedCallOut } from './status_failed_callout';
+import { FailureHistory } from './failure_history';
+import { RuleStatus } from '../components/rule_status';
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -65,6 +77,24 @@ export interface DispatchProps {
     to: number;
   }>;
 }
+
+enum RuleDetailTabs {
+  signals = 'signals',
+  failures = 'failures',
+}
+
+const ruleDetailTabs = [
+  {
+    id: RuleDetailTabs.signals,
+    name: detectionI18n.SIGNAL,
+    disabled: false,
+  },
+  {
+    id: RuleDetailTabs.failures,
+    name: i18n.FAILURE_HISTORY_TAB,
+    disabled: false,
+  },
+];
 
 type RuleDetailsComponentProps = ReduxProps & DispatchProps;
 
@@ -81,6 +111,9 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
     } = useUserInfo();
     const { ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
+    // This is used to re-trigger api rule status when user de/activate rule
+    const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
+    const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
       rule,
       detailsView: true,
@@ -149,11 +182,50 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       filters,
     ]);
 
+    const tabs = useMemo(
+      () => (
+        <EuiTabs>
+          {ruleDetailTabs.map(tab => (
+            <EuiTab
+              onClick={() => setRuleDetailTab(tab.id)}
+              isSelected={tab.id === ruleDetailTab}
+              disabled={tab.disabled}
+              key={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ),
+      [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
+    );
+    const ruleError = useMemo(
+      () =>
+        rule?.status === 'failed' &&
+        ruleDetailTab === RuleDetailTabs.signals &&
+        rule?.last_failure_at != null ? (
+          <RuleStatusFailedCallOut
+            message={rule?.last_failure_message ?? ''}
+            date={rule?.last_failure_at}
+          />
+        ) : null,
+      [rule, ruleDetailTab]
+    );
+
     const updateDateRangeCallback = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]
+    );
+
+    const handleOnChangeEnabledRule = useCallback(
+      (enabled: boolean) => {
+        if (ruleEnabled == null || enabled !== ruleEnabled) {
+          setRuleEnabled(enabled);
+        }
+      },
+      [ruleEnabled, setRuleEnabled]
     );
 
     return (
@@ -176,18 +248,19 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
                           text: i18n.BACK_TO_RULES,
                         }}
-                        badgeOptions={{ text: i18n.EXPERIMENTAL }}
                         border
                         subtitle={subTitle}
                         subtitle2={[
-                          lastSignals != null ? (
-                            <>
-                              {detectionI18n.LAST_SIGNAL}
-                              {': '}
-                              {lastSignals}
-                            </>
-                          ) : null,
-                          'Status: Comming Soon',
+                          ...(lastSignals != null
+                            ? [
+                                <>
+                                  {detectionI18n.LAST_SIGNAL}
+                                  {': '}
+                                  {lastSignals}
+                                </>,
+                              ]
+                            : []),
+                          <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
                         ]}
                         title={title}
                       >
@@ -198,6 +271,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                               isDisabled={userHasNoPermissions}
                               enabled={rule?.enabled ?? false}
                               optionLabel={i18n.ACTIVATE_RULE}
+                              onChange={handleOnChangeEnabledRule}
                             />
                           </EuiFlexItem>
 
@@ -212,76 +286,86 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                                   {ruleI18n.EDIT_RULE_SETTINGS}
                                 </EuiButton>
                               </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <RuleActionsOverflow
+                                  rule={rule}
+                                  userHasNoPermissions={userHasNoPermissions}
+                                />
+                              </EuiFlexItem>
                             </EuiFlexGroup>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </HeaderPage>
-
+                      {ruleError}
+                      {tabs}
                       <EuiSpacer />
+                      {ruleDetailTab === RuleDetailTabs.signals && (
+                        <>
+                          <EuiFlexGroup>
+                            <EuiFlexItem component="section" grow={1}>
+                              <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                                {defineRuleData != null && (
+                                  <StepDefineRule
+                                    descriptionDirection="column"
+                                    isReadOnlyView={true}
+                                    isLoading={false}
+                                    defaultValues={defineRuleData}
+                                  />
+                                )}
+                              </StepPanel>
+                            </EuiFlexItem>
 
-                      <EuiFlexGroup>
-                        <EuiFlexItem component="section" grow={1}>
-                          <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                            {defineRuleData != null && (
-                              <StepDefineRule
-                                descriptionDirection="column"
-                                isReadOnlyView={true}
-                                isLoading={false}
-                                defaultValues={defineRuleData}
-                              />
-                            )}
-                          </StepPanel>
-                        </EuiFlexItem>
+                            <EuiFlexItem component="section" grow={2}>
+                              <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
+                                {aboutRuleData != null && (
+                                  <StepAboutRule
+                                    descriptionDirection="row"
+                                    isReadOnlyView={true}
+                                    isLoading={false}
+                                    defaultValues={aboutRuleData}
+                                  />
+                                )}
+                              </StepPanel>
+                            </EuiFlexItem>
 
-                        <EuiFlexItem component="section" grow={2}>
-                          <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
-                            {aboutRuleData != null && (
-                              <StepAboutRule
-                                descriptionDirection="row"
-                                isReadOnlyView={true}
-                                isLoading={false}
-                                defaultValues={aboutRuleData}
-                              />
-                            )}
-                          </StepPanel>
-                        </EuiFlexItem>
-
-                        <EuiFlexItem component="section" grow={1}>
-                          <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                            {scheduleRuleData != null && (
-                              <StepScheduleRule
-                                descriptionDirection="column"
-                                isReadOnlyView={true}
-                                isLoading={false}
-                                defaultValues={scheduleRuleData}
-                              />
-                            )}
-                          </StepPanel>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-
-                      <EuiSpacer />
-                      <SignalsHistogramPanel
-                        filters={signalMergedFilters}
-                        query={query}
-                        from={from}
-                        stackByOptions={signalsHistogramOptions}
-                        to={to}
-                        updateDateRange={updateDateRangeCallback}
-                      />
-
-                      <EuiSpacer />
-
-                      {ruleId != null && (
-                        <SignalsTable
-                          canUserCRUD={canUserCRUD ?? false}
-                          defaultFilters={signalDefaultFilters}
-                          hasIndexWrite={hasIndexWrite ?? false}
-                          from={from}
-                          loading={loading}
-                          signalsIndex={signalIndexName ?? ''}
-                          to={to}
-                        />
+                            <EuiFlexItem component="section" grow={1}>
+                              <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                                {scheduleRuleData != null && (
+                                  <StepScheduleRule
+                                    descriptionDirection="column"
+                                    isReadOnlyView={true}
+                                    isLoading={false}
+                                    defaultValues={scheduleRuleData}
+                                  />
+                                )}
+                              </StepPanel>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer />
+                          <SignalsHistogramPanel
+                            filters={signalMergedFilters}
+                            query={query}
+                            from={from}
+                            stackByOptions={signalsHistogramOptions}
+                            to={to}
+                            updateDateRange={updateDateRangeCallback}
+                          />
+                          <EuiSpacer />
+                          {ruleId != null && (
+                            <SignalsTable
+                              canUserCRUD={canUserCRUD ?? false}
+                              defaultFilters={signalDefaultFilters}
+                              hasIndexWrite={hasIndexWrite ?? false}
+                              from={from}
+                              loading={loading}
+                              signalsIndex={signalIndexName ?? ''}
+                              to={to}
+                            />
+                          )}
+                        </>
+                      )}
+                      {ruleDetailTab === RuleDetailTabs.failures && (
+                        <FailureHistory id={rule?.id} />
                       )}
                     </WrapperPage>
                   </StickyContainer>

@@ -78,8 +78,12 @@ export const RuleSchema = t.intersection([
     updated_by: t.string,
   }),
   t.partial({
+    last_failure_at: t.string,
+    last_failure_message: t.string,
     output_index: t.string,
     saved_id: t.string,
+    status: t.string,
+    status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
     version: t.number,
@@ -142,9 +146,52 @@ export interface DeleteRulesProps {
 }
 
 export interface DuplicateRulesProps {
-  rules: Rules;
+  rules: Rule[];
 }
 
 export interface BasicFetchProps {
   signal: AbortSignal;
+}
+
+export interface ImportRulesProps {
+  fileToImport: File;
+  overwrite?: boolean;
+  signal: AbortSignal;
+}
+
+export interface ImportRulesResponseError {
+  rule_id: string;
+  error: {
+    status_code: number;
+    message: string;
+  };
+}
+
+export interface ImportRulesResponse {
+  success: boolean;
+  success_count: number;
+  errors: ImportRulesResponseError[];
+}
+
+export interface ExportRulesProps {
+  ruleIds?: string[];
+  filename?: string;
+  excludeExportDetails?: boolean;
+  signal: AbortSignal;
+}
+
+export interface RuleStatus {
+  current_status: RuleInfoStatus;
+  failures: RuleInfoStatus[];
+}
+
+export type RuleStatusType = 'executing' | 'failed' | 'going to run' | 'succeeded';
+export interface RuleInfoStatus {
+  alert_id: string;
+  status_date: string;
+  status: RuleStatusType | null;
+  last_failure_at: string | null;
+  last_success_at: string | null;
+  last_failure_message: string | null;
+  last_success_message: string | null;
 }
