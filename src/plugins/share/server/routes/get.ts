@@ -17,23 +17,40 @@
  * under the License.
  */
 
-import { handleShortUrlError } from './lib/short_url_error';
-import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+import { CoreSetup, IRouter } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 
-export const createGotoRoute = ({ server, shortUrlLookup }) => ({
-  method: 'GET',
-  path: '/goto_LP/{urlId}',
-  handler: async function(request, h) {
-    try {
-      const url = await shortUrlLookup.getUrl(request.params.urlId, request);
+import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+import { ShortUrlLookupService } from './lib/short_url_lookup';
+import { getUrlPath } from '../../common/short_url_routes';
+
+export const createGetterRoute = ({
+  router,
+  shortUrlLookup,
+  http,
+}: {
+  router: IRouter;
+  shortUrlLookup: ShortUrlLookupService;
+  http: CoreSetup['http'];
+}) => {
+  router.get(
+    {
+      path: getUrlPath('{urlId}'),
+      validate: {
+        params: schema.object({ urlId: schema.string() }),
+      },
+    },
+    router.handleLegacyErrors(async function(context, request, response) {
+      const url = await shortUrlLookup.getUrl(request.params.urlId, {
+        savedObjects: context.core.savedObjects.client,
+      });
       shortUrlAssertValid(url);
 
-      const app = server.getHiddenUiAppById('stateSessionStorageRedirect');
-      return h.renderApp(app, {
-        redirectUrl: url,
+      return response.ok({
+        body: {
+          url,
+        },
       });
-    } catch (err) {
-      throw handleShortUrlError(err);
-    }
-  },
-});
+    })
+  );
+};
