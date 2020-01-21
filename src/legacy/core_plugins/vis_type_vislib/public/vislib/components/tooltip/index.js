@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { VisLegend } from './vislib_vis_legend';
-export { CUSTOM_LEGEND_VIS_TYPES } from './models';
+export { Tooltip } from './tooltip';
+export { hierarchicalTooltipFormatter } from './_hierarchical_tooltip_formatter';
+export { pointSeriesTooltipFormatter } from './_pointseries_tooltip_formatter';

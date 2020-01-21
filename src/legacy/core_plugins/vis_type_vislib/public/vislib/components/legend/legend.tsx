@@ -24,11 +24,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
 // @ts-ignore
-import { createFiltersFromEvent } from '../../../../../core_plugins/visualizations/public';
+import { createFiltersFromEvent } from '../../../../../visualizations/public';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
-import { VisLegendItem } from './vislib_vis_legend_item';
+import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
-import { getTableAggs } from '../../../visualize/loader/pipeline_helpers/utilities';
+import { getTableAggs } from '../../../legacy_imports';
 
 export interface VisLegendProps {
   vis: any;
@@ -138,7 +138,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       this.setState({
         labels: [
           {
-            label: i18n.translate('common.ui.vis.visTypes.legend.loadingLabel', {
+            label: i18n.translate('visTypeVislib.vislib.legend.loadingLabel', {
               defaultMessage: 'loading…',
             }),
           },
@@ -244,13 +244,13 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
           className={classNames('visLegend__toggle kbn-resetFocusState', {
             'visLegend__toggle--isOpen': open,
           })}
-          aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonAriaLabel', {
+          aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {
             defaultMessage: 'Toggle legend',
           })}
           aria-expanded={Boolean(open)}
           aria-controls={this.legendId}
           data-test-subj="vislibToggleLegend"
-          title={i18n.translate('common.ui.vis.visTypes.legend.toggleLegendButtonTitle', {
+          title={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonTitle', {
             defaultMessage: 'Toggle legend',
           })}
         >

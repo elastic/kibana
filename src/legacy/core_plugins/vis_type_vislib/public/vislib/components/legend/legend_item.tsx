@@ -77,7 +77,7 @@ const VisLegendItemComponent = ({
   const filterOptions: EuiButtonGroupOption[] = [
     {
       id: 'filterIn',
-      label: i18n.translate('common.ui.vis.visTypes.legend.filterForValueButtonAriaLabel', {
+      label: i18n.translate('visTypeVislib.vislib.legend.filterForValueButtonAriaLabel', {
         defaultMessage: 'Filter for value {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
@@ -86,7 +86,7 @@ const VisLegendItemComponent = ({
     },
     {
       id: 'filterOut',
-      label: i18n.translate('common.ui.vis.visTypes.legend.filterOutValueButtonAriaLabel', {
+      label: i18n.translate('visTypeVislib.vislib.legend.filterOutValueButtonAriaLabel', {
         defaultMessage: 'Filter out value {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
@@ -105,7 +105,7 @@ const VisLegendItemComponent = ({
         type="multi"
         isIconOnly
         isFullWidth
-        legend={i18n.translate('common.ui.vis.visTypes.legend.filterOptionsLegend', {
+        legend={i18n.translate('visTypeVislib.vislib.legend.filterOptionsLegend', {
           defaultMessage: '{legendDataLabel}, filter options',
           values: { legendDataLabel: item.label },
         })}
@@ -131,7 +131,7 @@ const VisLegendItemComponent = ({
       onBlur={onUnhighlight}
       data-label={item.label}
       title={item.label}
-      aria-label={i18n.translate('common.ui.vis.visTypes.legend.toggleOptionsButtonAriaLabel', {
+      aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleOptionsButtonAriaLabel', {
         defaultMessage: '{legendDataLabel}, toggle options',
         values: { legendDataLabel: item.label },
       })}
@@ -163,7 +163,7 @@ const VisLegendItemComponent = ({
         <div className="visLegend__valueColorPicker" role="listbox">
           <span id={`${legendId}ColorPickerDesc`} className="euiScreenReaderOnly">
             <FormattedMessage
-              id="common.ui.vis.visTypes.legend.setColorScreenReaderDescription"
+              id="visTypeVislib.vislib.legend.setColorScreenReaderDescription"
               defaultMessage="Set color for value {legendDataLabel}"
               values={{ legendDataLabel: item.label }}
             />

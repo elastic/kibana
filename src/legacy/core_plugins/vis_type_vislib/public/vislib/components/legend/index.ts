@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { Tooltip, TooltipProvider } from './tooltip';
+export { VisLegend } from './legend';
+export { CUSTOM_LEGEND_VIS_TYPES } from './models';

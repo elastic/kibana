@@ -23,7 +23,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiButtonGroup } from '@elastic/eui';
 
-import { VisLegend, VisLegendProps } from '../vislib_vis_legend/vislib_vis_legend';
+import { VisLegend, VisLegendProps } from './legend';
 import { legendColors } from './models';
 
 jest.mock('@elastic/eui', () => ({
@@ -31,10 +31,10 @@ jest.mock('@elastic/eui', () => ({
   htmlIdGenerator: jest.fn().mockReturnValue(() => 'legendId'),
 }));
 
-jest.mock('../../../visualize/loader/pipeline_helpers/utilities', () => ({
+jest.mock('../../../legacy_imports', () => ({
   getTableAggs: jest.fn(),
 }));
-jest.mock('../../../../../core_plugins/visualizations/public', () => ({
+jest.mock('../../../../../visualizations/public', () => ({
   createFiltersFromEvent: jest.fn().mockReturnValue(['yes']),
 }));
 
