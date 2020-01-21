@@ -19,17 +19,15 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
-import { Role, KibanaPrivileges } from '../../../../../../../common/model';
+import { Role, KibanaPrivileges, SecuredFeature } from '../../../../../../../common/model';
 import { PrivilegeDisplay } from '../space_aware_privilege_section/privilege_display';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-import { Feature } from '../../../../../../../../features/common';
 import { Privilege } from '../../../../../../../common/model/poc_kibana_privileges/privilege_instance';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props {
   role: Role;
-  features: Feature[];
   privilegeCalculator: POCPrivilegeCalculator;
   kibanaPrivileges: KibanaPrivileges;
   intl: InjectedIntl;
@@ -45,7 +43,7 @@ interface State {
 
 interface TableRow {
   featureId: string;
-  feature: Feature;
+  feature: SecuredFeature;
   inherited: Privilege[];
   effective: Privilege[];
   role: Role;
@@ -65,9 +63,11 @@ export class FeatureTable extends Component<Props, State> {
   }
 
   public render() {
-    const { role, features, privilegeCalculator, spacesIndex } = this.props;
+    const { role, privilegeCalculator, spacesIndex, kibanaPrivileges } = this.props;
 
-    const items: TableRow[] = features
+    const featurePrivileges = Array.from(kibanaPrivileges.getAllFeaturePrivileges().values());
+
+    const items: TableRow[] = featurePrivileges
       .sort((feature1, feature2) => {
         if (feature1.reserved && !feature2.reserved) {
           return 1;
@@ -112,7 +112,7 @@ export class FeatureTable extends Component<Props, State> {
             [featureId]: (
               <FeatureTableExpandedRow
                 spacesIndex={this.props.spacesIndex}
-                feature={this.props.features.find(f => f.id === featureId)!}
+                feature={featurePrivileges.find(f => f.id === featureId)!}
                 onChange={this.props.onChange}
                 role={this.props.role}
                 privilegeCalculator={this.props.privilegeCalculator}
@@ -144,7 +144,7 @@ export class FeatureTable extends Component<Props, State> {
             'xpack.security.management.editRole.featureTable.enabledRoleFeaturesFeatureColumnTitle',
           defaultMessage: 'Feature',
         }),
-        render: (feature: Feature) => {
+        render: (feature: SecuredFeature) => {
           let tooltipElement = null;
           if (feature.privilegesTooltip) {
             const tooltipContent = (
@@ -225,7 +225,7 @@ export class FeatureTable extends Component<Props, State> {
 
           // TODO: better min priv check
           const selectedPrivilege = effectiveFeaturePrivileges.find(afp => {
-            return record.feature.privileges.find(
+            return record.feature.primaryFeaturePrivileges.find(
               featurePriv => afp.id === featurePriv.id || afp.id === `minimal_${featurePriv.id}`
             );
           });
@@ -233,13 +233,6 @@ export class FeatureTable extends Component<Props, State> {
           const selectedPrivilegeId = selectedPrivilege?.id.startsWith('minimal_')
             ? selectedPrivilege?.id.substr('minimal_'.length)
             : selectedPrivilege?.id;
-
-          if (record.feature.id === 'discover')
-            console.log({
-              feature: record.feature.privileges,
-              effectiveFeaturePrivileges,
-              selectedPrivilegeId,
-            });
 
           // TODO
           const allowsNone =
@@ -273,7 +266,7 @@ export class FeatureTable extends Component<Props, State> {
             );
           }
 
-          const options = record.feature.privileges!.map(priv => {
+          const options = record.feature.primaryFeaturePrivileges.map(priv => {
             return {
               id: `${feature.id}_${priv.id}`,
               label: priv.name,

@@ -5,8 +5,11 @@
  */
 
 import { flatten, uniq } from 'lodash';
-import { Feature } from '../../../../features/server';
-import { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from '../../../common/model';
+import {
+  RawKibanaFeaturePrivileges,
+  RawKibanaPrivileges,
+  SecuredFeature,
+} from '../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import { FeaturesService } from '../../plugin';
@@ -20,7 +23,9 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
 
   return {
     get() {
-      const features = featuresService.getFeatures();
+      const features = featuresService
+        .getFeatures()
+        .map(feature => new SecuredFeature(feature.toRaw()));
       const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
 
       const allActions = uniq(
@@ -59,7 +64,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
       );
 
       return {
-        features: features.reduce((acc: RawKibanaFeaturePrivileges, feature: Feature) => {
+        features: features.reduce((acc: RawKibanaFeaturePrivileges, feature: SecuredFeature) => {
           for (const featurePrivilege of feature.privilegeIterator({
             augmentWithSubFeaturePrivileges: false,
           })) {
@@ -116,7 +121,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
           all: [actions.login, actions.version, ...allActions, actions.allHack],
           read: [actions.login, actions.version, ...readActions],
         },
-        reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {
+        reserved: features.reduce((acc: Record<string, string[]>, feature: SecuredFeature) => {
           if (feature.reserved) {
             acc[feature.id] = [
               actions.version,

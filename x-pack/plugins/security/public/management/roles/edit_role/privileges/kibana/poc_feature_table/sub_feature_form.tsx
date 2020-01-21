@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
-import { SubFeaturePrivilegeGroup } from '../../../../../../../../features/common/sub_feature_privilege_group';
+import { SubFeature, SubFeaturePrivilegeGroup } from '../../../../../../../common/model';
 import { FeaturePrivilegesExplanations } from '../../../../../../../common/model/poc_kibana_privileges/feature_privileges_explanations';
-import { SubFeature } from '../../../../../../../../features/common/sub_feature';
+
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props {

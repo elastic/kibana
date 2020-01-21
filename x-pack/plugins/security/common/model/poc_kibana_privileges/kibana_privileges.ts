@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Feature } from '../../../../features/public';
 import { RawKibanaPrivileges } from '../raw_kibana_privileges';
 import { Privilege, PrivilegeType } from './privilege_instance';
 import { PrivilegeCollection } from './privilege_collection';
 import { RoleKibanaPrivilege } from '../role';
+import { SecuredFeature } from '../secured_feature';
 
 function toPrivilege(type: PrivilegeType, entry: [string, string[]]): [string, Privilege] {
   const [privilegeId, actions] = entry;
@@ -26,15 +28,15 @@ export class KibanaPrivileges {
 
   private spaces: ReadonlyMap<string, Privilege>;
 
-  private feature: ReadonlyMap<string, ReadonlyMap<string, Privilege>>;
+  private feature: ReadonlyMap<string, SecuredFeature>;
 
-  constructor(rawKibanaPrivileges: RawKibanaPrivileges) {
-    this.global = recordsToPrivilegeMap('global_base', rawKibanaPrivileges.global);
-    this.spaces = recordsToPrivilegeMap('space_base', rawKibanaPrivileges.space);
+  constructor(rawKibanaPrivileges: RawKibanaPrivileges, features: Feature[]) {
+    this.global = recordsToPrivilegeMap('base', rawKibanaPrivileges.global);
+    this.spaces = recordsToPrivilegeMap('base', rawKibanaPrivileges.space);
     this.feature = new Map(
-      Object.entries(rawKibanaPrivileges.features).map(rawFeature => {
-        const [featureId, featurePrivileges] = rawFeature;
-        return [featureId, recordsToPrivilegeMap('feature', featurePrivileges)];
+      features.map(feature => {
+        const rawPrivs = rawKibanaPrivileges.features[feature.id];
+        return [feature.id, new SecuredFeature(feature.toRaw(), rawPrivs)];
       })
     );
   }
@@ -52,10 +54,7 @@ export class KibanaPrivileges {
   }
 
   public getFeaturePrivileges(featureId: string) {
-    if (this.feature.has(featureId)) {
-      return Array.from(this.feature.get(featureId)!.values());
-    }
-    return [];
+    return this.feature.get(featureId)?.allPrivileges ?? [];
   }
 
   public createCollectionFromRoleKibanaPrivileges(roleKibanaPrivileges: RoleKibanaPrivilege[]) {

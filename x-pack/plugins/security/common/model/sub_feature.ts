@@ -4,20 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SubFeatureConfig } from '../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
-import {
-  SubFeaturePrivilegeGroupConfig,
-  SubFeaturePrivilegeGroup,
-} from './sub_feature_privilege_group';
-
-export interface SubFeatureConfig {
-  id: string;
-  name: string;
-  privilegeGroups: SubFeaturePrivilegeGroupConfig[];
-}
+import { SubFeaturePrivilegeGroup } from '.';
 
 export class SubFeature {
-  constructor(private readonly config: SubFeatureConfig) {}
+  constructor(
+    private readonly config: SubFeatureConfig,
+    private readonly actionMapping: { [privilegeId: string]: string[] }
+  ) {}
 
   public get id() {
     return this.config.id;
@@ -42,7 +37,7 @@ export class SubFeature {
 
     for (const group of this.config.privilegeGroups) {
       yield* group.privileges
-        .map(p => new SubFeaturePrivilege(p))
+        .map(p => new SubFeaturePrivilege(p, this.actionMapping[p.id]))
         .filter(subFeaturePrivilege => predicate(subFeaturePrivilege, this));
     }
   }

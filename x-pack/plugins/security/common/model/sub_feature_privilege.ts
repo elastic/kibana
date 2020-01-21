@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FeatureKibanaPrivileges } from '../../../features/common';
 import { FeaturePrivilege } from './feature_privilege';
-import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 
 export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
@@ -14,23 +14,29 @@ export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
 }
 
 export class SubFeaturePrivilege extends FeaturePrivilege {
-  constructor(private readonly subPrivilegeConfig: SubFeaturePrivilegeConfig) {
-    super(subPrivilegeConfig.id, subPrivilegeConfig);
+  constructor(
+    protected readonly subPrivilegeConfig: SubFeaturePrivilegeConfig,
+    public readonly actions: string[] = []
+  ) {
+    super(subPrivilegeConfig.id, subPrivilegeConfig, actions);
   }
 
   public static empty() {
-    return new SubFeaturePrivilege({
-      id: '____EMPTY____',
-      name: '____EMPTY SUB FEATURE PRIVILEGE____',
-      includeIn: 'none',
-      api: [],
-      app: [],
-      ui: [],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-    });
+    return new SubFeaturePrivilege(
+      {
+        id: '____EMPTY____',
+        name: '____EMPTY SUB FEATURE PRIVILEGE____',
+        includeIn: 'none',
+        api: [],
+        app: [],
+        ui: [],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+      } as SubFeaturePrivilegeConfig,
+      []
+    );
   }
 
   public includeIn(primaryFeaturePrivilege: PrimaryFeaturePrivilege) {
@@ -52,6 +58,9 @@ export class SubFeaturePrivilege extends FeaturePrivilege {
       },
     };
 
-    return new SubFeaturePrivilege(mergedPrivilege);
+    return new SubFeaturePrivilege(
+      mergedPrivilege,
+      Array.from(new Set([...this.actions, ...otherSubFeature.actions]).values())
+    );
   }
 }

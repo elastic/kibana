@@ -39,7 +39,6 @@ import {
 import { IFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { Space } from '../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../features/public';
 import {
   KibanaPrivileges,
   RawKibanaPrivileges,
@@ -50,6 +49,7 @@ import {
   copyRole,
   prepareRoleClone,
   RoleIndexPrivilege,
+  SecuredFeature,
 } from '../../../../common/model';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from './validate_role';
@@ -230,7 +230,7 @@ function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup, spacesEnabled
 }
 
 function useFeatures(http: HttpStart, fatalErrors: FatalErrorsSetup) {
-  const [features, setFeatures] = useState<Feature[] | null>(null);
+  const [features, setFeatures] = useState<SecuredFeature[] | null>(null);
   useEffect(() => {
     http
       .get<IFeature[]>('/api/features')
@@ -250,7 +250,7 @@ function useFeatures(http: HttpStart, fatalErrors: FatalErrorsSetup) {
         fatalErrors.add(err);
         throw err;
       })
-      .then(rawFeatures => setFeatures(rawFeatures.map(raw => new Feature(raw))));
+      .then(rawFeatures => setFeatures(rawFeatures.map(raw => new SecuredFeature(raw))));
   }, [http, fatalErrors]);
 
   return features;
@@ -422,7 +422,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       <div>
         <EuiSpacer />
         <KibanaPrivilegesRegion
-          kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges)}
+          kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
           spaces={spaces}
           spacesEnabled={spacesEnabled}
           features={features}

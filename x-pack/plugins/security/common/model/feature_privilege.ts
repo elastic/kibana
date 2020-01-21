@@ -5,10 +5,17 @@
  */
 
 import _ from 'lodash';
-import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+import { FeatureKibanaPrivileges } from '../../../features/common';
+import { Privilege } from './poc_kibana_privileges/privilege_instance';
 
-export class FeaturePrivilege {
-  constructor(public readonly id: string, protected readonly config: FeatureKibanaPrivileges) {}
+export class FeaturePrivilege extends Privilege {
+  constructor(
+    id: string,
+    protected readonly config: FeatureKibanaPrivileges,
+    public readonly actions: string[] = []
+  ) {
+    super('feature', id, actions);
+  }
 
   public get name() {
     return this.config.name || _.capitalize(this.id);
@@ -43,7 +50,11 @@ export class FeaturePrivilege {
   }
 
   public merge(otherPrivilege: FeaturePrivilege) {
-    return new FeaturePrivilege(this.id, this.mergePrivilegeConfigs(otherPrivilege));
+    return new FeaturePrivilege(
+      this.id,
+      this.mergePrivilegeConfigs(otherPrivilege),
+      Array.from(new Set([...this.actions, ...otherPrivilege.actions]).values())
+    );
   }
 
   protected mergePrivilegeConfigs(other: FeaturePrivilege) {

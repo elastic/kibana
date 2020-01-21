@@ -6,12 +6,6 @@
 
 import { SubFeaturePrivilegeConfig, SubFeaturePrivilege } from './sub_feature_privilege';
 
-export interface SubFeaturePrivilegeGroupConfig {
-  name: string;
-  groupType: 'mutually_exclusive' | 'independent';
-  privileges: SubFeaturePrivilegeConfig[];
-}
-
 export class SubFeaturePrivilegeGroup {
   constructor(private readonly config: SubFeaturePrivilegeGroupConfig) {}
 

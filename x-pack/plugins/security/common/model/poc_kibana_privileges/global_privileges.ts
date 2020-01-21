@@ -11,7 +11,7 @@ export class KibanaGlobalPrivileges {
 
   public getAllPrivileges(): Privilege[] {
     return Object.entries(this.globalPrivilegesMap).map(
-      ([privilegeId, actions]) => new Privilege('global_base', privilegeId, actions)
+      ([privilegeId, actions]) => new Privilege('base', privilegeId, actions)
     );
   }
 }

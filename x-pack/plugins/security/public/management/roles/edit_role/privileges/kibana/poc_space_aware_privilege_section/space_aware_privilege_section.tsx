@@ -16,9 +16,13 @@ import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { Capabilities } from 'src/core/public';
-import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
+import {
+  KibanaPrivileges,
+  Role,
+  isReservedRole,
+  SecuredFeature,
+} from '../../../../../../../common/model';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../features/common';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
@@ -33,7 +37,6 @@ interface Props {
   validator: RoleValidator;
   intl: InjectedIntl;
   uiCapabilities: Capabilities;
-  features: Feature[];
 }
 
 interface State {
@@ -119,7 +122,6 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
             role={this.props.role}
             privilegeCalculator={this.props.privilegeCalculator}
             kibanaPrivileges={this.props.kibanaPrivileges}
-            features={this.props.features}
             intl={this.props.intl}
             onChange={this.onSpacesPrivilegeChange}
             onCancel={this.onCancelEditPrivileges}

@@ -5,7 +5,6 @@
  */
 import _ from 'lodash';
 import { Role } from '../../../../../../plugins/security/common/model';
-import { ScopedPrivilege } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/scoped_privilege';
 import { PrivilegeExplanation } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/privilege_explanation';
 import { FeaturePrivilegesExplanations } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/feature_privileges_explanations';
 import { Privilege } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/privilege_instance';
@@ -31,6 +30,10 @@ export class POCPrivilegeCalculator {
     }
 
     return entries;
+  }
+
+  public scopedInstance(role: Role, privilegeIndex: number) {
+    return {};
   }
 
   public getEffectiveBasePrivilege(role: Role, privilegeIndex: number) {
@@ -71,23 +74,16 @@ export class POCPrivilegeCalculator {
       privilegeSet ? [privilegeSet] : []
     );
 
-    const globalGrantingPrivileges = globalPrivileges
-      .getPrivilegesGranting(basePrivilege)
-      .map(gp => new ScopedPrivilege('global', gp));
+    const globalGrantingPrivileges = globalPrivileges.getPrivilegesGranting(basePrivilege);
 
     const grantingPrivileges = isGlobalPrivilege
       ? []
-      : spacePrivileges
-          .getPrivilegesGranting(basePrivilege)
-          .map(gp => new ScopedPrivilege('space', gp));
+      : spacePrivileges.getPrivilegesGranting(basePrivilege);
 
-    return new PrivilegeExplanation(
-      new ScopedPrivilege(isGlobalPrivilege ? 'global' : 'space', basePrivilege),
-      {
-        global: globalGrantingPrivileges,
-        space: isGlobalPrivilege ? [] : grantingPrivileges,
-      }
-    );
+    return new PrivilegeExplanation(basePrivilege, {
+      global: globalGrantingPrivileges,
+      space: isGlobalPrivilege ? [] : grantingPrivileges,
+    });
   }
 
   public getEffectiveFeaturePrivileges(role: Role, privilegeIndex: number, featureId: string) {
@@ -178,23 +174,16 @@ export class POCPrivilegeCalculator {
       .getFeaturePrivileges(featureId)
       .find(p => p.id === privilegeId)!;
 
-    const globalGrantingPrivileges = globalPrivileges
-      .getPrivilegesGranting(featurePrivilege)
-      .map(gp => new ScopedPrivilege('global', gp));
+    const globalGrantingPrivileges = globalPrivileges.getPrivilegesGranting(featurePrivilege);
 
     const grantingPrivileges = isGlobalPrivilege
       ? []
-      : spacePrivileges
-          .getPrivilegesGranting(featurePrivilege)
-          .map(gp => new ScopedPrivilege('space', gp));
+      : spacePrivileges.getPrivilegesGranting(featurePrivilege);
 
-    return new PrivilegeExplanation(
-      new ScopedPrivilege(isGlobalPrivilege ? 'global' : 'space', featurePrivilege),
-      {
-        global: globalGrantingPrivileges,
-        space: isGlobalPrivilege ? [] : grantingPrivileges,
-      }
-    );
+    return new PrivilegeExplanation(featurePrivilege, {
+      global: globalGrantingPrivileges,
+      space: isGlobalPrivilege ? [] : grantingPrivileges,
+    });
   }
 
   public getAssignedFeaturePrivileges(role: Role, privilegeIndex: number, featureId: string) {

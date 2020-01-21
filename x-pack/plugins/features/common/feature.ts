@@ -5,13 +5,9 @@
  */
 
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
-import { SubFeaturePrivilege } from './sub_feature_privilege';
-import { SubFeature, SubFeatureConfig } from './sub_feature';
-import { FeaturePrivilege } from './feature_privilege';
 
 export class Feature {
-  constructor(private readonly config: IFeature) {}
+  constructor(protected readonly config: IFeature) {}
 
   public get id() {
     return this.config.id;
@@ -37,101 +33,20 @@ export class Feature {
     return this.config.management;
   }
 
-  public get excludeFromBasePrivileges() {
-    return Boolean(this.config.excludeFromBasePrivileges);
-  }
-
   public get icon() {
     return this.config.icon;
   }
 
-  public get privilegesTooltip() {
-    return this.config.privilegesTooltip;
-  }
-
-  public get reserved() {
-    return this.config.reserved
-      ? {
-          // TODO priv id
-          privilege: new FeaturePrivilege('_reserved_', this.config.reserved.privilege),
-          description: this.config.reserved.description,
-        }
-      : undefined;
-  }
-
-  public get primaryFeaturePrivileges() {
-    return Object.entries(this.config.privileges || {}).map(
-      ([id, privilege]) => new PrimaryFeaturePrivilege(id, privilege)
-    );
-  }
-
-  public get minimalPrimaryFeaturePrivileges() {
-    return Object.entries(this.config.privileges || {}).map(
-      ([id, privilege]) => new PrimaryFeaturePrivilege(`minimal_${id}`, privilege)
-    );
+  public get privileges() {
+    return this.config.privileges;
   }
 
   public get subFeatures() {
-    if (Array.isArray(this.config.subFeatures)) {
-      return this.config.subFeatures.map(sf => new SubFeature(sf));
-    }
-    return [];
+    return this.config.subFeatures;
   }
 
   public toRaw() {
     return { ...this.config };
-  }
-
-  // TODO: this is a shim
-  public get privileges() {
-    return this.primaryFeaturePrivileges;
-  }
-
-  public *privilegeIterator({
-    augmentWithSubFeaturePrivileges = true,
-    predicate = () => true,
-  }: {
-    augmentWithSubFeaturePrivileges?: boolean;
-    predicate?: (privilege: PrimaryFeaturePrivilege, feature: Feature) => boolean;
-  }): IterableIterator<PrimaryFeaturePrivilege> {
-    if (!this.config.privileges) {
-      return [];
-    }
-
-    const allSubFeaturePrivileges: SubFeaturePrivilege[] = [];
-
-    if (augmentWithSubFeaturePrivileges) {
-      for (const subFeature of this.subFeatures) {
-        for (const subFeaturePriv of subFeature.privilegeIterator()) {
-          allSubFeaturePrivileges.push(subFeaturePriv);
-        }
-      }
-    }
-
-    yield* this.primaryFeaturePrivileges
-      .filter(privilege => (predicate ? predicate(privilege, this) : true))
-      .map(privilege => {
-        const subFeaturePrivsToMerge = allSubFeaturePrivileges.filter(priv =>
-          priv.includeIn(privilege)
-        );
-
-        const subFeaturePrivileges: SubFeaturePrivilege = subFeaturePrivsToMerge.reduce(
-          (acc, addon) => {
-            return acc.merge(addon);
-          },
-          SubFeaturePrivilege.empty()
-        );
-
-        const mergedPrivilege = privilege.merge(subFeaturePrivileges);
-
-        return mergedPrivilege;
-      });
-  }
-
-  public *subFeaturePrivilegeIterator(): IterableIterator<SubFeaturePrivilege> {
-    for (const subFeature of this.subFeatures) {
-      yield* subFeature.privilegeIterator();
-    }
   }
 }
 
@@ -244,4 +159,20 @@ export interface IFeature {
     privilege: FeatureKibanaPrivileges;
     description: string;
   };
+}
+
+export interface SubFeatureConfig {
+  id: string;
+  name: string;
+  privilegeGroups: SubFeaturePrivilegeGroupConfig[];
+}
+export interface SubFeaturePrivilegeGroupConfig {
+  name: string;
+  groupType: 'mutually_exclusive' | 'independent';
+  privileges: SubFeaturePrivilegeConfig[];
+}
+
+export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
+  id: string;
+  includeIn: 'all' | 'read' | 'none';
 }

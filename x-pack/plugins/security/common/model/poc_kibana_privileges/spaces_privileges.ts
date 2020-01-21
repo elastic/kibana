@@ -10,7 +10,7 @@ export class KibanaSpacesPrivileges {
 
   public getAllPrivileges(): Privilege[] {
     return Object.entries(this.spacesPrivilegesMap).map(
-      ([privilegeId, actions]) => new Privilege('space_base', privilegeId, actions)
+      ([privilegeId, actions]) => new Privilege('base', privilegeId, actions)
     );
   }
 }

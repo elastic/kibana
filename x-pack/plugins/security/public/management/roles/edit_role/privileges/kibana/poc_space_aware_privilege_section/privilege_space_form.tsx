@@ -36,7 +36,6 @@ interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
   privilegeCalculator: POCPrivilegeCalculator;
-  features: Feature[];
   spaces: Space[];
   editingIndex: number;
   onChange: (role: Role) => void;
@@ -269,7 +268,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
         <FeatureTable
           role={this.state.role}
-          features={this.props.features}
           intl={this.props.intl}
           privilegeCalculator={this.props.privilegeCalculator}
           onChange={this.onFeaturePrivilegesChange}

@@ -12,6 +12,10 @@ export class PrimaryFeaturePrivilege extends FeaturePrivilege {
   }
 
   public merge(otherPrivilege: FeaturePrivilege) {
-    return new PrimaryFeaturePrivilege(this.id, this.mergePrivilegeConfigs(otherPrivilege));
+    return new PrimaryFeaturePrivilege(
+      this.id,
+      this.mergePrivilegeConfigs(otherPrivilege),
+      Array.from(new Set([...this.actions, ...otherPrivilege.actions]).values())
+    );
   }
 }

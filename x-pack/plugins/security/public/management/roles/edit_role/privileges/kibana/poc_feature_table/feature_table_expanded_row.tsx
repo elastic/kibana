@@ -7,14 +7,12 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
-import { PrimaryFeaturePrivilege } from '../../../../../../../../features/common/primary_feature_privilege';
-import { Role } from '../../../../../../../common/model';
-import { Feature } from '../../../../../../../../features/public';
+import { Role, SecuredFeature, PrimaryFeaturePrivilege } from '../../../../../../../common/model';
 import { SubFeatureForm } from './sub_feature_form';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
 interface Props {
-  feature: Feature;
+  feature: SecuredFeature;
   role: Role;
   spacesIndex: number;
   privilegeCalculator: POCPrivilegeCalculator;
@@ -98,9 +96,8 @@ export const FeatureTableExpandedRow = ({
     privilegeExplanations.exists((featureId, privilegeId, explanation) => {
       return (
         !explanation.isGranted() ||
-        !explanation
-          .getGrantSources()
-          .some(source => source.type === 'global_base' || source.type === 'space_base')
+        !explanation.getGrantSources().global.some(source => source.type === 'base') ||
+        !explanation.getGrantSources().space.some(source => source.type === 'base')
       );
     });
 
@@ -109,7 +106,7 @@ export const FeatureTableExpandedRow = ({
     privilegeExplanations.exists((featureId, privilegeId, explanation) => {
       return explanation
         .getGrantSources()
-        .some(source => source.scope === 'global' && subFeaturePrivileges.includes(privilegeId));
+        .global.some(source => subFeaturePrivileges.includes(privilegeId));
     });
 
   const isCustomizingSubFeaturePrivileges =
