@@ -7,7 +7,7 @@
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
-} from '../../../../../src/legacy/ui/public/courier';
+} from '../../../../../src/legacy/core_plugins/data/public';
 import { esFilters } from '../../../../../src/plugins/data/public';
 import { npStart } from 'ui/new_platform';
 
