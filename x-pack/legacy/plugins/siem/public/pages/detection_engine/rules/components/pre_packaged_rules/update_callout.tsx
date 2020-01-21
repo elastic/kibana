@@ -20,7 +20,7 @@ const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCal
   numberOfUpdatedRules,
   updateRules,
 }) => (
-  <EuiCallOut size="s" title={i18n.UPDATE_PREPACKAGED_RULES_TITLE}>
+  <EuiCallOut title={i18n.UPDATE_PREPACKAGED_RULES_TITLE}>
     <p>{i18n.UPDATE_PREPACKAGED_RULES_MSG(numberOfUpdatedRules)}</p>
     <EuiButton onClick={updateRules} size="s" isLoading={loading}>
       {i18n.UPDATE_PREPACKAGED_RULES(numberOfUpdatedRules)}

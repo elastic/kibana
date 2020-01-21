@@ -123,7 +123,7 @@ export const RulesComponent = React.memo(() => {
             {prePackagedRuleStatus === 'ruleNotInstalled' && (
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  iconType="plusInCircle"
+                  iconType="indexOpen"
                   isLoading={loadingCreatePrePackagedRules}
                   isDisabled={userHasNoPermissions || loading}
                   onClick={handleCreatePrePackagedRules}
