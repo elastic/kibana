@@ -22,29 +22,29 @@ automatically when you submit a PR.
 
 Smoke Tests are located in `siem/cypress/integration/smoke_tests`
 
-## Test Helpers
+## Structure
 
-_Test helpers_ are functions that may be re-used across tests.
+### Tasks
 
-- Reusable code and CSS selectors should be added to
-`siem/cypress/integration/lib`, as described below.
+_Tasks_ are functions that my be re-used across tests. Inside the _tasks_ folder there are some other folders that represents 
+the page to which we will perform the actions. For each folder we are going to create a file for each one of the sections that
+ has the page.
 
-### Reusable Test Helper Functions and CSS Selectors
+i.e.
+- tasks
+  - hosts
+    - events.ts
 
-The `cypress/integration/lib` directory contains code intended to be re-used
-across many different tests. Add reusable test helper functions and CSS
-selectors to directories under `cypress/integration/lib`.
+### Screens
 
-- Files named `helpers.ts` (e.g. `siem/cypress/integration/lib/login/helpers.ts`)
-contain functions (e.g. `login`) that may be imported and invoked from multiple tests.
+In _screens_ folder we are going to find all the elements we want to interact in our tests. Inside _screens_ fonder there
+are some other folders that represents the page that contains the elements the tests are going to interact with. For each 
+folder we are going to create a file for each one of the sections that the page has.
 
-- Files named `selectors.ts` export CSS selectors for re-use. For example,
-`siem/cypress/integration/lib/login/selectors.ts` exports the following selector
-that matches the Username text area in the Kibana login page:
-
-```sh
-export const USERNAME = '[data-test-subj="loginUsername"]';
-```
+i.e.
+- tasks
+  - hosts
+    - events.ts      
 
 ## Mock Data
 
