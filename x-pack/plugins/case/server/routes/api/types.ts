@@ -9,6 +9,7 @@ import {
   CommentSchema,
   NewCaseSchema,
   NewCommentSchema,
+  SavedOptionsFindOptionsSchema,
   UpdatedCaseSchema,
   UpdatedCommentSchema,
   UserSchema,
@@ -17,6 +18,7 @@ import {
 export type NewCaseType = TypeOf<typeof NewCaseSchema>;
 export type NewCommentFormatted = TypeOf<typeof CommentSchema>;
 export type NewCommentType = TypeOf<typeof NewCommentSchema>;
+export type SavedOptionsFindOptionsType = TypeOf<typeof SavedOptionsFindOptionsSchema>;
 export type UpdatedCaseTyped = TypeOf<typeof UpdatedCaseSchema>;
 export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
 export type UserType = TypeOf<typeof UserSchema>;

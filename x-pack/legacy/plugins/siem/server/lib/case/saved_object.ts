@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import axios from 'axios';
 import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
 import { CaseSavedObject, CasesSavedObjects, PageInfoCase, SortCase } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
@@ -57,12 +58,22 @@ export class Case {
   }
 
   private async getAllSavedCase(request: FrameworkRequest, options: SavedObjectsFindOptions) {
-    const savedObjectsClient = request.context.core.savedObjects.client;
+    // const savedObjectsClient = request.context.core.savedObjects.client;
     console.log('saved objects find options', options);
-    const savedObjects = await savedObjectsClient.find(options);
+    let response;
+    try {
+      response = await axios.get('/api/cases', {
+        params: options,
+      });
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+    const { data }: { data: CasesSavedObjects } = response; // await savedObjectsClient.find(options);
     return {
-      ...savedObjects,
-      saved_objects: savedObjects.saved_objects.map(savedObject =>
+      ...data,
+      saved_objects: data.saved_objects.map(savedObject =>
         convertSavedObjectToSavedCase(savedObject)
       ),
     };

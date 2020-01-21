@@ -1,0 +1,136 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
+
+import chrome from 'ui/chrome';
+import { CasesSavedObjects } from '../../components/page/case/types';
+import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS, UPDATE_TABLE } from './constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
+import { Direction, SortFieldCase } from '../../graphql/types';
+
+interface TableArgs {
+  page: number;
+  perPage: number;
+  sortField: SortFieldCase;
+  sortOrder: Direction;
+}
+
+interface QueryArgs {
+  page?: number;
+  perPage?: number;
+  sortField?: SortFieldCase;
+  sortOrder?: Direction;
+}
+
+interface CasesState {
+  data: CasesSavedObjects;
+  isLoading: boolean;
+  isError: boolean;
+  table: TableArgs;
+}
+interface PayloadObj {
+  [key: string]: unknown;
+}
+interface Action {
+  type: string;
+  payload: CasesSavedObjects | QueryArgs | PayloadObj;
+}
+
+const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
+  switch (action.type) {
+    case FETCH_INIT:
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case FETCH_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+        data: action.payload,
+      };
+    case FETCH_FAILURE:
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
+    case UPDATE_TABLE:
+      console.log('UPDATE_TABLE return');
+      return {
+        ...state,
+        table: {
+          ...state.table,
+          ...action.payload,
+        },
+      };
+    default:
+      throw new Error();
+  }
+};
+const initialData: CasesSavedObjects = {
+  page: 0,
+  per_page: 0,
+  total: 0,
+  saved_objects: [],
+};
+export const useCaseApi = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>] => {
+  const [state, dispatch] = useReducer(dataFetchReducer, {
+    isLoading: false,
+    isError: false,
+    data: initialData,
+    table: {
+      page: DEFAULT_TABLE_ACTIVE_PAGE + 1,
+      perPage: DEFAULT_TABLE_LIMIT,
+      sortField: SortFieldCase.created_at,
+      sortOrder: Direction.desc,
+    },
+  });
+  const [query, setQuery] = useState(state.table as QueryArgs);
+
+  useEffect(() => {
+    console.log('useEffect ONE', { query, table: state.table });
+    dispatch({ type: UPDATE_TABLE, payload: query });
+  }, [query]);
+
+  useEffect(() => {
+    console.log('useEffect TWO', { query, table: state.table });
+    let didCancel = false;
+    const fetchData = async () => {
+      dispatch({ type: FETCH_INIT, payload: {} });
+      try {
+        const queryParams = Object.entries(state.table).reduce((acc, [key, value]) => {
+          return `${acc}${key}=${value}&`;
+        }, '?');
+        const result = await fetch(`${chrome.getBasePath()}/api/cases${queryParams}`, {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-system-api': 'true',
+            'kbn-xsrf': 'true',
+          },
+        });
+        if (!didCancel) {
+          dispatch({ type: FETCH_SUCCESS, payload: await result.json() });
+        }
+      } catch (error) {
+        console.log('ERRROR', error);
+        if (!didCancel) {
+          dispatch({ type: FETCH_FAILURE, payload: {} });
+        }
+      }
+    };
+    fetchData();
+    return () => {
+      didCancel = true;
+    };
+  }, [state.table]);
+  return [state, setQuery];
+};

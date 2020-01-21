@@ -18,6 +18,7 @@ import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../constants';
 import {
   NewCaseFormatted,
   NewCommentFormatted,
+  SavedOptionsFindOptionsType,
   UpdatedCaseType,
   UpdatedCommentType,
 } from '../routes/api/types';
@@ -32,6 +33,10 @@ interface ClientArgs {
 
 interface GetCaseArgs extends ClientArgs {
   caseId: string;
+}
+
+interface GetCasesArgs extends ClientArgs {
+  options?: SavedOptionsFindOptionsType;
 }
 interface GetCommentArgs extends ClientArgs {
   commentId: string;
@@ -64,7 +69,7 @@ interface CaseServiceDeps {
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
-  getAllCases(args: ClientArgs): Promise<SavedObjectsFindResponse>;
+  getAllCases(args: GetCasesArgs): Promise<SavedObjectsFindResponse>;
   getAllCaseComments(args: GetCaseArgs): Promise<SavedObjectsFindResponse>;
   getCase(args: GetCaseArgs): Promise<SavedObject>;
   getComment(args: GetCommentArgs): Promise<SavedObject>;
@@ -114,10 +119,10 @@ export class CaseService {
         throw error;
       }
     },
-    getAllCases: async ({ client }: ClientArgs) => {
+    getAllCases: async ({ client, options }: GetCasesArgs) => {
       try {
         this.log.debug(`Attempting to GET all cases`);
-        return await client.find({ type: CASE_SAVED_OBJECT });
+        return await client.find({ ...options, type: CASE_SAVED_OBJECT });
       } catch (error) {
         this.log.debug(`Error on GET cases: ${error}`);
         throw error;
