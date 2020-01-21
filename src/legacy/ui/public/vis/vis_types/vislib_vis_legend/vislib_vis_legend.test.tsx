@@ -31,11 +31,9 @@ jest.mock('@elastic/eui', () => ({
   htmlIdGenerator: jest.fn().mockReturnValue(() => 'legendId'),
 }));
 
-jest.mock('../../../../../core_plugins/data/common', () => ({
-  getTableAggs: jest.fn(),
-}));
 jest.mock('../../../../../core_plugins/visualizations/public', () => ({
   createFiltersFromEvent: jest.fn().mockReturnValue(['yes']),
+  getTableAggs: jest.fn(),
 }));
 
 const vis = {

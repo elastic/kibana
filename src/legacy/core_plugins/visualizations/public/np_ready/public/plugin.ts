@@ -29,6 +29,7 @@ import {
   setSavedObjects,
   setUsageCollector,
   setFilterManager,
+  setFieldFormats,
 } from './services';
 import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
@@ -109,6 +110,7 @@ export class VisualizationsPlugin
     setSavedObjects(core.savedObjects);
     setIndexPatterns(data.indexPatterns);
     setFilterManager(data.query.filterManager);
+    setFieldFormats(data.fieldFormats);
 
     return {
       types,
