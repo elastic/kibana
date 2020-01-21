@@ -24,6 +24,7 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { COLOR_GRADIENTS } from '../../styles/color_utils';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -136,7 +137,7 @@ export class ESPewPewSource extends AbstractESAggSource {
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },
-          color: 'Blues',
+          color: COLOR_GRADIENTS[0].value,
         },
       },
       [VECTOR_STYLES.LINE_WIDTH]: {

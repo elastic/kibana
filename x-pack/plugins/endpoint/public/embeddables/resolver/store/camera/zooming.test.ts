@@ -9,7 +9,8 @@ import { cameraReducer } from './reducer';
 import { createStore, Store } from 'redux';
 import { CameraState, AABB } from '../../types';
 import { viewableBoundingBox, inverseProjectionMatrix } from './selectors';
-import { userScaled, expectVectorsToBeClose } from './test_helpers';
+import { expectVectorsToBeClose } from './test_helpers';
+import { scaleToZoom } from './scale_to_zoom';
 import { applyMatrix3 } from '../../lib/vector2';
 
 describe('zooming', () => {
@@ -43,21 +44,7 @@ describe('zooming', () => {
     );
     describe('when the user has scaled in to 2x', () => {
       beforeEach(() => {
-        userScaled(store, [2, 2]);
-      });
-      it(
-        ...cameraShouldBeBoundBy({
-          minimum: [-75, -50],
-          maximum: [75, 50],
-        })
-      );
-    });
-    describe('when the user zooms in by 1 zoom unit', () => {
-      beforeEach(() => {
-        const action: CameraAction = {
-          type: 'userZoomed',
-          payload: 1,
-        };
+        const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(2) };
         store.dispatch(action);
       });
       it(
@@ -66,6 +53,30 @@ describe('zooming', () => {
           maximum: [75, 50],
         })
       );
+    });
+    describe('when the user zooms in all the way', () => {
+      beforeEach(() => {
+        const action: CameraAction = {
+          type: 'userZoomed',
+          payload: 1,
+        };
+        store.dispatch(action);
+      });
+      it('should zoom to maximum scale factor', () => {
+        const actual = viewableBoundingBox(store.getState());
+        expect(actual).toMatchInlineSnapshot(`
+          Object {
+            "maximum": Array [
+              25.000000000000007,
+              16.666666666666668,
+            ],
+            "minimum": Array [
+              -25,
+              -16.666666666666668,
+            ],
+          }
+        `);
+      });
     });
     it('the raster position 200, 50 should map to the world position 50, 50', () => {
       expectVectorsToBeClose(applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())), [
@@ -126,7 +137,8 @@ describe('zooming', () => {
       });
       describe('when the user scales to 2x', () => {
         beforeEach(() => {
-          userScaled(store, [2, 2]);
+          const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(2) };
+          store.dispatch(action);
         });
         it('should be centered on 100, 0', () => {
           const worldCenterPoint = applyMatrix3(

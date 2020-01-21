@@ -28,13 +28,6 @@ export const NAVIGATION_AUTHENTICATIONS_TITLE = i18n.translate(
   }
 );
 
-export const NAVIGATION_AUTHENTICATIONS_STACK_BY_EVENT_TYPE = i18n.translate(
-  'xpack.siem.hosts.navigation.authentications.stackByEventType',
-  {
-    defaultMessage: 'event type',
-  }
-);
-
 export const NAVIGATION_UNCOMMON_PROCESSES_TITLE = i18n.translate(
   'xpack.siem.hosts.navigation.uncommonProcessesTitle',
   {
@@ -53,28 +46,8 @@ export const NAVIGATION_EVENTS_TITLE = i18n.translate('xpack.siem.hosts.navigati
   defaultMessage: 'Events',
 });
 
-export const NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION = i18n.translate(
-  'xpack.siem.hosts.navigation.eventsStackByEventAction',
-  {
-    defaultMessage: 'action',
-  }
-);
-
 export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.hosts.navigation.alertsTitle', {
   defaultMessage: 'Alerts',
-});
-
-export const EMPTY_TITLE = i18n.translate('xpack.siem.hosts.emptyTitle', {
-  defaultMessage:
-    'It looks like you don’t have any indices relevant to hosts in the SIEM application',
-});
-
-export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.hosts.emptyActionPrimary', {
-  defaultMessage: 'View setup instructions',
-});
-
-export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.hosts.emptyActionSecondary', {
-  defaultMessage: 'Go to documentation',
 });
 
 export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(

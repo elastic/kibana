@@ -14,8 +14,12 @@ export const TOTAL_COUNT_OF_ALERTS = i18n.translate('xpack.siem.alertsView.total
   defaultMessage: 'alerts match the search criteria',
 });
 
-export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.alertsView.alertsDocumentType', {
+export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.alertsView.alertsTableTitle', {
   defaultMessage: 'Alerts',
+});
+
+export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.alertsView.alertsGraphTitle', {
+  defaultMessage: 'Alert detection frequency',
 });
 
 export const ALERTS_STACK_BY_MODULE = i18n.translate(
@@ -41,3 +45,11 @@ export const ERROR_FETCHING_ALERTS_DATA = i18n.translate(
     defaultMessage: 'Failed to query alerts data',
   }
 );
+
+export const CATEGORY = i18n.translate('xpack.siem.alertsView.categoryLabel', {
+  defaultMessage: 'category',
+});
+
+export const MODULE = i18n.translate('xpack.siem.alertsView.moduleLabel', {
+  defaultMessage: 'module',
+});

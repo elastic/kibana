@@ -8,6 +8,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 
+import { EventType } from '../../store/timeline/model';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
 /**
@@ -155,9 +156,14 @@ export const EventsTbody = styled.div.attrs(({ className = '' }) => ({
 
 export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trGroup ${className}`,
-}))<{ className?: string }>`
+}))<{ className?: string; eventType: Omit<EventType, 'all'>; showLeftBorder: boolean }>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
+  ${({ theme, eventType, showLeftBorder }) =>
+    showLeftBorder
+      ? `border-left: 4px solid
+    ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
+      : ''};
 
   &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};

@@ -43,9 +43,9 @@ export interface CameraState {
   readonly panning?: PanningState;
 
   /**
-   * Scales the coordinate system, used for zooming.
+   * Scales the coordinate system, used for zooming. Should always be between 0 and 1
    */
-  readonly scaling: Vector2;
+  readonly scalingFactor: number;
 
   /**
    * The size (in pixels) of the Resolver component.

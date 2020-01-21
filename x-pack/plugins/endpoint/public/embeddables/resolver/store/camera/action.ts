@@ -6,18 +6,19 @@
 
 import { Vector2 } from '../../types';
 
-interface UserScaled {
-  readonly type: 'userScaled';
+interface UserSetZoomLevel {
+  readonly type: 'userSetZoomLevel';
   /**
-   * A vector who's `x` and `y` component will be the new scaling factors for the projection.
+   * A number whose value is always between 0 and 1 and will be the new scaling factor for the projection.
    */
-  readonly payload: Vector2;
+  readonly payload: number;
 }
 
 interface UserZoomed {
   readonly type: 'userZoomed';
   /**
-   * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`, pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
+   * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
+   * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
    */
   payload: number;
 }
@@ -65,7 +66,7 @@ interface UserMovedPointer {
 }
 
 export type CameraAction =
-  | UserScaled
+  | UserSetZoomLevel
   | UserSetRasterSize
   | UserSetPositionOfCamera
   | UserStartedPanning

@@ -106,7 +106,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
     >
       <span
         class="euiBadge euiBadge--iconLeft"
-        style="background-color:#bd271e;color:#FFFFFF"
+        style="background-color:#bd271e;color:#fff"
       >
         <span
           class="euiBadge__content"
@@ -145,7 +145,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
     >
       <span
         class="euiBadge euiBadge--iconLeft"
-        style="background-color:#bd271e;color:#FFFFFF"
+        style="background-color:#bd271e;color:#fff"
       >
         <span
           class="euiBadge__content"
@@ -214,46 +214,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
     >
       <span
         class="euiBadge euiBadge--iconLeft"
-        style="background-color:#d3dae6;color:#000000"
-      >
-        <span
-          class="euiBadge__content"
-        >
-          <span
-            class="euiBadge__text"
-          >
-            <div
-              class="euiText euiText--medium"
-            >
-              <div
-                class="c2"
-              >
-                Islamabad
-              </div>
-            </div>
-          </span>
-        </span>
-      </span>
-      <span
-        class="c3"
-      >
-        <div
-          class="euiText euiText--medium"
-        >
-          <div
-            class="euiTextColor euiTextColor--subdued"
-          >
-            5s ago
-          </div>
-        </div>
-      </span>
-    </div>
-    <div
-      class="c1"
-    >
-      <span
-        class="euiBadge euiBadge--iconLeft"
-        style="background-color:#d3dae6;color:#000000"
+        style="background-color:#d3dae6;color:#000"
       >
         <span
           class="euiBadge__content"
@@ -283,6 +244,45 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
             class="euiTextColor euiTextColor--subdued"
           >
             5d ago
+          </div>
+        </div>
+      </span>
+    </div>
+    <div
+      class="c1"
+    >
+      <span
+        class="euiBadge euiBadge--iconLeft"
+        style="background-color:#d3dae6;color:#000"
+      >
+        <span
+          class="euiBadge__content"
+        >
+          <span
+            class="euiBadge__text"
+          >
+            <div
+              class="euiText euiText--medium"
+            >
+              <div
+                class="c2"
+              >
+                Islamabad
+              </div>
+            </div>
+          </span>
+        </span>
+      </span>
+      <span
+        class="c3"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          <div
+            class="euiTextColor euiTextColor--subdued"
+          >
+            5s ago
           </div>
         </div>
       </span>
@@ -321,7 +321,7 @@ Array [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color:#bd271e;color:#FFFFFF"
+          style="background-color:#bd271e;color:#fff"
         >
           <span
             class="euiBadge__content"
@@ -360,7 +360,7 @@ Array [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color:#bd271e;color:#FFFFFF"
+          style="background-color:#bd271e;color:#fff"
         >
           <span
             class="euiBadge__content"
@@ -399,7 +399,7 @@ Array [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color:#bd271e;color:#FFFFFF"
+          style="background-color:#bd271e;color:#fff"
         >
           <span
             class="euiBadge__content"
@@ -438,7 +438,7 @@ Array [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color:#bd271e;color:#FFFFFF"
+          style="background-color:#bd271e;color:#fff"
         >
           <span
             class="euiBadge__content"
@@ -477,7 +477,7 @@ Array [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color:#bd271e;color:#FFFFFF"
+          style="background-color:#bd271e;color:#fff"
         >
           <span
             class="euiBadge__content"
@@ -516,7 +516,7 @@ Array [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color:#bd271e;color:#FFFFFF"
+          style="background-color:#bd271e;color:#fff"
         >
           <span
             class="euiBadge__content"
@@ -555,7 +555,7 @@ Array [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color:#bd271e;color:#FFFFFF"
+          style="background-color:#bd271e;color:#fff"
         >
           <span
             class="euiBadge__content"
@@ -594,7 +594,7 @@ Array [
       >
         <span
           class="euiBadge euiBadge--iconLeft"
-          style="background-color:#bd271e;color:#FFFFFF"
+          style="background-color:#bd271e;color:#fff"
         >
           <span
             class="euiBadge__content"

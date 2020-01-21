@@ -56,6 +56,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationAPIClientParams](./kibana-plugin-server.deprecationapiclientparams.md) |  |
 |  [DeprecationAPIResponse](./kibana-plugin-server.deprecationapiresponse.md) |  |
 |  [DeprecationInfo](./kibana-plugin-server.deprecationinfo.md) |  |
+|  [DeprecationSettings](./kibana-plugin-server.deprecationsettings.md) | UiSettings deprecation field options. |
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchError](./kibana-plugin-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
@@ -69,6 +70,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ICspConfig](./kibana-plugin-server.icspconfig.md) | CSP configuration for use in Kibana. |
 |  [IKibanaResponse](./kibana-plugin-server.ikibanaresponse.md) | A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution |
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
+|  [ImageValidation](./kibana-plugin-server.imagevalidation.md) |  |
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-server.indexsettingsdeprecationinfo.md) |  |
 |  [IRenderOptions](./kibana-plugin-server.irenderoptions.md) |  |
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-server.routeconfig.md) and [RequestHandler](./kibana-plugin-server.requesthandler.md) for more information about arguments to route registrations. |
@@ -140,6 +142,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
+|  [StringValidation](./kibana-plugin-server.stringvalidation.md) |  |
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md) |  |

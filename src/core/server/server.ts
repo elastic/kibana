@@ -220,7 +220,11 @@ export class Server {
 
         return {
           rendering: {
-            render: rendering.render.bind(rendering, req, uiSettingsClient),
+            render: async (options = {}) =>
+              rendering.render(req, uiSettingsClient, {
+                ...options,
+                vars: await this.legacy.legacyInternals!.getVars('core', req),
+              }),
           },
           savedObjects: {
             client: savedObjectsClient,

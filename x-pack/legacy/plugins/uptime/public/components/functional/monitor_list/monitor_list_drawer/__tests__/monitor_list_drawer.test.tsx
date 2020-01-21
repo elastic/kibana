@@ -9,6 +9,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { MonitorListDrawerComponent } from '../monitor_list_drawer';
 import { MonitorDetails } from '../../../../../../common/runtime_types';
+import { renderWithRouter } from '../../../../../lib';
 
 describe('MonitorListDrawer component', () => {
   let summary: MonitorSummary;
@@ -52,11 +53,13 @@ describe('MonitorListDrawer component', () => {
 
   it('renders nothing when no summary data is present', () => {
     const component = shallowWithIntl(
-      <MonitorListDrawerComponent
-        loadMonitorDetails={loadMonitorDetails}
-        summary={summary}
-        monitorDetails={monitorDetails}
-      />
+      renderWithRouter(
+        <MonitorListDrawerComponent
+          loadMonitorDetails={loadMonitorDetails}
+          summary={summary}
+          monitorDetails={monitorDetails}
+        />
+      )
     );
     expect(component).toEqual({});
   });
@@ -64,22 +67,26 @@ describe('MonitorListDrawer component', () => {
   it('renders nothing when no check data is present', () => {
     delete summary.state.checks;
     const component = shallowWithIntl(
-      <MonitorListDrawerComponent
-        summary={summary}
-        loadMonitorDetails={loadMonitorDetails}
-        monitorDetails={monitorDetails}
-      />
+      renderWithRouter(
+        <MonitorListDrawerComponent
+          summary={summary}
+          loadMonitorDetails={loadMonitorDetails}
+          monitorDetails={monitorDetails}
+        />
+      )
     );
     expect(component).toEqual({});
   });
 
   it('renders a MonitorListDrawer when there is only one check', () => {
     const component = shallowWithIntl(
-      <MonitorListDrawerComponent
-        summary={summary}
-        loadMonitorDetails={loadMonitorDetails}
-        monitorDetails={monitorDetails}
-      />
+      renderWithRouter(
+        <MonitorListDrawerComponent
+          summary={summary}
+          loadMonitorDetails={loadMonitorDetails}
+          monitorDetails={monitorDetails}
+        />
+      )
     );
     expect(component).toMatchSnapshot();
   });
@@ -110,11 +117,13 @@ describe('MonitorListDrawer component', () => {
     ];
     summary.state.checks = checks;
     const component = shallowWithIntl(
-      <MonitorListDrawerComponent
-        summary={summary}
-        loadMonitorDetails={loadMonitorDetails}
-        monitorDetails={monitorDetails}
-      />
+      renderWithRouter(
+        <MonitorListDrawerComponent
+          summary={summary}
+          loadMonitorDetails={loadMonitorDetails}
+          monitorDetails={monitorDetails}
+        />
+      )
     );
     expect(component).toMatchSnapshot();
   });

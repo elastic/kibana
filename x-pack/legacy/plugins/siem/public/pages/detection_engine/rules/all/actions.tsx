@@ -16,7 +16,11 @@ import {
 } from '../../../../containers/detection_engine/rules';
 import { Action } from './reducer';
 
-import { ActionToaster, displayErrorToast } from '../../../../components/toasters';
+import {
+  ActionToaster,
+  displayErrorToast,
+  displaySuccessToast,
+} from '../../../../components/toasters';
 
 import * as i18n from '../translations';
 import { bucketRulesResponse } from './helpers';
@@ -25,18 +29,25 @@ export const editRuleAction = (rule: Rule, history: H.History) => {
   history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${rule.id}/edit`);
 };
 
-export const runRuleAction = () => {};
-
-export const duplicateRuleAction = async (
-  rule: Rule,
+export const duplicateRulesAction = async (
+  rules: Rule[],
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>
 ) => {
   try {
-    dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: true });
-    const duplicatedRule = await duplicateRules({ rules: [rule] });
-    dispatch({ type: 'updateLoading', ids: [rule.id], isLoading: false });
-    dispatch({ type: 'updateRules', rules: duplicatedRule, appendRuleId: rule.id });
+    const ruleIds = rules.map(r => r.id);
+    dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: true });
+    const duplicatedRules = await duplicateRules({ rules });
+    dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: false });
+    dispatch({
+      type: 'updateRules',
+      rules: duplicatedRules,
+      appendRuleId: rules[rules.length - 1].id,
+    });
+    displaySuccessToast(
+      i18n.SUCCESSFULLY_DUPLICATED_RULES(duplicatedRules.length),
+      dispatchToaster
+    );
   } catch (e) {
     displayErrorToast(i18n.DUPLICATE_RULE_ERROR, [e.message], dispatchToaster);
   }
@@ -49,7 +60,8 @@ export const exportRulesAction = async (rules: Rule[], dispatch: React.Dispatch<
 export const deleteRulesAction = async (
   ids: string[],
   dispatch: React.Dispatch<Action>,
-  dispatchToaster: Dispatch<ActionToaster>
+  dispatchToaster: Dispatch<ActionToaster>,
+  onRuleDeleted?: () => void
 ) => {
   try {
     dispatch({ type: 'updateLoading', ids, isLoading: true });
@@ -65,6 +77,9 @@ export const deleteRulesAction = async (
         errors.map(e => e.error.message),
         dispatchToaster
       );
+    } else {
+      // FP: See https://github.com/typescript-eslint/typescript-eslint/issues/1138#issuecomment-566929566
+      onRuleDeleted?.(); // eslint-disable-line no-unused-expressions
     }
   } catch (e) {
     displayErrorToast(

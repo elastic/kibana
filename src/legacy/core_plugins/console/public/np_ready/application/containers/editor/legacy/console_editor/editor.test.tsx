@@ -52,7 +52,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
         <ServicesContextProvider value={mockedAppContextValue}>
           <RequestContextProvider>
             <EditorContextProvider settings={{} as any}>
-              <Editor />
+              <Editor initialTextValue="" />
             </EditorContextProvider>
           </RequestContextProvider>
         </ServicesContextProvider>
@@ -72,6 +72,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
           updateCurrentState: jest.fn(),
         } as any,
         notifications: notificationServiceMock.createSetupContract(),
+        objectStorageClient: {} as any,
       },
       docLinkVersion: 'NA',
     };

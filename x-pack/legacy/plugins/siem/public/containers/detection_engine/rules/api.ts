@@ -178,37 +178,41 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule
 /**
  * Duplicates provided Rules
  *
- * @param rule to duplicate
+ * @param rules to duplicate
  */
 export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Rule[]> => {
-  const requests = rules.map(rule =>
-    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
         'kbn-xsrf': 'true',
       },
-      body: JSON.stringify({
-        ...rule,
-        name: `${rule.name} [Duplicate]`,
-        created_at: undefined,
-        created_by: undefined,
-        id: undefined,
-        rule_id: undefined,
-        updated_at: undefined,
-        updated_by: undefined,
-        enabled: rule.enabled,
-        immutable: false,
-      }),
-    })
+      body: JSON.stringify(
+        rules.map(rule => ({
+          ...rule,
+          name: `${rule.name} [${i18n.DUPLICATE}]`,
+          created_at: undefined,
+          created_by: undefined,
+          id: undefined,
+          rule_id: undefined,
+          updated_at: undefined,
+          updated_by: undefined,
+          enabled: rule.enabled,
+          immutable: undefined,
+          last_success_at: undefined,
+          last_success_message: undefined,
+          status: undefined,
+          status_date: undefined,
+        }))
+      ),
+    }
   );
 
-  const responses = await Promise.all(requests);
-  await responses.map(response => throwIfNotOk(response));
-  return Promise.all(
-    responses.map<Promise<Rule>>(response => response.json())
-  );
+  await throwIfNotOk(response);
+  return response.json();
 };
 
 /**
@@ -318,7 +322,7 @@ export const getRuleStatusById = async ({
 }: {
   id: string;
   signal: AbortSignal;
-}): Promise<Record<string, RuleStatus[]>> => {
+}): Promise<Record<string, RuleStatus>> => {
   const response = await fetch(
     `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_STATUS}?ids=${encodeURIComponent(
       JSON.stringify([id])

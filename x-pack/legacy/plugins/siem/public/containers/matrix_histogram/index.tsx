@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Position } from '@elastic/charts';
 import React from 'react';
 import { compose } from 'redux';
 
@@ -16,29 +17,33 @@ import { MatrixHistogram } from '../../components/matrix_histogram';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
+  GetTitle,
   GetSubTitle,
 } from '../../components/matrix_histogram/types';
 import { UpdateDateRange } from '../../components/charts/common';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 
 export interface OwnProps extends QueryTemplateProps {
+  dataKey: string | string[];
+  defaultStackByOption: MatrixHistogramOption;
+  errorMessage: string;
+  headerChildren?: React.ReactNode;
+  hideHistogramIfEmpty?: boolean;
   isAlertsHistogram?: boolean;
   isAnomaliesHistogram?: boolean;
   isAuthenticationsHistogram?: boolean;
-  dataKey: string | string[];
-  defaultStackByOption: MatrixHistogramOption;
-  deleteQuery?: ({ id }: { id: string }) => void;
-  isEventsType?: boolean;
-  errorMessage: string;
-  hideHistogramIfEmpty?: boolean;
   id: string;
+  isDnsHistogram?: boolean;
+  isEventsHistogram?: boolean;
+  legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   query: Maybe<string>;
   setQuery: SetQuery;
+  showLegend?: boolean;
   sourceId: string;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
-  title: string;
+  title: string | GetTitle;
   type: hostsModel.HostsType | networkModel.NetworkType;
   updateDateRange: UpdateDateRange;
 }

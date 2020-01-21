@@ -19,6 +19,7 @@ import {
   getDefaultDynamicProperties,
   VECTOR_STYLES,
 } from '../../styles/vector/vector_style_defaults';
+import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -249,7 +250,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN,
           },
-          color: 'Blues',
+          color: COLOR_GRADIENTS[0].value,
         },
       },
       [VECTOR_STYLES.LINE_COLOR]: {

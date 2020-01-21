@@ -51,9 +51,6 @@
               "description": {
                 "type": "keyword"
               },
-              "filter": {
-                "type": "object"
-              },
               "from": {
                 "type": "keyword"
               },

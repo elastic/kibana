@@ -96,6 +96,7 @@ export class Explorer extends React.Component {
   static propTypes = {
     explorerState: PropTypes.object.isRequired,
     setSelectedCells: PropTypes.func.isRequired,
+    severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
   };
 
@@ -260,7 +261,7 @@ export class Explorer extends React.Component {
   };
 
   render() {
-    const { showCharts } = this.props;
+    const { showCharts, severity } = this.props;
 
     const {
       annotationsData,
@@ -276,7 +277,6 @@ export class Explorer extends React.Component {
       queryString,
       selectedCells,
       selectedJobs,
-      severity,
       swimlaneContainerWidth,
       tableData,
       tableQueryString,
