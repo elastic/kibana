@@ -93,7 +93,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
     if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
       return (
         <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
+          <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
           <DetectionEngineUserUnauthenticated />
         </WrapperPage>
       );
@@ -101,7 +101,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
     if (isSignalIndexExists != null && !isSignalIndexExists && !loading) {
       return (
         <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
+          <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
           <DetectionEngineNoIndex />
         </WrapperPage>
       );
@@ -204,7 +204,7 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
               </StickyContainer>
             ) : (
               <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
+                <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
                 <DetectionEngineEmptyPage />
               </WrapperPage>
             );
