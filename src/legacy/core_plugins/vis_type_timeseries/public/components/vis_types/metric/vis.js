@@ -24,7 +24,7 @@ import { createTickFormatter } from '../../lib/tick_formatter';
 import _, { get, isUndefined, assign, includes, pick } from 'lodash';
 import { Metric } from '../../../visualizations/views/metric';
 import { getLastValue } from '../../../../../../../plugins/vis_type_timeseries/common/get_last_value';
-import { isBackgroundInverted } from '../../../../../../../plugins/vis_type_timeseries/common/set_is_reversed';
+import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 function getColors(props) {
   const { model, visData } = props;

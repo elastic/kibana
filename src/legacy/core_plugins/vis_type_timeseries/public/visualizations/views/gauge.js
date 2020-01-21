@@ -21,10 +21,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import {
-  isBackgroundInverted,
-  isBackgroundDark,
-} from '../../../../../../plugins/vis_type_timeseries/common/set_is_reversed';
+import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
 import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
 import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';

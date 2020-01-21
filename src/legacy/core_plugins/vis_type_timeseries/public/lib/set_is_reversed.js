@@ -18,9 +18,9 @@
  */
 
 import color from 'color';
-import chrome from '../../../legacy/ui/public/chrome';
+import { getUISettings } from '../services';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
+const isDarkTheme = () => getUISettings().get('theme:darkMode');
 
 /**
  * Returns true if the color that is passed has low luminosity
@@ -34,7 +34,7 @@ const isColorDark = c => {
  * Defaults to checking `theme:darkMode`.
  */
 export const isThemeDark = currentTheme => {
-  let themeIsDark = currentTheme || IS_DARK_THEME;
+  let themeIsDark = currentTheme || isDarkTheme();
 
   // If passing a string, check the luminosity
   if (typeof currentTheme === 'string') {
