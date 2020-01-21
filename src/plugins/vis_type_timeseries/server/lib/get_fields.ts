@@ -37,7 +37,7 @@ export async function getFields(
   const reqFacade: any = {
     framework,
     pre: {
-      indexPatternService: new IndexPatternsFetcher(
+      indexPatternsService: new IndexPatternsFetcher(
         requestContext.core.elasticsearch.dataClient.callAsCurrentUser
       ),
     },
