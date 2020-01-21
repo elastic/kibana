@@ -256,6 +256,7 @@ describe('Properties validator', () => {
         enable_position_increments: [],
         depth_limit: true,
         dims: false,
+        max_shingle_size: 'string_not_allowed',
       },
       // All the parameters in "goodField" have the correct format
       // and should still be there after the validation ran.
@@ -307,6 +308,7 @@ describe('Properties validator', () => {
         enable_position_increments: true,
         depth_limit: 20,
         dims: 'abc',
+        max_shingle_size: 2,
       },
     };
 
