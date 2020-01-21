@@ -4,7 +4,7 @@
 
 beta[]
 
-*Lens* provides you with a simple and fast way to create visualizations from your Elasticsearch data. With Lens, you can:
+*Lens* provides you with a simple and fast way to create visualizations from your {es} data. With Lens, you can:
 
 * Quickly build visualizations by dragging and dropping data fields.
 
@@ -13,6 +13,20 @@ beta[]
 * Easily change the visualization type by selecting the automatically generated visualization suggestions.
 
 * Save your visualization for use in a dashboard.
+
+[float]
+[[lens-aggregation]]
+=== Supported aggregations
+
+Lens supports the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+
+* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
+
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+
+* <<visualize-bucket-aggregations,Bucket>>
 
 [float]
 [[drag-drop]]
