@@ -637,7 +637,7 @@ function discoverController(
 
       // fetch data when filters fire fetch event
       subscriptions.add(
-        subscribeWithScope($scope, filterManager.getUpdates$(), {
+        subscribeWithScope($scope, filterManager.getFetches$(), {
           next: $scope.fetch,
         })
       );

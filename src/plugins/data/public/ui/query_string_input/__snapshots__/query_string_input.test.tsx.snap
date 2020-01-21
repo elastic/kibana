@@ -150,6 +150,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
@@ -205,6 +211,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -303,6 +315,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                   "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                 },
               },
+            },
+            "fatalErrors": Object {
+              "add": [MockFunction],
+              "get$": [MockFunction],
             },
             "http": Object {
               "addLoadingCountSource": [MockFunction],
@@ -776,6 +792,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
@@ -831,6 +853,12 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -929,6 +957,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                           "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                         },
                       },
+                    },
+                    "fatalErrors": Object {
+                      "add": [MockFunction],
+                      "get$": [MockFunction],
                     },
                     "http": Object {
                       "addLoadingCountSource": [MockFunction],
@@ -1384,6 +1416,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
@@ -1439,6 +1477,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -1537,6 +1581,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                   "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                 },
               },
+            },
+            "fatalErrors": Object {
+              "add": [MockFunction],
+              "get$": [MockFunction],
             },
             "http": Object {
               "addLoadingCountSource": [MockFunction],
@@ -2007,6 +2055,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
@@ -2062,6 +2116,12 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -2160,6 +2220,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                           "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                         },
                       },
+                    },
+                    "fatalErrors": Object {
+                      "add": [MockFunction],
+                      "get$": [MockFunction],
                     },
                     "http": Object {
                       "addLoadingCountSource": [MockFunction],
@@ -2615,6 +2679,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
               "setIsVisible": [MockFunction],
             },
             "data": Object {
+              "__LEGACY": Object {
+                "esClient": Object {
+                  "msearch": [MockFunction],
+                  "search": [MockFunction],
+                },
+              },
               "autocomplete": Object {
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
@@ -2670,6 +2740,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 },
               },
               "search": Object {
+                "__LEGACY": Object {
+                  "esClient": Object {
+                    "msearch": [MockFunction],
+                    "search": [MockFunction],
+                  },
+                },
                 "search": [MockFunction],
               },
               "ui": Object {
@@ -2768,6 +2844,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                   "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                 },
               },
+            },
+            "fatalErrors": Object {
+              "add": [MockFunction],
+              "get$": [MockFunction],
             },
             "http": Object {
               "addLoadingCountSource": [MockFunction],
@@ -3238,6 +3318,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       "setIsVisible": [MockFunction],
                     },
                     "data": Object {
+                      "__LEGACY": Object {
+                        "esClient": Object {
+                          "msearch": [MockFunction],
+                          "search": [MockFunction],
+                        },
+                      },
                       "autocomplete": Object {
                         "getQuerySuggestions": [MockFunction],
                         "getValueSuggestions": [MockFunction],
@@ -3293,6 +3379,12 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         },
                       },
                       "search": Object {
+                        "__LEGACY": Object {
+                          "esClient": Object {
+                            "msearch": [MockFunction],
+                            "search": [MockFunction],
+                          },
+                        },
                         "search": [MockFunction],
                       },
                       "ui": Object {
@@ -3391,6 +3483,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                           "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                         },
                       },
+                    },
+                    "fatalErrors": Object {
+                      "add": [MockFunction],
+                      "get$": [MockFunction],
                     },
                     "http": Object {
                       "addLoadingCountSource": [MockFunction],

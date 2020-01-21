@@ -57,7 +57,7 @@ export const EditRuleComponent = memo(() => {
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
-  const { ruleId } = useParams();
+  const { detailName: ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
 
   const userHasNoPermissions =
@@ -347,7 +347,7 @@ export const EditRuleComponent = memo(() => {
         </EuiFlexGroup>
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute state={{ ruleName: rule?.name }} />
     </>
   );
 });

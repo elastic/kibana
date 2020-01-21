@@ -187,6 +187,7 @@ describe('SIEM Navigation', () => {
       query: { language: 'kuery', query: '' },
       savedQuery: undefined,
       search: '',
+      state: undefined,
       tabName: 'authentications',
       timeline: { id: '', isOpen: false },
       timerange: {
