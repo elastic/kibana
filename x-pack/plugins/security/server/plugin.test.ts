@@ -6,7 +6,7 @@
 
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { ICustomClusterClient, CoreSetup } from '../../../../src/core/server';
+import { ICustomClusterClient } from '../../../../src/core/server';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 import { Plugin, PluginSetupDependencies } from './plugin';
 
@@ -14,7 +14,7 @@ import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/
 
 describe('Security Plugin', () => {
   let plugin: Plugin;
-  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
   let mockClusterClient: jest.Mocked<ICustomClusterClient>;
   let mockDependencies: PluginSetupDependencies;
   beforeEach(() => {
