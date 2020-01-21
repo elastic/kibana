@@ -39,6 +39,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
+        pageNavigation: 'individual',
       });
       await browser.setWindowSize(1600, 1000);
 
@@ -199,7 +200,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.security.forceLogout();
         await PageObjects.security.login('mixeduser', '123456');
 
-        if (await appsMenu.linkExists('Management')) {
+        if (await appsMenu.linkExists('Stack Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
@@ -208,7 +209,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.security.forceLogout();
         await PageObjects.security.login('mysuperuser', '123456');
 
-        if (!(await appsMenu.linkExists('Management'))) {
+        if (!(await appsMenu.linkExists('Stack Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });

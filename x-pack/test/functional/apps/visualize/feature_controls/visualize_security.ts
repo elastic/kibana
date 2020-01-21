@@ -75,7 +75,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Visualize', 'Management']);
+        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -189,7 +189,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Visualize', 'Management']);
+        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {

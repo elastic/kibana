@@ -17,6 +17,7 @@ export interface ChromeNavLink
 |  --- | --- | --- |
 |  [active](./kibana-plugin-public.chromenavlink.active.md) | <code>boolean</code> | Indicates whether or not this app is currently on the screen. |
 |  [baseUrl](./kibana-plugin-public.chromenavlink.baseurl.md) | <code>string</code> | The base route used to open the root of an application. |
+|  [category](./kibana-plugin-public.chromenavlink.category.md) | <code>AppCategory</code> | The category the app lives in |
 |  [disabled](./kibana-plugin-public.chromenavlink.disabled.md) | <code>boolean</code> | Disables a link from being clickable. |
 |  [euiIconType](./kibana-plugin-public.chromenavlink.euiicontype.md) | <code>string</code> | A EUI iconType that will be used for the app's icon. This icon takes precendence over the <code>icon</code> property. |
 |  [hidden](./kibana-plugin-public.chromenavlink.hidden.md) | <code>boolean</code> | Hides a link from the navigation. |

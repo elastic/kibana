@@ -32,6 +32,7 @@ export class UiApp {
       hidden,
       linkToLastSubUrl,
       listed,
+      category,
       url = `/app/${id}`,
     } = spec;
 
@@ -46,6 +47,7 @@ export class UiApp {
     this._icon = icon;
     this._euiIconType = euiIconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
+    this._category = category;
     this._hidden = hidden;
     this._listed = listed;
     this._url = url;
@@ -68,6 +70,7 @@ export class UiApp {
         euiIconType: this._euiIconType,
         url: this._url,
         linkToLastSubUrl: this._linkToLastSubUrl,
+        category: this._category,
       });
     }
   }
@@ -115,6 +118,7 @@ export class UiApp {
       main: this._main,
       navLink: this._navLink,
       linkToLastSubUrl: this._linkToLastSubUrl,
+      category: this._category,
     };
   }
 }

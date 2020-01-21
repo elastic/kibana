@@ -24,6 +24,7 @@ import { Capabilities } from '../../core/server';
 import { SavedObjectsSchemaDefinition } from '../../core/server/saved_objects/schema';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagementDefinition } from '../../core/server/saved_objects/management';
+import { AppCategory } from '../../core/types';
 
 /**
  * Usage
@@ -53,6 +54,7 @@ export interface LegacyPluginOptions {
   uiExports: Partial<{
     app: Partial<{
       title: string;
+      category?: AppCategory;
       description: string;
       main: string;
       icon: string;

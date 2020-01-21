@@ -45,6 +45,7 @@ describe('UiNavLink', () => {
         euiIconType: spec.euiIconType,
         hidden: spec.hidden,
         disabled: spec.disabled,
+        category: undefined,
 
         // defaults
         linkToLastSubUrl: true,
