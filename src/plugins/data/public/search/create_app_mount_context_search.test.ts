@@ -18,32 +18,35 @@
  */
 
 import { createAppMountSearchContext } from './create_app_mount_context_search';
-import { from } from 'rxjs';
+import { from, BehaviorSubject } from 'rxjs';
 
 describe('Create app mount search context', () => {
   it('Returns search fn when there are no strategies', () => {
-    const context = createAppMountSearchContext({});
+    const context = createAppMountSearchContext({}, new BehaviorSubject(0));
     expect(context.search).toBeDefined();
   });
 
   it(`Search throws an error when the strategy doesn't exist`, () => {
-    const context = createAppMountSearchContext({});
+    const context = createAppMountSearchContext({}, new BehaviorSubject(0));
     expect(() => context.search({}, {}, 'noexist').toPromise()).toThrowErrorMatchingInlineSnapshot(
       `"Strategy with name noexist does not exist"`
     );
   });
 
   it(`Search fn is called on appropriate strategy name`, done => {
-    const context = createAppMountSearchContext({
-      mysearch: search =>
-        Promise.resolve({
-          search: () => from(Promise.resolve({ percentComplete: 98 })),
-        }),
-      anothersearch: search =>
-        Promise.resolve({
-          search: () => from(Promise.resolve({ percentComplete: 0 })),
-        }),
-    });
+    const context = createAppMountSearchContext(
+      {
+        mysearch: search =>
+          Promise.resolve({
+            search: () => from(Promise.resolve({ percentComplete: 98 })),
+          }),
+        anothersearch: search =>
+          Promise.resolve({
+            search: () => from(Promise.resolve({ percentComplete: 0 })),
+          }),
+      },
+      new BehaviorSubject(0)
+    );
 
     context.search({}, {}, 'mysearch').subscribe(response => {
       expect(response).toEqual({ percentComplete: 98 });
@@ -52,16 +55,19 @@ describe('Create app mount search context', () => {
   });
 
   it(`Search fn is called with the passed in request object`, done => {
-    const context = createAppMountSearchContext({
-      mysearch: search => {
-        return Promise.resolve({
-          search: request => {
-            expect(request).toEqual({ greeting: 'hi' });
-            return from(Promise.resolve({}));
-          },
-        });
+    const context = createAppMountSearchContext(
+      {
+        mysearch: search => {
+          return Promise.resolve({
+            search: request => {
+              expect(request).toEqual({ greeting: 'hi' });
+              return from(Promise.resolve({}));
+            },
+          });
+        },
       },
-    });
+      new BehaviorSubject(0)
+    );
     context.search({ greeting: 'hi' } as any, {}, 'mysearch').subscribe(
       response => {},
       () => {},

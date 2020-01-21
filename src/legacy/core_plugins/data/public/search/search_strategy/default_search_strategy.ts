@@ -38,7 +38,14 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 };
 
-function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
+// @deprecated
+function msearch({
+  searchRequests,
+  searchService,
+  config,
+  esShardTimeout,
+}: SearchStrategySearchParams) {
+  const es = searchService.__LEGACY.esClient;
   const inlineRequests = searchRequests.map(({ index, body, search_type: searchType }) => {
     const inlineHeader = {
       index: index.title || index,
@@ -57,19 +64,39 @@ function msearch({ searchRequests, es, config, esShardTimeout }: SearchStrategyS
     ...getMSearchParams(config),
     body: `${inlineRequests.join('\n')}\n`,
   });
+
   return {
-    searching: searching.then(({ responses }) => responses),
+    searching: searching.then(({ responses }: any) => responses),
     abort: searching.abort,
   };
 }
 
-function search({ searchRequests, es, config, esShardTimeout }: SearchStrategySearchParams) {
+function search({
+  searchRequests,
+  searchService,
+  config,
+  esShardTimeout,
+}: SearchStrategySearchParams) {
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, esShardTimeout);
+  const es = searchService.__LEGACY.esClient;
   const promises = searchRequests.map(({ index, body }) => {
     const searching = es.search({ index: index.title || index, body, ...searchParams });
     abortController.signal.addEventListener('abort', searching.abort);
-    return searching.catch(({ response }) => JSON.parse(response));
+    return searching.catch(({ response }: any) => JSON.parse(response));
+    /*
+     * Once #44302 is resolved, replace the old implementation with this one -
+     * const params = {
+     *   index: index.title || index,
+     *   body,
+     *   ...searchParams,
+     * };
+     * const { signal } = abortController;
+     * return searchService
+     *   .search({ params }, { signal })
+     *   .toPromise()
+     *   .then(({ rawResponse }) => rawResponse);
+     */
   });
   return {
     searching: Promise.all(promises),

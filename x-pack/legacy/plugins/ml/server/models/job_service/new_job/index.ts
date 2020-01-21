@@ -5,4 +5,4 @@
  */
 
 export { newJobChartsProvider } from './charts';
-export { categorizationExamplesProvider } from './categorization';
+export { categorizationExamplesProvider, topCategoriesProvider } from './categorization';

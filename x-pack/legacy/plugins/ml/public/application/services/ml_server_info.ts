@@ -5,6 +5,7 @@
  */
 
 import { ml } from './ml_api_service';
+import { CategorizationAnalyzer } from '../../../common/types/categories';
 
 export interface MlServerDefaults {
   anomaly_detectors: {
@@ -14,13 +15,6 @@ export interface MlServerDefaults {
     categorization_analyzer?: CategorizationAnalyzer;
   };
   datafeeds: { scroll_size?: number };
-}
-
-export interface CategorizationAnalyzer {
-  char_filter?: any[];
-  tokenizer?: string;
-  filter?: any[];
-  analyzer?: string;
 }
 
 export interface MlServerLimits {

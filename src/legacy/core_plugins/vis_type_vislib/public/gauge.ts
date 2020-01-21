@@ -56,9 +56,9 @@ export interface GaugeVisParams {
 
 export const createGaugeVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'gauge',
-  title: i18n.translate('kbnVislibVisTypes.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
+  title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
-  description: i18n.translate('kbnVislibVisTypes.gauge.gaugeDescription', {
+  description: i18n.translate('visTypeVislib.gauge.gaugeDescription', {
     defaultMessage:
       "Gauges indicate the status of a metric. Use it to show how a metric's value relates to reference threshold values.",
   }),
@@ -116,7 +116,7 @@ export const createGaugeVisTypeDefinition = (deps: KbnVislibVisTypesDependencies
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.gauge.metricTitle', { defaultMessage: 'Metric' }),
+        title: i18n.translate('visTypeVislib.gauge.metricTitle', { defaultMessage: 'Metric' }),
         min: 1,
         aggFilter: [
           '!std_dev',
@@ -134,7 +134,7 @@ export const createGaugeVisTypeDefinition = (deps: KbnVislibVisTypesDependencies
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.gauge.groupTitle', {
+        title: i18n.translate('visTypeVislib.gauge.groupTitle', {
           defaultMessage: 'Split group',
         }),
         min: 0,

@@ -69,7 +69,18 @@ export const createUseUiSetting$Mock = () => {
 };
 
 export const createUseKibanaMock = () => {
-  const services = { ...createKibanaCoreStartMock(), ...createKibanaPluginsStartMock() };
+  const core = createKibanaCoreStartMock();
+  const plugins = createKibanaPluginsStartMock();
+  const useUiSetting = createUseUiSettingMock();
+
+  const services = {
+    ...core,
+    ...plugins,
+    uiSettings: {
+      ...core.uiSettings,
+      get: useUiSetting,
+    },
+  };
 
   return () => ({ services });
 };
@@ -85,15 +96,11 @@ export const createWithKibanaMock = () => {
 
 export const createKibanaContextProviderMock = () => {
   const kibana = createUseKibanaMock()();
-  const uiSettings = {
-    ...kibana.services.uiSettings,
-    get: createUseUiSettingMock(),
-  };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return ({ services, ...rest }: any) =>
     React.createElement(KibanaContextProvider, {
       ...rest,
-      services: { ...kibana.services, uiSettings, ...services },
+      services: { ...kibana.services, ...services },
     });
 };
