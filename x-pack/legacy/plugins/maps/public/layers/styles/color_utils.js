@@ -113,7 +113,11 @@ export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {
       height: '100%',
       display: 'inline-block',
     };
-    return <div style={style}>&nbsp;</div>;
+    return (
+      <div style={style} key={color}>
+        &nbsp;
+      </div>
+    );
   });
   return {
     value: palette.id,

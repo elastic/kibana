@@ -256,6 +256,12 @@ export class LegacyService implements CoreService {
     startDeps: LegacyServiceStartDeps,
     legacyPlugins: LegacyPlugins
   ) {
+    const coreStart: CoreStart = {
+      capabilities: startDeps.core.capabilities,
+      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
+      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+    };
+
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
@@ -291,11 +297,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
-    };
-    const coreStart: CoreStart = {
-      capabilities: startDeps.core.capabilities,
-      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
-      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
