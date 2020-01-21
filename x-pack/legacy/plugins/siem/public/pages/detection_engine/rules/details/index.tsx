@@ -373,7 +373,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
               </GlobalTime>
             ) : (
               <WrapperPage>
-                <HeaderPage border title={i18n.PAGE_TITLE} />
+                <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
 
                 <DetectionEngineEmptyPage />
               </WrapperPage>
