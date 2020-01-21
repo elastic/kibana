@@ -70,20 +70,15 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       storage: this.storage,
     });
 
-    this.esClient = getEsClient(core.injectedMetadata, core.http);
-
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core),
+      search: this.searchService.setup(core, this.packageInfo),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
-      __LEGACY: {
-        esClient: this.esClient,
-      },
     };
   }
 
@@ -102,7 +97,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const dataServices = {
       autocomplete: this.autocomplete.start(),
-      search: this.searchService.start(core, this.packageInfo),
+      search: this.searchService.start(core),
       fieldFormats,
       query: this.queryService.start(core.savedObjects),
       indexPatterns: indexPatternsService,
