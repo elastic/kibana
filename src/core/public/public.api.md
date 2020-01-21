@@ -600,7 +600,7 @@ export interface HttpFetchQuery {
 
 // @public
 export interface HttpHandler {
-    // @deprecated (undocumented)
+    // (undocumented)
     <TResponseBody = any>(path: string, options: HttpFetchOptions & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
@@ -608,7 +608,7 @@ export interface HttpHandler {
     <TResponseBody = any>(options: HttpFetchOptionsWithPath & {
         asResponse: true;
     }): Promise<HttpResponse<TResponseBody>>;
-    // @deprecated (undocumented)
+    // (undocumented)
     <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
     // (undocumented)
     <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;

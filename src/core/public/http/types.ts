@@ -252,14 +252,12 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
  * @public
  */
 export interface HttpHandler {
-  /** @deprecated */
   <TResponseBody = any>(path: string, options: HttpFetchOptions & { asResponse: true }): Promise<
     HttpResponse<TResponseBody>
   >;
   <TResponseBody = any>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
     HttpResponse<TResponseBody>
   >;
-  /** @deprecated */
   <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
   <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
