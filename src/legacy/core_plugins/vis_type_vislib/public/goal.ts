@@ -27,9 +27,9 @@ import { KbnVislibVisTypesDependencies } from './plugin';
 
 export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'goal',
-  title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
+  title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
-  description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
+  description: i18n.translate('visTypeVislib.goal.goalDescription', {
     defaultMessage: 'A goal chart indicates how close you are to your final goal.',
   }),
   visualization: createVislibVisController(deps),
@@ -80,7 +80,7 @@ export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
+        title: i18n.translate('visTypeVislib.goal.metricTitle', { defaultMessage: 'Metric' }),
         min: 1,
         aggFilter: [
           '!std_dev',
@@ -98,7 +98,7 @@ export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', {
+        title: i18n.translate('visTypeVislib.goal.groupTitle', {
           defaultMessage: 'Split group',
         }),
         min: 0,
