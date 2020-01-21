@@ -1,6 +1,6 @@
-This test is to ensure that signals will "halt" eventually when they are run against themselves.  This isn't how anyone should setup
+This test is to ensure that signals will "halt" eventually when they are run against themselves. This isn't how anyone should setup
 signals on signals but rather how we will eventually "halt" given the worst case situations where users are running signals on top of signals
-that are duplicates of each other and going very far back in time. 
+that are duplicates of each other and going very far back in time.
 
 It contains a rule called
 
@@ -16,8 +16,8 @@ signal_on_signal.json
 
 which will always generate a signal for EVERY single document it sees `"query": "_id: *"`
 
-Setup
----
+## Setup
+
 You should first get a valid `_id` from the system from the last 24 hours by running any query within timeline
 or in the system and copying its `_id`. Once you have that `_id` add it to `query_single_id.json`. For example if you have found an `_id`
 in the last 24 hours of `sQevtW8BvLT8jmu5l0TA` add it to `query_single_id.json` under the key `query` like so:
@@ -29,7 +29,7 @@ in the last 24 hours of `sQevtW8BvLT8jmu5l0TA` add it to `query_single_id.json` 
 Then get your current signal index:
 
 ```json
-./get_signals_index.sh
+./get_signal_index.sh
 {
   "name": ".siem-signals-default"
 }
@@ -57,7 +57,7 @@ Wait 30+ seconds to ensure that the single record shows up in your signals index
 to see this by first getting your configured signals index by running:
 
 ```ts
-./get_signals_index.sh
+./get_signal_index.sh
 {
   "name": ".siem-signals-default"
 }
@@ -106,7 +106,7 @@ ancestor of that event. Each 30 seconds that goes it will use de-duplication tec
 each 30 seconds you DO SEE multiple signals then the bug is a de-duplication bug and a critical bug. If you ever see a duplicate rule in the
 ancestors array then that is another CRITICAL bug which needs to be fixed.
 
-After this is ensured, the next step is to run a single signal on top of a signal by posting once 
+After this is ensured, the next step is to run a single signal on top of a signal by posting once
 
 ```sh
 ./post_rule.sh ./rules/test_cases/signals_on_signals/halting_test/signal_on_signal.json
@@ -117,6 +117,7 @@ running in the system which are generating signals on top of signals. After 30 s
 documents in the signals index. The first signal is our original (signal -> event) document with a rule id:
 
 (signal -> event)
+
 ```json
 "parent" : {
   "rule" : "ded57b36-9c4e-4ee4-805d-be4e92033e41",
@@ -139,6 +140,7 @@ documents in the signals index. The first signal is our original (signal -> even
 and the second document is a signal on top of a signal like so:
 
 (signal -> signal -> event)
+
 ```json
 "parent" : {
   "rule" : "161fa5b8-0b96-4985-b066-0d99b2bcb904",
@@ -166,11 +168,11 @@ and the second document is a signal on top of a signal like so:
 ```
 
 Notice that the depth indicates it is at level 2 and its parent is that of a signal. Also notice that the ancestors is an array of size 2
-indicating that this signal terminates at an event. Each and every signal ancestors array should terminate at an event and should ONLY contain 1 
+indicating that this signal terminates at an event. Each and every signal ancestors array should terminate at an event and should ONLY contain 1
 event and NEVER 2 or more events. After 30+ seconds you should NOT see any new documents being created and you should be stable
 at 2. Otherwise we have AND/OR a de-duplication issue, signal on signal issue.
 
-Now, post a second signal that is going to run against these two documents. 
+Now, post a second signal that is going to run against these two documents.
 
 ```sh
 ./post_rule.sh ./rules/test_cases/signals_on_signals/halting_test/signal_on_signal.json
@@ -183,14 +185,15 @@ If you were to look at the number of rules you have:
 ```
 
 You should see that you have 3 rules running concurrently at this point. Write down the `id` to keep track of them
+
 - 1 event rule which is always finding the same event continuously (id: ded57b36-9c4e-4ee4-805d-be4e92033e41)
 - 1 signal rule which is finding ALL signals (id: 161fa5b8-0b96-4985-b066-0d99b2bcb904)
 - 1 signal rule which is finding ALL signals (id: f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406)
 
-
 The expected behavior is that eventually you will get 5 total documents but not additional ones after 1+ minutes. These will be:
 
 The original event rule ded57b36-9c4e-4ee4-805d-be4e92033e41 (event -> signal)
+
 ```json
 "parent" : {
   "rule" : "ded57b36-9c4e-4ee4-805d-be4e92033e41",
@@ -211,6 +214,7 @@ The original event rule ded57b36-9c4e-4ee4-805d-be4e92033e41 (event -> signal)
 ```
 
 The first signal to signal rule 161fa5b8-0b96-4985-b066-0d99b2bcb904 (signal -> event)
+
 ```json
 "parent" : {
   "rule" : "161fa5b8-0b96-4985-b066-0d99b2bcb904",
@@ -268,6 +272,7 @@ signal to signal
 
 But then f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406 also finds the first signal to signal rule from 161fa5b8-0b96-4985-b066-0d99b2bcb904
 and writes that document out with a depth of 3. (signal -> signal -> event)
+
 ```json
 "parent" : {
   "rule" : "f2b70c4a-4d8f-4db5-9ed7-d3ab0630e406",
@@ -337,7 +342,7 @@ Since it wrote that document, the first signal to signal 161fa5b8-0b96-4985-b066
 ]
 ```
 
-You will be "halted" at this point as the signal ancestry and de-duplication ensures that we do not report twice on signals and that we do not 
+You will be "halted" at this point as the signal ancestry and de-duplication ensures that we do not report twice on signals and that we do not
 create additional duplications. So what happens if we create a 3rd rule which does a signal on a signal?
 
 ```sh
@@ -354,11 +359,11 @@ be outputted.
 
 Why does it take sometimes several minutes before things become stable? This is because a rule can write a signal back to the index, then another rule
 wakes up and writes its document, and the previous rules on next run see this one and creates another chain. This continues until the ancestor detection
-part of the code realizes that it is going to create a cyclic if it adds the same rule a second time and you no longer have a DAG (Directed Acyclic Graph) 
+part of the code realizes that it is going to create a cyclic if it adds the same rule a second time and you no longer have a DAG (Directed Acyclic Graph)
 at which point it terminates.
 
 What would happen if I changed the rule look-back from `"from": "now-1d"` to something smaller such as `"from": "now-30s"`? Then you won't get the same
-number potentially and things are indeterministic because depending on when your rule runs it might find a previous signal and it might not. This is ok 
+number potentially and things are indeterministic because depending on when your rule runs it might find a previous signal and it might not. This is ok
 and normal as you are then running signals on signals at the same interval as each other and the rules at the moment. A signal on a signal does not detect
 that another signal has written something and it needs to re-run within the same scheduled time period. It also does not detect that another rule has just
 written something and does not re-schedule its self to re-run again or against that document.

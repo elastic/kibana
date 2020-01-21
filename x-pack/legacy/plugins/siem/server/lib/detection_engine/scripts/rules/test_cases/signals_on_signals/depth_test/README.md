@@ -37,8 +37,7 @@ which will only create signals from all signals that point directly to another s
 "query": "signal.parent.depth: 2 and _id: *"
 ```
 
-Setup
----
+## Setup
 
 You should first get a valid `_id` from the system from the last 24 hours by running any query within timeline
 or in the system and copying its `_id`. Once you have that `_id` add it to `query_single_id.json`. For example if you have found an `_id`
@@ -51,7 +50,7 @@ in the last 24 hours of `sQevtW8BvLT8jmu5l0TA` add it to `query_single_id.json` 
 Then get your current signal index:
 
 ```json
-./get_signals_index.sh
+./get_signal_index.sh
 {
   "name": ".siem-signals-default"
 }
@@ -79,7 +78,7 @@ Wait 30+ seconds to ensure that the single record shows up in your signals index
 to see this by first getting your configured signals index by running:
 
 ```ts
-./get_signals_index.sh
+./get_signal_index.sh
 {
   "name": ".siem-signals-default"
 }
@@ -90,7 +89,6 @@ And then you can query against that:
 ```ts
 GET .siem-signals-default/_search
 ```
-
 
 Check your parent section of the signal and you will see something like this:
 
@@ -129,7 +127,7 @@ ancestor of that event. Each 30 seconds that goes it will use de-duplication tec
 each 30 seconds you DO SEE multiple signals then the bug is a de-duplication bug and a critical bug. If you ever see a duplicate rule in the
 ancestors array then that is another CRITICAL bug which needs to be fixed.
 
-After this is ensured, the next step is to run a single signal on top of a signal by posting once 
+After this is ensured, the next step is to run a single signal on top of a signal by posting once
 
 ```sh
 ./post_rule.sh ./rules/test_cases/signals_on_signals/depth_test/signal_on_signal_depth_1.json
@@ -187,7 +185,7 @@ and the second document is a signal on top of a signal like so:
 ```
 
 Notice that the depth indicates it is at level 2 and its parent is that of a signal. Also notice that the ancestors is an array of size 2
-indicating that this signal terminates at an event. Each and every signal ancestors array should terminate at an event and should ONLY contain 1 
+indicating that this signal terminates at an event. Each and every signal ancestors array should terminate at an event and should ONLY contain 1
 event and NEVER 2 or more events. After 30+ seconds you should NOT see any new documents being created and you should be stable
 at 2. Otherwise we have AND/OR a de-duplication issue, signal on signal issue.
 
@@ -204,6 +202,7 @@ If you were to look at the number of rules you have:
 ```
 
 You should see that you have 3 rules running concurrently at this point. Write down the `id` to keep track of them
+
 - 1 event rule which is always finding the same event continuously (id: 74e0dd0c-4609-416f-b65e-90f8b2564612)
 - 1 signal rule which is finding ALL signals at depth 1 (id: 1d3b3735-66ef-4e53-b7f5-4340026cc40c)
 - 1 signal rule which is finding ALL signals at depth 1 (id: c93ddb57-e7e9-4973-9886-72ddefb4d22e)
@@ -291,7 +290,6 @@ signal to signal
 We should be able to post this depth level as many times as we want and get only 1 new document each time. If we decide though to
 post `signal_on_signal_depth_2.json` like so:
 
-
 ```sh
 ./post_rule.sh ./rules/test_cases/signals_on_signals/depth_test/signal_on_signal_depth_2.json
 ```
@@ -367,4 +365,3 @@ depth 1 rules running then the signals at depth 2 will produce two new ones and 
 
 The total number of documents should be 5 at this point. If you were to post this same rule a second time to get a second instance
 running you will end up with 7 documents as it will only re-report the first 2 and not interfere with the other rules.
-
