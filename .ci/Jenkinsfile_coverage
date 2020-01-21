@@ -96,6 +96,10 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   mkdir -p target/kibana-coverage/mocha-combined
                   cp -r /tmp/extracted_coverage/target/kibana-coverage/mocha target/kibana-coverage/mocha-combined
 
+
+                  # Debugging Ingest and Static Site
+                  ls -R target
+
                   echo "###  Ingesting Code Coverage"
                   export ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243
                   export BUILD_ID=${BUILD_NUMBER}
