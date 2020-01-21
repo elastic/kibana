@@ -55,15 +55,40 @@ export class QueryContext {
     return clauses;
   }
 
-  async dateRangeFilter(forceNoTimespan?: boolean): Promise<any> {
+  async dateRangeFilter(): Promise<any> {
     const timestampClause = {
       range: { '@timestamp': { gte: this.dateRangeStart, lte: this.dateRangeEnd } },
     };
 
-    if (forceNoTimespan === true || !(await this.hasTimespan())) {
+    if (!(await this.hasTimespan())) {
       return timestampClause;
     }
 
+    return {
+      bool: {
+        filter: [
+          timestampClause,
+          {
+            bool: {
+              should: [
+                this.timespanClause(),
+                {
+                  bool: {
+                    must_not: { exists: { field: 'monitor.timespan' } },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+  }
+
+  // timeRangeClause queries the given date range using the monitor timespan field
+  // which is a bit dicey since we may have data that predates this field existing,
+  // or we may have data that has it, but a slow ingestion process.
+  timespanClause() {
     // We subtract 5m from the start to account for data that shows up late,
     // for instance, with a large value for the elasticsearch refresh interval
     // setting it lower can work very well on someone's laptop, but with real world
@@ -74,29 +99,11 @@ export class QueryContext {
     const tsEnd = DateMath.parse(this.dateRangeEnd)!;
 
     return {
-      bool: {
-        filter: [
-          timestampClause,
-          {
-            bool: {
-              should: [
-                {
-                  range: {
-                    'monitor.timespan': {
-                      gte: tsStart.toISOString(),
-                      lte: tsEnd.toISOString(),
-                    },
-                  },
-                },
-                {
-                  bool: {
-                    must_not: { exists: { field: 'monitor.timespan' } },
-                  },
-                },
-              ],
-            },
-          },
-        ],
+      range: {
+        'monitor.timespan': {
+          gte: tsStart.toISOString(),
+          lte: tsEnd.toISOString(),
+        },
       },
     };
   }
@@ -112,10 +119,7 @@ export class QueryContext {
           body: {
             query: {
               bool: {
-                filter: [
-                  await this.dateRangeFilter(true),
-                  { exists: { field: 'monitor.timespan' } },
-                ],
+                filter: [this.timespanClause()],
               },
             },
           },
