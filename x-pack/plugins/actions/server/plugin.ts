@@ -19,7 +19,6 @@ import {
   SavedObjectsServiceStart,
 } from '../../../../src/core/server';
 
-import { PluginSetupContract as SecurityPluginSetupContract } from '../../security/server';
 import {
   PluginSetupContract as EncryptedSavedObjectsSetupContract,
   PluginStartContract as EncryptedSavedObjectsStartContract,
@@ -59,7 +58,6 @@ export interface PluginStartContract {
 }
 
 export interface ActionsPluginsSetup {
-  security?: SecurityPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
   licensing: LicensingPluginSetup;
