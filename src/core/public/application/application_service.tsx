@@ -113,6 +113,12 @@ export class ApplicationService {
     redirectTo = (path: string) => (window.location.href = path),
     history,
   }: SetupDeps): InternalApplicationSetup {
+    const legacyMode = injectedMetadata.getLegacyMode();
+    this.currentAppId$.subscribe(appId => {
+      // eslint-disable-next-line no-console
+      console.log(`${new Date().toISOString()} - (${legacyMode}) ApplicationID: ${appId}`);
+    });
+
     const basename = basePath.get();
     // Only setup history if we're not in legacy mode
     if (!injectedMetadata.getLegacyMode()) {

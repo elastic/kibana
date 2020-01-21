@@ -50,6 +50,8 @@ export default function(chrome, internals) {
    */
   chrome.setRootTemplate = function(template) {
     internals.rootTemplate = template;
+    // eslint-disable-next-line no-console
+    console.log(`SetRootTemplate ApplicationID ${chrome.getApp().id}`);
     return chrome;
   };
 
