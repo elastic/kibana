@@ -9,8 +9,7 @@ import { SearchBar, OuterSearchBarProps } from './search_bar';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
-import { QueryStringInput } from '../../../../../../src/plugins/data/public';
+import { IndexPattern, QueryStringInput } from '../../../../../../src/plugins/data/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -22,6 +21,7 @@ import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
 
+jest.mock('ui/new_platform');
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
 const waitForIndexPatternFetch = () => new Promise(r => setTimeout(r));
@@ -52,7 +52,7 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
         savedQueries: {},
       },
       autocomplete: {
-        getProvider: () => undefined,
+        hasQuerySuggestions: () => false,
       },
     },
   };

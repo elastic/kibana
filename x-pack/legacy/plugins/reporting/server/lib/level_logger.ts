@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type ServerLog = (tags: string[], msg: string) => void;
+import { ServerFacade } from '../../types';
 
 const trimStr = (toTrim: string) => {
   return typeof toTrim === 'string' ? toTrim.trim() : toTrim;
@@ -16,12 +16,12 @@ export class LevelLogger {
 
   public warn: (msg: string, tags?: string[]) => void;
 
-  static createForServer(server: any, tags: string[]) {
-    const serverLog: ServerLog = (tgs: string[], msg: string) => server.log(tgs, msg);
+  static createForServer(server: ServerFacade, tags: string[]) {
+    const serverLog: ServerFacade['log'] = (tgs: string[], msg: string) => server.log(tgs, msg);
     return new LevelLogger(serverLog, tags);
   }
 
-  constructor(logger: ServerLog, tags: string[]) {
+  constructor(logger: ServerFacade['log'], tags: string[]) {
     this._logger = logger;
     this._tags = tags;
 

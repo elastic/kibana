@@ -131,6 +131,9 @@ export const npSetup = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        update: sinon.fake(),
+      },
     },
   },
 };
@@ -148,6 +151,8 @@ export const npStart = {
       legacy: {
         getSection: () => ({
           register: sinon.fake(),
+          deregister: sinon.fake(),
+          hasItem: sinon.fake(),
         }),
       },
     },

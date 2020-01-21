@@ -19,7 +19,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { AutocompleteSuggestion } from '../..';
+import { autocomplete } from '../..';
 import { SuggestionComponent } from './suggestion_component';
 import { SuggestionsComponent } from './suggestions_component';
 
@@ -27,7 +27,7 @@ const noop = () => {
   return;
 };
 
-const mockSuggestions: AutocompleteSuggestion[] = [
+const mockSuggestions: autocomplete.QuerySuggestion[] = [
   {
     description: 'This is not a helpful suggestion',
     end: 0,

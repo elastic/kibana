@@ -274,7 +274,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
       // if options.body.output === 'stream'
       return schema.stream();
     } else {
-      return schema.maybe(schema.nullable(schema.object({}, { allowUnknowns: true })));
+      return schema.maybe(schema.nullable(schema.any({})));
     }
   }
 }

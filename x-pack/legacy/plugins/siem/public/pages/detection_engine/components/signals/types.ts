@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../../../src/plugins/data/common/es_query';
-import { TimelineNonEcsData } from '../../../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../../store';
+import ApolloClient from 'apollo-client';
+
+import { Ecs } from '../../../../graphql/types';
+import { TimelineModel } from '../../../../store/timeline/model';
 
 export interface SetEventsLoadingProps {
   eventIds: string[];
@@ -31,24 +32,21 @@ export interface UpdateSignalStatusActionProps {
   status: 'open' | 'closed';
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
-  kbnVersion: string;
 }
 
 export type SendSignalsToTimeline = () => void;
 
-export interface SendSignalsToTimelineActionProps {
+export interface SendSignalToTimelineActionProps {
+  apolloClient?: ApolloClient<{}>;
   createTimeline: CreateTimeline;
-  data: TimelineNonEcsData[][];
+  ecsData: Ecs;
+  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 }
 
 export interface CreateTimelineProps {
-  id: string;
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
-  };
-  filters?: esFilters.Filter[];
-  dateRange?: { start: number; end: number };
+  from: number;
+  timeline: TimelineModel;
+  to: number;
 }
 
-export type CreateTimeline = ({ id, kqlQuery, filters, dateRange }: CreateTimelineProps) => void;
+export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;

@@ -12,14 +12,6 @@ Describes a plugin configuration properties.
 export interface PluginConfigDescriptor<T = any> 
 ```
 
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [deprecations](./kibana-plugin-server.pluginconfigdescriptor.deprecations.md) | <code>ConfigDeprecationProvider</code> | Provider for the [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md) to apply to the plugin configuration. |
-|  [exposeToBrowser](./kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md) | <code>{</code><br/><code>        [P in keyof T]?: boolean;</code><br/><code>    }</code> | List of configuration properties that will be available on the client-side plugin. |
-|  [schema](./kibana-plugin-server.pluginconfigdescriptor.schema.md) | <code>PluginConfigSchema&lt;T&gt;</code> | Schema to use to validate the plugin configuration.[PluginConfigSchema](./kibana-plugin-server.pluginconfigschema.md) |
-
 ## Example
 
 
@@ -47,4 +39,12 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 };
 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [deprecations](./kibana-plugin-server.pluginconfigdescriptor.deprecations.md) | <code>ConfigDeprecationProvider</code> | Provider for the [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md) to apply to the plugin configuration. |
+|  [exposeToBrowser](./kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md) | <code>{</code><br/><code>        [P in keyof T]?: boolean;</code><br/><code>    }</code> | List of configuration properties that will be available on the client-side plugin. |
+|  [schema](./kibana-plugin-server.pluginconfigdescriptor.schema.md) | <code>PluginConfigSchema&lt;T&gt;</code> | Schema to use to validate the plugin configuration.[PluginConfigSchema](./kibana-plugin-server.pluginconfigschema.md) |
 

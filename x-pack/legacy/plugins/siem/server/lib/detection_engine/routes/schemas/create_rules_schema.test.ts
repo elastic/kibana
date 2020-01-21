@@ -238,6 +238,7 @@ describe('create rules schema', () => {
       }).error
     ).toBeFalsy();
   });
+
   test('You can send in an empty array to threats', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
@@ -260,6 +261,7 @@ describe('create rules schema', () => {
       }).error
     ).toBeFalsy();
   });
+
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threats] does validate', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
@@ -355,8 +357,10 @@ describe('create rules schema', () => {
         query: 'some-query',
         language: 'kuery',
         references: [5],
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual(
+      'child "references" fails because ["references" at position 0 fails because ["0" must be a string]]'
+    );
   });
 
   test('indexes cannot be numbers', () => {
@@ -377,8 +381,10 @@ describe('create rules schema', () => {
           query: 'some-query',
           language: 'kuery',
         }
-      ).error
-    ).toBeTruthy();
+      ).error.message
+    ).toEqual(
+      'child "index" fails because ["index" at position 0 fails because ["0" must be a string]]'
+    );
   });
 
   test('defaults interval to 5 min', () => {
@@ -430,8 +436,8 @@ describe('create rules schema', () => {
         severity: 'severity',
         interval: '5m',
         type: 'saved_query',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "saved_id" fails because ["saved_id" is required]');
   });
 
   test('saved_id is required when type is saved_query and validates with it', () => {
@@ -491,8 +497,8 @@ describe('create rules schema', () => {
         type: 'saved_query',
         saved_id: 'some id',
         filters: 'some string',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "filters" fails because ["filters" must be an array]');
   });
 
   test('language validates with kuery', () => {
@@ -554,8 +560,8 @@ describe('create rules schema', () => {
         references: ['index-1'],
         query: 'some query',
         language: 'something-made-up',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "language" fails because ["language" must be one of [kuery, lucene]]');
   });
 
   test('max_signals cannot be negative', () => {
@@ -576,8 +582,8 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: -1,
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "max_signals" fails because ["max_signals" must be greater than 0]');
   });
 
   test('max_signals cannot be zero', () => {
@@ -598,8 +604,8 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 0,
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "max_signals" fails because ["max_signals" must be greater than 0]');
   });
 
   test('max_signals can be 1', () => {
@@ -666,8 +672,10 @@ describe('create rules schema', () => {
         language: 'kuery',
         max_signals: 1,
         tags: [0, 1, 2],
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual(
+      'child "tags" fails because ["tags" at position 0 fails because ["0" must be a string]]'
+    );
   });
 
   test('You cannot send in an array of threats that are missing "framework"', () => {
@@ -708,9 +716,12 @@ describe('create rules schema', () => {
             ],
           },
         ],
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual(
+      'child "threats" fails because ["threats" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
+    );
   });
+
   test('You cannot send in an array of threats that are missing "tactic"', () => {
     expect(
       createRulesSchema.validate<
@@ -745,9 +756,12 @@ describe('create rules schema', () => {
             ],
           },
         ],
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual(
+      'child "threats" fails because ["threats" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
+    );
   });
+
   test('You cannot send in an array of threats that are missing "techniques"', () => {
     expect(
       createRulesSchema.validate<
@@ -780,8 +794,10 @@ describe('create rules schema', () => {
             },
           },
         ],
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual(
+      'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+    );
   });
 
   test('You can optionally send in an array of false positives', () => {
@@ -828,34 +844,13 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual(
+      'child "false_positives" fails because ["false_positives" at position 0 fails because ["0" must be a string]]'
+    );
   });
 
-  test('You can optionally set the immutable to be true', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        immutable: true,
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'severity',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-      }).error
-    ).toBeFalsy();
-  });
-
-  test('You cannot set the immutable to be a number', () => {
+  test('You cannot set the immutable when trying to create a rule', () => {
     expect(
       createRulesSchema.validate<
         Partial<Omit<RuleAlertParamsRest, 'immutable'>> & { immutable: number }
@@ -876,8 +871,8 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('"immutable" is not allowed');
   });
 
   test('You cannot set the risk_score to 101', () => {
@@ -889,7 +884,6 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'severity',
@@ -899,8 +893,8 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "risk_score" fails because ["risk_score" must be less than 101]');
   });
 
   test('You cannot set the risk_score to -1', () => {
@@ -912,7 +906,6 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'severity',
@@ -922,8 +915,8 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "risk_score" fails because ["risk_score" must be greater than -1]');
   });
 
   test('You can set the risk_score to 0', () => {
@@ -935,7 +928,6 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'severity',
@@ -958,7 +950,6 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'severity',
@@ -981,7 +972,6 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'severity',
@@ -1007,7 +997,6 @@ describe('create rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'severity',
@@ -1018,20 +1007,19 @@ describe('create rules schema', () => {
         language: 'kuery',
         max_signals: 1,
         meta: 'should not work',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "meta" fails because ["meta" must be an object]');
   });
 
   test('You can omit the query string when filters are present', () => {
     expect(
-      createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'meta'> & { meta: string }>>({
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
         output_index: '.siem-signals',
         risk_score: 50,
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'severity',
@@ -1045,7 +1033,30 @@ describe('create rules schema', () => {
     ).toBeFalsy();
   });
 
-  test('timeline_id validates', () => {
+  test('validates with timeline_id and timeline_title', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: 'timeline-id',
+        timeline_title: 'timeline-title',
+      }).error
+    ).toBeFalsy();
+  });
+
+  test('You cannot omit timeline_title when timeline_id is present', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -1063,7 +1074,98 @@ describe('create rules schema', () => {
         query: 'some query',
         language: 'kuery',
         timeline_id: 'some_id',
-      }).error
-    ).toBeFalsy();
+      }).error.message
+    ).toEqual('child "timeline_title" fails because ["timeline_title" is required]');
+  });
+
+  test('You cannot have a null value for timeline_title when timeline_id is present', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: 'some_id',
+        timeline_title: null,
+      }).error.message
+    ).toEqual('child "timeline_title" fails because ["timeline_title" must be a string]');
+  });
+
+  test('You cannot have empty string for timeline_title when timeline_id is present', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: 'some_id',
+        timeline_title: '',
+      }).error.message
+    ).toEqual('child "timeline_title" fails because ["timeline_title" is not allowed to be empty]');
+  });
+
+  test('You cannot have timeline_title with an empty timeline_id', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_id: '',
+        timeline_title: 'some-title',
+      }).error.message
+    ).toEqual('child "timeline_id" fails because ["timeline_id" is not allowed to be empty]');
+  });
+
+  test('You cannot have timeline_title without timeline_id', () => {
+    expect(
+      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+        rule_id: 'rule-1',
+        output_index: '.siem-signals',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'severity',
+        interval: '5m',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        timeline_title: 'some-title',
+      }).error.message
+    ).toEqual('child "timeline_title" fails because ["timeline_title" is not allowed]');
   });
 });
