@@ -20,8 +20,8 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [DEFAULT](./kibana-plugin-server.cspconfig.default.md) | <code>static</code> | <code>CspConfig</code> |  |
 |  [header](./kibana-plugin-server.cspconfig.header.md) |  | <code>string</code> |  |
+|  [headerChangedFromDefault](./kibana-plugin-server.cspconfig.headerchangedfromdefault.md) |  | <code>boolean</code> |  |
 |  [rules](./kibana-plugin-server.cspconfig.rules.md) |  | <code>string[]</code> |  |
 |  [strict](./kibana-plugin-server.cspconfig.strict.md) |  | <code>boolean</code> |  |
 |  [warnLegacyBrowsers](./kibana-plugin-server.cspconfig.warnlegacybrowsers.md) |  | <code>boolean</code> |  |

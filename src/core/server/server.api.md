@@ -583,11 +583,11 @@ export interface CoreStart {
 // @public
 export class CspConfig implements ICspConfig {
     // @internal
-    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>, env?: Env);
-    // (undocumented)
-    static readonly DEFAULT: CspConfig;
+    constructor(env: Env, rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
     // (undocumented)
     readonly header: string;
+    // (undocumented)
+    readonly headerChangedFromDefault: boolean;
     // (undocumented)
     readonly rules: string[];
     // (undocumented)
@@ -773,6 +773,7 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 // @public
 export interface ICspConfig {
     readonly header: string;
+    readonly headerChangedFromDefault: boolean;
     readonly rules: string[];
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
