@@ -18,6 +18,8 @@
  */
 
 import { CspConfig, ICspConfig } from '../../../../../../core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createMockEnv } from '../../../../../../core/server/config/env.mock';
 import { createCspCollector } from './csp_collector';
 
 const createMockKbnServer = () => ({
@@ -25,7 +27,7 @@ const createMockKbnServer = () => ({
     setup: {
       core: {
         http: {
-          csp: new CspConfig(),
+          csp: new CspConfig(createMockEnv()),
         },
       },
     },
@@ -36,7 +38,7 @@ describe('csp collector', () => {
   let kbnServer: ReturnType<typeof createMockKbnServer>;
 
   function updateCsp(config: Partial<ICspConfig>) {
-    kbnServer.newPlatform.setup.core.http.csp = new CspConfig(config);
+    kbnServer.newPlatform.setup.core.http.csp = new CspConfig(createMockEnv(), config);
   }
 
   beforeEach(() => {
