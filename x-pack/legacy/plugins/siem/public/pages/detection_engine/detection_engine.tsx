@@ -230,8 +230,13 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const DetectionEngine = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(DetectionEngineComponent);
+};
+
+export const DetectionEngine = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(DetectionEngineComponent);
 
 DetectionEngine.displayName = 'DetectionEngine';
