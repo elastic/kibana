@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiAccordion,
-  EuiAccordionProps,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
