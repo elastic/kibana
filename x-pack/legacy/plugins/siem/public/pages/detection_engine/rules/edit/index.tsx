@@ -62,15 +62,6 @@ export const EditRuleComponent = memo(() => {
 
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (userHasNoPermissions) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
-  }
 
   const [initForm, setInitForm] = useState(false);
   const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({
@@ -274,6 +265,16 @@ export const EditRuleComponent = memo(() => {
 
   if (isSaved || (rule != null && rule.immutable)) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
+  }
+
+  if (
+    isSignalIndexExists != null &&
+    isAuthenticated != null &&
+    (!isSignalIndexExists || !isAuthenticated)
+  ) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 

@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useState } from 're
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
 
-import { useRules } from '../../../../containers/detection_engine/rules';
+import { useRules, CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
   UtilityBar,
@@ -56,7 +56,7 @@ const initialState: State = {
 };
 
 interface AllRulesProps {
-  createPrePackagedRules: () => void;
+  createPrePackagedRules: CreatePreBuiltRules | null;
   hasNoPermissions: boolean;
   importCompleteToggle: boolean;
   loading: boolean;
@@ -65,6 +65,7 @@ interface AllRulesProps {
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
+  setRefreshRulesData: (refreshRule: () => void) => void;
 }
 
 /**
@@ -86,6 +87,7 @@ export const AllRules = React.memo<AllRulesProps>(
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
+    setRefreshRulesData,
   }) => {
     const [
       {
@@ -101,12 +103,9 @@ export const AllRules = React.memo<AllRulesProps>(
     ] = useReducer(allRulesReducer, initialState);
     const history = useHistory();
     const [isInitialLoad, setIsInitialLoad] = useState(true);
-    const [isLoadingRules, rulesData, reFetchRulesData] = useRules(
-      pagination,
-      filterOptions,
-      refreshToggle
-    );
+    const [isGlobalLoading, setIsGlobalLoad] = useState(false);
     const [, dispatchToaster] = useStateToaster();
+    const [isLoadingRules, rulesData, reFetchRulesData] = useRules(pagination, filterOptions);
 
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
       rulesInstalled,
@@ -147,11 +146,21 @@ export const AllRules = React.memo<AllRulesProps>(
 
     useEffect(() => {
       dispatch({ type: 'loading', isLoading: isLoadingRules });
+    }, [isLoadingRules]);
 
-      if (!isLoadingRules) {
+    useEffect(() => {
+      if (!isLoadingRules && !loading && isInitialLoad) {
         setIsInitialLoad(false);
       }
-    }, [isLoadingRules]);
+    }, [isInitialLoad, isLoadingRules, loading]);
+
+    useEffect(() => {
+      if (!isGlobalLoading && (isLoadingRules || isLoading)) {
+        setIsGlobalLoad(true);
+      } else if (isGlobalLoading && !isLoadingRules && !isLoading) {
+        setIsGlobalLoad(false);
+      }
+    }, [setIsGlobalLoad, isGlobalLoading, isLoadingRules, isLoading]);
 
     useEffect(() => {
       if (!isInitialLoad) {
@@ -163,13 +172,14 @@ export const AllRules = React.memo<AllRulesProps>(
       if (reFetchRulesData != null) {
         reFetchRulesData();
       }
-    }, [rulesInstalled, rulesNotInstalled, rulesNotUpdated]);
+      refetchPrePackagedRulesStatus();
+    }, [refreshToggle, reFetchRulesData, refetchPrePackagedRulesStatus]);
 
     useEffect(() => {
-      if (refetchPrePackagedRulesStatus != null && tableData.length > 0) {
-        refetchPrePackagedRulesStatus();
+      if (reFetchRulesData != null) {
+        setRefreshRulesData(reFetchRulesData);
       }
-    }, [refetchPrePackagedRulesStatus, tableData]);
+    }, [reFetchRulesData, setRefreshRulesData]);
 
     useEffect(() => {
       dispatch({
@@ -182,6 +192,13 @@ export const AllRules = React.memo<AllRulesProps>(
         },
       });
     }, [rulesData]);
+
+    const handleCreatePrePackagedRules = useCallback(async () => {
+      if (createPrePackagedRules != null) {
+        await createPrePackagedRules();
+        dispatch({ type: 'refresh' });
+      }
+    }, [createPrePackagedRules]);
 
     const euiBasicTableSelectionProps = useMemo(
       () => ({
@@ -211,12 +228,10 @@ export const AllRules = React.memo<AllRulesProps>(
         />
         <EuiSpacer />
 
-        <Panel loading={isLoading}>
-          {isInitialLoad ? (
-            <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-          ) : (
-            <>
-              <HeaderSection split title={i18n.ALL_RULES}>
+        <Panel loading={isGlobalLoading}>
+          <>
+            <HeaderSection split title={i18n.ALL_RULES}>
+              {rulesInstalled != null && rulesInstalled > 0 && (
                 <EuiFieldSearch
                   aria-label={i18n.SEARCH_RULES}
                   fullWidth
@@ -236,66 +251,69 @@ export const AllRules = React.memo<AllRulesProps>(
                     });
                   }}
                 />
-              </HeaderSection>
-              {(isLoading || loading) && (
-                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
               )}
-              {isEmpty(tableData) && prePackagedRuleStatus === 'ruleNotInstalled' && (
-                <PrePackagedRulesPrompt
-                  createPrePackagedRules={createPrePackagedRules}
-                  loading={loadingCreatePrePackagedRules}
-                  userHasNoPermissions={hasNoPermissions}
-                />
-              )}
-              {!isEmpty(tableData) && (
-                <>
-                  <UtilityBar border>
-                    <UtilityBarSection>
-                      <UtilityBarGroup>
-                        <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
-                      </UtilityBarGroup>
+            </HeaderSection>
+            {isInitialLoad && isEmpty(tableData) && (
+              <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+            )}
+            {isGlobalLoading && !isEmpty(tableData) && (
+              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+            )}
+            {isEmpty(tableData) && prePackagedRuleStatus === 'ruleNotInstalled' && (
+              <PrePackagedRulesPrompt
+                createPrePackagedRules={handleCreatePrePackagedRules}
+                loading={loadingCreatePrePackagedRules}
+                userHasNoPermissions={hasNoPermissions}
+              />
+            )}
+            {!isEmpty(tableData) && (
+              <>
+                <UtilityBar border>
+                  <UtilityBarSection>
+                    <UtilityBarGroup>
+                      <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
+                    </UtilityBarGroup>
 
-                      <UtilityBarGroup>
-                        <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
-                        {!hasNoPermissions && (
-                          <UtilityBarAction
-                            iconSide="right"
-                            iconType="arrowDown"
-                            popoverContent={getBatchItemsPopoverContent}
-                          >
-                            {i18n.BATCH_ACTIONS}
-                          </UtilityBarAction>
-                        )}
+                    <UtilityBarGroup>
+                      <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
+                      {!hasNoPermissions && (
                         <UtilityBarAction
                           iconSide="right"
-                          iconType="refresh"
-                          onClick={() => dispatch({ type: 'refresh' })}
+                          iconType="arrowDown"
+                          popoverContent={getBatchItemsPopoverContent}
                         >
-                          {i18n.REFRESH}
+                          {i18n.BATCH_ACTIONS}
                         </UtilityBarAction>
-                      </UtilityBarGroup>
-                    </UtilityBarSection>
-                  </UtilityBar>
+                      )}
+                      <UtilityBarAction
+                        iconSide="right"
+                        iconType="refresh"
+                        onClick={() => dispatch({ type: 'refresh' })}
+                      >
+                        {i18n.REFRESH}
+                      </UtilityBarAction>
+                    </UtilityBarGroup>
+                  </UtilityBarSection>
+                </UtilityBar>
 
-                  <EuiBasicTable
-                    columns={columns}
-                    isSelectable={!hasNoPermissions ?? false}
-                    itemId="id"
-                    items={tableData}
-                    onChange={tableOnChangeCallback}
-                    pagination={{
-                      pageIndex: pagination.page - 1,
-                      pageSize: pagination.perPage,
-                      totalItemCount: pagination.total,
-                      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-                    }}
-                    sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
-                    selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
-                  />
-                </>
-              )}
-            </>
-          )}
+                <EuiBasicTable
+                  columns={columns}
+                  isSelectable={!hasNoPermissions ?? false}
+                  itemId="id"
+                  items={tableData}
+                  onChange={tableOnChangeCallback}
+                  pagination={{
+                    pageIndex: pagination.page - 1,
+                    pageSize: pagination.perPage,
+                    totalItemCount: pagination.total,
+                    pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+                  }}
+                  sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
+                  selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+                />
+              </>
+            )}
+          </>
         </Panel>
       </>
     );

@@ -12,9 +12,9 @@ import { getPrePackagedRulesStatus, createPrepackagedRules } from './api';
 import * as i18n from './translations';
 
 type Func = () => void;
-
+export type CreatePreBuiltRules = () => Promise<boolean>;
 interface Return {
-  createPrePackagedRules: Func | null;
+  createPrePackagedRules: null | CreatePreBuiltRules;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   refetchPrePackagedRulesStatus: Func | null;
@@ -52,7 +52,7 @@ export const usePrePackagedRules = ({
   const [rulesNotUpdated, setRulesNotUpdated] = useState<number | null>(null);
   const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
   const [loading, setLoading] = useState(true);
-  const createPrePackagedRules = useRef<Func | null>(null);
+  const createPrePackagedRules = useRef<null | CreatePreBuiltRules>(null);
   const refetchPrePackagedRules = useRef<Func | null>(null);
   const [, dispatchToaster] = useStateToaster();
 
@@ -85,60 +85,64 @@ export const usePrePackagedRules = ({
       }
     };
 
-    const createElasticRules = async () => {
-      try {
-        if (
-          canUserCRUD &&
-          hasIndexManage &&
-          hasManageApiKey &&
-          isAuthenticated &&
-          isSignalIndexExists
-        ) {
-          setLoadingCreatePrePackagedRules(true);
-          await createPrepackagedRules({
-            signal: abortCtrl.signal,
-          });
+    const createElasticRules = async (): Promise<boolean> => {
+      return new Promise(async resolve => {
+        try {
+          if (
+            canUserCRUD &&
+            hasIndexManage &&
+            hasManageApiKey &&
+            isAuthenticated &&
+            isSignalIndexExists
+          ) {
+            setLoadingCreatePrePackagedRules(true);
+            await createPrepackagedRules({
+              signal: abortCtrl.signal,
+            });
 
-          if (isSubscribed) {
-            let iterationTryOfFetchingPrePackaagedCount = 0;
-            let timeoutId = -1;
-            const stopTimeOut = () => {
-              if (timeoutId !== -1) {
-                window.clearTimeout(timeoutId);
-              }
-            };
-            const reFetch = () =>
-              window.setTimeout(async () => {
-                iterationTryOfFetchingPrePackaagedCount =
-                  iterationTryOfFetchingPrePackaagedCount + 1;
-                const prePackagedRuleStatusResponse = await getPrePackagedRulesStatus({
-                  signal: abortCtrl.signal,
-                });
-                if (
-                  isSubscribed &&
-                  ((prePackagedRuleStatusResponse.rules_not_installed === 0 &&
-                    prePackagedRuleStatusResponse.rules_not_updated === 0) ||
-                    iterationTryOfFetchingPrePackaagedCount > 100)
-                ) {
-                  setLoadingCreatePrePackagedRules(false);
-                  setRulesInstalled(prePackagedRuleStatusResponse.rules_installed);
-                  setRulesNotInstalled(prePackagedRuleStatusResponse.rules_not_installed);
-                  setRulesNotUpdated(prePackagedRuleStatusResponse.rules_not_updated);
-                  displaySuccessToast(i18n.RULE_PREPACKAGED_SUCCESS, dispatchToaster);
-                  stopTimeOut();
-                } else {
-                  timeoutId = reFetch();
+            if (isSubscribed) {
+              let iterationTryOfFetchingPrePackagedCount = 0;
+              let timeoutId = -1;
+              const stopTimeOut = () => {
+                if (timeoutId !== -1) {
+                  window.clearTimeout(timeoutId);
                 }
-              }, 300);
-            timeoutId = reFetch();
+              };
+              const reFetch = () =>
+                window.setTimeout(async () => {
+                  iterationTryOfFetchingPrePackagedCount =
+                    iterationTryOfFetchingPrePackagedCount + 1;
+                  const prePackagedRuleStatusResponse = await getPrePackagedRulesStatus({
+                    signal: abortCtrl.signal,
+                  });
+                  if (
+                    isSubscribed &&
+                    ((prePackagedRuleStatusResponse.rules_not_installed === 0 &&
+                      prePackagedRuleStatusResponse.rules_not_updated === 0) ||
+                      iterationTryOfFetchingPrePackagedCount > 100)
+                  ) {
+                    setLoadingCreatePrePackagedRules(false);
+                    setRulesInstalled(prePackagedRuleStatusResponse.rules_installed);
+                    setRulesNotInstalled(prePackagedRuleStatusResponse.rules_not_installed);
+                    setRulesNotUpdated(prePackagedRuleStatusResponse.rules_not_updated);
+                    displaySuccessToast(i18n.RULE_PREPACKAGED_SUCCESS, dispatchToaster);
+                    stopTimeOut();
+                    resolve(true);
+                  } else {
+                    timeoutId = reFetch();
+                  }
+                }, 300);
+              timeoutId = reFetch();
+            }
+          }
+        } catch (error) {
+          if (isSubscribed) {
+            setLoadingCreatePrePackagedRules(false);
+            errorToToaster({ title: i18n.RULE_PREPACKAGED_FAILURE, error, dispatchToaster });
+            resolve(false);
           }
         }
-      } catch (error) {
-        if (isSubscribed) {
-          setLoadingCreatePrePackagedRules(false);
-          errorToToaster({ title: i18n.RULE_PREPACKAGED_FAILURE, error, dispatchToaster });
-        }
-      }
+      });
     };
 
     fetchPrePackagedRules();

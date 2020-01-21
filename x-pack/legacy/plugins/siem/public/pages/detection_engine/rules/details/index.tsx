@@ -122,14 +122,6 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
     const userHasNoPermissions =
       canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
-    if (
-      isSignalIndexExists != null &&
-      isAuthenticated != null &&
-      (!isSignalIndexExists || !isAuthenticated)
-    ) {
-      return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-    }
-
     const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
     const subTitle = useMemo(
       () =>
@@ -227,6 +219,14 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       },
       [ruleEnabled, setRuleEnabled]
     );
+
+    if (
+      isSignalIndexExists != null &&
+      isAuthenticated != null &&
+      (!isSignalIndexExists || !isAuthenticated)
+    ) {
+      return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    }
 
     return (
       <>

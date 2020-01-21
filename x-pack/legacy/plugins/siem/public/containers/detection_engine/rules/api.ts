@@ -64,7 +64,7 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
+    sortField: 'name',
     sortOrder: 'desc',
   },
   pagination = {

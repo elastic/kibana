@@ -10,17 +10,19 @@ import { EuiCallOut, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface UpdatePrePackagedRulesCallOutProps {
+  loading: boolean;
   numberOfUpdatedRules: number;
   updateRules: () => void;
 }
 
 const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCallOutProps> = ({
+  loading,
   numberOfUpdatedRules,
   updateRules,
 }) => (
   <EuiCallOut size="s" title={i18n.UPDATE_PREPACKAGED_RULES_TITLE}>
     <p>{i18n.UPDATE_PREPACKAGED_RULES_MSG(numberOfUpdatedRules)}</p>
-    <EuiButton onClick={updateRules} size="s">
+    <EuiButton onClick={updateRules} size="s" isLoading={loading}>
       {i18n.UPDATE_PREPACKAGED_RULES(numberOfUpdatedRules)}
     </EuiButton>
   </EuiCallOut>

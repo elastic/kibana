@@ -80,16 +80,6 @@ export const CreateRuleComponent = React.memo(() => {
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (userHasNoPermissions) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
-  }
-
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
@@ -225,6 +215,16 @@ export const CreateRuleComponent = React.memo(() => {
   if (isSaved) {
     const ruleName = (stepsData.current[RuleStep.aboutRule].data as AboutStepRule).name;
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
+  }
+
+  if (
+    isSignalIndexExists != null &&
+    isAuthenticated != null &&
+    (!isSignalIndexExists || !isAuthenticated)
+  ) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  } else if (userHasNoPermissions) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 

@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
@@ -24,9 +24,12 @@ import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/u
 import { getPrePackagedRuleStatus } from './helpers';
 import * as i18n from './translations';
 
+type Func = () => void;
+
 export const RulesComponent = React.memo(() => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
+  const refreshRulesData = useRef<null | Func>(null);
   const {
     loading,
     isSignalIndexExists,
@@ -56,6 +59,29 @@ export const RulesComponent = React.memo(() => {
     rulesNotUpdated
   );
 
+  const userHasNoPermissions =
+    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const lastCompletedRun = undefined;
+
+  const handleCreatePrePackagedRules = useCallback(async () => {
+    if (createPrePackagedRules != null) {
+      await createPrePackagedRules();
+      if (refreshRulesData.current != null) {
+        refreshRulesData.current();
+      }
+    }
+  }, [createPrePackagedRules, refreshRulesData]);
+
+  const handleRefetchPrePackagedRulesStatus = useCallback(() => {
+    if (refetchPrePackagedRulesStatus != null) {
+      refetchPrePackagedRulesStatus();
+    }
+  }, [refetchPrePackagedRulesStatus]);
+
+  const handleSetRefreshRulesData = useCallback((refreshRule: Func) => {
+    refreshRulesData.current = refreshRule;
+  }, []);
+
   if (
     isSignalIndexExists != null &&
     isAuthenticated != null &&
@@ -63,21 +89,6 @@ export const RulesComponent = React.memo(() => {
   ) {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
   }
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-  const lastCompletedRun = undefined;
-
-  const handleCreatePrePackagedRules = useCallback(() => {
-    if (createPrePackagedRules != null) {
-      createPrePackagedRules();
-    }
-  }, [createPrePackagedRules]);
-
-  const handleRefetchPrePackagedRulesStatus = useCallback(() => {
-    if (refetchPrePackagedRulesStatus != null) {
-      refetchPrePackagedRulesStatus();
-    }
-  }, [refetchPrePackagedRulesStatus]);
 
   return (
     <>
@@ -158,12 +169,13 @@ export const RulesComponent = React.memo(() => {
         </HeaderPage>
         {prePackagedRuleStatus === 'ruleNeedUpdate' && (
           <UpdatePrePackagedRulesCallOut
+            loading={loadingCreatePrePackagedRules}
             numberOfUpdatedRules={rulesNotUpdated ?? 0}
             updateRules={handleCreatePrePackagedRules}
           />
         )}
         <AllRules
-          createPrePackagedRules={handleCreatePrePackagedRules}
+          createPrePackagedRules={createPrePackagedRules}
           loading={loading || prePackagedRuleLoading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
           hasNoPermissions={userHasNoPermissions}
@@ -172,6 +184,7 @@ export const RulesComponent = React.memo(() => {
           rulesInstalled={rulesInstalled}
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}
+          setRefreshRulesData={handleSetRefreshRulesData}
         />
       </WrapperPage>
 

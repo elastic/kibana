@@ -20,13 +20,8 @@ type Return = [boolean, FetchRulesResponse, Func | null];
  *
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
- * @param refetchToggle toggle for refetching data
  */
-export const useRules = (
-  pagination: PaginationOptions,
-  filterOptions: FilterOptions,
-  refetchToggle: boolean
-): Return => {
+export const useRules = (pagination: PaginationOptions, filterOptions: FilterOptions): Return => {
   const [rules, setRules] = useState<FetchRulesResponse>({
     page: 1,
     perPage: 20,
@@ -40,10 +35,10 @@ export const useRules = (
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    setLoading(true);
 
     async function fetchData() {
       try {
+        setLoading(true);
         const fetchRulesResult = await fetchRules({
           filterOptions,
           pagination,
@@ -70,7 +65,6 @@ export const useRules = (
       abortCtrl.abort();
     };
   }, [
-    refetchToggle,
     pagination.page,
     pagination.perPage,
     filterOptions.filter,
