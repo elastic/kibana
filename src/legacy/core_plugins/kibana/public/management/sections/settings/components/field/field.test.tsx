@@ -284,41 +284,27 @@ describe('Field', () => {
       });
     });
 
-    // if (type === 'select') {
-    //   it('should use options for rendering values', () => {
-    //     const component = mountWithI18nProvider(
-    //       <Field
-    //         setting={{
-    //           ...setting,
-    //           isCustom: true,
-    //         }}
-    //         handleChange={handleChange}
-    //         enableSaving={true}
-    //       />
-    //     );
-    //     const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
-    //     // @ts-ignore
-    //     const labels = select.find('option').map(option => option.prop('value'));
-    //     expect(labels).toEqual(['apple', 'orange', 'banana']);
-    //   });
-
-    //   it('should use optionLabels for rendering labels', () => {
-    //     const component = mountWithI18nProvider(
-    //       <Field
-    //         setting={{
-    //           ...setting,
-    //           isCustom: true,
-    //         }}
-    //         handleChange={handleChange}
-    //         enableSaving={true}
-    //       />
-    //     );
-    //     const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
-    //     // @ts-ignore
-    //     const labels = select.find('option').map(option => option.text());
-    //     expect(labels).toEqual(['Apple', 'Orange', 'banana']);
-    //   });
-    // }
+    if (type === 'select') {
+      it('should use options for rendering values and optionsLabels for rendering labels', () => {
+        const component = mountWithI18nProvider(
+          <Field
+            setting={{
+              ...setting,
+              isCustom: true,
+            }}
+            handleChange={handleChange}
+            enableSaving={true}
+          />
+        );
+        const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
+        // @ts-ignore
+        const values = select.find('option').map(option => option.prop('value'));
+        expect(values).toEqual(['apple', 'orange', 'banana']);
+        // @ts-ignore
+        const labels = select.find('option').map(option => option.text());
+        expect(labels).toEqual(['Apple', 'Orange', 'banana']);
+      });
+    }
 
     // const setup = () => {
     //   const Wrapper = (props: Record<string, any>) => (
