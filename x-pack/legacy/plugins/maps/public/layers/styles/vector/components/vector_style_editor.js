@@ -7,10 +7,10 @@
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
-import chrome from 'ui/chrome';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
+import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
 import { VectorStyle } from '../vector_style';
@@ -23,7 +23,6 @@ import {
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { i18n } from '@kbn/i18n';
-import { SYMBOL_OPTIONS } from '../symbol_utils';
 
 import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
@@ -308,12 +307,18 @@ export class VectorStyleEditor extends Component {
       );
       symbolMarkerEditor = (
         <Fragment>
-          <div
-            symbolOptions={SYMBOL_OPTIONS}
-            isDarkMode={chrome.getUiSettingsClient().get('theme:darkMode', false)}
-          >
-            select symbol
-          </div>
+          <VectorStyleIconEditor
+            onStaticStyleChange={this._onStaticStyleChange}
+            onDynamicStyleChange={this._onDynamicStyleChange}
+            styleProperty={this.props.styleProperties[VECTOR_STYLES.SYMBOL_MARKER]}
+            fields={this.state.categoricalFields}
+            defaultStaticStyleOptions={
+              this.state.defaultStaticProperties[VECTOR_STYLES.SYMBOL_MARKER].options
+            }
+            defaultDynamicStyleOptions={
+              this.state.defaultDynamicProperties[VECTOR_STYLES.SYMBOL_MARKER].options
+            }
+          />
           <EuiSpacer size="m" />
         </Fragment>
       );
