@@ -19,12 +19,7 @@
 
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
 import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
-import {
-  getSearchParams,
-  getMSearchParams,
-  getPreference,
-  getTimeout,
-} from '../fetch/get_search_params';
+import { getSearchParams, getMSearchParams, getPreference, getTimeout } from './get_search_params';
 
 export const defaultSearchStrategy: SearchStrategyProvider = {
   id: 'default',
