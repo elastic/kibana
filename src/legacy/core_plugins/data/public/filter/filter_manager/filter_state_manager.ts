@@ -22,6 +22,13 @@ import { Subscription } from 'rxjs';
 import { State } from 'ui/state_management/state';
 import { FilterManager, esFilters } from '../../../../../../plugins/data/public';
 
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  // this whole file will soon be deprecated by new state management.
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/data/public/query/filter_manager/lib/compare_filters';
+
 type GetAppStateFunc = () => { filters?: esFilters.Filter[]; save?: () => void } | undefined | null;
 
 /**
@@ -67,8 +74,16 @@ export class FilterStateManager {
       const globalFilters = this.globalState.filters || [];
       const appFilters = (appState && appState.filters) || [];
 
-      const globalFilterChanged = !_.isEqual(this.filterManager.getGlobalFilters(), globalFilters);
-      const appFilterChanged = !_.isEqual(this.filterManager.getAppFilters(), appFilters);
+      const globalFilterChanged = !compareFilters(
+        this.filterManager.getGlobalFilters(),
+        globalFilters,
+        COMPARE_ALL_OPTIONS
+      );
+      const appFilterChanged = !compareFilters(
+        this.filterManager.getAppFilters(),
+        appFilters,
+        COMPARE_ALL_OPTIONS
+      );
       const filterStateChanged = globalFilterChanged || appFilterChanged;
 
       if (!filterStateChanged) return;
