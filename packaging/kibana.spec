@@ -32,6 +32,7 @@ fi
 #extract dlumbrer/kbn_network plugin, following the renaming and file modification steps from github repo
 unzip -q resources/plugins/kbn_network*.zip -d plugins/
 if [ $? -ne 0 ]; then
+   echo "Exiting build. Could not unzip plugin."
    exit $?
 fi
 mv plugins/kbn_network* plugins/network_vis
