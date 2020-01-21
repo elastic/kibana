@@ -45,7 +45,7 @@ const EmbeddedPanel = styled.div`
   }
 `;
 
-export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
+export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
   const { colors } = useContext(UptimeThemeContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -55,10 +55,6 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     id: uuid.v4(),
     filters: [],
     hidePanelTitles: true,
-    query: {
-      query: '',
-      language: 'kuery',
-    },
     refreshConfig: {
       value: 0,
       pause: false,
@@ -116,6 +112,6 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
       <div className="embPanel__content" ref={embeddableRoot} />
     </EmbeddedPanel>
   );
-};
+});
 
 EmbeddedMap.displayName = 'EmbeddedMap';

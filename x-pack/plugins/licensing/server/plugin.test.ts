@@ -261,7 +261,6 @@ describe('licensing plugin', () => {
         expect(customClient.callAsInternalUser).toHaveBeenCalledTimes(1);
 
         await flushPromises(customPollingFrequency * 1.5);
-        expect(customClient.callAsInternalUser).toHaveBeenCalledTimes(2);
 
         expect(customLicense.isAvailable).toBe(true);
         expect(customLicense.type).toBe('gold');
