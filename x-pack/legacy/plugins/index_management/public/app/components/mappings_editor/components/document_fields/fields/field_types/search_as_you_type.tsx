@@ -14,6 +14,7 @@ import {
   NormsParameter,
   SimilarityParameter,
   TermVectorParameter,
+  MaxShingleSizeParameter,
 } from '../../field_parameters';
 import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
@@ -24,7 +25,8 @@ interface Props {
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'similarity':
-    case 'term_vector': {
+    case 'term_vector':
+    case 'max_shingle_size': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'analyzers': {
@@ -46,6 +48,10 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
 
       <AdvancedParametersSection>
         <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
+
+        <MaxShingleSizeParameter
+          defaultToggleValue={getDefaultToggleValue('max_shingle_size', field.source)}
+        />
 
         <NormsParameter />
 

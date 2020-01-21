@@ -17,32 +17,26 @@
  * under the License.
  */
 
-import { AppStateClass } from '../legacy_imports';
+import { esFilters } from '../../../../common';
 
 /**
- * A poor excuse for a mock just to get some basic tests to run in jest without requiring the injector.
- * This could be improved if we extract the appState and state classes externally of their angular providers.
- * @return {AppStateMock}
+ * Sort filters according to their store - global filters go first
+ *
+ * @param {object} first The first filter to compare
+ * @param {object} second The second filter to compare
+ *
+ * @returns {number} Sorting order of filters
  */
-export function getAppStateMock(): AppStateClass {
-  class AppStateMock {
-    constructor(defaults: any) {
-      Object.assign(this, defaults);
-    }
-
-    on() {}
-    off() {}
-    toJSON() {
-      return '';
-    }
-    save() {}
-    translateHashToRison(stateHashOrRison: string | string[]) {
-      return stateHashOrRison;
-    }
-    getQueryParamName() {
-      return '';
-    }
+export const sortFilters = (
+  { $state: a }: esFilters.Filter,
+  { $state: b }: esFilters.Filter
+): number => {
+  if (a!.store === b!.store) {
+    return 0;
+  } else {
+    return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
+      b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
+      ? -1
+      : 1;
   }
-
-  return AppStateMock;
-}
+};
