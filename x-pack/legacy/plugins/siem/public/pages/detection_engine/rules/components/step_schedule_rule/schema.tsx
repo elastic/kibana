@@ -20,7 +20,8 @@ export const schema: FormSchema = {
     helpText: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepScheduleRule.fieldIntervalHelpText',
       {
-        defaultMessage: 'Rules run periodically and detect signal within the specified time frame.',
+        defaultMessage:
+          'Rules run periodically and detect signals within the specified time frame.',
       }
     ),
   },

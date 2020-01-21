@@ -119,24 +119,6 @@ export const getCurrentLocation = (
   return CONSTANTS.unknown;
 };
 
-export const isKqlForRoute = (
-  pageName: string,
-  detailName: string | undefined,
-  queryLocation: LocationTypes | null = null
-): boolean => {
-  const currentLocation = getCurrentLocation(pageName, detailName);
-  if (
-    (currentLocation === CONSTANTS.hostsPage && queryLocation === CONSTANTS.hostsPage) ||
-    (currentLocation === CONSTANTS.networkPage && queryLocation === CONSTANTS.networkPage) ||
-    (currentLocation === CONSTANTS.hostsDetails && queryLocation === CONSTANTS.hostsDetails) ||
-    (currentLocation === CONSTANTS.networkDetails && queryLocation === CONSTANTS.networkDetails) ||
-    (currentLocation === CONSTANTS.detectionsPage && queryLocation === CONSTANTS.detectionsPage)
-  ) {
-    return true;
-  }
-  return false;
-};
-
 export const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();

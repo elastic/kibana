@@ -30,7 +30,7 @@ export const BACK_TO = i18n.translate('xpack.siem.detectionEngine.editRule.backT
 });
 
 export const SUCCESSFULLY_SAVED_RULE = (ruleName: string) =>
-  i18n.translate('xpack.siem.detectionEngine.rules.update.successfullyRuleSavedTitle', {
+  i18n.translate('xpack.siem.detectionEngine.rules.update.successfullySavedRuleTitle', {
     values: { ruleName },
     defaultMessage: '{ruleName} was saved',
   });

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const BACK_TO_DETECTION_ENGINE = i18n.translate(
   'xpack.siem.detectionEngine.rules.backOptionsHeader',
   {
-    defaultMessage: 'Back to detection engine',
+    defaultMessage: 'Back to detections',
   }
 );
 
@@ -22,7 +22,7 @@ export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.add
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Signal detection rules',
 });
 
 export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules.refreshTitle', {
@@ -75,10 +75,10 @@ export const BATCH_ACTION_EXPORT_SELECTED = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_EDIT_INDEX_PATTERNS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.batchActions.editIndexPatternsTitle',
+export const BATCH_ACTION_DUPLICATE_SELECTED = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.batchActions.duplicateSelectedTitle',
   {
-    defaultMessage: 'Edit selected index patterns…',
+    defaultMessage: 'Duplicate selected…',
   }
 );
 
