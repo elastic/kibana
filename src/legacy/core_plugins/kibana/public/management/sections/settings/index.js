@@ -32,7 +32,6 @@ import React from 'react';
 import { AdvancedSettings } from './advanced_settings';
 import { i18n } from '@kbn/i18n';
 import { getBreadcrumbs } from './breadcrumbs';
-import { useEffectOnce } from 'react-use';
 
 uiRoutes.when('/management/kibana/settings/:setting?', {
   template: indexTemplate,
@@ -59,28 +58,22 @@ uiModules.get('apps/management').directive('kbnManagementAdvanced', function($ro
   return {
     restrict: 'E',
     link: function($scope) {
-      $scope.route = $route;
+      $scope.query = $route.current.params.setting || '';
+      $route.updateParams({ setting: null });
     },
   };
 });
 
-const AdvancedSettingsApp = ({ route }) => {
-  useEffectOnce(() => {
-    route.updateParams({ setting: null });
-  });
-
+const AdvancedSettingsApp = ({ query = '' }) => {
   return (
     <I18nContext>
-      <AdvancedSettings
-        query={route.current.params.setting || ''}
-        enableSaving={capabilities.get().advancedSettings.save}
-      />
+      <AdvancedSettings query={query} enableSaving={capabilities.get().advancedSettings.save} />
     </I18nContext>
   );
 };
 
 uiModules.get('apps/management').directive('kbnManagementAdvancedReact', function(reactDirective) {
-  return reactDirective(AdvancedSettingsApp, [['route', { watchDepth: 'reference' }]]);
+  return reactDirective(AdvancedSettingsApp, [['query', { watchDepth: 'reference' }]]);
 });
 
 management.getSection('kibana').register('settings', {
