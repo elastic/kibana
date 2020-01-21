@@ -74,9 +74,6 @@ export class VectorStyle extends AbstractStyle {
       this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
       VECTOR_STYLES.SYMBOLIZE_AS
     );
-    this._symbolMarkerStyleProperty = this._makeSymbolMarkerProperty(
-      this._descriptor.properties[VECTOR_STYLES.SYMBOL_MARKER]
-    );
     this._lineColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
       VECTOR_STYLES.LINE_COLOR
@@ -88,6 +85,9 @@ export class VectorStyle extends AbstractStyle {
     this._lineWidthStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
       VECTOR_STYLES.LINE_WIDTH
+    );
+    this._iconStyleProperty = this._makeIconProperty(
+      this._descriptor.properties[VECTOR_STYLES.ICON]
     );
     this._iconSizeStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
@@ -123,7 +123,7 @@ export class VectorStyle extends AbstractStyle {
   _getAllStyleProperties() {
     return [
       this._symbolizeAsStyleProperty,
-      this._symbolMarkerStyleProperty,
+      this._iconStyleProperty,
       this._lineColorStyleProperty,
       this._fillColorStyleProperty,
       this._lineWidthStyleProperty,
@@ -417,7 +417,7 @@ export class VectorStyle extends AbstractStyle {
   _getSymbolId() {
     return this.arePointsSymbolizedAsCircles()
       ? undefined
-      : this._symbolMarkerStyleProperty.getOptions().value;
+      : this._iconStyleProperty.getOptions().value;
   }
 
   getIcon = () => {
@@ -666,16 +666,16 @@ export class VectorStyle extends AbstractStyle {
     }
   }
 
-  _makeSymbolMarkerProperty(descriptor) {
+  _makeIconProperty(descriptor) {
     if (!descriptor || !descriptor.options) {
-      return new StaticStyleProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.SYMBOL_MARKER);
+      return new StaticStyleProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.ICON);
     } else if (descriptor.type === StaticStyleProperty.type) {
-      return new StaticStyleProperty(descriptor.options, VECTOR_STYLES.SYMBOL_MARKER);
+      return new StaticStyleProperty(descriptor.options, VECTOR_STYLES.ICON);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
       return new DynamicStyleProperty(
         descriptor.options,
-        VECTOR_STYLES.SYMBOL_MARKER,
+        VECTOR_STYLES.ICON,
         field,
         this._getFieldMeta,
         this._getFieldFormatter

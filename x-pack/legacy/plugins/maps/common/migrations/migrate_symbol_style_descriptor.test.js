@@ -75,7 +75,7 @@ describe('migrateSymbolStyleDescriptor', () => {
               symbolizeAs: {
                 options: { value: 'icon' },
               },
-              symbolMarker: {
+              icon: {
                 type: STYLE_TYPE.STATIC,
                 options: { value: 'square' },
               },
@@ -118,7 +118,7 @@ describe('migrateSymbolStyleDescriptor', () => {
               symbolizeAs: {
                 options: { value: 'circle' },
               },
-              symbolMarker: {
+              icon: {
                 type: STYLE_TYPE.STATIC,
                 options: { value: 'airfield' },
               },

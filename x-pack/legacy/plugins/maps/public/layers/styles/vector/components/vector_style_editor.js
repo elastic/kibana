@@ -286,7 +286,7 @@ export class VectorStyleEditor extends Component {
 
   _renderPointProperties() {
     let iconOrientationEditor;
-    let symbolMarkerEditor;
+    let iconEditor;
     if (this.props.styleProperties[VECTOR_STYLES.SYMBOLIZE_AS].isSymbolizedAsIcon()) {
       iconOrientationEditor = (
         <Fragment>
@@ -305,18 +305,18 @@ export class VectorStyleEditor extends Component {
           <EuiSpacer size="m" />
         </Fragment>
       );
-      symbolMarkerEditor = (
+      iconEditor = (
         <Fragment>
           <VectorStyleIconEditor
             onStaticStyleChange={this._onStaticStyleChange}
             onDynamicStyleChange={this._onDynamicStyleChange}
-            styleProperty={this.props.styleProperties[VECTOR_STYLES.SYMBOL_MARKER]}
+            styleProperty={this.props.styleProperties[VECTOR_STYLES.ICON]}
             fields={this.state.categoricalFields}
             defaultStaticStyleOptions={
-              this.state.defaultStaticProperties[VECTOR_STYLES.SYMBOL_MARKER].options
+              this.state.defaultStaticProperties[VECTOR_STYLES.ICON].options
             }
             defaultDynamicStyleOptions={
-              this.state.defaultDynamicProperties[VECTOR_STYLES.SYMBOL_MARKER].options
+              this.state.defaultDynamicProperties[VECTOR_STYLES.ICON].options
             }
           />
           <EuiSpacer size="m" />
@@ -332,7 +332,7 @@ export class VectorStyleEditor extends Component {
         />
         <EuiSpacer size="m" />
 
-        {symbolMarkerEditor}
+        {iconEditor}
 
         {this._renderFillColor()}
         <EuiSpacer size="m" />

@@ -31,10 +31,10 @@ export const LABEL_BORDER_SIZES = {
 
 export const VECTOR_STYLES = {
   SYMBOLIZE_AS: 'symbolizeAs',
-  SYMBOL_MARKER: 'symbolMarker',
   FILL_COLOR: 'fillColor',
   LINE_COLOR: 'lineColor',
   LINE_WIDTH: 'lineWidth',
+  ICON: 'icon',
   ICON_SIZE: 'iconSize',
   ICON_ORIENTATION: 'iconOrientation',
   LABEL_TEXT: 'labelText',
@@ -77,7 +77,7 @@ export function getDefaultStaticProperties(mapColors = []) {
   const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
 
   return {
-    [VECTOR_STYLES.SYMBOL_MARKER]: {
+    [VECTOR_STYLES.ICON]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         value: DEFAULT_ICON,
@@ -142,7 +142,7 @@ export function getDefaultStaticProperties(mapColors = []) {
 
 export function getDefaultDynamicProperties() {
   return {
-    [VECTOR_STYLES.SYMBOL_MARKER]: {
+    [VECTOR_STYLES.ICON]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
         iconPallet: undefined,
