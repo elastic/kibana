@@ -20,7 +20,7 @@
 const env = process.env;
 
 export const kibanaTestUser = {
-  username: env.TEST_KIBANA_USER || 'elastic',
+  username: env.TEST_KIBANA_USER || 'kibana',
   password: env.TEST_KIBANA_PASS || 'changeme',
 };
 

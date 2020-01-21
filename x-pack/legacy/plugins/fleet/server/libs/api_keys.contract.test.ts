@@ -42,7 +42,7 @@ function getUserForApiKey(apiKey: { id: string; api_key: string }) {
   } as FrameworkUser;
 }
 
-describe('ApiKeys Lib', () => {
+describe.skip('ApiKeys Lib', () => {
   let servers: any;
   let soAdapter: MemorizeSODatabaseAdapter;
   let esAdapter: MemorizedElasticsearchAdapter;
