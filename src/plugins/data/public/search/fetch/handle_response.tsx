@@ -20,8 +20,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
-import { Request, ResponseWithShardFailure } from './components/shard_failure_types';
+import { ShardFailureOpenModalButton, ShardFailureRequest, ShardFailureResponse } from '../../ui';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';
 import { SearchRequest, SearchResponse } from '..';
@@ -55,8 +54,8 @@ export function handleResponse(request: SearchRequest, response: SearchResponse)
         {description}
         <EuiSpacer size="s" />
         <ShardFailureOpenModalButton
-          request={request.body as Request}
-          response={response as ResponseWithShardFailure}
+          request={request.body as ShardFailureRequest}
+          response={response as ShardFailureResponse}
           title={title}
         />
       </>

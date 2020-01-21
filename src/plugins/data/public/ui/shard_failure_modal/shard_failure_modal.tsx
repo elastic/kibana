@@ -33,12 +33,12 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { ShardFailureTable } from './shard_failure_table';
-import { ResponseWithShardFailure, Request } from './shard_failure_types';
+import { ShardFailureResponse, ShardFailureRequest } from './shard_failure_types';
 
 export interface Props {
   onClose: () => void;
-  request: Request;
-  response: ResponseWithShardFailure;
+  request: ShardFailureRequest;
+  response: ShardFailureResponse;
   title: string;
 }
 

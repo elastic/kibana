@@ -16,38 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export interface Request {
-  docvalue_fields: string[];
-  _source: unknown;
-  query: unknown;
-  script_fields: unknown;
-  sort: unknown;
-  stored_fields: string[];
-}
 
-export interface ResponseWithShardFailure {
-  _shards: {
-    failed: number;
-    failures: ShardFailure[];
-    skipped: number;
-    successful: number;
-    total: number;
-  };
-}
+import { setOverlays } from '../../services';
+import { OverlayStart } from 'kibana/public';
 
-export interface ShardFailure {
-  index: string;
-  node: string;
-  reason: {
-    caused_by: {
-      reason: string;
-      type: string;
-    };
-    reason: string;
-    lang?: string;
-    script?: string;
-    script_stack?: string[];
-    type: string;
-  };
-  shard: number;
-}
+export const openModal = jest.fn();
+
+setOverlays(({
+  openModal,
+} as unknown) as OverlayStart);

@@ -19,7 +19,10 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../../../core_plugins/data/public';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';

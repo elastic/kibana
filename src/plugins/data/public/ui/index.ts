@@ -23,6 +23,12 @@ export { FilterBar } from './filter_bar';
 export { QueryStringInput } from './query_string_input/query_string_input';
 export { SearchBar, SearchBarProps } from './search_bar';
 
+export {
+  ShardFailureOpenModalButton,
+  ShardFailureRequest,
+  ShardFailureResponse,
+} from './shard_failure_modal';
+
 // temp export - will be removed as final components are migrated to NP
 export { SavedQueryManagementComponent } from './saved_query_management';
 export { SaveQueryForm, SavedQueryMeta } from './saved_query_form';

@@ -17,11 +17,5 @@
  * under the License.
  */
 
-import { setOverlays } from '../../../services';
-import { OverlayStart } from 'kibana/public';
-
-export const openModal = jest.fn();
-
-setOverlays(({
-  openModal,
-} as unknown) as OverlayStart);
+export { ShardFailureRequest, ShardFailureResponse } from './shard_failure_types';
+export { ShardFailureOpenModalButton } from './shard_failure_open_modal_button';

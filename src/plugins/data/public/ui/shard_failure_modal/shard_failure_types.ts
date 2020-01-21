@@ -16,16 +16,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export interface ShardFailureRequest {
+  docvalue_fields: string[];
+  _source: unknown;
+  query: unknown;
+  script_fields: unknown;
+  sort: unknown;
+  stored_fields: string[];
+}
 
-/**
- * Nothing to see here!
- *
- * Courier / SearchSource has moved to the data plugin, and is being
- * re-exported for backwards compatibility.
- */
+export interface ShardFailureResponse {
+  _shards: {
+    failed: number;
+    failures: ShardFailure[];
+    skipped: number;
+    successful: number;
+    total: number;
+  };
+}
 
-// static code
-export {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../core_plugins/data/public';
+export interface ShardFailure {
+  index: string;
+  node: string;
+  reason: {
+    caused_by: {
+      reason: string;
+      type: string;
+    };
+    reason: string;
+    lang?: string;
+    script?: string;
+    script_stack?: string[];
+    type: string;
+  };
+  shard: number;
+}
