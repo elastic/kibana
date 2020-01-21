@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export * from './plugin_dependencies';
 export * from './core_editor';
 export * from './token';
 export * from './tokens_provider';

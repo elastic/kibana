@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { Plugin } from 'kibana/server';
+import { Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
-import { AppServerPluginSetupDependencies } from './types';
+export class ConsoleServerPlugin implements Plugin<void, void> {
+  log: Logger;
 
-export class ConsoleServerPlugin implements Plugin<void, void, AppServerPluginSetupDependencies> {
+  constructor(ctx: PluginInitializerContext) {
+    this.log = ctx.logger.get();
+  }
   setup() {}
   start() {}
   stop() {}

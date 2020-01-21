@@ -23,6 +23,8 @@ import { ConsoleUIPlugin } from './plugin';
 
 export { ConsoleUIPlugin as Plugin };
 
+export { Panel, PanelsContainer } from './application/components/split_panel';
+
 export function plugin(ctx: PluginInitializerContext) {
   return new ConsoleUIPlugin(ctx);
 }

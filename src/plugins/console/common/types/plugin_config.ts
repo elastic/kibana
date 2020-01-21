@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export interface AppServerPluginSetupDependencies {}
+export interface PluginConfig {
+  elasticsearchUrl: string;
+}

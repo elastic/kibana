@@ -20,20 +20,21 @@
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
-import { PluginInitializerContext, Plugin, CoreStart, CoreSetup } from 'src/core/public';
-import { XPluginSet } from '../legacy';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 
-export class ConsoleUIPlugin implements Plugin<any, any> {
-  // @ts-ignore
+import { FeatureCatalogueCategory } from '../../home/public';
+
+import { PluginConfig } from '../common/types';
+
+import { AppSetupUIPluginDependencies } from './types';
+
+export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
   constructor(private readonly ctx: PluginInitializerContext) {}
 
-  async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
-    const {
-      __LEGACY: { I18nContext, elasticsearchUrl, category },
-      dev_tools,
-      home,
-    } = pluginSet;
-
+  async setup(
+    { notifications, getStartServices }: CoreSetup,
+    { dev_tools, home }: AppSetupUIPluginDependencies
+  ) {
     home.featureCatalogue.register({
       id: 'console',
       title: i18n.translate('console.devToolsTitle', {
@@ -45,7 +46,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
       icon: 'consoleApp',
       path: '/app/kibana#/dev_tools/console',
       showOnHomePage: true,
-      category,
+      category: FeatureCatalogueCategory.ADMIN,
     });
 
     dev_tools.register({
@@ -55,12 +56,13 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
         defaultMessage: 'Console',
       }),
       enableRouting: false,
-      async mount({ core: { docLinks } }, { element }) {
+      mount: async ({ core: { docLinks, i18n: i18nDep } }, { element }) => {
         const { boot } = await import('./application');
+        const { elasticsearchUrl } = this.ctx.config.get<PluginConfig>();
         render(
           boot({
             docLinkVersion: docLinks.DOC_LINK_VERSION,
-            I18nContext,
+            I18nContext: i18nDep.Context,
             notifications,
             elasticsearchUrl,
           }),

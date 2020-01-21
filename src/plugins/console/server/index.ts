@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PluginInitializerContext } from 'kibana/server';
+import { ConsoleServerPlugin } from './plugin';
 
-export const plugin = () => {};
-
+export const plugin = (ctx: PluginInitializerContext) => new ConsoleServerPlugin(ctx);

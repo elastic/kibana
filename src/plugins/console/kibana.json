@@ -2,5 +2,6 @@
   "id": "console",
   "version": "kibana",
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredPlugins": ["dev_tools", "home"]
 }

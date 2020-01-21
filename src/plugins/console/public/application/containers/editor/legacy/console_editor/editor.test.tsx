@@ -25,7 +25,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { act } from 'react-dom/test-utils';
 import * as sinon from 'sinon';
 
-import { notificationServiceMock } from '../../../../../../../../../../../src/core/public/mocks';
+import { notificationServiceMock } from '../../../../../../../../core/public/mocks';
 
 import { nextTick } from 'test_utils/enzyme_helpers';
 import {

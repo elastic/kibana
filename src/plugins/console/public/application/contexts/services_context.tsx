@@ -20,7 +20,7 @@
 import React, { createContext, useContext } from 'react';
 import { NotificationsSetup } from 'kibana/public';
 import { History, Storage, Settings } from '../../services';
-import { ObjectStorageClient } from '../../../../common/types';
+import { ObjectStorageClient } from '../../../common/types';
 import { MetricsTracker } from '../../types';
 
 export interface ContextValue {

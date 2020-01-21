@@ -19,7 +19,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { MetricsTracker } from '../types';
-import { createUiStatsReporter } from '../../../../ui_metric/public';
+import { createUiStatsReporter } from '../../../../legacy/core_plugins/ui_metric/public';
 
 const APP_TRACKER_NAME = 'console';
 export const createUsageTracker = (): MetricsTracker => {
