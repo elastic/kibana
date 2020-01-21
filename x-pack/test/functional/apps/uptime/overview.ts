@@ -50,13 +50,11 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
-    // flakey see https://github.com/elastic/kibana/issues/54527
-    it.skip('pagination is cleared when filter criteria changes', async () => {
+    it('pagination is cleared when filter criteria changes', async () => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await pageObjects.uptime.changePage('next');
       // there should now be pagination data in the URL
-      const contains = await pageObjects.uptime.pageUrlContains('pagination');
-      expect(contains).to.be(true);
+      await pageObjects.uptime.pageUrlContains('pagination');
       await pageObjects.uptime.pageHasExpectedIds([
         '0010-down',
         '0011-up',
@@ -71,8 +69,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       ]);
       await pageObjects.uptime.setStatusFilter('up');
       // ensure that pagination is removed from the URL
-      const doesNotContain = await pageObjects.uptime.pageUrlContains('pagination');
-      expect(doesNotContain).to.be(false);
+      await pageObjects.uptime.pageUrlContains('pagination', false);
       await pageObjects.uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',

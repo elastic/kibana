@@ -30,6 +30,7 @@ import {
   chromeHeaderNavControlsRegistry,
   NavControlSide,
 } from '../../registry/chrome_header_nav_controls';
+import { subscribeWithScope } from '../../utils/subscribe_with_scope';
 
 export function kbnChromeProvider(chrome, internals) {
   uiModules.get('kibana').directive('kbnChrome', () => {
@@ -82,6 +83,15 @@ export function kbnChromeProvider(chrome, internals) {
             bannerListContainer
           );
         }
+
+        const chromeVisibility = subscribeWithScope($scope, chrome.visible$, {
+          next: () => {
+            // just makes sure change detection is triggered when chrome visibility changes
+          },
+        });
+        $scope.$on('$destroy', () => {
+          chromeVisibility.unsubscribe();
+        });
 
         return chrome;
       },

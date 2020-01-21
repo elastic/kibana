@@ -19,8 +19,8 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
+
 import { layoutTypes } from '../../../../lib/layout/layout_types';
 
 describe('Vislib Column Layout Test Suite', function() {
@@ -85,16 +85,13 @@ describe('Vislib Column Layout Test Suite', function() {
     yAxisLabel: 'Count',
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function() {
-      el = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'visualization');
-      columnLayout = layoutTypes.point_series(el, data);
-    })
-  );
+  beforeEach(function() {
+    el = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'visualization');
+    columnLayout = layoutTypes.point_series(el, data);
+  });
 
   afterEach(function() {
     el.remove();

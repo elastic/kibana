@@ -40,9 +40,9 @@ export interface PieVisParams extends CommonVislibParams {
 
 export const createPieVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'pie',
-  title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
+  title: i18n.translate('visTypeVislib.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
-  description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', {
+  description: i18n.translate('visTypeVislib.pie.pieDescription', {
     defaultMessage: 'Compare parts of a whole',
   }),
   visualization: createVislibVisController(deps),
@@ -70,7 +70,7 @@ export const createPieVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) 
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', {
+        title: i18n.translate('visTypeVislib.pie.metricTitle', {
           defaultMessage: 'Slice size',
         }),
         min: 1,
@@ -81,7 +81,7 @@ export const createPieVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) 
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', {
+        title: i18n.translate('visTypeVislib.pie.segmentTitle', {
           defaultMessage: 'Split slices',
         }),
         min: 0,
@@ -91,7 +91,7 @@ export const createPieVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) 
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', {
+        title: i18n.translate('visTypeVislib.pie.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         mustBeFirst: true,

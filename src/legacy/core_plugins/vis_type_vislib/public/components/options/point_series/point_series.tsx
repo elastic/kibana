@@ -35,7 +35,7 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="kbnVislibVisTypes.editors.pointSeries.settingsTitle"
+              id="visTypeVislib.editors.pointSeries.settingsTitle"
               defaultMessage="Settings"
             />
           </h3>
@@ -46,7 +46,7 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
         {vis.hasSchemaAgg('segment', 'date_histogram') ? (
           <SwitchOption
-            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.currentTimeMarkerLabel', {
+            label={i18n.translate('visTypeVislib.editors.pointSeries.currentTimeMarkerLabel', {
               defaultMessage: 'Current time marker',
             })}
             paramName="addTimeMarker"
@@ -55,7 +55,7 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
           />
         ) : (
           <SwitchOption
-            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.orderBucketsBySumLabel', {
+            label={i18n.translate('visTypeVislib.editors.pointSeries.orderBucketsBySumLabel', {
               defaultMessage: 'Order buckets by sum',
             })}
             paramName="orderBucketsBySum"
@@ -66,7 +66,7 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
         {vis.type.type === 'histogram' && (
           <SwitchOption
-            label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.showLabels', {
+            label={i18n.translate('visTypeVislib.editors.pointSeries.showLabels', {
               defaultMessage: 'Show values on chart',
             })}
             paramName="show"

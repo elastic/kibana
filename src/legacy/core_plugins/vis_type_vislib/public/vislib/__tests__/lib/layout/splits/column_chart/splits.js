@@ -18,9 +18,9 @@
  */
 
 import d3 from 'd3';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import $ from 'jquery';
+
 import { chartSplit } from '../../../../../lib/layout/splits/column_chart/chart_split';
 import { chartTitleSplit } from '../../../../../lib/layout/splits/column_chart/chart_title_split';
 import { xAxisSplit } from '../../../../../lib/layout/splits/column_chart/x_axis_split';
@@ -150,16 +150,13 @@ describe('Vislib Split Function Test Suite', function() {
       ],
     };
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function() {
-        el = d3
-          .select('body')
-          .append('div')
-          .attr('class', 'visualization')
-          .datum(data);
-      })
-    );
+    beforeEach(() => {
+      el = d3
+        .select('body')
+        .append('div')
+        .attr('class', 'visualization')
+        .datum(data);
+    });
 
     afterEach(function() {
       el.remove();
@@ -168,11 +165,9 @@ describe('Vislib Split Function Test Suite', function() {
     describe('chart split function', function() {
       let fixture;
 
-      beforeEach(
-        ngMock.inject(function() {
-          fixture = d3.select('.visualization').call(chartSplit);
-        })
-      );
+      beforeEach(function() {
+        fixture = d3.select('.visualization').call(chartSplit);
+      });
 
       afterEach(function() {
         fixture.remove();
@@ -192,28 +187,26 @@ describe('Vislib Split Function Test Suite', function() {
       let newEl;
       let fixture;
 
-      beforeEach(
-        ngMock.inject(function() {
-          visEl = el.append('div').attr('class', 'visWrapper');
-          visEl.append('div').attr('class', 'visAxis__splitTitles--x');
-          visEl.append('div').attr('class', 'visAxis__splitTitles--y');
-          visEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
-          visEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
+      beforeEach(function() {
+        visEl = el.append('div').attr('class', 'visWrapper');
+        visEl.append('div').attr('class', 'visAxis__splitTitles--x');
+        visEl.append('div').attr('class', 'visAxis__splitTitles--y');
+        visEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
+        visEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
 
-          newEl = d3
-            .select('body')
-            .append('div')
-            .attr('class', 'visWrapper')
-            .datum({ series: [] });
+        newEl = d3
+          .select('body')
+          .append('div')
+          .attr('class', 'visWrapper')
+          .datum({ series: [] });
 
-          newEl.append('div').attr('class', 'visAxis__splitTitles--x');
-          newEl.append('div').attr('class', 'visAxis__splitTitles--y');
-          newEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
-          newEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
+        newEl.append('div').attr('class', 'visAxis__splitTitles--x');
+        newEl.append('div').attr('class', 'visAxis__splitTitles--y');
+        newEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
+        newEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
 
-          fixture = newEl.selectAll(this.childNodes)[0].length;
-        })
-      );
+        fixture = newEl.selectAll(this.childNodes)[0].length;
+      });
 
       afterEach(function() {
         newEl.remove();
@@ -237,17 +230,15 @@ describe('Vislib Split Function Test Suite', function() {
       let fixture;
       let divs;
 
-      beforeEach(
-        ngMock.inject(function() {
-          fixture = d3
-            .select('body')
-            .append('div')
-            .attr('class', 'columns')
-            .datum({ columns: [{}, {}] });
-          d3.select('.columns').call(xAxisSplit);
-          divs = d3.selectAll('.x-axis-div')[0];
-        })
-      );
+      beforeEach(function() {
+        fixture = d3
+          .select('body')
+          .append('div')
+          .attr('class', 'columns')
+          .datum({ columns: [{}, {}] });
+        d3.select('.columns').call(xAxisSplit);
+        divs = d3.selectAll('.x-axis-div')[0];
+      });
 
       afterEach(function() {
         fixture.remove();
@@ -263,19 +254,17 @@ describe('Vislib Split Function Test Suite', function() {
       let fixture;
       let divs;
 
-      beforeEach(
-        ngMock.inject(function() {
-          fixture = d3
-            .select('body')
-            .append('div')
-            .attr('class', 'rows')
-            .datum({ rows: [{}, {}] });
+      beforeEach(function() {
+        fixture = d3
+          .select('body')
+          .append('div')
+          .attr('class', 'rows')
+          .datum({ rows: [{}, {}] });
 
-          d3.select('.rows').call(yAxisSplit);
+        d3.select('.rows').call(yAxisSplit);
 
-          divs = d3.selectAll('.y-axis-div')[0];
-        })
-      );
+        divs = d3.selectAll('.y-axis-div')[0];
+      });
 
       afterEach(function() {
         fixture.remove();
