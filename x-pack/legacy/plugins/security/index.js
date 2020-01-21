@@ -63,8 +63,6 @@ export const security = kibana =>
     },
 
     uiExports: {
-      chromeNavControls: [],
-      managementSections: ['plugins/security/views/management'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       apps: [
         {
@@ -99,7 +97,6 @@ export const security = kibana =>
         'plugins/security/hacks/on_unauthorized_response',
         'plugins/security/hacks/register_account_management_app',
       ],
-      home: ['plugins/security/register_feature'],
       injectDefaultVars: server => {
         const securityPlugin = server.newPlatform.setup.plugins.security;
         if (!securityPlugin) {
