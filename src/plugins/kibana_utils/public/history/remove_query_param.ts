@@ -17,5 +17,23 @@
  * under the License.
  */
 
-export { getSavedDashboardMock } from './get_saved_dashboard_mock';
-export { getEmbeddableFactoryMock } from './get_embeddable_factories_mock';
+import { History, Location } from 'history';
+import { parse } from 'querystring';
+import { stringifyQueryString } from '../state_management/url/stringify_query_string'; // TODO: extract it to ../url
+
+export function removeQueryParam(history: History, param: string, replace: boolean = true) {
+  const oldLocation = history.location;
+  const search = (oldLocation.search || '').replace(/^\?/, '');
+  const query = parse(search);
+  delete query[param];
+  const newSearch = stringifyQueryString(query);
+  const newLocation: Location<any> = {
+    ...oldLocation,
+    search: newSearch,
+  };
+  if (replace) {
+    history.replace(newLocation);
+  } else {
+    history.push(newLocation);
+  }
+}
