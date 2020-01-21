@@ -245,7 +245,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         >
           <EuiText>
             <FormattedMessage
-              defaultMessage="Endgame"
+              defaultMessage="Elastic Endpoint Security"
               id="xpack.siem.overview.hostStatGroupEndgame"
               values={Object {}}
             />
