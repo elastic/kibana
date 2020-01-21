@@ -448,23 +448,4 @@ describe('SavedObjectsClient', () => {
       `);
     });
   });
-
-  it('maintains backwards compatibility by transforming http.fetch errors to be compatible with kfetch errors', () => {
-    const err = {
-      response: { ok: false, redirected: false, status: 409, statusText: 'Conflict' },
-      body: 'response body',
-    };
-    http.fetch.mockRejectedValue(err);
-    return expect(savedObjectsClient.get(doc.type, doc.id)).rejects.toMatchInlineSnapshot(`
-                    Object {
-                      "body": "response body",
-                      "res": Object {
-                        "ok": false,
-                        "redirected": false,
-                        "status": 409,
-                        "statusText": "Conflict",
-                      },
-                    }
-                `);
-  });
 });

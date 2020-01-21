@@ -51,6 +51,7 @@ function buildRestrictedPaths(shimmedPlugins) {
     from: [
       `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
       `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/index.ts`,
+      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/legacy.ts`,
     ],
     allowSameFolder: false,
     errorMessage: `kibana/public/${shimmedPlugin} is behaving like a NP plugin and does not allow deep imports. If you need something from within ${shimmedPlugin} in another plugin, consider re-exporting it from the top level index module`,
