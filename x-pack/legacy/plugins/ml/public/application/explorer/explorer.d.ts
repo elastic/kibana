@@ -15,6 +15,7 @@ import { AppStateSelectedCells } from '../explorer/explorer_utils';
 
 declare interface ExplorerProps {
   explorerState: ExplorerState;
+  severity: number;
   showCharts: boolean;
   setSelectedCells: (swimlaneSelectedCells: AppStateSelectedCells) => void;
 }
