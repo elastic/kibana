@@ -5,10 +5,10 @@
  */
 
 import React, { createContext, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { UptimeAppProps } from '../uptime_app';
 import { CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/functional/uptime_date_picker';
+import { useUrlParams } from '../hooks';
 
 export interface UptimeSettingsContextValues {
   basePath: string;
@@ -39,7 +39,9 @@ export const UptimeSettingsContext = createContext(defaultContext);
 export const UptimeSettingsContextProvider: React.FC<UptimeAppProps> = ({ children, ...props }) => {
   const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges } = props;
 
-  const { dateRangeStart, dateRangeEnd } = useParams();
+  const [getUrlParams] = useUrlParams();
+
+  const { dateRangeStart, dateRangeEnd } = getUrlParams();
 
   const value = useMemo(() => {
     return {

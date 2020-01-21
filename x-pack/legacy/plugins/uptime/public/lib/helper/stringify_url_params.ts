@@ -5,6 +5,18 @@
  */
 
 import qs from 'querystring';
-import { UptimeUrlParams } from './url_params/get_supported_url_params';
+import { UptimeUrlParams } from './url_params';
 
-export const stringifyUrlParams = (params: Partial<UptimeUrlParams>) => `?${qs.stringify(params)}`;
+export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty = false) => {
+  if (ignoreEmpty) {
+    Object.keys(params).forEach((key: string) => {
+      // @ts-ignore
+      const val = params[key];
+      if (val == null || val === '') {
+        // @ts-ignore
+        delete params[key];
+      }
+    });
+  }
+  return `?${qs.stringify(params)}`;
+};
