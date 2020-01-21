@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { FieldFormats } from '../../../../types';
 
 interface IndexPatternSavedObject {
   attributes: {
@@ -13,12 +14,6 @@ interface IndexPatternSavedObject {
   id: string;
   type: string;
   version: string;
-}
-
-interface FieldFormats {
-  getConfig: number;
-  getInstance: (config: any) => any;
-  getDefaultInstance: (key: string) => any;
 }
 
 /**

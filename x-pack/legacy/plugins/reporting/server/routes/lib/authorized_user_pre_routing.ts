@@ -4,16 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from 'boom';
+import Boom from 'boom';
+import { Legacy } from 'kibana';
+import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { getUserFactory } from '../../lib/get_user';
+import { ServerFacade } from '../../../types';
 
 const superuserRole = 'superuser';
 
-export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(server) {
+export type PreRoutingFunction = (
+  request: Legacy.Request
+) => Promise<Boom<null> | AuthenticatedUser | null>;
+
+export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
+  server: ServerFacade
+) {
   const getUser = getUserFactory(server);
   const config = server.config();
 
-  return async function authorizedUserPreRouting(request) {
+  return async function authorizedUserPreRouting(request: Legacy.Request) {
     const xpackInfo = server.plugins.xpack_main.info;
 
     if (!xpackInfo || !xpackInfo.isAvailable()) {
@@ -21,7 +30,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
         ['reporting', 'authorizedUserPreRouting', 'debug'],
         'Unable to authorize user before xpack info is available.'
       );
-      return boom.notFound();
+      return Boom.notFound();
     }
 
     const security = xpackInfo.feature('security');
@@ -32,12 +41,15 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
     const user = await getUser(request);
 
     if (!user) {
-      return boom.unauthorized(`Sorry, you aren't authenticated`);
+      return Boom.unauthorized(`Sorry, you aren't authenticated`);
     }
 
-    const authorizedRoles = [superuserRole, ...config.get('xpack.reporting.roles.allow')];
+    const authorizedRoles = [
+      superuserRole,
+      ...(config.get('xpack.reporting.roles.allow') as string[]),
+    ];
     if (!user.roles.find(role => authorizedRoles.includes(role))) {
-      return boom.forbidden(`Sorry, you don't have access to Reporting`);
+      return Boom.forbidden(`Sorry, you don't have access to Reporting`);
     }
 
     return user;

@@ -82,17 +82,19 @@ export function registerJobInfoRoutes(
       const { docId } = request.params;
 
       return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
-        ({ _source: job }: JobSource<any>): JobDocOutput => {
-          if (!job) {
+        (result): JobDocOutput => {
+          if (!result) {
             throw boom.notFound();
           }
+          const {
+            _source: { jobtype: jobType, output: jobOutput },
+          } = result;
 
-          const { jobtype: jobType } = job;
           if (!request.pre.management.jobTypes.includes(jobType)) {
             throw boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
           }
 
-          return job.output;
+          return jobOutput;
         }
       );
     },
@@ -107,26 +109,25 @@ export function registerJobInfoRoutes(
       const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
-      return jobsQuery
-        .get(request.pre.user, docId)
-        .then(({ _source: job }: JobSource<any>): JobSource<any>['_source'] => {
-          if (!job) {
-            throw boom.notFound();
-          }
+      return jobsQuery.get(request.pre.user, docId).then((result): JobSource<any>['_source'] => {
+        if (!result) {
+          throw boom.notFound();
+        }
 
-          const { jobtype: jobType, payload } = job;
-          if (!request.pre.management.jobTypes.includes(jobType)) {
-            throw boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
-          }
+        const { _source: job } = result;
+        const { jobtype: jobType, payload: jobPayload } = job;
+        if (!request.pre.management.jobTypes.includes(jobType)) {
+          throw boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+        }
 
-          return {
-            ...job,
-            payload: {
-              ...payload,
-              headers: undefined,
-            },
-          };
-        });
+        return {
+          ...job,
+          payload: {
+            ...jobPayload,
+            headers: undefined,
+          },
+        };
+      });
     },
   });
 
