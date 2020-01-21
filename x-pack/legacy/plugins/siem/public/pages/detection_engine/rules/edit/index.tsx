@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import {
   EuiButton,
   EuiCallOut,
@@ -14,7 +16,7 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
@@ -48,7 +50,7 @@ interface ScheduleStepRuleForm extends StepRuleForm {
   data: ScheduleStepRule | null;
 }
 
-export const EditRuleComponent = memo(() => {
+const EditRulePageComponent: FC = () => {
   const [, dispatchToaster] = useStateToaster();
   const {
     loading: initLoading,
@@ -350,5 +352,6 @@ export const EditRuleComponent = memo(() => {
       <SpyRoute />
     </>
   );
-});
-EditRuleComponent.displayName = 'EditRuleComponent';
+};
+
+export const EditRulePage = memo(EditRulePageComponent);

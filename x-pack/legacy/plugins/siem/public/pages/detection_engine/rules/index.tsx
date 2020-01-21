@@ -22,7 +22,7 @@ import { ReadOnlyCallOut } from './components/read_only_callout';
 import { useUserInfo } from '../components/user_info';
 import * as i18n from './translations';
 
-export const RulesComponent = React.memo(() => {
+const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
   const {
@@ -106,6 +106,6 @@ export const RulesComponent = React.memo(() => {
       <SpyRoute />
     </>
   );
-});
+};
 
-RulesComponent.displayName = 'RulesComponent';
+export const RulesPage = React.memo(RulesPageComponent);

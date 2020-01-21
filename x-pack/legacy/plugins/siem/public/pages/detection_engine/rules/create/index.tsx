@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiAccordion,
+  EuiAccordionProps,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { StyledComponent } from 'styled-components';
 
 import { usePersistRule } from '../../../../containers/detection_engine/rules';
 
@@ -35,21 +42,36 @@ const MyEuiPanel = styled(EuiPanel)<{
   position: relative;
   z-index: ${props => props.zIndex}; /* ugly fix to allow searchBar to overflow the EuiPanel */
 
-  .euiAccordion__iconWrapper {
-    display: none;
-  }
-  .euiAccordion__childWrapper {
-    overflow: visible;
-  }
-  .euiAccordion__button {
-    cursor: default !important;
-    &:hover {
-      text-decoration: none !important;
+  > .euiAccordion > .euiAccordion__triggerWrapper {
+    .euiAccordion__button {
+      cursor: default !important;
+      &:hover {
+        text-decoration: none !important;
+      }
+    }
+
+    .euiAccordion__iconWrapper {
+      display: none;
     }
   }
 `;
 
-export const CreateRuleComponent = React.memo(() => {
+MyEuiPanel.displayName = 'MyEuiPanel';
+
+const StepDefineRuleAccordion: StyledComponent<
+  typeof EuiAccordion,
+  any, // eslint-disable-line
+  { ref: React.MutableRefObject<EuiAccordion | null> },
+  never
+> = styled(EuiAccordion)`
+  .euiAccordion__childWrapper {
+    overflow: visible;
+  }
+`;
+
+StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
+
+const CreateRulePageComponent: React.FC = () => {
   const {
     loading,
     isSignalIndexExists,
@@ -91,6 +113,7 @@ export const CreateRuleComponent = React.memo(() => {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
       stepsData.current[step] = { ...stepsData.current[step], data, isValid };
@@ -130,10 +153,12 @@ export const CreateRuleComponent = React.memo(() => {
     [isStepRuleInReadOnlyView, openAccordionId, stepsData.current, setRule]
   );
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const setStepsForm = useCallback((step: RuleStep, form: FormHook<FormData>) => {
     stepsForm.current[step] = form;
   }, []);
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const getAccordionType = useCallback(
     (accordionId: RuleStep) => {
       if (accordionId === openAccordionId) {
@@ -182,6 +207,7 @@ export const CreateRuleComponent = React.memo(() => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const manageAccordions = useCallback(
     (id: RuleStep, isOpen: boolean) => {
       const activeRuleIdx = stepsRuleOrder.findIndex(step => step === openAccordionId);
@@ -203,6 +229,7 @@ export const CreateRuleComponent = React.memo(() => {
     [isStepRuleInReadOnlyView, openAccordionId, stepsData]
   );
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const manageIsEditable = useCallback(
     async (id: RuleStep) => {
       const activeForm = await stepsForm.current[openAccordionId]?.submit();
@@ -239,7 +266,7 @@ export const CreateRuleComponent = React.memo(() => {
           title={i18n.PAGE_TITLE}
         />
         <MyEuiPanel zIndex={3}>
-          <EuiAccordion
+          <StepDefineRuleAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
             buttonContent={defineRuleButton}
@@ -270,7 +297,7 @@ export const CreateRuleComponent = React.memo(() => {
               setStepData={setStepData}
               descriptionDirection="row"
             />
-          </EuiAccordion>
+          </StepDefineRuleAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
         <MyEuiPanel zIndex={2}>
@@ -345,5 +372,6 @@ export const CreateRuleComponent = React.memo(() => {
       <SpyRoute />
     </>
   );
-});
-CreateRuleComponent.displayName = 'CreateRuleComponent';
+};
+
+export const CreateRulePage = React.memo(CreateRulePageComponent);

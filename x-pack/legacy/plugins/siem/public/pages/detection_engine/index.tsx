@@ -8,11 +8,11 @@ import React from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { ManageUserInfo } from './components/user_info';
-import { CreateRuleComponent } from './rules/create';
-import { DetectionEngine } from './detection_engine';
-import { EditRuleComponent } from './rules/edit';
-import { RuleDetails } from './rules/details';
-import { RulesComponent } from './rules';
+import { CreateRulePage } from './rules/create';
+import { DetectionEnginePage } from './detection_engine';
+import { EditRulePage } from './rules/edit';
+import { RuleDetailsPage } from './rules/details';
+import { RulesPage } from './rules';
 import { DetectionEngineTab } from './types';
 
 const detectionEnginePath = `/:pageName(detections)`;
@@ -27,19 +27,19 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
         path={`${detectionEnginePath}/:tabName(${DetectionEngineTab.signals}|${DetectionEngineTab.alerts})`}
         strict
       >
-        <DetectionEngine />
+        <DetectionEnginePage />
       </Route>
       <Route exact path={`${detectionEnginePath}/rules`}>
-        <RulesComponent />
+        <RulesPage />
       </Route>
       <Route exact path={`${detectionEnginePath}/rules/create`}>
-        <CreateRuleComponent />
+        <CreateRulePage />
       </Route>
       <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/`}>
-        <RuleDetails />
+        <RuleDetailsPage />
       </Route>
       <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
-        <EditRuleComponent />
+        <EditRulePage />
       </Route>
       <Route
         path="/detections/"
