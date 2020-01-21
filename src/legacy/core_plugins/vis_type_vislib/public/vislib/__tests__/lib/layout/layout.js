@@ -37,13 +37,14 @@ const names = ['series', 'columns', 'rows', 'stackedSeries'];
 dateHistogramArray.forEach(function(data, i) {
   describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function() {
     let vis;
-    let persistedState;
+    let mockUiState;
     let numberOfCharts;
     let testLayout;
 
     beforeEach(() => {
       vis = getVis();
-      vis.render(data, getMockUiState());
+      mockUiState = getMockUiState();
+      vis.render(data, mockUiState);
       numberOfCharts = vis.handler.charts.length;
     });
 
@@ -74,7 +75,7 @@ dateHistogramArray.forEach(function(data, i) {
             type: 'histogram',
           },
           data,
-          persistedState,
+          mockUiState,
           vis.element,
           () => undefined
         );
