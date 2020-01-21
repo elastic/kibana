@@ -43,7 +43,6 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
 // @ts-ignore
@@ -155,8 +154,6 @@ export class VisualizePlugin implements Plugin {
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA,
     });
-
-    VisEditorTypesRegistryProvider.register(defaultEditor);
   }
 
   public start(
