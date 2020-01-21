@@ -55,3 +55,5 @@ export * from './locale_parameter';
 export * from './dynamic_parameter';
 
 export * from './enabled_parameter';
+
+export * from './max_shingle_size_parameter';

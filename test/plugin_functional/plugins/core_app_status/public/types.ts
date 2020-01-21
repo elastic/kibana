@@ -17,24 +17,10 @@
  * under the License.
  */
 
-import { filter } from 'lodash';
-import { esFilters } from '../../../../common';
-import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
+import { CoreAppStatusPluginStart } from './plugin';
 
-const isEnabled = (f: esFilters.Filter) => f && f.meta && !f.meta.disabled;
-
-/**
- * Checks to see if only disabled filters have been changed
- *
- * @returns {bool} Only disabled filters
- */
-export const onlyDisabledFiltersChanged = (
-  newFilters?: esFilters.Filter[],
-  oldFilters?: esFilters.Filter[]
-) => {
-  // If it's the same - compare only enabled filters
-  const newEnabledFilters = filter(newFilters || [], isEnabled);
-  const oldEnabledFilters = filter(oldFilters || [], isEnabled);
-
-  return compareFilters(oldEnabledFilters, newEnabledFilters, COMPARE_ALL_OPTIONS);
-};
+declare global {
+  interface Window {
+    __coreAppStatus: CoreAppStatusPluginStart;
+  }
+}
