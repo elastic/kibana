@@ -33,7 +33,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
 
   async setup(
     { notifications, getStartServices }: CoreSetup,
-    { dev_tools, home }: AppSetupUIPluginDependencies
+    { dev_tools, home, usageCollection }: AppSetupUIPluginDependencies
   ) {
     home.featureCatalogue.register({
       id: 'console',
@@ -65,6 +65,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             I18nContext: i18nDep.Context,
             notifications,
             elasticsearchUrl,
+            usageCollection,
           }),
           element
         );

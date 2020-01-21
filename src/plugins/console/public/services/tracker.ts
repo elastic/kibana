@@ -17,15 +17,22 @@
  * under the License.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { MetricsTracker } from '../types';
-import { createUiStatsReporter } from '../../../../legacy/core_plugins/ui_metric/public';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 const APP_TRACKER_NAME = 'console';
-export const createUsageTracker = (): MetricsTracker => {
-  const track = createUiStatsReporter(APP_TRACKER_NAME);
+
+export const createUsageTracker = (usageCollection?: UsageCollectionSetup): MetricsTracker => {
+  const track = (type: UiStatsMetricType, name: string) =>
+    usageCollection?.reportUiStats(APP_TRACKER_NAME, type, name);
+
   return {
-    count: (eventName: string) => track(METRIC_TYPE.COUNT, eventName),
-    load: (eventName: string) => track(METRIC_TYPE.LOADED, eventName),
+    count: (eventName: string) => {
+      track(METRIC_TYPE.COUNT, eventName);
+    },
+    load: (eventName: string) => {
+      track(METRIC_TYPE.LOADED, eventName);
+    },
   };
 };

@@ -1,7 +1,8 @@
 {
   "id": "console",
   "version": "kibana",
-  "server": true,
+  "server": false,
   "ui": true,
-  "requiredPlugins": ["dev_tools", "home"]
+  "requiredPlugins": ["dev_tools", "home"],
+  "optionalPlugins": ["usageCollection"]
 }

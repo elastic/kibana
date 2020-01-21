@@ -24,21 +24,29 @@ import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { createUsageTracker } from '../services/tracker';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
   return settingsRef;
 }
 
-export function boot(deps: {
+export interface BootDependencies {
   docLinkVersion: string;
   I18nContext: any;
   notifications: NotificationsSetup;
   elasticsearchUrl: string;
-}) {
-  const { I18nContext, notifications, docLinkVersion, elasticsearchUrl } = deps;
+  usageCollection?: UsageCollectionSetup;
+}
 
-  const trackUiMetric = createUsageTracker();
+export function boot({
+  I18nContext,
+  notifications,
+  docLinkVersion,
+  elasticsearchUrl,
+  usageCollection,
+}: BootDependencies) {
+  const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
   const storage = createStorage({
