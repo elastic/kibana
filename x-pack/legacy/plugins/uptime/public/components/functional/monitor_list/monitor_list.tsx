@@ -100,6 +100,11 @@ export const MonitorListComponent = (props: Props) => {
       sortable: true,
     },
     {
+      aligh: 'left' as const,
+      field: 'state.url.full',
+      name: labels.URL,
+    },
+    {
       align: 'center' as const,
       field: 'histogram.points',
       name: labels.HISTORY_COLUMN_LABEL,
