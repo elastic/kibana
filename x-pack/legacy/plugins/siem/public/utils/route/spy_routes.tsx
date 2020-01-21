@@ -17,7 +17,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
     location: { pathname, search },
     history,
     match: {
-      params: { pageName, detailName, tabName },
+      params: { pageName, detailName, tabName, flowTarget },
     },
   }) => {
     const [isInitializing, setIsInitializing] = useState(true);
@@ -43,6 +43,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
               tabName,
               pathName: pathname,
               history,
+              flowTarget,
             },
           });
           setIsInitializing(false);
@@ -56,11 +57,12 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
               search,
               pathName: pathname,
               history,
+              flowTarget,
             },
           });
         }
       }
-    }, [pathname, search, pageName, detailName, tabName]);
+    }, [pathname, search, pageName, detailName, tabName, flowTarget]);
     return null;
   }
 );
