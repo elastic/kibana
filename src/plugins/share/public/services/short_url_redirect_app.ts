@@ -17,24 +17,29 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { hashUrl } from '../../../../plugins/kibana_utils/public';
-import uiRoutes from 'ui/routes';
-import { fatalError } from 'ui/notify';
+import { CoreSetup } from 'kibana/public';
+import { getUrlIdFromGotoRoute, getUrlPath, GOTO_PREFIX } from '../../common/short_url_routes';
+import { hashUrl } from '../../../kibana_utils/public';
 
-uiRoutes.enable();
-uiRoutes.when('/', {
-  resolve: {
-    url: function(AppState, globalState, $window) {
-      const redirectUrl = chrome.getInjected('redirectUrl');
-      try {
-        const hashedUrl = hashUrl(redirectUrl);
-        const url = chrome.addBasePath(hashedUrl);
+export const createShortUrlRedirectApp = (core: CoreSetup, location: Location) => ({
+  id: 'short_url_redirect',
+  appRoute: GOTO_PREFIX,
+  chromeless: true,
+  title: 'Short URL Redirect',
+  async mount() {
+    const urlId = getUrlIdFromGotoRoute(location.pathname);
 
-        $window.location = url;
-      } catch (e) {
-        fatalError(e);
-      }
-    },
+    if (!urlId) {
+      throw new Error('Url id not present in path');
+    }
+
+    const response = await core.http.get<{ url: string }>(getUrlPath(urlId));
+    const redirectUrl = response.url;
+    const hashedUrl = hashUrl(redirectUrl);
+    const url = core.http.basePath.prepend(hashedUrl);
+
+    location.href = url;
+
+    return () => {};
   },
 });
