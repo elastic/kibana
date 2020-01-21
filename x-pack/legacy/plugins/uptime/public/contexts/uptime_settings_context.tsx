@@ -6,7 +6,7 @@
 
 import React, { createContext, useMemo } from 'react';
 import { UptimeAppProps } from '../uptime_app';
-import { CONTEXT_DEFAULTS } from '../../common/constants';
+import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../common/constants';
 import { CommonlyUsedRange } from '../components/functional/uptime_date_picker';
 import { useUrlParams } from '../hooks';
 
@@ -20,7 +20,9 @@ export interface UptimeSettingsContextValues {
   commonlyUsedRanges?: CommonlyUsedRange[];
 }
 
-const { BASE_PATH, DATE_RANGE_START, DATE_RANGE_END } = CONTEXT_DEFAULTS;
+const { BASE_PATH } = CONTEXT_DEFAULTS;
+
+const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
 
 /**
  * These are default values for the context. These defaults are typically
