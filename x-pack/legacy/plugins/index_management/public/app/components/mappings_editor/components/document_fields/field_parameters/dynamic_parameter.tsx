@@ -19,11 +19,14 @@ interface Props {
 export const DynamicParameter = ({ field }: Props) => {
   return (
     <EditFieldFormRow
-      title={i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicParameter.fieldTitle', {
-        defaultMessage: 'Dynamically add new properties',
-      })}
+      title={i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.dynamicPropertyMappingParameter.fieldTitle',
+        {
+          defaultMessage: 'Dynamic property mapping',
+        }
+      )}
       description={i18n.translate(
-        'xpack.idxMgmt.mappingsEditor.dynamicParameter.fieldDescription',
+        'xpack.idxMgmt.mappingsEditor.dynamicPropertyMappingParameter.fieldDescription',
         {
           defaultMessage:
             'By default, fields can be added dynamically to objects within a document, just by indexing a document containing the new field.',
