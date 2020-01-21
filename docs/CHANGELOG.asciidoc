@@ -35,8 +35,6 @@ This section summarizes the changes in each release.
 [[release-notes-7.5.2]]
 == {kib} 7.5.2
 
-coming::[7.5.2]
-
 See <<breaking-changes-7.5, breaking changes in 7.5>>.
 
 [float]
