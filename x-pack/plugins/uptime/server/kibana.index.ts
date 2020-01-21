@@ -5,11 +5,12 @@
  */
 
 import { Request, Server } from 'hapi';
+import { i18n } from '@kbn/i18n';
+import { PLUGIN } from '../../../legacy/plugins/uptime/common/constants';
 import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
-import { registerFeature } from './register_feature';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -28,6 +29,34 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   const libs = compose(server);
   KibanaTelemetryAdapter.registerUsageCollector(usageCollection);
 
-  registerFeature(features);
+  features.registerFeature({
+    id: PLUGIN.ID,
+    name: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
+      defaultMessage: 'Uptime',
+    }),
+    navLinkId: PLUGIN.ID,
+    icon: 'uptimeApp',
+    app: ['uptime', 'kibana'],
+    catalogue: ['uptime'],
+    privileges: {
+      all: {
+        api: ['uptime'],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: ['save'],
+      },
+      read: {
+        api: ['uptime'],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: [],
+      },
+    },
+  });
+
   initUptimeServer(libs);
 };
