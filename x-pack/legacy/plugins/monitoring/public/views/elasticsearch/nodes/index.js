@@ -39,6 +39,7 @@ uiRoutes.when('/elasticsearch/nodes', {
         }) || {};
 
       const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
+        _api; // to fix eslint
         const $http = $injector.get('$http');
         const globalState = $injector.get('globalState');
         const timeBounds = timefilter.getBounds();

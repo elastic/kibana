@@ -5,6 +5,7 @@
  */
 
 import { esFilters } from '../../../../../../../src/plugins/data/server';
+import { IRuleStatusAttributes } from './rules/types';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
@@ -44,6 +45,7 @@ export interface RuleAlertParams {
   tags: string[];
   to: string;
   timelineId: string | undefined | null;
+  timelineTitle: string | undefined | null;
   threats: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
@@ -56,29 +58,67 @@ export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
   | 'ruleId'
   | 'falsePositives'
+  | 'immutable'
   | 'maxSignals'
   | 'savedId'
   | 'riskScore'
   | 'timelineId'
+  | 'timelineTitle'
   | 'outputIndex'
   | 'updatedAt'
   | 'createdAt'
-> & {
-  rule_id: RuleAlertParams['ruleId'];
-  false_positives: RuleAlertParams['falsePositives'];
-  saved_id: RuleAlertParams['savedId'];
-  timeline_id: RuleAlertParams['timelineId'];
-  max_signals: RuleAlertParams['maxSignals'];
-  risk_score: RuleAlertParams['riskScore'];
-  output_index: RuleAlertParams['outputIndex'];
-  created_at: RuleAlertParams['createdAt'];
-  updated_at: RuleAlertParams['updatedAt'];
-};
+> &
+  Omit<
+    IRuleStatusAttributes,
+    | 'status'
+    | 'alertId'
+    | 'statusDate'
+    | 'lastFailureAt'
+    | 'lastSuccessAt'
+    | 'lastSuccessMessage'
+    | 'lastFailureMessage'
+  > & {
+    rule_id: RuleAlertParams['ruleId'];
+    false_positives: RuleAlertParams['falsePositives'];
+    saved_id: RuleAlertParams['savedId'];
+    timeline_id: RuleAlertParams['timelineId'];
+    timeline_title: RuleAlertParams['timelineTitle'];
+    max_signals: RuleAlertParams['maxSignals'];
+    risk_score: RuleAlertParams['riskScore'];
+    output_index: RuleAlertParams['outputIndex'];
+    created_at: RuleAlertParams['createdAt'];
+    updated_at: RuleAlertParams['updatedAt'];
+    status?: IRuleStatusAttributes['status'] | undefined;
+    status_date?: IRuleStatusAttributes['statusDate'] | undefined;
+    last_failure_at?: IRuleStatusAttributes['lastFailureAt'] | undefined;
+    last_success_at?: IRuleStatusAttributes['lastSuccessAt'] | undefined;
+    last_failure_message?: IRuleStatusAttributes['lastFailureMessage'] | undefined;
+    last_success_message?: IRuleStatusAttributes['lastSuccessMessage'] | undefined;
+  };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
+  immutable: boolean;
 };
+
+export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
+  id: string | undefined | null;
+  rule_id: string;
+  immutable: boolean;
+};
+
+export type PrepackagedRules = Omit<
+  RuleAlertParamsRest,
+  | 'status'
+  | 'status_date'
+  | 'last_failure_at'
+  | 'last_success_at'
+  | 'last_failure_message'
+  | 'last_success_message'
+  | 'updated_at'
+  | 'created_at'
+> & { rule_id: string; immutable: boolean };
 
 export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;

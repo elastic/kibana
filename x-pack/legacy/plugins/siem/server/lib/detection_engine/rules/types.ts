@@ -5,7 +5,14 @@
  */
 
 import { get } from 'lodash/fp';
+import { Readable } from 'stream';
 
+import {
+  SavedObject,
+  SavedObjectAttributes,
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { AlertsClient } from '../../../../../alerting/server/alerts_client';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
@@ -39,12 +46,70 @@ export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface IRuleStatusAttributes extends Record<string, any> {
+  alertId: string; // created alert id.
+  statusDate: string;
+  lastFailureAt: string | null | undefined;
+  lastFailureMessage: string | null | undefined;
+  lastSuccessAt: string | null | undefined;
+  lastSuccessMessage: string | null | undefined;
+  status: RuleStatusString | null | undefined;
+}
+
+export interface RuleStatusResponse {
+  [key: string]: {
+    current_status: IRuleStatusAttributes | null | undefined;
+    failures: IRuleStatusAttributes[] | null | undefined;
+  };
+}
+
+export interface IRuleSavedAttributesSavedObjectAttributes
+  extends IRuleStatusAttributes,
+    SavedObjectAttributes {}
+
+export interface IRuleStatusSavedObject {
+  type: string;
+  id: string;
+  attributes: Array<SavedObject<IRuleStatusAttributes & SavedObjectAttributes>>;
+  references: unknown[];
+  updated_at: string;
+  version: string;
+}
+
+export interface IRuleStatusFindType {
+  page: number;
+  per_page: number;
+  total: number;
+  saved_objects: IRuleStatusSavedObject[];
+}
+
+export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
+
 export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
 }
 
 export interface BulkRulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest[];
+}
+
+export interface HapiReadableStream extends Readable {
+  hapi: {
+    filename: string;
+  };
+}
+export interface ImportRulesRequest extends Omit<RequestFacade, 'query'> {
+  query: { overwrite: boolean };
+  payload: { file: HapiReadableStream };
+}
+
+export interface ExportRulesRequest extends Omit<RequestFacade, 'query'> {
+  payload: { objects: Array<{ rule_id: string }> | null | undefined };
+  query: {
+    file_name: string;
+    exclude_export_details: boolean;
+  };
 }
 
 export type QueryRequest = Omit<RequestFacade, 'query'> & {
@@ -77,6 +142,12 @@ export interface FindRulesRequest extends Omit<RequestFacade, 'query'> {
   };
 }
 
+export interface FindRulesStatusesRequest extends Omit<RequestFacade, 'query'> {
+  query: {
+    ids: string[];
+  };
+}
+
 export interface Clients {
   alertsClient: AlertsClient;
   actionsClient: ActionsClient;
@@ -84,6 +155,7 @@ export interface Clients {
 
 export type UpdateRuleParams = Partial<RuleAlertParams> & {
   id: string | undefined | null;
+  savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
 export type DeleteRuleParams = Clients & {
@@ -105,4 +177,26 @@ export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
 
 export const isAlertType = (obj: unknown): obj is RuleAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;
+};
+
+export const isRuleStatusAttributes = (obj: unknown): obj is IRuleStatusAttributes => {
+  return get('lastSuccessMessage', obj) != null;
+};
+
+export const isRuleStatusSavedObjectType = (
+  obj: unknown
+): obj is SavedObject<IRuleSavedAttributesSavedObjectAttributes> => {
+  return get('attributes', obj) != null;
+};
+
+export const isRuleStatusFindType = (
+  obj: unknown
+): obj is SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => {
+  return get('saved_objects', obj) != null;
+};
+
+export const isRuleStatusFindTypes = (
+  obj: unknown[] | undefined
+): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
+  return obj ? obj.every(ruleStatus => isRuleStatusFindType(ruleStatus)) : false;
 };

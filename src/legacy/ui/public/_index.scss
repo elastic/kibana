@@ -20,10 +20,10 @@
 @import './saved_objects/index';
 @import './share/index';
 @import './style_compile/index';
+@import '../../../plugins/management/public/components/index';
 
 // The following are prefixed with "vis"
 
 // Can't import vis folder here because of cascading issues, it's imported in core_plugins/kibana
 // @import './vis/index';
-@import './vislib/index';
 @import './visualize/index';

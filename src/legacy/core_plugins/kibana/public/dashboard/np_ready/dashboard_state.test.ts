@@ -28,6 +28,12 @@ import { ViewMode } from 'src/plugins/embeddable/public';
 jest.mock('ui/state_management/state', () => ({
   State: {},
 }));
+jest.mock('ui/agg_types', () => ({
+  aggTypes: {
+    metrics: [],
+    buckets: [],
+  },
+}));
 
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;

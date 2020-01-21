@@ -6,11 +6,14 @@
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
 import { TimeHistory } from 'ui/timefilter';
 import { TimeRange } from 'src/plugins/data/public';
 
-import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
+import {
+  mlTimefilterRefresh$,
+  mlTimefilterTimeChange$,
+} from '../../../services/timefilter_refresh_service';
 import { useUiContext } from '../../../contexts/ui/use_ui_context';
 
 interface Duration {
@@ -20,13 +23,19 @@ interface Duration {
 
 function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
   return function(): Duration[] {
-    return timeHistory.get().map(({ from, to }: TimeRange) => {
-      return {
-        start: from,
-        end: to,
-      };
-    });
+    return (
+      timeHistory.get()?.map(({ from, to }: TimeRange) => {
+        return {
+          start: from,
+          end: to,
+        };
+      }) ?? []
+    );
   };
+}
+
+function updateLastRefresh(timeRange: OnRefreshProps) {
+  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
 export const TopNav: FC = () => {
@@ -47,9 +56,18 @@ export const TopNav: FC = () => {
 
   useEffect(() => {
     const subscriptions = new Subscription();
-    subscriptions.add(timefilter.getRefreshIntervalUpdate$().subscribe(timefilterUpdateListener));
-    subscriptions.add(timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener));
-    subscriptions.add(timefilter.getEnabledUpdated$().subscribe(timefilterUpdateListener));
+    const refreshIntervalUpdate$ = timefilter.getRefreshIntervalUpdate$();
+    if (refreshIntervalUpdate$ !== undefined) {
+      subscriptions.add(refreshIntervalUpdate$.subscribe(timefilterUpdateListener));
+    }
+    const timeUpdate$ = timefilter.getTimeUpdate$();
+    if (timeUpdate$ !== undefined) {
+      subscriptions.add(timeUpdate$.subscribe(timefilterUpdateListener));
+    }
+    const enabledUpdated$ = timefilter.getEnabledUpdated$();
+    if (enabledUpdated$ !== undefined) {
+      subscriptions.add(enabledUpdated$.subscribe(timefilterUpdateListener));
+    }
 
     return function cleanup() {
       subscriptions.unsubscribe();
@@ -74,6 +92,7 @@ export const TopNav: FC = () => {
     timefilter.setTime(newTime);
     setTime(newTime);
     setRecentlyUsedRanges(getRecentlyUsedRanges());
+    mlTimefilterTimeChange$.next({ lastRefresh: Date.now(), timeRange: { start, end } });
   }
 
   function updateInterval({
@@ -104,7 +123,7 @@ export const TopNav: FC = () => {
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
-            onRefresh={() => mlTimefilterRefresh$.next()}
+            onRefresh={updateLastRefresh}
             onRefreshChange={updateInterval}
             recentlyUsedRanges={recentlyUsedRanges}
             dateFormat={dateFormat}

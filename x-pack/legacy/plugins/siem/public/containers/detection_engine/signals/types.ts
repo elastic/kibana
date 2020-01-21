@@ -7,11 +7,10 @@
 export * from './errors_types';
 
 export interface BasicSignals {
-  kbnVersion: string;
   signal: AbortSignal;
 }
 export interface QuerySignals extends BasicSignals {
-  query: string;
+  query: object;
 }
 
 export interface SignalsResponse {
@@ -19,7 +18,8 @@ export interface SignalsResponse {
   timeout: boolean;
 }
 
-export interface SignalSearchResponse<Hit = {}, Aggregations = undefined> extends SignalsResponse {
+export interface SignalSearchResponse<Hit = {}, Aggregations = {} | undefined>
+  extends SignalsResponse {
   _shards: {
     total: number;
     successful: number;
@@ -39,7 +39,6 @@ export interface SignalSearchResponse<Hit = {}, Aggregations = undefined> extend
 export interface UpdateSignalStatusProps {
   query: object;
   status: 'open' | 'closed';
-  kbnVersion: string;
   signal?: AbortSignal; // TODO: implement cancelling
 }
 
@@ -97,5 +96,5 @@ export interface Privilege {
       write: boolean;
     };
   };
-  isAuthenticated: boolean;
+  is_authenticated: boolean;
 }
