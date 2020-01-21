@@ -121,7 +121,8 @@ export type ParameterName =
   | 'path'
   | 'dims'
   | 'depth_limit'
-  | 'relations';
+  | 'relations'
+  | 'max_shingle_size';
 
 export interface Parameter {
   fieldConfig: FieldConfig;

@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup } from 'kibana/server';
+
 import { EndpointPlugin, EndpointPluginSetupDependencies } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { PluginSetupContract } from '../../features/server';
 
 describe('test endpoint plugin', () => {
   let plugin: EndpointPlugin;
-  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
   let mockedEndpointPluginSetupDependencies: jest.Mocked<EndpointPluginSetupDependencies>;
   let mockedPluginSetupContract: jest.Mocked<PluginSetupContract>;
   beforeEach(() => {

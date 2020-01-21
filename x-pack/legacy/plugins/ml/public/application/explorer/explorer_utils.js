@@ -280,11 +280,13 @@ export function loadViewByTopFieldValuesForSelectedTime(
 
           const topFieldValues = [];
           const topInfluencers = resp.influencers[viewBySwimlaneFieldName];
-          topInfluencers.forEach(influencerData => {
-            if (influencerData.maxAnomalyScore > 0) {
-              topFieldValues.push(influencerData.influencerFieldValue);
-            }
-          });
+          if (Array.isArray(topInfluencers)) {
+            topInfluencers.forEach(influencerData => {
+              if (influencerData.maxAnomalyScore > 0) {
+                topFieldValues.push(influencerData.influencerFieldValue);
+              }
+            });
+          }
           resolve(topFieldValues);
         });
     } else {

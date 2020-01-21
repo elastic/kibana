@@ -54,6 +54,8 @@ export * from './split_queries_on_whitespace_parameter';
 
 export * from './locale_parameter';
 
+export * from './max_shingle_size_parameter';
+
 export * from './relations_parameter';
 
 export const PARAMETER_SERIALIZERS = [relationsSerializer];
