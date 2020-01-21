@@ -102,7 +102,7 @@ export const mostRecentCheckGroups = async (
       query: {
         bool: {
           filter: [
-            await queryContext.dateRangeFilter(),
+            queryContext.dateRangeFilter(),
             { terms: { 'monitor.id': potentialMatchMonitorIDs } },
             // only match summary docs because we only want the latest *complete* check group.
             { exists: { field: 'summary' } },

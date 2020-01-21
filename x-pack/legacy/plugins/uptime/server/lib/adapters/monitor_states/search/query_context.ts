@@ -55,14 +55,10 @@ export class QueryContext {
     return clauses;
   }
 
-  async dateRangeFilter(forceNoTimespan?: boolean): Promise<any> {
+  dateRangeFilter(): any {
     const timestampClause = {
       range: { '@timestamp': { gte: this.dateRangeStart, lte: this.dateRangeEnd } },
     };
-
-    if (forceNoTimespan === true || !(await this.hasTimespan())) {
-      return timestampClause;
-    }
 
     // We subtract 5m from the start to account for data that shows up late,
     // for instance, with a large value for the elasticsearch refresh interval
@@ -112,10 +108,7 @@ export class QueryContext {
           body: {
             query: {
               bool: {
-                filter: [
-                  await this.dateRangeFilter(true),
-                  { exists: { field: 'monitor.timespan' } },
-                ],
+                filter: [this.dateRangeFilter(), { exists: { field: 'monitor.timespan' } }],
               },
             },
           },
