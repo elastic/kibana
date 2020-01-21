@@ -15,8 +15,9 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       return await client.create(
         'index-pattern',
         {
-          ...uptimeIndexPattern.attributes,
-          title: 'UptimeIndexPattern',
+          timeFieldName: '@timestamp',
+          title: 'heartbeat-8*',
+          fields: '[]',
         },
         { id: uptimeIndexPattern.id, overwrite: false }
       );
