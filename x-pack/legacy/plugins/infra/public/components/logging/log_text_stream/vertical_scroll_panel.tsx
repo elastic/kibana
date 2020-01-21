@@ -34,21 +34,18 @@ interface VerticalScrollPanelProps {
   target: string | null;
   height: number;
   width: number;
-  hideScrollbar?: boolean;
   'data-test-subj'?: string;
   isStreaming: boolean;
   entriesCount: number;
 }
 
 const SCROLL_DEBOUNCE_INTERVAL = 32;
-export const ASSUMED_SCROLLBAR_WIDTH = 20;
 
 export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   children,
   target,
   height,
   width,
-  hideScrollbar = false,
   'data-test-subj': dataTestSubj,
   onVisibleChildrenChange,
   onScrollLockChange,
@@ -62,7 +59,6 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
     getLogEntryHeightFromMessageContent,
     recalculateColumnSize,
   } = useLogEntryMessageColumnWidthContext();
-  const scrollbarOffset = hideScrollbar ? ASSUMED_SCROLLBAR_WIDTH : 0;
 
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -218,8 +214,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
       <ScrollPanelWrapper
         data-test-subj={dataTestSubj}
         height={height}
-        width={width + scrollbarOffset}
-        scrollbarOffset={scrollbarOffset}
+        width={width}
         onScroll={handleScroll}
         ref={windowRef}
         outerRef={outerRef}
@@ -263,15 +258,11 @@ const getVisibleChildren = ({
 };
 
 interface ScrollPanelWrapperProps {
-  scrollbarOffset?: number;
   isHidden: boolean;
 }
 
 const ScrollPanelWrapper = euiStyled(VariableSizeList)<ScrollPanelWrapperProps>`
-  overflow-x: hidden;
-  overflow-y: scroll;
   position: relative;
-  padding-right: ${props => props.scrollbarOffset || 0}px;
   visibility: ${props => (props.isHidden ? 'hidden' : 'visible')};
   & * {
     overflow-anchor: none;
