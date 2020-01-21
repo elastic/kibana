@@ -81,7 +81,12 @@ export const getPrePackagedRuleStatus = (
   rulesNotInstalled: number | null,
   rulesNotUpdated: number | null
 ): PrePackagedRuleStatus => {
-  if (rulesInstalled === 0 && rulesNotInstalled === 0 && rulesNotUpdated === 0) {
+  if (
+    rulesNotInstalled != null &&
+    rulesInstalled === 0 &&
+    rulesNotInstalled > 0 &&
+    rulesNotUpdated === 0
+  ) {
     return 'ruleNotInstalled';
   } else if (
     rulesInstalled != null &&

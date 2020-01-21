@@ -36,12 +36,13 @@ export const RulesComponent = React.memo(() => {
     hasManageApiKey,
   } = useUserInfo();
   const {
+    createPrePackagedRules,
     loading: prePackagedRuleLoading,
     loadingCreatePrePackagedRules,
+    refetchPrePackagedRulesStatus,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
-    createPrePackagedRules,
   } = usePrePackagedRules({
     canUserCRUD,
     hasIndexManage,
@@ -71,6 +72,12 @@ export const RulesComponent = React.memo(() => {
       createPrePackagedRules();
     }
   }, [createPrePackagedRules]);
+
+  const handleRefetchPrePackagedRulesStatus = useCallback(() => {
+    if (refetchPrePackagedRulesStatus != null) {
+      refetchPrePackagedRulesStatus();
+    }
+  }, [refetchPrePackagedRulesStatus]);
 
   return (
     <>
@@ -106,6 +113,7 @@ export const RulesComponent = React.memo(() => {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   iconType="plusInCircle"
+                  isLoading={loadingCreatePrePackagedRules}
                   isDisabled={userHasNoPermissions || loading}
                   onClick={handleCreatePrePackagedRules}
                 >
@@ -117,6 +125,7 @@ export const RulesComponent = React.memo(() => {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   iconType="plusInCircle"
+                  isLoading={loadingCreatePrePackagedRules}
                   isDisabled={userHasNoPermissions || loading}
                   onClick={handleCreatePrePackagedRules}
                 >
@@ -159,6 +168,7 @@ export const RulesComponent = React.memo(() => {
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
           hasNoPermissions={userHasNoPermissions}
           importCompleteToggle={importCompleteToggle}
+          refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
           rulesInstalled={rulesInstalled}
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}

@@ -10,7 +10,6 @@ import React, { useEffect, useReducer, Dispatch, createContext, useContext } fro
 import { usePrivilegeUser } from '../../../../containers/detection_engine/signals/use_privilege_user';
 import { useSignalIndex } from '../../../../containers/detection_engine/signals/use_signal_index';
 import { useKibana } from '../../../../lib/kibana';
-import { useCreatePackagedRules } from '../../../../containers/detection_engine/rules/use_create_packaged_rules';
 
 export interface State {
   canUserCRUD: boolean | null;
@@ -161,14 +160,6 @@ export const useUserInfo = (): State => {
     apiSignalIndexName,
     createSignalIndex,
   ] = useSignalIndex();
-
-  useCreatePackagedRules({
-    canUserCRUD,
-    hasIndexManage,
-    hasManageApiKey,
-    isAuthenticated,
-    isSignalIndexExists,
-  });
 
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean =

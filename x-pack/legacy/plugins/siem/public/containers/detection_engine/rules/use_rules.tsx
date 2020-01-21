@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { FetchRulesResponse, FilterOptions, PaginationOptions } from './types';
 import { useStateToaster } from '../../../components/toasters';
@@ -12,7 +12,8 @@ import { fetchRules } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
-type Return = [boolean, FetchRulesResponse];
+type Func = () => void;
+type Return = [boolean, FetchRulesResponse, Func | null];
 
 /**
  * Hook for using the list of Rules from the Detection Engine API
@@ -32,6 +33,7 @@ export const useRules = (
     total: 0,
     data: [],
   });
+  const reFetchRules = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
 
@@ -62,6 +64,7 @@ export const useRules = (
     }
 
     fetchData();
+    reFetchRules.current = fetchData;
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
@@ -75,5 +78,5 @@ export const useRules = (
     filterOptions.sortOrder,
   ]);
 
-  return [loading, rules];
+  return [loading, rules, reFetchRules.current];
 };

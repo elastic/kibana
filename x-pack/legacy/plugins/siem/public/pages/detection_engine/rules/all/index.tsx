@@ -61,6 +61,7 @@ interface AllRulesProps {
   importCompleteToggle: boolean;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
+  refetchPrePackagedRulesStatus: () => void;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
@@ -81,6 +82,7 @@ export const AllRules = React.memo<AllRulesProps>(
     importCompleteToggle,
     loading,
     loadingCreatePrePackagedRules,
+    refetchPrePackagedRulesStatus,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
@@ -99,7 +101,11 @@ export const AllRules = React.memo<AllRulesProps>(
     ] = useReducer(allRulesReducer, initialState);
     const history = useHistory();
     const [isInitialLoad, setIsInitialLoad] = useState(true);
-    const [isLoadingRules, rulesData] = useRules(pagination, filterOptions, refreshToggle);
+    const [isLoadingRules, rulesData, reFetchRulesData] = useRules(
+      pagination,
+      filterOptions,
+      refreshToggle
+    );
     const [, dispatchToaster] = useStateToaster();
 
     const prePackagedRuleStatus = getPrePackagedRuleStatus(
@@ -152,6 +158,18 @@ export const AllRules = React.memo<AllRulesProps>(
         dispatch({ type: 'refresh' });
       }
     }, [importCompleteToggle]);
+
+    useEffect(() => {
+      if (reFetchRulesData != null) {
+        reFetchRulesData();
+      }
+    }, [rulesInstalled, rulesNotInstalled, rulesNotUpdated]);
+
+    useEffect(() => {
+      if (refetchPrePackagedRulesStatus != null && tableData.length > 0) {
+        refetchPrePackagedRulesStatus();
+      }
+    }, [refetchPrePackagedRulesStatus, tableData]);
 
     useEffect(() => {
       dispatch({
@@ -229,7 +247,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   userHasNoPermissions={hasNoPermissions}
                 />
               )}
-              {isEmpty(tableData) && (
+              {!isEmpty(tableData) && (
                 <>
                   <UtilityBar border>
                     <UtilityBarSection>
