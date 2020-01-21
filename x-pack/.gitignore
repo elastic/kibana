@@ -12,6 +12,3 @@
 !/legacy/plugins/infra/**/target
 .cache
 !/legacy/plugins/siem/**/target
-
-# We don't want any yarn.lock files in here
-/yarn.lock
