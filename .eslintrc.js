@@ -642,6 +642,8 @@ module.exports = {
         jest: true,
       },
       rules: {
+        // This will be turned on after bug fixes are mostly completed
+        // '@kbn/eslint/no-memo-displayname': 'error',
         'accessor-pairs': 'error',
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
