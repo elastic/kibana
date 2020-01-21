@@ -102,54 +102,58 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     selectTab(tab);
   };
 
-  return multipleMappingsDeclared ? (
-    <MultipleMappingsWarning />
-  ) : (
-    <IndexSettingsProvider indexSettings={indexSettings}>
-      <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue!}>
-        {({ state }) => {
-          const tabToContentMap = {
-            fields: <DocumentFields />,
-            templates: <TemplatesForm defaultValue={state.templates.defaultValue} />,
-            advanced: <ConfigurationForm defaultValue={state.configuration.defaultValue} />,
-          };
+  return (
+    <div data-test-subj="mappingsEditor">
+      {multipleMappingsDeclared ? (
+        <MultipleMappingsWarning />
+      ) : (
+        <IndexSettingsProvider indexSettings={indexSettings}>
+          <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue!}>
+            {({ state }) => {
+              const tabToContentMap = {
+                fields: <DocumentFields />,
+                templates: <TemplatesForm defaultValue={state.templates.defaultValue} />,
+                advanced: <ConfigurationForm defaultValue={state.configuration.defaultValue} />,
+              };
 
-          return (
-            <div className="mappingsEditor">
-              <EuiTabs>
-                <EuiTab
-                  onClick={() => changeTab('fields', state)}
-                  isSelected={selectedTab === 'fields'}
-                >
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
-                    defaultMessage: 'Mapped fields',
-                  })}
-                </EuiTab>
-                <EuiTab
-                  onClick={() => changeTab('templates', state)}
-                  isSelected={selectedTab === 'templates'}
-                >
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
-                    defaultMessage: 'Dynamic templates',
-                  })}
-                </EuiTab>
-                <EuiTab
-                  onClick={() => changeTab('advanced', state)}
-                  isSelected={selectedTab === 'advanced'}
-                >
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
-                    defaultMessage: 'Advanced options',
-                  })}
-                </EuiTab>
-              </EuiTabs>
+              return (
+                <div className="mappingsEditor">
+                  <EuiTabs>
+                    <EuiTab
+                      onClick={() => changeTab('fields', state)}
+                      isSelected={selectedTab === 'fields'}
+                    >
+                      {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
+                        defaultMessage: 'Mapped fields',
+                      })}
+                    </EuiTab>
+                    <EuiTab
+                      onClick={() => changeTab('templates', state)}
+                      isSelected={selectedTab === 'templates'}
+                    >
+                      {i18n.translate('xpack.idxMgmt.mappingsEditor.templatesTabLabel', {
+                        defaultMessage: 'Dynamic templates',
+                      })}
+                    </EuiTab>
+                    <EuiTab
+                      onClick={() => changeTab('advanced', state)}
+                      isSelected={selectedTab === 'advanced'}
+                    >
+                      {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
+                        defaultMessage: 'Advanced options',
+                      })}
+                    </EuiTab>
+                  </EuiTabs>
 
-              <EuiSpacer size="l" />
+                  <EuiSpacer size="l" />
 
-              {tabToContentMap[selectedTab]}
-            </div>
-          );
-        }}
-      </MappingsState>
-    </IndexSettingsProvider>
+                  {tabToContentMap[selectedTab]}
+                </div>
+              );
+            }}
+          </MappingsState>
+        </IndexSettingsProvider>
+      )}
+    </div>
   );
 });

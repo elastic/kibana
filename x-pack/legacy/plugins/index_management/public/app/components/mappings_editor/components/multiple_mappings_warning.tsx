@@ -17,6 +17,7 @@ export const MultipleMappingsWarning = () => (
     })}
     iconType="alert"
     color="warning"
+    data-test-subj="multipleMappingsCallout"
   >
     <p>
       {i18n.translate('xpack.idxMgmt.mappingsEditor.multipleMappingsCallOutDescription1', {

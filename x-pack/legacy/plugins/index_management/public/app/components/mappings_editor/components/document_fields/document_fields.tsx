@@ -48,7 +48,7 @@ export const DocumentFields = React.memo(() => {
   const searchTerm = search.term.trim();
 
   return (
-    <>
+    <div data-test-subj="documentFields">
       <DocumentFieldsHeader searchValue={search.term} onSearchChange={onSearchChange} />
       <EuiSpacer size="m" />
       {searchTerm !== '' ? (
@@ -57,6 +57,6 @@ export const DocumentFields = React.memo(() => {
         editor
       )}
       {renderEditField()}
-    </>
+    </div>
   );
 });
