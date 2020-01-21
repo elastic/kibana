@@ -14,12 +14,11 @@ const makeOverviewBreadcrumb = (search?: string): ChromeBreadcrumb => ({
   href: `#/${search ? search : ''}`,
 });
 
-export const getOverviewPageBreadcrumbs = (search?: string): ChromeBreadcrumb[] => {
-  const result = [makeOverviewBreadcrumb(search)];
-  return result;
-};
+export const getOverviewPageBreadcrumbs = (search?: string): ChromeBreadcrumb[] => [
+  makeOverviewBreadcrumb(search),
+];
 
-export const getMonitorPageBreadcrumb = (name: string, search?: string): ChromeBreadcrumb[] => {
-  const result = [makeOverviewBreadcrumb(search), { text: name }];
-  return result;
-};
+export const getMonitorPageBreadcrumb = (name: string, search?: string): ChromeBreadcrumb[] => [
+  makeOverviewBreadcrumb(search),
+  { text: name },
+];
