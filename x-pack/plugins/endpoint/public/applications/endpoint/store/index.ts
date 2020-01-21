@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore, compose, applyMiddleware } from 'redux';
+import { createStore, compose, applyMiddleware, Store } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { appSagaFactory } from './saga';
 import { appReducer } from './reducer';
@@ -15,10 +15,13 @@ const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMP
   ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
   : compose;
 
-export const appStoreFactory = (coreStart: CoreStart) => {
+export const appStoreFactory = (coreStart: CoreStart): [Store, () => void] => {
+  const sagaReduxMiddleware = appSagaFactory(coreStart);
   const store = createStore(
     appReducer,
-    composeWithReduxDevTools(applyMiddleware(appSagaFactory(coreStart)))
+    composeWithReduxDevTools(applyMiddleware(sagaReduxMiddleware))
   );
-  return store;
+
+  sagaReduxMiddleware.start();
+  return [store, sagaReduxMiddleware.stop];
 };
