@@ -20,7 +20,8 @@
 import { callClient } from './call_client';
 import { handleResponse } from './handle_response';
 import { FetchHandlers } from './types';
-import { SearchRequest, SearchStrategySearchParams } from '../..';
+import { SearchRequest } from '../..';
+import { SearchStrategySearchParams } from '../search_strategy';
 
 const mockResponses = [{}, {}];
 const mockAbortFns = [jest.fn(), jest.fn()];

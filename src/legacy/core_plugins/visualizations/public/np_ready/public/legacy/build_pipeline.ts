@@ -21,14 +21,13 @@ import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import moment from 'moment';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
+import { ISearchSource } from 'src/plugins/data/public';
 import {
   AggConfig,
   setBounds,
   isDateHistogramBucketAggConfig,
   createFormat,
 } from '../../../legacy_imports';
-// eslint-disable-next-line
-import { ISearchSource } from '../../../../../../ui/public/courier/search_source/search_source';
 import { Vis, VisParams, VisState } from '..';
 
 interface SchemaConfigParams {

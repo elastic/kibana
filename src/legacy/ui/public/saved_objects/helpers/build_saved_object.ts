@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import { SearchSource } from 'ui/courier';
+import { SearchSource } from '../../../../../plugins/data/public';
 import { hydrateIndexPattern } from './hydrate_index_pattern';
 import { intializeSavedObject } from './initialize_saved_object';
 import { serializeSavedObject } from './serialize_saved_object';

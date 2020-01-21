@@ -31,8 +31,7 @@ import { TimeRange } from 'src/plugins/data/public';
 import { Schema } from '../vis/editors/default/schemas';
 import { AggConfig, AggConfigOptions } from './agg_config';
 import { AggGroupNames } from '../vis/editors/default/agg_groups';
-import { IndexPattern, FetchOptions } from '../../../../plugins/data/public';
-import { ISearchSource } from '../courier/types';
+import { IndexPattern, ISearchSource, FetchOptions } from '../../../../plugins/data/public';
 
 type Schemas = Record<string, any>;
 

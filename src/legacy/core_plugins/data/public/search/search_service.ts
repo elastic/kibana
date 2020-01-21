@@ -18,21 +18,13 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from '../../../../../core/public';
-import { SearchSource } from './search_source';
-import { defaultSearchStrategy, SearchStrategyProvider } from '../../../../../plugins/data/public';
 
 export interface SearchSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
-export interface SearchStart {
-  defaultSearchStrategy: SearchStrategyProvider;
-  SearchSource: typeof SearchSource;
-}
+export interface SearchStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /**
- * The contract provided here is a new platform shim for ui/courier.
- *
- * Once it has been refactored to work with new platform services,
- * it will move into the existing search service in src/plugins/data/public/search
+ * Search Service shim
  */
 export class SearchService implements Plugin<SearchSetup, SearchStart> {
   public setup(core: CoreSetup): SearchSetup {
@@ -40,10 +32,7 @@ export class SearchService implements Plugin<SearchSetup, SearchStart> {
   }
 
   public start(core: CoreStart): SearchStart {
-    return {
-      defaultSearchStrategy,
-      SearchSource,
-    };
+    return {};
   }
 
   public stop() {}

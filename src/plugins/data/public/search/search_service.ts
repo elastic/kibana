@@ -40,6 +40,7 @@ import { TStrategyTypes } from './strategy_types';
 import { esSearchService } from './es_search';
 import { ISearchGeneric } from './i_search';
 import { getEsClient } from './es_client';
+import { defaultSearchStrategy, addSearchStrategy } from './search_strategy';
 
 /**
  * Extends the AppMountContext so other plugins have access
@@ -122,6 +123,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     // however these two plugins are tightly coupled due to the default search strategy using
     // es search types.
     esSearchService(this.initializerContext).setup(core, { search: api });
+
+    // This is to be deprecated once we switch to the new search service fully
+    addSearchStrategy(defaultSearchStrategy);
 
     return api;
   }

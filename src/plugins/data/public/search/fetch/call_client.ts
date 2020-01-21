@@ -20,7 +20,8 @@
 import { groupBy } from 'lodash';
 import { handleResponse } from './handle_response';
 import { FetchOptions, FetchHandlers } from './types';
-import { SearchRequest, getSearchStrategyForSearchRequest, getSearchStrategyById } from '../..';
+import { SearchRequest } from '../types';
+import { getSearchStrategyForSearchRequest, getSearchStrategyById } from '../search_strategy';
 
 export function callClient(
   searchRequests: SearchRequest[],

@@ -20,6 +20,7 @@
 export { ISearchAppMountContext } from './i_search_app_mount_context';
 
 export { ISearchSetup } from './i_search_setup';
+export { ISearchStart } from './search_service';
 
 export { ISearchContext } from './i_search_context';
 
@@ -39,20 +40,21 @@ export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
-export { ISearchStart } from './search_service';
-
 export {
   addSearchStrategy,
   hasSearchStategyForIndexPattern,
-  getSearchStrategyById,
   getSearchErrorType,
-  getSearchStrategyForSearchRequest,
   SearchError,
-  defaultSearchStrategy,
-  SearchStrategyProvider,
-  SearchStrategySearchParams,
 } from './search_strategy';
 
 export { SearchRequest, SearchResponse } from './types';
 
 export { FetchOptions } from './fetch';
+
+export {
+  SearchSource,
+  ISearchSource,
+  EsQuerySortValue,
+  SortDirection,
+  SearchSourceFields,
+} from './search_source';

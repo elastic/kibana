@@ -17,8 +17,5 @@
  * under the License.
  */
 
-import { addSearchStrategy, defaultSearchStrategy } from '../../../../../plugins/data/public';
-
-addSearchStrategy(defaultSearchStrategy);
-
-export { defaultSearchStrategy };
+export * from './search_source';
+export { SortDirection, EsQuerySortValue, SearchSourceFields } from './types';

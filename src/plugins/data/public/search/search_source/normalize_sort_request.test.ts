@@ -19,7 +19,7 @@
 
 import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IIndexPattern } from '../..';
 
 jest.mock('ui/new_platform');
 

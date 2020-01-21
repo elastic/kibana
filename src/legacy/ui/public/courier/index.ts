@@ -21,20 +21,8 @@
  * Nothing to see here!
  *
  * Courier / SearchSource has moved to the data plugin, and is being
- * re-exported from ui/courier for backwards compatibility.
+ * re-exported for backwards compatibility.
  */
-
-import { start as dataStart } from '../../../core_plugins/data/public/legacy';
-
-// runtime contracts
-export const { defaultSearchStrategy, SearchSource } = dataStart.search;
-
-// types
-export {
-  ISearchSource,
-  EsQuerySortValue, // used externally by Discover
-  SortDirection, // used externally by Discover
-} from '../../../core_plugins/data/public';
 
 // static code
 export {

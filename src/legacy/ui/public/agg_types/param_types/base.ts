@@ -19,8 +19,7 @@
 
 import { AggConfigs } from '../agg_configs';
 import { AggConfig } from '../../vis';
-import { ISearchSource } from '../../courier/types';
-import { FetchOptions } from '../../../../../plugins/data/public';
+import { FetchOptions, ISearchSource } from '../../../../../plugins/data/public';
 
 export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
   name: string;

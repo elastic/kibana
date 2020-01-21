@@ -24,11 +24,10 @@ import { initParams } from './agg_params';
 
 import { AggConfig } from '../vis';
 import { AggConfigs } from './agg_configs';
-import { ISearchSource } from '../courier';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from '../agg_types/param_types/agg';
-import { KBN_FIELD_TYPES, FieldFormat } from '../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, FieldFormat, ISearchSource } from '../../../../plugins/data/public';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IIndexPattern } from '../..';
 import { EsQuerySortValue, SortOptions } from './types';
 
 export function normalizeSortRequest(

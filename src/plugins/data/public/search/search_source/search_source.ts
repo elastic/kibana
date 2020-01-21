@@ -71,28 +71,13 @@
 
 import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
-import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
-import {
-  getHighlightRequest,
-  esFilters,
-  esQuery,
-  SearchRequest,
-} from '../../../../../../plugins/data/public';
 import { filterDocvalueFields } from './filter_docvalue_fields';
+import { fieldWildcardFilter } from '../../../../kibana_utils/public';
+import { getHighlightRequest, esFilters, esQuery, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import {
-  fetchSoon,
-  FetchOptions,
-  RequestFailure,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/data/public/search/fetch';
+import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 
-import {
-  getSearchService,
-  getUiSettings,
-  getInjectedMetadata,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/data/public/services';
+import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 

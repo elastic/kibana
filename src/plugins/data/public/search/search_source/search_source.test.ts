@@ -18,18 +18,13 @@
  */
 
 import { SearchSource } from '../search_source';
-import { IndexPattern } from '../../../../../../plugins/data/public';
-import {
-  setSearchService,
-  setUiSettings,
-  setInjectedMetadata,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/data/public/services';
+import { IndexPattern } from '../..';
+import { setSearchService, setUiSettings, setInjectedMetadata } from '../../services';
 
 import {
   injectedMetadataServiceMock,
   uiSettingsServiceMock,
-} from '../../../../../../core/public/mocks';
+} from '../../../../../core/public/mocks';
 
 setUiSettings(uiSettingsServiceMock.createStartContract());
 setInjectedMetadata(injectedMetadataServiceMock.createSetupContract());

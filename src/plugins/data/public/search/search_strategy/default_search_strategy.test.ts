@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { defaultSearchStrategy } from './default_search_strategy';
 import { IUiSettingsClient } from '../../../../../core/public';
 import { SearchStrategySearchParams } from './types';
+import { defaultSearchStrategy } from './default_search_strategy';
 
 const { search } = defaultSearchStrategy;
 
