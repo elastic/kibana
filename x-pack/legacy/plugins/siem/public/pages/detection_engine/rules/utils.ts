@@ -5,12 +5,14 @@
  */
 
 import { Breadcrumb } from 'ui/chrome';
+import { isEmpty } from 'lodash/fp';
 
 import {
   getDetectionEngineUrl,
   getDetectionEngineTabUrl,
   getRulesUrl,
   getRuleDetailsUrl,
+  getCreateRuleUrl,
   getEditRuleUrl,
 } from '../../../components/link_to/redirect_to_detection_engine';
 import * as i18nDetections from '../translations';
@@ -23,24 +25,28 @@ const getTabBreadcrumb = (pathname: string, search: string[]) => {
   if (tabPath === 'alerts') {
     return {
       text: i18nDetections.ALERT,
-      href: `${getDetectionEngineTabUrl(tabPath)}${search && search[0] ? search[0] : ''}`,
+      href: `${getDetectionEngineTabUrl(tabPath)}${!isEmpty(search[0]) ? search[0] : ''}`,
     };
   }
 
   if (tabPath === 'signals') {
     return {
       text: i18nDetections.SIGNAL,
-      href: `${getDetectionEngineTabUrl(tabPath)}${search && search[0] ? search[0] : ''}`,
+      href: `${getDetectionEngineTabUrl(tabPath)}${!isEmpty(search[0]) ? search[0] : ''}`,
     };
   }
 
   if (tabPath === 'rules') {
     return {
       text: i18nRules.PAGE_TITLE,
-      href: `${getRulesUrl()}${search && search[0] ? search[0] : ''}`,
+      href: `${getRulesUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
     };
   }
 };
+
+const isRuleCreatePage = (pathname: string) =>
+  pathname.includes('/rules') && pathname.includes('/create');
+
 const isRuleEditPage = (pathname: string) =>
   pathname.includes('/rules') && pathname.includes('/edit');
 
@@ -48,7 +54,7 @@ export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcr
   let breadcrumb = [
     {
       text: i18nDetections.PAGE_TITLE,
-      href: `${getDetectionEngineUrl()}${search && search[0] ? search[0] : ''}`,
+      href: `${getDetectionEngineUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
     },
   ];
 
@@ -63,7 +69,17 @@ export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcr
       ...breadcrumb,
       {
         text: params.state.ruleName,
-        href: `${getRuleDetailsUrl(params.detailName)}${search && search[1] ? search[1] : ''}`,
+        href: `${getRuleDetailsUrl(params.detailName)}${!isEmpty(search[1]) ? search[1] : ''}`,
+      },
+    ];
+  }
+
+  if (isRuleCreatePage(params.pathName)) {
+    breadcrumb = [
+      ...breadcrumb,
+      {
+        text: i18nRules.ADD_PAGE_TITLE,
+        href: `${getCreateRuleUrl()}${!isEmpty(search[1]) ? search[1] : ''}`,
       },
     ];
   }
@@ -73,7 +89,7 @@ export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcr
       ...breadcrumb,
       {
         text: i18nRules.EDIT_PAGE_TITLE,
-        href: `${getEditRuleUrl(params.detailName)}${search && search[1] ? search[1] : ''}`,
+        href: `${getEditRuleUrl(params.detailName)}${!isEmpty(search[1]) ? search[1] : ''}`,
       },
     ];
   }
