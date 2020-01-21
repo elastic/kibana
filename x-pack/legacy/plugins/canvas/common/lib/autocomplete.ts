@@ -287,8 +287,8 @@ function getFnNameSuggestions(
   const nextFnContext = nextFnDef && nextFnDef.context && nextFnDef.context.types;
 
   const fnDefs = specs.sort((a: CanvasFunction, b: CanvasFunction): number => {
-    const aScore = getScore(a, prevFnType, nextFnContext);
-    const bScore = getScore(b, prevFnType, nextFnContext);
+    const aScore = getScore(a, prevFnType, nextFnContext, false);
+    const bScore = getScore(b, prevFnType, nextFnContext, false);
 
     if (aScore === bScore) {
       return a.name < b.name ? -1 : 1;
@@ -297,7 +297,7 @@ function getFnNameSuggestions(
   });
 
   return fnDefs.map(fnDef => {
-    return { type: 'function', text: fnDef.name + ' ', start, end: end - MARKER.length, fnDef };
+    return { type: 'function', text: `${fnDef.name} `, start, end: end - MARKER.length, fnDef };
   });
 }
 
@@ -327,8 +327,8 @@ function getSubFnNameSuggestions(
   const expectedReturnTypes = matchingArgDef.types;
 
   const fnDefs = matchingFnDefs.sort((a: CanvasFunction, b: CanvasFunction) => {
-    const aScore = getScore(a, contextFnType, expectedReturnTypes);
-    const bScore = getScore(b, contextFnType, expectedReturnTypes);
+    const aScore = getScore(a, contextFnType, expectedReturnTypes, true);
+    const bScore = getScore(b, contextFnType, expectedReturnTypes, true);
 
     if (aScore === bScore) {
       return a.name < b.name ? -1 : 1;
@@ -341,26 +341,56 @@ function getSubFnNameSuggestions(
   });
 }
 
-function getScore(a: CanvasFunction, context: any, returnTypes?: any[] | null) {
+function getScore(
+  func: CanvasFunction,
+  contextType: any,
+  returnTypes?: any[] | null,
+  isSubFunc?: boolean
+) {
   let score = 0;
-  if (!context) {
-    context = 'null';
+  if (!contextType) {
+    contextType = 'null';
   }
-  if (a.context && a.context.types) {
-    score++;
-    if (a.context.types.includes(context)) {
-      score++;
-    }
-  } else if (!context && a.context && (a.context.types as string[]).includes('null')) {
-    score += 2;
+
+  let funcContextTypes = [];
+  if (func.context && func.context.types && func.context.types.length) {
+    funcContextTypes = func.context.types;
   }
-  if (returnTypes && a.type) {
-    score++;
-    if (returnTypes.length && returnTypes.includes(a.type)) {
-      score += 3;
+
+  if (isSubFunc) {
+    if (returnTypes && func.type) {
+      // If in a sub-expression, favor types that match the expected return type for the argument
+      // with top results matching the passed in context
+      if (returnTypes.length && returnTypes.includes(func.type)) {
+        score++;
+
+        if (funcContextTypes.includes(contextType)) {
+          score++;
+        }
+      }
     }
-  } else if (!returnTypes && (!a.type || a.type === 'null')) {
-    score += 4;
+  } else {
+    if (func.context && func.context.types) {
+      const expectsNull = (funcContextTypes as string[]).includes('null');
+
+      if (!expectsNull && contextType !== 'null') {
+        // If not in a sub-expression and there's a preceding function,
+        // favor functions that expect a context with top results matching the passed in context
+        score++;
+
+        if (func.context.types.includes(contextType)) {
+          score++;
+        }
+      } else if (expectsNull && contextType === 'null') {
+        // If not in a sub-expression and there's NOT a preceding function,
+        // favor functions that don't expect anything being passed in with top results returning a non-null
+        score++;
+
+        if (func.type && func.type !== 'null') {
+          score++;
+        }
+      }
+    }
   }
 
   return score;
