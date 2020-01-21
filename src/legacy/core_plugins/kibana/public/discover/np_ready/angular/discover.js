@@ -44,7 +44,6 @@ import {
   getServices,
   hasSearchStategyForIndexPattern,
   intervalOptions,
-  isDefaultTypeIndexPattern,
   migrateLegacyQuery,
   RequestAdapter,
   showSaveModal,
@@ -402,7 +401,8 @@ function discoverController(
 
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  if (isDefaultTypeIndexPattern($scope.indexPattern)) {
+  const indexPatterns = getServices().indexPatterns;
+  if (indexPatterns.isDefault($scope.indexPattern)) {
     timeRangeSearchSource.setField('filter', () => {
       return timefilter.createFilter($scope.indexPattern);
     });
@@ -560,7 +560,7 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
+    timefield: indexPatterns.isDefault($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
   };
@@ -1158,7 +1158,7 @@ function discoverController(
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
   $scope.isUnsupportedIndexPattern =
-    !isDefaultTypeIndexPattern($route.current.locals.savedObjects.ip.loaded) &&
+    !indexPatterns.isDefault($route.current.locals.savedObjects.ip.loaded) &&
     !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded);
 
   if ($scope.isUnsupportedIndexPattern) {

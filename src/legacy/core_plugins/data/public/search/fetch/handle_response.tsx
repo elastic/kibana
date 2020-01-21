@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
 import { Request, ResponseWithShardFailure } from './components/shard_failure_types';
-import { SearchRequest, SearchResponse } from '../types';
+import { SearchRequest, SearchResponse } from '../../../../../../plugins/data/public';
 import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getNotifications } from '../../../../../../plugins/data/public/services';

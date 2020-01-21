@@ -18,10 +18,13 @@
  */
 
 import { groupBy } from 'lodash';
-import { getSearchStrategyForSearchRequest, getSearchStrategyById } from '../search_strategy';
 import { handleResponse } from './handle_response';
 import { FetchOptions, FetchHandlers } from './types';
-import { SearchRequest } from '../types';
+import {
+  SearchRequest,
+  getSearchStrategyForSearchRequest,
+  getSearchStrategyById,
+} from '../../../../../../plugins/data/public';
 
 export function callClient(
   searchRequests: SearchRequest[],

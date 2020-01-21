@@ -18,7 +18,7 @@
  */
 
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
-import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
+import { indexPatterns } from '../../index_patterns';
 import { getSearchParams, getMSearchParams, getPreference, getTimeout } from './get_search_params';
 
 export const defaultSearchStrategy: SearchStrategyProvider = {
@@ -29,7 +29,7 @@ export const defaultSearchStrategy: SearchStrategyProvider = {
   },
 
   isViable: indexPattern => {
-    return indexPattern && isDefaultTypeIndexPattern(indexPattern);
+    return indexPattern && indexPatterns.isDefault(indexPattern);
   },
 };
 

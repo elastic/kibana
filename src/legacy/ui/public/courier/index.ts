@@ -42,21 +42,3 @@ export {
   getRequestInspectorStats,
   getResponseInspectorStats,
 } from '../../../core_plugins/data/public';
-
-// TODO: Exporting this mock outside of jest tests causes errors because
-// jest is undefined. Need to refactor the mock to be consistent with
-// other NP-style mocks.
-// export { searchSourceMock } from './search_source/mocks';
-
-// Most these can probably be made internal to the search
-// service, so we are temporarily deeply importing them
-// until we relocate them to a longer-term home.
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-export {
-  addSearchStrategy, // used externally by Rollups
-  getSearchErrorType, // used externally by Rollups
-  hasSearchStategyForIndexPattern, // used externally by Discover
-  isDefaultTypeIndexPattern, // used externally by Discover
-  SearchError, // used externally by Visualizations & Rollups
-} from '../../../core_plugins/data/public/search/search_strategy';
-/* eslint-enable @kbn/eslint/no-restricted-paths */

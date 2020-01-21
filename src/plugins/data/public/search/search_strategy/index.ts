@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../../../plugins/data/public';
+export {
+  addSearchStrategy,
+  hasSearchStategyForIndexPattern,
+  getSearchStrategyById,
+  getSearchStrategyForSearchRequest,
+} from './search_strategy_registry';
 
-export const isDefaultTypeIndexPattern = (indexPattern: IndexPattern) => {
-  // Default index patterns don't have `type` defined.
-  return !indexPattern.type;
-};
+export { defaultSearchStrategy } from './default_search_strategy';
+
+export { SearchError, getSearchErrorType } from './search_error';
+
+export { SearchStrategyProvider, SearchStrategySearchParams } from './types';

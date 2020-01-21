@@ -21,7 +21,7 @@ import { fetchSoon } from './fetch_soon';
 import { callClient } from './call_client';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { FetchHandlers, FetchOptions } from './types';
-import { SearchRequest, SearchResponse } from '../types';
+import { SearchRequest, SearchResponse } from '../../../../../../plugins/data/public';
 
 function getConfigStub(config: any = {}) {
   return {

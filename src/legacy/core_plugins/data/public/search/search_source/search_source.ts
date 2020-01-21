@@ -73,10 +73,15 @@ import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
-import { getHighlightRequest, esFilters, esQuery } from '../../../../../../plugins/data/public';
+import {
+  getHighlightRequest,
+  esFilters,
+  esQuery,
+  SearchRequest,
+} from '../../../../../../plugins/data/public';
 import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
-import { SearchSourceOptions, SearchSourceFields, SearchRequest } from './types';
+import { SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchOptions } from '../fetch/types';
 
 import {

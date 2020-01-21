@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { ISearchStart } from 'src/plugins/data/public';
+import { ISearchStart, SearchRequest, SearchResponse } from 'src/plugins/data/public';
 import { IUiSettingsClient } from '../../../../../../core/public';
-import { SearchRequest, SearchResponse } from '../types';
 
 export interface ApiCaller {
   search: (searchRequest: SearchRequest) => ApiCallerResponse;

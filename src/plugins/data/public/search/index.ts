@@ -40,3 +40,17 @@ export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
 export { ISearchStart } from './search_service';
+
+export {
+  addSearchStrategy,
+  hasSearchStategyForIndexPattern,
+  getSearchStrategyById,
+  getSearchErrorType,
+  getSearchStrategyForSearchRequest,
+  SearchError,
+  defaultSearchStrategy,
+  SearchStrategyProvider,
+  SearchStrategySearchParams,
+} from './search_strategy';
+
+export { SearchRequest, SearchResponse } from './types';

@@ -5,7 +5,7 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { SearchError, getSearchErrorType } from '../../../../../../src/legacy/ui/public/courier';
+import { SearchError, getSearchErrorType } from '../../../../../../src/plugins/data/public';
 
 function serializeFetchParams(searchRequests) {
   return JSON.stringify(

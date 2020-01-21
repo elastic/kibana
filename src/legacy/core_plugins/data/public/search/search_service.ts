@@ -19,8 +19,7 @@
 
 import { Plugin, CoreSetup, CoreStart } from '../../../../../core/public';
 import { SearchSource } from './search_source';
-import { defaultSearchStrategy } from './search_strategy';
-import { SearchStrategyProvider } from './search_strategy/types';
+import { defaultSearchStrategy, SearchStrategyProvider } from '../../../../../plugins/data/public';
 
 export interface SearchSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
 

@@ -60,8 +60,6 @@ export { callAfterBindingsWorkaround } from 'ui/compat';
 export {
   getRequestInspectorStats,
   getResponseInspectorStats,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
   SearchSource,
   EsQuerySortValue,
   SortDirection,
@@ -95,6 +93,7 @@ export {
   IIndexPattern,
   IndexPattern,
   indexPatterns,
+  hasSearchStategyForIndexPattern,
   IFieldType,
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';

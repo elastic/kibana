@@ -17,4 +17,25 @@
  * under the License.
  */
 
-export { SearchError } from '../index';
+import { ISearchStart, SearchRequest, SearchResponse } from '../../';
+import { IUiSettingsClient } from '../../../../../core/public';
+
+export interface ApiCaller {
+  search: (searchRequest: SearchRequest) => ApiCallerResponse;
+  msearch: (searchRequest: SearchRequest) => ApiCallerResponse;
+}
+
+export interface ApiCallerResponse extends Promise<SearchResponse> {
+  abort: () => void;
+}
+
+export interface FetchOptions {
+  abortSignal?: AbortSignal;
+  searchStrategyId?: string;
+}
+
+export interface FetchHandlers {
+  searchService: ISearchStart;
+  config: IUiSettingsClient;
+  esShardTimeout: number;
+}

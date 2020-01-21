@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { addSearchStrategy, defaultSearchStrategy } from '../index';
+import { addSearchStrategy, defaultSearchStrategy } from '../../../../../plugins/data/public';
 
 addSearchStrategy(defaultSearchStrategy);
 

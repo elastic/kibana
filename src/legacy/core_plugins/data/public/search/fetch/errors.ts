@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { SearchError } from '../search_strategy';
 import { KbnError } from '../../../../../../plugins/kibana_utils/public';
-import { SearchResponse } from '../types';
+import { SearchResponse, SearchError } from '../../../../../../plugins/data/public';
 
 /**
  * Request Failure - When an entire multi request fails
