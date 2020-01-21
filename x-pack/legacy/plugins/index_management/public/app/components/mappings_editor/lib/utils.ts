@@ -17,6 +17,7 @@ import {
   ChildFieldName,
   ParameterName,
   ComboBoxOption,
+  GenericObject,
 } from '../types';
 
 import {
@@ -30,6 +31,8 @@ import {
 import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
+
+export const isObject = (obj: any) => obj != null && obj.constructor.name === 'Object';
 
 export const getUniqueId = () => {
   return uuid.v4();
@@ -502,3 +505,58 @@ export const isStateValid = (state: State): boolean | undefined =>
 
       return isValid && value.isValid;
     }, true as undefined | boolean);
+
+/**
+ * 5.x index templates can be created with multiple types.
+ * e.g.
+ ```
+  const mappings = {
+      type1: {
+        properties: {
+          name1: {
+            type: 'keyword',
+          },
+        },
+      },
+      type2: {
+        properties: {
+          name2: {
+            type: 'keyword',
+          },
+        },
+      },
+    };
+ ```
+ * A mappings can also be declared under an explicit "_doc" property.
+ ```
+ const mappings = {
+    _doc: {
+      _source: {
+        "enabled": false
+      },
+      properties: {
+        name1: {
+          type: 'keyword',
+        },
+      },
+    },
+  };
+ ```
+ * This helpers parse the mappings provided an removes any possible "type" declared
+ *
+ * @param mappings The mappings object to validate
+ */
+export const extractMappingsDefinition = (mappings = {}): GenericObject | null => {
+  const mappingsFound = Object.values(mappings).reduce((acc: GenericObject[], value) => {
+    if (isObject(value) && {}.hasOwnProperty.call(value, 'properties')) {
+      acc.push(value as GenericObject);
+    }
+    return acc;
+  }, []);
+
+  return mappingsFound.length === 0
+    ? mappings
+    : mappingsFound.length === 1
+    ? mappingsFound[0]
+    : null; // If more than 1 mappings definition, return null
+};

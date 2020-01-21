@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateMappings, validateProperties, isObject } from './mappings_validator';
+import { validateMappings, validateProperties } from './mappings_validator';
+import { isObject } from './utils';
 
 describe('Mappings configuration validator', () => {
   it('should convert non object to empty object', () => {

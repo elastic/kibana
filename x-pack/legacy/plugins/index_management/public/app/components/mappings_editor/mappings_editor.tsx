@@ -63,7 +63,6 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
       if (!isConfigurationFormValid) {
         /**
          * Don't navigate away from the tab if there are errors in the form.
-         * For now there is no need to display a CallOut as the form can never be invalid.
          */
         return;
       }

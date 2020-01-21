@@ -11,7 +11,7 @@ import { isLeft, isRight } from 'fp-ts/lib/Either';
 import { errorReporter } from './error_reporter';
 import { ALL_DATA_TYPES, PARAMETERS_DEFINITION } from '../constants';
 import { FieldMeta } from '../types';
-import { getFieldMeta } from '../lib';
+import { getFieldMeta, isObject } from './utils';
 
 const ALLOWED_FIELD_PROPERTIES = [
   ...Object.keys(PARAMETERS_DEFINITION),
@@ -48,8 +48,6 @@ interface FieldValidatorResponse {
 interface GenericObject {
   [key: string]: any;
 }
-
-export const isObject = (obj: any) => obj != null && obj.constructor.name === 'Object';
 
 const validateFieldType = (type: any): boolean => {
   if (typeof type !== 'string') {
