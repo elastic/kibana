@@ -32,7 +32,7 @@ export function migrateSymbolStyleDescriptor({ attributes }) {
       options: { value: symbolizeAs },
     };
     const iconId = _.get(layerDescriptor, 'style.properties.symbol.options.symbolId', DEFAULT_ICON);
-    layerDescriptor.style.properties.icon = {
+    layerDescriptor.style.properties.symbolMarker = {
       type: STYLE_TYPE.STATIC,
       options: { value: iconId },
     };

@@ -21,11 +21,11 @@ import {
   SOURCE_META_ID_ORIGIN,
   SOURCE_FORMATTERS_ID_ORIGIN,
   LAYER_STYLE_TYPE,
+  DEFAULT_ICON,
 } from '../../../../common/constants';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
-import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import { getMakiSymbolAnchor } from './symbol_utils';
 import { getComputedFieldName, isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
@@ -40,6 +40,7 @@ import { StaticTextProperty } from './properties/static_text_property';
 import { DynamicTextProperty } from './properties/dynamic_text_property';
 import { LabelBorderSizeProperty } from './properties/label_border_size_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
+import { SymbolizeAsProperty } from './properties/symbolize_as_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -69,6 +70,13 @@ export class VectorStyle extends AbstractStyle {
       ...VectorStyle.createDescriptor(descriptor.properties, descriptor.isTimeAware),
     };
 
+    this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
+      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
+      VECTOR_STYLES.SYMBOLIZE_AS
+    );
+    this._symbolMarkerStyleProperty = this._makeSymbolMarkerProperty(
+      this._descriptor.properties[VECTOR_STYLES.SYMBOL_MARKER]
+    );
     this._lineColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
       VECTOR_STYLES.LINE_COLOR
@@ -84,7 +92,7 @@ export class VectorStyle extends AbstractStyle {
     this._iconSizeStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
       VECTOR_STYLES.ICON_SIZE,
-      this._descriptor.properties[VECTOR_STYLES.SYMBOL].options.symbolizeAs === SYMBOLIZE_AS_ICON
+      this._symbolizeAsStyleProperty.isSymbolizedAsIcon()
     );
     this._iconOrientationProperty = this._makeOrientationProperty(
       this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
@@ -114,6 +122,8 @@ export class VectorStyle extends AbstractStyle {
 
   _getAllStyleProperties() {
     return [
+      this._symbolizeAsStyleProperty,
+      this._symbolMarkerStyleProperty,
       this._lineColorStyleProperty,
       this._fillColorStyleProperty,
       this._lineWidthStyleProperty,
@@ -153,7 +163,6 @@ export class VectorStyle extends AbstractStyle {
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
-        symbolDescriptor={this._descriptor.properties[VECTOR_STYLES.SYMBOL]}
         layer={layer}
         isPointsOnly={this._getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
@@ -408,7 +417,7 @@ export class VectorStyle extends AbstractStyle {
   _getSymbolId() {
     return this.arePointsSymbolizedAsCircles()
       ? undefined
-      : this._descriptor.properties.symbol.options.symbolId;
+      : this._symbolMarkerStyleProperty.getOptions().value;
   }
 
   getIcon = () => {
@@ -527,7 +536,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   arePointsSymbolizedAsCircles() {
-    return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
+    return !this._symbolizeAsStyleProperty.isSymbolizedAsIcon();
   }
 
   setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
@@ -554,7 +563,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
-    const symbolId = this._descriptor.properties.symbol.options.symbolId;
+    const symbolId = this._getSymbolId();
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
@@ -565,10 +574,6 @@ export class VectorStyle extends AbstractStyle {
     this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
     this._iconSizeStyleProperty.syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId);
     this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
-  }
-
-  arePointsSymbolizedAsCircles() {
-    return this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_CIRCLE;
   }
 
   _makeField(fieldDescriptor) {
@@ -652,6 +657,25 @@ export class VectorStyle extends AbstractStyle {
       return new DynamicTextProperty(
         descriptor.options,
         VECTOR_STYLES.LABEL_TEXT,
+        field,
+        this._getFieldMeta,
+        this._getFieldFormatter
+      );
+    } else {
+      throw new Error(`${descriptor} not implemented`);
+    }
+  }
+
+  _makeSymbolMarkerProperty(descriptor) {
+    if (!descriptor || !descriptor.options) {
+      return new StaticStyleProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.SYMBOL_MARKER);
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticStyleProperty(descriptor.options, VECTOR_STYLES.SYMBOL_MARKER);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      const field = this._makeField(descriptor.options.field);
+      return new DynamicStyleProperty(
+        descriptor.options,
+        VECTOR_STYLES.SYMBOL_MARKER,
         field,
         this._getFieldMeta,
         this._getFieldFormatter
