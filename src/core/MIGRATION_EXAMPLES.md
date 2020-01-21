@@ -16,6 +16,7 @@ APIs to their New Platform equivalents.
     - [Accessing Services](#accessing-services)
   - [Chrome](#chrome)
     - [Updating an application navlink](#updating-application-navlink)
+  - [Chromeless Applications](#chromeless-applications)
   - [Render HTML Content](#render-html-content)
 
 ## Configuration
