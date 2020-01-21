@@ -47,11 +47,7 @@ import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/pu
 import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
 // @ts-ignore
 import { savedObjectManagementRegistry } from '../management/saved_object_registry';
-
-export interface LegacyAngularInjectedDependencies {
-  legacyChrome: any;
-  editorTypes: any;
-}
+import { Chrome } from './legacy_imports';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -63,7 +59,7 @@ export interface VisualizePluginStartDependencies {
 
 export interface VisualizePluginSetupDependencies {
   __LEGACY: {
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
+    legacyChrome: Chrome;
   };
   home: HomePublicPluginSetup;
   kibana_legacy: KibanaLegacySetup;
@@ -82,12 +78,7 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    {
-      home,
-      kibana_legacy,
-      __LEGACY: { getAngularDependencies },
-      usageCollection,
-    }: VisualizePluginSetupDependencies
+    { home, kibana_legacy, __LEGACY, usageCollection }: VisualizePluginSetupDependencies
   ) {
     kibana_legacy.registerLegacyApp({
       id: 'visualize',
@@ -106,7 +97,6 @@ export class VisualizePlugin implements Plugin {
           share,
         } = this.startDependencies;
 
-        const angularDependencies = await getAngularDependencies();
         const savedVisualizations = createSavedVisLoader({
           savedObjectsClient,
           indexPatterns: data.indexPatterns,
@@ -115,7 +105,7 @@ export class VisualizePlugin implements Plugin {
           visualizations,
         });
         const deps: VisualizeKibanaServices = {
-          ...angularDependencies,
+          ...__LEGACY,
           addBasePath: contextCore.http.basePath.prepend,
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,

@@ -62,7 +62,7 @@ The list of common parameters:
 - *visualization*: A constructor function for a Visualization.
 - *requestHandler*: <string> one of the available request handlers or a <function> for a custom request handler
 - *responseHandler*: <string> one of the available response handlers or a <function> for a custom response handler
-- *editor*: <string> one of the available editors or Editor class for custom one
+- *editor*: A React component with a custom editor
 - *editorConfig*: object holding editor parameters
 - *options.showTimePicker*: <bool> show or hide time filter (defaults to true)
 - *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
@@ -204,7 +204,18 @@ const MyNewVisType = (Private) => {
 [[development-vis-editors]]
 === Visualization Editors
 By default, visualizations will use the `default` editor. 
-This is the sidebar editor you see in many of the Kibana visualizations. You can also write your own editor.
+This is the sidebar editor you see in many of the Kibana visualizations. You can also write your own editor. To specify custom editor use `editor` parameter as a key and a React component as a value.
+
+["source","js"]
+-----------
+{
+    name: 'my_new_vis',
+    title: 'My New Vis',
+    icon: 'my_icon',
+    description: 'Cool new chart',
+    editor: MyEditorReactComponent
+  }
+-----------
 
 [[development-default-editor]]
 ==== `default` editor controller
@@ -218,7 +229,6 @@ These tabs should be React components.
     title: 'My New Vis',
     icon: 'my_icon',
     description: 'Cool new chart',
-    editor: 'default',
     editorConfig: {
        optionsTemplate: MyReactComponent // or if multiple tabs are required:
        optionTabs: [
