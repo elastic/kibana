@@ -20,8 +20,7 @@
 import {
   UiSettingsParams,
   UserProvidedValues,
-  StringValidation,
-  UiSettingsType,
+  StringValidationRegexString,
 } from 'src/core/server/types';
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
@@ -43,7 +42,7 @@ export function toEditableConfig({
 }: {
   def: UiSettingsParams & UserProvidedValues<any>;
   name: string;
-  value: SavedObjectAttribute; // todo verify this
+  value: SavedObjectAttribute;
   isCustom: boolean;
   isOverridden: boolean;
 }) {
@@ -51,7 +50,7 @@ export function toEditableConfig({
     def = {};
   }
 
-  const validationTyped = def.validation as StringValidation;
+  const validationTyped = def.validation as StringValidationRegexString;
 
   const conf = {
     name,
@@ -63,13 +62,13 @@ export function toEditableConfig({
     isOverridden,
     readonly: !!def.readonly,
     defVal: def.value,
-    type: getValType(def, value) as UiSettingsType,
+    type: getValType(def, value),
     description: def.description,
     deprecation: def.deprecation,
     validation:
       validationTyped && validationTyped.regexString
         ? {
-            regex: new RegExp(validationTyped.regexString || ''),
+            regex: new RegExp(validationTyped.regexString),
             message: validationTyped.message,
           }
         : def.validation,

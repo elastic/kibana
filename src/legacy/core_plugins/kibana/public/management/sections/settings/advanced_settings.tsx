@@ -140,7 +140,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     }, {});
   }
 
-  onQueryChange = ({ query }: { query: any }) => {
+  onQueryChange = ({ query }: { query: IQuery }) => {
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),

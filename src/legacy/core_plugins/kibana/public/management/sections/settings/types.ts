@@ -17,23 +17,13 @@
  * under the License.
  */
 
-import { UiSettingsType } from '../../../../../../../core/server/ui_settings';
-import { SavedObjectAttribute } from '../../../../../../../core/server/saved_objects/types';
+import {
+  UiSettingsType,
+  StringValidation,
+  ImageValidation,
+} from '../../../../../../../core/server/ui_settings';
+import { SavedObjectAttribute } from '../../../../../../../core/server';
 
-export interface StringValidation {
-  regex?: RegExp;
-  regexString?: string;
-  message: string;
-}
-
-export interface ImageValidation {
-  maxSize: {
-    length: number;
-    description: string;
-  };
-}
-
-// todo consider whether this is needed
 export interface FieldSetting {
   displayName: string;
   name: string;
@@ -56,6 +46,7 @@ export interface FieldSetting {
   };
 }
 
+// until eui searchbar and query are typed
 export interface IQuery {
   ast: any; // incomplete
   text: string;

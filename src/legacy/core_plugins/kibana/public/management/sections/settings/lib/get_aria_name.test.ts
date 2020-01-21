@@ -32,7 +32,6 @@ describe('Settings', function() {
       it('should return an empty string if passed undefined or null', function() {
         expect(getAriaName()).to.be('');
         expect(getAriaName(undefined)).to.be('');
-        expect(getAriaName(null)).to.be('');
       });
     });
   });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsParams, StringValidation } from 'src/core/server/types';
+import { UiSettingsParams, StringValidationRegex } from 'src/core/server/types';
 import expect from '@kbn/expect';
 import { toEditableConfig } from './to_editable_config';
 
@@ -101,7 +101,7 @@ describe('Settings', function() {
               message: 'must start with "foo"',
             };
             const result = invoke({ def });
-            const validationTyped = result.validation as StringValidation;
+            const validationTyped = result.validation as StringValidationRegex;
             expect(validationTyped.regex).to.be.a(RegExp);
             expect(validationTyped.message).to.equal('must start with "foo"');
           });

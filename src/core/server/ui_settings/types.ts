@@ -130,10 +130,16 @@ export interface UiSettingsParams {
   validation?: ImageValidation | StringValidation;
 }
 
-export interface StringValidation {
-  regex?: RegExp;
+export type StringValidation = StringValidationRegex | StringValidationRegexString;
+
+export interface StringValidationRegex {
+  regex: RegExp;
   message: string;
-  regexString?: string;
+}
+
+export interface StringValidationRegexString {
+  regexString: string;
+  message: string;
 }
 
 export interface ImageValidation {

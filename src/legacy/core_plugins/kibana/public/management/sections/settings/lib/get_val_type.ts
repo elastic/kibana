@@ -23,9 +23,10 @@
  * @returns {string} the type to use for determining the display and editor
  */
 
+import { UiSettingsType } from 'src/core/server/types';
 import { FieldSetting } from '../types';
 
-export function getValType(def: Partial<FieldSetting>, value?: any): string {
+export function getValType(def: Partial<FieldSetting>, value?: any): UiSettingsType {
   if (def.type) {
     return def.type;
   }
@@ -34,5 +35,16 @@ export function getValType(def: Partial<FieldSetting>, value?: any): string {
     return 'array';
   }
 
-  return def.value != null ? typeof def.value : typeof value;
+  const typeofVal = def.value != null ? typeof def.value : typeof value;
+
+  if (
+    typeofVal === 'symbol' ||
+    typeofVal === 'undefined' ||
+    typeofVal === 'object' ||
+    typeofVal === 'function'
+  ) {
+    throw new Error('incompatible UiSettingsType');
+  }
+
+  return typeofVal === 'bigint' ? 'number' : typeofVal;
 }

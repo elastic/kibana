@@ -53,9 +53,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldSetting, StringValidation, ImageValidation } from '../../types';
+import { FieldSetting } from '../../types';
 import { isDefaultValue } from '../../lib';
-import { UiSettingsType } from '../../../../../../../../../core/server/';
+import {
+  UiSettingsType,
+  ImageValidation,
+  StringValidationRegex,
+} from '../../../../../../../../../core/server';
 
 interface FieldProps {
   setting: FieldSetting;
@@ -214,9 +218,9 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     let isInvalid = false;
     let error = null;
 
-    if (validation && (validation as StringValidation).regex) {
-      if (!(validation as StringValidation).regex!.test(newUnsavedValue.toString())) {
-        error = (validation as StringValidation).message;
+    if (validation && (validation as StringValidationRegex).regex) {
+      if (!(validation as StringValidationRegex).regex!.test(newUnsavedValue.toString())) {
+        error = (validation as StringValidationRegex).message;
         isInvalid = true;
       }
     }
