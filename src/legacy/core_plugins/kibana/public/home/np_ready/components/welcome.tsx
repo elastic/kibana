@@ -35,6 +35,7 @@ import {
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../../kibana_services';
 
@@ -64,17 +65,17 @@ export class Welcome extends React.Component<Props> {
   }
 
   private onSampleDataDecline = () => {
-    this.services.trackUiMetric(this.services.METRIC_TYPE.CLICK, 'sampleDataDecline');
+    this.services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataDecline');
     this.props.onSkip();
   };
 
   private onSampleDataConfirm = () => {
-    this.services.trackUiMetric(this.services.METRIC_TYPE.CLICK, 'sampleDataConfirm');
+    this.services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
     this.redirecToSampleData();
   };
 
   componentDidMount() {
-    this.services.trackUiMetric(this.services.METRIC_TYPE.LOADED, 'welcomeScreenMount');
+    this.services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
     this.props.onOptInSeen();
     document.addEventListener('keydown', this.hideOnEsc);
   }
