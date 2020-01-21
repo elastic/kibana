@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { Parser } from 'pegjs';
 
 // @ts-ignore
-import { parse } from '../chain';
+import { parse } from '../_generated_/chain';
 
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 import { ArgValueSuggestions, FunctionArg, Location } from '../helpers/arg_value_suggestions';
