@@ -12,7 +12,13 @@ const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects([
+    'common',
+    'infraHome',
+    'security',
+    'spaceSelector',
+    'settings',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const retry = getService('retry');
@@ -31,7 +37,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
         await esArchiver.load('empty_kibana');
-
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -48,6 +53,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
+        await PageObjects.settings.setNavType('individual');
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Metrics');
       });

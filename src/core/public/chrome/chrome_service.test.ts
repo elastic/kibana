@@ -29,6 +29,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { ChromeService } from './chrome_service';
 import { App } from '../application';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -51,6 +52,7 @@ function defaultStartDeps(availableApps?: App[]) {
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
 
   if (availableApps) {

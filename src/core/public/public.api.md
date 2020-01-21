@@ -26,6 +26,7 @@ export interface App extends AppBase {
 // @public (undocumented)
 export interface AppBase {
     capabilities?: Partial<Capabilities>;
+    category?: AppCategory;
     chromeless?: boolean;
     euiIconType?: string;
     icon?: string;
@@ -38,6 +39,14 @@ export interface AppBase {
     title: string;
     tooltip?: string;
     updater$?: Observable<AppUpdater>;
+}
+
+// @public
+export interface AppCategory {
+    ariaLabel?: string;
+    euiIconType?: string;
+    label: string;
+    order?: number;
 }
 
 // @public
@@ -251,6 +260,7 @@ export interface ChromeNavLink {
     // @deprecated
     readonly active?: boolean;
     readonly baseUrl: string;
+    readonly category?: AppCategory;
     // @deprecated
     readonly disabled?: boolean;
     readonly euiIconType?: string;
@@ -409,6 +419,26 @@ export class CoreSystem {
     // (undocumented)
     stop(): void;
     }
+
+// @internal (undocumented)
+export const DEFAULT_APP_CATEGORIES: Readonly<{
+    analyze: {
+        label: string;
+        order: number;
+    };
+    observability: {
+        label: string;
+        order: number;
+    };
+    security: {
+        label: string;
+        order: number;
+    };
+    management: {
+        label: string;
+        euiIconType: string;
+    };
+}>;
 
 // @public (undocumented)
 export interface DocLinksStart {
@@ -746,6 +776,8 @@ export interface LegacyCoreStart extends CoreStart {
 
 // @public (undocumented)
 export interface LegacyNavLink {
+    // (undocumented)
+    category?: AppCategory;
     // (undocumented)
     euiIconType?: string;
     // (undocumented)

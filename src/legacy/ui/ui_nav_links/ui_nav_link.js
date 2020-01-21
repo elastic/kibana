@@ -31,6 +31,7 @@ export class UiNavLink {
       hidden = false,
       disabled = false,
       tooltip = '',
+      category,
     } = spec;
 
     this._id = id;
@@ -44,6 +45,7 @@ export class UiNavLink {
     this._hidden = hidden;
     this._disabled = disabled;
     this._tooltip = tooltip;
+    this._category = category;
   }
 
   getOrder() {
@@ -63,6 +65,7 @@ export class UiNavLink {
       hidden: this._hidden,
       disabled: this._disabled,
       tooltip: this._tooltip,
+      category: this._category,
     };
   }
 }
