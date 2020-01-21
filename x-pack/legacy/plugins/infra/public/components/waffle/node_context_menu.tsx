@@ -6,6 +6,7 @@
 
 import { EuiPopoverProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import React from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
@@ -15,7 +16,14 @@ import { createUptimeLink } from './lib/create_uptime_link';
 import { findInventoryModel } from '../../../common/inventory_models';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { ActionMenu } from './action_menu';
+import {
+  ActionMenu,
+  Section,
+  SectionTitle,
+  SectionSubtitle,
+  SectionLinks,
+  SectionLink,
+} from './action_menu';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -104,25 +112,52 @@ export const NodeContextMenu = ({
 
   return (
     <ActionMenu
-      sections={[
-        {
-          title: i18n.translate('xpack.infra.nodeContextMenu.title', {
-            defaultMessage: '{inventoryName} details',
-            values: { inventoryName: inventoryModel.singularDisplayName },
-          }),
-          description: i18n.translate('xpack.infra.nodeContextMenu.description', {
-            defaultMessage:
-              'View logs, metrics and traces of this {inventoryName} to get further details',
-            values: { inventoryName: inventoryModel.singularDisplayName },
-          }),
-          links: [nodeLogsMenuItem, nodeDetailMenuItem, apmTracesMenuItem, uptimeMenuItem],
-        },
-      ]}
       closePopover={closePopover}
       id={`${node.pathId}-popover`}
       isOpen={isPopoverOpen}
       button={children}
       anchorPosition={popoverPosition}
-    />
+    >
+      <Section>
+        <SectionTitle>
+          <FormattedMessage
+            id={'xpack.infra.nodeContextMenu.title'}
+            defaultMessage={'{inventoryName} details'}
+            values={{ inventoryName: inventoryModel.singularDisplayName }}
+          />
+        </SectionTitle>
+        <SectionSubtitle>
+          <FormattedMessage
+            id={'xpack.infra.nodeContextMenu.description'}
+            defaultMessage={
+              'View logs, metrics and traces of this {inventoryName} to get further details'
+            }
+            values={{ inventoryName: inventoryModel.singularDisplayName }}
+          />
+        </SectionSubtitle>
+        <SectionLinks>
+          <SectionLink
+            label={nodeLogsMenuItem.label}
+            href={nodeLogsMenuItem.href}
+            isDisabled={nodeLogsMenuItem.isDisabled}
+          />
+          <SectionLink
+            label={nodeDetailMenuItem.label}
+            href={nodeDetailMenuItem.href}
+            isDisabled={nodeDetailMenuItem.isDisabled}
+          />
+          <SectionLink
+            label={apmTracesMenuItem.label}
+            href={apmTracesMenuItem.href}
+            isDisabled={apmTracesMenuItem.isDisabled}
+          />
+          <SectionLink
+            label={uptimeMenuItem.label}
+            href={uptimeMenuItem.href}
+            isDisabled={uptimeMenuItem.isDisabled}
+          />
+        </SectionLinks>
+      </Section>
+    </ActionMenu>
   );
 };

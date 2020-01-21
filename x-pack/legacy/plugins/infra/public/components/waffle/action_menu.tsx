@@ -10,76 +10,47 @@ import {
   EuiListGroup,
   EuiSpacer,
   EuiHorizontalRule,
-  PopoverAnchorPosition,
+  EuiListGroupItem,
+  EuiPopoverProps,
 } from '@elastic/eui';
 
-import React, { useCallback, ReactNode } from 'react';
+import React, { HTMLAttributes } from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 
-interface Props {
-  sections: Section[];
-  otherLinks?: EuiListGroupItemProps[];
+type Props = EuiPopoverProps & HTMLAttributes<HTMLDivElement>;
 
-  button: NonNullable<ReactNode>;
-  anchorPosition?: PopoverAnchorPosition;
-  id?: string;
-  isOpen?: boolean;
-  closePopover(): void;
-}
+export const SectionTitle: React.FC<{}> = props => (
+  <>
+    <EuiText size={'s'} grow={false}>
+      <h5>{props.children}</h5>
+    </EuiText>
+    <EuiSpacer size={'s'} />
+  </>
+);
 
-interface Section {
-  title: string;
-  description: string;
-  links: EuiListGroupItemProps[];
-}
+export const SectionSubtitle: React.FC<{}> = props => (
+  <>
+    <EuiText size={'xs'} color={'subdued'} grow={false}>
+      <small>{props.children}</small>
+    </EuiText>
+    <EuiSpacer size={'s'} />
+  </>
+);
 
-export const ActionMenu = (props: Props) => {
-  const { closePopover, button, anchorPosition, isOpen, id, sections, otherLinks } = props;
+export const SectionLinks: React.FC<{}> = props => (
+  <EuiListGroup flush={true} bordered={false}>
+    {props.children}
+  </EuiListGroup>
+);
 
-  const linkWithDefaults = useCallback((link: EuiListGroupItemProps) => {
-    link.style = { ...link.style, padding: 0 };
-    link.size = link.size || 's';
-    return link;
-  }, []);
+export const SectionSpacer: React.FC<{}> = () => <EuiSpacer size={'l'} />;
 
-  return (
-    <EuiPopover
-      closePopover={closePopover}
-      id={id}
-      isOpen={isOpen}
-      button={button}
-      anchorPosition={anchorPosition}
-    >
-      <>
-        {sections.map((s, idx) => (
-          <React.Fragment key={s.title}>
-            <EuiText size={'s'} grow={false}>
-              <h5>{s.title}</h5>
-            </EuiText>
-            <EuiSpacer size={'s'} />
-            <EuiText size={'xs'} color={'subdued'} grow={false}>
-              <small>{s.description}</small>
-            </EuiText>
-            <EuiSpacer size={'s'} />
-            <EuiListGroup
-              flush={true}
-              bordered={false}
-              listItems={s.links.map(l => linkWithDefaults(l))}
-            />
-            {idx !== sections.length - 1 && <EuiSpacer size={'l'} />}
-          </React.Fragment>
-        ))}
-        {otherLinks?.length && (
-          <div>
-            <EuiHorizontalRule margin={'s'} />
-            <EuiListGroup
-              flush={true}
-              bordered={false}
-              listItems={otherLinks.map(l => linkWithDefaults(l))}
-            />
-          </div>
-        )}
-      </>
-    </EuiPopover>
-  );
-};
+export const Section: React.FC<{}> = props => <>{props.children}</>;
+
+export const SectionLink: React.FC<EuiListGroupItemProps> = props => (
+  <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />
+);
+
+export const ActionMenuDivider: React.FC<{}> = props => <EuiHorizontalRule margin={'s'} />;
+
+export const ActionMenu: React.FC<Props> = props => <EuiPopover {...props} />;
