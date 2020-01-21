@@ -300,7 +300,7 @@ export class HotPhase extends PureComponent {
                           ),
                         },
                         {
-                          value: 'microseconds',
+                          value: 'micros',
                           text: i18n.translate(
                             'xpack.indexLifecycleMgmt.hotPhase.microsecondsLabel',
                             {
@@ -309,7 +309,7 @@ export class HotPhase extends PureComponent {
                           ),
                         },
                         {
-                          value: 'nanoseconds',
+                          value: 'nanos',
                           text: i18n.translate(
                             'xpack.indexLifecycleMgmt.hotPhase.nanosecondsLabel',
                             {
