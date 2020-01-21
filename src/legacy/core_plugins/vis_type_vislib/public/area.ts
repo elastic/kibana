@@ -42,9 +42,9 @@ import { KbnVislibVisTypesDependencies } from './plugin';
 
 export const createAreaVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'area',
-  title: i18n.translate('kbnVislibVisTypes.area.areaTitle', { defaultMessage: 'Area' }),
+  title: i18n.translate('visTypeVislib.area.areaTitle', { defaultMessage: 'Area' }),
   icon: 'visArea',
-  description: i18n.translate('kbnVislibVisTypes.area.areaDescription', {
+  description: i18n.translate('visTypeVislib.area.areaDescription', {
     defaultMessage: 'Emphasize the quantity beneath a line chart',
   }),
   visualization: createVislibVisController(deps),
@@ -136,7 +136,7 @@ export const createAreaVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.area.metricsTitle', {
+        title: i18n.translate('visTypeVislib.area.metricsTitle', {
           defaultMessage: 'Y-axis',
         }),
         aggFilter: ['!geo_centroid', '!geo_bounds'],
@@ -146,7 +146,7 @@ export const createAreaVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('kbnVislibVisTypes.area.radiusTitle', {
+        title: i18n.translate('visTypeVislib.area.radiusTitle', {
           defaultMessage: 'Dot size',
         }),
         min: 0,
@@ -156,7 +156,7 @@ export const createAreaVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.area.segmentTitle', {
+        title: i18n.translate('visTypeVislib.area.segmentTitle', {
           defaultMessage: 'X-axis',
         }),
         min: 0,
@@ -166,7 +166,7 @@ export const createAreaVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.area.groupTitle', {
+        title: i18n.translate('visTypeVislib.area.groupTitle', {
           defaultMessage: 'Split series',
         }),
         min: 0,
@@ -176,7 +176,7 @@ export const createAreaVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.area.splitTitle', {
+        title: i18n.translate('visTypeVislib.area.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,
