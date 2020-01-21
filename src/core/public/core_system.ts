@@ -214,6 +214,7 @@ export class CoreSystem {
       const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup! });
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
+      const fatalErrors = await this.fatalErrors.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
@@ -271,6 +272,7 @@ export class CoreSystem {
         notifications,
         overlays,
         uiSettings,
+        fatalErrors,
       };
 
       const plugins = await this.plugins.start(core);
