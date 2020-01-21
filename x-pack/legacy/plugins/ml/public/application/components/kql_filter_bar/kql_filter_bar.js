@@ -46,12 +46,8 @@ export class KqlFilterBar extends Component {
     const boolFilter = [];
 
     try {
-      const suggestions = await getSuggestions(
-        inputValue,
-        selectionStart,
-        indexPattern,
-        boolFilter
-      );
+      const suggestions =
+        (await getSuggestions(inputValue, selectionStart, indexPattern, boolFilter)) || [];
 
       if (currentRequest !== this.currentRequest) {
         return;

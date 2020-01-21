@@ -18,7 +18,6 @@
  */
 
 import 'ui/collapsible_sidebar'; // used in default editor
-import 'ui/vis/editors/default/sidebar';
 
 import { PluginInitializerContext } from 'kibana/public';
 import {

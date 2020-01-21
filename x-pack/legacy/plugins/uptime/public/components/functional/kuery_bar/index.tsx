@@ -13,10 +13,10 @@ import { Typeahead } from './typeahead';
 import { useUrlParams } from '../../../hooks';
 import { toStaticIndexPattern } from '../../../lib/helper';
 import {
-  AutocompleteProviderRegister,
-  AutocompleteSuggestion,
   esKuery,
   IIndexPattern,
+  autocomplete,
+  DataPublicPluginStart,
 } from '../../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from '../../../hooks';
 
@@ -25,7 +25,7 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: AutocompleteSuggestion[];
+  suggestions: autocomplete.QuerySuggestion[];
   isLoadingIndexPattern: boolean;
 }
 
@@ -34,38 +34,11 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
 
-function getSuggestions(
-  query: string,
-  selectionStart: number,
-  apmIndexPattern: IIndexPattern,
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>
-) {
-  const autocompleteProvider = autocomplete.getProvider('kuery');
-  if (!autocompleteProvider) {
-    return [];
-  }
-  const config = {
-    get: () => true,
-  };
-
-  const getAutocompleteSuggestions = autocompleteProvider({
-    config,
-    indexPatterns: [apmIndexPattern],
-  });
-
-  const suggestions = getAutocompleteSuggestions({
-    query,
-    selectionStart,
-    selectionEnd: selectionStart,
-  });
-  return suggestions;
-}
-
 interface Props {
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+  autocomplete: DataPublicPluginStart['autocomplete'];
 }
 
-export function KueryBar({ autocomplete }: Props) {
+export function KueryBar({ autocomplete: autocompleteService }: Props) {
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingIndexPattern: true,
@@ -99,14 +72,16 @@ export function KueryBar({ autocomplete }: Props) {
     currentRequestCheck = currentRequest;
 
     try {
-      let suggestions = await getSuggestions(
-        inputValue,
-        selectionStart,
-        indexPattern,
-        autocomplete
-      );
-      suggestions = suggestions
-        .filter((suggestion: AutocompleteSuggestion) => !startsWith(suggestion.text, 'span.'))
+      const suggestions = (
+        (await autocompleteService.getQuerySuggestions({
+          language: 'kuery',
+          indexPatterns: [indexPattern],
+          query: inputValue,
+          selectionStart,
+          selectionEnd: selectionStart,
+        })) || []
+      )
+        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {

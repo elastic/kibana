@@ -65,6 +65,6 @@ export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export { IInjector } from 'ui/chrome';
 export { SavedObjectLoader } from 'ui/saved_objects';
-export { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize_embeddable';
+export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
