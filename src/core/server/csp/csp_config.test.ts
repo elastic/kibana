@@ -88,7 +88,7 @@ describe('CspConfig', () => {
     `);
   });
 
-  test(`includes blob: style-src if env specified and it indicates we're running from source`, () => {
+  test(`includes blob: style-src if env indicates we're running from source`, () => {
     const cspConfig = new CspConfig(createMockEnv({ dist: false }));
 
     expect(cspConfig).toMatchInlineSnapshot(`
