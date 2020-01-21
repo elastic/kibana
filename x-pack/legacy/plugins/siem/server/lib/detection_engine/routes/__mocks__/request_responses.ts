@@ -18,9 +18,9 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
-import { RuleAlertParamsRest } from '../../types';
+import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
 
-export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
+export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -51,8 +51,6 @@ export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
   false_positives: [],
   saved_id: 'some-id',
   max_signals: 100,
-  created_at: '2019-12-13T16:40:33.400Z',
-  updated_at: '2019-12-13T16:40:33.400Z',
   timeline_id: 'timeline-id',
   timeline_title: 'timeline-title',
 });
@@ -393,7 +391,7 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
-  isAuthenticated: false,
+  is_authenticated: false,
 });
 
 export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({

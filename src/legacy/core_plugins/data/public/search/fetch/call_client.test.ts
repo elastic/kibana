@@ -76,7 +76,7 @@ describe('callClient', () => {
 
   test('Passes the additional arguments it is given to the search strategy', () => {
     const searchRequests = [{ _searchStrategyId: 0 }];
-    const args = { es: {}, config: {}, esShardTimeout: 0 } as FetchHandlers;
+    const args = { searchService: {}, config: {}, esShardTimeout: 0 } as FetchHandlers;
 
     callClient(searchRequests, [], args);
 

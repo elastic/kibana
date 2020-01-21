@@ -18,7 +18,6 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import {
   createFieldOptions,
-  createScriptFieldOptions,
   createMlcategoryFieldOption,
 } from '../../../../../common/job_creator/util/general';
 import {
@@ -88,7 +87,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
 
-  const usingScriptFields = jobCreator.scriptFields.length > 0;
+  const usingScriptFields = jobCreator.additionalFields.length > 0;
   // list of aggregation combobox options.
 
   const aggOptions: EuiComboBoxOptionProps[] = aggs
@@ -98,12 +97,12 @@ export const AdvancedDetectorModal: FC<Props> = ({
   // fields available for the selected agg
   const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(
     detector.agg,
-    jobCreator.scriptFields
+    jobCreator.additionalFields,
+    fields
   );
 
   const allFieldOptions: EuiComboBoxOptionProps[] = [
-    ...createFieldOptions(fields),
-    ...createScriptFieldOptions(jobCreator.scriptFields),
+    ...createFieldOptions(fields, jobCreator.additionalFields),
   ].sort(comboBoxOptionsSort);
 
   const splitFieldOptions: EuiComboBoxOptionProps[] = [
@@ -127,7 +126,9 @@ export const AdvancedDetectorModal: FC<Props> = ({
       return mlCategory;
     }
     return (
-      fields.find(f => f.id === title) || jobCreator.scriptFields.find(f => f.id === title) || null
+      fields.find(f => f.id === title) ||
+      jobCreator.additionalFields.find(f => f.id === title) ||
+      null
     );
   }
 
@@ -365,21 +366,27 @@ function useDetectorPlaceholder(detector: RichDetector) {
 }
 
 // creates list of combobox options based on an aggregation's field list
-function createFieldOptionsFromAgg(agg: Aggregation | null) {
-  return createFieldOptions(agg !== null && agg.fields !== undefined ? agg.fields : []);
+function createFieldOptionsFromAgg(agg: Aggregation | null, additionalFields: Field[]) {
+  return createFieldOptions(
+    agg !== null && agg.fields !== undefined ? agg.fields : [],
+    additionalFields
+  );
 }
 
 // custom hook for storing combobox options based on an aggregation field list
-function useCurrentFieldOptions(aggregation: Aggregation | null, scriptFields: Field[]) {
+function useCurrentFieldOptions(
+  aggregation: Aggregation | null,
+  additionalFields: Field[],
+  fields: Field[]
+) {
   const [currentFieldOptions, setCurrentFieldOptions] = useState(
-    createFieldOptionsFromAgg(aggregation)
+    createFieldOptionsFromAgg(aggregation, additionalFields)
   );
-  const scriptFieldOptions = createScriptFieldOptions(scriptFields);
 
   return {
     currentFieldOptions,
     setCurrentFieldOptions: (agg: Aggregation | null) =>
-      setCurrentFieldOptions([...createFieldOptionsFromAgg(agg), ...scriptFieldOptions]),
+      setCurrentFieldOptions(createFieldOptionsFromAgg(agg, additionalFields)),
   };
 }
 

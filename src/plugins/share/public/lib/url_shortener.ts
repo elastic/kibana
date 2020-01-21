@@ -19,6 +19,7 @@
 
 import url from 'url';
 import { HttpStart } from 'kibana/public';
+import { CREATE_PATH, getGotoPath } from '../../common/short_url_routes';
 
 export async function shortenUrl(
   absoluteUrl: string,
@@ -34,10 +35,10 @@ export async function shortenUrl(
 
   const body = JSON.stringify({ url: relativeUrl });
 
-  const resp = await post('/api/shorten_url', { body });
+  const resp = await post(CREATE_PATH, { body });
   return url.format({
     protocol: parsedUrl.protocol,
     host: parsedUrl.host,
-    pathname: `${basePath}/goto/${resp.urlId}`,
+    pathname: `${basePath}${getGotoPath(resp.urlId)}`,
   });
 }
