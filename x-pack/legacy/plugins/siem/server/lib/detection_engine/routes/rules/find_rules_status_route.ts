@@ -13,10 +13,16 @@ import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
 import {
   FindRulesStatusesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
+  RuleStatusResponse,
+  IRuleStatusAttributes,
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-const convertToSnakeCase = (obj: IRuleSavedAttributesSavedObjectAttributes) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> | null => {
+  if (!obj) {
+    return null;
+  }
   return Object.keys(obj).reduce((acc, item) => {
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };
@@ -53,7 +59,7 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
             "anotherAlertId": ...
         }
     */
-    const statuses = await query.ids.reduce(async (acc, id) => {
+    const statuses = await query.ids.reduce<Promise<RuleStatusResponse | {}>>(async (acc, id) => {
       const lastFiveErrorsForId = await savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({
@@ -64,15 +70,21 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
         search: id,
         searchFields: ['alertId'],
       });
-      const toDisplay =
-        lastFiveErrorsForId.saved_objects.length <= 5
-          ? lastFiveErrorsForId.saved_objects
-          : lastFiveErrorsForId.saved_objects.slice(1);
+      const accumulated = await acc;
+      const currentStatus = convertToSnakeCase<IRuleStatusAttributes>(
+        lastFiveErrorsForId.saved_objects[0]?.attributes
+      );
+      const failures = lastFiveErrorsForId.saved_objects
+        .slice(1)
+        .map(errorItem => convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes));
       return {
-        ...(await acc),
-        [id]: toDisplay.map(errorItem => convertToSnakeCase(errorItem.attributes)),
+        ...accumulated,
+        [id]: {
+          current_status: currentStatus,
+          failures,
+        },
       };
-    }, {});
+    }, Promise.resolve<RuleStatusResponse>({}));
     return statuses;
   },
 };

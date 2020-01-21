@@ -401,7 +401,7 @@ export async function claimAvailableTasks(
   } else {
     performance.mark('claimAvailableTasks.noAvailableWorkers');
     logger.info(
-      `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers. If this happens often, consider adjusting the "xpack.task_manager.max_workers" configuration.`
+      `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
     );
   }
   return [];
