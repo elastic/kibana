@@ -20,7 +20,8 @@
 import { difference, get, set } from 'lodash';
 // @ts-ignore
 import { getTransform } from '../../../../legacy/deprecation/index';
-import { unset, getFlattenedObject } from '../../../../legacy/utils';
+import { unset } from '../../../../legacy/utils';
+import { getFlattenedObject } from '../../../utils';
 import { hasConfigPathIntersection } from '../../config';
 import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
 
