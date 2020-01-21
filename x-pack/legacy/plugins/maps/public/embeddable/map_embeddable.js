@@ -32,11 +32,12 @@ import {
   hideToolbarOverlay,
   hideLayerControl,
   hideViewControl,
+  setHiddenLayers,
 } from '../actions/map_actions';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { getInspectorAdapters, setEventHandlers } from '../reducers/non_serializable_instances';
-import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
+import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export class MapEmbeddable extends Embeddable {
@@ -153,6 +154,9 @@ export class MapEmbeddable extends Embeddable {
     }
 
     this._store.dispatch(replaceLayerList(this._layerList));
+    if (this.input.hiddenLayers) {
+      this._store.dispatch(setHiddenLayers(this.input.hiddenLayers));
+    }
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
 
@@ -242,6 +246,14 @@ export class MapEmbeddable extends Embeddable {
     if (!_.isEqual(this.input.openTOCDetails, openTOCDetails)) {
       this.updateInput({
         openTOCDetails,
+      });
+    }
+
+    const hiddenLayerIds = getHiddenLayerIds(this._store.getState());
+
+    if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
+      this.updateInput({
+        hiddenLayers: hiddenLayerIds,
       });
     }
   }

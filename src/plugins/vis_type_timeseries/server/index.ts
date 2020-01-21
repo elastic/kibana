@@ -30,6 +30,8 @@ export const config = {
 
 export type VisTypeTimeseriesConfig = TypeOf<typeof config.schema>;
 
+export { ValidationTelemetryServiceSetup } from './validation_telemetry';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeTimeseriesPlugin(initializerContext);
 }

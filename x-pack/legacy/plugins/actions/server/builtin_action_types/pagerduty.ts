@@ -96,7 +96,9 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.pagerduty',
-    name: 'pagerduty',
+    name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
+      defaultMessage: 'PagerDuty',
+    }),
     validate: {
       config: schema.object(configSchemaProps, {
         validate: curry(valdiateActionTypeConfig)(configurationUtilities),

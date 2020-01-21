@@ -38,7 +38,7 @@ export const ShardDetails = ({ index, shard, operations }: Props) => {
         <EuiFlexItem grow={false} className="prfDevTool__profileTree__shard__header-flex-item">
           <EuiText className="prfDevTool__shardDetails--dim">
             <PercentageBadge
-              timePercentage={relative as number}
+              timePercentage={String(relative)}
               label={msToPretty(time as number, 3)}
               valueType={'time'}
             />

@@ -59,7 +59,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         return filters.length > 0 ? [...filters, ...filterAlertsNetwork] : filterAlertsNetwork;
       }
       return filters;
-    }, [tabName]);
+    }, [tabName, filters]);
+
     const narrowDateRange = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
@@ -132,14 +133,14 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                       <EuiSpacer />
 
                       <NetworkRoutes
-                        to={to}
                         filterQuery={filterQuery}
-                        isInitializing={isInitializing}
                         from={from}
-                        type={networkModel.NetworkType.page}
+                        isInitializing={isInitializing}
                         indexPattern={indexPattern}
                         setQuery={setQuery}
                         setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                        type={networkModel.NetworkType.page}
+                        to={to}
                         networkPagePath={networkPagePath}
                       />
                     </>

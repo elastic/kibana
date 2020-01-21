@@ -168,6 +168,7 @@ describe('<WatchEdit />', () => {
         });
 
         const latestRequest = server.requests[server.requests.length - 1];
+
         const {
           id,
           type,
@@ -194,9 +195,11 @@ describe('<WatchEdit />', () => {
             triggerIntervalUnit,
             aggType,
             termSize,
+            termOrder: 'desc',
             thresholdComparator,
             timeWindowSize,
             timeWindowUnit,
+            hasTermsAgg: false,
             threshold: threshold && threshold[0],
           })
         );

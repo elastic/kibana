@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 import { ExecutorError } from './executor_error';
 import { ActionExecutor } from './action_executor';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '../../../../../plugins/task_manager/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
@@ -16,6 +16,7 @@ import {
   savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
+import { createEventLoggerMock } from '../../../../../plugins/event_log/server/event_logger.mock';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -62,6 +63,7 @@ const actionExecutorInitializerParams = {
   actionTypeRegistry,
   spaces: () => undefined,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
+  eventLogger: createEventLoggerMock(),
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,

@@ -19,14 +19,15 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
 
-import { TopNavMenu, WelcomePanel, HelpPanel } from '../../components';
+import { TopNavMenu, WelcomePanel, HelpPanel, SomethingWentWrongCallout } from '../../components';
 
 import { useServicesContext, useEditorReadContext } from '../../contexts';
+import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
 
@@ -48,6 +49,15 @@ export function Main() {
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
   };
+  const { done, error, retry } = useDataInit();
+
+  if (error) {
+    return (
+      <EuiPageContent>
+        <SomethingWentWrongCallout onButtonClick={retry} error={error} />
+      </EuiPageContent>
+    );
+  }
 
   return (
     <div id="consoleRoot">
@@ -66,6 +76,7 @@ export function Main() {
             </h1>
           </EuiTitle>
           <TopNavMenu
+            disabled={!done}
             items={getTopNavConfig({
               onClickHistory: () => setShowHistory(!showingHistory),
               onClickSettings: () => setShowSettings(true),
@@ -75,11 +86,11 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor />
+          <Editor loading={!done} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {showWelcome ? (
+      {done && showWelcome ? (
         <WelcomePanel
           onDismiss={() => {
             storage.set('version_welcome_shown', '@@SENSE_REVISION');

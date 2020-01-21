@@ -25,13 +25,15 @@ const RuleStatusIconStyled = styled.div`
   }
 `;
 
-export const RuleStatusIcon = memo<RuleStatusIconProps>(({ name, type }) => {
+const RuleStatusIconComponent: React.FC<RuleStatusIconProps> = ({ name, type }) => {
   const theme = useEuiTheme();
-  const color = type === 'passive' ? theme.euiColorLightestShade : theme.euiColorDarkestShade;
+  const color = type === 'passive' ? theme.euiColorLightestShade : theme.euiColorPrimary;
   return (
     <RuleStatusIconStyled>
       <EuiAvatar color={color} name={type === 'valid' ? '' : name} size="l" />
       {type === 'valid' ? <EuiIcon type="check" color={theme.euiColorEmptyShade} size="l" /> : null}
     </RuleStatusIconStyled>
   );
-});
+};
+
+export const RuleStatusIcon = memo(RuleStatusIconComponent);

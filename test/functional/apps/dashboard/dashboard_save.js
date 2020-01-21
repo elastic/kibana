@@ -19,8 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
+  const listingTable = getService('listingTable');
 
   describe('dashboard save', function describeIndexTests() {
     this.tags('smoke');
@@ -47,8 +48,10 @@ export default function({ getPageObjects }) {
 
     it('does not save on reject confirmation', async function() {
       await PageObjects.dashboard.cancelSave();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
         dashboardName
       );
       expect(countOfDashboards).to.equal(1);
@@ -68,15 +71,17 @@ export default function({ getPageObjects }) {
       // wait till it finishes reloading or it might reload the url after simulating the
       // dashboard landing page click.
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
         dashboardName
       );
       expect(countOfDashboards).to.equal(2);
     });
 
     it('Does not warn when you save an existing dashboard with the title it already has, and that title is a duplicate', async function() {
-      await PageObjects.dashboard.selectDashboard(dashboardName);
+      await listingTable.clickItemLink('dashboard', dashboardName);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.saveDashboard(dashboardName);
@@ -121,8 +126,10 @@ export default function({ getPageObjects }) {
       // wait till it finishes reloading or it might reload the url after simulating the
       // dashboard landing page click.
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(
+      const countOfDashboards = await listingTable.searchAndGetItemsCount(
+        'dashboard',
         dashboardNameEnterKey
       );
       expect(countOfDashboards).to.equal(1);

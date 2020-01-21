@@ -7,6 +7,6 @@
   "bounds": [-180, -85.0511, 180, 85.0511],
   "format": "png",
   "type": "baselayer",
-  "tiles": ["https://raster-style.foobar/styles/osm-bright-desaturated/{z}/{x}/{y}.png"],
+  "tiles": ["/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png"],
   "center": [0, 0, 2]
 }

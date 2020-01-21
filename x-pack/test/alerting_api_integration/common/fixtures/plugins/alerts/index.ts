@@ -63,7 +63,7 @@ export default function(kibana: any) {
           }),
         },
         async executor({ config, secrets, params, services }: ActionTypeExecutorOptions) {
-          return await services.callCluster('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -97,7 +97,7 @@ export default function(kibana: any) {
               source: 'action:test.failing',
             },
           });
-          throw new Error('Failed to execute action type');
+          throw new Error(`expected failure for ${params.index} ${params.reference}`);
         },
       };
       const rateLimitedActionType: ActionType = {
@@ -202,8 +202,21 @@ export default function(kibana: any) {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
         actionGroups: ['default', 'other'],
-        async executor({ services, params, state }: AlertExecutorOptions) {
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const {
+            services,
+            params,
+            state,
+            alertId,
+            spaceId,
+            namespace,
+            name,
+            tags,
+            createdBy,
+            updatedBy,
+          } = alertExecutorOptions;
           let group = 'default';
+          const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
           if (params.groupsToScheduleActionsInSeries) {
             const index = state.groupInSeriesIndex || 0;
@@ -226,6 +239,7 @@ export default function(kibana: any) {
               params,
               reference: params.reference,
               source: 'alert:test.always-firing',
+              alertInfo,
             },
           });
           return {

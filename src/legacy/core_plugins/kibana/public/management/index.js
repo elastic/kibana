@@ -28,7 +28,8 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { ManagementSidebarNav } from '../../../../../plugins/management/public';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,
@@ -42,6 +43,7 @@ import {
   EuiIcon,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
@@ -72,7 +74,7 @@ export function updateLandingPage(version) {
               <h1>
                 <FormattedMessage
                   id="kbn.management.landing.header"
-                  defaultMessage="Kibana {version} management"
+                  defaultMessage="Welcome to Stack Management {version}"
                   values={{ version }}
                 />
               </h1>
@@ -91,7 +93,7 @@ export function updateLandingPage(version) {
             <p>
               <FormattedMessage
                 id="kbn.management.landing.text"
-                defaultMessage="A full list of tools can be found in the left menu"
+                defaultMessage="A complete list of apps is in the menu on the left."
               />
             </p>
           </EuiText>
@@ -102,7 +104,7 @@ export function updateLandingPage(version) {
   );
 }
 
-export function updateSidebar(items, id) {
+export function updateSidebar(legacySections, id) {
   const node = document.getElementById(SIDENAV_ID);
   if (!node) {
     return;
@@ -110,7 +112,12 @@ export function updateSidebar(items, id) {
 
   render(
     <I18nContext>
-      <SidebarNav sections={items} selectedId={id} className="mgtSideNav" />
+      <ManagementSidebarNav
+        getSections={npStart.plugins.management.sections.getSectionsEnabled}
+        legacySections={legacySections}
+        selectedId={id}
+        className="mgtSideNav"
+      />
     </I18nContext>,
     node
   );
@@ -166,11 +173,11 @@ uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnV
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
-    id: 'management',
-    title: i18n.translate('kbn.management.managementLabel', {
-      defaultMessage: 'Management',
+    id: 'stack-management',
+    title: i18n.translate('kbn.stackManagement.managementLabel', {
+      defaultMessage: 'Stack Management',
     }),
-    description: i18n.translate('kbn.management.managementDescription', {
+    description: i18n.translate('kbn.stackManagement.managementDescription', {
       defaultMessage: 'Your center console for managing the Elastic Stack.',
     }),
     icon: 'managementApp',

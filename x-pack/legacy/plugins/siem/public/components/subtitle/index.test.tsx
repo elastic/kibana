@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -15,7 +14,7 @@ describe('Subtitle', () => {
   test('it renders', () => {
     const wrapper = shallow(<Subtitle items="Test subtitle" />);
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders one subtitle string item', () => {

@@ -7,8 +7,9 @@
 import { defaults } from 'lodash/fp';
 import { AlertAction, IntervalSchedule } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
-import { UpdateRuleParams } from './types';
+import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';
+import { ruleStatusSavedObjectType } from './saved_object_mappings';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -66,6 +67,7 @@ export const calculateName = ({
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
+  savedObjectsClient,
   description,
   falsePositives,
   enabled,
@@ -74,6 +76,7 @@ export const updateRules = async ({
   outputIndex,
   savedId,
   timelineId,
+  timelineTitle,
   meta,
   filters,
   from,
@@ -118,6 +121,7 @@ export const updateRules = async ({
       outputIndex,
       savedId,
       timelineId,
+      timelineTitle,
       meta,
       filters,
       index,
@@ -133,10 +137,39 @@ export const updateRules = async ({
     }
   );
 
+  const ruleCurrentStatus = savedObjectsClient
+    ? await savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
+        type: ruleStatusSavedObjectType,
+        perPage: 1,
+        sortField: 'statusDate',
+        sortOrder: 'desc',
+        search: rule.id,
+        searchFields: ['alertId'],
+      })
+    : null;
+
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
+    // set current status for this rule to null to represent disabled,
+    // but keep last_success_at / last_failure_at properties intact for
+    // use on frontend while rule is disabled.
+    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
+      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
+      currentStatusToDisable.attributes.status = null;
+      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+        ...currentStatusToDisable.attributes,
+      });
+    }
   } else if (!rule.enabled && enabled === true) {
     await alertsClient.enable({ id: rule.id });
+    // set current status for this rule to be 'going to run'
+    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
+      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
+      currentStatusToDisable.attributes.status = 'going to run';
+      await savedObjectsClient?.update(ruleStatusSavedObjectType, currentStatusToDisable.id, {
+        ...currentStatusToDisable.attributes,
+      });
+    }
   } else {
     // enabled is null or undefined and we do not touch the rule
   }

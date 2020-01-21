@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Alert } from '../../../../../alerting/server/types';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
-import { RuleAlertType, ReadRuleParams, isAlertType } from './types';
+import { ReadRuleParams, isAlertType } from './types';
 
 /**
  * This reads the rules through a cascade try of what is fastest to what is slowest.
@@ -20,7 +21,7 @@ export const readRules = async ({
   alertsClient,
   id,
   ruleId,
-}: ReadRuleParams): Promise<RuleAlertType | null> => {
+}: ReadRuleParams): Promise<Alert | null> => {
   if (id != null) {
     try {
       const rule = await alertsClient.get({ id });

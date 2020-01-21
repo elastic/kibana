@@ -7,6 +7,7 @@ import { get, isEmpty, noop } from 'lodash/fp';
 
 import { BrowserFields } from '../../../containers/source';
 import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
+import { EventType } from '../../../store/timeline/model';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ColumnHeader } from './column_headers/column_header';
 import * as i18n from './translations';
@@ -125,4 +126,12 @@ export const getEventIdToDataMapping = (
       ...fvm,
     };
   }, {});
+};
+
+/** Return eventType raw or signal */
+export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
+  if (!isEmpty(event.signal?.rule?.id)) {
+    return 'signal';
+  }
+  return 'raw';
 };

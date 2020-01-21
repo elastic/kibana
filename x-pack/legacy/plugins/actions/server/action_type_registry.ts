@@ -6,11 +6,11 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { TaskManagerSetupContract } from './shim';
-import { RunContext } from '../../task_manager/server';
+import { RunContext, TaskManagerSetupContract } from '../../../../plugins/task_manager/server';
 import { ExecutorError, TaskRunnerFactory } from './lib';
 import { ActionType } from './types';
 import { ActionsConfigurationUtilities } from './actions_config';
+
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;

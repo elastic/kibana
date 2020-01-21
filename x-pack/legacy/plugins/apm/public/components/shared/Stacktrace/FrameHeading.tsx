@@ -35,9 +35,13 @@ const FrameHeading: React.FC<Props> = ({ stackframe, isLibraryFrame }) => {
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
   const lineNumber = stackframe.line.number;
+
+  const name =
+    'filename' in stackframe ? stackframe.filename : stackframe.classname;
+
   return (
     <FileDetails>
-      <FileDetail>{stackframe.filename}</FileDetail> in{' '}
+      <FileDetail>{name}</FileDetail> in{' '}
       <FileDetail>{stackframe.function}</FileDetail>
       {lineNumber > 0 && (
         <Fragment>

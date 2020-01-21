@@ -11,7 +11,7 @@ import { identity } from 'fp-ts/lib/function';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { InfraMetricsRequestOptions } from '../../lib/adapters/metrics';
-import { InfraNodeType, InfraMetric } from '../../graphql/types';
+
 import {
   NodeDetailsRequestRT,
   NodeDetailsMetricDataResponseRT,
@@ -46,9 +46,9 @@ export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
             nodeId,
             cloudId,
           },
-          nodeType: nodeType as InfraNodeType,
+          nodeType,
           sourceConfiguration: source.configuration,
-          metrics: metrics as InfraMetric[],
+          metrics,
           timerange,
         };
         return response.ok({

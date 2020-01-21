@@ -3,7 +3,6 @@
 exports[`FullTimeRangeSelector renders the selector 1`] = `
 <EuiButton
   data-test-subj="mlButtonUseFullData"
-  fill={true}
   isDisabled={false}
   onClick={[Function]}
 >

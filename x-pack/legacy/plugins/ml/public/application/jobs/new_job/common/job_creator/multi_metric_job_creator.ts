@@ -92,12 +92,11 @@ export class MultiMetricJobCreator extends JobCreator {
       // not split field, use the default
       this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
     } else {
-      const fieldNames = this._detectors.map(d => d.field_name).filter(fn => fn !== undefined);
       const { modelMemoryLimit } = await ml.calculateModelMemoryLimit({
         indexPattern: this._indexPatternTitle,
         splitFieldName: this._splitField.name,
         query: this._datafeed_config.query,
-        fieldNames,
+        fieldNames: this.fields.map(f => f.id),
         influencerNames: this._influencers,
         timeFieldName: this._job_config.data_description.time_field,
         earliestMs: this._start,
@@ -154,7 +153,7 @@ export class MultiMetricJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
-    const detectors = getRichDetectors(job, datafeed, this.scriptFields, false);
+    const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
 
     if (datafeed.aggregations !== undefined) {
       // if we've converting from a single metric job,

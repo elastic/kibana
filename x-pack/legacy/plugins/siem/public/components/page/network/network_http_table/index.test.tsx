@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -51,7 +50,7 @@ describe('NetworkHttp Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper.find('Connect(NetworkHttpTableComponent)'))).toMatchSnapshot();
+      expect(wrapper.find('Connect(NetworkHttpTableComponent)')).toMatchSnapshot();
     });
   });
 

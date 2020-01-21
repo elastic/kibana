@@ -19,12 +19,14 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { npStart } from 'ui/new_platform';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
 
 import { toastNotifications } from 'ui/notify';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCode,
@@ -41,6 +43,7 @@ import {
   EuiImage,
   EuiLink,
   EuiSpacer,
+  EuiToolTip,
   EuiText,
   EuiSelect,
   EuiSwitch,
@@ -224,7 +227,7 @@ export class Field extends PureComponent {
     }
 
     const file = files[0];
-    const { maxSize } = this.props.setting.options;
+    const { maxSize } = this.props.setting.validation;
     try {
       const base64Image = await this.getImageAsBase64(file);
       const isInvalid = !!(maxSize && maxSize.length && base64Image.length > maxSize.length);
@@ -565,6 +568,36 @@ export class Field extends PureComponent {
 
   renderDescription(setting) {
     let description;
+    let deprecation;
+
+    if (setting.deprecation) {
+      const { links } = npStart.core.docLinks;
+
+      deprecation = (
+        <>
+          <EuiToolTip content={setting.deprecation.message}>
+            <EuiBadge
+              color="warning"
+              onClick={() => {
+                window.open(links.management[setting.deprecation.docLinksKey], '_blank');
+              }}
+              onClickAriaLabel={i18n.translate(
+                'kbn.management.settings.field.deprecationClickAreaLabel',
+                {
+                  defaultMessage: 'Click to view deprecation documentation for {settingName}.',
+                  values: {
+                    settingName: setting.name,
+                  },
+                }
+              )}
+            >
+              Deprecated
+            </EuiBadge>
+          </EuiToolTip>
+          <EuiSpacer size="s" />
+        </>
+      );
+    }
 
     if (React.isValidElement(setting.description)) {
       description = setting.description;
@@ -582,6 +615,7 @@ export class Field extends PureComponent {
 
     return (
       <Fragment>
+        {deprecation}
         {description}
         {this.renderDefaultValue(setting)}
       </Fragment>

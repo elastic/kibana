@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EXPLORER_ACTION, VIEW_BY_JOB_LABEL } from '../../explorer_constants';
+import { VIEW_BY_JOB_LABEL } from '../../explorer_constants';
 import { ActionPayload } from '../../explorer_dashboard_service';
-
-import { appStateReducer } from '../app_state_reducer';
 
 import { ExplorerState } from './state';
 
@@ -43,21 +41,8 @@ export function setInfluencerFilterSettings(
     }
   }
 
-  const appState = appStateReducer(state.appState, {
-    type: EXPLORER_ACTION.APP_STATE_SAVE_INFLUENCER_FILTER_SETTINGS,
-    payload: {
-      influencersFilterQuery,
-      filterActive: true,
-      filteredFields,
-      queryString,
-      tableQueryString,
-      isAndOperator,
-    },
-  });
-
   return {
     ...state,
-    appState,
     filterActive: true,
     filteredFields,
     influencersFilterQuery,

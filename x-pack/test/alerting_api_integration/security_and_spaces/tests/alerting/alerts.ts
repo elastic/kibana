@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../scenarios';
+import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   ESTestIndexTool,
@@ -96,7 +96,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference);
-              await alertUtils.disable(response.body.id);
+
+              const alertId = response.body.id;
+              await alertUtils.disable(alertId);
               await taskManagerUtils.waitForIdle(testStart);
 
               // Ensure only 1 alert executed with proper params
@@ -112,6 +114,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
+                },
+                alertInfo: {
+                  alertId,
+                  spaceId: space.id,
+                  namespace: space.id,
+                  name: 'abc',
+                  tags: [],
+                  createdBy: user.fullName,
+                  updatedBy: user.fullName,
                 },
               });
 
@@ -140,6 +151,56 @@ export default function alertTests({ getService }: FtrProviderContext) {
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
+        });
+
+        it('should pass updated alert params to executor', async () => {
+          // create an alert
+          const reference = alertUtils.generateReference();
+          const overwrites = {
+            throttle: '1s',
+            schedule: { interval: '1s' },
+          };
+          const response = await alertUtils.createAlwaysFiringAction({ reference, overwrites });
+
+          // only need to test creation success paths
+          if (response.statusCode !== 200) return;
+
+          // update the alert with super user
+          const alertId = response.body.id;
+          const reference2 = alertUtils.generateReference();
+          const response2 = await alertUtils.updateAlwaysFiringAction({
+            alertId,
+            actionId: indexRecordActionId,
+            user: Superuser,
+            reference: reference2,
+            overwrites: {
+              name: 'def',
+              tags: ['fee', 'fi', 'fo'],
+              throttle: '1s',
+              schedule: { interval: '1s' },
+            },
+          });
+
+          expect(response2.statusCode).to.eql(200);
+
+          // make sure alert info passed to executor is correct
+          await esTestIndexTool.waitForDocs('alert:test.always-firing', reference2);
+          await alertUtils.disable(alertId);
+          const alertSearchResult = await esTestIndexTool.search(
+            'alert:test.always-firing',
+            reference2
+          );
+
+          expect(alertSearchResult.hits.total.value).to.be.greaterThan(0);
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo).to.eql({
+            alertId,
+            spaceId: space.id,
+            namespace: space.id,
+            name: 'def',
+            tags: ['fee', 'fi', 'fo'],
+            createdBy: user.fullName,
+            updatedBy: Superuser.fullName,
+          });
         });
 
         it('should handle custom retry logic when appropriate', async () => {
@@ -601,16 +662,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           }
         });
 
-        /**
-         * Skipping due to an issue we've discovered in the `muteAll` api
-         * which corrupts the apiKey and causes this test to exhibit flaky behaviour.
-         * Failed CIs for example:
-         * 1. https://github.com/elastic/kibana/issues/53690
-         * 2. https://github.com/elastic/kibana/issues/53683
-         *
-         * This will be fixed and reverted in PR: https://github.com/elastic/kibana/pull/53333
-         */
-        it.skip(`shouldn't schedule actions when alert is muted`, async () => {
+        it(`shouldn't schedule actions when alert is muted`, async () => {
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({

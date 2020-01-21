@@ -35,8 +35,8 @@ import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
-
 import {
+  VISUALIZE_EMBEDDABLE_TYPE,
   subscribeWithScope,
   absoluteToParsedUrl,
   KibanaParsedUrl,
@@ -114,6 +114,11 @@ function VisualizeAppController(
 
   const $appStatus = (this.appStatus = {
     dirty: !savedVis.id,
+  });
+
+  vis.on('dirtyStateChange', ({ isDirty }) => {
+    vis.dirty = isDirty;
+    $scope.$digest();
   });
 
   $scope.topNavMenu = [
@@ -357,7 +362,10 @@ function VisualizeAppController(
     };
 
     $scope.showQueryBarTimePicker = () => {
-      return vis.type.options.showTimePicker;
+      // tsvb loads without an indexPattern initially (TODO investigate).
+      // hide timefilter only if timeFieldName is explicitly undefined.
+      const hasTimeField = $scope.indexPattern ? !!$scope.indexPattern.timeFieldName : true;
+      return vis.type.options.showTimePicker && hasTimeField;
     };
 
     $scope.timeRange = timefilter.getTime();
@@ -493,7 +501,7 @@ function VisualizeAppController(
       language:
         localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
     };
-    queryFilter.removeAll();
+    queryFilter.setFilters(queryFilter.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };
@@ -502,7 +510,9 @@ function VisualizeAppController(
     $state.query = savedQuery.attributes.query;
     $state.save();
 
-    queryFilter.setFilters(savedQuery.attributes.filters || []);
+    const savedQueryFilters = savedQuery.attributes.filters || [];
+    const globalFilters = queryFilter.getGlobalFilters();
+    queryFilter.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({
@@ -588,7 +598,11 @@ function VisualizeAppController(
                 getBasePath()
               );
               dashboardParsedUrl.addQueryParameter(
-                DashboardConstants.NEW_VISUALIZATION_ID_PARAM,
+                DashboardConstants.ADD_EMBEDDABLE_TYPE,
+                VISUALIZE_EMBEDDABLE_TYPE
+              );
+              dashboardParsedUrl.addQueryParameter(
+                DashboardConstants.ADD_EMBEDDABLE_ID,
                 savedVis.id
               );
               kbnUrl.change(dashboardParsedUrl.appPath);

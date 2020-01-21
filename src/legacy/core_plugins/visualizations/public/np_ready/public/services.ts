@@ -17,12 +17,40 @@
  * under the License.
  */
 
-import { I18nStart, IUiSettingsClient } from 'src/core/public';
+import {
+  Capabilities,
+  HttpStart,
+  I18nStart,
+  IUiSettingsClient,
+  SavedObjectsStart,
+} from 'src/core/public';
 import { TypesStart } from './types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
+import { FilterManager, IndexPatternsContract } from '../../../../../../plugins/data/public';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
+export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
+
+export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
+
+export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjects'
+);
 
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
+
+export const [getFilterManager, setFilterManager] = createGetterSetter<FilterManager>(
+  'FilterManager'
+);
+
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
+  'IndexPatterns'
+);
+
+export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionSetup>(
+  'UsageCollection'
+);

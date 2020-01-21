@@ -51,33 +51,33 @@ const defaultAlertsFilters: esFilters.Filter[] = [
   },
 ];
 
-export const AlertsTable = React.memo(
-  ({
-    endDate,
-    startDate,
-    pageFilters = [],
-  }: {
-    endDate: number;
-    startDate: number;
-    pageFilters?: esFilters.Filter[];
-  }) => {
-    const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
-    return (
-      <StatefulEventsViewer
-        pageFilters={alertsFilter}
-        defaultModel={alertsDefaultModel}
-        end={endDate}
-        id={ALERTS_TABLE_ID}
-        start={startDate}
-        timelineTypeContext={useMemo(
-          () => ({
-            documentType: i18n.ALERTS_DOCUMENT_TYPE,
-            footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-            title: i18n.ALERTS_TABLE_TITLE,
-          }),
-          []
-        )}
-      />
-    );
-  }
-);
+interface Props {
+  endDate: number;
+  startDate: number;
+  pageFilters?: esFilters.Filter[];
+}
+
+const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters = [] }) => {
+  const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
+  const timelineTypeContext = useMemo(
+    () => ({
+      documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+      title: i18n.ALERTS_TABLE_TITLE,
+    }),
+    []
+  );
+
+  return (
+    <StatefulEventsViewer
+      pageFilters={alertsFilter}
+      defaultModel={alertsDefaultModel}
+      end={endDate}
+      id={ALERTS_TABLE_ID}
+      start={startDate}
+      timelineTypeContext={timelineTypeContext}
+    />
+  );
+};
+
+export const AlertsTable = React.memo(AlertsTableComponent);

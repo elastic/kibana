@@ -25,13 +25,16 @@ import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
+import { SourceLoadingPage } from '../source_loading_page';
 
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
+  displaySettings: 'metrics' | 'logs';
 }
 
 export const SourceConfigurationSettings = ({
   shouldAllowEdit,
+  displaySettings,
 }: SourceConfigurationSettingsProps) => {
   const {
     createSourceConfiguration,
@@ -80,7 +83,10 @@ export const SourceConfigurationSettings = ({
     source,
   ]);
 
-  if (!source || !source.configuration) {
+  if (!source) {
+    return <SourceLoadingPage />;
+  }
+  if (!source.configuration) {
     return null;
   }
 
@@ -112,6 +118,7 @@ export const SourceConfigurationSettings = ({
               logAliasFieldProps={indicesConfigurationProps.logAlias}
               metricAliasFieldProps={indicesConfigurationProps.metricAlias}
               readOnly={!isWriteable}
+              displaySettings={displaySettings}
             />
           </EuiPanel>
           <EuiSpacer />
@@ -124,18 +131,21 @@ export const SourceConfigurationSettings = ({
               readOnly={!isWriteable}
               tiebreakerFieldProps={indicesConfigurationProps.tiebreakerField}
               timestampFieldProps={indicesConfigurationProps.timestampField}
+              displaySettings={displaySettings}
             />
           </EuiPanel>
           <EuiSpacer />
-          <EuiPanel paddingSize="l">
-            <LogColumnsConfigurationPanel
-              addLogColumn={addLogColumn}
-              moveLogColumn={moveLogColumn}
-              availableFields={availableFields}
-              isLoading={isLoading}
-              logColumnConfiguration={logColumnConfigurationProps}
-            />
-          </EuiPanel>
+          {displaySettings === 'logs' && (
+            <EuiPanel paddingSize="l">
+              <LogColumnsConfigurationPanel
+                addLogColumn={addLogColumn}
+                moveLogColumn={moveLogColumn}
+                availableFields={availableFields}
+                isLoading={isLoading}
+                logColumnConfiguration={logColumnConfigurationProps}
+              />
+            </EuiPanel>
+          )}
           {errors.length > 0 ? (
             <>
               <EuiCallOut color="danger">

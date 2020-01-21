@@ -16,6 +16,7 @@ import { getOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
 import * as i18n from './translations';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 
 const Wrapper = styled.header`
   ${({ theme }) => css`
@@ -47,14 +48,25 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
           </FlexItem>
 
           <FlexItem component="nav">
-            <SiemNavigation
-              display="condensed"
-              navTabs={
-                hideDetectionEngine
-                  ? pickBy((value, key) => key !== SiemPageName.detectionEngine, navTabs)
-                  : navTabs
+            <WithSource sourceId="default">
+              {({ indicesExist }) =>
+                indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+                  <SiemNavigation
+                    display="condensed"
+                    navTabs={
+                      hideDetectionEngine
+                        ? pickBy((_, key) => key !== SiemPageName.detections, navTabs)
+                        : navTabs
+                    }
+                  />
+                ) : (
+                  <SiemNavigation
+                    display="condensed"
+                    navTabs={pickBy((_, key) => key === SiemPageName.overview, navTabs)}
+                  />
+                )
               }
-            />
+            </WithSource>
           </FlexItem>
         </EuiFlexGroup>
       </FlexItem>

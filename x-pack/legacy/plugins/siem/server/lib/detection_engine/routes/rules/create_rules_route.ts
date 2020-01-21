@@ -10,10 +10,11 @@ import Boom from 'boom';
 import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
-import { RulesRequest } from '../../rules/types';
+import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { createRulesSchema } from '../schemas/create_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformOrError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { callWithRequestFactory, getIndex, transformError } from '../utils';
@@ -38,12 +39,12 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         enabled,
         false_positives: falsePositives,
         from,
-        immutable,
         query,
         language,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
+        timeline_title: timelineTitle,
         meta,
         filters,
         rule_id: ruleId,
@@ -64,8 +65,10 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -74,17 +77,14 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, finalIndex);
         if (!indexExists) {
-          return new Boom(
-            `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-            {
-              statusCode: 400,
-            }
+          return Boom.badRequest(
+            `To create a rule, the index must exist first. Index ${finalIndex} does not exist`
           );
         }
         if (ruleId != null) {
           const rule = await readRules({ alertsClient, ruleId });
           if (rule != null) {
-            return new Boom(`rule_id: "${ruleId}" already exists`, { statusCode: 409 });
+            return Boom.conflict(`rule_id: "${ruleId}" already exists`);
           }
         }
         const createdRule = await createRules({
@@ -95,12 +95,13 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           enabled,
           falsePositives,
           from,
-          immutable,
+          immutable: false,
           query,
           language,
           outputIndex: finalIndex,
           savedId,
           timelineId,
+          timelineTitle,
           meta,
           filters,
           ruleId: ruleId != null ? ruleId : uuid.v4(),
@@ -118,7 +119,17 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           references,
           version: 1,
         });
-        return transformOrError(createdRule);
+        const ruleStatuses = await savedObjectsClient.find<
+          IRuleSavedAttributesSavedObjectAttributes
+        >({
+          type: ruleStatusSavedObjectType,
+          perPage: 1,
+          sortField: 'statusDate',
+          sortOrder: 'desc',
+          search: `${createdRule.id}`,
+          searchFields: ['alertId'],
+        });
+        return transformOrError(createdRule, ruleStatuses.saved_objects[0]);
       } catch (err) {
         return transformError(err);
       }

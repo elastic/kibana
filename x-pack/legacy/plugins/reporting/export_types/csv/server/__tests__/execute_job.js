@@ -590,8 +590,7 @@ describe('CSV Execute Job', function() {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/43069
-  describe.skip('cancellation', function() {
+  describe('cancellation', function() {
     const scrollId = getRandomScrollId();
 
     beforeEach(function() {
@@ -618,10 +617,10 @@ describe('CSV Execute Job', function() {
         cancellationToken
       );
 
-      await delay(100);
+      await delay(250);
       const callCount = callWithRequestStub.callCount;
       cancellationToken.cancel();
-      await delay(100);
+      await delay(250);
       expect(callWithRequestStub.callCount).to.be(callCount + 1); // last call is to clear the scroll
     });
 

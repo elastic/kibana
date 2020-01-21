@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { mockTimelineData, TestProviders } from '../../../../mock';
@@ -24,7 +23,7 @@ describe('HostWorkingDir', () => {
         workingDirectory="[working-directory-123]"
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders a hostname without a workingDirectory', () => {

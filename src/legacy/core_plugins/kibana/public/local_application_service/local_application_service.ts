@@ -56,7 +56,7 @@ export class LocalApplicationService {
         outerAngularWrapperRoute: true,
         reloadOnSearch: false,
         reloadOnUrl: false,
-        template: `<div style="height:100%" id="${wrapperElementId}"></div>`,
+        template: `<div class="kbnLocalApplicationWrapper" id="${wrapperElementId}"></div>`,
         controller($scope: IScope) {
           const element = document.getElementById(wrapperElementId)!;
           let unmountHandler: AppUnmount | null = null;
@@ -68,7 +68,7 @@ export class LocalApplicationService {
             isUnmounted = true;
           });
           (async () => {
-            const params = { element, appBasePath: '' };
+            const params = { element, appBasePath: '', onAppLeave: () => undefined };
             unmountHandler = isAppMountDeprecated(app.mount)
               ? await app.mount({ core: npStart.core }, params)
               : await app.mount(params);

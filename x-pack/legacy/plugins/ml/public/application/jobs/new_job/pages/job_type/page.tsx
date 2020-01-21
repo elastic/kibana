@@ -24,6 +24,7 @@ import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { CategorizationIcon } from './categorization_job_icon';
 
 export const Page: FC = () => {
   const kibanaContext = useKibanaContext();
@@ -150,6 +151,22 @@ export const Page: FC = () => {
           'Use the full range of options to create a job for more advanced use cases.',
       }),
       id: 'mlJobTypeLinkAdvancedJob',
+    },
+    {
+      href: getUrl('#jobs/new_job/categorization'),
+      icon: {
+        type: CategorizationIcon,
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
+          defaultMessage: 'Categorization job',
+        }),
+      },
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationTitle', {
+        defaultMessage: 'Categorization',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationDescription', {
+        defaultMessage: 'Group log messages into categories and detect anomalies within them.',
+      }),
+      id: 'mlJobTypeLinkCategorizationJob',
     },
   ];
 

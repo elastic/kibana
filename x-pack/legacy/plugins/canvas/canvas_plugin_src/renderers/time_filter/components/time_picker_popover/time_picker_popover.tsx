@@ -42,7 +42,16 @@ export const TimePickerPopover: FunctionComponent<Props> = ({ from, to, onSelect
       anchorClassName="canvasTimePickerPopover__anchor"
       button={button}
     >
-      {() => <TimePicker from={from} to={to} onSelect={onSelect} />}
+      {({ closePopover }) => (
+        <TimePicker
+          from={from}
+          to={to}
+          onSelect={(...args) => {
+            onSelect(...args);
+            closePopover();
+          }}
+        />
+      )}
     </Popover>
   );
 };

@@ -61,6 +61,10 @@ export function getFieldTypeName(type: string) {
       return i18n.translate('common.ui.directives.fieldNameIcons.stringFieldAriaLabel', {
         defaultMessage: 'String field',
       });
+    case 'nested':
+      return i18n.translate('common.ui.directives.fieldNameIcons.nestedFieldAriaLabel', {
+        defaultMessage: 'Nested field',
+      });
     default:
       return i18n.translate('common.ui.directives.fieldNameIcons.unknownFieldAriaLabel', {
         defaultMessage: 'Unknown field',

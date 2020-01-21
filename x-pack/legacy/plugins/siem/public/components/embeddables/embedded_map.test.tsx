@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { EmbeddedMapComponent } from './embedded_map';
@@ -41,6 +40,6 @@ describe('EmbeddedMapComponent', () => {
         startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

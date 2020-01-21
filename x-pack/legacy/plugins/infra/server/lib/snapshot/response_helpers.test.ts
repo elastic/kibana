@@ -5,7 +5,6 @@
  */
 
 import { isIPv4, getIPFromBucket, InfraSnapshotNodeGroupByBucket } from './response_helpers';
-import { InfraNodeType } from '../../graphql/types';
 
 describe('InfraOps ResponseHelpers', () => {
   describe('isIPv4', () => {
@@ -44,7 +43,7 @@ describe('InfraOps ResponseHelpers', () => {
           },
         },
       };
-      expect(getIPFromBucket(InfraNodeType.host, bucket)).toBe('192.168.1.4');
+      expect(getIPFromBucket('host', bucket)).toBe('192.168.1.4');
     });
     it('should NOT return ipv6 address', () => {
       const bucket: InfraSnapshotNodeGroupByBucket = {
@@ -72,7 +71,7 @@ describe('InfraOps ResponseHelpers', () => {
           },
         },
       };
-      expect(getIPFromBucket(InfraNodeType.host, bucket)).toBe(null);
+      expect(getIPFromBucket('host', bucket)).toBe(null);
     });
   });
 });

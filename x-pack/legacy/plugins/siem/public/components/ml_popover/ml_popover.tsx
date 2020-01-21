@@ -10,8 +10,7 @@ import moment from 'moment';
 import React, { useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
-import { DEFAULT_KBN_VERSION } from '../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
 import { errorToToaster } from '../ml/api/error_to_toaster';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
@@ -97,7 +96,6 @@ export const MlPopover = React.memo(() => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const [kbnVersion] = useUiSetting$<string>(DEFAULT_KBN_VERSION);
   const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const capabilities = useContext(MlCapabilitiesContext);
@@ -114,7 +112,6 @@ export const MlPopover = React.memo(() => {
           indexPatternName: job.defaultIndexPattern,
           jobIdErrorFilter: [job.id],
           groups: job.groups,
-          kbnVersion,
         });
       } catch (error) {
         errorToToaster({ title: i18n.CREATE_JOB_FAILURE, error, dispatchToaster });
@@ -132,14 +129,14 @@ export const MlPopover = React.memo(() => {
     if (enable) {
       const startTime = Math.max(latestTimestampMs, maxStartTime);
       try {
-        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], kbnVersion, start: startTime });
+        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
         errorToToaster({ title: i18n.START_JOB_FAILURE, error, dispatchToaster });
       }
     } else {
       try {
-        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`], kbnVersion });
+        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
       } catch (error) {
         track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
         errorToToaster({ title: i18n.STOP_JOB_FAILURE, error, dispatchToaster });

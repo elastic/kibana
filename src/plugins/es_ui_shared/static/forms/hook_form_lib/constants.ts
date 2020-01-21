@@ -28,6 +28,7 @@ export const FIELD_TYPES = {
   RADIO_GROUP: 'radioGroup',
   RANGE: 'range',
   SELECT: 'select',
+  SUPER_SELECT: 'superSelect',
   MULTI_SELECT: 'multiSelect',
 };
 

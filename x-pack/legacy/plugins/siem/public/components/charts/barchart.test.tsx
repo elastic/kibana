@@ -5,7 +5,7 @@
  */
 
 import { shallow, ShallowWrapper } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';
@@ -18,41 +18,41 @@ const customWidth = '120px';
 const chartDataSets = [
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: '' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: '' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: '' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 1714, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 0, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: null, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 2354, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -63,40 +63,40 @@ const chartHolderDataSets: Array<[ChartSeriesData[] | undefined | null]> = [
   [null],
   [
     [
-      { key: 'uniqueSourceIps', color: '#DB1374' },
+      { key: 'uniqueSourceIps', color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{}], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{}], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{}],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
   [
     [
-      { key: 'uniqueSourceIps', value: [{ y: 0, x: 'uniqueSourceIps' }], color: '#DB1374' },
+      { key: 'uniqueSourceIps', value: [{ y: 0, x: 'uniqueSourceIps' }], color: '#D36086' },
       {
         key: 'uniqueDestinationIps',
         value: [{ y: 0, x: 'uniqueDestinationIps' }],
-        color: '#490092',
+        color: '#9170B8',
       },
     ],
   ],
@@ -122,12 +122,12 @@ describe('BarChartBaseComponent', () => {
     {
       key: 'uniqueSourceIps',
       value: [{ y: 1714, x: 'uniqueSourceIps', g: 'uniqueSourceIps' }],
-      color: '#DB1374',
+      color: '#D36086',
     },
     {
       key: 'uniqueDestinationIps',
       value: [{ y: 2354, x: 'uniqueDestinationIps', g: 'uniqueDestinationIps' }],
-      color: '#490092',
+      color: '#9170B8',
     },
   ];
 

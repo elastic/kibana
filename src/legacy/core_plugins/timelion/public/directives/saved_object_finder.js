@@ -19,12 +19,12 @@
 
 import _ from 'lodash';
 import rison from 'rison-node';
-import { keyMap } from 'ui/utils/key_map';
 import { uiModules } from 'ui/modules';
 import 'ui/directives/input_focus';
 import 'ui/directives/paginate';
 import savedObjectFinderTemplate from './saved_object_finder.html';
 import { savedSheetLoader } from '../services/saved_sheets';
+import { keyMap } from 'ui/directives/key_map';
 
 const module = uiModules.get('kibana');
 

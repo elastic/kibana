@@ -65,8 +65,8 @@ describe('Split panel', () => {
 
       const panelContainer = mount(
         <PanelsContainer onPanelWidthChange={onWidthChange}>
-          <Panel initialWidth={'50%'}>{testComponentA}</Panel>
-          <Panel initialWidth={'50%'}>{testComponentB}</Panel>
+          <Panel initialWidth={50}>{testComponentA}</Panel>
+          <Panel initialWidth={50}>{testComponentB}</Panel>
         </PanelsContainer>
       );
 

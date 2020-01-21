@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { TaskManagerStartContract } from './shim';
+import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
 import { GetBasePathFunction } from './types';
 
 interface CreateExecuteFunctionOptions {

@@ -60,10 +60,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Metrics', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -175,10 +173,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows metrics navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Metrics', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -417,9 +413,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show metrics navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.not.contain(['Metrics']);
       });
 
