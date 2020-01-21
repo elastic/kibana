@@ -46,7 +46,7 @@ export class ActionStatus {
       return ACTION_STATES.ACKNOWLEDGED;
     }
 
-    // A user could potentionally land in this state if running on multiple nodes and timing is off
+    // A user could potentially land in this state if running on multiple nodes and timing is off
     if (ackState === 'acked' && this.lastAcknowledged < this.lastExecution) {
       return ACTION_STATES.ERROR;
     }
