@@ -119,7 +119,8 @@ export type ParameterName =
   | 'points_only'
   | 'path'
   | 'dims'
-  | 'depth_limit';
+  | 'depth_limit'
+  | 'max_shingle_size';
 
 export interface Parameter {
   fieldConfig: FieldConfig;

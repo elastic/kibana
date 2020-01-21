@@ -552,13 +552,14 @@ export interface ContextSetup {
 export type CoreId = symbol;
 
 // @public
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
+    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
@@ -2005,9 +2006,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:161:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:162:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:222:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:223:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:227:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:228:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

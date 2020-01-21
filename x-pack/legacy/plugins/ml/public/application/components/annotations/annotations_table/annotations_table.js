@@ -323,6 +323,7 @@ const AnnotationsTable = injectI18n(
           }),
           sortable: true,
           width: '50%',
+          scope: 'row',
         },
         {
           field: 'timestamp',

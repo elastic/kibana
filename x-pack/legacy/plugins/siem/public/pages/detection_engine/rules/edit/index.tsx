@@ -17,11 +17,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 
+import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
 import { HeaderPage } from '../../../../components/header_page';
 import { WrapperPage } from '../../../../components/wrapper_page';
-import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
-import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
+import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
+import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
 import { FormHook, FormData } from '../components/shared_imports';
 import { StepPanel } from '../components/step_panel';
@@ -48,6 +49,7 @@ interface ScheduleStepRuleForm extends StepRuleForm {
 }
 
 export const EditRuleComponent = memo(() => {
+  const [, dispatchToaster] = useStateToaster();
   const {
     loading: initLoading,
     isSignalIndexExists,
@@ -55,7 +57,7 @@ export const EditRuleComponent = memo(() => {
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
-  const { ruleId } = useParams();
+  const { detailName: ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
 
   const userHasNoPermissions =
@@ -271,6 +273,7 @@ export const EditRuleComponent = memo(() => {
   }, []);
 
   if (isSaved || (rule != null && rule.immutable)) {
+    displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 
@@ -344,7 +347,7 @@ export const EditRuleComponent = memo(() => {
         </EuiFlexGroup>
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute state={{ ruleName: rule?.name }} />
     </>
   );
 });

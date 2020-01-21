@@ -58,3 +58,5 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
+export { removeQueryParam } from './history';
+export { applyDiff } from './state_management/utils/diff_object';
