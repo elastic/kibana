@@ -26,11 +26,12 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { createHashHistory } from 'history';
 import { RenderDeps } from './np_ready/application';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
-import { Storage } from '../../../../../plugins/kibana_utils/public';
+import { createKbnUrlStateStorage, Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { DashboardConstants } from './np_ready/dashboard_constants';
 import {
@@ -96,6 +97,12 @@ export class DashboardPlugin implements Plugin {
           overlays: contextCore.overlays,
         });
 
+        const history = createHashHistory();
+        const kbnUrlStateStorage = createKbnUrlStateStorage({
+          history,
+          useHash: contextCore.uiSettings.get('state:storeInSessionStorage'),
+        });
+
         const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
           ...angularDependencies,
@@ -111,6 +118,8 @@ export class DashboardPlugin implements Plugin {
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
+          history,
+          kbnUrlStateStorage,
         };
         const { renderApp } = await import('./np_ready/application');
         return renderApp(params.element, params.appBasePath, deps);

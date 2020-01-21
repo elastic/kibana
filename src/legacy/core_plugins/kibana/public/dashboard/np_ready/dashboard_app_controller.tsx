@@ -23,7 +23,7 @@ import React from 'react';
 import angular from 'angular';
 
 import { Subscription } from 'rxjs';
-import { createHashHistory } from 'history';
+import { filter, map } from 'rxjs/operators';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -32,12 +32,11 @@ import {
   SavedObjectSaveOpts,
   SaveResult,
   showSaveModal,
-  State,
   subscribeWithScope,
 } from '../legacy_imports';
-import { FilterStateManager } from '../../../../data/public';
 import {
   esFilters,
+  FilterManager,
   IndexPattern,
   IndexPatternsContract,
   Query,
@@ -77,12 +76,15 @@ import {
   SavedObjectFinderUi,
 } from '../../../../../../plugins/kibana_react/public';
 import { removeQueryParam, unhashUrl } from '../../../../../../plugins/kibana_utils/public';
+import {
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+} from '../../../../../../plugins/data/public/query/filter_manager/lib/compare_filters';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
-  globalState: State;
   indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
   config: any;
@@ -99,7 +101,6 @@ export class DashboardAppController {
     $scope,
     $route,
     $routeParams,
-    globalState,
     dashboardConfig,
     localStorage,
     indexPatterns,
@@ -116,6 +117,9 @@ export class DashboardAppController {
       },
     },
     core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
+    history,
+    kbnUrlStateStorage,
+    hasInheritedGlobalState,
   }: DashboardAppControllerDependencies) {
     const queryFilter = filterManager;
 
@@ -126,34 +130,59 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    const history = createHashHistory();
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
-      useHashedUrl: config.get('state:storeInSessionStorage'),
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       kibanaVersion: injectedMetadata.getKibanaVersion(),
+      kbnUrlStateStorage,
       history,
     });
 
-    const filterStateManager = new FilterStateManager(
-      globalState,
-      () => {
-        // Temporary AppState replacement
-        return {
-          set filters(_filters: esFilters.Filter[]) {
-            dashboardStateManager.setFilters(_filters);
-          },
-          get filters() {
-            return dashboardStateManager.appState.filters;
-          },
-        };
-      },
-      filterManager
-    );
+    // make sure initial filters are picked up from url
+    filterManager.setFilters([
+      ...filterManager.getGlobalFilters(),
+      ..._.cloneDeep(dashboardStateManager.appState.filters),
+    ]);
+
+    // this should go away after: https://github.com/elastic/kibana/issues/55339
+    // is resolved
+    // sync filterManager's appFilters with dashboardStateManager
+    // dashboardStateManager then sync it to url '_a'
+    const appFiltersSubscription = filterManager
+      .getUpdates$()
+      .pipe(
+        map(() => filterManager.getAppFilters()),
+        filter(
+          // continue only if app state filters updated
+          appFilters =>
+            !compareFilters(appFilters, dashboardStateManager.appState.filters, COMPARE_ALL_OPTIONS)
+        )
+      )
+      .subscribe(appFilters => {
+        dashboardStateManager.setFilters(appFilters);
+      });
+
+    // this should go away after: https://github.com/elastic/kibana/issues/55339
+    // is resolved
+    // if appFilters in dashboardStateManager changed (e.g browser history update),
+    // sync it to filterManager
+    dashboardStateManager.registerChangeListener(() => {
+      if (
+        !compareFilters(
+          dashboardStateManager.appState.filters,
+          filterManager.getAppFilters(),
+          COMPARE_ALL_OPTIONS
+        )
+      ) {
+        const newAppFilters = _.cloneDeep(dashboardStateManager.appState.filters);
+        FilterManager.setFiltersStore(newAppFilters, esFilters.FilterStateStore.APP_STATE);
+        filterManager.setFilters([...filterManager.getGlobalFilters(), ...newAppFilters]);
+      }
+    });
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !globalState.$inheritedGlobalState) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalState?.value) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
@@ -411,7 +440,17 @@ export class DashboardAppController {
 
       const containerInput = dashboardContainer.getInput();
       const differences: Partial<DashboardContainerInput> = {};
-      Object.keys(containerInput).forEach(key => {
+
+      // Filters can't be compared using regular isEqual
+      // this should go away after: https://github.com/elastic/kibana/issues/55339
+      // is resolved
+      if (
+        !compareFilters(containerInput.filters, appStateDashboardInput.filters, COMPARE_ALL_OPTIONS)
+      ) {
+        differences.filters = appStateDashboardInput.filters;
+      }
+
+      Object.keys(_.omit(containerInput, 'filters')).forEach(key => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
@@ -878,6 +917,7 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
+      appFiltersSubscription.unsubscribe();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();
 
@@ -890,9 +930,6 @@ export class DashboardAppController {
       }
       if (dashboardContainer) {
         dashboardContainer.destroy();
-      }
-      if (filterStateManager) {
-        filterStateManager.destroy();
       }
     });
   }

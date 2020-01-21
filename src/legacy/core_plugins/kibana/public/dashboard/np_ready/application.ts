@@ -19,38 +19,38 @@
 
 import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
+import { History } from 'history';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
   ChromeStart,
+  IUiSettingsClient,
   LegacyCoreStart,
   SavedObjectsClientContract,
-  IUiSettingsClient,
 } from 'kibana/public';
-import { Storage } from '../../../../../../plugins/kibana_utils/public';
+import { IKbnUrlStateStorage, Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
-  GlobalStateProvider,
-  StateManagementConfigProvider,
-  PrivateProvider,
-  EventsProvider,
-  PersistedState,
+  configureAppAngularModule,
+  confirmModalFactory,
   createTopNavDirective,
   createTopNavHelper,
-  PromiseServiceCreator,
-  KbnUrlProvider,
-  RedirectWhenMissingProvider,
-  confirmModalFactory,
-  configureAppAngularModule,
-  SavedObjectLoader,
+  EventsProvider,
   IPrivate,
+  KbnUrlProvider,
+  PersistedState,
+  PrivateProvider,
+  PromiseServiceCreator,
+  RedirectWhenMissingProvider,
+  SavedObjectLoader,
+  StateManagementConfigProvider,
 } from '../legacy_imports';
-
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
+import { initGlobalState } from './kbn_global_state';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
@@ -67,11 +67,33 @@ export interface RenderDeps {
   embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
+  history: History;
+
+  // hack: keeping the value nested
+  // as configureAppAngularModule() is called once and initialised with reference to 'hasInheritedGlobalState' ,
+  // so to be able to update underlying value, so angular controller could pick it up
+  // this param is used to determine if time filter saved with dashboard should be applied or not
+  hasInheritedGlobalState?: {
+    value: boolean;
+  };
 }
 
 let angularModuleInstance: IModule | null = null;
+const hasInheritedGlobalStateRef: { value: boolean } = { value: false };
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
+  const { destroy: destroyGlobalState, hasInheritedGlobalState } = initGlobalState(
+    deps.kbnUrlStateStorage,
+    deps.npDataStart.query.filterManager,
+    deps.npDataStart.query.timefilter.timefilter
+  );
+
+  // hack: always keeping the latest 'hasInheritedGlobalState' value in the same object - hasInheritedGlobalStateRef
+  // this is needed so angular Controller picks up the latest value, as it has reference to the hasInheritedGlobalStateRef
+  hasInheritedGlobalStateRef.value = hasInheritedGlobalState;
+  deps.hasInheritedGlobalState = hasInheritedGlobalStateRef;
+
   if (!angularModuleInstance) {
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
@@ -79,9 +101,12 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     // custom routing stuff
     initDashboardApp(angularModuleInstance, deps);
   }
+
   const $injector = mountDashboardApp(appBasePath, element);
+
   return () => {
     $injector.get('$rootScope').$destroy();
+    destroyGlobalState();
   };
 };
 
@@ -146,17 +171,13 @@ function createLocalConfirmModalModule() {
 }
 
 function createLocalStateModule() {
-  angular
-    .module('app/dashboard/State', [
-      'app/dashboard/Private',
-      'app/dashboard/Config',
-      'app/dashboard/KbnUrl',
-      'app/dashboard/Promise',
-      'app/dashboard/PersistedState',
-    ])
-    .service('globalState', function(Private: any) {
-      return Private(GlobalStateProvider);
-    });
+  angular.module('app/dashboard/State', [
+    'app/dashboard/Private',
+    'app/dashboard/Config',
+    'app/dashboard/KbnUrl',
+    'app/dashboard/Promise',
+    'app/dashboard/PersistedState',
+  ]);
 }
 
 function createLocalPersistedStateModule() {

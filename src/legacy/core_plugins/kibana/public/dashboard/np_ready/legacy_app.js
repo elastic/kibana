@@ -22,20 +22,15 @@ import { i18n } from '@kbn/i18n';
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
-import {
-  ensureDefaultIndexPattern,
-  registerTimefilterWithGlobalStateFactory,
-} from '../legacy_imports';
+import { ensureDefaultIndexPattern } from '../legacy_imports';
 import { initDashboardAppDirective } from './dashboard_app';
-import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
+import { createDashboardEditUrl, DashboardConstants } from './dashboard_constants';
 import {
   InvalidJSONProperty,
   SavedObjectNotFound,
 } from '../../../../../../plugins/kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { syncOnMount } from './global_state_sync';
-import { createHashHistory } from 'history';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -61,16 +56,9 @@ export function initDashboardApp(app, deps) {
     addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
   }
 
-  app.run(globalState => {
-    syncOnMount(globalState, deps.npDataStart);
-  });
-
-  app.run((globalState, $rootScope) => {
-    registerTimefilterWithGlobalStateFactory(
-      deps.npDataStart.query.timefilter.timefilter,
-      globalState,
-      $rootScope
-    );
+  app.config(stateManagementConfigProvider => {
+    // Dashboard state management is handled by state containers and state_sync utilities
+    stateManagementConfigProvider.disable();
   });
 
   app.config(function($routeProvider) {
@@ -218,9 +206,8 @@ export function initDashboardApp(app, deps) {
                 // See https://github.com/elastic/kibana/issues/10951 for more context.
                 if (error instanceof SavedObjectNotFound && id === 'create') {
                   // Note preserve querystring part is necessary so the state is preserved through the redirect.
-                  const history = createHashHistory();
-                  history.replace({
-                    ...history.location, // preserve query,
+                  deps.history.replace({
+                    ...deps.history.location, // preserve query,
                     pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
                   });
 
