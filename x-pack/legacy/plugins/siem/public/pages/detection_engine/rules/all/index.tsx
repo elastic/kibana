@@ -11,10 +11,12 @@ import {
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-
 import uuid from 'uuid';
+
+import { useRules } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
   UtilityBar,
@@ -23,16 +25,17 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../components/detection_engine/utility_bar';
-import { getColumns } from './columns';
-import { useRules } from '../../../../containers/detection_engine/rules';
+import { useStateToaster } from '../../../../components/toasters';
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
-import { getBatchItems } from './batch_actions';
-import { EuiBasicTableOnChange, TableData } from '../types';
-import { allRulesReducer, State } from './reducer';
-import * as i18n from '../translations';
+import { PrePackagedRulesPrompt } from '../components/pre_packaged_rules/load_empty_prompt';
 import { RuleDownloader } from '../components/rule_downloader';
-import { useStateToaster } from '../../../../components/toasters';
+import { getPrePackagedRuleStatus } from '../helpers';
+import * as i18n from '../translations';
+import { EuiBasicTableOnChange, TableData } from '../types';
+import { getBatchItems } from './batch_actions';
+import { getColumns } from './columns';
+import { allRulesReducer, State } from './reducer';
 
 const initialState: State = {
   isLoading: true,
@@ -52,6 +55,17 @@ const initialState: State = {
   },
 };
 
+interface AllRulesProps {
+  createPrePackagedRules: () => void;
+  hasNoPermissions: boolean;
+  importCompleteToggle: boolean;
+  loading: boolean;
+  loadingCreatePrePackagedRules: boolean;
+  rulesInstalled: number | null;
+  rulesNotInstalled: number | null;
+  rulesNotUpdated: number | null;
+}
+
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
  * by name, sort by enabled, and perform the following actions:
@@ -60,191 +74,214 @@ const initialState: State = {
  *   * Delete
  *   * Import/Export
  */
-export const AllRules = React.memo<{
-  hasNoPermissions: boolean;
-  importCompleteToggle: boolean;
-  loading: boolean;
-}>(({ hasNoPermissions, importCompleteToggle, loading }) => {
-  const [
-    {
-      exportPayload,
-      filterOptions,
-      isLoading,
-      refreshToggle,
-      selectedItems,
-      tableData,
-      pagination,
-    },
-    dispatch,
-  ] = useReducer(allRulesReducer, initialState);
-  const history = useHistory();
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isLoadingRules, rulesData] = useRules(pagination, filterOptions, refreshToggle);
-  const [, dispatchToaster] = useStateToaster();
+export const AllRules = React.memo<AllRulesProps>(
+  ({
+    createPrePackagedRules,
+    hasNoPermissions,
+    importCompleteToggle,
+    loading,
+    loadingCreatePrePackagedRules,
+    rulesInstalled,
+    rulesNotInstalled,
+    rulesNotUpdated,
+  }) => {
+    const [
+      {
+        exportPayload,
+        filterOptions,
+        isLoading,
+        refreshToggle,
+        selectedItems,
+        tableData,
+        pagination,
+      },
+      dispatch,
+    ] = useReducer(allRulesReducer, initialState);
+    const history = useHistory();
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [isLoadingRules, rulesData] = useRules(pagination, filterOptions, refreshToggle);
+    const [, dispatchToaster] = useStateToaster();
 
-  const getBatchItemsPopoverContent = useCallback(
-    (closePopover: () => void) => (
-      <EuiContextMenuPanel
-        items={getBatchItems(selectedItems, dispatch, dispatchToaster, history, closePopover)}
-      />
-    ),
-    [selectedItems, dispatch, dispatchToaster, history]
-  );
+    const prePackagedRuleStatus = getPrePackagedRuleStatus(
+      rulesInstalled,
+      rulesNotInstalled,
+      rulesNotUpdated
+    );
 
-  const tableOnChangeCallback = useCallback(
-    ({ page, sort }: EuiBasicTableOnChange) => {
+    const getBatchItemsPopoverContent = useCallback(
+      (closePopover: () => void) => (
+        <EuiContextMenuPanel
+          items={getBatchItems(selectedItems, dispatch, dispatchToaster, history, closePopover)}
+        />
+      ),
+      [selectedItems, dispatch, dispatchToaster, history]
+    );
+
+    const tableOnChangeCallback = useCallback(
+      ({ page, sort }: EuiBasicTableOnChange) => {
+        dispatch({
+          type: 'updatePagination',
+          pagination: { ...pagination, page: page.index + 1, perPage: page.size },
+        });
+        dispatch({
+          type: 'updateFilterOptions',
+          filterOptions: {
+            ...filterOptions,
+            sortField: 'enabled', // Only enabled is supported for sorting currently
+            sortOrder: sort?.direction ?? 'desc',
+          },
+        });
+      },
+      [dispatch, filterOptions, pagination]
+    );
+
+    const columns = useMemo(() => {
+      return getColumns(dispatch, dispatchToaster, history, hasNoPermissions);
+    }, [dispatch, dispatchToaster, history]);
+
+    useEffect(() => {
+      dispatch({ type: 'loading', isLoading: isLoadingRules });
+
+      if (!isLoadingRules) {
+        setIsInitialLoad(false);
+      }
+    }, [isLoadingRules]);
+
+    useEffect(() => {
+      if (!isInitialLoad) {
+        dispatch({ type: 'refresh' });
+      }
+    }, [importCompleteToggle]);
+
+    useEffect(() => {
       dispatch({
-        type: 'updatePagination',
-        pagination: { ...pagination, page: page.index + 1, perPage: page.size },
-      });
-      dispatch({
-        type: 'updateFilterOptions',
-        filterOptions: {
-          ...filterOptions,
-          sortField: 'enabled', // Only enabled is supported for sorting currently
-          sortOrder: sort?.direction ?? 'desc',
+        type: 'updateRules',
+        rules: rulesData.data,
+        pagination: {
+          page: rulesData.page,
+          perPage: rulesData.perPage,
+          total: rulesData.total,
         },
       });
-    },
-    [dispatch, filterOptions, pagination]
-  );
+    }, [rulesData]);
 
-  const columns = useMemo(() => {
-    return getColumns(dispatch, dispatchToaster, history, hasNoPermissions);
-  }, [dispatch, dispatchToaster, history]);
+    const euiBasicTableSelectionProps = useMemo(
+      () => ({
+        selectable: (item: TableData) => !item.isLoading,
+        onSelectionChange: (selected: TableData[]) =>
+          dispatch({ type: 'setSelected', selectedItems: selected }),
+      }),
+      []
+    );
 
-  useEffect(() => {
-    dispatch({ type: 'loading', isLoading: isLoadingRules });
+    return (
+      <>
+        <RuleDownloader
+          filename={`${i18n.EXPORT_FILENAME}.ndjson`}
+          rules={exportPayload}
+          onExportComplete={exportCount => {
+            dispatchToaster({
+              type: 'addToaster',
+              toast: {
+                id: uuid.v4(),
+                title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
+                color: 'success',
+                iconType: 'check',
+              },
+            });
+          }}
+        />
+        <EuiSpacer />
 
-    if (!isLoadingRules) {
-      setIsInitialLoad(false);
-    }
-  }, [isLoadingRules]);
+        <Panel loading={isLoading}>
+          {isInitialLoad ? (
+            <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+          ) : (
+            <>
+              <HeaderSection split title={i18n.ALL_RULES}>
+                <EuiFieldSearch
+                  aria-label={i18n.SEARCH_RULES}
+                  fullWidth
+                  incremental={false}
+                  placeholder={i18n.SEARCH_PLACEHOLDER}
+                  onSearch={filterString => {
+                    dispatch({
+                      type: 'updateFilterOptions',
+                      filterOptions: {
+                        ...filterOptions,
+                        filter: filterString,
+                      },
+                    });
+                    dispatch({
+                      type: 'updatePagination',
+                      pagination: { ...pagination, page: 1 },
+                    });
+                  }}
+                />
+              </HeaderSection>
+              {(isLoading || loading) && (
+                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+              )}
+              {isEmpty(tableData) && prePackagedRuleStatus === 'ruleNotInstalled' && (
+                <PrePackagedRulesPrompt
+                  createPrePackagedRules={createPrePackagedRules}
+                  loading={loadingCreatePrePackagedRules}
+                  userHasNoPermissions={hasNoPermissions}
+                />
+              )}
+              {isEmpty(tableData) && (
+                <>
+                  <UtilityBar border>
+                    <UtilityBarSection>
+                      <UtilityBarGroup>
+                        <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
+                      </UtilityBarGroup>
 
-  useEffect(() => {
-    if (!isInitialLoad) {
-      dispatch({ type: 'refresh' });
-    }
-  }, [importCompleteToggle]);
+                      <UtilityBarGroup>
+                        <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
+                        {!hasNoPermissions && (
+                          <UtilityBarAction
+                            iconSide="right"
+                            iconType="arrowDown"
+                            popoverContent={getBatchItemsPopoverContent}
+                          >
+                            {i18n.BATCH_ACTIONS}
+                          </UtilityBarAction>
+                        )}
+                        <UtilityBarAction
+                          iconSide="right"
+                          iconType="refresh"
+                          onClick={() => dispatch({ type: 'refresh' })}
+                        >
+                          {i18n.REFRESH}
+                        </UtilityBarAction>
+                      </UtilityBarGroup>
+                    </UtilityBarSection>
+                  </UtilityBar>
 
-  useEffect(() => {
-    dispatch({
-      type: 'updateRules',
-      rules: rulesData.data,
-      pagination: {
-        page: rulesData.page,
-        perPage: rulesData.perPage,
-        total: rulesData.total,
-      },
-    });
-  }, [rulesData]);
-
-  const euiBasicTableSelectionProps = useMemo(
-    () => ({
-      selectable: (item: TableData) => !item.isLoading,
-      onSelectionChange: (selected: TableData[]) =>
-        dispatch({ type: 'setSelected', selectedItems: selected }),
-    }),
-    []
-  );
-
-  return (
-    <>
-      <RuleDownloader
-        filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-        rules={exportPayload}
-        onExportComplete={exportCount => {
-          dispatchToaster({
-            type: 'addToaster',
-            toast: {
-              id: uuid.v4(),
-              title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
-              color: 'success',
-              iconType: 'check',
-            },
-          });
-        }}
-      />
-      <EuiSpacer />
-
-      <Panel loading={isLoading}>
-        {isInitialLoad ? (
-          <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-        ) : (
-          <>
-            <HeaderSection split title={i18n.ALL_RULES}>
-              <EuiFieldSearch
-                aria-label={i18n.SEARCH_RULES}
-                fullWidth
-                incremental={false}
-                placeholder={i18n.SEARCH_PLACEHOLDER}
-                onSearch={filterString => {
-                  dispatch({
-                    type: 'updateFilterOptions',
-                    filterOptions: {
-                      ...filterOptions,
-                      filter: filterString,
-                    },
-                  });
-                  dispatch({
-                    type: 'updatePagination',
-                    pagination: { ...pagination, page: 1 },
-                  });
-                }}
-              />
-            </HeaderSection>
-
-            <UtilityBar border>
-              <UtilityBarSection>
-                <UtilityBarGroup>
-                  <UtilityBarText>{i18n.SHOWING_RULES(pagination.total ?? 0)}</UtilityBarText>
-                </UtilityBarGroup>
-
-                <UtilityBarGroup>
-                  <UtilityBarText>{i18n.SELECTED_RULES(selectedItems.length)}</UtilityBarText>
-                  {!hasNoPermissions && (
-                    <UtilityBarAction
-                      iconSide="right"
-                      iconType="arrowDown"
-                      popoverContent={getBatchItemsPopoverContent}
-                    >
-                      {i18n.BATCH_ACTIONS}
-                    </UtilityBarAction>
-                  )}
-                  <UtilityBarAction
-                    iconSide="right"
-                    iconType="refresh"
-                    onClick={() => dispatch({ type: 'refresh' })}
-                  >
-                    {i18n.REFRESH}
-                  </UtilityBarAction>
-                </UtilityBarGroup>
-              </UtilityBarSection>
-            </UtilityBar>
-
-            <EuiBasicTable
-              columns={columns}
-              isSelectable={!hasNoPermissions ?? false}
-              itemId="id"
-              items={tableData}
-              onChange={tableOnChangeCallback}
-              pagination={{
-                pageIndex: pagination.page - 1,
-                pageSize: pagination.perPage,
-                totalItemCount: pagination.total,
-                pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-              }}
-              sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
-              selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
-            />
-            {(isLoading || loading) && (
-              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-            )}
-          </>
-        )}
-      </Panel>
-    </>
-  );
-});
+                  <EuiBasicTable
+                    columns={columns}
+                    isSelectable={!hasNoPermissions ?? false}
+                    itemId="id"
+                    items={tableData}
+                    onChange={tableOnChangeCallback}
+                    pagination={{
+                      pageIndex: pagination.page - 1,
+                      pageSize: pagination.perPage,
+                      totalItemCount: pagination.total,
+                      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+                    }}
+                    sorting={{ sort: { field: 'activate', direction: filterOptions.sortOrder } }}
+                    selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+                  />
+                </>
+              )}
+            </>
+          )}
+        </Panel>
+      </>
+    );
+  }
+);
 
 AllRules.displayName = 'AllRules';

@@ -194,7 +194,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
             disabled={tab.disabled}
-            key={tab.name}
+            key={tab.id}
           >
             {tab.name}
           </EuiTab>

@@ -6,20 +6,22 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
+import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect_to_detection_engine';
 import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
 import { getEmptyTagValue } from '../../../components/empty_value';
 import { HeaderPage } from '../../../components/header_page';
 import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
-
+import { useUserInfo } from '../components/user_info';
 import { AllRules } from './all';
 import { ImportRuleModal } from './components/import_rule_modal';
 import { ReadOnlyCallOut } from './components/read_only_callout';
-import { useUserInfo } from '../components/user_info';
+import { UpdatePrePackagedRulesCallOut } from './components/pre_packaged_rules/update_callout';
+import { getPrePackagedRuleStatus } from './helpers';
 import * as i18n from './translations';
 
 export const RulesComponent = React.memo(() => {
@@ -30,8 +32,28 @@ export const RulesComponent = React.memo(() => {
     isSignalIndexExists,
     isAuthenticated,
     canUserCRUD,
+    hasIndexManage,
     hasManageApiKey,
   } = useUserInfo();
+  const {
+    loading: prePackagedRuleLoading,
+    loadingCreatePrePackagedRules,
+    rulesInstalled,
+    rulesNotInstalled,
+    rulesNotUpdated,
+    createPrePackagedRules,
+  } = usePrePackagedRules({
+    canUserCRUD,
+    hasIndexManage,
+    hasManageApiKey,
+    isSignalIndexExists,
+    isAuthenticated,
+  });
+  const prePackagedRuleStatus = getPrePackagedRuleStatus(
+    rulesInstalled,
+    rulesNotInstalled,
+    rulesNotUpdated
+  );
 
   if (
     isSignalIndexExists != null &&
@@ -43,6 +65,13 @@ export const RulesComponent = React.memo(() => {
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
   const lastCompletedRun = undefined;
+
+  const handleCreatePrePackagedRules = useCallback(() => {
+    if (createPrePackagedRules != null) {
+      createPrePackagedRules();
+    }
+  }, [createPrePackagedRules]);
+
   return (
     <>
       {userHasNoPermissions && <ReadOnlyCallOut />}
@@ -73,6 +102,28 @@ export const RulesComponent = React.memo(() => {
           title={i18n.PAGE_TITLE}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+            {prePackagedRuleStatus === 'ruleNotInstalled' && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="plusInCircle"
+                  isDisabled={userHasNoPermissions || loading}
+                  onClick={handleCreatePrePackagedRules}
+                >
+                  {i18n.LOAD_PREPACKAGED_RULES}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {prePackagedRuleStatus === 'someRuleUninstall' && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="plusInCircle"
+                  isDisabled={userHasNoPermissions || loading}
+                  onClick={handleCreatePrePackagedRules}
+                >
+                  {i18n.RELOAD_MISSING_PREPACKAGED_RULES(rulesNotInstalled ?? 0)}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"
@@ -96,10 +147,21 @@ export const RulesComponent = React.memo(() => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </HeaderPage>
+        {prePackagedRuleStatus === 'ruleNeedUpdate' && (
+          <UpdatePrePackagedRulesCallOut
+            numberOfUpdatedRules={rulesNotUpdated ?? 0}
+            updateRules={handleCreatePrePackagedRules}
+          />
+        )}
         <AllRules
-          loading={loading}
+          createPrePackagedRules={handleCreatePrePackagedRules}
+          loading={loading || prePackagedRuleLoading}
+          loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
           hasNoPermissions={userHasNoPermissions}
           importCompleteToggle={importCompleteToggle}
+          rulesInstalled={rulesInstalled}
+          rulesNotInstalled={rulesNotInstalled}
+          rulesNotUpdated={rulesNotUpdated}
         />
       </WrapperPage>
 
