@@ -5690,7 +5690,6 @@
     "xpack.fileUpload.jsonIndexFilePicker.filePickerLabel": "アップロードするファイルを選択",
     "xpack.fileUpload.jsonIndexFilePicker.fileProcessingError": "ファイル処理エラー: {errorMessage}",
     "xpack.fileUpload.jsonIndexFilePicker.fileSizeError": "ファイルサイズエラー: {errorMessage}",
-    "xpack.fileUpload.jsonIndexFilePicker.formatsAccepted": "許可されている形式：.json、.geojson",
     "xpack.fileUpload.jsonIndexFilePicker.maxSize": "最大サイズ：{maxFileSize}",
     "xpack.fileUpload.jsonIndexFilePicker.noFileNameError": "ファイル名が指定されていません",
     "xpack.fileUpload.jsonIndexFilePicker.parsingFile": "{featuresProcessed} 件の機能が解析されました…",
