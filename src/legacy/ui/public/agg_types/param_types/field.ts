@@ -115,7 +115,10 @@ export class FieldParamType extends BaseParamType {
     const filteredFields = fields.filter((field: Field) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
-      if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {
+      if (
+        (onlyAggregatable && (!field.aggregatable || field.subType?.nested)) ||
+        (!scriptable && field.scripted)
+      ) {
         return false;
       }
 

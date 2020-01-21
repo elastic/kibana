@@ -279,6 +279,7 @@ export interface ChromeNavLinks {
     getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
     has(id: string): boolean;
     showOnly(id: string): void;
+    // @deprecated
     update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
 }
 
@@ -375,6 +376,8 @@ export interface CoreStart {
     chrome: ChromeStart;
     // (undocumented)
     docLinks: DocLinksStart;
+    // (undocumented)
+    fatalErrors: FatalErrorsStart;
     // (undocumented)
     http: HttpStart;
     // (undocumented)
@@ -530,6 +533,9 @@ export interface FatalErrorsSetup {
     add: (error: string | Error, source?: string) => never;
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
+
+// @public
+export type FatalErrorsStart = FatalErrorsSetup;
 
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;

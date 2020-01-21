@@ -39,6 +39,14 @@ export const AnomaliesQueryTabBody = ({
   flowTarget,
   ip,
 }: AnomaliesQueryTabBodyProps) => {
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, []);
+
   const [, siemJobs] = useSiemJobs(true);
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
@@ -51,21 +59,12 @@ export const AnomaliesQueryTabBody = ({
     ip
   );
 
-  useEffect(() => {
-    return () => {
-      if (deleteQuery) {
-        deleteQuery({ id: ID });
-      }
-    };
-  }, []);
-
   return (
     <>
       <MatrixHistogramContainer
         isAnomaliesHistogram={true}
         dataKey="AnomaliesHistogram"
         defaultStackByOption={anomaliesStackByOptions[0]}
-        deleteQuery={deleteQuery}
         endDate={endDate}
         errorMessage={i18n.ERROR_FETCHING_ANOMALIES_DATA}
         filterQuery={mergedFilterQuery}
