@@ -6,10 +6,16 @@
 
 import { delay } from './delay';
 
+const TEST_DELAY = 100;
+
 describe('delay', () => {
   test('works as expected', async () => {
     const timeStart = Date.now();
-    await delay(100);
-    expect(Date.now() - timeStart).toBeGreaterThanOrEqual(100);
+    await delay(TEST_DELAY);
+
+    // note: testing with .toBeGreaterThanOrEqual(TEST_DELAY) is flaky,
+    // sometimes the actual value is TEST_DELAY - 1, so ... using that as the
+    // value to test against; something funky with time rounding I'd guess.
+    expect(Date.now() - timeStart).toBeGreaterThanOrEqual(TEST_DELAY - 1);
   });
 });
