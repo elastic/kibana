@@ -12,12 +12,11 @@ import { getDateFormatTz, TimeRangeBounds } from '../explorer/explorer_utils';
 
 declare const TimeSeriesExplorer: FC<{
   appStateHandler: (action: string, payload: any) => void;
-  autoZoomDuration?: number;
-  bounds?: TimeRangeBounds;
+  autoZoomDuration: number;
+  bounds: TimeRangeBounds;
   dateFormatTz: string;
-  jobsWithTimeRange: any[];
   lastRefresh: number;
-  selectedJobIds: string[];
+  selectedJobId: string;
   selectedDetectorIndex: number;
   selectedEntities: any[];
   selectedForecastId: string;
