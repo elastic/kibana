@@ -28,7 +28,7 @@ const packages = [
     destinationPath: 'node_modules/re2/build/Release/',
     shas: {
       darwin: '0640af2971828597cdca590e3f022071d6f11d5d4f01f16d80783ff840019f33',
-      linux: '12aa5e5547469872af342194dfaf3ad2ed4967b447a16bd954eff40ad9bc0bfa',
+      linux: '5fea301d28756bf9fcd01b9ed98ef3fe7469a401632bc764f9b617de6faf4321',
       windows: '96d8194f1bbb2105b71330b671b202b2b46e3fa09141bd600d9c284202eda7b4',
     },
   },
