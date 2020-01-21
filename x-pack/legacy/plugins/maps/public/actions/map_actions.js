@@ -753,9 +753,9 @@ export function clearMissingStyleProperties(layerId) {
       return;
     }
 
-    const ordinalFields = await targetLayer.getOrdinalFields();
+    const ordinalAndCategoricalFields = await targetLayer.getOrdinalAndCategoricalFields();
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(
-      ordinalFields
+      ordinalAndCategoricalFields
     );
     if (hasChanges) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
