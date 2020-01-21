@@ -17,6 +17,10 @@ export interface RendererHandlers {
   getFilter: () => string;
   /** Sets the value of the filter property on the element object persisted on the workpad */
   setFilter: (filter: string) => void;
+  /** Handler to invoke when the input to a function has changed internally */
+  onEmbeddableInputChange: (expression: string) => void;
+  /** Handler to invoke when a rendered embeddable is destroyed */
+  onEmbeddableDestroyed: () => void;
 }
 
 export interface RendererSpec<RendererConfig = {}> {

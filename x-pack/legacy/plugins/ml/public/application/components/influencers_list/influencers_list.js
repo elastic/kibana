@@ -56,7 +56,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
   const tooltipContent = getTooltipContent(maxScoreLabel, totalScoreLabel);
 
   return (
-    <div>
+    <div data-test-subj={`mlInfluencerEntry field-${influencerFieldName}`}>
       <div className="field-label">
         {influencerFieldName !== 'mlcategory' ? (
           <EntityCell
@@ -114,7 +114,7 @@ function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues 
 
   return (
     <React.Fragment key={influencerFieldName}>
-      <EuiTitle size="xs">
+      <EuiTitle size="xs" data-test-subj={`mlInfluencerFieldName ${influencerFieldName}`}>
         <h4>{influencerFieldName}</h4>
       </EuiTitle>
       <EuiSpacer size="xs" />

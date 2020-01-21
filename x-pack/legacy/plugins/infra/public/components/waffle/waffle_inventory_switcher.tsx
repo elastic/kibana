@@ -14,20 +14,17 @@ import {
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  InfraSnapshotMetricInput,
-  InfraSnapshotMetricType,
-  InfraNodeType,
-  InfraSnapshotGroupbyInput,
-} from '../../graphql/types';
 import { findInventoryModel } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { SnapshotMetricInput, SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
 
 interface WaffleInventorySwitcherProps {
-  nodeType: InfraNodeType;
-  changeNodeType: (nodeType: InfraNodeType) => void;
-  changeGroupBy: (groupBy: InfraSnapshotGroupbyInput[]) => void;
-  changeMetric: (metric: InfraSnapshotMetricInput) => void;
+  nodeType: InventoryItemType;
+  changeNodeType: (nodeType: InventoryItemType) => void;
+  changeGroupBy: (groupBy: SnapshotGroupBy) => void;
+  changeMetric: (metric: SnapshotMetricInput) => void;
+  changeAccount: (id: string) => void;
+  changeRegion: (name: string) => void;
 }
 
 const getDisplayNameForType = (type: InventoryItemType) => {
@@ -39,30 +36,34 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
   changeNodeType,
   changeGroupBy,
   changeMetric,
+  changeAccount,
+  changeRegion,
   nodeType,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
   const openPopover = useCallback(() => setIsOpen(true), []);
   const goToNodeType = useCallback(
-    (targetNodeType: InfraNodeType) => {
+    (targetNodeType: InventoryItemType) => {
       closePopover();
       changeNodeType(targetNodeType);
       changeGroupBy([]);
+      changeAccount('');
+      changeRegion('');
       const inventoryModel = findInventoryModel(targetNodeType);
       changeMetric({
-        type: inventoryModel.metrics.defaultSnapshot as InfraSnapshotMetricType,
+        type: inventoryModel.metrics.defaultSnapshot,
       });
     },
-    [closePopover, changeNodeType, changeGroupBy, changeMetric]
+    [closePopover, changeNodeType, changeGroupBy, changeMetric, changeAccount, changeRegion]
   );
-  const goToHost = useCallback(() => goToNodeType('host' as InfraNodeType), [goToNodeType]);
-  const goToK8 = useCallback(() => goToNodeType('pod' as InfraNodeType), [goToNodeType]);
-  const goToDocker = useCallback(() => goToNodeType('container' as InfraNodeType), [goToNodeType]);
-  const goToAwsEC2 = useCallback(() => goToNodeType('awsEC2' as InfraNodeType), [goToNodeType]);
-  const goToAwsS3 = useCallback(() => goToNodeType('awsS3' as InfraNodeType), [goToNodeType]);
-  const goToAwsRDS = useCallback(() => goToNodeType('awsRDS' as InfraNodeType), [goToNodeType]);
-  const goToAwsSQS = useCallback(() => goToNodeType('awsSQS' as InfraNodeType), [goToNodeType]);
+  const goToHost = useCallback(() => goToNodeType('host'), [goToNodeType]);
+  const goToK8 = useCallback(() => goToNodeType('pod'), [goToNodeType]);
+  const goToDocker = useCallback(() => goToNodeType('container'), [goToNodeType]);
+  const goToAwsEC2 = useCallback(() => goToNodeType('awsEC2'), [goToNodeType]);
+  const goToAwsS3 = useCallback(() => goToNodeType('awsS3'), [goToNodeType]);
+  const goToAwsRDS = useCallback(() => goToNodeType('awsRDS'), [goToNodeType]);
+  const goToAwsSQS = useCallback(() => goToNodeType('awsSQS'), [goToNodeType]);
   const panels = useMemo(
     () =>
       [

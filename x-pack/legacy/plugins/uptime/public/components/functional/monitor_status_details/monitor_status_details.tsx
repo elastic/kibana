@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { LocationMap } from '../location_map';
-import { MonitorStatusBar } from '../monitor_status_bar';
+import { MonitorStatusBar } from './monitor_status_bar';
+import { UptimeRefreshContext } from '../../../contexts';
 
 interface MonitorStatusBarProps {
   monitorId: string;
@@ -29,12 +30,38 @@ export const MonitorStatusDetailsComponent = ({
   useEffect(() => {
     loadMonitorLocations(monitorId);
   }, [loadMonitorLocations, monitorId, dateStart, dateEnd]);
+  const { refreshApp } = useContext(UptimeRefreshContext);
+
+  const [isTabActive] = useState(document.visibilityState);
+  const onTabActive = () => {
+    if (document.visibilityState === 'visible' && isTabActive === 'hidden') {
+      refreshApp();
+    }
+  };
+
+  // Refreshing application state after Tab becomes active to render latest map state
+  // If application renders in when tab is not in focus it gives some unexpected behaviors
+  // Where map is not visible on change
+  useEffect(() => {
+    document.addEventListener('visibilitychange', onTabActive);
+    return () => {
+      document.removeEventListener('visibilitychange', onTabActive);
+    };
+
+    // we want this effect to execute exactly once after the component mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <EuiPanel>
       <EuiFlexGroup gutterSize="l" wrap>
         <EuiFlexItem grow={true}>
-          <MonitorStatusBar monitorId={monitorId} variables={variables} />
+          <MonitorStatusBar
+            monitorId={monitorId}
+            variables={variables}
+            dateStart={dateStart}
+            dateEnd={dateEnd}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LocationMap monitorLocations={monitorLocations} />

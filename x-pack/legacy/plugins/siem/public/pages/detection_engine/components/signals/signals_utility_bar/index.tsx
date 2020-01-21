@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { EuiContextMenuPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import {
   UtilityBar,
@@ -15,25 +15,28 @@ import {
   UtilityBarText,
 } from '../../../../../components/detection_engine/utility_bar';
 import * as i18n from './translations';
-import { getBatchItems } from './batch_actions';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
 import { TimelineNonEcsData } from '../../../../../graphql/types';
-import { SendSignalsToTimeline, UpdateSignalsStatus } from '../types';
+import { UpdateSignalsStatus } from '../types';
+import { FILTER_CLOSED, FILTER_OPEN } from '../signals_filter_group';
 
 interface SignalsUtilityBarProps {
+  canUserCRUD: boolean;
+  hasIndexWrite: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
   isFilteredToOpen: boolean;
   selectAll: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
-  sendSignalsToTimeline: SendSignalsToTimeline;
   showClearSelection: boolean;
   totalCount: number;
   updateSignalsStatus: UpdateSignalsStatus;
 }
 
 const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
+  canUserCRUD,
+  hasIndexWrite,
   areEventsLoading,
   clearSelection,
   totalCount,
@@ -42,32 +45,15 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
   selectAll,
   showClearSelection,
   updateSignalsStatus,
-  sendSignalsToTimeline,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const getBatchItemsPopoverContent = useCallback(
-    (closePopover: () => void) => (
-      <EuiContextMenuPanel
-        items={getBatchItems(
-          areEventsLoading,
-          showClearSelection,
-          selectedEventIds,
-          updateSignalsStatus,
-          sendSignalsToTimeline,
-          closePopover,
-          isFilteredToOpen
-        )}
-      />
-    ),
-    [
-      areEventsLoading,
-      selectedEventIds,
-      updateSignalsStatus,
-      sendSignalsToTimeline,
-      isFilteredToOpen,
-    ]
-  );
+  const handleUpdateStatus = useCallback(async () => {
+    await updateSignalsStatus({
+      signalIds: Object.keys(selectedEventIds),
+      status: isFilteredToOpen ? FILTER_CLOSED : FILTER_OPEN,
+    });
+  }, [selectedEventIds, updateSignalsStatus, isFilteredToOpen]);
 
   const formattedTotalCount = numeral(totalCount).format(defaultNumberFormat);
   const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
@@ -83,7 +69,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
           </UtilityBarGroup>
 
           <UtilityBarGroup>
-            {totalCount > 0 && (
+            {canUserCRUD && hasIndexWrite && (
               <>
                 <UtilityBarText>
                   {i18n.SELECTED_SIGNALS(
@@ -93,15 +79,17 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
                 </UtilityBarText>
 
                 <UtilityBarAction
-                  iconSide="right"
-                  iconType="arrowDown"
-                  popoverContent={getBatchItemsPopoverContent}
+                  disabled={areEventsLoading || isEmpty(selectedEventIds)}
+                  iconType={isFilteredToOpen ? 'securitySignalResolved' : 'securitySignalDetected'}
+                  onClick={handleUpdateStatus}
                 >
-                  {i18n.BATCH_ACTIONS}
+                  {isFilteredToOpen
+                    ? i18n.BATCH_ACTION_CLOSE_SELECTED
+                    : i18n.BATCH_ACTION_OPEN_SELECTED}
                 </UtilityBarAction>
 
                 <UtilityBarAction
-                  iconType="listAdd"
+                  iconType={showClearSelection ? 'cross' : 'pagesSelect'}
                   onClick={() => {
                     if (!showClearSelection) {
                       selectAll();
