@@ -179,7 +179,6 @@ export class ValidationResults {
           {
             defaultMessage:
               'Tokenization of field value examples could not be performed due to insufficient privileges. Field values cannot therefore be checked to see if they are appropriate for use in a categorization job.',
-            values: { message },
           }
         ),
       });
