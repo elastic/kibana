@@ -111,11 +111,13 @@ export const AddDataSourceForm = ({ package: pkg }: AddDataSourceStepsProps) => 
           // @ts-ignore not sure where/how to enforce a `value` key on options
           policyIds: formState.policies.map(({ value }) => value),
         });
+
+        setInstallationRequested(false);
         setAddDataSourceSuccess(true);
+
         notifications.toasts.addSuccess({
           title: `Added ${pkg.title} data source`,
         });
-        return;
       } catch (err) {
         notifications.toasts.addWarning({
           title: `Failed to add data source to ${pkg.title}`,
