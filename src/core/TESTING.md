@@ -59,22 +59,22 @@ test('my test', async () => {
 });
 ```
 
-### Strategies for specific Core APIs
+## Strategies for specific Core APIs
 
-#### HTTP Routes
-The HTTP API interface is another public contract of Kibana. Although not every Kibana endpoint is for external use. Evaluating the required level of test coverage for an HTTP resource, make your judgment based on the fact whether an endpoint is considered to be public or private. Public API is expected to have a higher level of test coverage.
-Public API tests should cover **observable behavior** of the system. Therefore they should be close to the real user interactions as much as possible. Ideally, to use HTTP requests to communicate with the Kibana server.
+### HTTP Routes
+The HTTP API interface is another public contract of Kibana, although not every Kibana endpoint is for external use. When evaluating the required level of test coverage for an HTTP resource, make your judgment based on whether an endpoint is considered to be public or private. Public API is expected to have a higher level of test coverage.
+Public API tests should cover the **observable behavior** of the system, therefore they should be close to the real user interactions as much as possible, ideally by using HTTP requests to communicate with the Kibana server as a real user would do.
 
-##### Integration tests
+#### Integration tests
 Depending on the number of external dependencies, you can consider implementing several high-level integration tests. They would work as a set of [smoke tests](https://en.wikipedia.org/wiki/Smoke_testing_(software)) for the most important functionality.
-Subjects for tests:
+Main subjects for tests should be:
 - authenticated / unauthenticated access to an endpoint.
 - endpoint validation (params, query, body).
 - main business logic.
 
-###### Functional Test Runner
-If your plugin leverages elasticsearch server to store data and supports additional configuration, you can utilize Functional Test Runner(FTR) to add integration tests. 
-FTR bootstraps the real elasticsearch instance and runs Kibana against it.
+##### Functional Test Runner
+If your plugin relies on the elasticsearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests. 
+FTR bootstraps an Elasticsearch and a Kibana instance and runs the test suite against it.
 Pros:
 - runs the whole Elastic stack
 - tests cross-plugin integration
@@ -85,7 +85,8 @@ Cons:
 - hard to debug
 - brittle tests
 
-Imagine that `myPlugin` provides a set of endpoints to store & retrieve user data:
+###### Example
+Let's assume that `myPlugin` provides a set of endpoints to store & retrieve user data:
 ```ts
 router.post(
   {
@@ -115,12 +116,19 @@ router.get(
     },
   },
   async (context, request, response) => {
-    const savedObjectsClient = context.core.savedObjects.client;
-    const { attributes } = await savedObjectsClient.get('myPlugin-type', request.params.id);
+    try {
+      const savedObjectsClient = context.core.savedObjects.client;
+      const { attributes } = await savedObjectsClient.get('myPlugin-type', request.params.id);
 
-    return response.ok({
-      body: attributes.something,
-    });
+      return response.ok({
+        body: attributes.something,
+      });
+    } catch(error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return response.notFound()
+      }
+      throw e;
+    }
   }
 );
 ```
@@ -133,6 +141,7 @@ The tests cover:
 ```
 - request validation
 ```ts
+// test/api_integration/apis/my_plugin/something.ts
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('myPlugin', () => {
@@ -173,6 +182,14 @@ export default function({ getService }: FtrProviderContext) {
       const response = await supertest.get(`/myPlugin/something/${body.id}`).expect(200);
       expect(response.text).be('bbb');
     });
+
+    it('returns NotFound error when cannot find a resource', async () => {
+      await supertest
+        .post('/myPlugin/something')
+        .set('content-type', 'application/json')
+        .send({ text: 'missing' })
+        .expect(404, 'Saved object [myPlugin-type/missing] not found');
+    });
   });
 ```
 
@@ -185,7 +202,9 @@ Pros:
 Cons:
 - faster than FTR because it doesn't run Elasticsearch instance, but still slow
 - hard to debug
+- doesn't cover Kibana CLI logic
 
+###### Example
 Given `myPlugin` plugin with an endpoint to format user-provided text:
 ```ts
 router.get(
@@ -198,14 +217,21 @@ router.get(
     },
   },
   async (context, request, response) => {
-    const sanitizeString = deps.sanitizer.sanitize(request.query.text);
-    const formattedText = format(sanitizeString);
-    return response.ok({ body: formattedText });
+    try {
+      const sanitizeString = deps.sanitizer.sanitize(request.query.text);
+      const formattedText = format(sanitizeString);
+      return response.ok({ body: formattedText });
+    } catch(error) {
+      if (error instanceof MisformedTextError) {
+        return response.badRequest({ body: error.message })
+      }
+    }
   }
 );
 ```
 To have access to Kibana TestUtils, you should create `integration_tests` folder and import `test_utils` within a test file:
 ```ts
+// src/plugins/my_plugin/server/integration_tests/formatter.test.ts
 import * as kbnTestServer from 'src/test_utils/kbn_server';
 
 describe('myPlugin', () => {
@@ -235,11 +261,18 @@ describe('myPlugin', () => {
 
       expect(response.text).toBe('...');
     });
+
+    it('returns BadRequest if passed string contains banned symbols', async () => {
+      await kbnTestServer.request
+        .get(root, '/myPlugin/formatter')
+        .query({ text: '<script>' })
+        .expect(400, 'Text cannot contain unescaped HTML markup.');
+    });
   });
 });
 ```
 
-##### Unit testing
+#### Unit testing
 For cases when writing integration tests is hard and slow due to complex setup or the number of logic permutations, you can go with testing your models.
 Pros:
 - fast
@@ -249,6 +282,7 @@ Cons:
 - doesn't test against real dependencies
 - doesn't cover integration with other plugins
 
+###### Example
 You can leverage existing unit-test infrastructure for this. Let's adopt an example with `/myPlugin/formatter` endpoint to make out controllers *thin* and isolating all the network layer dependencies.
 ```ts
 class TextFormatter {
@@ -275,9 +309,9 @@ router.get(
     try {
       const formattedText = await TextFormatter.format(request.query.text, deps.sanitizer);
       return response.ok({ body: result });
-    } catch(e){
-      if(e instanceof MisformedTextError) {
-        return response.badRequest({ body: e.message })
+    } catch(error) {
+      if (error instanceof MisformedTextError) {
+        return response.badRequest({ body: error.message })
       }
       throw e;
     }
@@ -291,6 +325,7 @@ Now we can add `*.test.ts` file and use dependencies mocks to cover the function
 - expected exception
 - interaction with dependencies
 ```ts
+// src/plugins/my_plugin/server/formatter.test.ts
 describe('TextFormatter', () => {
   describe('format()', () => {
     const sanitizer = sanitizerMock.createSetup();
@@ -307,7 +342,7 @@ describe('TextFormatter', () => {
     });
 
     it('throws MisformedTextError if passed string contains banned symbols', async () => {
-      await expect(TextFormatter.format('aaa', sanitizer)).rejects.toThrow(MisformedTextError);
+      await expect(TextFormatter.format('<script>', sanitizer)).rejects.toThrow(MisformedTextError);
     });
     // ... other tests
   });
