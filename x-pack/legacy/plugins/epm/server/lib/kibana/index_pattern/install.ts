@@ -104,18 +104,18 @@ export const dedupeFields = (fields: Fields) => {
 
 /**
  * search through fields with field's path property
+ * returns undefined if field not found or field is not a leaf node
  * @param  allFields fields to search
  * @param  path dot separated path from field.path
  */
 export const findFieldByPath = (allFields: Fields, path: string): Field | undefined => {
   const pathParts = path.split('.');
   const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
+    if (!pathNames.length) return undefined;
     // get the first rest of path names
     const [name, ...restPathNames] = pathNames;
     for (const field of fields) {
       if (field.name === name) {
-        // no nested fields to search and matches
-        if (!restPathNames.length) return field;
         // check field's fields, passing in the remaining path names
         if (field.fields && field.fields.length > 0) {
           return getField(field.fields, restPathNames);
@@ -124,6 +124,7 @@ export const findFieldByPath = (allFields: Fields, path: string): Field | undefi
         if (restPathNames.length) {
           return undefined;
         }
+        return field;
       }
     }
     return undefined;
@@ -212,7 +213,7 @@ export const flattenFields = (allFields: Fields): Fields => {
         // handle alias type fields - TODO: this should probably go somewhere else
         if (field.type === 'alias' && field.path) {
           const foundField = findFieldByPath(allFields, field.path);
-          // if aliased field is found copy its props over except path and name
+          // if aliased leaf field is found copy its props over except path and name
           if (foundField) {
             const { path, name } = field;
             field = { ...foundField, path, name };

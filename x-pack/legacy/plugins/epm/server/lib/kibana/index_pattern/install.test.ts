@@ -52,7 +52,7 @@ describe('creating index patterns from yaml fields', () => {
     expect(deduped).toMatchSnapshot('dedupeFields');
   });
 
-  test('getFieldByPath searches recursively for field in fields given dot separated path', () => {
+  describe('getFieldByPath searches recursively for field in fields given dot separated path', () => {
     const searchFields: Fields = [
       {
         name: '1',
@@ -85,12 +85,18 @@ describe('creating index patterns from yaml fields', () => {
         ],
       },
     ];
-    expect(findFieldByPath(searchFields, '0')).toBe(undefined);
-    expect(findFieldByPath(searchFields, '1')?.name).toBe('1');
-    expect(findFieldByPath(searchFields, '3')?.name).toBe(undefined);
-    expect(findFieldByPath(searchFields, '1.1-3')?.name).toBe(undefined);
-    expect(findFieldByPath(searchFields, '2.2-2.2-2-1')?.name).toBe('2-2-1');
-    expect(findFieldByPath(searchFields, '2.2-2.2-2-3')?.name).toBe(undefined);
+    test('returns undefined when the field does not exist', () => {
+      expect(findFieldByPath(searchFields, '0')).toBe(undefined);
+    });
+    test('returns undefined if the field is not a leaf node', () => {
+      expect(findFieldByPath(searchFields, '1')?.name).toBe(undefined);
+    });
+    test('returns undefined searching for a nested field that does not exist', () => {
+      expect(findFieldByPath(searchFields, '1.1-3')?.name).toBe(undefined);
+    });
+    test('returns nested field that is a leaf node', () => {
+      expect(findFieldByPath(searchFields, '2.2-2.2-2-1')?.name).toBe('2-2-1');
+    });
   });
 
   test('transformField maps field types to kibana index pattern data types', () => {
