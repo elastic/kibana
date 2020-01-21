@@ -22,19 +22,31 @@ cd %_builddir
 rm -rf %{name}
 mkdir %{name}
 cd %{name}
+
 #extract sources
 tar xzf %_sourcedir/%{name}-%{version}.tar.gz
 if [ $? -ne 0 ]; then
    exit $?
 fi
 
+#extract dlumbrer/kbn_network plugin, following the renaming and file modification steps from github repo
+unzip -q resources/plugins/kbn_network*.zip -d plugins/
+if [ $? -ne 0 ]; then
+   exit $?
+fi
+mv plugins/kbn_network* plugins/network_vis
+rm -rf plugins/network_vis/images/
+
 %build
-#installs dependencies and runs the build
+#must install kibana dependencies before running build due to a yarn bug fetching new dependencies
 cd %{name}
 /usr/bin/yarn
+
+#plugin has a package.json that must also be installed before running build
 cd plugins/network_vis/
 /usr/bin/yarn
 
+#run the build
 cd ../../
 /usr/bin/yarn kbn bootstrap
 node scripts/build --rpm --oss --skip-archives --release --verbose
