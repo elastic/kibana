@@ -194,8 +194,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
-          model_bytes_exceeded: '0',
-          model_bytes_memory_limit: '10485760',
+          model_bytes_exceeded: '0.0 B',
+          model_bytes_memory_limit: '10.0 MB',
           total_by_field_count: '37',
           total_over_field_count: '92',
           total_partition_field_count: '8',
@@ -261,8 +261,8 @@ export default function({ getService }: FtrProviderContext) {
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
-          model_bytes_exceeded: '0',
-          model_bytes_memory_limit: '104857600',
+          model_bytes_exceeded: '0.0 B',
+          model_bytes_memory_limit: '100.0 MB',
           total_by_field_count: '994',
           total_over_field_count: '0',
           total_partition_field_count: '2',
