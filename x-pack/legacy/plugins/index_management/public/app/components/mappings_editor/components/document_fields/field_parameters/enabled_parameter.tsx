@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
@@ -14,16 +15,18 @@ import { EditFieldFormRow } from '../fields/edit_field';
 export const EnabledParameter = () => {
   return (
     <EditFieldFormRow
-      title={i18n.translate('xpack.idxMgmt.mappingsEditor.enabledParameter.fieldTitle', {
-        defaultMessage: 'Parse and index the JSON value for the object',
+      title={i18n.translate('xpack.idxMgmt.mappingsEditor.searchableProperties.fieldTitle', {
+        defaultMessage: 'Searchable properties',
       })}
-      description={i18n.translate(
-        'xpack.idxMgmt.mappingsEditor.enabledParameter.fieldDescription',
-        {
-          defaultMessage:
-            'If you disable this setting Elasticsearch will skip parsing the contents of the field entirely. The JSON can still be retrieved from the _source field, but it is not searchable or stored in any other way.',
-        }
-      )}
+      description={
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.searchableProperties.fieldDescription"
+          defaultMessage="Allow object properties to be searched. The JSON can still be retrieved from the {source} field even after disabling this setting."
+          values={{
+            source: <EuiCode>_source</EuiCode>,
+          }}
+        />
+      }
       docLink={{
         text: i18n.translate('xpack.idxMgmt.mappingsEditor.enabledDocLinkText', {
           defaultMessage: 'Enabled documentation',
