@@ -5702,7 +5702,6 @@
     "xpack.fileUpload.jsonIndexFilePicker.filePickerLabel": "选择文件进行上传",
     "xpack.fileUpload.jsonIndexFilePicker.fileProcessingError": "文件处理错误：{errorMessage}",
     "xpack.fileUpload.jsonIndexFilePicker.fileSizeError": "文件大小错误：{errorMessage}",
-    "xpack.fileUpload.jsonIndexFilePicker.formatsAccepted": "接受的格式：.json、.geojson",
     "xpack.fileUpload.jsonIndexFilePicker.maxSize": "最大大小：{maxFileSize}",
     "xpack.fileUpload.jsonIndexFilePicker.noFileNameError": "未提供任何文件名称",
     "xpack.fileUpload.jsonIndexFilePicker.parsingFile": "{featuresProcessed} 特征已解析......",
