@@ -9,6 +9,7 @@ import {
   getResponseInspectorStats,
 } from '../../../../../src/legacy/core_plugins/data/public';
 import { esFilters } from '../../../../../src/plugins/data/public';
+export { SearchSource } from '../../../../../src/plugins/data/public';
 import { npStart } from 'ui/new_platform';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
