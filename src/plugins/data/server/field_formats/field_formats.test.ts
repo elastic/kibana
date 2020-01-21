@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FieldFormatsService } from './field_formats_service';
+import { FieldFormats } from './field_formats';
 import { NumberFormat } from '../../../../plugins/data/public';
 
 const getConfig = (key: string) => {
@@ -33,22 +33,22 @@ const getConfig = (key: string) => {
 };
 
 describe('FieldFormatsService', () => {
-  let fieldFormatsService: FieldFormatsService;
+  let fieldFormats: FieldFormats;
 
   beforeEach(() => {
     const fieldFormatClasses = [NumberFormat];
 
-    fieldFormatsService = new FieldFormatsService(fieldFormatClasses, getConfig);
+    fieldFormats = new FieldFormats(fieldFormatClasses, getConfig);
   });
 
   test('FieldFormats are accessible via getType method', () => {
-    const Type = fieldFormatsService.getType('number');
+    const Type = fieldFormats.getType('number');
 
     expect(Type.id).toBe('number');
   });
 
   test('getDefaultInstance returns default FieldFormat instance for fieldType', () => {
-    const instance = fieldFormatsService.getDefaultInstance('number');
+    const instance = fieldFormats.getDefaultInstance('number');
 
     expect(instance.type.id).toBe('number');
     expect(instance.convert('0.33333')).toBe('0.333');

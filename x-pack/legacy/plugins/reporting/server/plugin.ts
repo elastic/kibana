@@ -6,7 +6,6 @@
 
 import { Legacy } from 'kibana';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
-import { IUiSettingsClient } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 // @ts-ignore
@@ -18,6 +17,7 @@ import { LevelLogger, checkLicenseFactory, getExportTypesRegistry, runValidation
 import { createBrowserDriverFactory } from './browsers';
 import { registerReportingUsageCollector } from './usage';
 import { logConfiguration } from '../log_configuration';
+import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 
 // For now there is no exposed functionality to other plugins
 export type ReportingSetup = object;
@@ -44,7 +44,7 @@ export interface LegacySetup {
   route: Legacy.Server['route'];
   savedObjects: Legacy.Server['savedObjects'];
   uiSettingsServiceFactory: Legacy.Server['uiSettingsServiceFactory'];
-  fieldFormatServiceFactory: (uiConfig: IUiSettingsClient) => unknown;
+  fieldFormatServiceFactory: DataPluginStart['fieldFormats']['fieldFormatServiceFactory'];
 }
 
 export type ReportingPlugin = Plugin<

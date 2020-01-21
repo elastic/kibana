@@ -18,11 +18,13 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { DataServerPlugin, DataPluginSetup } from './plugin';
+import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
+
+export { FieldFormatsService, FieldFormats } from './field_formats';
 
 /**
  * Types to be shared externally
@@ -93,4 +95,8 @@ export {
   getKbnTypeNames,
 } from '../common';
 
-export { DataServerPlugin as Plugin, DataPluginSetup as PluginSetup };
+export {
+  DataServerPlugin as Plugin,
+  DataPluginSetup as PluginSetup,
+  DataPluginStart as PluginStart,
+};

@@ -17,6 +17,8 @@ import {
   reportingPluginFactory,
 } from './server/plugin';
 
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
 };
@@ -70,6 +72,9 @@ export const reporting = (kibana: any) => {
       const pluginsSetup: ReportingSetupDeps = {
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
       };
+
+      const data = server.newPlatform.setup.plugins.data as DataPluginStart;
+
       const __LEGACY: LegacySetup = {
         config: server.config,
         info: server.info,
@@ -80,9 +85,8 @@ export const reporting = (kibana: any) => {
           security: server.plugins.security,
         },
         savedObjects: server.savedObjects,
+        fieldFormatServiceFactory: data.fieldFormats.fieldFormatServiceFactory,
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
-        // @ts-ignore Property 'fieldFormatServiceFactory' does not exist on type 'Server'.
-        fieldFormatServiceFactory: server.fieldFormatServiceFactory,
         log: server.log.bind(server),
       };
 

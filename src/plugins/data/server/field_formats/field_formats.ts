@@ -25,13 +25,11 @@ interface FieldFormatConfig {
   params?: Record<string, any>;
 }
 
-export class FieldFormatsService {
-  getConfig: any;
-  _fieldFormats: Dictionary<IFieldFormatType>;
+export class FieldFormats {
+  private readonly _fieldFormats: Dictionary<IFieldFormatType>;
 
-  constructor(fieldFormatClasses: IFieldFormatType[], getConfig: Function) {
+  constructor(fieldFormatClasses: IFieldFormatType[], private getConfig: Function) {
     this._fieldFormats = indexBy(fieldFormatClasses, 'id');
-    this.getConfig = getConfig;
   }
 
   /**
@@ -43,6 +41,7 @@ export class FieldFormatsService {
    */
   getDefaultConfig(fieldType: string): FieldFormatConfig {
     const defaultMap = this.getConfig('format:defaultTypeMap');
+
     return defaultMap[fieldType] || defaultMap._default_;
   }
 

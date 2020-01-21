@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { fieldFormatsMixin } from './mixin/field_formats_mixin';
+export {
+  FieldFormatsService,
+  FieldFormatsServiceSetup,
+  FieldFormatsServiceStart,
+} from './field_formats_service';
+export { FieldFormats } from './field_formats';
