@@ -73,13 +73,8 @@ export class ReportInfoButton extends Component<Props, State> {
 
     const jobType = info.jobtype || NA;
 
-    interface JobInfo {
-      title: string;
-      description: string;
-    }
-
     interface JobInfoMap {
-      [thing: string]: JobInfo[];
+      [thing: string]: Array<{ title: string; description: string }>;
     }
 
     const attempts = info.attempts ? info.attempts.toString() : NA;
@@ -118,7 +113,8 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Browser Locales',
-          description: get(info, 'payload.browserLocales')?.join(', ') || NA,
+          description:
+            get<JobInfo | null, string[]>(info, 'payload.browserLocales')?.join(', ') || NA,
         },
       ],
       payload: [
