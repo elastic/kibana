@@ -177,6 +177,10 @@ class DocumentationService {
     return `${this.esDocsBase}/index-options.html`;
   }
 
+  public getRemovalMappingTypeLink() {
+    return `${this.esDocsBase}/removal-of-types.html`;
+  }
+
   public getWellKnownTextLink() {
     return 'http://docs.opengeospatial.org/is/12-063r5/12-063r5.html';
   }

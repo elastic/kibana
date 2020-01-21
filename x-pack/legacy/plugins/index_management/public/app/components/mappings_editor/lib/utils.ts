@@ -542,7 +542,7 @@ export const isStateValid = (state: State): boolean | undefined =>
     },
   };
  ```
- * This helpers parse the mappings provided an removes any possible "type" declared
+ * This helpers parse the mappings provided an removes any possible mapping "type" declared
  *
  * @param mappings The mappings object to validate
  */

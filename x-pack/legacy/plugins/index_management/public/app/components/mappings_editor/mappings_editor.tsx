@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
-import { ConfigurationForm, DocumentFields, TemplatesForm } from './components';
+import {
+  ConfigurationForm,
+  DocumentFields,
+  TemplatesForm,
+  MultipleMappingsWarning,
+} from './components';
 import { IndexSettings } from './types';
+import { extractMappingsDefinition } from './lib';
 import { State } from './reducer';
-import { MappingsState, Props as MappingsStateProps } from './mappings_state';
+import { MappingsState, Props as MappingsStateProps, Types } from './mappings_state';
 import { IndexSettingsProvider } from './index_settings_context';
 
 interface Props {
@@ -25,7 +31,13 @@ type TabName = 'fields' | 'advanced' | 'templates';
 export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSettings }: Props) => {
   const [selectedTab, selectTab] = useState<TabName>('fields');
 
-  const parsedDefaultValue = useMemo(() => {
+  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo(() => {
+    const mappingsDefinition = extractMappingsDefinition(defaultValue);
+
+    if (mappingsDefinition === null) {
+      return { multipleMappingsDeclared: true };
+    }
+
     const {
       _source = {},
       _meta = {},
@@ -36,9 +48,9 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
       dynamic_date_formats,
       properties = {},
       dynamic_templates,
-    } = defaultValue ?? {};
+    } = mappingsDefinition;
 
-    return {
+    const parsed = {
       configuration: {
         _source,
         _meta,
@@ -53,7 +65,20 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
         dynamic_templates,
       },
     };
+
+    return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };
   }, [defaultValue]);
+
+  useEffect(() => {
+    if (multipleMappingsDeclared) {
+      // We set the data getter here as the user won't be able to make any changes
+      onUpdate({
+        getData: () => defaultValue! as Types['Mappings'],
+        validate: () => Promise.resolve(true),
+        isValid: true,
+      });
+    }
+  }, [multipleMappingsDeclared]);
 
   const changeTab = async (tab: TabName, state: State) => {
     if (selectedTab === 'advanced') {
@@ -77,9 +102,11 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     selectTab(tab);
   };
 
-  return (
+  return multipleMappingsDeclared ? (
+    <MultipleMappingsWarning />
+  ) : (
     <IndexSettingsProvider indexSettings={indexSettings}>
-      <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue}>
+      <MappingsState onUpdate={onUpdate} defaultValue={parsedDefaultValue!}>
         {({ state }) => {
           const tabToContentMap = {
             fields: <DocumentFields />,
