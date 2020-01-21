@@ -19,8 +19,8 @@
 
 import { set } from 'lodash';
 // @ts-ignore
-import { createFilter } from '../../../core_plugins/visualizations/public';
-import { FormattedData } from './adapters';
+import { createFilter } from '../../../../visualizations/public';
+import { FormattedData } from '../../../../../../plugins/inspector/public';
 
 interface Column {
   id: string;
