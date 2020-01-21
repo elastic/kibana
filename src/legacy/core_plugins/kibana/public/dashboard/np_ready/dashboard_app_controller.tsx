@@ -470,18 +470,21 @@ export class DashboardAppController {
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-        []
+        queryFilter.getGlobalFilters()
       );
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
-      setTimeout(queryFilter.removeAll, 0);
+      setTimeout(() => {
+        queryFilter.setFilters(queryFilter.getGlobalFilters());
+      }, 0);
     };
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
-      dashboardStateManager.applyFilters(
-        savedQuery.attributes.query,
-        savedQuery.attributes.filters || []
-      );
+      const savedQueryFilters = savedQuery.attributes.filters || [];
+      const globalFilters = queryFilter.getGlobalFilters();
+      const allFilters = [...globalFilters, ...savedQueryFilters];
+
+      dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
       if (savedQuery.attributes.timefilter) {
         timefilter.setTime({
           from: savedQuery.attributes.timefilter.from,
@@ -494,7 +497,7 @@ export class DashboardAppController {
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
       setTimeout(() => {
-        queryFilter.setFilters(savedQuery.attributes.filters || []);
+        queryFilter.setFilters(allFilters);
       }, 0);
     };
 
