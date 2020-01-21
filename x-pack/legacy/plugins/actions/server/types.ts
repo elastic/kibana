@@ -63,7 +63,7 @@ export interface ActionTypeExecutorResult {
 // signature of the action type executor function
 export type ExecutorType = (
   options: ActionTypeExecutorOptions
-) => Promise<ActionTypeExecutorResult>;
+) => Promise<ActionTypeExecutorResult | null | undefined | void>;
 
 interface ValidatorType {
   validate<T>(value: any): any;
