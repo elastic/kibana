@@ -14,6 +14,9 @@ describe('Register Rollup Search Strategy', () => {
 
     kbnServer = {
       afterPluginsInit,
+      newPlatform: {
+        setup: { plugins: {} },
+      },
     };
 
     metrics = {
@@ -25,19 +28,16 @@ describe('Register Rollup Search Strategy', () => {
   });
 
   test('should run initialization on "afterPluginsInit" hook', () => {
-    registerRollupSearchStrategy(kbnServer, {
-      plugins: {},
-    });
+    registerRollupSearchStrategy(kbnServer, {});
 
     expect(kbnServer.afterPluginsInit).toHaveBeenCalled();
   });
 
   test('should run initialization if metrics plugin available', () => {
-    registerRollupSearchStrategy(kbnServer, {
-      plugins: {
-        metrics,
-      },
-    });
+    registerRollupSearchStrategy(
+      { ...kbnServer, newPlatform: { setup: { plugins: { metrics } } } },
+      {}
+    );
 
     expect(metrics.addSearchStrategy).toHaveBeenCalled();
   });
