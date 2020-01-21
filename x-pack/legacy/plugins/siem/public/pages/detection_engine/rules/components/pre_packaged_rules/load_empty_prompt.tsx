@@ -39,7 +39,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType="gear"
+              iconType="plusInCircle"
               isDisabled={userHasNoPermissions}
               isLoading={loading}
               onClick={handlePreBuiltCreation}
