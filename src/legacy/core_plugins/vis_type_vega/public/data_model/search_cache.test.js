@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { SearchCache } from '../search_cache';
+import { SearchCache } from './search_cache';
 
 describe(`SearchCache`, () => {
   class FauxEs {
@@ -45,27 +44,27 @@ describe(`SearchCache`, () => {
 
     // empty request
     let res = await sc.search([]);
-    expect(res).to.eql([]);
-    expect(sc._es.searches).to.eql([]);
+    expect(res).toEqual([]);
+    expect(sc._es.searches).toEqual([]);
 
     // single request
     res = await sc.search([request1]);
-    expect(res).to.eql([expected1]);
-    expect(sc._es.searches).to.eql([request1]);
+    expect(res).toEqual([expected1]);
+    expect(sc._es.searches).toEqual([request1]);
 
     // repeat the same search, use array notation
     res = await sc.search([request1]);
-    expect(res).to.eql([expected1]);
-    expect(sc._es.searches).to.eql([request1]); // no new entries
+    expect(res).toEqual([expected1]);
+    expect(sc._es.searches).toEqual([request1]); // no new entries
 
     // new single search
     res = await sc.search([request2]);
-    expect(res).to.eql([expected2]);
-    expect(sc._es.searches).to.eql([request1, request2]);
+    expect(res).toEqual([expected2]);
+    expect(sc._es.searches).toEqual([request1, request2]);
 
     // multiple search, some new, some old
     res = await sc.search([request1, request3, request2]);
-    expect(res).to.eql([expected1, expected3, expected2]);
-    expect(sc._es.searches).to.eql([request1, request2, request3]);
+    expect(res).toEqual([expected1, expected3, expected2]);
+    expect(sc._es.searches).toEqual([request1, request2, request3]);
   });
 });

@@ -525,17 +525,7 @@ describe('#start()', () => {
       const { getComponent } = await service.start(startDeps);
 
       expect(() => shallow(createElement(getComponent))).not.toThrow();
-      expect(getComponent()).toMatchInlineSnapshot(`
-        <AppRouter
-          history={
-            Object {
-              "push": [MockFunction],
-            }
-          }
-          mounters={Map {}}
-          setAppLeaveHandler={[Function]}
-        />
-      `);
+      expect(getComponent()).toMatchSnapshot();
     });
 
     it('renders null when in legacy mode', async () => {
