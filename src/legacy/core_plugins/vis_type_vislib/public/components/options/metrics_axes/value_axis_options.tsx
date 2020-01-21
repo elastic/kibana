@@ -119,7 +119,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
   return (
     <>
       <SelectOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.positionLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.positionLabel', {
           defaultMessage: 'Position',
         })}
         options={positions}
@@ -130,7 +130,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
 
       <SelectOption
         id={`valueAxisMode${index}`}
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.modeLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.modeLabel', {
           defaultMessage: 'Mode',
         })}
         options={vis.type.editorConfig.collections.axisModes}
@@ -141,7 +141,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
 
       <SelectOption
         id={`scaleSelectYAxis-${axis.id}`}
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleTypeLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.scaleTypeLabel', {
           defaultMessage: 'Scale type',
         })}
         options={vis.type.editorConfig.collections.scaleTypes}
@@ -153,7 +153,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
       <EuiHorizontalRule margin="m" />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.showLabel', {
           defaultMessage: 'Show axis lines and labels',
         })}
         paramName="show"
@@ -166,7 +166,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
           <EuiSpacer size="m" />
           <TextInputOption
             data-test-subj={`valueAxisTitle${index}`}
-            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.titleLabel', {
+            label={i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.titleLabel', {
               defaultMessage: 'Title',
             })}
             paramName="text"
@@ -188,13 +188,13 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         initialIsOpen={false}
         buttonContentClassName="euiText euiText--small"
         buttonContent={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.valueAxes.customExtentsLabel',
+          'visTypeVislib.controls.pointSeries.valueAxes.customExtentsLabel',
           {
             defaultMessage: 'Custom extents',
           }
         )}
         aria-label={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.valueAxes.toggleCustomExtendsAriaLabel',
+          'visTypeVislib.controls.pointSeries.valueAxes.toggleCustomExtendsAriaLabel',
           {
             defaultMessage: 'Toggle custom extents',
           }

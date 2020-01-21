@@ -105,7 +105,8 @@ export type PluginOpaqueId = symbol;
  */
 export interface PluginManifest {
   /**
-   * Identifier of the plugin.
+   * Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract.
+   * Other plugins leverage it to access plugin API, navigate to the plugin, etc.
    */
   readonly id: PluginName;
 
@@ -121,7 +122,11 @@ export interface PluginManifest {
 
   /**
    * Root {@link ConfigPath | configuration path} used by the plugin, defaults
-   * to "id".
+   * to "id" in snake_case format.
+   *
+   * @example
+   * id: myPlugin
+   * configPath: my_plugin
    */
   readonly configPath: ConfigPath;
 
@@ -162,7 +167,7 @@ export interface DiscoveredPlugin {
   readonly id: PluginName;
 
   /**
-   * Root configuration path used by the plugin, defaults to "id".
+   * Root configuration path used by the plugin, defaults to "id" in snake_case format.
    */
   readonly configPath: ConfigPath;
 

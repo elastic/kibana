@@ -22,7 +22,6 @@ import {
   getDeleteAsPostBulkRequestById,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { ServerFacade } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
@@ -33,7 +32,7 @@ describe('delete_rules', () => {
 
   beforeEach(() => {
     ({ server, alertsClient, savedObjectsClient } = createMockServer());
-    deleteRulesBulkRoute((server as unknown) as ServerFacade);
+    deleteRulesBulkRoute(server);
   });
 
   afterEach(() => {
@@ -100,14 +99,14 @@ describe('delete_rules', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteRulesBulkRoute((serverWithoutActionClient as unknown) as ServerFacade);
+      deleteRulesBulkRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getDeleteBulkRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      deleteRulesBulkRoute((serverWithoutAlertClient as unknown) as ServerFacade);
+      deleteRulesBulkRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getDeleteBulkRequest());
       expect(statusCode).toBe(404);
     });
@@ -116,7 +115,7 @@ describe('delete_rules', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteRulesBulkRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
+      deleteRulesBulkRoute(serverWithoutActionOrAlertClient);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteBulkRequest());
       expect(statusCode).toBe(404);
     });
