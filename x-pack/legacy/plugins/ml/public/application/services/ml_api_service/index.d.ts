@@ -27,7 +27,7 @@ import {
   CategoryFieldExample,
   FieldExampleCheck,
 } from '../../../../common/types/categories';
-import { CATEGORY_EXAMPLES_VALID_STATUS } from '../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/new_job';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -194,7 +194,7 @@ declare interface Ml {
     ): Promise<{
       examples: CategoryFieldExample[];
       sampleSize: number;
-      overallValidStatus: CATEGORY_EXAMPLES_VALID_STATUS;
+      overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
       validationChecks: FieldExampleCheck[];
     }>;
     topCategories(

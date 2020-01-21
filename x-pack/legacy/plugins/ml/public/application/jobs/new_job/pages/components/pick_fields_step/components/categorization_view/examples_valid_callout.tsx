@@ -14,11 +14,11 @@ import {
   FieldExampleCheck,
 } from '../../../../../../../../../common/types/categories';
 import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
-import { CATEGORY_EXAMPLES_VALID_STATUS } from '../../../../../../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/new_job';
 
 interface Props {
   validationChecks: FieldExampleCheck[];
-  overallValidStatus: CATEGORY_EXAMPLES_VALID_STATUS;
+  overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
   categorizationAnalyzer: CategorizationAnalyzer;
 }
 
@@ -37,7 +37,7 @@ export const ExamplesValidCallout: FC<Props> = ({
     }
   );
 
-  if (overallValidStatus === CATEGORY_EXAMPLES_VALID_STATUS.INVALID) {
+  if (overallValidStatus === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID) {
     color = 'danger';
     title = i18n.translate(
       'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.invalid',
@@ -45,7 +45,7 @@ export const ExamplesValidCallout: FC<Props> = ({
         defaultMessage: 'Selected category field is invalid',
       }
     );
-  } else if (overallValidStatus === CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID) {
+  } else if (overallValidStatus === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID) {
     color = 'warning';
     title = i18n.translate(
       'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldCalloutTitle.possiblyInvalid',

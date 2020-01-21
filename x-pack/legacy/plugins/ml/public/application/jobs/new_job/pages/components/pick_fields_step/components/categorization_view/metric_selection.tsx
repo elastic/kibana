@@ -18,7 +18,7 @@ import {
   CategoryFieldExample,
   FieldExampleCheck,
 } from '../../../../../../../../../common/types/categories';
-import { CATEGORY_EXAMPLES_VALID_STATUS } from '../../../../../../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/new_job';
 import { LoadingWrapper } from '../../../charts/loading_wrapper';
 
 interface Props {
@@ -37,7 +37,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   );
   const [fieldExamples, setFieldExamples] = useState<CategoryFieldExample[] | null>(null);
   const [overallValidStatus, setOverallValidStatus] = useState(
-    CATEGORY_EXAMPLES_VALID_STATUS.INVALID
+    CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID
   );
   const [validationChecks, setValidationChecks] = useState<FieldExampleCheck[]>([]);
 
@@ -91,13 +91,13 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
         setLoadingData(false);
         setFieldExamples(null);
         setValidationChecks([]);
-        setOverallValidStatus(CATEGORY_EXAMPLES_VALID_STATUS.INVALID);
+        setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
         mlMessageBarService.notify.error(error);
       }
     } else {
       setFieldExamples(null);
       setValidationChecks([]);
-      setOverallValidStatus(CATEGORY_EXAMPLES_VALID_STATUS.INVALID);
+      setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
     }
     setIsValid(categorizationFieldName !== null);
   }

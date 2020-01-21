@@ -16,7 +16,7 @@ import {
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
-  CATEGORY_EXAMPLES_VALID_STATUS,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '../../../../../../common/constants/new_job';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import {
@@ -35,8 +35,8 @@ export class CategorizationJobCreator extends JobCreator {
   private _examplesLoader: CategorizationExamplesLoader;
   private _categoryFieldExamples: CategoryFieldExample[] = [];
   private _validationChecks: FieldExampleCheck[] = [];
-  private _overallValidStatus: CATEGORY_EXAMPLES_VALID_STATUS =
-    CATEGORY_EXAMPLES_VALID_STATUS.INVALID;
+  private _overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS =
+    CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
   private _detectorType: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE =
     ML_JOB_AGGREGATION.COUNT;
   private _categorizationAnalyzer: CategorizationAnalyzer = {};

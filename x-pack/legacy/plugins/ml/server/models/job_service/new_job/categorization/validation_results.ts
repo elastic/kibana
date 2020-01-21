@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  CATEGORY_EXAMPLES_VALID_STATUS,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
   CATEGORY_EXAMPLES_ERROR_LIMIT,
   CATEGORY_EXAMPLES_WARNING_LIMIT,
 } from '../../../../../common/constants/new_job';
@@ -29,13 +29,13 @@ export class ValidationResults {
   }
 
   public get overallResult() {
-    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALID_STATUS.INVALID)) {
-      return CATEGORY_EXAMPLES_VALID_STATUS.INVALID;
+    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID)) {
+      return CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
     }
-    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID)) {
-      return CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID;
+    if (this._results.some(c => c.valid === CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID)) {
+      return CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID;
     }
-    return CATEGORY_EXAMPLES_VALID_STATUS.VALID;
+    return CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
   }
 
   private _resultExists(id: VALIDATION_RESULT) {
@@ -57,11 +57,11 @@ export class ValidationResults {
     const validExamplesSize = examples.filter(e => e.tokens.length >= VALID_TOKEN_COUNT).length;
     const percentValid = sampleSize === 0 ? 0 : validExamplesSize / sampleSize;
 
-    let valid = CATEGORY_EXAMPLES_VALID_STATUS.VALID;
+    let valid = CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID;
     if (percentValid < CATEGORY_EXAMPLES_ERROR_LIMIT) {
-      valid = CATEGORY_EXAMPLES_VALID_STATUS.INVALID;
+      valid = CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
     } else if (percentValid < CATEGORY_EXAMPLES_WARNING_LIMIT) {
-      valid = CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID;
+      valid = CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID;
     }
 
     const message = i18n.translate(
@@ -95,7 +95,7 @@ export class ValidationResults {
     if (median > MEDIAN_LINE_LENGTH_LIMIT) {
       this._results.push({
         id: VALIDATION_RESULT.MEDIAN_LINE_LENGTH,
-        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+        valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
         message: i18n.translate(
           'xpack.ml.models.jobService.categorization.messages.medianLineLength',
           {
@@ -111,7 +111,7 @@ export class ValidationResults {
   public createNoExamplesResult() {
     this._results.push({
       id: VALIDATION_RESULT.NULL_VALUES,
-      valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+      valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
       message: i18n.translate('xpack.ml.models.jobService.categorization.messages.noDataFound', {
         defaultMessage:
           'No examples for this field could be found. Please ensure the selected date range contains data.',
@@ -125,7 +125,7 @@ export class ValidationResults {
     if (nullCount / examples.length >= NULL_COUNT_PERCENT_LIMIT) {
       this._results.push({
         id: VALIDATION_RESULT.NULL_VALUES,
-        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+        valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
         message: i18n.translate('xpack.ml.models.jobService.categorization.messages.nullValues', {
           defaultMessage: 'More than {percent}% of field values are null.',
           values: { percent: NULL_COUNT_PERCENT_LIMIT * 100 },
@@ -151,7 +151,7 @@ export class ValidationResults {
         const tokenLimit = match[1];
         this._results.push({
           id: VALIDATION_RESULT.TOO_MANY_TOKENS,
-          valid: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
+          valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID,
           message: i18n.translate(
             'xpack.ml.models.jobService.categorization.messages.tooManyTokens',
             {
@@ -173,7 +173,7 @@ export class ValidationResults {
     if (message) {
       this._results.push({
         id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,
-        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+        valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
         message: i18n.translate(
           'xpack.ml.models.jobService.categorization.messages.insufficientPrivileges',
           {
@@ -184,7 +184,7 @@ export class ValidationResults {
       });
       this._results.push({
         id: VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES,
-        valid: CATEGORY_EXAMPLES_VALID_STATUS.PARTIALLY_VALID,
+        valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
         message,
       });
       return;
@@ -194,7 +194,7 @@ export class ValidationResults {
   public createFailureToTokenize(message: string | undefined) {
     this._results.push({
       id: VALIDATION_RESULT.FAILED_TO_TOKENIZE,
-      valid: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
+      valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID,
       message: i18n.translate(
         'xpack.ml.models.jobService.categorization.messages.failureToGetTokens',
         {

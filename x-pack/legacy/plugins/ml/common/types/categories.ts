@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CATEGORY_EXAMPLES_VALID_STATUS } from '../constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../constants/new_job';
 
 export type CategoryId = number;
 
@@ -49,6 +49,6 @@ export enum VALIDATION_RESULT {
 
 export interface FieldExampleCheck {
   id: VALIDATION_RESULT;
-  valid: CATEGORY_EXAMPLES_VALID_STATUS;
+  valid: CATEGORY_EXAMPLES_VALIDATION_STATUS;
   message: string;
 }

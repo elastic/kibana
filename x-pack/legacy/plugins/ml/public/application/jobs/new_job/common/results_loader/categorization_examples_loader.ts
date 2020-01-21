@@ -10,7 +10,7 @@ import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
 import {
   NUMBER_OF_CATEGORY_EXAMPLES,
-  CATEGORY_EXAMPLES_VALID_STATUS,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '../../../../../../common/constants/new_job';
 
 export class CategorizationExamplesLoader {
@@ -36,7 +36,7 @@ export class CategorizationExamplesLoader {
       return {
         examples: [],
         sampleSize: 0,
-        overallValidStatus: CATEGORY_EXAMPLES_VALID_STATUS.INVALID,
+        overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID,
         validationChecks: [],
       };
     }
