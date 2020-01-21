@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import uuid from 'uuid';
 import { AggRow } from './agg_row';
@@ -50,14 +50,14 @@ export function MathAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
-  if (!checkModel(model)) {
-    handleChange({
-      variables: [{ id: uuid.v1(), name: '', field: '' }],
-      script: '',
-    });
-
-    return null;
-  }
+  useEffect(() => {
+    if (!checkModel(model)) {
+      handleChange({
+        variables: [{ id: uuid.v1(), name: '', field: '' }],
+        script: '',
+      });
+    }
+  }, [handleChange, model]);
 
   return (
     <AggRow

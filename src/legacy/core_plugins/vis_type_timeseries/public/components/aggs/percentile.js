@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
@@ -49,13 +49,13 @@ export function PercentileAgg(props) {
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
-  if (!checkModel(model)) {
-    handleChange({
-      percentiles: [newPercentile({ value: 50 })],
-    });
-
-    return null;
-  }
+  useEffect(() => {
+    if (!checkModel(model)) {
+      handleChange({
+        percentiles: [newPercentile({ value: 50 })],
+      });
+    }
+  }, [handleChange, model]);
 
   return (
     <AggRow

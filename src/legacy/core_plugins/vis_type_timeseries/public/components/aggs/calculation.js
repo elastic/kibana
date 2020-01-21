@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 import uuid from 'uuid';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
@@ -50,14 +50,14 @@ export function CalculationAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
-  if (!checkModel(model)) {
-    handleChange({
-      variables: [{ id: uuid.v1(), name: '', field: '' }],
-      script: '',
-    });
-
-    return null;
-  }
+  useEffect(() => {
+    if (!checkModel(model)) {
+      handleChange({
+        variables: [{ id: uuid.v1(), name: '', field: '' }],
+        script: '',
+      });
+    }
+  }, [handleChange, model]);
 
   return (
     <AggRow
