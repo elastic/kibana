@@ -24,7 +24,7 @@ const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
 const dnsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.STACK_BY_DOMAIN,
+    text: 'dns.question.registered_domain',
     value: 'dns.question.registered_domain',
   },
 ];
@@ -70,7 +70,6 @@ export const DnsQueryTabBody = ({
         title={getTitle}
         type={networkModel.NetworkType.page}
         updateDateRange={updateDateRange}
-        showLegend={false}
       />
       <EuiSpacer />
       <NetworkDnsQuery

@@ -9,7 +9,7 @@ Context passed to the plugins `setup` method.
 <b>Signature:</b>
 
 ```typescript
-export interface CoreSetup 
+export interface CoreSetup<TPluginsStart extends object = object> 
 ```
 
 ## Properties
@@ -23,4 +23,10 @@ export interface CoreSetup
 |  [savedObjects](./kibana-plugin-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) |
 |  [uiSettings](./kibana-plugin-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |
 |  [uuid](./kibana-plugin-server.coresetup.uuid.md) | <code>UuidServiceSetup</code> | [UuidServiceSetup](./kibana-plugin-server.uuidservicesetup.md) |
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [getStartServices()](./kibana-plugin-server.coresetup.getstartservices.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 

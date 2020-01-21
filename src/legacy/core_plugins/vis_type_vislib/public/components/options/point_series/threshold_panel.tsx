@@ -55,7 +55,7 @@ function ThresholdPanel({
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.editors.pointSeries.thresholdLineSettingsTitle"
+            id="visTypeVislib.editors.pointSeries.thresholdLineSettingsTitle"
             defaultMessage="Threshold line"
           />
         </h3>
@@ -63,7 +63,7 @@ function ThresholdPanel({
       <EuiSpacer size="m" />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.editors.pointSeries.thresholdLine.showLabel', {
+        label={i18n.translate('visTypeVislib.editors.pointSeries.thresholdLine.showLabel', {
           defaultMessage: 'Show threshold line',
         })}
         paramName="show"
@@ -74,12 +74,9 @@ function ThresholdPanel({
       {stateParams.thresholdLine.show && (
         <>
           <NumberInputOption
-            label={i18n.translate(
-              'kbnVislibVisTypes.editors.pointSeries.thresholdLine.valueLabel',
-              {
-                defaultMessage: 'Threshold value',
-              }
-            )}
+            label={i18n.translate('visTypeVislib.editors.pointSeries.thresholdLine.valueLabel', {
+              defaultMessage: 'Threshold value',
+            })}
             paramName="value"
             value={stateParams.thresholdLine.value}
             setValue={setThresholdLine}
@@ -87,12 +84,9 @@ function ThresholdPanel({
           />
 
           <NumberInputOption
-            label={i18n.translate(
-              'kbnVislibVisTypes.editors.pointSeries.thresholdLine.widthLabel',
-              {
-                defaultMessage: 'Line width',
-              }
-            )}
+            label={i18n.translate('visTypeVislib.editors.pointSeries.thresholdLine.widthLabel', {
+              defaultMessage: 'Line width',
+            })}
             paramName="width"
             min={1}
             step={1}
@@ -102,12 +96,9 @@ function ThresholdPanel({
           />
 
           <SelectOption
-            label={i18n.translate(
-              'kbnVislibVisTypes.editors.pointSeries.thresholdLine.styleLabel',
-              {
-                defaultMessage: 'Line style',
-              }
-            )}
+            label={i18n.translate('visTypeVislib.editors.pointSeries.thresholdLine.styleLabel', {
+              defaultMessage: 'Line style',
+            })}
             options={vis.type.editorConfig.collections.thresholdLineStyles}
             paramName="style"
             value={stateParams.thresholdLine.style}
@@ -115,12 +106,9 @@ function ThresholdPanel({
           />
 
           <EuiFormRow
-            label={i18n.translate(
-              'kbnVislibVisTypes.editors.pointSeries.thresholdLine.colorLabel',
-              {
-                defaultMessage: 'Line color',
-              }
-            )}
+            label={i18n.translate('visTypeVislib.editors.pointSeries.thresholdLine.colorLabel', {
+              defaultMessage: 'Line color',
+            })}
             fullWidth
             compressed
           >

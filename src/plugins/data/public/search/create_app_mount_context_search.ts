@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { mergeMap } from 'rxjs/operators';
-import { from } from 'rxjs';
+import { mergeMap, tap } from 'rxjs/operators';
+import { from, BehaviorSubject } from 'rxjs';
 import { ISearchAppMountContext } from './i_search_app_mount_context';
 import { ISearchGeneric } from './i_search';
 import {
@@ -30,7 +30,8 @@ import { TStrategyTypes } from './strategy_types';
 import { DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 
 export const createAppMountSearchContext = (
-  searchStrategies: TSearchStrategiesMap
+  searchStrategies: TSearchStrategiesMap,
+  loadingCount$: BehaviorSubject<number>
 ): ISearchAppMountContext => {
   const getSearchStrategy = <K extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(
     strategyName?: K
@@ -48,7 +49,13 @@ export const createAppMountSearchContext = (
     const strategyPromise = getSearchStrategy(strategyName);
     return from(strategyPromise).pipe(
       mergeMap(strategy => {
-        return strategy.search(request, options);
+        loadingCount$.next(loadingCount$.getValue() + 1);
+        return strategy.search(request, options).pipe(
+          tap(
+            error => loadingCount$.next(loadingCount$.getValue() - 1),
+            complete => loadingCount$.next(loadingCount$.getValue() - 1)
+          )
+        );
       })
     );
   };

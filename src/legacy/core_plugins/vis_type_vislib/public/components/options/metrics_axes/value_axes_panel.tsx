@@ -60,7 +60,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
 
   const removeButtonTooltip = useMemo(
     () =>
-      i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.removeButtonTooltip', {
+      i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.removeButtonTooltip', {
         defaultMessage: 'Remove Y-axis',
       }),
     []
@@ -83,7 +83,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
 
   const addButtonTooltip = useMemo(
     () =>
-      i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.addButtonTooltip', {
+      i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.addButtonTooltip', {
         defaultMessage: 'Add Y-axis',
       }),
     []
@@ -111,7 +111,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
+                id="visTypeVislib.controls.pointSeries.valueAxes.yAxisTitle"
                 defaultMessage="Y-axes"
               />
             </h3>
@@ -142,7 +142,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
           buttonClassName="eui-textTruncate"
           buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
           aria-label={i18n.translate(
-            'kbnVislibVisTypes.controls.pointSeries.valueAxes.toggleOptionsAriaLabel',
+            'visTypeVislib.controls.pointSeries.valueAxes.toggleOptionsAriaLabel',
             {
               defaultMessage: 'Toggle {axisName} options',
               values: { axisName: axis.name },

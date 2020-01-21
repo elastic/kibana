@@ -4,7 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderTemplate } from './string_utils';
+import { renderTemplate, getMedianStringLength } from './string_utils';
+
+const strings: string[] = [
+  'foo',
+  'foofoofoofoofoo',
+  'foofoofoo',
+  'f',
+  'f',
+  'foofoofoofoofoofoofoo',
+];
+const noStrings: string[] = [];
 
 describe('ML - string utils', () => {
   describe('renderTemplate', () => {
@@ -22,6 +32,18 @@ describe('ML - string utils', () => {
       const templateString = 'string with {{one}} replacement, and a {{two}} one.';
       const result = renderTemplate(templateString, { one: '1', two: '2nd' });
       expect(result).toBe('string with 1 replacement, and a 2nd one.');
+    });
+  });
+
+  describe('getMedianStringLength', () => {
+    test('test median for string array', () => {
+      const result = getMedianStringLength(strings);
+      expect(result).toBe(9);
+    });
+
+    test('test median for no strings', () => {
+      const result = getMedianStringLength(noStrings);
+      expect(result).toBe(0);
     });
   });
 });

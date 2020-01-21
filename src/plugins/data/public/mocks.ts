@@ -30,9 +30,9 @@ export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
 const autocompleteMock: any = {
-  addProvider: jest.fn(),
-  getProvider: jest.fn(),
-  clearProviders: jest.fn(),
+  getValueSuggestions: jest.fn(),
+  getQuerySuggestions: jest.fn(),
+  hasQuerySuggestions: jest.fn(),
 };
 
 const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
@@ -69,12 +69,27 @@ const createStartContract = (): Start => {
   const startContract = {
     autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
-    search: { search: jest.fn() },
+    search: {
+      search: jest.fn(),
+
+      __LEGACY: {
+        esClient: {
+          search: jest.fn(),
+          msearch: jest.fn(),
+        },
+      },
+    },
     fieldFormats: fieldFormatsMock as FieldFormatsStart,
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn(),
+    },
+    __LEGACY: {
+      esClient: {
+        search: jest.fn(),
+        msearch: jest.fn(),
+      },
     },
     indexPatterns: {} as IndexPatternsContract,
   };

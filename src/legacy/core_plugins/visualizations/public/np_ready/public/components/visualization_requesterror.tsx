@@ -19,7 +19,7 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { SearchError } from '../../../legacy_imports';
+import { SearchError } from '../../../../../data/public/search/search_strategy';
 
 interface VisualizationRequestErrorProps {
   onInit?: () => void;
