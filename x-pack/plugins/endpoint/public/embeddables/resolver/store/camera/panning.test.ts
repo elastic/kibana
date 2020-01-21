@@ -64,7 +64,7 @@ describe('panning interaction', () => {
         const action: CameraAction = { type: 'userClickedPanControl', payload: 'north' };
         store.dispatch(action);
       });
-      it('translation should be updated north', () => {
+      it('moves the camera south so that objects appear closer to the bottom of the screen', () => {
         const actual = translation(store.getState());
         expect(actual).toMatchInlineSnapshot(`
           Array [
@@ -79,7 +79,7 @@ describe('panning interaction', () => {
         const action: CameraAction = { type: 'userClickedPanControl', payload: 'south' };
         store.dispatch(action);
       });
-      it('translation should be updated south', () => {
+      it('moves the camera north so that objects appear closer to the top of the screen', () => {
         const actual = translation(store.getState());
         expect(actual).toMatchInlineSnapshot(`
           Array [
@@ -94,11 +94,11 @@ describe('panning interaction', () => {
         const action: CameraAction = { type: 'userClickedPanControl', payload: 'east' };
         store.dispatch(action);
       });
-      it('translation should be updated east', () => {
+      it('moves the camera west so that objects appear closer to the left of the screen', () => {
         const actual = translation(store.getState());
         expect(actual).toMatchInlineSnapshot(`
           Array [
-            32.49906769231164,
+            -32.49906769231164,
             0,
           ]
         `);
@@ -109,11 +109,11 @@ describe('panning interaction', () => {
         const action: CameraAction = { type: 'userClickedPanControl', payload: 'west' };
         store.dispatch(action);
       });
-      it('translation should be updated west', () => {
+      it('moves the camera east so that objects appear closer to the right of the screen', () => {
         const actual = translation(store.getState());
         expect(actual).toMatchInlineSnapshot(`
           Array [
-            -32.49906769231164,
+            32.49906769231164,
             0,
           ]
         `);
