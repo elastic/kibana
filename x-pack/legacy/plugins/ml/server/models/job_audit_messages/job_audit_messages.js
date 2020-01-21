@@ -10,6 +10,30 @@ import moment from 'moment';
 const SIZE = 1000;
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 };
 
+// filter to match job_type: 'anomaly_detector' or no job_type field at all
+// if no job_type field exist, we can assume the message is for an anomaly detector job
+const anomalyDetectorTypeFilter = {
+  bool: {
+    should: [
+      {
+        term: {
+          job_type: 'anomaly_detector',
+        },
+      },
+      {
+        bool: {
+          must_not: {
+            exists: {
+              field: 'job_type',
+            },
+          },
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
 export function jobAuditMessagesProvider(callWithRequest) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
@@ -47,13 +71,9 @@ export function jobAuditMessagesProvider(callWithRequest) {
                   level: 'activity',
                 },
               },
-              must: {
-                term: {
-                  job_type: 'anomaly_detector',
-                },
-              },
             },
           },
+          anomalyDetectorTypeFilter,
           timeFilter,
         ],
       },
@@ -119,6 +139,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
                 },
               },
             },
+            anomalyDetectorTypeFilter,
           ],
         },
       };
