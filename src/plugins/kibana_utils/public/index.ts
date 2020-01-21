@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { defer } from '../common';
+export { defer, Defer, of } from '../common';
 export * from './core';
 export * from './errors';
 export * from './field_mapping';
@@ -58,3 +58,5 @@ export {
   StartSyncStateFnType,
   StopSyncStateFnType,
 } from './state_sync';
+export { removeQueryParam } from './history';
+export { applyDiff } from './state_management/utils/diff_object';

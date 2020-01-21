@@ -74,11 +74,18 @@ export class History {
     });
   }
 
-  getSavedEditorState() {
+  getLegacySavedEditorState() {
     const saved = this.storage.get('editor_state');
     if (!saved) return;
     const { time, content } = saved;
     return { time, content };
+  }
+
+  /**
+   * This function should only ever be called once for a user if they had legacy state.
+   */
+  deleteLegacySavedEditorState() {
+    this.storage.delete('editor_state');
   }
 
   clearHistory() {

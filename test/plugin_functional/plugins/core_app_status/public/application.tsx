@@ -31,15 +31,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
 
-const AppStatusApp = () => (
+const AppStatusApp = ({ appId }: { appId: string }) => (
   <EuiPage>
     <EuiPageBody data-test-subj="appStatusApp">
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>Welcome to App Status Test App!</h1>
+            <h1>Welcome to {appId} Test App!</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
@@ -47,18 +47,18 @@ const AppStatusApp = () => (
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h2>App Status Test App home page section title</h2>
+              <h2>{appId} Test App home page section title</h2>
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiPageContentBody>App Status Test App content</EuiPageContentBody>
+        <EuiPageContentBody>{appId} Test App content</EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
 );
 
-export const renderApp = (context: AppMountContext, { element }: AppMountParameters) => {
-  render(<AppStatusApp />, element);
+export const renderApp = (appId: string, { element }: AppMountParameters) => {
+  render(<AppStatusApp appId={appId} />, element);
 
   return () => unmountComponentAtNode(element);
 };
