@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '../../../../../../../src/core/server';
 import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../types';
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';

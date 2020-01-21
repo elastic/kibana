@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest } from '../../../../../../../../src/core/server';
 // @ts-ignore no module definition TODO
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
