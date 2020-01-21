@@ -287,7 +287,10 @@ export class SavedObjectsService
      */
     const cliArgs = this.coreContext.env.cliArgs;
     const skipMigrations = cliArgs.optimize || savedObjectsConfig.skip;
+
+    this.logger.debug('Starting saved objects migration');
     await migrator.runMigrations(skipMigrations);
+    this.logger.debug('Saved objects migration completed');
 
     const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
