@@ -1,6 +1,5 @@
 {
   "baseUrl": "http://localhost:5601",
-  "pageLoadTimeout": 180000,
   "screenshotsFolder": "../../../../target/kibana-siem/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
   "video": false,

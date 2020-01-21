@@ -144,7 +144,7 @@ describe('url state', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 5000 }).type(
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT }).type(
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`
     );
 
@@ -156,7 +156,7 @@ describe('url state', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: 5000 }).type(
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT }).type(
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}{enter}`
     );
 
@@ -172,23 +172,23 @@ describe('url state', () => {
 
   it('sets kql on network page', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
-    cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).type('source.ip: "10.142.0.9" {enter}');
     cy.url().should('include', `query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')`);
   });
 
   it('sets the url state when kql is set and check if href reflect this change', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.url);
-    cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).type('source.ip: "10.142.0.9" {enter}');
     cy.get(NAVIGATION_HOSTS)
       .first()
       .click({ force: true });
@@ -201,8 +201,8 @@ describe('url state', () => {
 
   it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlHost);
-    cy.get(KQL_INPUT, { timeout: 5000 }).type('host.name: "siem-kibana" {enter}');
-    cy.get(NAVIGATION_HOSTS_ALL_HOSTS, { timeout: 5000 })
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).type('host.name: "siem-kibana" {enter}');
+    cy.get(NAVIGATION_HOSTS_ALL_HOSTS, { timeout: DEFAULT_TIMEOUT })
       .first()
       .click({ force: true });
     waitForAllHostsWidget();
@@ -216,15 +216,15 @@ describe('url state', () => {
       'href',
       "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1546376609186,kind:absolute,to:1577828009186)),timeline:(linkTo:!(global),timerange:(from:1546376609186,kind:absolute,to:1577828009186)))"
     );
-    cy.get(HOST_DETAIL_SIEM_KIBANA, { timeout: 5000 })
+    cy.get(HOST_DETAIL_SIEM_KIBANA, { timeout: DEFAULT_TIMEOUT })
       .first()
       .invoke('text')
       .should('eq', 'siem-kibana');
     cy.get(HOST_DETAIL_SIEM_KIBANA)
       .first()
       .click({ force: true });
-    cy.get(KQL_INPUT, { timeout: 5000 }).clear();
-    cy.get(KQL_INPUT, { timeout: 5000 }).type('agent.type: "auditbeat" {enter}');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).clear();
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).type('agent.type: "auditbeat" {enter}');
     cy.get(NAVIGATION_HOSTS_ANOMALIES).should(
       'have.attr',
       'href',
@@ -249,7 +249,7 @@ describe('url state', () => {
   it('Do not clears kql when navigating to a new page', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(NAVIGATION_NETWORK).click({ force: true });
-    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets and reads the url state for timeline by id', () => {
@@ -257,11 +257,17 @@ describe('url state', () => {
     toggleTimelineVisibility();
     executeKQL(hostExistsQuery);
     assertAtLeastOneEventMatchesSearch();
-    const bestTimelineName = 'The Best Timeline';
-    cy.get(TIMELINE_TITLE, { timeout: 5000 }).type(bestTimelineName);
-    cy.url().should('include', 'timeline=');
-    cy.visit(
-      `/app/siem#/timelines?timerange=(global:(linkTo:!(),timerange:(from:1565274377369,kind:absolute,to:1565360777369)),timeline:(linkTo:!(),timerange:(from:1565274377369,kind:absolute,to:1565360777369)))`
-    ).then(() => cy.get(TIMELINE_TITLE).should('have.attr', 'value', bestTimelineName));
+    const timelineName = 'My Timeline';
+    cy.get(TIMELINE_TITLE).type(`${timelineName}{enter}`);
+    cy.url({ timeout: DEFAULT_TIMEOUT }).should('match', /\w*-\w*-\w*-\w*-\w*/);
+    cy.url().then(url => {
+      const matched = url.match(/\w*-\w*-\w*-\w*-\w*/);
+      const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
+      expect(matched).to.have.lengthOf(1);
+      cy.visit('/app/kibana');
+      cy.visit(`/app/siem#/overview?timeline\=(id:'${newTimelineId}',isOpen:!t)`);
+      cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
+      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timelineName);
+    });
   });
 });
