@@ -6,6 +6,7 @@
 
 import numeral from '@elastic/numeral';
 import { formatDate } from '@elastic/eui/lib/services/format';
+import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { toLocaleString } from '../../../../util/string_utils';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -35,6 +36,8 @@ export function formatValues([key, value]) {
     case 'established_model_memory':
     case 'input_bytes':
     case 'model_bytes':
+    case 'model_bytes_exceeded':
+    case 'model_bytes_memory_limit':
       value = formatData(value);
       break;
 
@@ -53,7 +56,14 @@ export function formatValues([key, value]) {
     case 'total_over_field_count':
     case 'total_partition_field_count':
     case 'bucket_allocation_failures_count':
+    case 'search_count':
       value = toLocaleString(value);
+      break;
+
+    // numbers rounded to 3 decimal places
+    case 'average_search_time_per_bucket_ms':
+    case 'exponential_average_search_time_per_hour_ms':
+      value = typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value;
       break;
 
     default:
