@@ -43,13 +43,13 @@ describe('licenseExpiration lib', () => {
   });
 
   describe('getUiMessage', () => {
-    const license: any = { expiryDateMS: moment('2020-01-20 08:00:00').utc() };
     const timezone = 'Europe/London';
+    const license: any = { expiryDateMS: moment.tz('2020-01-20 08:00:00', timezone).utc() };
 
     it('should return a message when firing', () => {
       const message = getUiMessage(license, timezone, false);
       expect(message).toBe(
-        `This cluster's license is going to expire in {TIME} at January 20, 2020 1:00 PM GMT.`
+        `This cluster's license is going to expire in {TIME} at January 20, 2020 8:00 AM GMT.`
       );
     });
 
