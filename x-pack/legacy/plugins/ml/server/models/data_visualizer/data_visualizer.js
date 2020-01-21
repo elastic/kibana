@@ -261,11 +261,7 @@ export class DataVisualizer {
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
       aggs[`${safeFieldName}_count`] = {
-        filter: {
-          exists: {
-            field: safeFieldName,
-          },
-        },
+        filter: { exists: { field } },
       };
       aggs[`${safeFieldName}_cardinality`] = {
         cardinality: { field },
@@ -437,11 +433,7 @@ export class DataVisualizer {
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_field_stats`] = {
-        filter: {
-          exists: {
-            field: safeFieldName,
-          },
-        },
+        filter: { exists: { field: field.fieldName } },
         aggs: {
           actual_stats: {
             stats: { field: field.fieldName },
@@ -654,11 +646,7 @@ export class DataVisualizer {
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_field_stats`] = {
-        filter: {
-          exists: {
-            field: safeFieldName,
-          },
-        },
+        filter: { exists: { field: field.fieldName } },
         aggs: {
           actual_stats: {
             stats: { field: field.fieldName },
@@ -720,11 +708,7 @@ export class DataVisualizer {
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_value_count`] = {
-        filter: {
-          exists: {
-            field: safeFieldName,
-          },
-        },
+        filter: { exists: { field: field.fieldName } },
       };
       aggs[`${safeFieldName}_values`] = {
         terms: {
