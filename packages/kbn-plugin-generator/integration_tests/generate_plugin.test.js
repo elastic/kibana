@@ -61,7 +61,7 @@ describe(`running the plugin-generator via 'node scripts/generate_plugin.js plug
     expect(stats.isDirectory()).toBe(true);
   });
 
-  it(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
+  it.skip(`should create an internationalization config file with a blank line appended to satisfy the parser`, async () => {
     // Link to the error that happens when the blank line is not there:
     // https://github.com/elastic/kibana/pull/45044#issuecomment-530092627
     const intlFile = `${generatedPath}/.i18nrc.json`;

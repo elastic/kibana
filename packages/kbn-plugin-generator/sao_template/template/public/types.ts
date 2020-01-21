@@ -1,5 +1,5 @@
-
 export interface <%= upperCamelCaseName %>PublicPluginSetup {
-    getGreeting: () => string;
+  getGreeting: () => string;
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface <%= upperCamelCaseName %>PublicPluginStart {}

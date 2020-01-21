@@ -23,6 +23,7 @@ const startCase = require('lodash.startcase');
 const camelCase = require('lodash.camelcase');
 const snakeCase = require('lodash.snakecase');
 const chalk = require('chalk');
+const execa = require('execa');
 
 const pkg = require('../package.json');
 const kibanaPkgPath = require.resolve('../../../package.json');
@@ -44,14 +45,14 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
         message: 'Should an app component be generated?',
         default: true,
       },
-      generateTranslations: {
-        type: 'confirm',
-        message: 'Should translation files be generated?',
-        default: true,
-      },
       generateApi: {
         type: 'confirm',
         message: 'Should a server API be generated?',
+        default: true,
+      },
+      generateTranslations: {
+        type: 'confirm',
+        message: 'Should translation files be generated?',
         default: true,
       },
       generateScss: {
@@ -63,16 +64,12 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
     },
     filters: {
       'public/**/*': 'generateApp',
+      'server/**/*': 'generateApi',
       'translations/**/*': 'generateTranslations',
       '.i18nrc.json': 'generateTranslations',
-      'server/**/*': 'generateApi',
-      'public/app.scss': 'generateScss',
-      '.kibana-plugin-helpers.json': 'generateScss',
     },
     move: {
-      gitignore: '.gitignore',
       'eslintrc.js': '.eslintrc.js',
-      'package_template.json': 'package.json',
     },
     data: answers =>
       Object.assign(
@@ -82,6 +79,7 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
           camelCase,
           snakeCase,
           name,
+          isKibanaPlugin,
           kbnVersion: answers.kbnVersion,
           upperCamelCaseName: name.charAt(0).toUpperCase() + camelCase(name).slice(1),
           hasUi: !!answers.generateApp,
@@ -94,27 +92,21 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
     installDependencies: false,
     gitInit: !isKibanaPlugin,
     async post({ log }) {
-      // await execa('yarn', ['kbn', 'bootstrap'], {
-      //   cwd: KBN_DIR,
-      //   stdio: 'inherit',
-      // });
-
       const dir = relative(process.cwd(), targetPath);
 
-      // try {
-      //   await execa('yarn', ['lint', '--fix'], {
-      //     cwd: dir,
-      //     all: true,
-      //   });
-      // } catch (error) {
-      //   throw new Error(`Failure when running prettier on the generated output: ${error.all}`);
-      // }
+      // Apply eslint to the generated plugin
+      try {
+        await execa('yarn', ['lint:es', `./${dir}/**/*.ts*`, '--no-ignore', '--fix']);
+      } catch (error) {
+        throw new Error(
+          `Failure when running prettier on the generated output: ${error.all || error}`
+        );
+      }
 
       log.success(chalk`🎉
 
-Your plugin has been created in {bold ${dir}}. Move into that directory to run it:
+Your plugin has been created in {bold ${dir}}.
 
-  {bold cd "${dir}"}
   {bold yarn start}
 `);
     },

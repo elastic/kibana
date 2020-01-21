@@ -1,17 +1,15 @@
-
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '<%= relRoot %>/src/core/server';
 
-import {
-  <%= upperCamelCaseName %>PluginSetup,
-  <%= upperCamelCaseName %>PluginStart,
-} from './types';
+import { <%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart } from './types';
 
-export class <%= upperCamelCaseName %>ServerPlugin implements Plugin<<%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart> {
+export class <%= upperCamelCaseName %>ServerPlugin
+  implements Plugin<<%= upperCamelCaseName %>PluginSetup, <%= upperCamelCaseName %>PluginStart> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
 
+    // Register a server side API endpoint
     router.get(
       {
         path: '/api/<%= snakeCase(name) %>/example',
@@ -20,8 +18,8 @@ export class <%= upperCamelCaseName %>ServerPlugin implements Plugin<<%= upperCa
       async (context, request, response) => {
         return response.ok({
           body: {
-            time: (new Date()).toISOString(),
-          }
+            time: new Date().toISOString(),
+          },
         });
       }
     );

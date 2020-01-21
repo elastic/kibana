@@ -1,41 +1,42 @@
-import { CoreSetup, CoreStart, Plugin } from '<%= relRoot %>/src/core/public';
-import {
-  <%= upperCamelCaseName %>PublicPluginSetup,
-  <%= upperCamelCaseName %>PublicPluginStart,
-} from './types';
 import { i18n } from '@kbn/i18n';
+import { CoreSetup, CoreStart, Plugin } from '<%= relRoot %>/src/core/public';
+import { <%= upperCamelCaseName %>PublicPluginSetup, <%= upperCamelCaseName %>PublicPluginStart } from './types';
 import { PLUGIN_NAME } from '../common';
 
-export class <%= upperCamelCaseName %>PublicPlugin implements Plugin<<%= upperCamelCaseName %>PublicPluginSetup, <%= upperCamelCaseName %>PublicPluginStart> {
+export class <%= upperCamelCaseName %>PublicPlugin
+  implements Plugin<<%= upperCamelCaseName %>PublicPluginSetup, <%= upperCamelCaseName %>PublicPluginStart> {
   public setup(core: CoreSetup): <%= upperCamelCaseName %>PublicPluginSetup {
+
+    // Register an application into the side navigation menu
     core.application.register({
       id: '<%= camelCase(name) %>',
       title: PLUGIN_NAME,
       async mount(params) {
         // Load application bundle
         const { renderApp } = await import('./components/app');
-        // Get start services
+        // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
+        // Render the application
         return renderApp(coreStart, depsStart, params);
-      }
+      },
     });
 
-    // Return any methods that should be available to other plugins
+    // Return methods that should be available to other plugins
     return {
       getGreeting() {
         return i18n.translate('<%= camelCase(name) %>.greetingText', {
           defaultMessage: 'Hello from {name}!',
-          values: { 
+          values: {
             name: PLUGIN_NAME,
-           },
+          },
         });
       },
     };
   }
 
   public start(core: CoreStart): <%= upperCamelCaseName %>PublicPluginStart {
-    return {}
-  }  
+    return {};
+  }
 
   public stop() {}
 }

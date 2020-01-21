@@ -39,30 +39,38 @@ import { NavigationPublicPluginStart } from '<%= relRoot %>/../src/plugins/navig
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 
-interface <%= upperCamelCaseName %>AppDeps { 
+interface <%= upperCamelCaseName %>AppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
-};
+}
 
 const <%= upperCamelCaseName %>App = ({ basename, notifications, http, navigation }: <%= upperCamelCaseName %>AppDeps) => {
+  // Use React hooks to manage state.
   const [timestamp, setTimestamp] = useState<string | undefined>();
-  const fetchData = () => {
-    http.get('/api/<%= snakeCase(name) %>/example').then((res) => {
+
+  const onClickHandler = () => {
+<%_ if (generateApi) { -%>
+    // Use the core http service to make a response to the server API.
+    http.get('/api/<%= snakeCase(name) %>/example').then(res => {
       setTimestamp(res.time);
+      // Use the core notifications service to display a success message.
       notifications.toasts.addSuccess(PLUGIN_NAME);
     });
+<%_ } else { -%>
+    setTimestamp(new Date().toISOString());
+    notifications.toasts.addSuccess(PLUGIN_NAME);
+<%_ } -%>
   };
 
+  // Render the application DOM.
+  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
     <Router basename={basename}>
       <I18nProvider>
         <>
-          <navigation.ui.TopNavMenu
-            appName={ PLUGIN_ID }
-            showSearchBar={true}
-          />
+          <navigation.ui.TopNavMenu appName={ PLUGIN_ID } showSearchBar={true} />
           <EuiPage>
             <EuiPageBody>
               <EuiPageHeader>
@@ -97,20 +105,13 @@ const <%= upperCamelCaseName %>App = ({ basename, notifications, http, navigatio
                     </h3>
                     <p>
                       <FormattedMessage
-                        id="banana.serverTimeText"
-                        defaultMessage="Last response from server: {time}"
+                        id="banana.timestampText"
+                        defaultMessage="Last timestamp: {time}"
                         values={{ time: timestamp ? timestamp : 'Unknown' }}
-                        />
-                    </p>
-                    <EuiButton 
-                      type="primary" 
-                      size="s" 
-                      onClick={fetchData}
-                    >
-                      <FormattedMessage
-                        id="<%= camelCase(name) %>.buttonText"
-                        defaultMessage="Fetch data"
                       />
+                    </p>
+                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
+                      <FormattedMessage id="<%= camelCase(name) %>.buttonText" defaultMessage="<%_ if (generateApi) { -%>Fetch data<%_ } else { -%>Click me<%_ } -%>" />
                     </EuiButton>
                   </EuiText>
                 </EuiPageContentBody>
@@ -128,7 +129,15 @@ export const renderApp = (
   { navigation }: any,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<<%= upperCamelCaseName %>App basename={appBasePath} notifications={notifications} http={http} navigation={navigation}/>, element);
+  ReactDOM.render(
+    <<%= upperCamelCaseName %>App
+      basename={appBasePath}
+      notifications={notifications}
+      http={http}
+      navigation={navigation}
+    />,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
