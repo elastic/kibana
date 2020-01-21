@@ -21,7 +21,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { truncatedColorSchemas as colorSchemas } from 'ui/color_maps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 
 import { createTileMapVisualization } from './tile_map_visualization';
@@ -32,7 +31,7 @@ import { supportsCssFilters } from './css_filters';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-  const { uiSettings, serviceSettings } = dependencies;
+  const { uiSettings, serviceSettings, colorMaps } = dependencies;
 
   return {
     name: 'tile_map',
@@ -63,7 +62,7 @@ export function createTileMapTypeDefinition(dependencies) {
     responseHandler: convertToGeoJson,
     editorConfig: {
       collections: {
-        colorSchemas,
+        colorSchemas: colorMaps.truncatedColorSchemas,
         legendPositions: [
           {
             value: 'bottomleft',

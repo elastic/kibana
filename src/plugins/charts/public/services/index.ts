@@ -17,9 +17,7 @@
  * under the License.
  */
 
-export { Vis, VisParams } from 'ui/vis';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { VisOptionsProps } from 'ui/vis/editors/default';
-// @ts-ignore
-export { Schemas } from 'ui/vis/editors/default/schemas';
-export { AggGroupNames } from 'ui/vis/editors/default';
+import * as colorMapsService from './color_maps';
+
+export { ThemeService } from './theme';
+export { colorMapsService };

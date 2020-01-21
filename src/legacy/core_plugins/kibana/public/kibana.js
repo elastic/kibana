@@ -52,7 +52,6 @@ import './visualize';
 import './dashboard';
 import './management';
 import './dev_tools';
-import 'ui/color_maps';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import { showAppRedirectNotification } from 'ui/notify';

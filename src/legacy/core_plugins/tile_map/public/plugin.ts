@@ -32,16 +32,19 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
+import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
 /** @private */
 interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: IUiSettingsClient;
+  colorMaps: ChartsPluginSetup['colorMaps'];
 }
 
 /** @internal */
 export interface TileMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
 
@@ -55,9 +58,10 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, __LEGACY }: TileMapPluginSetupDependencies
+    { expressions, visualizations, charts, __LEGACY }: TileMapPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
+      colorMaps: charts.colorMaps,
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };

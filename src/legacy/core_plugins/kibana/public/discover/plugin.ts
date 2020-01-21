@@ -27,7 +27,7 @@ import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embed
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { Chrome, setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
+import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
@@ -59,7 +59,7 @@ export interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
   embeddable: IEmbeddableStart;
   navigation: NavigationStart;
-  eui_utils: EuiUtilsStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share: SharePluginStart;
   inspector: any;

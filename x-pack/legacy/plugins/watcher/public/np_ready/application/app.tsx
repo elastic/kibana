@@ -31,6 +31,7 @@ import { BASE_PATH } from './constants';
 import { LICENSE_STATUS_VALID } from '../../../../../common/constants';
 import { AppContextProvider } from './app_context';
 import { LegacyDependencies } from '../types';
+import { ChartsPluginSetup } from '../../../../../../../src/plugins/charts/public';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -44,7 +45,7 @@ export interface AppDeps {
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   legacy: LegacyDependencies;
-  euiUtils: any;
+  theme: ChartsPluginSetup['theme'];
 }
 
 export const App = (deps: AppDeps) => {

@@ -87,11 +87,11 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 export const WatchVisualization = () => {
   const {
     legacy: { TimeBuckets },
-    euiUtils,
+    theme,
     uiSettings,
   } = useAppContext();
   const { watch } = useContext(WatchContext);
-  const chartsTheme = euiUtils.useChartsTheme();
+  const chartsTheme = theme.useChartsTheme();
   const {
     index,
     timeField,

@@ -23,7 +23,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
-import { truncatedColorMaps } from 'ui/color_maps';
 import * as topojson from 'topojson-client';
 import { toastNotifications } from 'ui/notify';
 import * as colorUtil from 'ui/vis/map/color_util';
@@ -73,12 +72,22 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     }
   }
 
-  constructor(name, attribution, format, showAllShapes, meta, layerConfig, serviceSettings) {
+  constructor(
+    name,
+    attribution,
+    format,
+    showAllShapes,
+    meta,
+    layerConfig,
+    serviceSettings,
+    colorMaps
+  ) {
     super();
     this._serviceSettings = serviceSettings;
     this._metrics = null;
     this._joinField = null;
-    this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]].value;
+    this._colorRamp =
+      colorMaps.truncatedColorMaps[Object.keys(colorMaps.truncatedColorMaps)[0]].value;
     this._lineWeight = 1;
     this._tooltipFormatter = () => '';
     this._attribution = attribution;
@@ -279,7 +288,8 @@ CORS configuration of the server permits requests from the Kibana application on
     showAllData,
     meta,
     layerConfig,
-    serviceSettings
+    serviceSettings,
+    colorMaps
   ) {
     const clonedLayer = new ChoroplethLayer(
       name,
@@ -288,7 +298,8 @@ CORS configuration of the server permits requests from the Kibana application on
       showAllData,
       meta,
       layerConfig,
-      serviceSettings
+      serviceSettings,
+      colorMaps
     );
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);

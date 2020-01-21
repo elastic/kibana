@@ -17,7 +17,4 @@
  * under the License.
  */
 
-import { EuiUtils } from './eui_utils';
-
-export const plugin = () => new EuiUtils();
-export type EuiUtilsStart = ReturnType<EuiUtils['start']>;
+export { ThemeService } from './theme';

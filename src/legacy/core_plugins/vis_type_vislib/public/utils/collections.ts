@@ -19,7 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
-import { colorSchemas } from '../legacy_imports';
+
+import { KbnVislibVisTypesDependencies } from '../plugin';
 
 export const Positions = Object.freeze({
   RIGHT: 'right' as 'right',
@@ -325,16 +326,16 @@ const getConfigCollections = () => ({
   thresholdLineStyles: getThresholdLineStyles(),
 });
 
-const getGaugeCollections = () => ({
+const getGaugeCollections = (colorMaps: KbnVislibVisTypesDependencies['colorMaps']) => ({
   gaugeTypes: getGaugeTypes(),
   alignments: getAlignments(),
-  colorSchemas,
+  colorSchemas: colorMaps.colorSchemas,
 });
 
-const getHeatmapCollections = () => ({
+const getHeatmapCollections = (colorMaps: KbnVislibVisTypesDependencies['colorMaps']) => ({
   legendPositions: getPositions(),
   scales: getScaleTypes(),
-  colorSchemas,
+  colorSchemas: colorMaps.colorSchemas,
 });
 
 export {

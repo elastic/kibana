@@ -30,7 +30,6 @@ import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
-import 'ui/color_maps';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'leaflet';

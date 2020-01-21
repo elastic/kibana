@@ -42,6 +42,7 @@ import {
 const setupPlugins: Readonly<KbnVislibVisTypesPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
+  charts: npSetup.plugins.charts,
   __LEGACY: {
     vislibSeriesResponseHandlerProvider,
     vislibSlicesResponseHandlerProvider,

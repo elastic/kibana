@@ -59,7 +59,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
         elem = document.getElementById('watchReactRoot')!;
         const instance = plugin();
         instance.setup(shimCore, {
-          ...(npSetup.plugins as typeof npSetup.plugins & { eui_utils: any }),
+          ...(npSetup.plugins as typeof npSetup.plugins),
           __LEGACY: {
             MANAGEMENT_BREADCRUMB,
             TimeBuckets,
@@ -67,7 +67,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
           },
         });
 
-        instance.start(npStart.core, npStart.plugins);
+        instance.start(npStart.core);
 
         (mountApp() as Promise<AppUnmount>).then(fn => (unmountApp = fn));
 

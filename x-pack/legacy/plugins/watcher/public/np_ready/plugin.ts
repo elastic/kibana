@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart } from 'kibana/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 
 import { LegacyDependencies } from './types';
 
-interface LegacyPlugins {
+interface WatcherUISetupPlugins {
   __LEGACY: LegacyDependencies;
+  charts: ChartsPluginSetup;
 }
 
-export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
-  /* TODO: Remove this in future. We need this at mount (setup) but it's only available on start plugins. */
-  euiUtils: any = null;
-
-  setup({ application, notifications, http, uiSettings }: CoreSetup, { __LEGACY }: LegacyPlugins) {
+export class WatcherUIPlugin implements Plugin<void, void, WatcherUISetupPlugins> {
+  setup(
+    { application, notifications, http, uiSettings }: CoreSetup,
+    { __LEGACY, charts: { theme } }: WatcherUISetupPlugins
+  ) {
     application.register({
       id: 'watcher',
       title: 'Watcher',
@@ -33,7 +35,6 @@ export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
         },
         { element }
       ) => {
-        const euiUtils = this.euiUtils!;
         const { boot } = await import('./application/boot');
         return boot({
           element,
@@ -42,7 +43,7 @@ export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
           uiSettings,
           docLinks,
           chrome,
-          euiUtils,
+          theme,
           savedObjects: savedObjects.client,
           I18nContext,
           legacy: {
@@ -53,10 +54,5 @@ export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
     });
   }
 
-  start(core: CoreStart, { eui_utils }: any) {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    this.euiUtils = eui_utils;
-  }
-
-  stop() {}
+  start(core: CoreStart) {}
 }

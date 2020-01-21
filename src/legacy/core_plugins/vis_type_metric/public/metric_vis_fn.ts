@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { vislibColorMaps, ColorSchemas } from './legacy_imports';
 import {
   ExpressionFunction,
   KibanaDatatable,
@@ -29,6 +28,8 @@ import {
 } from '../../../../plugins/expressions/public';
 import { ColorModes } from '../../vis_type_vislib/public';
 import { visType, DimensionsVisParam, VisParams } from './types';
+import { MetricVisDependencies } from './plugin';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
 export type Context = KibanaDatatable;
 
@@ -58,12 +59,9 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createMetricVisFn = (): ExpressionFunction<
-  typeof name,
-  Context,
-  Arguments,
-  Return
-> => ({
+export const createMetricVisFn = ({
+  colorMaps,
+}: MetricVisDependencies): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
   name,
   type: 'render',
   context: {
@@ -83,7 +81,7 @@ export const createMetricVisFn = (): ExpressionFunction<
     colorSchema: {
       types: ['string'],
       default: '"Green to Red"',
-      options: Object.values(vislibColorMaps).map((value: any) => value.id),
+      options: Object.values(colorMaps.vislibColorMaps).map((value: any) => value.id),
       help: i18n.translate('visTypeMetric.function.colorSchema.help', {
         defaultMessage: 'Color schema to use',
       }),

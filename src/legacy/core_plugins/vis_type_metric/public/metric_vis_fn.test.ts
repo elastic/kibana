@@ -19,13 +19,19 @@
 
 import { createMetricVisFn } from './metric_vis_fn';
 
+import { npSetup } from 'ui/new_platform';
+
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
 jest.mock('ui/new_platform');
 
 describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(createMetricVisFn);
+  const fn = functionWrapper(() =>
+    createMetricVisFn({
+      colorMaps: npSetup.plugins.charts.colorMaps,
+    })
+  );
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

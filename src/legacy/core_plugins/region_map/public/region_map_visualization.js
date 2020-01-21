@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
-import { truncatedColorMaps } from 'ui/color_maps';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { toastNotifications } from 'ui/notify';
 
@@ -28,7 +27,12 @@ import { TileMapTooltipFormatter } from './tooltip_formatter';
 // TODO: reference to TILE_MAP plugin should be removed
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 
-export function createRegionMapVisualization({ serviceSettings, $injector, uiSettings }) {
+export function createRegionMapVisualization({
+  serviceSettings,
+  $injector,
+  uiSettings,
+  colorMaps,
+}) {
   const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
   const tooltipFormatter = new TileMapTooltipFormatter($injector);
 
@@ -112,7 +116,7 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
       const metricFieldFormatter = getFormat(this._params.metric.format);
 
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
-      this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
+      this._choroplethLayer.setColorRamp(colorMaps.truncatedColorMaps[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
       this._choroplethLayer.setTooltipFormatter(
         tooltipFormatter,
@@ -149,7 +153,8 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          serviceSettings
+          serviceSettings,
+          colorMaps
         );
       } else {
         this._choroplethLayer = new ChoroplethLayer(
@@ -159,7 +164,8 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          serviceSettings
+          serviceSettings,
+          colorMaps
         );
       }
 

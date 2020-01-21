@@ -19,11 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas, AggGroupNames, ColorSchemas } from './legacy_imports';
+import { Schemas, AggGroupNames } from './legacy_imports';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
 import { createVislibVisController } from './vis_controller';
 import { KbnVislibVisTypesDependencies } from './plugin';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
 export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'goal',
@@ -74,7 +75,7 @@ export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
     },
   },
   editorConfig: {
-    collections: getGaugeCollections(),
+    collections: getGaugeCollections(deps.colorMaps),
     optionsTemplate: GaugeOptions,
     schemas: new Schemas([
       {

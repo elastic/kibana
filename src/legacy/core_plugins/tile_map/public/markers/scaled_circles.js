@@ -22,7 +22,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
-import { truncatedColorMaps } from 'ui/color_maps';
 import * as colorUtil from 'ui/vis/map/color_util';
 
 export class ScaledCirclesMarkers extends EventEmitter {
@@ -32,7 +31,8 @@ export class ScaledCirclesMarkers extends EventEmitter {
     options,
     targetZoom,
     kibanaMap,
-    metricAgg
+    metricAgg,
+    colorMaps
   ) {
     super();
     this._featureCollection = featureCollection;
@@ -40,6 +40,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     this._zoom = targetZoom;
     this._metricAgg = metricAgg;
+    this._colorMaps = colorMaps;
 
     this._valueFormatter =
       options.valueFormatter ||
@@ -225,7 +226,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 }
 
 function makeLegendColors(colorRampKey) {
-  const colorRamp = _.get(truncatedColorMaps[colorRampKey], 'value');
+  const colorRamp = _.get(this._colorMaps.truncatedColorMaps[colorRampKey], 'value');
   return colorUtil.getLegendColors(colorRamp);
 }
 

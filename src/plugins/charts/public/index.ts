@@ -17,9 +17,11 @@
  * under the License.
  */
 
-export { Vis, VisParams } from 'ui/vis';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { VisOptionsProps } from 'ui/vis/editors/default';
-// @ts-ignore
-export { Schemas } from 'ui/vis/editors/default/schemas';
-export { AggGroupNames } from 'ui/vis/editors/default';
+import { ChartsPlugin } from './plugin';
+
+export const plugin = () => new ChartsPlugin();
+
+export type ChartsPluginSetup = ReturnType<ChartsPlugin['setup']>;
+export type ChartsPluginStart = ReturnType<ChartsPlugin['start']>;
+
+export { ColorSchemas, ColorSchema } from './services/color_maps';

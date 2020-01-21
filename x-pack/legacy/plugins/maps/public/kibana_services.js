@@ -14,6 +14,7 @@ import { npStart } from 'ui/new_platform';
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from '../../../../../src/legacy/ui/public/courier';
 export const indexPatternService = npStart.plugins.data.indexPatterns;
+export const colorMaps = npStart.plugins.charts.colorMaps;
 
 let licenseId;
 export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);

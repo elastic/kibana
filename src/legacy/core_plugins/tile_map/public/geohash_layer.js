@@ -29,7 +29,7 @@ import { GeohashGridMarkers } from './markers/geohash_grid';
 import { MapTypes } from './map_types';
 
 export class GeohashLayer extends KibanaMapLayer {
-  constructor(featureCollection, featureCollectionMetaData, options, zoom, kibanaMap) {
+  constructor(featureCollection, featureCollectionMetaData, options, zoom, kibanaMap, colorMaps) {
     super();
 
     this._featureCollection = featureCollection;
@@ -38,6 +38,7 @@ export class GeohashLayer extends KibanaMapLayer {
     this._geohashOptions = options;
     this._zoom = zoom;
     this._kibanaMap = kibanaMap;
+    this._colorMaps = colorMaps;
     const geojson = L.geoJson(this._featureCollection);
     this._bounds = geojson.getBounds();
     this._createGeohashMarkers();
@@ -59,7 +60,8 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap
+          this._kibanaMap,
+          this._colorMaps
         );
         break;
       case MapTypes.ShadedCircleMarkers:
@@ -68,7 +70,8 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap
+          this._kibanaMap,
+          this._colorMaps
         );
         break;
       case MapTypes.ShadedGeohashGrid:
@@ -77,7 +80,8 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap
+          this._kibanaMap,
+          this._colorMaps
         );
         break;
       case MapTypes.Heatmap:

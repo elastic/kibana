@@ -25,7 +25,7 @@ export class GaugeChart extends Chart {
   constructor(handler, chartEl, chartData, deps) {
     super(handler, chartEl, chartData, deps);
     this.gaugeConfig = handler.visConfig.get('gauge', {});
-    this.gauge = new gaugeTypes[this.gaugeConfig.type](this);
+    this.gauge = new gaugeTypes[this.gaugeConfig.type](this, deps);
   }
 
   addEvents(element) {

@@ -38,6 +38,7 @@ import {
   createGaugeVisTypeDefinition,
   createGoalVisTypeDefinition,
 } from './vis_type_vislib_vis_types';
+import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
 type ResponseHandlerProvider = () => {
   name: string;
@@ -53,12 +54,14 @@ export interface LegacyDependencies {
 
 export type KbnVislibVisTypesDependencies = LegacyDependencies & {
   uiSettings: IUiSettingsClient;
+  colorMaps: ChartsPluginSetup['colorMaps'];
 };
 
 /** @internal */
 export interface KbnVislibVisTypesPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
   __LEGACY: LegacyDependencies;
 }
 
@@ -74,11 +77,12 @@ export class KbnVislibVisTypesPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: KbnVislibVisTypesCoreSetup,
-    { expressions, visualizations, __LEGACY }: KbnVislibVisTypesPluginSetupDependencies
+    { expressions, visualizations, charts, __LEGACY }: KbnVislibVisTypesPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<KbnVislibVisTypesDependencies> = {
-      ...__LEGACY,
       uiSettings: core.uiSettings,
+      colorMaps: charts.colorMaps,
+      ...__LEGACY,
     };
 
     expressions.registerFunction(createKbnVislibVisTypesFn(visualizationDependencies));

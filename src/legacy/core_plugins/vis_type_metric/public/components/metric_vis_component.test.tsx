@@ -20,12 +20,16 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { MetricVisComponent } from './metric_vis_component';
+import { npSetup } from 'ui/new_platform';
+
 import { Vis } from '../legacy_imports';
+import { createMetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
 
 jest.mock('ui/new_platform');
 
-type Props = MetricVisComponent['props'];
+const MetricVisComponent = createMetricVisComponent(npSetup.plugins.charts.colorMaps);
+
+type Props = MetricVisComponentProps;
 
 const baseVisData = {
   columns: [{ id: 'col-0', name: 'Count' }],

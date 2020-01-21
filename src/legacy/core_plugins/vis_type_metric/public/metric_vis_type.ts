@@ -19,12 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { MetricVisComponent } from './components/metric_vis_component';
+import { createMetricVisComponent } from './components/metric_vis_component';
 import { MetricVisOptions } from './components/metric_vis_options';
 import { ColorModes } from '../../vis_type_vislib/public';
-import { Schemas, AggGroupNames, colorSchemas, ColorSchemas } from './legacy_imports';
+import { Schemas, AggGroupNames } from './legacy_imports';
+import { MetricVisDependencies } from './plugin';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
-export const metricVisTypeDefinition = {
+export const createMetricVisTypeDefinition = ({ colorMaps }: MetricVisDependencies) => ({
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
@@ -32,7 +34,7 @@ export const metricVisTypeDefinition = {
     defaultMessage: 'Display a calculation as a single number',
   }),
   visConfig: {
-    component: MetricVisComponent,
+    component: createMetricVisComponent(colorMaps),
     defaults: {
       addTooltip: true,
       addLegend: false,
@@ -79,7 +81,7 @@ export const metricVisTypeDefinition = {
           }),
         },
       ],
-      colorSchemas,
+      colorSchemas: colorMaps.colorSchemas,
     },
     optionsTemplate: MetricVisOptions,
     schemas: new Schemas([
@@ -121,4 +123,4 @@ export const metricVisTypeDefinition = {
       },
     ]),
   },
-};
+});

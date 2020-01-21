@@ -34,12 +34,12 @@ export const mockContextValue = {
   },
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
-  euiUtils: {
+  theme: {
     useChartsTheme: jest.fn(),
   },
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
-};
+} as any;
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
   return (
