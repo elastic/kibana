@@ -149,7 +149,7 @@ export class HttpConfig {
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType, env?: Env) {
+  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType, env: Env) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
@@ -163,7 +163,7 @@ export class HttpConfig {
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.csp = new CspConfig(rawCspConfig, env);
+    this.csp = new CspConfig(env, rawCspConfig);
     this.xsrf = rawHttpConfig.xsrf;
   }
 }

@@ -18,6 +18,7 @@
  */
 
 import { CspConfig } from '.';
+import { createMockEnv } from '../config/env.mock';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -33,25 +34,13 @@ import { CspConfig } from '.';
 // the nature of a change in defaults during a PR review.
 
 describe('CspConfig', () => {
-  test('DEFAULT', () => {
-    expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
-      CspConfig {
-        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-        "rules": Array [
-          "script-src 'unsafe-eval' 'self'",
-          "worker-src blob: 'self'",
-          "style-src 'unsafe-inline' 'self'",
-        ],
-        "strict": true,
-        "warnLegacyBrowsers": true,
-      }
-    `);
-  });
-
   test('defaults from config', () => {
-    expect(new CspConfig()).toMatchInlineSnapshot(`
+    const cspConfig = new CspConfig(createMockEnv());
+
+    expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "headerChangedFromDefault": false,
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
           "worker-src blob: 'self'",
@@ -64,9 +53,12 @@ describe('CspConfig', () => {
   });
 
   test('creates from partial config', () => {
-    expect(new CspConfig({ strict: false, warnLegacyBrowsers: false })).toMatchInlineSnapshot(`
+    const cspConfig = new CspConfig(createMockEnv(), { strict: false, warnLegacyBrowsers: false });
+
+    expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "headerChangedFromDefault": false,
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
           "worker-src blob: 'self'",
@@ -79,11 +71,12 @@ describe('CspConfig', () => {
   });
 
   test('computes header from rules', () => {
-    const cspConfig = new CspConfig({ rules: ['alpha', 'beta', 'gamma'] });
+    const cspConfig = new CspConfig(createMockEnv(), { rules: ['alpha', 'beta', 'gamma'] });
 
     expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
         "header": "alpha; beta; gamma",
+        "headerChangedFromDefault": true,
         "rules": Array [
           "alpha",
           "beta",
@@ -96,36 +89,16 @@ describe('CspConfig', () => {
   });
 
   test(`includes blob: style-src if env specified and it indicates we're running from source`, () => {
-    const cspConfig = new CspConfig({}, {
-      packageInfo: { dist: false },
-    } as any);
+    const cspConfig = new CspConfig(createMockEnv({ dist: false }));
 
     expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src blob: 'unsafe-inline' 'self'",
+        "headerChangedFromDefault": false,
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
           "worker-src blob: 'self'",
           "style-src blob: 'unsafe-inline' 'self'",
-        ],
-        "strict": true,
-        "warnLegacyBrowsers": true,
-      }
-    `);
-  });
-
-  test(`does not include blob: style-src if env specified and it indicates we're running the dist`, () => {
-    const cspConfig = new CspConfig({}, {
-      packageInfo: { dist: true },
-    } as any);
-
-    expect(cspConfig).toMatchInlineSnapshot(`
-      CspConfig {
-        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-        "rules": Array [
-          "script-src 'unsafe-eval' 'self'",
-          "worker-src blob: 'self'",
-          "style-src 'unsafe-inline' 'self'",
         ],
         "strict": true,
         "warnLegacyBrowsers": true,
