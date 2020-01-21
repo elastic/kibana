@@ -14,6 +14,8 @@ export const caseSchema = gql`
 
   enum SortFieldCase {
     created_at
+    state
+    updated_at
   }
 
   input SortCase {
@@ -66,18 +68,3 @@ export const caseSchema = gql`
   }
 `;
 
-//
-// input PageInfoCase {
-//   pageIndex: Float!
-//   pageSize: Float!
-// }
-//
-// enum SortFieldCase {
-//   updatedBy
-//   updated
-// }
-//
-// input SortCase {
-//   sortField: SortFieldCase!
-//   sortOrder: Direction!
-// }

@@ -283,6 +283,8 @@ export interface FavoriteTimelineInput {
 
 export enum SortFieldCase {
   created_at = 'created_at',
+  state = 'state',
+  updated_at = 'updated_at',
 }
 
 export enum Direction {

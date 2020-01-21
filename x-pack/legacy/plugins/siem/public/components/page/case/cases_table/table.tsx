@@ -12,7 +12,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { Criteria, PaginatedTable } from '../../../paginated_table';
 
 import { getCasesColumns } from './columns';
-import { CasesSavedObjects, Direction, SortCase } from '../../../../graphql/types';
+import { CasesSavedObjects, Direction, SortCase, SortFieldCase } from '../../../../graphql/types';
 import { caseActions, caseSelectors, caseModel } from '../../../../store/case';
 import { State } from '../../../../store';
 
@@ -60,12 +60,29 @@ export const CasesPaginatedTableComponent = React.memo(
 
     const onChange = useCallback(
       (criteria: Criteria) => {
+        console.log('Critera sort', criteria.sort);
+        console.log('sortsortsort', sort);
         if (criteria.sort != null && criteria.sort.direction !== sort.direction) {
+          let newSort;
+          switch (criteria.sort.field) {
+            case 'attributes.state':
+              newSort = SortFieldCase.state;
+              break;
+            case 'attributes.created_at':
+              newSort = SortFieldCase.created_at;
+              break;
+            case 'updated_at':
+              newSort = SortFieldCase.updated_at;
+              break;
+            default:
+              newSort = SortFieldCase.created_at;
+          }
+          console.log('newSort', newSort)
           updateCaseTable({
             tableType,
             updates: {
               sort: {
-                field: sort.field,
+                field: newSort,
                 direction: criteria.sort.direction as Direction,
               },
             },
@@ -86,6 +103,7 @@ export const CasesPaginatedTableComponent = React.memo(
           <FormattedMessage id="xpack.siem.casesTable.header" defaultMessage="Case Management" />
         }
         headerUnit={'cases'}
+        hideInspect={true}
         id={id}
         limit={limit}
         loading={loading}

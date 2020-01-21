@@ -98,6 +98,7 @@ export interface BasicTableProps<T> {
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
   headerUnit: string | React.ReactElement;
+  hideInspect?: boolean;
   id?: string;
   itemsPerRow?: ItemsPerRow[];
   isInspect?: boolean;
@@ -136,6 +137,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   headerTitle,
   headerTooltip,
   headerUnit,
+  hideInspect,
   id,
   isInspect,
   itemsPerRow,
@@ -230,7 +232,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
 
   return (
-    <InspectButtonContainer show={!loadingInitial}>
+    <InspectButtonContainer show={!hideInspect && !loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
           id={id}

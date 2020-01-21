@@ -58,6 +58,7 @@ export class Case {
 
   private async getAllSavedCase(request: FrameworkRequest, options: SavedObjectsFindOptions) {
     const savedObjectsClient = request.context.core.savedObjects.client;
+    console.log('saved objects find options', options);
     const savedObjects = await savedObjectsClient.find(options);
     return {
       ...savedObjects,

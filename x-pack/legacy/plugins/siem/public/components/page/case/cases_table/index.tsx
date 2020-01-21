@@ -10,15 +10,10 @@ import { EuiFlexItem } from '@elastic/eui';
 import { CasesQuery } from '../../../../containers/case/get_cases';
 import { CasesPaginatedTable } from './table';
 
-export const CasesTable = React.memo(() => {
-
-  return (
-    <EuiFlexItem>
-      <CasesQuery sourceId="default">
-        {children => <CasesPaginatedTable {...children} />}
-      </CasesQuery>
-    </EuiFlexItem>
-  );
-});
+export const CasesTable = React.memo(() => (
+  <EuiFlexItem>
+    <CasesQuery sourceId="default">{children => <CasesPaginatedTable {...children} />}</CasesQuery>
+  </EuiFlexItem>
+));
 
 CasesTable.displayName = 'CasesTable';

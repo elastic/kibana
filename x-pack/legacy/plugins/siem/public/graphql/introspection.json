@@ -625,6 +625,13 @@
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          { "name": "state", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "updated_at",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null

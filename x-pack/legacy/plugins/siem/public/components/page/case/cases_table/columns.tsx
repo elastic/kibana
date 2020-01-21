@@ -56,6 +56,7 @@ export const getCasesColumns = (): CasesColumns => [
   {
     field: 'updated_at',
     name: 'Last updated',
+    sortable: true,
     render: updatedAt => {
       if (updatedAt != null) {
         return <FormattedRelativePreferenceDate value={updatedAt} />;
@@ -66,6 +67,7 @@ export const getCasesColumns = (): CasesColumns => [
   {
     field: 'attributes.state',
     name: 'State',
+    sortable: true,
     render: state => renderStringField(state),
   },
 ];
