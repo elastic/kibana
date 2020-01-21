@@ -97,10 +97,10 @@ const schema = Joi.object({
     .required(),
   management: managementSchema,
   catalogue: catalogueSchema,
-  privileges: Joi.array()
-    .min(2)
-    .max(2)
-    .items(privilegeSchema),
+  privileges: Joi.object({
+    all: privilegeSchema,
+    read: privilegeSchema,
+  }),
   subFeatures: Joi.array().items(subFeatureSchema),
   privilegesTooltip: Joi.string(),
   reserved: Joi.object({

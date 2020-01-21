@@ -6,14 +6,14 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
-import { FeaturePrivilegesExplanations } from '../../../../../../../../../../../plugins/security/common/model/poc_kibana_privileges/feature_privileges_explanations';
-import { FeatureKibanaPrivilegesGroup } from '../../../../../../../../../../../plugins/features/common/feature_kibana_privileges';
-import { ISubFeature } from '../../../../../../../../../../../plugins/features/common';
-import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { SubFeaturePrivilegeGroup } from '../../../../../../../../features/common/sub_feature_privilege_group';
+import { FeaturePrivilegesExplanations } from '../../../../../../../common/model/poc_kibana_privileges/feature_privileges_explanations';
+import { SubFeature } from '../../../../../../../../features/common/sub_feature';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props {
   featureId: string;
-  subFeature: ISubFeature;
+  subFeature: SubFeature;
   selectedPrivileges: string[];
   privilegeExplanations: FeaturePrivilegesExplanations;
   onChange: (selectedPrivileges: string[]) => void;
@@ -30,7 +30,7 @@ export const SubFeatureForm = (props: Props) => {
     </EuiFlexGroup>
   );
 
-  function renderPrivilegeGroup(privilegeGroup: FeatureKibanaPrivilegesGroup, index: number) {
+  function renderPrivilegeGroup(privilegeGroup: SubFeaturePrivilegeGroup, index: number) {
     switch (privilegeGroup.groupType) {
       case 'independent':
         return renderIndependentPrivilegeGroup(privilegeGroup, index);
@@ -42,7 +42,7 @@ export const SubFeatureForm = (props: Props) => {
   }
 
   function renderIndependentPrivilegeGroup(
-    privilegeGroup: FeatureKibanaPrivilegesGroup,
+    privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
     return (
@@ -77,7 +77,7 @@ export const SubFeatureForm = (props: Props) => {
   }
 
   function renderMutuallyExclusivePrivilegeGroup(
-    privilegeGroup: FeatureKibanaPrivilegesGroup,
+    privilegeGroup: SubFeaturePrivilegeGroup,
     index: number
   ) {
     const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
@@ -92,6 +92,7 @@ export const SubFeatureForm = (props: Props) => {
         return {
           id: privilege.id,
           label: privilege.name,
+          isDisabled: props.privilegeExplanations.isInherited(props.featureId, privilege.id),
         };
       }),
       {

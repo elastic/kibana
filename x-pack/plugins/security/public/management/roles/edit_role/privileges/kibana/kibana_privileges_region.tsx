@@ -6,10 +6,10 @@
 
 import React, { Component } from 'react';
 import { Capabilities } from 'src/core/public';
+import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { Space } from '../../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../../features/public';
 import { KibanaPrivileges, Role } from '../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from './kibana_privilege_calculator';
 import { RoleValidator } from '../../validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';

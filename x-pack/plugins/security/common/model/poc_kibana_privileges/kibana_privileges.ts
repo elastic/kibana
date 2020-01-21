@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isGlobalPrivilegeDefinition } from 'plugins/security/lib/privilege_utils';
 import { RawKibanaPrivileges } from '../raw_kibana_privileges';
 import { Privilege, PrivilegeType } from './privilege_instance';
 import { PrivilegeCollection } from './privilege_collection';
@@ -66,7 +65,7 @@ export class KibanaPrivileges {
     const privileges: Privilege[] = roleKibanaPrivileges
       .map(rkp => {
         let basePrivileges: Privilege[];
-        if (isGlobalPrivilegeDefinition(rkp)) {
+        if (this.isGlobalPrivilegeDefinition(rkp)) {
           basePrivileges = this.getGlobalPrivileges().filter(filterAssigned(rkp.base));
         } else {
           basePrivileges = this.getSpacesPrivileges().filter(filterAssigned(rkp.base));
@@ -85,5 +84,13 @@ export class KibanaPrivileges {
       .flat<Privilege>();
 
     return new PrivilegeCollection(privileges);
+  }
+
+  // TODO: Consolidate definition with the one inbside the edit role screen
+  private isGlobalPrivilegeDefinition(privilegeSpec: RoleKibanaPrivilege): boolean {
+    if (!privilegeSpec.spaces || privilegeSpec.spaces.length === 0) {
+      return true;
+    }
+    return privilegeSpec.spaces.includes('*');
   }
 }

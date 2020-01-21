@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 
 export class FeaturePrivilege {
-  constructor(public readonly id: string, private readonly config: FeatureKibanaPrivileges) {}
+  constructor(public readonly id: string, protected readonly config: FeatureKibanaPrivileges) {}
+
+  public get name() {
+    return this.config.name || _.capitalize(this.id);
+  }
 
   public get app() {
     return this.config.app;
@@ -38,17 +43,19 @@ export class FeaturePrivilege {
   }
 
   public merge(otherPrivilege: FeaturePrivilege) {
-    const mergedPrivilege: FeatureKibanaPrivileges = {
+    return new FeaturePrivilege(this.id, this.mergePrivilegeConfigs(otherPrivilege));
+  }
+
+  protected mergePrivilegeConfigs(other: FeaturePrivilege) {
+    return {
       ...this.config,
-      api: this.api ? [...this.api, ...otherPrivilege.api!] : undefined,
-      app: this.app ? [...this.app, ...otherPrivilege.app!] : undefined,
-      ui: this.ui ? [...this.ui, ...otherPrivilege.ui!] : [],
+      api: this.api ? [...(this.api || []), ...(other.config.api || [])] : undefined,
+      app: this.app ? [...(this.app || []), ...(other.config.app || [])] : undefined,
+      ui: this.ui ? [...this.ui, ...other.config.ui!] : [],
       savedObject: {
-        all: [...this.savedObject.all, ...otherPrivilege.savedObject.all],
-        read: [...this.savedObject.read, ...otherPrivilege.savedObject.read],
+        all: [...this.savedObject.all, ...other.config.savedObject.all],
+        read: [...this.savedObject.read, ...other.config.savedObject.read],
       },
     };
-
-    return new FeaturePrivilege('TODO', mergedPrivilege);
   }
 }

@@ -6,12 +6,9 @@
 import { EuiIcon, EuiIconTip, EuiText, IconType, PropsOf, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
-import React, { ReactNode, SFC } from 'react';
-import {
-  PRIVILEGE_SOURCE,
-  PrivilegeExplanation,
-} from '../../../../../../../lib/kibana_privilege_calculator';
-import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import React, { ReactNode, SFC, FC } from 'react';
+import { PrivilegeExplanation } from '../../../../../../../common/model/poc_kibana_privileges/privilege_explanation';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props extends PropsOf<typeof EuiText> {
   privilege: string | string[] | undefined;
@@ -21,16 +18,16 @@ interface Props extends PropsOf<typeof EuiText> {
   tooltipContent?: ReactNode;
 }
 
-export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
+export const PrivilegeDisplay: FC<Props> = (props: Props) => {
   const { explanation } = props;
 
   if (!explanation) {
     return <SimplePrivilegeDisplay {...props} />;
   }
 
-  if (explanation.supersededPrivilege) {
-    return <SupersededPrivilegeDisplay {...props} />;
-  }
+  // if (explanation.supersededPrivilege) {
+  //   return <SupersededPrivilegeDisplay {...props} />;
+  // }
 
   if (!explanation.isDirectlyAssigned) {
     return <EffectivePrivilegeDisplay {...props} />;
@@ -39,7 +36,7 @@ export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
   return <SimplePrivilegeDisplay {...props} />;
 };
 
-const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
+const SimplePrivilegeDisplay: FC<Props> = (props: Props) => {
   const { privilege, iconType, iconTooltipContent, explanation, tooltipContent, ...rest } = props;
 
   const text = (
@@ -55,7 +52,7 @@ const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
   return text;
 };
 
-export const SupersededPrivilegeDisplay: SFC<Props> = (props: Props) => {
+export const SupersededPrivilegeDisplay: FC<Props> = (props: Props) => {
   const { supersededPrivilege, actualPrivilegeSource } =
     props.explanation || ({} as PrivilegeExplanation);
 
@@ -77,7 +74,7 @@ export const SupersededPrivilegeDisplay: SFC<Props> = (props: Props) => {
   );
 };
 
-export const EffectivePrivilegeDisplay: SFC<Props> = (props: Props) => {
+export const EffectivePrivilegeDisplay: FC<Props> = (props: Props) => {
   const { explanation, ...rest } = props;
 
   const source = getReadablePrivilegeSource(explanation!.actualPrivilegeSource);

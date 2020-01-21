@@ -17,6 +17,10 @@ export class Feature {
     return this.config.id;
   }
 
+  public get name() {
+    return this.config.name;
+  }
+
   public get navLinkId() {
     return this.config.navLinkId;
   }
@@ -37,6 +41,14 @@ export class Feature {
     return Boolean(this.config.excludeFromBasePrivileges);
   }
 
+  public get icon() {
+    return this.config.icon;
+  }
+
+  public get privilegesTooltip() {
+    return this.config.privilegesTooltip;
+  }
+
   public get reserved() {
     return this.config.reserved
       ? {
@@ -53,6 +65,12 @@ export class Feature {
     );
   }
 
+  public get minimalPrimaryFeaturePrivileges() {
+    return Object.entries(this.config.privileges || {}).map(
+      ([id, privilege]) => new PrimaryFeaturePrivilege(`minimal_${id}`, privilege)
+    );
+  }
+
   public get subFeatures() {
     if (Array.isArray(this.config.subFeatures)) {
       return this.config.subFeatures.map(sf => new SubFeature(sf));
@@ -62,6 +80,11 @@ export class Feature {
 
   public toRaw() {
     return { ...this.config };
+  }
+
+  // TODO: this is a shim
+  public get privileges() {
+    return this.primaryFeaturePrivileges;
   }
 
   public *privilegeIterator({

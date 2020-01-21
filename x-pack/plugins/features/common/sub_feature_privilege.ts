@@ -43,8 +43,8 @@ export class SubFeaturePrivilege extends FeaturePrivilege {
   public merge(otherSubFeature: SubFeaturePrivilege): SubFeaturePrivilege {
     const mergedPrivilege: SubFeaturePrivilegeConfig = {
       ...this.subPrivilegeConfig,
-      api: this.api ? [...this.api, ...otherSubFeature.api!] : undefined,
-      app: this.app ? [...this.app, ...otherSubFeature.app!] : undefined,
+      api: this.api ? [...(this.api || []), ...(otherSubFeature.api || [])] : undefined,
+      app: this.app ? [...(this.app || []), ...(otherSubFeature.app || [])] : undefined,
       ui: this.ui ? [...this.ui, ...otherSubFeature.ui!] : [],
       savedObject: {
         all: [...this.savedObject.all, ...otherSubFeature.savedObject.all],

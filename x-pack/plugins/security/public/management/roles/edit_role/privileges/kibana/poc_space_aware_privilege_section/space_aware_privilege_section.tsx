@@ -14,16 +14,14 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { UICapabilities } from 'ui/capabilities';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
-import { KibanaPrivileges } from '../../../../../../../../../../../plugins/security/common/model/poc_kibana_privileges';
-import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { Feature } from '../../../../../../../../../../../plugins/features/public';
-import { Role } from '../../../../../../../../common/model';
-import { isReservedRole } from '../../../../../../../lib/role_utils';
-import { RoleValidator } from '../../../../lib/validate_role';
-import { PrivilegeSpaceForm } from './privilege_space_form';
+import { Capabilities } from 'src/core/public';
+import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
+import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Feature } from '../../../../../../../../features/common';
+import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
+import { PrivilegeSpaceForm } from './privilege_space_form';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
@@ -34,7 +32,7 @@ interface Props {
   editable: boolean;
   validator: RoleValidator;
   intl: InjectedIntl;
-  uiCapabilities: UICapabilities;
+  uiCapabilities: Capabilities;
   features: Feature[];
 }
 

@@ -20,7 +20,7 @@ export {
   isRoleEnabled,
   prepareRoleClone,
 } from './role';
-export { KibanaPrivileges } from './kibana_privileges';
+export { KibanaPrivileges } from './poc_kibana_privileges';
 export {
   InlineRoleTemplate,
   StoredRoleTemplate,

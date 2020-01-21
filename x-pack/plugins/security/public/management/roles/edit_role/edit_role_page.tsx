@@ -36,6 +36,7 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
+import { IFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { Space } from '../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../features/public';
@@ -232,7 +233,7 @@ function useFeatures(http: HttpStart, fatalErrors: FatalErrorsSetup) {
   const [features, setFeatures] = useState<Feature[] | null>(null);
   useEffect(() => {
     http
-      .get('/api/features')
+      .get<IFeature[]>('/api/features')
       .catch((err: IHttpFetchError) => {
         // Currently, the `/api/features` endpoint effectively requires the "Global All" kibana privilege (e.g., what
         // the `kibana_user` grants), because it returns information about all registered features (#35841). It's
@@ -243,13 +244,13 @@ function useFeatures(http: HttpStart, fatalErrors: FatalErrorsSetup) {
         // 404 here, and respond in a way that still allows the UI to render itself.
         const unauthorizedForFeatures = err.response?.status === 404;
         if (unauthorizedForFeatures) {
-          return [];
+          return [] as IFeature[];
         }
 
         fatalErrors.add(err);
         throw err;
       })
-      .then(setFeatures);
+      .then(rawFeatures => setFeatures(rawFeatures.map(raw => new Feature(raw))));
   }, [http, fatalErrors]);
 
   return features;

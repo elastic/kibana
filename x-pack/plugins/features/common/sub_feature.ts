@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SubFeaturePrivilege, SubFeaturePrivilegeConfig } from './sub_feature_privilege';
-
-export interface SubFeaturePrivilegeGroup {
-  name: string;
-  groupType: 'mutually_exclusive' | 'independent';
-  privileges: SubFeaturePrivilegeConfig[];
-}
+import { SubFeaturePrivilege } from './sub_feature_privilege';
+import {
+  SubFeaturePrivilegeGroupConfig,
+  SubFeaturePrivilegeGroup,
+} from './sub_feature_privilege_group';
 
 export interface SubFeatureConfig {
   id: string;
   name: string;
-  privilegeGroups: SubFeaturePrivilegeGroup[];
+  privilegeGroups: SubFeaturePrivilegeGroupConfig[];
 }
 
 export class SubFeature {
@@ -23,6 +21,14 @@ export class SubFeature {
 
   public get id() {
     return this.config.id;
+  }
+
+  public get name() {
+    return this.config.name;
+  }
+
+  public get privilegeGroups() {
+    return this.config.privilegeGroups.map(pg => new SubFeaturePrivilegeGroup(pg));
   }
 
   public *privilegeIterator({

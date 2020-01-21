@@ -16,17 +16,17 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { getSpaceColor } from 'plugins/spaces/space_avatar';
-import { Space } from '../../../../../../../../../spaces/common/model/space';
 import {
-  FeaturesPrivileges,
   Role,
+  FeaturesPrivileges,
   RoleKibanaPrivilege,
-} from '../../../../../../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
-import { copyRole } from '../../../../../../../lib/role_utils';
-import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+  copyRole,
+} from '../../../../../../../common/model';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
+import { Space } from '../../../../../../../../spaces/common/model/space';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
+import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 
 const SPACES_DISPLAY_COUNT = 4;
 

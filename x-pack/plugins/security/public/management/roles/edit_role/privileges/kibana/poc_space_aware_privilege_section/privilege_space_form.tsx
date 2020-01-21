@@ -25,20 +25,18 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
-import { KibanaPrivileges } from '../../../../../../../../../../../plugins/security/common/model/poc_kibana_privileges';
-import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { IFeature } from '../../../../../../../../../../../plugins/features/common';
-import { Role } from '../../../../../../../../common/model';
-import { copyRole } from '../../../../../../../lib/role_utils';
-import { CUSTOM_PRIVILEGE_VALUE } from '../../../../lib/constants';
-import { FeatureTable } from '../poc_feature_table';
+import { Role, KibanaPrivileges, copyRole } from '../../../../../../../common/model';
+import { Feature } from '../../../../../../../../features/common';
+import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceSelector } from './space_selector';
+import { FeatureTable } from '../poc_feature_table';
+import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 
 interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
   privilegeCalculator: POCPrivilegeCalculator;
-  features: IFeature[];
+  features: Feature[];
   spaces: Space[];
   editingIndex: number;
   onChange: (role: Role) => void;
