@@ -51,3 +51,5 @@ export * from './fielddata_parameter';
 export * from './split_queries_on_whitespace_parameter';
 
 export * from './locale_parameter';
+
+export * from './max_shingle_size_parameter';
