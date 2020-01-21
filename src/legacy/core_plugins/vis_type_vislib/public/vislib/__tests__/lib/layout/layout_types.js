@@ -18,19 +18,16 @@
  */
 
 import _ from 'lodash';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
+
 import { layoutTypes as layoutType } from '../../../lib/layout/layout_types';
 
 describe('Vislib Layout Types Test Suite', function() {
   let layoutFunc;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function() {
-      layoutFunc = layoutType.point_series;
-    })
-  );
+  beforeEach(() => {
+    layoutFunc = layoutType.point_series;
+  });
 
   it('should be an object', function() {
     expect(_.isObject(layoutType)).to.be(true);

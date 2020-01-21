@@ -7,12 +7,15 @@
   &.visLib--legend-left {
     flex-direction: row-reverse;
   }
+
   &.visLib--legend-right {
     flex-direction: row;
   }
+
   &.visLib--legend-top {
     flex-direction: column-reverse;
   }
+
   &.visLib--legend-bottom {
     flex-direction: column;
   }

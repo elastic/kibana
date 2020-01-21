@@ -67,7 +67,7 @@ function ChartOptions({
         value: id,
       })),
       {
-        text: i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.newAxisLabel', {
+        text: i18n.translate('visTypeVislib.controls.pointSeries.series.newAxisLabel', {
           defaultMessage: 'New axis…',
         }),
         value: 'new',
@@ -80,7 +80,7 @@ function ChartOptions({
     <>
       <SelectOption
         id={`seriesValueAxis${index}`}
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.valueAxisLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.series.valueAxisLabel', {
           defaultMessage: 'Value axis',
         })}
         options={valueAxesOptions}
@@ -95,7 +95,7 @@ function ChartOptions({
         <EuiFlexItem>
           <SelectOption
             id={`seriesType${index}`}
-            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.chartTypeLabel', {
+            label={i18n.translate('visTypeVislib.controls.pointSeries.series.chartTypeLabel', {
               defaultMessage: 'Chart type',
             })}
             options={vis.type.editorConfig.collections.chartTypes}
@@ -107,7 +107,7 @@ function ChartOptions({
         <EuiFlexItem>
           <SelectOption
             id={`seriesMode${index}`}
-            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.modeLabel', {
+            label={i18n.translate('visTypeVislib.controls.pointSeries.series.modeLabel', {
               defaultMessage: 'Mode',
             })}
             options={vis.type.editorConfig.collections.chartModes}
@@ -123,7 +123,7 @@ function ChartOptions({
           <EuiSpacer size="m" />
 
           <SelectOption
-            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineModeLabel', {
+            label={i18n.translate('visTypeVislib.controls.pointSeries.series.lineModeLabel', {
               defaultMessage: 'Line mode',
             })}
             options={vis.type.editorConfig.collections.interpolationModes}

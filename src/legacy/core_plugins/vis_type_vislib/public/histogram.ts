@@ -42,11 +42,11 @@ import { KbnVislibVisTypesDependencies } from './plugin';
 
 export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'histogram',
-  title: i18n.translate('kbnVislibVisTypes.histogram.histogramTitle', {
+  title: i18n.translate('visTypeVislib.histogram.histogramTitle', {
     defaultMessage: 'Vertical Bar',
   }),
   icon: 'visBarVertical',
-  description: i18n.translate('kbnVislibVisTypes.histogram.histogramDescription', {
+  description: i18n.translate('visTypeVislib.histogram.histogramDescription', {
     defaultMessage: 'Assign a continuous variable to each axis',
   }),
   visualization: createVislibVisController(deps),
@@ -139,7 +139,7 @@ export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependen
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.histogram.metricTitle', {
+        title: i18n.translate('visTypeVislib.histogram.metricTitle', {
           defaultMessage: 'Y-axis',
         }),
         min: 1,
@@ -149,7 +149,7 @@ export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependen
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('kbnVislibVisTypes.histogram.radiusTitle', {
+        title: i18n.translate('visTypeVislib.histogram.radiusTitle', {
           defaultMessage: 'Dot size',
         }),
         min: 0,
@@ -159,7 +159,7 @@ export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependen
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.histogram.segmentTitle', {
+        title: i18n.translate('visTypeVislib.histogram.segmentTitle', {
           defaultMessage: 'X-axis',
         }),
         min: 0,
@@ -169,7 +169,7 @@ export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependen
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.histogram.groupTitle', {
+        title: i18n.translate('visTypeVislib.histogram.groupTitle', {
           defaultMessage: 'Split series',
         }),
         min: 0,
@@ -179,7 +179,7 @@ export const createHistogramVisTypeDefinition = (deps: KbnVislibVisTypesDependen
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.histogram.splitTitle', {
+        title: i18n.translate('visTypeVislib.histogram.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,
