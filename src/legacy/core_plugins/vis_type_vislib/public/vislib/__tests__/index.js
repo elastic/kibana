@@ -19,18 +19,15 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
+
 import VislibProvider from '..';
 
 describe('Vislib Index Test Suite', function() {
   let vislib;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private) {
-      vislib = Private(VislibProvider);
-    })
-  );
+  beforeEach(() => {
+    vislib = new VislibProvider();
+  });
 
   it('should return an object', function() {
     expect(_.isObject(vislib)).to.be(true);

@@ -26,16 +26,12 @@ import { ScaleTypes } from '../../../utils/collections';
 import { NumberInputOption } from '../../common';
 import { SetScale } from './value_axis_options';
 
-const rangeError = i18n.translate(
-  'kbnVislibVisTypes.controls.pointSeries.valueAxes.minErrorMessage',
-  { defaultMessage: 'Min should be less than Max.' }
-);
-const minError = i18n.translate(
-  'kbnVislibVisTypes.controls.pointSeries.valueAxes.minNeededScaleText',
-  {
-    defaultMessage: 'Min must exceed 0 when a log scale is selected.',
-  }
-);
+const rangeError = i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.minErrorMessage', {
+  defaultMessage: 'Min should be less than Max.',
+});
+const minError = i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.minNeededScaleText', {
+  defaultMessage: 'Min must exceed 0 when a log scale is selected.',
+});
 
 function areExtentsValid(min: number | null = null, max: number | null = null): boolean {
   if (min === null || max === null) {
@@ -90,7 +86,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
             <NumberInputOption
               data-test-subj="yAxisYExtentsMin"
               isInvalid={!!errors.length}
-              label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel', {
+              label={i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.minLabel', {
                 defaultMessage: 'Min',
               })}
               step={0.1}
@@ -102,7 +98,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
           <EuiFlexItem>
             <NumberInputOption
               data-test-subj="yAxisYExtentsMax"
-              label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel', {
+              label={i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.maxLabel', {
                 defaultMessage: 'Max',
               })}
               step={0.1}

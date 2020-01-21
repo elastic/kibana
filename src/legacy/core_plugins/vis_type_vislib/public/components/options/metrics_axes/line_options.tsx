@@ -46,7 +46,7 @@ function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
       <EuiSpacer size="m" />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.showLineLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.series.showLineLabel', {
           defaultMessage: 'Show line',
         })}
         paramName="drawLinesBetweenPoints"
@@ -60,7 +60,7 @@ function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
         <EuiFlexItem>
           <SelectOption
             disabled={!chart.drawLinesBetweenPoints}
-            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineModeLabel', {
+            label={i18n.translate('visTypeVislib.controls.pointSeries.series.lineModeLabel', {
               defaultMessage: 'Line mode',
             })}
             options={vis.type.editorConfig.collections.interpolationModes}
@@ -72,7 +72,7 @@ function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
         <EuiFlexItem>
           <NumberInputOption
             disabled={!chart.drawLinesBetweenPoints}
-            label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.lineWidthLabel', {
+            label={i18n.translate('visTypeVislib.controls.pointSeries.series.lineWidthLabel', {
               defaultMessage: 'Line width',
             })}
             paramName="lineWidth"
@@ -87,7 +87,7 @@ function LineOptions({ chart, vis, setChart }: LineOptionsParams) {
       <EuiSpacer size="m" />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.series.showDotsLabel', {
+        label={i18n.translate('visTypeVislib.controls.pointSeries.series.showDotsLabel', {
           defaultMessage: 'Show dots',
         })}
         paramName="showCircles"

@@ -21,7 +21,8 @@ import expect from '@kbn/expect';
 import $ from 'jquery';
 import _ from 'lodash';
 import sinon from 'sinon';
-import { positionTooltip } from '../position_tooltip';
+
+import { positionTooltip } from '../../components/tooltip/position_tooltip';
 
 describe('Tooltip Positioning', function() {
   const sandbox = sinon.createSandbox();

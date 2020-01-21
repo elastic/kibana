@@ -19,9 +19,10 @@
 
 import d3 from 'd3';
 import _ from 'lodash';
-import { Binder } from '../../../binder';
-import { positionTooltip } from './position_tooltip';
 import $ from 'jquery';
+
+import { Binder } from '../../../legacy_imports';
+import { positionTooltip } from './position_tooltip';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 let allContents = [];
@@ -217,7 +218,7 @@ Tooltip.prototype.render = function() {
           return content.id !== id;
         });
 
-        if (html) allContents.push({ id: id, html: html, order: order });
+        if (html) allContents.push({ id, html, order });
 
         const allHtml = _(allContents)
           .sortBy('order')
@@ -253,7 +254,3 @@ Tooltip.prototype.destroy = function() {
   this.hide();
   this.binder.destroy();
 };
-
-export function TooltipProvider() {
-  return Tooltip;
-}
