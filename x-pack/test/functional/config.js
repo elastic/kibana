@@ -199,10 +199,10 @@ export default async function({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/watcher/watches/',
       },
-      // transform: {
-      //   pathname: '/app/kibana/',
-      //   hash: '/management/elasticsearch/transform',
-      // },
+      transform: {
+        pathname: '/app/kibana/',
+        hash: '/management/elasticsearch/transform',
+      },
       endpoint: {
         pathname: '/app/endpoint',
       },
