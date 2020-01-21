@@ -35,7 +35,6 @@ import { DiscoverStartPlugins } from './plugin';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { SavedSearch } from './np_ready/types';
-import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -44,7 +43,6 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
-  docViewsRegistry: DocViewsRegistry;
   eui_utils: EuiUtilsStart;
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
@@ -59,8 +57,7 @@ export interface DiscoverServices {
 }
 export async function buildServices(
   core: CoreStart,
-  plugins: DiscoverStartPlugins,
-  docViewsRegistry: DocViewsRegistry
+  plugins: DiscoverStartPlugins
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
@@ -76,7 +73,6 @@ export async function buildServices(
     core,
     data: plugins.data,
     docLinks: core.docLinks,
-    docViewsRegistry,
     eui_utils: plugins.eui_utils,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),

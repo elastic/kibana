@@ -27,8 +27,6 @@ export interface AngularDirective {
 
 export type AngularScope = IScope;
 
-export type AngularController = (scope: AngularScope) => void;
-
 export type ElasticSearchHit = Record<string, string | number | Record<string, unknown>>;
 
 export interface FieldMapping {
