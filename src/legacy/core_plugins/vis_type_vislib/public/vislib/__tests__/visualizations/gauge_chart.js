@@ -17,21 +17,15 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
 import $ from 'jquery';
 import _ from 'lodash';
-
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 import data from '../lib/fixtures/mock_data/terms/_seriesMultiple';
-import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
 
 describe('Vislib Gauge Chart Test Suite', function() {
-  let PersistedState;
-  let vislibVis;
   let vis;
-  let persistedState;
   let chartEl;
   const visLibParams = {
     type: 'gauge',
@@ -81,21 +75,15 @@ describe('Vislib Gauge Chart Test Suite', function() {
       vis.destroy();
       $('.visChart').remove();
     }
-    vis = vislibVis(config);
-    persistedState = new PersistedState();
+    vis = getVis(config);
     vis.on('brush', _.noop);
-    vis.render(data, persistedState);
+    vis.render(data, getMockUiState());
     chartEl = vis.handler.charts[0].chartEl;
   }
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private, $injector) {
-      vislibVis = getFixturesVislibVisFixtureProvider(Private);
-      PersistedState = $injector.get('PersistedState');
-      generateVis();
-    })
-  );
+  beforeEach(() => {
+    generateVis();
+  });
 
   afterEach(function() {
     vis.destroy();
