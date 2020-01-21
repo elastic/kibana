@@ -5,9 +5,9 @@
  */
 
 import { Legacy } from 'kibana';
-import { ServerFacade } from '../../types';
+import { Logger, ServerFacade } from '../../types';
 
-export function getUserFactory(server: ServerFacade) {
+export function getUserFactory(server: ServerFacade, logger: Logger) {
   /*
    * Legacy.Request because this is called from routing middleware
    */
@@ -19,7 +19,7 @@ export function getUserFactory(server: ServerFacade) {
     try {
       return await server.plugins.security.getUser(request);
     } catch (err) {
-      server.log(['reporting', 'getUser', 'error'], err);
+      logger.error(err);
       return null;
     }
   };

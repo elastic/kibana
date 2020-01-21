@@ -74,7 +74,6 @@ export type ServerFacade = LegacySetup;
 export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
 
 export type EnqueueJobFn = <JobParamsType>(
-  parentLogger: LevelLogger,
   exportTypeId: string,
   jobParams: JobParamsType,
   user: string,
@@ -278,9 +277,13 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
+export type CreateJobFactory<CreateJobFnType> = (
+  server: ServerFacade,
+  logger: LevelLogger
+) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   server: ServerFacade,
+  logger: LevelLogger,
   opts: {
     browserDriverFactory: HeadlessChromiumDriverFactory;
   }

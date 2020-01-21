@@ -33,7 +33,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   server: ServerFacade,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server);
+  const routeOptions = getRouteOptionsCsv(server, parentLogger);
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
@@ -55,8 +55,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
        *
        * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
        */
-      const createJobFn = createJobFactory(server);
-      const executeJobFn = executeJobFactory(server, {
+      const createJobFn = createJobFactory(server, logger);
+      const executeJobFn = executeJobFactory(server, logger, {
         browserDriverFactory: {} as HeadlessChromiumDriverFactory,
       });
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(

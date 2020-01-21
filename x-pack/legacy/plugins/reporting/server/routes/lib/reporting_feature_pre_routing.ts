@@ -6,12 +6,13 @@
 
 import Boom from 'boom';
 import { Legacy } from 'kibana';
-import { ServerFacade } from '../../../types';
+import { Logger, ServerFacade } from '../../../types';
 
 export type GetReportingFeatureIdFn = (request: Legacy.Request) => string;
 
 export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRoutingFn(
-  server: ServerFacade
+  server: ServerFacade,
+  logger: Logger
 ) {
   const xpackMainPlugin = server.plugins.xpack_main;
   const pluginId = 'reporting';

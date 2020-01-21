@@ -17,9 +17,7 @@ import {
   JobSource,
   ListQuery,
 } from '../../types';
-// @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
-// @ts-ignore
 import { jobResponseHandlerFactory } from './lib/job_response_handler';
 import {
   getRouteConfigFactoryDownloadPre,
@@ -39,8 +37,8 @@ export function registerJobInfoRoutes(
   logger: Logger
 ) {
   const jobsQuery = jobsQueryFactory(server);
-  const getRouteConfig = getRouteConfigFactoryManagementPre(server);
-  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
+  const getRouteConfig = getRouteConfigFactoryManagementPre(server, logger);
+  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, logger);
 
   // list jobs in the queue, paginated
   server.route({
