@@ -20,6 +20,7 @@
 import React, { Component } from 'react';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
+import { npStart } from 'ui/new_platform';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
@@ -39,7 +40,6 @@ import {
 import { getSettingsComponent } from './components/component_registry';
 
 interface AdvancedSettingsProps {
-  config: IUiSettingsClient;
   query: string;
   enableSaving: boolean;
 }
@@ -53,6 +53,7 @@ interface AdvancedSettingsState {
 type GroupedSettings = Record<string, FieldSetting[]>;
 
 export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
+  private config: IUiSettingsClient;
   private settings: FieldSetting[];
   private groupedSettings: GroupedSettings;
   private categoryCounts: Record<string, number>;
@@ -60,9 +61,11 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   constructor(props: AdvancedSettingsProps) {
     super(props);
-    const { config, query } = this.props;
+    const { query } = this.props;
     const parsedQuery = Query.parse(query ? `ariaName:"${getAriaName(query)}"` : '');
-    this.settings = this.initSettings(config);
+
+    this.config = npStart.core.uiSettings;
+    this.settings = this.initSettings(this.config);
     this.groupedSettings = this.initGroupedSettings(this.settings);
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
@@ -103,13 +106,13 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     );
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: AdvancedSettingsProps) {
-    const { config } = nextProps;
-    const { query } = this.state;
-
-    this.init(config);
-    this.setState({
-      filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
+  componentDidMount() {
+    this.config.getUpdate$().subscribe(() => {
+      const { query } = this.state;
+      this.init(this.config);
+      this.setState({
+        filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
+      });
     });
   }
 
@@ -190,8 +193,8 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}
-          save={this.props.config.set.bind(this.props.config)}
-          clear={this.props.config.remove.bind(this.props.config)}
+          save={this.config.set.bind(this.config)}
+          clear={this.config.remove.bind(this.config)}
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
         />
