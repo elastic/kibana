@@ -20,12 +20,7 @@
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 
-import {
-  AppStateClass as TAppStateClass,
-  AppState as TAppState,
-  IInjector,
-  KbnUrl,
-} from '../legacy_imports';
+import { IInjector } from '../legacy_imports';
 
 import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
@@ -43,7 +38,7 @@ import { RenderDeps } from './application';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
-  appState: TAppState;
+  appState: DashboardAppState;
   screenTitle: string;
   model: {
     query: Query;
@@ -60,7 +55,6 @@ export interface DashboardAppScope extends ng.IScope {
   refreshInterval: any;
   panels: SavedDashboardPanel[];
   indexPatterns: IIndexPattern[];
-  $evalAsync: any;
   dashboardViewMode: ViewMode;
   expandedPanel?: string;
   getShouldShowEditHelp: () => boolean;
@@ -91,8 +85,6 @@ export interface DashboardAppScope extends ng.IScope {
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
   app.directive('dashboardApp', function($injector: IInjector) {
-    const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
-    const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
     const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
     const config = deps.uiSettings;
 
@@ -105,17 +97,13 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         $routeParams: {
           id?: string;
         },
-        getAppState: any,
         globalState: any
       ) =>
         new DashboardAppController({
           $route,
           $scope,
           $routeParams,
-          getAppState,
           globalState,
-          kbnUrl,
-          AppStateClass: AppState,
           config,
           confirmModal,
           indexPatterns: deps.npDataStart.indexPatterns,

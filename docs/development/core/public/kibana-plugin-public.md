@@ -130,6 +130,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-public.chromehelpextensionmenugithublink.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
+|  [FatalErrorsStart](./kibana-plugin-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-public.handlercontexttype.md)<!-- -->. |
