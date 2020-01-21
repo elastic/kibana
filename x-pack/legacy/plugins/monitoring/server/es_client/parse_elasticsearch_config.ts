@@ -12,6 +12,9 @@ const KEY = 'xpack.monitoring.elasticsearch';
 /*
  * Parse a config object's Elasticsearch configuration, reading any
  * certificates/keys from the filesystem
+ *
+ * TODO: this code can be removed when this plugin is migrated to the Kibana Platform,
+ * at that point the ElasticsearchClient and ElasticsearchConfig should be used instead
  */
 export const parseElasticsearchConfig = (config: any) => {
   const es = config.get(KEY);

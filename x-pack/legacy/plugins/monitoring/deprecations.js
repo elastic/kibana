@@ -26,7 +26,8 @@ export const deprecations = () => {
           `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
         );
       }
-
+    },
+    (settings, log) => {
       const fromPath = 'xpack.monitoring.elasticsearch';
       const es = get(settings, 'elasticsearch');
       if (es) {
@@ -35,16 +36,20 @@ export const deprecations = () => {
             `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
           );
         }
-        if (es.ssl) {
-          if (es.ssl.key !== undefined && es.ssl.certificate === undefined) {
-            log(
-              `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-            );
-          } else if (es.ssl.certificate !== undefined && es.ssl.key === undefined) {
-            log(
-              `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-            );
-          }
+      }
+    },
+    (settings, log) => {
+      const fromPath = 'xpack.monitoring.elasticsearch.ssl';
+      const ssl = get(settings, 'elasticsearch.ssl');
+      if (ssl) {
+        if (ssl.key !== undefined && ssl.certificate === undefined) {
+          log(
+            `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+          );
+        } else if (ssl.certificate !== undefined && ssl.key === undefined) {
+          log(
+            `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+          );
         }
       }
     },
