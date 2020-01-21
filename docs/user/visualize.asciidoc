@@ -15,7 +15,9 @@ _Visualize_ enables you to create visualizations of the data from your {es} indi
 . Click *Create new visualization*.
 . Choose the visualization type:
 +
-* <<lens,Lens>>
+* Basic charts
+[horizontal]
+<<lens,Lens>>::
 Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
 
 * *<<most-frequent,Most frequently used visualizations>>*
@@ -41,7 +43,7 @@ data sets.
 
 * *Maps*
 [horizontal]
-<<maps,Elastic maps>>:: The most powerful way of visualizing map data in {kib}.
+<<maps,Elastic Maps>>:: The most powerful way of visualizing map data in {kib}.
 
 <<tilemap,Coordinate map>>:: Displays points on a map using a geohash aggregation.
 
@@ -61,11 +63,11 @@ data sets.
 
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the <<index-patterns, index pattern>> for the indices that
-contain the data you want to visualize. This opens the visualization builder
+contain the data you want to visualize. The visualization builder opens
 with a wildcard query that matches all of the documents in the selected
 indices.
 ** To build a visualization from a saved search, click the name of the saved
-search you want to use. This opens the visualization builder and loads the
+search you want to use. The visualization builder opens and loads the
 selected query.
 +
 NOTE: When you build a visualization from a saved search, any subsequent
@@ -73,8 +75,11 @@ modifications to the saved search are automatically reflected in the
 visualization. To disable automatic updates, you can disconnect a visualization
 from the saved search.
 
+
 --
 include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+
+include::{kib-repo-dir}/visualize/aggregations.asciidoc[]
 
 include::{kib-repo-dir}/visualize/lens.asciidoc[]
 

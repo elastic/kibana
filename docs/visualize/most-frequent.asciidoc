@@ -1,9 +1,7 @@
 [[most-frequent]]
 == Most frequently used visualizations
 
-The most frequently used visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>. They all support a single-level of
-{es} {ref}/search-aggregations-metrics.html[metric] aggregations, and one or more
-levels of {es} {ref}/search-aggregations-bucket.html[bucket] aggregations.
+The most frequently used visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>.
 
 The most frequently used visualizations include:
 
@@ -14,11 +12,25 @@ The most frequently used visualizations include:
 * Tag cloud
 
 [float]
+[[frequently-used-viz-aggregation]]
+=== Supported aggregations
+
+The most frequently used visualizations support the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+
+* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
+
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+
+* <<visualize-bucket-aggregations,Bucket>>
+
+[float]
 === Configure your visualization
 
-You configure visualizations using the default editor, which is broken into metric and bucket aggregations, and includes a default count
-metric. Each visualization supports different configurations for what the metrics and buckets
-represent. For example, a bar chart allows you to add an x-axis:
+You configure visualizations using the default editor. Each visualization supports different configurations of the metrics and buckets.
+
+For example, a bar chart allows you to add an x-axis:
 
 [role="screenshot"]
 image::images/add-bucket.png["",height=478]
@@ -57,5 +69,3 @@ Each visualization also has its own customization options. Most visualizations a
 
 [role="screenshot"]
 image::images/color-picker.png[An array of color dots that users can select,height=267]
-
-include::aggregations.asciidoc[]
