@@ -23,12 +23,14 @@ interface Duration {
 
 function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
   return function(): Duration[] {
-    return timeHistory.get().map(({ from, to }: TimeRange) => {
-      return {
-        start: from,
-        end: to,
-      };
-    });
+    return (
+      timeHistory.get()?.map(({ from, to }: TimeRange) => {
+        return {
+          start: from,
+          end: to,
+        };
+      }) ?? []
+    );
   };
 }
 
@@ -54,9 +56,18 @@ export const TopNav: FC = () => {
 
   useEffect(() => {
     const subscriptions = new Subscription();
-    subscriptions.add(timefilter.getRefreshIntervalUpdate$().subscribe(timefilterUpdateListener));
-    subscriptions.add(timefilter.getTimeUpdate$().subscribe(timefilterUpdateListener));
-    subscriptions.add(timefilter.getEnabledUpdated$().subscribe(timefilterUpdateListener));
+    const refreshIntervalUpdate$ = timefilter.getRefreshIntervalUpdate$();
+    if (refreshIntervalUpdate$ !== undefined) {
+      subscriptions.add(refreshIntervalUpdate$.subscribe(timefilterUpdateListener));
+    }
+    const timeUpdate$ = timefilter.getTimeUpdate$();
+    if (timeUpdate$ !== undefined) {
+      subscriptions.add(timeUpdate$.subscribe(timefilterUpdateListener));
+    }
+    const enabledUpdated$ = timefilter.getEnabledUpdated$();
+    if (enabledUpdated$ !== undefined) {
+      subscriptions.add(enabledUpdated$.subscribe(timefilterUpdateListener));
+    }
 
     return function cleanup() {
       subscriptions.unsubscribe();
