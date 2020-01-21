@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
+import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
 import { createFieldOptions } from '../../../../../common/job_creator/util/general';
 
@@ -17,7 +18,8 @@ interface Props {
 }
 
 export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
-  const options: EuiComboBoxOptionProps[] = createFieldOptions(fields);
+  const { jobCreator } = useContext(JobCreatorContext);
+  const options: EuiComboBoxOptionProps[] = createFieldOptions(fields, jobCreator.additionalFields);
 
   const selection: EuiComboBoxOptionProps[] = [];
   if (selectedField !== null) {

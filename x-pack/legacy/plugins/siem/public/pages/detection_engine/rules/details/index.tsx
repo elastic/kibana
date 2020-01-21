@@ -109,7 +109,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       hasIndexWrite,
       signalIndexName,
     } = useUserInfo();
-    const { ruleId } = useParams();
+    const { detailName: ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
     // This is used to re-trigger api rule status when user de/activate rule
     const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
@@ -381,7 +381,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
           }}
         </WithSource>
 
-        <SpyRoute />
+        <SpyRoute state={{ ruleName: rule?.name }} />
       </>
     );
   }
@@ -402,8 +402,10 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const RuleDetails = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(RuleDetailsComponent);
+};
+
+export const RuleDetails = connect(makeMapStateToProps, mapDispatchToProps)(RuleDetailsComponent);
 
 RuleDetails.displayName = 'RuleDetails';
