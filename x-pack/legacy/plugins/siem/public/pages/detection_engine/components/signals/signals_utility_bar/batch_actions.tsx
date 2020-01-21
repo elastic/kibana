@@ -61,7 +61,7 @@ export const getBatchItems = ({
 
     <EuiContextMenuItem
       key={filterString}
-      icon={isFilteredToOpen ? 'indexClose' : 'indexOpen'}
+      icon={isFilteredToOpen ? 'securitySignalResolved' : 'securitySignalDetected'}
       disabled={allDisabled}
       onClick={async () => {
         closePopover();
