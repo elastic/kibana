@@ -5,6 +5,7 @@
  */
 
 import os from 'os';
+import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
 import { ApiKeyLib } from '../api_keys';
 import { AgentLib } from '../agent';
 import { FrameworkLib } from '../framework';
@@ -25,8 +26,28 @@ import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 import { AgentPolicyLib } from '../agent_policy';
 import { AgentEventLib } from '../agent_event';
 import { makePolicyUpdateHandler } from '../policy_update';
+import { PluginSetupContract as SecurityPlugin } from '../../../../../../plugins/security/server';
+import { OutputsLib as IngestOutputLib } from '../../../../ingest/server/libs/outputs';
+import { PolicyLib as IngestPolicyLib } from '../../../../ingest/server/libs/policy';
+
+export interface FleetPluginsStart {
+  security: SecurityPluginStartContract;
+  ingest: {
+    outputs: IngestOutputLib;
+    policies: IngestPolicyLib;
+  };
+}
+
+export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
+export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
 
 export function compose(server: any): FleetServerLib {
+  const newPlatform = ((server as unknown) as KbnServer).newPlatform;
+  const pluginsStart: FleetPluginsStart = {
+    security: newPlatform.setup.plugins.security as SecurityPluginStartContract,
+    ingest: server.plugins.ingest,
+  };
+
   const frameworkAdapter = new FrameworkAdapter(server);
   const policyAdapter = new PoliciesRepository(
     server.plugins.ingest.policy,
@@ -49,8 +70,9 @@ export function compose(server: any): FleetServerLib {
     encryptedObjectAdapter
   );
 
+  const libs: FleetServerLib = ({} as any) as FleetServerLib;
   const policies = new PolicyLib(policyAdapter);
-  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, framework);
+  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, libs, pluginsStart);
   const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
   const agentEvents = new AgentEventLib(agentEventsRepository);
   const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);
@@ -60,7 +82,7 @@ export function compose(server: any): FleetServerLib {
 
   const install = new InstallLib(framework);
 
-  const libs = {
+  Object.assign(libs, {
     agents,
     agentsPolicy,
     agentEvents,
@@ -69,7 +91,8 @@ export function compose(server: any): FleetServerLib {
     artifacts,
     install,
     framework,
-  };
+  });
+
   const policyUpdateHandler = makePolicyUpdateHandler(libs);
   server.plugins.ingest.policy.registerPolicyUpdateHandler(policyUpdateHandler);
 

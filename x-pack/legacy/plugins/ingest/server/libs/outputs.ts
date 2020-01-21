@@ -39,6 +39,24 @@ export class OutputsLib {
     }
   }
 
+  public async getAdminUser() {
+    // TEMPORY DO BETTER :)
+    return {
+      username: 'elastic',
+      password: 'changeme',
+    };
+
+    // const [defaultOutput] = await libs.outputs.getByIDs(libs.framework.internalUser, ['default']);
+    // if (!defaultOutput) {
+    //   throw new Error('No default output');
+    // }
+
+    // return {
+    //   username: defaultOutput.admin_username,
+    //   password: defaultOutput.admin_password,
+    // };
+  }
+
   public async getByIDs(_user: FrameworkUser, ids: string[]): Promise<Output[]> {
     if (ids.length > 0 && ids[0] !== 'default') {
       throw new Error('Currently, only a default output is supported');
