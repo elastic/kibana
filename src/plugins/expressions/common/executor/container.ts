@@ -23,9 +23,9 @@ import { ExpressionRenderFunction } from './expression_renderers';
 import { Type } from './expression_types';
 
 export interface ExecutorState {
-  functions: Record<string, undefined | ExpressionFunction>;
-  types: Record<string, undefined | Type>;
-  renderers: Record<string, undefined | ExpressionRenderFunction>;
+  functions: Record<string, ExpressionFunction>;
+  types: Record<string, Type>;
+  renderers: Record<string, ExpressionRenderFunction>;
 }
 
 export const defaultState: ExecutorState = {

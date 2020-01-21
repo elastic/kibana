@@ -19,14 +19,14 @@
 
 import { functionWrapper } from './utils';
 import { kibana } from '../kibana';
-import { ExecutionHandlers } from '../../../common/types';
+import { ExecutionContext } from '../../../common/types';
 import { KibanaContext } from '../../../common/expression_types/kibana_context';
 
 describe('interpreter/functions#kibana', () => {
   const fn = functionWrapper(kibana);
   let context: Partial<KibanaContext>;
   let initialContext: KibanaContext;
-  let handlers: ExecutionHandlers;
+  let handlers: ExecutionContext;
 
   beforeEach(() => {
     context = { timeRange: { from: '0', to: '1' } };
