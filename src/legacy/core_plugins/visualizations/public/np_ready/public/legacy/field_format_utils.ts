@@ -92,7 +92,7 @@ export const unserializeFieldFormat: FormatFactory = mapping => {
       const format = getFieldFormats().getInstance(id, mapping.params);
       const gte = '\u2265';
       const lt = '\u003c';
-      return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
+      return i18n.translate('visualizations.fieldFormatUtils.rangesFormatMessage', {
         defaultMessage: '{gte} {from} and {lt} {to}',
         values: {
           gte,

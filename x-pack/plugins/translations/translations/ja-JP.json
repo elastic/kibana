@@ -522,7 +522,6 @@
     "common.ui.vislib.colormaps.greysText": "グレー",
     "common.ui.vislib.colormaps.redsText": "赤",
     "common.ui.vislib.colormaps.yellowToRedText": "黄色から赤",
-    "common.ui.visualize.queryGeohashBounds.unableToGetBoundErrorTitle": "バウンドを取得できませんでした",
     "console.autocomplete.addMethodMetaText": "メソド",
     "console.consoleDisplayName": "コンソール",
     "console.consoleMenu.copyAsCurlMessage": "リクエストが URL としてコピーされました",
