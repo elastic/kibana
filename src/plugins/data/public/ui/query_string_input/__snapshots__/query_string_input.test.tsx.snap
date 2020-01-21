@@ -316,6 +316,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 },
               },
             },
+            "fatalErrors": Object {
+              "add": [MockFunction],
+              "get$": [MockFunction],
+            },
             "http": Object {
               "addLoadingCountSource": [MockFunction],
               "anonymousPaths": Object {
@@ -954,6 +958,10 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         },
                       },
                     },
+                    "fatalErrors": Object {
+                      "add": [MockFunction],
+                      "get$": [MockFunction],
+                    },
                     "http": Object {
                       "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
@@ -1573,6 +1581,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                   "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                 },
               },
+            },
+            "fatalErrors": Object {
+              "add": [MockFunction],
+              "get$": [MockFunction],
             },
             "http": Object {
               "addLoadingCountSource": [MockFunction],
@@ -2209,6 +2221,10 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         },
                       },
                     },
+                    "fatalErrors": Object {
+                      "add": [MockFunction],
+                      "get$": [MockFunction],
+                    },
                     "http": Object {
                       "addLoadingCountSource": [MockFunction],
                       "anonymousPaths": Object {
@@ -2828,6 +2844,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                   "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                 },
               },
+            },
+            "fatalErrors": Object {
+              "add": [MockFunction],
+              "get$": [MockFunction],
             },
             "http": Object {
               "addLoadingCountSource": [MockFunction],
@@ -3463,6 +3483,10 @@ exports[`QueryStringInput Should render the given query 1`] = `
                           "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
                         },
                       },
+                    },
+                    "fatalErrors": Object {
+                      "add": [MockFunction],
+                      "get$": [MockFunction],
                     },
                     "http": Object {
                       "addLoadingCountSource": [MockFunction],
