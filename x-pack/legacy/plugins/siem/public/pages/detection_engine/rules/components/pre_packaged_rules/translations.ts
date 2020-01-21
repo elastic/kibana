@@ -43,7 +43,7 @@ export const UPDATE_PREPACKAGED_RULES_TITLE = i18n.translate(
 );
 
 export const UPDATE_PREPACKAGED_RULES_MSG = (updateRules: number) =>
-  i18n.translate('xpack.siem.detectionEngine.rules.updatePrePackagedRulesTitle', {
+  i18n.translate('xpack.siem.detectionEngine.rules.updatePrePackagedRulesMsg', {
     values: { updateRules },
     defaultMessage:
       'You can update {updateRules} Elastic prebuilt {updateRules, plural, =1 {rule} other {rules}}. Note that this will reload deleted Elastic prebuilt rules.',
@@ -53,5 +53,5 @@ export const UPDATE_PREPACKAGED_RULES = (updateRules: number) =>
   i18n.translate('xpack.siem.detectionEngine.rules.updatePrePackagedRulesButton', {
     values: { updateRules },
     defaultMessage:
-      'Update {updateRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
+      'Update {updateRules} Elastic prebuilt {updateRules, plural, =1 {rule} other {rules}} ',
   });
