@@ -145,7 +145,7 @@ export function getDefaultDynamicProperties() {
     [VECTOR_STYLES.ICON]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
-        iconPallet: undefined,
+        iconPaletteId: 'filledShapes',
         field: undefined,
       },
     },

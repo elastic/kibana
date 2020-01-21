@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
 import { parseXmlString } from '../../../../common/parse_xml_string';
+import { SymbolIcon } from './components/legend/symbol_icon';
 
 export const LARGE_MAKI_ICON_SIZE = 15;
 const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();
@@ -76,4 +78,41 @@ export async function styleSvg(svgString, fill, stroke, strokeWidth) {
   if (style) svgXml.svg.$.style = style;
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
+}
+
+const ICON_PALETTES = [
+  {
+    id: 'filledShapes',
+    icons: ['circle', 'marker', 'square', 'star', 'triangle', 'hospital'],
+  },
+  {
+    id: 'hollowShapes',
+    icons: [
+      'circle-stroked',
+      'marker-stroked',
+      'square-stroked',
+      'star-stroked',
+      'triangle-stroked',
+    ],
+  },
+];
+
+export function getIconPaletteOptions(isDarkMode) {
+  return ICON_PALETTES.map(({ id, icons }) => {
+    const iconsDisplay = icons.map(iconId => {
+      return (
+        <SymbolIcon
+          key={iconId}
+          symbolId={iconId}
+          fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+          stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
+          strokeWidth={'1px'}
+        />
+      );
+    });
+    return {
+      value: id,
+      inputDisplay: <div>{iconsDisplay}</div>,
+    };
+  });
 }

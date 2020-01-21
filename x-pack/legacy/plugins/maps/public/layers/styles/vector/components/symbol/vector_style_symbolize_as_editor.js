@@ -16,7 +16,7 @@ const SYMBOLIZE_AS_OPTIONS = [
   {
     id: SYMBOLIZE_AS_TYPES.CIRCLE,
     label: i18n.translate('xpack.maps.vector.symbolAs.circleLabel', {
-      defaultMessage: 'circle marker',
+      defaultMessage: 'marker',
     }),
   },
   {
