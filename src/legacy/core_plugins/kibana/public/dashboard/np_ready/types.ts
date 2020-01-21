@@ -18,7 +18,6 @@
  */
 
 import { ViewMode } from 'src/plugins/embeddable/public';
-import { AppState } from '../legacy_imports';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -93,11 +92,7 @@ export type SavedDashboardPanelTo60 = Pick<
   readonly type: string;
 };
 
-export type DashboardAppStateDefaults = DashboardAppStateParameters & {
-  description?: string;
-};
-
-export interface DashboardAppStateParameters {
+export interface DashboardAppState {
   panels: SavedDashboardPanel[];
   fullScreenMode: boolean;
   title: string;
@@ -113,9 +108,24 @@ export interface DashboardAppStateParameters {
   savedQuery?: string;
 }
 
-// This could probably be improved if we flesh out AppState more... though AppState will be going away
-// so maybe not worth too much time atm.
-export type DashboardAppState = DashboardAppStateParameters & AppState;
+export type DashboardAppStateDefaults = DashboardAppState & {
+  description?: string;
+};
+
+export interface DashboardAppStateTransitions {
+  set: (
+    state: DashboardAppState
+  ) => <T extends keyof DashboardAppState>(
+    prop: T,
+    value: DashboardAppState[T]
+  ) => DashboardAppState;
+  setOption: (
+    state: DashboardAppState
+  ) => <T extends keyof DashboardAppState['options']>(
+    prop: T,
+    value: DashboardAppState['options'][T]
+  ) => DashboardAppState;
+}
 
 export interface SavedDashboardPanelMap {
   [key: string]: SavedDashboardPanel;
@@ -138,19 +148,4 @@ export type ConfirmModalFn = (
     defaultFocusedButton: string;
     title: string;
   }
-) => void;
-
-export type AddFilterFn = (
-  {
-    field,
-    value,
-    operator,
-    index,
-  }: {
-    field: string;
-    value: string;
-    operator: string;
-    index: string;
-  },
-  appState: AppState
 ) => void;

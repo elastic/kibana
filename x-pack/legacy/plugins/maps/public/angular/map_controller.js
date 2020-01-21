@@ -367,7 +367,9 @@ app.controller(
       if (prevIndexPatternIds !== nextIndexPatternIds) {
         return;
       }
-      $scope.indexPatterns = indexPatterns;
+      $scope.$evalAsync(() => {
+        $scope.indexPatterns = indexPatterns;
+      });
     }
 
     $scope.isFullScreen = false;
