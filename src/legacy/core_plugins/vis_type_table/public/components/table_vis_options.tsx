@@ -24,11 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { tabifyGetColumns, VisOptionsProps } from '../legacy_imports';
-import {
-  NumberInputOption,
-  SwitchOption,
-  SelectOption,
-} from '../../../vis_type_vislib/public/components/common';
+import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
 import { TableVisParams } from '../types';
 import { totalAggregations, isAggConfigNumeric } from './utils';
 

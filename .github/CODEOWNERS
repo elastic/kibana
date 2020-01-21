@@ -15,6 +15,7 @@
 /src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/legacy/core_plugins/metrics/ @elastic/kibana-app
+/src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/home/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app

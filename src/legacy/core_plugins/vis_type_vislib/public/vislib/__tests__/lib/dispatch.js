@@ -19,14 +19,12 @@
 
 import _ from 'lodash';
 import d3 from 'd3';
-import ngMock from 'ng_mock';
-
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 // Data
 import data from './fixtures/mock_data/date_histogram/_series';
-import getFixturesVislibVisFixtureProvider from './fixtures/_vis_fixture';
+
+import { getVis, getMockUiState } from './fixtures/_vis_fixture';
 import { SimpleEmitter } from '../../../legacy_imports';
 
 describe('Vislib Dispatch Class Test Suite', function() {
@@ -44,17 +42,13 @@ describe('Vislib Dispatch Class Test Suite', function() {
 
   describe('', function() {
     let vis;
-    let persistedState;
+    let mockUiState;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        vis = getVis();
-        persistedState = new ($injector.get('PersistedState'))();
-        vis.render(data, persistedState);
-      })
-    );
+    beforeEach(() => {
+      vis = getVis();
+      mockUiState = getMockUiState();
+      vis.render(data, mockUiState);
+    });
 
     afterEach(function() {
       destroyVis(vis);
@@ -71,18 +65,14 @@ describe('Vislib Dispatch Class Test Suite', function() {
 
   describe('Stock event handlers', function() {
     let vis;
-    let persistedState;
+    let mockUiState;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        persistedState = new ($injector.get('PersistedState'))();
-        vis = getVis();
-        vis.on('brush', _.noop);
-        vis.render(data, persistedState);
-      })
-    );
+    beforeEach(() => {
+      mockUiState = getMockUiState();
+      vis = getVis();
+      vis.on('brush', _.noop);
+      vis.render(data, mockUiState);
+    });
 
     afterEach(function() {
       destroyVis(vis);
@@ -187,42 +177,30 @@ describe('Vislib Dispatch Class Test Suite', function() {
 
   describe('Custom event handlers', function() {
     it('should attach whatever gets passed on vis.on() to chart.events', function(done) {
-      let vis;
-      let persistedState;
-      ngMock.module('kibana');
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        vis = getVis();
-        persistedState = new ($injector.get('PersistedState'))();
-        vis.on('someEvent', _.noop);
-        vis.render(data, persistedState);
+      const vis = getVis();
+      const mockUiState = getMockUiState();
+      vis.on('someEvent', _.noop);
+      vis.render(data, mockUiState);
 
-        vis.handler.charts.forEach(function(chart) {
-          expect(chart.events.listenerCount('someEvent')).to.be(1);
-        });
-
-        destroyVis(vis);
-        done();
+      vis.handler.charts.forEach(function(chart) {
+        expect(chart.events.listenerCount('someEvent')).to.be(1);
       });
+
+      destroyVis(vis);
+      done();
     });
 
     it('can be added after rendering', function() {
-      let vis;
-      let persistedState;
-      ngMock.module('kibana');
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        vis = getVis();
-        persistedState = new ($injector.get('PersistedState'))();
-        vis.render(data, persistedState);
-        vis.on('someEvent', _.noop);
+      const vis = getVis();
+      const mockUiState = getMockUiState();
+      vis.render(data, mockUiState);
+      vis.on('someEvent', _.noop);
 
-        vis.handler.charts.forEach(function(chart) {
-          expect(chart.events.listenerCount('someEvent')).to.be(1);
-        });
-
-        destroyVis(vis);
+      vis.handler.charts.forEach(function(chart) {
+        expect(chart.events.listenerCount('someEvent')).to.be(1);
       });
+
+      destroyVis(vis);
     });
   });
 });
