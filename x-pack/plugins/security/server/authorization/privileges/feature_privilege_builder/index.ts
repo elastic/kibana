@@ -5,7 +5,8 @@
  */
 
 import { flatten } from 'lodash';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { FeaturePrivilege } from '../../../../../features/common/feature_privilege';
+import { Feature } from '../../../../../features/server';
 import { Actions } from '../../actions';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';
@@ -29,7 +30,7 @@ export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivile
   ];
 
   return {
-    getActions(privilege: FeatureKibanaPrivileges, feature: Feature) {
+    getActions(privilege: FeaturePrivilege, feature: Feature) {
       return flatten(builders.map(builder => builder.getActions(privilege, feature)));
     },
   };

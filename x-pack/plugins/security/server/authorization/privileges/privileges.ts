@@ -87,7 +87,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
               ],
             };
           }
-          for (const subFeaturePrivilege of feature.subFeaturesPrivilegeIterator()) {
+          for (const subFeaturePrivilege of feature.subFeaturePrivilegeIterator()) {
             acc[feature.id] = {
               ...acc[feature.id],
               [subFeaturePrivilege.id]: [

@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FeaturePrivilege } from '../../../../../features/common/feature_privilege';
 import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { Actions } from '../../actions';
 
 export interface FeaturePrivilegeBuilder {
-  getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[];
+  getActions(privilegeDefinition: FeaturePrivilege, feature: Feature): string[];
 }
 export abstract class BaseFeaturePrivilegeBuilder implements FeaturePrivilegeBuilder {
   constructor(protected readonly actions: Actions) {}
 
-  public abstract getActions(
-    privilegeDefinition: FeatureKibanaPrivileges,
-    feature: Feature
-  ): string[];
+  public abstract getActions(privilegeDefinition: FeaturePrivilege, feature: Feature): string[];
 }

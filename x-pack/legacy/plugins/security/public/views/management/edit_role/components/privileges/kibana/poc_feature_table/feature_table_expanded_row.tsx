@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSwitch } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { IFeature } from '../../../../../../../../../../../plugins/features/common';
 import { Role } from '../../../../../../../../common/model';
@@ -28,8 +28,12 @@ export const FeatureTableExpandedRow = ({
   privilegeCalculator,
   disabled,
 }: Props) => {
-  const { id, subFeatures = [] } = feature;
+  const { id, privileges = [], subFeatures = [] } = feature;
   const selectedPrivileges = role.kibana[spacesIndex].feature[id] ?? [];
+
+  const selectedPrimaryFeaturePrivileges = selectedPrivileges.filter(sp =>
+    privileges.some(featurePrivilege => sp === featurePrivilege.id)
+  );
 
   const privilegeExplanations = privilegeCalculator.explainEffectiveFeaturePrivileges(
     role,
@@ -37,13 +41,54 @@ export const FeatureTableExpandedRow = ({
     feature.id
   );
 
+  // TODO: externalize
+  const isMinimumFeaturePrivilege = (privilege: string) => privilege.startsWith('minimum_');
+  const getMinimumFeaturePrivilege = (privilege: string) =>
+    isMinimumFeaturePrivilege(privilege) ? privilege : `minimum_${privilege}`;
+
+  const getRegularFeaturePrivilege = (privilege: string) =>
+    isMinimumFeaturePrivilege(privilege) ? privilege.substr(`minimum_`.length) : privilege;
+
+  const onCustomizeSubFeatureChange = (e: EuiSwitchEvent) => {
+    const customizeSubFeatures = e.target.checked;
+
+    const selectedPrimaryFeaturePrivilege = selectedPrimaryFeaturePrivileges[0];
+
+    if (!selectedPrimaryFeaturePrivilege) {
+      return;
+    }
+
+    const updatedSelectedPrivileges = selectedPrivileges.filter(
+      sp => sp !== selectedPrimaryFeaturePrivilege
+    );
+
+    if (customizeSubFeatures) {
+      updatedSelectedPrivileges.push(getMinimumFeaturePrivilege(selectedPrimaryFeaturePrivilege));
+    } else {
+      updatedSelectedPrivileges.push(getRegularFeaturePrivilege(selectedPrimaryFeaturePrivilege));
+    }
+
+    console.log({
+      feature: feature.id,
+      customizeSubFeatures,
+      selectedPrimaryFeaturePrivileges,
+      updatedSelectedPrivileges,
+    });
+
+    onChange(feature.id, updatedSelectedPrivileges);
+  };
+
+  const isCustomizingSubFeaturePrivileges = selectedPrimaryFeaturePrivileges.every(sp =>
+    isMinimumFeaturePrivilege(sp)
+  );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiSwitch
           label="Customize sub-feature privileges"
-          checked={false}
-          onChange={() => null}
+          checked={isCustomizingSubFeaturePrivileges}
+          onChange={onCustomizeSubFeatureChange}
           disabled={disabled}
         />
       </EuiFlexItem>

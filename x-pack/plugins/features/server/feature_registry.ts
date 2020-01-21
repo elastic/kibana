@@ -5,12 +5,12 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { Feature, FeatureKibanaPrivileges, IFeature } from '../common';
+import { IFeature, Feature, FeatureKibanaPrivileges } from '../common';
 import { validateFeature } from './feature_schema';
 
 export class FeatureRegistry {
   private locked = false;
-  private features: Record<string, Feature> = {};
+  private features: Record<string, IFeature> = {};
 
   public register(feature: IFeature) {
     if (this.locked) {
@@ -19,13 +19,7 @@ export class FeatureRegistry {
       );
     }
 
-    try {
-      validateFeature(feature);
-    } catch (e) {
-      console.error(`TODO: Ignoring invalid feature: ${feature.id}`);
-      if (feature.id === 'discover') throw e;
-      return;
-    }
+    validateFeature(feature);
 
     if (feature.id in this.features) {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
@@ -33,19 +27,18 @@ export class FeatureRegistry {
 
     const featureCopy: IFeature = cloneDeep(feature as IFeature);
 
-    this.features[feature.id] = new Feature(applyAutomaticPrivilegeGrants(featureCopy as IFeature));
+    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy as IFeature);
   }
 
   public getAll(): Feature[] {
     this.locked = true;
-    return Object.values(this.features);
+    return Object.values(this.features).map(featureConfig => new Feature(featureConfig));
   }
 }
 
 function applyAutomaticPrivilegeGrants(feature: IFeature): IFeature {
-  const allPrivilege = feature.privileges ? feature.privileges[0] : null;
-  const readPrivilege = feature.privileges ? feature.privileges[1] : null;
-  const reservedPrivilege = feature.reserved ? feature.reserved.privilege : null;
+  const { all: allPrivilege, read: readPrivilege } = feature.privileges || {};
+  const reservedPrivilege = feature.reserved ? feature.reserved.privilege : undefined;
 
   applyAutomaticAllPrivilegeGrants(allPrivilege, reservedPrivilege);
   applyAutomaticReadPrivilegeGrants(readPrivilege);
@@ -54,7 +47,7 @@ function applyAutomaticPrivilegeGrants(feature: IFeature): IFeature {
 }
 
 function applyAutomaticAllPrivilegeGrants(
-  ...allPrivileges: Array<FeatureKibanaPrivileges | null | undefined>
+  ...allPrivileges: Array<FeatureKibanaPrivileges | undefined>
 ) {
   allPrivileges.forEach(allPrivilege => {
     if (allPrivilege) {
@@ -65,7 +58,7 @@ function applyAutomaticAllPrivilegeGrants(
 }
 
 function applyAutomaticReadPrivilegeGrants(
-  ...readPrivileges: Array<FeatureKibanaPrivileges | null | undefined>
+  ...readPrivileges: Array<FeatureKibanaPrivileges | undefined>
 ) {
   readPrivileges.forEach(readPrivilege => {
     if (readPrivilege) {

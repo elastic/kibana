@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  FeatureKibanaPrivileges,
-  FeatureKibanaPrivilegesGroup,
-  SubFeatureKibanaPrivileges,
-} from './feature_kibana_privileges';
+import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
+import { SubFeaturePrivilege } from './sub_feature_privilege';
+import { SubFeature, SubFeatureConfig } from './sub_feature';
+import { FeaturePrivilege } from './feature_privilege';
 
 export class Feature {
   constructor(private readonly config: IFeature) {}
@@ -21,8 +21,16 @@ export class Feature {
     return this.config.navLinkId;
   }
 
+  public get app() {
+    return this.config.app;
+  }
+
   public get catalogue() {
     return this.config.catalogue;
+  }
+
+  public get management() {
+    return this.config.management;
   }
 
   public get excludeFromBasePrivileges() {
@@ -30,7 +38,26 @@ export class Feature {
   }
 
   public get reserved() {
-    return this.config.reserved;
+    return this.config.reserved
+      ? {
+          // TODO priv id
+          privilege: new FeaturePrivilege('_reserved_', this.config.reserved.privilege),
+          description: this.config.reserved.description,
+        }
+      : undefined;
+  }
+
+  public get primaryFeaturePrivileges() {
+    return Object.entries(this.config.privileges || {}).map(
+      ([id, privilege]) => new PrimaryFeaturePrivilege(id, privilege)
+    );
+  }
+
+  public get subFeatures() {
+    if (Array.isArray(this.config.subFeatures)) {
+      return this.config.subFeatures.map(sf => new SubFeature(sf));
+    }
+    return [];
   }
 
   public toRaw() {
@@ -42,80 +69,47 @@ export class Feature {
     predicate = () => true,
   }: {
     augmentWithSubFeaturePrivileges?: boolean;
-    predicate?: (privilege: FeatureKibanaPrivileges, feature: Feature) => boolean;
-  }): IterableIterator<FeatureKibanaPrivileges> {
+    predicate?: (privilege: PrimaryFeaturePrivilege, feature: Feature) => boolean;
+  }): IterableIterator<PrimaryFeaturePrivilege> {
     if (!this.config.privileges) {
       return [];
     }
 
-    const allSubFeaturePrivileges = (
-      (augmentWithSubFeaturePrivileges && this.config.subFeatures) ||
-      []
-    )
-      .map(subFeature => subFeature.privilegeGroups.map(pg => pg.privileges))
-      .flat(2);
+    const allSubFeaturePrivileges: SubFeaturePrivilege[] = [];
 
-    yield* this.config.privileges
+    if (augmentWithSubFeaturePrivileges) {
+      for (const subFeature of this.subFeatures) {
+        for (const subFeaturePriv of subFeature.privilegeIterator()) {
+          allSubFeaturePrivileges.push(subFeaturePriv);
+        }
+      }
+    }
+
+    yield* this.primaryFeaturePrivileges
       .filter(privilege => (predicate ? predicate(privilege, this) : true))
       .map(privilege => {
-        const subFeaturePrivsToMerge = allSubFeaturePrivileges.filter(
-          priv =>
-            priv.includeInPrimaryFeaturePrivilege === privilege.id ||
-            priv.includeInPrimaryFeaturePrivilege === 'read'
+        const subFeaturePrivsToMerge = allSubFeaturePrivileges.filter(priv =>
+          priv.includeIn(privilege)
         );
 
-        const subFeaturePrivileges: FeatureKibanaPrivileges = subFeaturePrivsToMerge.reduce(
+        const subFeaturePrivileges: SubFeaturePrivilege = subFeaturePrivsToMerge.reduce(
           (acc, addon) => {
-            return {
-              ...acc,
-              api: [...(acc.api || []), ...(addon.api || [])],
-              app: [...(acc.app || []), ...(addon.app || [])],
-              savedObject: {
-                all: [...acc.savedObject.all, ...addon.savedObject.all],
-                read: [...acc.savedObject.read, ...addon.savedObject.read],
-              },
-              ui: [...acc.ui, ...addon.ui],
-            };
+            return acc.merge(addon);
           },
-          ({
-            api: [],
-            app: [],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          } as unknown) as FeatureKibanaPrivileges
+          SubFeaturePrivilege.empty()
         );
 
-        const mergedPrivilege: FeatureKibanaPrivileges = {
-          ...privilege,
-          api: privilege.api ? [...privilege.api, ...subFeaturePrivileges.api!] : undefined,
-          app: privilege.app ? [...privilege.app, ...subFeaturePrivileges.app!] : undefined,
-          ui: privilege.ui ? [...privilege.ui, ...subFeaturePrivileges.ui!] : [],
-          savedObject: {
-            all: [...privilege.savedObject.all, ...subFeaturePrivileges.savedObject.all],
-            read: [...privilege.savedObject.read, ...subFeaturePrivileges.savedObject.read],
-          },
-        };
+        const mergedPrivilege = privilege.merge(subFeaturePrivileges);
 
         return mergedPrivilege;
       });
   }
 
-  public *subFeaturesPrivilegeIterator(): IterableIterator<SubFeatureKibanaPrivileges> {
-    if (!this.config.subFeatures) {
-      return [];
-    }
-    for (const subFeature of this.config.subFeatures) {
-      yield* subFeature.privilegeGroups.map(pg => pg.privileges).flat(2);
+  public *subFeaturePrivilegeIterator(): IterableIterator<SubFeaturePrivilege> {
+    for (const subFeature of this.subFeatures) {
+      yield* subFeature.privilegeIterator();
     }
   }
-}
-
-export interface ISubFeature {
-  name: string;
-  privilegeGroups: FeatureKibanaPrivilegesGroup[];
 }
 
 /**
@@ -208,9 +202,12 @@ export interface IFeature {
    * ```
    * @see FeatureKibanaPrivileges
    */
-  privileges?: FeatureKibanaPrivileges[];
+  privileges?: {
+    all: FeatureKibanaPrivileges;
+    read: FeatureKibanaPrivileges;
+  };
 
-  subFeatures?: ISubFeature[];
+  subFeatures?: SubFeatureConfig[];
 
   /**
    * Optional message to display on the Role Management screen when configuring permissions for this feature.

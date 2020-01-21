@@ -49,7 +49,7 @@ const privilegeSchema = Joi.object({
 const subFeaturePrivilegeSchema = Joi.object({
   id: Joi.string(),
   name: Joi.string(),
-  includeInPrimaryFeaturePrivilege: Joi.string().allow('all', 'read', 'none'),
+  includeIn: Joi.string().allow('all', 'read', 'none'),
   excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
   catalogue: catalogueSchema,

@@ -22,9 +22,8 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       navLinkId: 'kibana:discover',
       app: ['kibana'],
       catalogue: ['discover'],
-      privileges: [
-        {
-          id: 'all',
+      privileges: {
+        all: {
           name: 'All',
           savedObject: {
             all: ['search', 'query'],
@@ -32,8 +31,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           },
           ui: ['show', 'save', 'saveQuery'],
         },
-        {
-          id: 'read',
+        read: {
           name: 'Read',
           savedObject: {
             all: [],
@@ -41,7 +39,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           },
           ui: ['show'],
         },
-      ],
+      },
       subFeatures: [
         {
           name: 'Short URLs',
@@ -52,7 +50,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                 {
                   id: 'url_create',
                   name: 'Create Short URLs',
-                  includeInPrimaryFeaturePrivilege: 'all',
+                  includeIn: 'all',
                   savedObject: {
                     all: ['url'],
                     read: [],
@@ -72,7 +70,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                 {
                   id: 'alerting_readwrite',
                   name: 'Read/Write',
-                  includeInPrimaryFeaturePrivilege: 'all',
+                  includeIn: 'all',
                   savedObject: {
                     all: ['alerts'],
                     read: [],
@@ -82,7 +80,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                 {
                   id: 'alerting_read',
                   name: 'Read',
-                  includeInPrimaryFeaturePrivilege: 'read',
+                  includeIn: 'read',
                   savedObject: {
                     all: [],
                     read: ['read'],
@@ -97,7 +95,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                 {
                   id: 'alerting_mute',
                   name: 'Mute Alerts',
-                  includeInPrimaryFeaturePrivilege: 'all',
+                  includeIn: 'all',
                   savedObject: {
                     all: ['alerts'],
                     read: [],
@@ -308,9 +306,8 @@ const timelionFeature: IFeature = {
   navLinkId: 'timelion',
   app: ['timelion', 'kibana'],
   catalogue: ['timelion'],
-  privileges: [
-    {
-      id: 'all',
+  privileges: {
+    all: {
       name: 'All',
       savedObject: {
         all: ['timelion-sheet'],
@@ -318,8 +315,7 @@ const timelionFeature: IFeature = {
       },
       ui: ['save'],
     },
-    {
-      id: 'read',
+    read: {
       name: 'Read',
       savedObject: {
         all: [],
@@ -327,5 +323,5 @@ const timelionFeature: IFeature = {
       },
       ui: [],
     },
-  ],
+  },
 };
