@@ -42,7 +42,7 @@ export const name = Joi.string();
 export const risk_score = Joi.number()
   .greater(-1)
   .less(101);
-export const severity = Joi.string();
+export const severity = Joi.string().valid('low', 'medium', 'high', 'critical');
 export const status = Joi.string().valid('open', 'closed');
 export const to = Joi.string();
 export const type = Joi.string().valid('query', 'saved_query');
