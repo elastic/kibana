@@ -16,6 +16,7 @@ const getCurrentUserThrow = jest.fn().mockImplementation(() => {
 export const authenticationMock = {
   create: (): jest.Mocked<Authentication> => ({
     login: jest.fn(),
+    areAPIKeysEnabled: jest.fn(),
     createAPIKey: jest.fn(),
     getCurrentUser,
     invalidateAPIKey: jest.fn(),
@@ -25,6 +26,7 @@ export const authenticationMock = {
   }),
   createInvalid: (): jest.Mocked<Authentication> => ({
     login: jest.fn(),
+    areAPIKeysEnabled: jest.fn(),
     createAPIKey: jest.fn(),
     getCurrentUser: getCurrentUserThrow,
     invalidateAPIKey: jest.fn(),
