@@ -25,6 +25,7 @@ export function getPainlessError(error: Error) {
     error,
     'resp.error.root_cause'
   );
+  const message: string = get(error, 'message');
 
   if (!rootCause) {
     return;
@@ -43,6 +44,6 @@ export function getPainlessError(error: Error) {
       defaultMessage: "Error with Painless scripted field '{script}'.",
       values: { script },
     }),
-    error: error.message,
+    error: message,
   };
 }
