@@ -17,33 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-
-export function getPainlessError(error: Error) {
-  const rootCause: Array<{ lang: string; script: string }> | undefined = get(
-    error,
-    'resp.error.root_cause'
-  );
-  const message: string = get(error, 'message');
-
-  if (!rootCause) {
-    return;
-  }
-
-  const [{ lang, script }] = rootCause;
-
-  if (lang !== 'painless') {
-    return;
-  }
-
-  return {
-    lang,
-    script,
-    message: i18n.translate('kbn.discover.painlessError.painlessScriptedFieldErrorMessage', {
-      defaultMessage: "Error with Painless scripted field '{script}'.",
-      values: { script },
-    }),
-    error: message,
-  };
-}
+export { Tooltip } from './tooltip';
+export { hierarchicalTooltipFormatter } from './_hierarchical_tooltip_formatter';
+export { pointSeriesTooltipFormatter } from './_pointseries_tooltip_formatter';

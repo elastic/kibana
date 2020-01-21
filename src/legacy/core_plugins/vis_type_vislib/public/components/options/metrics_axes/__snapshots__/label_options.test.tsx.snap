@@ -11,7 +11,7 @@ exports[`LabelOptions component should init with the default set of props 1`] = 
     <h3>
       <FormattedMessage
         defaultMessage="Labels"
-        id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.labelsTitle"
+        id="visTypeVislib.controls.pointSeries.categoryAxis.labelsTitle"
         values={Object {}}
       />
     </h3>

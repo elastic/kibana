@@ -52,3 +52,5 @@ export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/bui
 // @ts-ignore
 export { updateOldState } from './legacy/vis_update_state';
 export { calculateObjectHash } from './legacy/calculate_object_hash';
+// @ts-ignore
+export { createFiltersFromEvent } from './filters/vis_filters';

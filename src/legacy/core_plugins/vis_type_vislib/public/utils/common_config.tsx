@@ -29,7 +29,7 @@ function getAreaOptionTabs() {
   return [
     {
       name: 'advanced',
-      title: i18n.translate('kbnVislibVisTypes.area.tabs.metricsAxesTitle', {
+      title: i18n.translate('visTypeVislib.area.tabs.metricsAxesTitle', {
         defaultMessage: 'Metrics & axes',
       }),
       editor: (props: VisOptionsProps<BasicVislibParams>) => (
@@ -38,7 +38,7 @@ function getAreaOptionTabs() {
     },
     {
       name: 'options',
-      title: i18n.translate('kbnVislibVisTypes.area.tabs.panelSettingsTitle', {
+      title: i18n.translate('visTypeVislib.area.tabs.panelSettingsTitle', {
         defaultMessage: 'Panel settings',
       }),
       editor: (props: VisOptionsProps<BasicVislibParams>) => (
@@ -48,7 +48,7 @@ function getAreaOptionTabs() {
   ];
 }
 
-const countLabel = i18n.translate('kbnVislibVisTypes.area.countText', {
+const countLabel = i18n.translate('visTypeVislib.area.countText', {
   defaultMessage: 'Count',
 });
 

@@ -26,7 +26,7 @@ import { SearchRequest } from '../types';
 export function callClient(
   searchRequests: SearchRequest[],
   requestsOptions: FetchOptions[] = [],
-  { es, config, esShardTimeout }: FetchHandlers
+  fetchHandlers: FetchHandlers
 ) {
   // Correlate the options with the request that they're associated with
   const requestOptionEntries: Array<[
@@ -53,9 +53,7 @@ export function callClient(
     // then an error would have been thrown above
     const { searching, abort } = searchStrategy!.search({
       searchRequests: requests,
-      es,
-      config,
-      esShardTimeout,
+      ...fetchHandlers,
     });
 
     requests.forEach((request, i) => {
