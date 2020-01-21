@@ -6,7 +6,7 @@
 import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
 import { LicenseState } from './lib/license_state';
 jest.mock('./lib/license_state', () => ({
-  verifyApiAccess: () => {},
+  verifyApiAccessFactory: () => {},
 }));
 
 describe('extendRouteWithLicenseCheck', () => {
