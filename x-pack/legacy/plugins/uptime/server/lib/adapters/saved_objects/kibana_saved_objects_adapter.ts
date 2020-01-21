@@ -5,12 +5,12 @@
  */
 
 import { UMSavedObjectsAdapter } from './types';
-import uptimeIndexPattern from './heartbeat_index_pattern.json';
+import { UPTIME_INDEX_PATTERN } from '../../../../common/constants';
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   getUptimeIndexPattern: async client => {
     try {
-      return await client.get('index-pattern', uptimeIndexPattern.id);
+      return await client.get('index-pattern', UPTIME_INDEX_PATTERN);
     } catch (error) {
       return await client.create(
         'index-pattern',
@@ -19,7 +19,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
           title: 'heartbeat-8*',
           fields: '[]',
         },
-        { id: uptimeIndexPattern.id, overwrite: false }
+        { id: UPTIME_INDEX_PATTERN, overwrite: false }
       );
     }
   },
