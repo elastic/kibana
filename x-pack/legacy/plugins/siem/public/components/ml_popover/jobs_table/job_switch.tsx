@@ -48,9 +48,10 @@ export const JobSwitchComponent = ({
 }: JobSwitchProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const handleChange = useCallback(
-    e => {
+    async e => {
       setIsLoading(true);
-      onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
+      await onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
+      setIsLoading(false);
     },
     [job, setIsLoading, onJobStateChange]
   );
