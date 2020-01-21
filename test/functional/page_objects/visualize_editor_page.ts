@@ -362,6 +362,15 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
 
+    public async changeYAxisShowCheckbox(axisId: string, enabled: boolean) {
+      const selector = `valueAxisShow-${axisId}`;
+      const button = await testSubjects.find(selector);
+      const isEnabled = (await button.getAttribute('aria-checked')) === 'true';
+      if (enabled !== isEnabled) {
+        await button.click();
+      }
+    }
+
     public async changeYAxisFilterLabelsCheckbox(axisId: string, enabled: boolean) {
       const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
       const button = await testSubjects.find(selector);

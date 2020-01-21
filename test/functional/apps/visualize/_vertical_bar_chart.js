@@ -420,6 +420,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickMetricsAndAxes();
         await PageObjects.visEditor.clickYAxisOptions(axisId);
         await PageObjects.visEditor.selectYAxisMode('percentage');
+        await PageObjects.visEditor.changeYAxisShowCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         expect(labels[0]).to.eql('0%');
