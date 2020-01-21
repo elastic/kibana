@@ -20,14 +20,14 @@ import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '.
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
-import { AutocompleteProviderRegister, esKuery } from '../../../../../../src/plugins/data/public';
 import { store } from '../state';
 import { setEsKueryString } from '../state/actions';
 import { PageHeader } from './page_header';
+import { esKuery, DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts/uptime_theme_context';
 
 interface OverviewPageProps {
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
+  autocomplete: DataPublicPluginStart['autocomplete'];
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 

@@ -35,6 +35,7 @@ import {
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncOnMount } from './global_state_sync';
+import { createHashHistory } from 'history';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -190,7 +191,7 @@ export function initDashboardApp(app, deps) {
         template: dashboardTemplate,
         controller: createNewDashboardCtrl,
         resolve: {
-          dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, AppState) {
+          dash: function($rootScope, $route, redirectWhenMissing, kbnUrl) {
             const id = $route.current.params.id;
 
             return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl)
@@ -216,8 +217,13 @@ export function initDashboardApp(app, deps) {
                 // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
                 // See https://github.com/elastic/kibana/issues/10951 for more context.
                 if (error instanceof SavedObjectNotFound && id === 'create') {
-                  // Note "new AppState" is necessary so the state in the url is preserved through the redirect.
-                  kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
+                  // Note preserve querystring part is necessary so the state is preserved through the redirect.
+                  const history = createHashHistory();
+                  history.replace({
+                    ...history.location, // preserve query,
+                    pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                  });
+
                   deps.toastNotifications.addWarning(
                     i18n.translate('kbn.dashboard.urlWasRemovedInSixZeroWarningMessage', {
                       defaultMessage:
