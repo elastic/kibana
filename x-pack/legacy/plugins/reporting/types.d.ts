@@ -7,7 +7,6 @@
 import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
 import { Legacy } from 'kibana';
-import { XPackMainPlugin } from '../xpack_main/server/xpack_main';
 import {
   ElasticsearchPlugin,
   CallCluster,
@@ -16,6 +15,7 @@ import { CancellationToken } from './common/cancellation_token';
 import { LevelLogger } from './server/lib/level_logger';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
+import { ServerFacade } from './index';
 
 export type ReportingPlugin = object; // For Plugin contract
 
@@ -53,7 +53,7 @@ export interface NetworkPolicy {
   rules: NetworkPolicyRule[];
 }
 
-interface ListQuery {
+export interface ListQuery {
   page: string;
   size: string;
   ids?: string; // optional field forbids us from extending RequestQuery
@@ -64,35 +64,12 @@ interface GenerateQuery {
 interface GenerateExportTypePayload {
   jobParams: string;
 }
-interface DownloadParams {
-  docId: string;
-}
 
 /*
  * Legacy System
  */
 
 export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
-
-export type ServerFacade = Legacy.Server & {
-  plugins: {
-    xpack_main?: XPackMainPlugin & {
-      status?: any;
-    };
-  };
-};
-
-interface ReportingRequest {
-  query: ListQuery & GenerateQuery;
-  params: DownloadParams;
-  payload: GenerateExportTypePayload;
-  pre: {
-    management: {
-      jobTypes: any;
-    };
-    user: any;
-  };
-}
 
 export type EnqueueJobFn = <JobParamsType>(
   parentLogger: LevelLogger,
@@ -103,7 +80,27 @@ export type EnqueueJobFn = <JobParamsType>(
   request: RequestFacade
 ) => Promise<Job>;
 
-export type RequestFacade = ReportingRequest & Legacy.Request;
+export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPayload;
+export type ReportingRequestQuery = ListQuery | GenerateQuery;
+
+export interface ReportingRequestPre {
+  management: {
+    jobTypes: any;
+  };
+  user: any; // TODO import AuthenticatedUser from security/server
+}
+
+export interface RequestFacade {
+  getBasePath: Legacy.Request['getBasePath'];
+  getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
+  headers: Legacy.Request['headers'];
+  params: Legacy.Request['params'];
+  payload: JobParamPostPayload | GenerateExportTypePayload;
+  query: ReportingRequestQuery;
+  route: Legacy.Request['route'];
+  pre: ReportingRequestPre;
+  getRawRequest: () => Legacy.Request;
+}
 
 export type ResponseFacade = ResponseObject & {
   isBoom: boolean;
@@ -355,3 +352,5 @@ export interface InterceptedRequest {
   frameId: string;
   resourceType: string;
 }
+
+export { ServerFacade };

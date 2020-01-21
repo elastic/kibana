@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { VisLegend } from './vislib_vis_legend';
-export { CUSTOM_LEGEND_VIS_TYPES } from './models';
+export { getEsClient } from './get_es_client';

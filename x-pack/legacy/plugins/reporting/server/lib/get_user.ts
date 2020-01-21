@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function getUserFactory(server) {
-  return async request => {
+import { Legacy } from 'kibana';
+import { ServerFacade } from '../../types';
+
+export function getUserFactory(server: ServerFacade) {
+  /*
+   * Legacy.Request because this is called from routing middleware
+   */
+  return async (request: Legacy.Request) => {
     if (!server.plugins.security) {
       return null;
     }
@@ -13,7 +19,7 @@ export function getUserFactory(server) {
     try {
       return await server.plugins.security.getUser(request);
     } catch (err) {
-      server.log(['reporting', 'getUser', 'debug'], err);
+      server.log(['reporting', 'getUser', 'error'], err);
       return null;
     }
   };
