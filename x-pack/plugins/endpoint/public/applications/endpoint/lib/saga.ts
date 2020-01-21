@@ -48,6 +48,7 @@ export interface SagaMiddleware extends Middleware {
 }
 
 const noop = () => {};
+const STOP = Symbol('STOP');
 
 /**
  * Creates Saga Middleware for use with Redux.
@@ -79,30 +80,28 @@ const noop = () => {};
 export function createSagaMiddleware(saga: Saga): SagaMiddleware {
   const iteratorInstances = new Set<IteratorInstance>();
   let runSaga: () => void = noop;
-  let running = false;
+  let stopSaga: () => void = noop;
+  let runningPromise: Promise<symbol>;
 
   async function* getActionsAndStateIterator(): StoreActionsAndState {
     const instance: IteratorInstance = { queue: [], nextResolve: null };
     iteratorInstances.add(instance);
-    running = true;
 
     try {
-      while (running) {
-        const actionAndState = await nextActionAndState();
+      while (true) {
+        const actionAndState = await Promise.race([nextActionAndState(), runningPromise]);
 
-        // while waiting for the nextActionAndState, the saga could have been stopped.
-        if (!running) {
-          continue;
+        if (actionAndState === STOP) {
+          break;
         }
 
-        yield actionAndState;
+        yield actionAndState as QueuedAction;
       }
     } finally {
       // If the consumer stops consuming this (e.g. `break` or `return` is called in the `for await`
       // then this `finally` block will run and unregister this instance and reset `runSaga`
       iteratorInstances.delete(instance);
-      runSaga = noop;
-      running = false;
+      runSaga = stopSaga = noop;
     }
 
     function nextActionAndState() {
@@ -148,17 +147,12 @@ export function createSagaMiddleware(saga: Saga): SagaMiddleware {
   }
 
   middleware.start = () => {
+    runningPromise = new Promise(resolve => (stopSaga = () => resolve(STOP)));
     runSaga();
   };
 
   middleware.stop = () => {
-    running = false;
-
-    // In order to actually stop the iterator instances, we need to force the loop to run one last time
-    enqueue({
-      action: { type: '' },
-      state: {} as GlobalState,
-    });
+    stopSaga();
   };
 
   return middleware;
