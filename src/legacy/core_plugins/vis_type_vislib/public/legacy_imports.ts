@@ -30,6 +30,5 @@ export { Tooltip } from 'ui/vis/components/tooltip';
 export { SimpleEmitter } from 'ui/utils/simple_emitter';
 // @ts-ignore
 export { Binder } from 'ui/binder';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';

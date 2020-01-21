@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { injectZeros } from '../components/zero_injection/inject_zeros';
 import { orderXValues } from '../components/zero_injection/ordered_x_keys';
 import { labels } from '../components/labels/labels';
-import { unserializeFieldFormat } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy/field_format_utils';
+import { unserializeFieldFormat } from '../../../../visualizations/public/np_ready/public/legacy/field_format_utils';
 
 /**
  * Provides an API for pulling values off the data

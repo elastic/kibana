@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { dataLabel } from '../lib/_data_label';
 import { Dispatch } from '../lib/dispatch';
 import { Tooltip } from '../../legacy_imports';
-import { unserializeFieldFormat } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy/field_format_utils';
+import { unserializeFieldFormat } from '../../../../visualizations/public/np_ready/public/legacy/field_format_utils';
 
 /**
  * The Base Class for all visualizations.

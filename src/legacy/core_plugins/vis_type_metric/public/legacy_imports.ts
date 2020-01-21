@@ -20,7 +20,6 @@
 export { Vis, VisParams } from 'ui/vis';
 export { vislibColorMaps, colorSchemas, ColorSchemas } from 'ui/color_maps';
 export { getHeatmapColors } from 'ui/color_maps';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 export { VisOptionsProps } from 'ui/vis/editors/default';
 // @ts-ignore
 export { Schemas } from 'ui/vis/editors/default/schemas';
