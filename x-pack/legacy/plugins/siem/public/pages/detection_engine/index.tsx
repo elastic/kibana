@@ -19,7 +19,7 @@ const detectionEnginePath = `/:pageName(detections)`;
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
-export const DetectionEngineContainer = React.memo<Props>(() => (
+const DetectionEngineContainerComponent: React.FC<Props> = () => (
   <ManageUserInfo>
     <Switch>
       <Route
@@ -35,10 +35,10 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
       <Route exact path={`${detectionEnginePath}/rules/create`}>
         <CreateRulePage />
       </Route>
-      <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/`}>
+      <Route exact path={`${detectionEnginePath}/rules/id/:detailName`}>
         <RuleDetailsPage />
       </Route>
-      <Route exact path={`${detectionEnginePath}/rules/id/:ruleId/edit`}>
+      <Route exact path={`${detectionEnginePath}/rules/id/:detailName/edit`}>
         <EditRulePage />
       </Route>
       <Route
@@ -49,5 +49,6 @@ export const DetectionEngineContainer = React.memo<Props>(() => (
       />
     </Switch>
   </ManageUserInfo>
-));
-DetectionEngineContainer.displayName = 'DetectionEngineContainer';
+);
+
+export const DetectionEngineContainer = React.memo(DetectionEngineContainerComponent);

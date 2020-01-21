@@ -114,7 +114,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
     hasIndexWrite,
     signalIndexName,
   } = useUserInfo();
-  const { ruleId } = useParams();
+  const { detailName: ruleId } = useParams();
   const [isLoading, rule] = useRule(ruleId);
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
@@ -384,7 +384,7 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
         }}
       </WithSource>
 
-      <SpyRoute />
+      <SpyRoute state={{ ruleName: rule?.name }} />
     </>
   );
 };

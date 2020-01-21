@@ -59,7 +59,7 @@ const EditRulePageComponent: FC = () => {
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
-  const { ruleId } = useParams();
+  const { detailName: ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
 
   const userHasNoPermissions =
@@ -349,7 +349,7 @@ const EditRulePageComponent: FC = () => {
         </EuiFlexGroup>
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute state={{ ruleName: rule?.name }} />
     </>
   );
 };
