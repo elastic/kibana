@@ -9,5 +9,5 @@ Provider to invoke to retrieve a [SavedObjectsClientFactory](./kibana-plugin-ser
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsClientFactoryProvider<Request = unknown> = (repositoryFactory: SavedObjectsRepositoryFactory) => SavedObjectsClientFactory<Request>;
+export declare type SavedObjectsClientFactoryProvider = (repositoryFactory: SavedObjectsRepositoryFactory) => SavedObjectsClientFactory;
 ```

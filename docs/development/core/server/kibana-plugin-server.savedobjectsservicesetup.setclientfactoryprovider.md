@@ -9,5 +9,5 @@ Set a default factory for creating Saved Objects clients. Only one client factor
 <b>Signature:</b>
 
 ```typescript
-setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider<KibanaRequest>) => void;
+setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 ```

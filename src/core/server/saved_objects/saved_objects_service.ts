@@ -87,9 +87,7 @@ export interface SavedObjectsServiceSetup {
    * Set a default factory for creating Saved Objects clients. Only one client
    * factory can be set, subsequent calls to this method will fail.
    */
-  setClientFactoryProvider: (
-    clientFactoryProvider: SavedObjectsClientFactoryProvider<KibanaRequest>
-  ) => void;
+  setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 
   /**
    * Add a client wrapper with the given priority.
@@ -97,7 +95,7 @@ export interface SavedObjectsServiceSetup {
   addClientWrapper: (
     priority: number,
     id: string,
-    factory: SavedObjectsClientWrapperFactory<KibanaRequest>
+    factory: SavedObjectsClientWrapperFactory
   ) => void;
 }
 
@@ -199,7 +197,7 @@ export interface SavedObjectsSetupDeps {
 interface WrappedClientFactoryWrapper {
   priority: number;
   id: string;
-  factory: SavedObjectsClientWrapperFactory<KibanaRequest>;
+  factory: SavedObjectsClientWrapperFactory;
 }
 
 /** @internal */
@@ -211,7 +209,7 @@ export class SavedObjectsService
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
-  private clientFactoryProvider?: SavedObjectsClientFactoryProvider<KibanaRequest>;
+  private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
   private mappings: SavedObjectsMapping[] = [];
@@ -309,7 +307,7 @@ export class SavedObjectsService
         createRepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
     };
 
-    const clientProvider = new SavedObjectsClientProvider<KibanaRequest>({
+    const clientProvider = new SavedObjectsClientProvider({
       defaultClientFactory({ request }) {
         const repository = repositoryFactory.createScopedRepository(request);
         return new SavedObjectsClient(repository);

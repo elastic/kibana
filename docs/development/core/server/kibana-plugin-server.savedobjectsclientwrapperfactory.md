@@ -9,5 +9,5 @@ Describes the factory used to create instances of Saved Objects Client Wrappers.
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsClientWrapperFactory<Request = unknown> = (options: SavedObjectsClientWrapperOptions<Request>) => SavedObjectsClientContract;
+export declare type SavedObjectsClientWrapperFactory = (options: SavedObjectsClientWrapperOptions) => SavedObjectsClientContract;
 ```

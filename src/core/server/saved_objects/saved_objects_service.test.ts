@@ -29,7 +29,6 @@ import * as legacyElasticsearch from 'elasticsearch';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { KibanaRequest } from '../http';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -51,7 +50,7 @@ describe('SavedObjectsService', () => {
         const setup = await soService.setup(createSetupDeps({}));
 
         const factory = jest.fn();
-        const factoryProvider: SavedObjectsClientFactoryProvider<KibanaRequest> = () => factory;
+        const factoryProvider: SavedObjectsClientFactoryProvider = () => factory;
 
         setup.setClientFactoryProvider(factoryProvider);
 

@@ -48,7 +48,7 @@ export interface UptimeCoreSetup {
 }
 
 export interface UptimeCorePlugins {
-  savedObjects: SavedObjectsLegacyService<any>;
+  savedObjects: SavedObjectsLegacyService;
   usageCollection: UsageCollectionSetup;
   xpack: any;
 }

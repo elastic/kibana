@@ -1491,12 +1491,12 @@ export class SavedObjectsClient {
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 // @public
-export type SavedObjectsClientFactory<Request = unknown> = ({ request, }: {
-    request: Request;
+export type SavedObjectsClientFactory = ({ request, }: {
+    request: KibanaRequest;
 }) => SavedObjectsClientContract;
 
 // @public
-export type SavedObjectsClientFactoryProvider<Request = unknown> = (repositoryFactory: SavedObjectsRepositoryFactory) => SavedObjectsClientFactory<Request>;
+export type SavedObjectsClientFactoryProvider = (repositoryFactory: SavedObjectsRepositoryFactory) => SavedObjectsClientFactory;
 
 // @public
 export interface SavedObjectsClientProviderOptions {
@@ -1505,14 +1505,14 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 // @public
-export type SavedObjectsClientWrapperFactory<Request = unknown> = (options: SavedObjectsClientWrapperOptions<Request>) => SavedObjectsClientContract;
+export type SavedObjectsClientWrapperFactory = (options: SavedObjectsClientWrapperOptions) => SavedObjectsClientContract;
 
 // @public
-export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+export interface SavedObjectsClientWrapperOptions {
     // (undocumented)
     client: SavedObjectsClientContract;
     // (undocumented)
-    request: Request;
+    request: KibanaRequest;
 }
 
 // @public (undocumented)
@@ -1748,15 +1748,15 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
 }
 
 // @internal @deprecated (undocumented)
-export interface SavedObjectsLegacyService<Request = any> {
+export interface SavedObjectsLegacyService {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider['addClientWrapperFactory'];
     // (undocumented)
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
-    getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
+    getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
     // (undocumented)
     importExport: {
         objectLimit: number;
@@ -1769,7 +1769,7 @@ export interface SavedObjectsLegacyService<Request = any> {
     // (undocumented)
     schema: SavedObjectsSchema;
     // (undocumented)
-    setScopedSavedObjectsClientFactory: SavedObjectsClientProvider<Request>['setClientFactory'];
+    setScopedSavedObjectsClientFactory: SavedObjectsClientProvider['setClientFactory'];
     // (undocumented)
     types: string[];
 }
@@ -1880,8 +1880,8 @@ export class SavedObjectsSerializer {
 
 // @public
 export interface SavedObjectsServiceSetup {
-    addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory<KibanaRequest>) => void;
-    setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider<KibanaRequest>) => void;
+    addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
 // @public

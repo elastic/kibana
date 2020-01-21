@@ -28,6 +28,6 @@ export class Plugin() { setup: (core: CoreSetup) =<!-- -->&gt; { core.savedObjec
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [addClientWrapper](./kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory&lt;KibanaRequest&gt;) =&gt; void</code> | Add a client wrapper with the given priority. |
-|  [setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md) | <code>(clientFactoryProvider: SavedObjectsClientFactoryProvider&lt;KibanaRequest&gt;) =&gt; void</code> | Set a default factory for creating Saved Objects clients. Only one client factory can be set, subsequent calls to this method will fail. |
+|  [addClientWrapper](./kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void</code> | Add a client wrapper with the given priority. |
+|  [setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md) | <code>(clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void</code> | Set a default factory for creating Saved Objects clients. Only one client factory can be set, subsequent calls to this method will fail. |
 

@@ -128,10 +128,10 @@ export class Plugin {
 
     this.taskRunnerFactory.initialize({
       logger: this.logger,
-      getServices(request: Hapi.Request): Services {
+      getServices(rawRequest: Hapi.Request): Services {
+        const request = KibanaRequest.from(rawRequest);
         return {
-          callCluster: (...args) =>
-            adminClient!.asScoped(KibanaRequest.from(request)).callAsCurrentUser(...args),
+          callCluster: (...args) => adminClient!.asScoped(request).callAsCurrentUser(...args),
           savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
         };
       },

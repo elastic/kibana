@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'kibana/server';
 // @ts-ignore no module definition TODO
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
@@ -57,7 +58,9 @@ export async function generateCsvSearch(
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory } = server;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req.getRawRequest());
+  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+    KibanaRequest.from(req.getRawRequest())
+  );
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
   const { indexPatternSavedObject } = await getDataSource(

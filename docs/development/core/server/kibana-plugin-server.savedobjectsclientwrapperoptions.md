@@ -9,7 +9,7 @@ Options passed to each SavedObjectsClientWrapperFactory to aid in creating the w
 <b>Signature:</b>
 
 ```typescript
-export interface SavedObjectsClientWrapperOptions<Request = unknown> 
+export interface SavedObjectsClientWrapperOptions 
 ```
 
 ## Properties
@@ -17,5 +17,5 @@ export interface SavedObjectsClientWrapperOptions<Request = unknown>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [client](./kibana-plugin-server.savedobjectsclientwrapperoptions.client.md) | <code>SavedObjectsClientContract</code> |  |
-|  [request](./kibana-plugin-server.savedobjectsclientwrapperoptions.request.md) | <code>Request</code> |  |
+|  [request](./kibana-plugin-server.savedobjectsclientwrapperoptions.request.md) | <code>KibanaRequest</code> |  |
 

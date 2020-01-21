@@ -9,7 +9,7 @@ Describes the factory used to create instances of the Saved Objects Client.
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsClientFactory<Request = unknown> = ({ request, }: {
-    request: Request;
+export declare type SavedObjectsClientFactory = ({ request, }: {
+    request: KibanaRequest;
 }) => SavedObjectsClientContract;
 ```

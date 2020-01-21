@@ -9,5 +9,5 @@ Add a client wrapper with the given priority.
 <b>Signature:</b>
 
 ```typescript
-addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory<KibanaRequest>) => void;
+addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
 ```
