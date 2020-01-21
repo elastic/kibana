@@ -2,19 +2,10 @@
 
 [Home](./index.md) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [StringValidation](./kibana-plugin-server.stringvalidation.md)
 
-## StringValidation interface
+## StringValidation type
 
 <b>Signature:</b>
 
 ```typescript
-export interface StringValidation 
+export declare type StringValidation = StringValidationRegex | StringValidationRegexString;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [message](./kibana-plugin-server.stringvalidation.message.md) | <code>string</code> |  |
-|  [regex](./kibana-plugin-server.stringvalidation.regex.md) | <code>RegExp</code> |  |
-|  [regexString](./kibana-plugin-server.stringvalidation.regexstring.md) | <code>string</code> |  |
-
