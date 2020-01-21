@@ -344,8 +344,7 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING: https://github.com/elastic/kibana/issues/52969
-    describe.skip('API access with missing access token document or expired refresh token.', () => {
+    describe('API access with missing access token document or expired refresh token.', () => {
       let sessionCookie: Cookie;
 
       beforeEach(async () => {

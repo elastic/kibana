@@ -30,6 +30,7 @@ import { FormattedDate } from '../../../../components/formatted_date';
 import { RuleSwitch } from '../components/rule_switch';
 import { SeverityBadge } from '../components/severity_badge';
 import { ActionToaster } from '../../../../components/toasters';
+import { getStatusColor } from '../components/rule_status/helpers';
 
 const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -86,7 +87,7 @@ export const getColumns = (
       field: 'method',
       name: i18n.COLUMN_METHOD,
       truncateText: true,
-      width: '16%',
+      width: '14%',
     },
     {
       field: 'severity',
@@ -113,19 +114,11 @@ export const getColumns = (
       field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
       render: (value: TableData['status']) => {
-        const color =
-          value == null
-            ? 'subdued'
-            : value === 'succeeded'
-            ? 'success'
-            : value === 'failed'
-            ? 'danger'
-            : value === 'executing'
-            ? 'warning'
-            : 'subdued';
         return (
           <>
-            <EuiHealth color={color}>{value ?? getEmptyTagValue()}</EuiHealth>
+            <EuiHealth color={getStatusColor(value ?? null)}>
+              {value ?? getEmptyTagValue()}
+            </EuiHealth>
           </>
         );
       },
@@ -161,7 +154,7 @@ export const getColumns = (
         />
       ),
       sortable: true,
-      width: '85px',
+      width: '95px',
     },
   ];
   const actions: RulesColumns[] = [

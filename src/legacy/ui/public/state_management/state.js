@@ -29,7 +29,6 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import rison from 'rison-node';
-import { applyDiff } from './utils/diff_object';
 import { EventsProvider } from '../events';
 import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
@@ -38,6 +37,7 @@ import {
   hashedItemStore,
   isStateHash,
   createStateHash,
+  applyDiff,
 } from '../../../../plugins/kibana_utils/public';
 
 export function StateProvider(

@@ -15,3 +15,6 @@ $secFormWidth: 460px;
 // Public views
 @import './views/index';
 
+// Styles of Kibana Platform plugin
+@import '../../../../plugins/security/public/index';
+

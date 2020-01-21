@@ -24,6 +24,7 @@ import { IStateSyncConfig } from './types';
 import { IStateStorage } from './state_sync_state_storage';
 import { distinctUntilChangedWithInitialValue } from '../../common';
 import { BaseState } from '../state_containers';
+import { applyDiff } from '../state_management/utils/diff_object';
 
 /**
  * Utility for syncing application state wrapped in state container
@@ -100,7 +101,18 @@ export function syncState<
   const updateState = () => {
     const newState = stateStorage.get<State>(storageKey);
     const oldState = stateContainer.get();
-    if (!defaultComparator(newState, oldState)) {
+    if (newState) {
+      // apply only real differences to new state
+      const mergedState = { ...oldState } as State;
+      // merges into 'mergedState' all differences from newState,
+      // but leaves references if they are deeply the same
+      const diff = applyDiff(mergedState, newState);
+
+      if (diff.keys.length > 0) {
+        stateContainer.set(mergedState);
+      }
+    } else if (oldState !== newState) {
+      // empty new state case
       stateContainer.set(newState);
     }
   };
