@@ -72,6 +72,7 @@ describe('Security Plugin', () => {
                   "registerPrivilegesWithCluster": [Function],
                 },
                 "authc": Object {
+                  "areAPIKeysEnabled": [Function],
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
                   "getSessionInfo": [Function],
