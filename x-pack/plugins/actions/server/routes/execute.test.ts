@@ -76,6 +76,44 @@ describe('executeActionRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('returns a "204 NO CONTENT" when the executor returns a nullish value', async () => {
+    const licenseState = mockLicenseState();
+    const router: RouterMock = mockRouter.create();
+
+    const [context, req, res] = mockHandlerArguments(
+      {},
+      {
+        body: {
+          params: {},
+        },
+        params: {
+          id: '1',
+        },
+      },
+      ['noContent']
+    );
+
+    const actionExecutor = {
+      initialize: jest.fn(),
+      execute: jest.fn(),
+    } as jest.Mocked<ActionExecutorContract>;
+
+    executeActionRoute(router, licenseState, actionExecutor);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    expect(await handler(context, req, res)).toEqual(undefined);
+
+    expect(actionExecutor.execute).toHaveBeenCalledWith({
+      actionId: '1',
+      params: {},
+      request: req,
+    });
+
+    expect(res.ok).not.toHaveBeenCalled();
+    expect(res.noContent).toHaveBeenCalled();
+  });
+
   it('ensures the license allows action execution', async () => {
     const licenseState = mockLicenseState();
     const router: RouterMock = mockRouter.create();

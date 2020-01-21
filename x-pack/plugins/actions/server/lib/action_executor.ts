@@ -99,27 +99,20 @@ export class ActionExecutor {
       return { status: 'error', actionId, message: err.message, retry: false };
     }
 
-    let result: ActionTypeExecutorResult | null = null;
     const actionLabel = `${actionId} - ${actionTypeId} - ${name}`;
-
     try {
-      result = await actionType.executor({
+      const result: ActionTypeExecutorResult | null = await actionType.executor({
         actionId,
         services,
         params: validatedParams,
         config: validatedConfig,
         secrets: validatedSecrets,
       });
+      logger.debug(`action executed successfully: ${actionLabel}`);
+      return result ? result : { status: 'ok', actionId }; // return basic response if none provided
     } catch (err) {
       logger.warn(`action executed unsuccessfully: ${actionLabel} - ${err.message}`);
       throw err;
     }
-
-    logger.debug(`action executed successfully: ${actionLabel}`);
-
-    // return basic response if none provided
-    if (result == null) return { status: 'ok', actionId };
-
-    return result;
   }
 }

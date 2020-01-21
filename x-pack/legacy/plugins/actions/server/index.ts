@@ -5,7 +5,6 @@
  */
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import { init } from './init';
 import mappings from './mappings.json';
 
 export function actions(kibana: any) {
@@ -27,7 +26,6 @@ export function actions(kibana: any) {
         config.get('xpack.task_manager.enabled') === true
       );
     },
-    init,
     uiExports: {
       mappings,
     },

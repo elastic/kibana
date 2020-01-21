@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import {
   PluginInitializerContext,
@@ -17,6 +16,7 @@ import {
   SharedGlobalConfig,
   RequestHandler,
   IContextProvider,
+  SavedObjectsServiceStart,
 } from '../../../../src/core/server';
 
 import { PluginSetupContract as SecurityPluginSetupContract } from '../../security/server';
@@ -72,7 +72,7 @@ export interface ActionsPluginsStart {
 
 export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, PluginStartContract> {
   private readonly kibanaIndex: Promise<string>;
-  private readonly config$: Observable<ActionsConfig>;
+  private readonly config: Promise<ActionsConfig>;
 
   private readonly logger: Logger;
   private serverBasePath?: string;
@@ -80,12 +80,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
-  private defaultKibanaIndex?: string;
   private licenseState: LicenseState | null = null;
   private spaces?: SpacesServiceSetup;
 
   constructor(initContext: PluginInitializerContext) {
-    this.config$ = initContext.config.create<ActionsConfig>();
+    this.config = initContext.config
+      .create<ActionsConfig>()
+      .pipe(first())
+      .toPromise();
 
     this.kibanaIndex = initContext.config.legacy.globalConfig$
       .pipe(
@@ -98,13 +100,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
-    const config = await this.config$.pipe(first()).toPromise();
-    this.adminClient = core.elasticsearch.adminClient;
-    this.defaultKibanaIndex = await this.kibanaIndex;
-
-    this.spaces = plugins.spaces?.spacesService;
-    this.licenseState = new LicenseState(plugins.licensing.license$);
-
     // Encrypted attributes
     // - `secrets` properties will be encrypted
     // - `config` will be included in AAD
@@ -121,7 +116,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const actionExecutor = new ActionExecutor();
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
-    const actionsConfigUtils = getActionsConfigurationUtilities(config as ActionsConfig);
+    const actionsConfigUtils = getActionsConfigurationUtilities(
+      (await this.config) as ActionsConfig
+    );
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
       taskManager: plugins.taskManager,
@@ -131,6 +128,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     this.actionTypeRegistry = actionTypeRegistry;
     this.serverBasePath = core.http.basePath.serverBasePath;
     this.actionExecutor = actionExecutor;
+    this.adminClient = core.elasticsearch.adminClient;
+    this.spaces = plugins.spaces?.spacesService;
 
     registerBuiltInActionTypes({
       logger: this.logger,
@@ -138,9 +137,13 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionsConfigUtils,
     });
 
-    core.http.registerRouteHandlerContext('actions', this.createRouteHandlerContext());
+    core.http.registerRouteHandlerContext(
+      'actions',
+      this.createRouteHandlerContext(await this.kibanaIndex)
+    );
 
     // Routes
+    this.licenseState = new LicenseState(plugins.licensing.license$);
     const router = core.http.createRouter();
     createActionRoute(router, this.licenseState);
     deleteActionRoute(router, this.licenseState);
@@ -156,19 +159,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    const { logger, actionExecutor, actionTypeRegistry, adminClient, taskRunnerFactory } = this;
-
-    function getServices(request: KibanaRequest): Services {
-      return {
-        callCluster: (...args) => adminClient!.asScoped(request).callAsCurrentUser(...args),
-        savedObjectsClient: core.savedObjects.getScopedClient(request),
-      };
-    }
+    const { logger, actionExecutor, actionTypeRegistry, taskRunnerFactory } = this;
 
     actionExecutor!.initialize({
       logger,
       spaces: this.spaces,
-      getServices,
+      getServices: this.getServicesFactory(core.savedObjects),
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       actionTypeRegistry: actionTypeRegistry!,
     });
@@ -179,29 +175,36 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       spaceIdToNamespace: this.spaceIdToNamespace,
     });
 
-    const executeFn = createExecuteFunction({
-      taskManager: plugins.taskManager,
-      getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
-      getBasePath: this.getBasePath,
-    });
-
     return {
-      execute: executeFn,
+      execute: createExecuteFunction({
+        taskManager: plugins.taskManager,
+        getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
+        getBasePath: this.getBasePath,
+      }),
     };
   }
 
-  private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<any, any, any>,
-    'actions'
-  > => {
-    const { actionTypeRegistry, adminClient, defaultKibanaIndex } = this;
+  private getServicesFactory(
+    savedObjects: SavedObjectsServiceStart
+  ): (request: KibanaRequest) => Services {
+    const { adminClient } = this;
+    return request => ({
+      callCluster: adminClient!.asScoped(request).callAsCurrentUser,
+      savedObjectsClient: savedObjects.getScopedClient(request),
+    });
+  }
+
+  private createRouteHandlerContext = (
+    defaultKibanaIndex: string
+  ): IContextProvider<RequestHandler<any, any, any>, 'actions'> => {
+    const { actionTypeRegistry, adminClient } = this;
     return async function actionsRouteHandlerContext(context, request) {
       return {
         getActionsClient: () => {
           return new ActionsClient({
             savedObjectsClient: context.core!.savedObjects.client,
             actionTypeRegistry: actionTypeRegistry!,
-            defaultKibanaIndex: defaultKibanaIndex!,
+            defaultKibanaIndex,
             scopedClusterClient: adminClient!.asScoped(request),
           });
         },

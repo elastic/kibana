@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   IRouter,
@@ -16,16 +15,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 
 import { ActionExecutorContract } from '../lib';
-
-// export function getExecuteActionRoute(actionExecutor: ActionExecutorContract) {
-//   return {
-//     config: {
-//       response: {
-//         emptyStatusCode: 204,
-//       },
-//     },
-//   };
-// }
+import { ActionTypeExecutorResult } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -59,13 +49,16 @@ export const executeActionRoute = (
       verifyApiAccess(licenseState);
       const { params } = req.body;
       const { id } = req.params;
-      return res.ok({
-        body: await actionExecutor.execute({
-          params,
-          request: req,
-          actionId: id,
-        }),
+      const body: ActionTypeExecutorResult = await actionExecutor.execute({
+        params,
+        request: req,
+        actionId: id,
       });
+      return body
+        ? res.ok({
+            body,
+          })
+        : res.noContent();
     })
   );
 };
