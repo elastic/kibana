@@ -64,14 +64,15 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
         })
       );
     }
-    const internalRepository = core
+    const internalRepositoryPromise = core
       .getStartServices()
       .then(([start]) => start.savedObjects.createInternalRepository());
 
     return {
       logFailedValidation: async () => {
         try {
-          await (await internalRepository).incrementCounter(
+          const internalRepository = await internalRepositoryPromise;
+          await internalRepository.incrementCounter(
             'tsvb-validation-telemetry',
             'tsvb-validation-telemetry',
             'failedRequests'

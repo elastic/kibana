@@ -72,7 +72,7 @@ describe('SavedObjectsService', () => {
         expect(() => {
           setup.setClientFactoryProvider(secondFactory);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"custom client factory is already set, unable to replace the current one"`
+          `"custom client factory is already set, and can only be set once"`
         );
       });
     });

@@ -242,9 +242,7 @@ export class SavedObjectsService
     return {
       setClientFactoryProvider: provider => {
         if (this.clientFactoryProvider) {
-          throw new Error(
-            'custom client factory is already set, unable to replace the current one'
-          );
+          throw new Error('custom client factory is already set, and can only be set once');
         }
         this.clientFactoryProvider = provider;
       },
@@ -306,9 +304,9 @@ export class SavedObjectsService
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
       createInternalRepository: (extraTypes?: string[]) =>
-        createRepository!(adminClient.callAsInternalUser, extraTypes),
+        createRepository(adminClient.callAsInternalUser, extraTypes),
       createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
-        createRepository!(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+        createRepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
     };
 
     const clientProvider = new SavedObjectsClientProvider<KibanaRequest>({

@@ -43,7 +43,7 @@ export function setupSavedObjects({
     ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
   );
 
-  const internalRepository = getStartServices().then(([core]) =>
+  const internalRepositoryPromise = getStartServices().then(([core]) =>
     core.savedObjects.createInternalRepository()
   );
   return {
@@ -52,7 +52,8 @@ export function setupSavedObjects({
       id: string,
       options?: SavedObjectsBaseOptions
     ): Promise<SavedObject<T>> => {
-      const savedObject = await (await internalRepository).get(type, id, options);
+      const internalRepository = await internalRepositoryPromise;
+      const savedObject = await internalRepository.get(type, id, options);
       return {
         ...savedObject,
         attributes: await service.decryptAttributes(
