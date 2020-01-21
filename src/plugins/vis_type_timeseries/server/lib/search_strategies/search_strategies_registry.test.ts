@@ -16,10 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { SearchStrategyRegistry } from './search_strategy_registry';
+// @ts-ignore
 import { AbstractSearchStrategy } from './strategies/abstract_search_strategy';
+// @ts-ignore
 import { DefaultSearchStrategy } from './strategies/default_search_strategy';
-import { AbstractSearchRequest } from './search_requests/abstract_request';
+// @ts-ignore
 import { DefaultSearchCapabilities } from './default_search_capabilities';
 
 class MockSearchStrategy extends AbstractSearchStrategy {
@@ -31,35 +34,21 @@ class MockSearchStrategy extends AbstractSearchStrategy {
   }
 }
 
-// TODO create tests for new registry
-describe.skip('SearchStrategiesRegister', () => {
-  let server;
-  let strategies;
-  let anotherSearchStrategy;
+describe('SearchStrategyRegister', () => {
+  let registry: SearchStrategyRegistry;
 
   beforeAll(() => {
-    server = {
-      expose: jest.fn((strategy, func) => {
-        server[strategy] = func;
-      }),
-    };
-    strategies = [
-      ['AbstractSearchStrategy', AbstractSearchStrategy],
-      ['AbstractSearchRequest', AbstractSearchRequest],
-      ['DefaultSearchCapabilities', DefaultSearchCapabilities],
-      ['addSearchStrategy', expect.any(Function)],
-    ];
-
-    SearchStrategyRegistry.init(server);
+    registry = new SearchStrategyRegistry();
   });
 
   test('should init strategies register', () => {
-    expect(server.expose.mock.calls).toEqual(strategies);
-    expect(server.addSearchStrategy()[0] instanceof DefaultSearchStrategy).toBe(true);
+    expect(
+      registry.addStrategy({} as AbstractSearchStrategy)[0] instanceof DefaultSearchStrategy
+    ).toBe(true);
   });
 
   test('should not add a strategy if it is not an instance of AbstractSearchStrategy', () => {
-    const addedStrategies = server.addSearchStrategy({});
+    const addedStrategies = registry.addStrategy({} as AbstractSearchStrategy);
 
     expect(addedStrategies.length).toEqual(1);
     expect(addedStrategies[0] instanceof DefaultSearchStrategy).toBe(true);
@@ -69,18 +58,15 @@ describe.skip('SearchStrategiesRegister', () => {
     const req = {};
     const indexPattern = '*';
 
-    const { searchStrategy, capabilities } = await SearchStrategyRegistry.getViableStrategy(
-      req,
-      indexPattern
-    );
+    const { searchStrategy, capabilities } = (await registry.getViableStrategy(req, indexPattern))!;
 
     expect(searchStrategy instanceof DefaultSearchStrategy).toBe(true);
     expect(capabilities instanceof DefaultSearchCapabilities).toBe(true);
   });
 
   test('should add a strategy if it is an instance of AbstractSearchStrategy', () => {
-    anotherSearchStrategy = new MockSearchStrategy();
-    const addedStrategies = server.addSearchStrategy(anotherSearchStrategy);
+    const anotherSearchStrategy = new MockSearchStrategy();
+    const addedStrategies = registry.addStrategy(anotherSearchStrategy);
 
     expect(addedStrategies.length).toEqual(2);
     expect(addedStrategies[0] instanceof AbstractSearchStrategy).toBe(true);
@@ -89,13 +75,12 @@ describe.skip('SearchStrategiesRegister', () => {
   test('should return a MockSearchStrategy instance', async () => {
     const req = {};
     const indexPattern = '*';
+    const anotherSearchStrategy = new MockSearchStrategy();
+    registry.addStrategy(anotherSearchStrategy);
 
-    const { searchStrategy, capabilities } = await SearchStrategyRegistry.getViableStrategy(
-      req,
-      indexPattern
-    );
+    const { searchStrategy, capabilities } = (await registry.getViableStrategy(req, indexPattern))!;
 
-    expect(searchStrategy instanceof AbstractSearchStrategy).toBe(true);
+    expect(searchStrategy instanceof MockSearchStrategy).toBe(true);
     expect(capabilities).toEqual({});
   });
 });
