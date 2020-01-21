@@ -10,10 +10,10 @@ import { ProfileContextProvider } from './contexts/profiler_context';
 
 import { AppDependencies } from './boot';
 
-export function App({ I18nContext, getLicenseStatus, notifications, http }: AppDependencies) {
+export function App({ I18nContext, initialLicenseStatus, notifications, http }: AppDependencies) {
   return (
     <I18nContext>
-      <AppContextProvider value={{ getLicenseStatus, notifications, http }}>
+      <AppContextProvider args={{ initialLicenseStatus, notifications, http }}>
         <ProfileContextProvider>
           <Main />
         </ProfileContextProvider>

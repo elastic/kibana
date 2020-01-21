@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, createContext } from 'react';
+import React, { useContext, createContext, useCallback } from 'react';
+
 import { HttpSetup, ToastsSetup } from 'kibana/public';
 import { LicenseStatus } from '../../../common/types';
+
+export interface ContextArgs {
+  http: HttpSetup;
+  notifications: ToastsSetup;
+  initialLicenseStatus: LicenseStatus;
+}
 
 export interface ContextValue {
   http: HttpSetup;
@@ -18,12 +25,24 @@ const AppContext = createContext<ContextValue>(null as any);
 
 export const AppContextProvider = ({
   children,
-  value,
+  args: { http, notifications, initialLicenseStatus },
 }: {
   children: React.ReactNode;
-  value: ContextValue;
+  args: ContextArgs;
 }) => {
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  const getLicenseStatus = useCallback(() => initialLicenseStatus, [initialLicenseStatus]);
+
+  return (
+    <AppContext.Provider
+      value={{
+        http,
+        notifications,
+        getLicenseStatus,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
 };
 
 export const useAppContext = () => {

@@ -6,20 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreStart, CoreSetup, PluginInitializerContext } from 'kibana/public';
+import { first } from 'rxjs/operators';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { LICENSE_CHECK_STATE } from '../../licensing/public';
 
 import { PLUGIN } from '../common/constants';
 import { AppPublicPluginDependencies } from './types';
-import { LicenseStatus } from '../common/types';
 
 export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {
-  private licenseStatus: LicenseStatus;
-
-  constructor(ctx: PluginInitializerContext) {
-    this.licenseStatus = { valid: false };
-  }
+  constructor(ctx: PluginInitializerContext) {}
 
   async setup(
     { http, getStartServices }: CoreSetup,
@@ -50,24 +46,20 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         const [coreStart] = await getStartServices();
         const { notifications, i18n: i18nDep } = coreStart;
         const { boot } = await import('./application/boot');
+
+        const license = await licensing.license$.pipe(first()).toPromise();
+        const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
+        const initialLicenseStatus =
+          state === LICENSE_CHECK_STATE.Valid ? { valid: true } : { valid: false, message };
+
         return boot({
           http,
-          getLicenseStatus: () => this.licenseStatus,
+          initialLicenseStatus,
           el: params.element,
           I18nContext: i18nDep.Context,
           notifications: notifications.toasts,
         });
       },
-    });
-
-    licensing.license$.subscribe(license => {
-      const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
-      const isAvailable = state === LICENSE_CHECK_STATE.Valid;
-      if (isAvailable) {
-        this.licenseStatus = { valid: true };
-      } else {
-        this.licenseStatus = { valid: false, message };
-      }
     });
   }
 

@@ -36,7 +36,7 @@ export const LicenseWarningNotice = () => {
         title={i18n.translate('xpack.searchProfiler.licenseErrorMessageTitle', {
           defaultMessage: 'License error',
         })}
-        color="warning"
+        color="danger"
         iconType="alert"
         style={{ padding: '16px' }}
       >
