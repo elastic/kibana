@@ -39,7 +39,7 @@ function CustomExtentsOptions({
   setValueAxisScale,
 }: CustomExtentsOptionsProps) {
   const invalidBoundsMarginMessage = i18n.translate(
-    'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin',
+    'visTypeVislib.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin',
     { defaultMessage: 'Bounds margin must be greater than or equal to 0.' }
   );
 
@@ -85,7 +85,7 @@ function CustomExtentsOptions({
     <>
       <SwitchOption
         label={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBoundsLabel',
+          'visTypeVislib.controls.pointSeries.valueAxes.scaleToDataBoundsLabel',
           {
             defaultMessage: 'Scale to data bounds',
           }
@@ -101,7 +101,7 @@ function CustomExtentsOptions({
             error={!isBoundsMarginValid && invalidBoundsMarginMessage}
             isInvalid={!isBoundsMarginValid}
             label={i18n.translate(
-              'kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBounds.boundsMargin',
+              'visTypeVislib.controls.pointSeries.valueAxes.scaleToDataBounds.boundsMargin',
               {
                 defaultMessage: 'Bounds margin',
               }
@@ -117,12 +117,9 @@ function CustomExtentsOptions({
 
       <SwitchOption
         data-test-subj="yAxisSetYExtents"
-        label={i18n.translate(
-          'kbnVislibVisTypes.controls.pointSeries.valueAxes.setAxisExtentsLabel',
-          {
-            defaultMessage: 'Set axis extents',
-          }
-        )}
+        label={i18n.translate('visTypeVislib.controls.pointSeries.valueAxes.setAxisExtentsLabel', {
+          defaultMessage: 'Set axis extents',
+        })}
         paramName="setYExtents"
         value={axis.scale.setYExtents}
         setValue={onSetYExtentsChange}

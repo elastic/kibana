@@ -20,8 +20,7 @@
 import { ColorSchemas } from './legacy_imports';
 import { Range } from '../../../../plugins/expressions/public';
 import { SchemaConfig } from '../../visualizations/public';
-import { ColorModes } from '../../vis_type_vislib/public/utils/collections';
-import { Labels, Style } from '../../vis_type_vislib/public/types';
+import { ColorModes, Labels, Style } from '../../vis_type_vislib/public';
 
 export const visType = 'metric';
 

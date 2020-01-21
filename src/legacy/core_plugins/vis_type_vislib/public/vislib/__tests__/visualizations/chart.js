@@ -18,16 +18,12 @@
  */
 
 import d3 from 'd3';
-import ngMock from 'ng_mock';
-
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 import { Chart } from '../../visualizations/_chart';
-import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
 
 describe('Vislib _chart Test Suite', function() {
-  let persistedState;
   let vis;
   let el;
   let myChart;
@@ -109,30 +105,24 @@ describe('Vislib _chart Test Suite', function() {
     yAxisLabel: 'Count',
   };
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private, $injector) {
-      const getVis = getFixturesVislibVisFixtureProvider(Private);
-      persistedState = new ($injector.get('PersistedState'))();
+  beforeEach(() => {
+    el = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'column-chart');
 
-      el = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'column-chart');
+    config = {
+      type: 'histogram',
+      addTooltip: true,
+      addLegend: true,
+      zeroFill: true,
+    };
 
-      config = {
-        type: 'histogram',
-        addTooltip: true,
-        addLegend: true,
-        zeroFill: true,
-      };
+    vis = getVis(config, el[0][0]);
+    vis.render(data, getMockUiState());
 
-      vis = getVis(config, el[0][0]);
-      vis.render(data, persistedState);
-
-      myChart = vis.handler.charts[0];
-    })
-  );
+    myChart = vis.handler.charts[0];
+  });
 
   afterEach(function() {
     el.remove();

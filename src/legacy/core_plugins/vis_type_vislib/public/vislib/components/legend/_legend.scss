@@ -1,4 +1,4 @@
-@import '../../../../core_plugins/vis_type_vislib/public/vislib/variables';
+@import '../../variables';
 
 // NOTE: Some of the styles attempt to align with the TSVB legend
 
@@ -14,17 +14,16 @@ $visLegendLineHeight: $euiSize;
   display: flex;
   padding: $euiSizeXS;
   background-color: $euiColorEmptyShade;
-  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance,
-    background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
+  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance, background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
 
   &:focus {
     box-shadow: none;
-    background-color: $euiFocusBackgroundColor !important;
+    background-color: $euiFocusBackgroundColor !important; // sass-lint:disable-line no-important
   }
 }
 
 .visLegend__toggle--isOpen {
-  background-color: transparentize($euiColorDarkestShade, 0.9);
+  background-color: transparentize($euiColorDarkestShade, .9);
   opacity: 1;
 }
 
