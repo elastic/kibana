@@ -246,6 +246,4 @@ const typeMap: TypeMap = {
   date: 'date',
   ip: 'ip',
   boolean: 'boolean',
-  /* TODO: add alias support */
-  alias: 'string',
 };
