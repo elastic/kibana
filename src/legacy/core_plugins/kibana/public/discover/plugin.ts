@@ -25,7 +25,7 @@ import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { Chrome, setAngularModule, setServices, setDocViewsRegistry } from './kibana_services';
+import { setAngularModule, setServices, setDocViewsRegistry } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './build_services';
@@ -50,9 +50,6 @@ export interface DiscoverSetupPlugins {
   uiActions: IUiActionsSetup;
   embeddable: IEmbeddableSetup;
   kibana_legacy: KibanaLegacySetup;
-  __LEGACY: {
-    chrome: Chrome;
-  };
   home: HomePublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
