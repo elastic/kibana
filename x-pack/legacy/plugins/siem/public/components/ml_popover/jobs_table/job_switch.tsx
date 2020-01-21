@@ -58,7 +58,7 @@ export const JobSwitchComponent = ({
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
-        {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
+        {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedState) ? (
           <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
         ) : (
           <StaticSwitch
