@@ -42,6 +42,7 @@ export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search
 
 export {
   addSearchStrategy,
+  defaultSearchStrategy,
   hasSearchStategyForIndexPattern,
   getSearchErrorType,
   SearchError,

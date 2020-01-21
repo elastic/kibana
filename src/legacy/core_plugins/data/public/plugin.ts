@@ -19,12 +19,20 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { SearchService, SearchStart } from './search';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  addSearchStrategy,
+  defaultSearchStrategy,
+} from '../../../../plugins/data/public';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import {
   setIndexPatterns,
   setQueryService,
+  setUiSettings,
+  setInjectedMetadata,
+  setSearchService,
+  setFieldFormats,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 
@@ -61,11 +69,19 @@ export class DataPlugin
   implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
   private readonly search = new SearchService();
 
-  public setup(core: CoreSetup) {}
+  public setup(core: CoreSetup) {
+    setInjectedMetadata(core.injectedMetadata);
+
+    // This is to be deprecated once we switch to the new search service fully
+    addSearchStrategy(defaultSearchStrategy);
+  }
 
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
+    setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
+    setSearchService(data.search);
+    setFieldFormats(data.fieldFormats);
 
     return {
       search: this.search.start(core),
