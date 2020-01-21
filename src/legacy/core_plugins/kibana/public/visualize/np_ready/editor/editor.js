@@ -116,6 +116,11 @@ function VisualizeAppController(
     dirty: !savedVis.id,
   });
 
+  vis.on('dirtyStateChange', ({ isDirty }) => {
+    vis.dirty = isDirty;
+    $scope.$digest();
+  });
+
   $scope.topNavMenu = [
     ...(visualizeCapabilities.save
       ? [

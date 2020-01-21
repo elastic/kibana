@@ -159,5 +159,12 @@ const Resolver = styled(
    */
   display: flex;
   flex-grow: 1;
+  /**
+   * The placeholder components use absolute positioning.
+   */
   position: relative;
+  /**
+   * Prevent partially visible components from showing up outside the bounds of Resolver.
+   */
+  overflow: hidden;
 `;

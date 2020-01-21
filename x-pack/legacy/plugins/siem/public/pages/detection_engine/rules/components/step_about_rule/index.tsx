@@ -5,10 +5,11 @@
  */
 
 import { EuiButton, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEqual, get } from 'lodash/fp';
+import { isEqual } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { setFieldValue } from '../../helpers';
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
 import * as RuleI18n from '../../translations';
 import { AddItem } from '../add_item_form';
@@ -71,14 +72,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
         isNew: false,
       };
       setMyStepData(myDefaultValues);
-      if (!isReadOnlyView) {
-        Object.keys(schema).forEach(key => {
-          const val = get(key, myDefaultValues);
-          if (val != null) {
-            form.setFieldValue(key, val);
-          }
-        });
-      }
+      setFieldValue(form, schema, myDefaultValues);
     }
   }, [defaultValues]);
 
@@ -88,7 +82,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     }
   }, [form]);
 
-  return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView && myStepData.name != null ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
     </StepContentWrapper>

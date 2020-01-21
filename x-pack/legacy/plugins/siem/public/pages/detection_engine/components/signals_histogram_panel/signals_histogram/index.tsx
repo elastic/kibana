@@ -44,7 +44,7 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
     from,
     query,
     filters,
-    legendPosition = 'bottom',
+    legendPosition = 'right',
     loadingInitial,
     setTotalSignalsCount,
     stackByField,

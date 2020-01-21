@@ -32,6 +32,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [App](./kibana-plugin-public.app.md) | Extension of [common app properties](./kibana-plugin-public.appbase.md) with the mount function. |
 |  [AppBase](./kibana-plugin-public.appbase.md) |  |
+|  [AppCategory](./kibana-plugin-public.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
 |  [AppLeaveConfirmAction](./kibana-plugin-public.appleaveconfirmaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) to show a confirmation message when trying to leave an application.<!-- -->See  |
 |  [AppLeaveDefaultAction](./kibana-plugin-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
 |  [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |  |
@@ -129,6 +130,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-public.chromehelpextensionmenugithublink.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
+|  [FatalErrorsStart](./kibana-plugin-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-public.handlercontexttype.md)<!-- -->. |

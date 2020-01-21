@@ -9,10 +9,11 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { usePersistRule } from '../../../../containers/detection_engine/rules';
 import { HeaderPage } from '../../../../components/header_page';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { WrapperPage } from '../../../../components/wrapper_page';
-import { usePersistRule } from '../../../../containers/detection_engine/rules';
+import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
 import { AccordionTitle } from '../components/accordion_title';
@@ -55,6 +56,7 @@ export const CreateRuleComponent = React.memo(() => {
     canUserCRUD,
     hasManageApiKey,
   } = useUserInfo();
+  const [, dispatchToaster] = useStateToaster();
   const [openAccordionId, setOpenAccordionId] = useState<RuleStep>(RuleStep.defineRule);
   const defineRuleRef = useRef<EuiAccordion | null>(null);
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
@@ -95,6 +97,7 @@ export const CreateRuleComponent = React.memo(() => {
         const stepRuleIdx = stepsRuleOrder.findIndex(item => step === item);
         if ([0, 1].includes(stepRuleIdx)) {
           if (isStepRuleInReadOnlyView[stepsRuleOrder[stepRuleIdx + 1]]) {
+            setOpenAccordionId(stepsRuleOrder[stepRuleIdx + 1]);
             setIsStepRuleInEditView({
               ...isStepRuleInReadOnlyView,
               [step]: true,
@@ -203,12 +206,15 @@ export const CreateRuleComponent = React.memo(() => {
     async (id: RuleStep) => {
       const activeForm = await stepsForm.current[openAccordionId]?.submit();
       if (activeForm != null && activeForm?.isValid) {
+        stepsData.current[openAccordionId] = {
+          ...stepsData.current[openAccordionId],
+          data: activeForm.data,
+          isValid: activeForm.isValid,
+        };
         setOpenAccordionId(id);
-        openCloseAccordion(openAccordionId);
-
         setIsStepRuleInEditView({
           ...isStepRuleInReadOnlyView,
-          [openAccordionId]: openAccordionId === RuleStep.scheduleRule ? false : true,
+          [openAccordionId]: true,
           [id]: false,
         });
       }
@@ -217,6 +223,8 @@ export const CreateRuleComponent = React.memo(() => {
   );
 
   if (isSaved) {
+    const ruleName = (stepsData.current[RuleStep.aboutRule].data as AboutStepRule).name;
+    displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
@@ -224,7 +232,7 @@ export const CreateRuleComponent = React.memo(() => {
     <>
       <WrapperPage restrictWidth>
         <HeaderPage
-          backOptions={{ href: '#detection-engine/rules', text: 'Back to rules' }}
+          backOptions={{ href: '#detections/rules', text: i18n.BACK_TO_RULES }}
           border
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
@@ -252,6 +260,9 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepDefineRule
               addPadding={true}
+              defaultValues={
+                (stepsData.current[RuleStep.defineRule].data as DefineStepRule) ?? null
+              }
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -284,6 +295,7 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepAboutRule
               addPadding={true}
+              defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
               descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
@@ -316,6 +328,9 @@ export const CreateRuleComponent = React.memo(() => {
             <EuiHorizontalRule margin="m" />
             <StepScheduleRule
               addPadding={true}
+              defaultValues={
+                (stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule) ?? null
+              }
               descriptionDirection="row"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}

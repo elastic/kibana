@@ -52,7 +52,7 @@ export type ChangeValueAxis = (
 const VALUE_AXIS_PREFIX = 'ValueAxis-';
 
 function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
-  const { stateParams, setValue, aggs, aggsLabels, setVisType, vis } = props;
+  const { stateParams, setValue, aggs, vis, isTabSelected } = props;
 
   const [isCategoryAxisHorizontal, setIsCategoryAxisHorizontal] = useState(true);
 
@@ -89,9 +89,11 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     }
   );
 
-  const updateAxisTitle = () => {
+  const updateAxisTitle = (seriesParams?: SeriesParam[]) => {
+    const series = seriesParams || stateParams.seriesParams;
     const axes = cloneDeep(stateParams.valueAxes);
     let isAxesChanged = false;
+    let lastValuesChanged = false;
     const lastLabels = { ...lastCustomLabels };
     const lastMatchingSeriesAgg = { ...lastSeriesAgg };
 
@@ -99,8 +101,8 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       let newCustomLabel = '';
       const matchingSeries: AggConfig[] = [];
 
-      stateParams.seriesParams.forEach((series, seriesIndex) => {
-        if ((axisNumber === 0 && !series.valueAxis) || series.valueAxis === axis.id) {
+      series.forEach((serie, seriesIndex) => {
+        if ((axisNumber === 0 && !serie.valueAxis) || serie.valueAxis === axis.id) {
           const aggByIndex = aggs.bySchemaName('metric')[seriesIndex];
           matchingSeries.push(aggByIndex);
         }
@@ -125,6 +127,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
           field: matchingSeriesAggField,
         };
         lastLabels[axis.id] = newCustomLabel;
+        lastValuesChanged = true;
 
         if (
           Object.keys(lastCustomLabels).length !== 0 &&
@@ -147,8 +150,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
       setValue('valueAxes', axes);
     }
 
-    setLastSeriesAgg(lastMatchingSeriesAgg);
-    setLastCustomLabels(lastLabels);
+    if (lastValuesChanged) {
+      setLastSeriesAgg(lastMatchingSeriesAgg);
+      setLastCustomLabels(lastLabels);
+    }
   };
 
   const onValueAxisPositionChanged = useCallback(
@@ -242,7 +247,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   const metrics = useMemo(() => {
     const schemaName = vis.type.schemas.metrics[0].name;
     return aggs.bySchemaName(schemaName);
-  }, [vis.type.schemas.metrics[0].name, aggs, aggsLabels]);
+  }, [vis.type.schemas.metrics[0].name, aggs]);
 
   const firstValueAxesId = stateParams.valueAxes[0].id;
 
@@ -272,7 +277,8 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
     });
 
     setValue('seriesParams', updatedSeries);
-  }, [aggsLabels, metrics, firstValueAxesId]);
+    updateAxisTitle(updatedSeries);
+  }, [metrics, firstValueAxesId]);
 
   const visType = useMemo(() => {
     const types = uniq(stateParams.seriesParams.map(({ type }) => type));
@@ -280,14 +286,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   }, [stateParams.seriesParams]);
 
   useEffect(() => {
-    setVisType(visType);
-  }, [visType]);
+    vis.setVisType(visType);
+  }, [vis, visType]);
 
-  useEffect(() => {
-    updateAxisTitle();
-  }, [aggsLabels]);
-
-  return (
+  return isTabSelected ? (
     <>
       <SeriesPanel setParamByIndex={setParamByIndex} changeValueAxis={changeValueAxis} {...props} />
       <EuiSpacer size="s" />
@@ -307,7 +309,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         setCategoryAxis={setCategoryAxis}
       />
     </>
-  );
+  ) : null;
 }
 
 export { MetricsAxisOptions };

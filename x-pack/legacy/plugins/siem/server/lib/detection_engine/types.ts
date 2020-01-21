@@ -58,6 +58,7 @@ export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
   | 'ruleId'
   | 'falsePositives'
+  | 'immutable'
   | 'maxSignals'
   | 'savedId'
   | 'riskScore'
@@ -99,11 +100,25 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
+  immutable: boolean;
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
   id: string | undefined | null;
   rule_id: string;
+  immutable: boolean;
 };
+
+export type PrepackagedRules = Omit<
+  RuleAlertParamsRest,
+  | 'status'
+  | 'status_date'
+  | 'last_failure_at'
+  | 'last_success_at'
+  | 'last_failure_message'
+  | 'last_success_message'
+  | 'updated_at'
+  | 'created_at'
+> & { rule_id: string; immutable: boolean };
 
 export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;

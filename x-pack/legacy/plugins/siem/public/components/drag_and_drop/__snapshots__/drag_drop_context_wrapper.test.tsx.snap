@@ -365,6 +365,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "example": null,
             "format": "",
             "indexes": Array [
+              "apm-*-transaction*",
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",
