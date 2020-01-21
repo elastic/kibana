@@ -29,38 +29,9 @@ import {
 } from 'ui/registry/feature_catalogue';
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { AdvancedSettings } from './advanced_settings';
 import { i18n } from '@kbn/i18n';
 import { getBreadcrumbs } from './breadcrumbs';
-import { npStart } from 'ui/new_platform';
-
-const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
-
-function updateAdvancedSettings($scope, config, query) {
-  $scope.$$postDigest(() => {
-    const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
-    if (!node) {
-      return;
-    }
-
-    render(
-      <I18nContext>
-        <AdvancedSettings
-          config={config}
-          query={query}
-          enableSaving={capabilities.get().advancedSettings.save}
-        />
-      </I18nContext>,
-      node
-    );
-  });
-}
-
-function destroyAdvancedSettings() {
-  const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
-  node && unmountComponentAtNode(node);
-}
 
 uiRoutes.when('/management/kibana/settings/:setting?', {
   template: indexTemplate,
@@ -87,22 +58,22 @@ uiModules.get('apps/management').directive('kbnManagementAdvanced', function($ro
   return {
     restrict: 'E',
     link: function($scope) {
-      updateAdvancedSettings($scope, npStart.core.uiSettings, $route.current.params.setting || '');
-      npStart.core.uiSettings.getUpdate$().subscribe(() => {
-        updateAdvancedSettings(
-          $scope,
-          npStart.core.uiSettings,
-          $route.current.params.setting || ''
-        );
-      });
-
-      $scope.$on('$destroy', () => {
-        destroyAdvancedSettings();
-      });
-
+      $scope.query = $route.current.params.setting || '';
       $route.updateParams({ setting: null });
     },
   };
+});
+
+const AdvancedSettingsApp = ({ query = '' }) => {
+  return (
+    <I18nContext>
+      <AdvancedSettings query={query} enableSaving={capabilities.get().advancedSettings.save} />
+    </I18nContext>
+  );
+};
+
+uiModules.get('apps/management').directive('kbnManagementAdvancedReact', function(reactDirective) {
+  return reactDirective(AdvancedSettingsApp, [['query', { watchDepth: 'reference' }]]);
 });
 
 management.getSection('kibana').register('settings', {

@@ -397,9 +397,6 @@ export class Field extends PureComponent<FieldProps, FieldState> {
       if (changeImage) {
         this.cancelChangeImage();
       }
-      this.setState({
-        savedValue: valueToSave,
-      });
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate('kbn.management.settings.field.saveFieldErrorMessage', {
