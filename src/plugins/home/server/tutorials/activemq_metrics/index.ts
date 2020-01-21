@@ -52,7 +52,7 @@ export function activemqMetricsSpecProvider(context: TutorialContext): TutorialS
     isBeta: true,
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.activemqMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.activemqMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',

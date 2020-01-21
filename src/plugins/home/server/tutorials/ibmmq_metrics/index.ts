@@ -33,14 +33,14 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
   const moduleName = 'ibmmq';
   return {
     id: 'ibmmqMetrics',
-    name: i18n.translate('kbn.server.tutorials.ibmmqMetrics.nameTitle', {
+    name: i18n.translate('home.tutorials.ibmmqMetrics.nameTitle', {
       defaultMessage: 'IBM MQ metrics',
     }),
     category: TutorialsCategory.METRICS,
-    shortDescription: i18n.translate('kbn.server.tutorials.ibmmqMetrics.shortDescription', {
+    shortDescription: i18n.translate('home.tutorials.ibmmqMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from IBM MQ instances.',
     }),
-    longDescription: i18n.translate('kbn.server.tutorials.ibmmqMetrics.longDescription', {
+    longDescription: i18n.translate('home.tutorials.ibmmqMetrics.longDescription', {
       defaultMessage:
         'The `ibmmq` Metricbeat module fetches monitoring metrics from IBM MQ instances \
 [Learn more]({learnMoreLink}).',
@@ -52,7 +52,7 @@ export function ibmmqMetricsSpecProvider(context: TutorialContext): TutorialSche
     isBeta: true,
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.ibmmqMetrics.artifacts.application.label', {
+        label: i18n.translate('home.tutorials.ibmmqMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
         path: '/app/kibana#/discover',
