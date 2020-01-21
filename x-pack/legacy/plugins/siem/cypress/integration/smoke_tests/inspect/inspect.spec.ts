@@ -4,34 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOSTS_PAGE } from '../../lib/urls';
+import { HOSTS_PAGE, NETWORK_PAGE } from '../../lib/urls';
 import {
-  INSPECT_BUTTON_ICON,
   INSPECT_MODAL,
-  INSPECT_BUTTONS_IN_SIEM,
+  INSPECT_NETWORK_BUTTONS_IN_SIEM,
+  INSPECT_HOSTS_BUTTONS_IN_SIEM,
   TIMELINE_SETTINGS_ICON,
   TIMELINE_INSPECT_BUTTON,
 } from '../../lib/inspect/selectors';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
 import { executeKQL, hostExistsQuery, toggleTimelineVisibility } from '../../lib/timeline/helpers';
+import { closesModal, openStatsAndTables } from '../../lib/inspect/helpers';
 
 describe('Inspect', () => {
-  describe('Hosts and network stats and tables', () => {
-    INSPECT_BUTTONS_IN_SIEM.map(table =>
+  context('Hosts stats and tables', () => {
+    before(() => {
+      loginAndWaitForPage(HOSTS_PAGE);
+    });
+    afterEach(() => {
+      closesModal();
+    });
+
+    INSPECT_HOSTS_BUTTONS_IN_SIEM.forEach(table =>
       it(`inspects the ${table.title}`, () => {
-        loginAndWaitForPage(table.url);
-        cy.get(table.id, { timeout: DEFAULT_TIMEOUT });
-        if (table.altInspectId) {
-          cy.get(table.altInspectId).trigger('click', { force: true });
-        } else {
-          cy.get(`${table.id} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
-        }
+        openStatsAndTables(table);
         cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
       })
     );
   });
 
-  describe('Timeline', () => {
+  context('Network stats and tables', () => {
+    before(() => {
+      loginAndWaitForPage(NETWORK_PAGE);
+    });
+    afterEach(() => {
+      closesModal();
+    });
+
+    INSPECT_NETWORK_BUTTONS_IN_SIEM.forEach(table =>
+      it(`inspects the ${table.title}`, () => {
+        openStatsAndTables(table);
+        cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('be.visible');
+      })
+    );
+  });
+
+  context('Timeline', () => {
     it('inspects the timeline', () => {
       loginAndWaitForPage(HOSTS_PAGE);
       toggleTimelineVisibility();

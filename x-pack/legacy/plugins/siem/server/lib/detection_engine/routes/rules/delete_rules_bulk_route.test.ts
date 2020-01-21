@@ -20,16 +20,18 @@ import {
   getDeleteBulkRequestById,
   getDeleteAsPostBulkRequest,
   getDeleteAsPostBulkRequestById,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
+import { BulkError } from '../utils';
 
 describe('delete_rules', () => {
-  let { server, alertsClient } = createMockServer();
+  let { server, alertsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient } = createMockServer());
+    ({ server, alertsClient, savedObjectsClient } = createMockServer());
     deleteRulesBulkRoute(server);
   });
 
@@ -82,11 +84,17 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      savedObjectsClient.delete.mockResolvedValue({});
       const { payload } = await server.inject(getDeleteBulkRequest());
-      const parsed = JSON.parse(payload);
-      expect(parsed).toEqual([
-        { error: { message: 'rule_id: "rule-1" not found', statusCode: 404 }, id: 'rule-1' },
-      ]);
+      const parsed: BulkError[] = JSON.parse(payload);
+      const expected: BulkError[] = [
+        {
+          error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
+          rule_id: 'rule-1',
+        },
+      ];
+      expect(parsed).toEqual(expected);
     });
 
     test('returns 404 if actionClient is not available on the route', async () => {

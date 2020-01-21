@@ -37,9 +37,7 @@ exports[`Flyout apm part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -378,9 +376,7 @@ exports[`Flyout beats part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -761,9 +757,7 @@ exports[`Flyout elasticsearch part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -1104,9 +1098,7 @@ exports[`Flyout kibana part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />
@@ -1454,9 +1446,7 @@ exports[`Flyout logstash part one should render normally 1`] = `
         labelType="label"
       >
         <EuiFieldText
-          compressed={false}
           fullWidth={true}
-          isLoading={false}
           onChange={[Function]}
           value="http://localhost:9200"
         />

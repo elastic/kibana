@@ -42,7 +42,7 @@ export interface Operation {
   hasChildren: boolean;
   visible: boolean;
   selfTime: number;
-  timePercentage: number;
+  timePercentage: string;
   absoluteColor: string;
   time: number;
 

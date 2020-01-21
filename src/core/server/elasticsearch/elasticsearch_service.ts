@@ -52,7 +52,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
-      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig, coreContext.logger.get('config'))));
+      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
   }
 
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
@@ -152,8 +152,6 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
-      adminClient$,
-      dataClient$,
       adminClient,
       dataClient,
 

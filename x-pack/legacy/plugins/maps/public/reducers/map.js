@@ -16,7 +16,7 @@ import {
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
-  TOGGLE_LAYER_VISIBLE,
+  SET_LAYER_VISIBILITY,
   MAP_EXTENT_CHANGED,
   MAP_READY,
   MAP_DESTROYED,
@@ -46,6 +46,7 @@ import {
   HIDE_TOOLBAR_OVERLAY,
   HIDE_LAYER_CONTROL,
   HIDE_VIEW_CONTROL,
+  SET_WAITING_FOR_READY_HIDDEN_LAYERS,
 } from '../actions/map_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -307,8 +308,8 @@ export function map(state = INITIAL_STATE, action) {
         ...state,
         waitingForMapReadyLayerList: [],
       };
-    case TOGGLE_LAYER_VISIBLE:
-      return updateLayerInList(state, action.layerId, 'visible');
+    case SET_LAYER_VISIBILITY:
+      return updateLayerInList(state, action.layerId, 'visible', action.visibility);
     case UPDATE_LAYER_STYLE:
       const styleLayerId = action.layerId;
       return updateLayerInList(state, styleLayerId, 'style', { ...action.style });
@@ -375,6 +376,14 @@ export function map(state = INITIAL_STATE, action) {
           ...state.mapState,
           hideViewControl: action.hideViewControl,
         },
+      };
+    case SET_WAITING_FOR_READY_HIDDEN_LAYERS:
+      return {
+        ...state,
+        waitingForMapReadyLayerList: state.waitingForMapReadyLayerList.map(layer => ({
+          ...layer,
+          visible: !action.hiddenLayerIds.includes(layer.id),
+        })),
       };
     default:
       return state;

@@ -15,7 +15,7 @@ import {
   EuiTextColor,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiSpacer,
+  EuiPortal,
 } from '@elastic/eui';
 import { Option } from '@elastic/eui/src/components/selectable/types';
 import { isEmpty } from 'lodash/fp';
@@ -37,12 +37,38 @@ const SearchTimelineSuperSelectGlobalStyle = createGlobalStyle`
   }
 `;
 
-const MyEuiHighlight = styled(EuiHighlight)<{ selected: boolean }>`
-  padding-left: ${({ selected }) => (selected ? '3px' : '0px')};
+const MyEuiFlexItem = styled(EuiFlexItem)`
+  display: inline-block;
+  max-width: 296px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
-const MyEuiTextColor = styled(EuiTextColor)<{ selected: boolean }>`
-  padding-left: ${({ selected }) => (selected ? '20px' : '0px')};
+const EuiSelectableContainer = styled.div<{ loading: boolean }>`
+  .euiSelectable {
+    .euiFormControlLayout__childrenWrapper {
+      display: flex;
+    }
+    ${({ loading }) => `${
+      loading
+        ? `
+      .euiFormControlLayoutIcons {
+        display: none;
+      }
+      .euiFormControlLayoutIcons.euiFormControlLayoutIcons--right {
+        display: block;
+        left: 12px;
+        top: 12px;
+      }`
+        : ''
+    }
+    `}
+  }
+`;
+
+const MyEuiFlexGroup = styled(EuiFlexGroup)`
+  padding 0px 4px;
 `;
 
 interface SearchTimelineSuperSelectProps {
@@ -62,6 +88,7 @@ const basicSuperSelectOptions = [
 const getBasicSelectableOptions = (timelineId: string) => [
   {
     description: i18n.DEFAULT_TIMELINE_DESCRIPTION,
+    favorite: [],
     label: i18n.DEFAULT_TIMELINE_TITLE,
     id: null,
     title: i18n.DEFAULT_TIMELINE_TITLE,
@@ -83,6 +110,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchTimelineValue, setSearchTimelineValue] = useState('');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
+  const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
 
   const onSearchTimeline = useCallback(val => {
     setSearchTimelineValue(val);
@@ -102,37 +130,61 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
 
   const renderTimelineOption = useCallback((option, searchValue) => {
     return (
-      <>
-        {option.checked === 'on' && <EuiIcon type="check" color="primary" />}
-        <MyEuiHighlight search={searchValue} selected={option.checked === 'on'}>
-          {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
-        </MyEuiHighlight>
-        <br />
-        <MyEuiTextColor color="subdued" component="span" selected={option.checked === 'on'}>
-          <small>
-            {option.description != null && option.description.trim().length > 0
-              ? option.description
-              : getEmptyTagValue()}
-          </small>
-        </MyEuiTextColor>
-      </>
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={`${option.checked === 'on' ? 'check' : 'none'}`} color="primary" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup gutterSize="none" direction="column">
+            <MyEuiFlexItem grow={false}>
+              <EuiHighlight search={searchValue}>
+                {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
+              </EuiHighlight>
+            </MyEuiFlexItem>
+            <MyEuiFlexItem grow={false}>
+              <EuiTextColor color="subdued" component="span">
+                <small>
+                  {option.description != null && option.description.trim().length > 0
+                    ? option.description
+                    : getEmptyTagValue()}
+                </small>
+              </EuiTextColor>
+            </MyEuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon
+            type={`${
+              option.favorite != null && isEmpty(option.favorite) ? 'starEmpty' : 'starFilled'
+            }`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }, []);
 
-  const handleTimelineChange = useCallback(options => {
-    const selectedTimeline = options.filter(
-      (option: { checked: string }) => option.checked === 'on'
-    );
-    if (selectedTimeline != null && selectedTimeline.length > 0 && onTimelineChange != null) {
-      onTimelineChange(
-        isEmpty(selectedTimeline[0].title)
-          ? i18nTimeline.UNTITLED_TIMELINE
-          : selectedTimeline[0].title,
-        selectedTimeline[0].id
+  const handleTimelineChange = useCallback(
+    options => {
+      const selectedTimeline = options.filter(
+        (option: { checked: string }) => option.checked === 'on'
       );
-    }
-    setIsPopoverOpen(false);
-  }, []);
+      if (selectedTimeline != null && selectedTimeline.length > 0) {
+        onTimelineChange(
+          isEmpty(selectedTimeline[0].title)
+            ? i18nTimeline.UNTITLED_TIMELINE
+            : selectedTimeline[0].title,
+          selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id
+        );
+      }
+      setIsPopoverOpen(false);
+    },
+    [onTimelineChange]
+  );
 
   const handleOnScroll = useCallback(
     (
@@ -187,6 +239,29 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     [handleOpenPopover, isDisabled, timelineId, timelineTitle]
   );
 
+  const favoritePortal = useMemo(
+    () =>
+      searchRef != null ? (
+        <EuiPortal insert={{ sibling: searchRef, position: 'after' }}>
+          <MyEuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup>
+                <EuiFilterButton
+                  size="l"
+                  data-test-subj="only-favorites-toggle"
+                  hasActiveFilters={onlyFavorites}
+                  onClick={handleOnToggleOnlyFavorites}
+                >
+                  {i18nTimeline.ONLY_FAVORITES}
+                </EuiFilterButton>
+              </EuiFilterGroup>
+            </EuiFlexItem>
+          </MyEuiFlexGroup>
+        </EuiPortal>
+      ) : null,
+    [searchRef, onlyFavorites, handleOnToggleOnlyFavorites]
+  );
+
   return (
     <EuiInputPopover
       id="searchTimelinePopover"
@@ -204,22 +279,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onlyUserFavorite={onlyFavorites}
       >
         {({ timelines, loading, totalCount }) => (
-          <>
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiFilterGroup>
-                  <EuiFilterButton
-                    size="xs"
-                    data-test-subj="only-favorites-toggle"
-                    hasActiveFilters={onlyFavorites}
-                    onClick={handleOnToggleOnlyFavorites}
-                  >
-                    {i18nTimeline.ONLY_FAVORITES}
-                  </EuiFilterButton>
-                </EuiFilterGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
+          <EuiSelectableContainer loading={loading}>
             <EuiSelectable
               height={POPOVER_HEIGHT}
               isLoading={loading && timelines.length === 0}
@@ -239,6 +299,9 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                 placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER,
                 onSearch: onSearchTimeline,
                 incremental: false,
+                inputRef: (ref: HTMLElement) => {
+                  setSearchRef(ref);
+                },
               }}
               singleSelection={true}
               options={[
@@ -249,6 +312,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                   (t, index) =>
                     ({
                       description: t.description,
+                      favorite: t.favorite,
                       label: t.title,
                       id: t.savedObjectId,
                       key: `${t.title}-${index}`,
@@ -261,11 +325,12 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               {(list, search) => (
                 <>
                   {search}
+                  {favoritePortal}
                   {list}
                 </>
               )}
             </EuiSelectable>
-          </>
+          </EuiSelectableContainer>
         )}
       </AllTimelinesQuery>
       <SearchTimelineSuperSelectGlobalStyle />

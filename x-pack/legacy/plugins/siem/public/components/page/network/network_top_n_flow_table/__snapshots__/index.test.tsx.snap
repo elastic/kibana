@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table on the IP Details page 1`] = `
-<Connect(NetworkTopNFlowTableComponent)
+<Connect(Component)
   data={
     Array [
       Object {
@@ -100,97 +100,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   fakeTotalCount={50}
   flowTargeted="source"
   id="topNFlowSource"
-  indexPattern={
-    Object {
-      "fields": Array [
-        Object {
-          "aggregatable": true,
-          "name": "@timestamp",
-          "searchable": true,
-          "type": "date",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "@version",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.ephemeral_id",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.hostname",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.id",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test1",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test2",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test3",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test4",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test5",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test6",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test7",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test8",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "host.name",
-          "searchable": true,
-          "type": "string",
-        },
-      ],
-      "title": "filebeat-*,auditbeat-*,packetbeat-*",
-    }
-  }
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
@@ -201,7 +110,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
 `;
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table on the Network page 1`] = `
-<Connect(NetworkTopNFlowTableComponent)
+<Connect(Component)
   data={
     Array [
       Object {
@@ -300,97 +209,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   fakeTotalCount={50}
   flowTargeted="source"
   id="topNFlowSource"
-  indexPattern={
-    Object {
-      "fields": Array [
-        Object {
-          "aggregatable": true,
-          "name": "@timestamp",
-          "searchable": true,
-          "type": "date",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "@version",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.ephemeral_id",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.hostname",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.id",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test1",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test2",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test3",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test4",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test5",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test6",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test7",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "agent.test8",
-          "searchable": true,
-          "type": "string",
-        },
-        Object {
-          "aggregatable": true,
-          "name": "host.name",
-          "searchable": true,
-          "type": "string",
-        },
-      ],
-      "title": "filebeat-*,auditbeat-*,packetbeat-*",
-    }
-  }
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}

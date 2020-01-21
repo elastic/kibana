@@ -41,5 +41,6 @@ exports[`Latest Active that latest active component renders normally 1`] = `
   }
   noItemsMessage="No items found"
   responsive={true}
+  tableLayout="fixed"
 />
 `;

@@ -26,6 +26,7 @@ export const registries = {
   browserFunctions: functionsRegistry,
   renderers: renderersRegistry,
   types: typesRegistry,
+  loadLegacyServerFunctionWrappers: () => Promise.resolve(),
 };
 
 const resetRegistry = (registry: any) => {

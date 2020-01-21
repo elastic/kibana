@@ -5,9 +5,10 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useUrlParams } from '../../hooks';
 import { CLIENT_DEFAULTS } from '../../../common/constants';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../contexts';
 
 // TODO: when EUI exports types for this, this should be replaced
 interface SuperDateRangePickerRangeChangedEvent {
@@ -26,16 +27,11 @@ export interface CommonlyUsedRange {
   display: string;
 }
 
-interface Props {
-  refreshApp: () => void;
-  commonlyUsedRanges?: CommonlyUsedRange[];
-}
-
-type UptimeDatePickerProps = Props;
-
-export const UptimeDatePicker = ({ refreshApp, commonlyUsedRanges }: UptimeDatePickerProps) => {
+export const UptimeDatePicker = () => {
   const [getUrlParams, updateUrl] = useUrlParams();
   const { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { commonlyUsedRanges } = useContext(UptimeSettingsContext);
+  const { refreshApp } = useContext(UptimeRefreshContext);
 
   const euiCommonlyUsedRanges = commonlyUsedRanges
     ? commonlyUsedRanges.map(

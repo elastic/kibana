@@ -18,7 +18,7 @@
  */
 
 import * as React from 'react';
-import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageSideBar } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { LegacySection } from '../../types';
@@ -42,12 +42,14 @@ export class ManagementChrome extends React.Component<Props> {
     return (
       <I18nProvider>
         <EuiPage>
-          <ManagementSidebarNav
-            getSections={this.props.getSections}
-            legacySections={this.props.legacySections}
-            selectedId={this.props.selectedId}
-          />
-          <EuiPageBody>
+          <EuiPageSideBar>
+            <ManagementSidebarNav
+              getSections={this.props.getSections}
+              legacySections={this.props.legacySections}
+              selectedId={this.props.selectedId}
+            />
+          </EuiPageSideBar>
+          <EuiPageBody restrictWidth={true} className="mgtPage__body">
             <div ref={this.container} />
           </EuiPageBody>
         </EuiPage>

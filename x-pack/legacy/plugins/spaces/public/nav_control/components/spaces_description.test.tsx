@@ -13,6 +13,7 @@ describe('SpacesDescription', () => {
     expect(
       shallow(
         <SpacesDescription
+          id={'foo'}
           capabilities={{
             navLinks: {},
             management: {},

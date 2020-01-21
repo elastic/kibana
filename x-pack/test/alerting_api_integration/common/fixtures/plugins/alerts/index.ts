@@ -202,8 +202,21 @@ export default function(kibana: any) {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
         actionGroups: ['default', 'other'],
-        async executor({ services, params, state }: AlertExecutorOptions) {
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const {
+            services,
+            params,
+            state,
+            alertId,
+            spaceId,
+            namespace,
+            name,
+            tags,
+            createdBy,
+            updatedBy,
+          } = alertExecutorOptions;
           let group = 'default';
+          const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
           if (params.groupsToScheduleActionsInSeries) {
             const index = state.groupInSeriesIndex || 0;
@@ -226,6 +239,7 @@ export default function(kibana: any) {
               params,
               reference: params.reference,
               source: 'alert:test.always-firing',
+              alertInfo,
             },
           });
           return {

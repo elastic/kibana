@@ -26,7 +26,7 @@ import parseSheet from './lib/parse_sheet.js';
 import repositionArguments from './lib/reposition_arguments.js';
 import indexArguments from './lib/index_arguments.js';
 import validateTime from './lib/validate_time.js';
-import { calculateInterval } from '../../common/lib';
+import { calculateInterval } from '../../../vis_type_timelion/common/lib';
 
 export default function chainRunner(tlConfig) {
   const preprocessChain = require('./lib/preprocess_chain')(tlConfig);

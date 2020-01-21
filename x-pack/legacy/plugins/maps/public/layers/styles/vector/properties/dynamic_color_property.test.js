@@ -4,18 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line no-unused-vars
+jest.mock('../components/vector_style_editor', () => ({
+  VectorStyleEditor: () => {
+    return <div>mockVectorStyleEditor</div>;
+  },
+}));
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
 import { VECTOR_STYLES } from '../vector_style_defaults';
 import { DynamicColorProperty } from './dynamic_color_property';
+import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 
 const mockField = {
   async getLabel() {
     return 'foobar_label';
   },
-
   getName() {
     return 'foobar';
   },
@@ -24,43 +29,61 @@ const mockField = {
   },
 };
 
-test('Should render ranged legend', async () => {
-  const colorStyle = new DynamicColorProperty(
-    {
-      color: 'Blues',
-    },
+const getOrdinalFieldMeta = () => {
+  return { min: 0, max: 100 };
+};
+
+const getCategoricalFieldMeta = () => {
+  return {
+    categories: [
+      {
+        key: 'US',
+        count: 10,
+      },
+      {
+        key: 'CN',
+        count: 8,
+      },
+    ],
+  };
+};
+const makeProperty = (options, getFieldMeta) => {
+  return new DynamicColorProperty(
+    options,
     VECTOR_STYLES.LINE_COLOR,
     mockField,
-    () => {
-      return { min: 0, max: 100 };
-    },
+    getFieldMeta,
     () => {
       return x => x + '_format';
     }
   );
+};
 
-  const legendRow = colorStyle.renderLegendDetailRow({
-    loadIsPointsOnly: () => {
-      return true;
+const defaultLegendParams = {
+  isPointsOnly: true,
+  isLinesOnly: false,
+};
+
+test('Should render ordinal legend', async () => {
+  const colorStyle = makeProperty(
+    {
+      color: 'Blues',
+      type: undefined,
     },
-    loadIsLinesOnly: () => {
-      return false;
-    },
-  });
+    getOrdinalFieldMeta
+  );
+
+  const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
   const component = shallow(legendRow);
-
-  // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
-  // Ensure the state changes are reflected
-  component.update();
 
   expect(component).toMatchSnapshot();
 });
 
-test('Should render categorical legend', async () => {
-  const colorStyle = new DynamicColorProperty(
+test('Should render ordinal legend with breaks', async () => {
+  const colorStyle = makeProperty(
     {
+      type: COLOR_MAP_TYPE.ORDINAL,
       useCustomColorRamp: true,
       customColorRamp: [
         {
@@ -73,24 +96,10 @@ test('Should render categorical legend', async () => {
         },
       ],
     },
-    VECTOR_STYLES.LINE_COLOR,
-    mockField,
-    () => {
-      return { min: 0, max: 100 };
-    },
-    () => {
-      return x => x + '_format';
-    }
+    getOrdinalFieldMeta
   );
 
-  const legendRow = colorStyle.renderLegendDetailRow({
-    loadIsPointsOnly: () => {
-      return true;
-    },
-    loadIsLinesOnly: () => {
-      return false;
-    },
-  });
+  const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
   const component = shallow(legendRow);
 
@@ -100,4 +109,115 @@ test('Should render categorical legend', async () => {
   component.update();
 
   expect(component).toMatchSnapshot();
+});
+
+test('Should render categorical legend with breaks from default', async () => {
+  const colorStyle = makeProperty(
+    {
+      type: COLOR_MAP_TYPE.CATEGORICAL,
+      useCustomColorPalette: false,
+      colorCategory: 'palette_0',
+    },
+    getCategoricalFieldMeta
+  );
+
+  const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+
+  const component = shallow(legendRow);
+
+  // Ensure all promises resolve
+  await new Promise(resolve => process.nextTick(resolve));
+  // Ensure the state changes are reflected
+  component.update();
+
+  expect(component).toMatchSnapshot();
+});
+
+test('Should render categorical legend with breaks from custom', async () => {
+  const colorStyle = makeProperty(
+    {
+      type: COLOR_MAP_TYPE.CATEGORICAL,
+      useCustomColorPalette: true,
+      customColorPalette: [
+        {
+          stop: null, //should include the default stop
+          color: '#FFFF00',
+        },
+        {
+          stop: 'US_STOP',
+          color: '#FF0000',
+        },
+        {
+          stop: 'CN_STOP',
+          color: '#00FF00',
+        },
+      ],
+    },
+    getCategoricalFieldMeta
+  );
+
+  const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+
+  const component = shallow(legendRow);
+
+  expect(component).toMatchSnapshot();
+});
+
+function makeFeatures(foobarPropValues) {
+  return foobarPropValues.map(value => {
+    return {
+      type: 'Feature',
+      properties: {
+        foobar: value,
+      },
+    };
+  });
+}
+
+test('Should pluck the categorical style-meta', async () => {
+  const colorStyle = makeProperty({
+    type: COLOR_MAP_TYPE.CATEGORICAL,
+    colorCategory: 'palette_0',
+    getCategoricalFieldMeta,
+  });
+
+  const features = makeFeatures(['CN', 'CN', 'US', 'CN', 'US', 'IN']);
+  const meta = colorStyle.pluckStyleMetaFromFeatures(features);
+
+  expect(meta).toEqual({
+    categories: [
+      { key: 'CN', count: 3 },
+      { key: 'US', count: 2 },
+      { key: 'IN', count: 1 },
+    ],
+  });
+});
+
+test('Should pluck the categorical style-meta from fieldmeta', async () => {
+  const colorStyle = makeProperty({
+    type: COLOR_MAP_TYPE.CATEGORICAL,
+    colorCategory: 'palette_0',
+    getCategoricalFieldMeta,
+  });
+
+  const meta = colorStyle.pluckStyleMetaFromFieldMetaData({
+    foobar: {
+      buckets: [
+        {
+          key: 'CN',
+          doc_count: 3,
+        },
+        { key: 'US', doc_count: 2 },
+        { key: 'IN', doc_count: 1 },
+      ],
+    },
+  });
+
+  expect(meta).toEqual({
+    categories: [
+      { key: 'CN', count: 3 },
+      { key: 'US', count: 2 },
+      { key: 'IN', count: 1 },
+    ],
+  });
 });

@@ -12,10 +12,12 @@ import {
   timelineSavedObjectType,
   timelineSavedObjectMappings,
 } from './lib/timeline/saved_object_mappings';
+import { ruleStatusSavedObjectMappings } from './lib/detection_engine/rules/saved_object_mappings';
 
 export { noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType };
 export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,
   ...pinnedEventSavedObjectMappings,
+  ...ruleStatusSavedObjectMappings,
 };

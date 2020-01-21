@@ -8,7 +8,6 @@ import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink } from './chart_context_menu';
 import { mount } from 'enzyme';
 import { options, source, timeRange, chartOptions } from '../../utils/fixtures/metrics_explorer';
-import { InfraNodeType } from '../../graphql/types';
 import DateMath from '@elastic/datemath';
 import { ReactWrapper } from 'enzyme';
 import { Capabilities } from 'src/core/public';
@@ -163,12 +162,7 @@ describe('MetricsExplorerChartContextMenu', () => {
       const toDateStrig = '2019-01-01T12:00:00Z';
       const to = DateMath.parse(toDateStrig, { roundUp: true })!;
       const from = DateMath.parse(fromDateStrig)!;
-      const link = createNodeDetailLink(
-        InfraNodeType.host,
-        'example-01',
-        fromDateStrig,
-        toDateStrig
-      );
+      const link = createNodeDetailLink('host', 'example-01', fromDateStrig, toDateStrig);
       expect(link).toBe(
         `#/link-to/host-detail/example-01?to=${to.valueOf()}&from=${from.valueOf()}`
       );

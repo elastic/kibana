@@ -51,7 +51,7 @@ interface QueryBarDefineRuleProps {
 
 const StyledEuiFormRow = styled(EuiFormRow)`
   .kbnTypeahead__items {
-    max-height: 14vh !important;
+    max-height: 45vh !important;
   }
   .globalQueryBar {
     padding: 4px 0px 0px 0px;

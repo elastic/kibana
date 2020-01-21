@@ -65,10 +65,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Maps', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Maps', 'Stack Management']);
       });
 
       it(`allows a map to be created`, async () => {
@@ -154,10 +152,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Maps', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Maps', 'Stack Management']);
       });
 
       it(`does not show create new button`, async () => {
@@ -251,10 +247,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show Maps navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`returns a 404`, async () => {

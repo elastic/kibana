@@ -118,7 +118,9 @@ export function getActionType(params: GetActionTypeParams): ActionType {
   const { logger, configurationUtilities } = params;
   return {
     id: '.email',
-    name: 'email',
+    name: i18n.translate('xpack.actions.builtin.emailTitle', {
+      defaultMessage: 'Email',
+    }),
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),

@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick } from 'lodash/fp';
+import { get, pick } from 'lodash/fp';
+import { useLocation } from 'react-router-dom';
 
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
+import { FormData, FormHook, FormSchema } from './components/shared_imports';
 import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
 
 interface GetStepsData {
@@ -64,3 +66,17 @@ export const getStepsData = ({
 
   return { aboutRuleData, defineRuleData, scheduleRuleData };
 };
+
+export const useQuery = () => new URLSearchParams(useLocation().search);
+
+export const setFieldValue = (
+  form: FormHook<FormData>,
+  schema: FormSchema<FormData>,
+  defaultValues: unknown
+) =>
+  Object.keys(schema).forEach(key => {
+    const val = get(key, defaultValues);
+    if (val != null) {
+      form.setFieldValue(key, val);
+    }
+  });

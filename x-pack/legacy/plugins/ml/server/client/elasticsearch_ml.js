@@ -753,4 +753,29 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     ],
     method: 'GET',
   });
+
+  ml.categories = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/results/categories/<%=categoryId%>',
+        req: {
+          jobId: {
+            type: 'string',
+          },
+          categoryId: {
+            type: 'string',
+          },
+        },
+      },
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/results/categories',
+        req: {
+          jobId: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'GET',
+  });
 };

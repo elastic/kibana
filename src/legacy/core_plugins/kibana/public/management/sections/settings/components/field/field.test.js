@@ -72,10 +72,9 @@ const settings = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
-    options: {
+    validation: {
       maxSize: {
         length: 1000,
-        displayName: '1 kB',
         description: 'Description for 1 kB',
       },
     },

@@ -450,11 +450,11 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string);
-    get: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest) => string;
+    get: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>) => string;
     prepend: (path: string) => string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: KibanaRequest<unknown, unknown, unknown, any> | LegacyRequest, requestSpecificBasePath: string) => void;
+    set: (request: LegacyRequest | KibanaRequest<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -552,13 +552,14 @@ export interface ContextSetup {
 export type CoreId = symbol;
 
 // @public
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
+    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
@@ -633,6 +634,12 @@ export interface DeprecationInfo {
     message: string;
     // (undocumented)
     url: string;
+}
+
+// @public
+export interface DeprecationSettings {
+    docLinksKey: string;
+    message: string;
 }
 
 // @public
@@ -795,6 +802,17 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
+// Warning: (ae-missing-release-tag) "ImageValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface ImageValidation {
+    // (undocumented)
+    maxSize: {
+        length: number;
+        description: string;
+    };
+}
+
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -803,7 +821,13 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public (undocumented)
 export interface IRenderOptions {
+    // @internal @deprecated
+    app?: {
+        getId(): string;
+    };
     includeUserSettings?: boolean;
+    // @internal @deprecated
+    vars?: Record<string, any>;
 }
 
 // @public
@@ -832,7 +856,7 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 
 // @public (undocumented)
 export interface IScopedRenderingClient {
-    render(options?: IRenderOptions): Promise<string>;
+    render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
 }
 
 // @public
@@ -888,7 +912,7 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Error | Record<string, any> | Buffer | Stream | {
+    custom: <T extends string | Error | Buffer | Stream | Record<string, any> | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
@@ -899,9 +923,9 @@ export const kibanaResponseFactory: {
     conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     internalError: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
-    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
-    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
+    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
+    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 };
 
@@ -932,20 +956,12 @@ export class LegacyInternals implements ILegacyInternals {
     // (undocumented)
     getInjectedUiAppVars(id: string): Promise<Record<string, any>>;
     // (undocumented)
-    getVars(id: string, request: LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
+    getVars(id: string, request: KibanaRequest | LegacyRequest, injected?: LegacyVars): Promise<Record<string, any>>;
     // Warning: (ae-forgotten-export) The symbol "VarsInjector" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     injectUiAppVars(id: string, injector: VarsInjector): void;
     }
-
-// @internal @deprecated (undocumented)
-export interface LegacyRenderOptions extends IRenderOptions {
-    app?: {
-        getId(): string;
-    };
-    vars?: Record<string, any>;
-}
 
 // @public @deprecated (undocumented)
 export interface LegacyRequest extends Request {
@@ -1233,7 +1249,7 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 
 // @internal (undocumented)
 export interface RenderingServiceSetup {
-    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: R extends LegacyRequest ? LegacyRenderOptions : IRenderOptions): Promise<string>;
+    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: IRenderOptions): Promise<string>;
 }
 
 // @public
@@ -1796,7 +1812,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): any;
+    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
@@ -1925,9 +1941,20 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
 }>;
 
+// Warning: (ae-missing-release-tag) "StringValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface StringValidation {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    regexString: string;
+}
+
 // @public
 export interface UiSettingsParams {
     category?: string[];
+    deprecation?: DeprecationSettings;
     description?: string;
     name?: string;
     optionLabels?: Record<string, string>;
@@ -1935,6 +1962,8 @@ export interface UiSettingsParams {
     readonly?: boolean;
     requiresPageReload?: boolean;
     type?: UiSettingsType;
+    // (undocumented)
+    validation?: ImageValidation | StringValidation;
     value?: SavedObjectAttribute;
 }
 
@@ -1977,9 +2006,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:161:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:162:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:222:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:223:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:227:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:228:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

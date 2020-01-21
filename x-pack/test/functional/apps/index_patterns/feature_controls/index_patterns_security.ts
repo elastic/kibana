@@ -69,10 +69,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -115,7 +113,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
 
-        await kibanaServer.uiSettings.replace({});
+        await kibanaServer.uiSettings.replace({ pageNavigation: 'individual' });
         await PageObjects.settings.navigateTo();
       });
 
@@ -125,10 +123,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`index pattern listing doesn't show create button`, async () => {
@@ -179,10 +175,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`doesn't show Index Patterns in management side-nav`, async () => {

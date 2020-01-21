@@ -637,7 +637,7 @@ function discoverController(
 
       // fetch data when filters fire fetch event
       subscriptions.add(
-        subscribeWithScope($scope, filterManager.getUpdates$(), {
+        subscribeWithScope($scope, filterManager.getFetches$(), {
           next: $scope.fetch,
         })
       );
@@ -671,7 +671,9 @@ function discoverController(
       $scope.$watch('state.query', (newQuery, oldQuery) => {
         if (!_.isEqual(newQuery, oldQuery)) {
           const query = migrateLegacyQuery(newQuery);
-          $scope.updateQueryAndFetch({ query });
+          if (!_.isEqual(query, newQuery)) {
+            $scope.updateQueryAndFetch({ query });
+          }
         }
       });
 
@@ -817,15 +819,21 @@ function discoverController(
             title: i18n.translate('kbn.discover.errorLoadingData', {
               defaultMessage: 'Error loading data',
             }),
+            toastMessage: error.shortMessage,
           });
         }
       });
   };
 
   $scope.updateQueryAndFetch = function({ query, dateRange }) {
+    const oldDateRange = timefilter.getTime();
     timefilter.setTime(dateRange);
     $state.query = query;
-    $scope.fetch();
+    // storing the updated timerange in the state will trigger a fetch
+    // call automatically, so only trigger fetch in case this is a refresh call (no changes in parameters).
+    if (_.isEqual(oldDateRange, dateRange)) {
+      $scope.fetch();
+    }
   };
 
   function onResults(resp) {

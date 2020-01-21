@@ -56,6 +56,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationAPIClientParams](./kibana-plugin-server.deprecationapiclientparams.md) |  |
 |  [DeprecationAPIResponse](./kibana-plugin-server.deprecationapiresponse.md) |  |
 |  [DeprecationInfo](./kibana-plugin-server.deprecationinfo.md) |  |
+|  [DeprecationSettings](./kibana-plugin-server.deprecationsettings.md) | UiSettings deprecation field options. |
 |  [DiscoveredPlugin](./kibana-plugin-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchError](./kibana-plugin-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |  |
@@ -69,6 +70,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ICspConfig](./kibana-plugin-server.icspconfig.md) | CSP configuration for use in Kibana. |
 |  [IKibanaResponse](./kibana-plugin-server.ikibanaresponse.md) | A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution |
 |  [IKibanaSocket](./kibana-plugin-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
+|  [ImageValidation](./kibana-plugin-server.imagevalidation.md) |  |
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-server.indexsettingsdeprecationinfo.md) |  |
 |  [IRenderOptions](./kibana-plugin-server.irenderoptions.md) |  |
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-server.routeconfig.md) and [RequestHandler](./kibana-plugin-server.requesthandler.md) for more information about arguments to route registrations. |
@@ -140,6 +142,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
+|  [StringValidation](./kibana-plugin-server.stringvalidation.md) |  |
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md) |  |
@@ -177,7 +180,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IBasePath](./kibana-plugin-server.ibasepath.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-server.basepath.md) |
 |  [IClusterClient](./kibana-plugin-server.iclusterclient.md) | Represents an Elasticsearch cluster API client created by the platform. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [IContextProvider](./kibana-plugin-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
-|  [ICustomClusterClient](./kibana-plugin-server.icustomclusterclient.md) | Represents an Elasticsearch cluster API client created by a plugin.. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
+|  [ICustomClusterClient](./kibana-plugin-server.icustomclusterclient.md) | Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [ClusterClient](./kibana-plugin-server.clusterclient.md)<!-- -->. |
 |  [IsAuthenticated](./kibana-plugin-server.isauthenticated.md) | Return authentication status for a request. |
 |  [ISavedObjectsRepository](./kibana-plugin-server.isavedobjectsrepository.md) | See [SavedObjectsRepository](./kibana-plugin-server.savedobjectsrepository.md) |
 |  [IScopedClusterClient](./kibana-plugin-server.iscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [ScopedClusterClient](./kibana-plugin-server.scopedclusterclient.md)<!-- -->. |

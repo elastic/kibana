@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
   const uptimeService = getService('uptime');
+  const retry = getService('retry');
 
   return new (class UptimePage {
     public async goToUptimePageAndSetDateRange(
@@ -51,8 +53,10 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await Promise.all(monitorIdsToCheck.map(id => uptimeService.monitorPageLinkExists(id)));
     }
 
-    public async pageUrlContains(value: string) {
-      return await uptimeService.urlContains(value);
+    public async pageUrlContains(value: string, expected: boolean = true) {
+      retry.try(async () => {
+        expect(await uptimeService.urlContains(value)).to.eql(expected);
+      });
     }
 
     public async changePage(direction: 'next' | 'prev') {
@@ -68,6 +72,17 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
         await uptimeService.setStatusFilterUp();
       } else if (value === 'down') {
         await uptimeService.setStatusFilterDown();
+      }
+    }
+
+    public async selectFilterItems(filters: Record<string, string[]>) {
+      for (const key in filters) {
+        if (filters.hasOwnProperty(key)) {
+          const values = filters[key];
+          for (let i = 0; i < values.length; i++) {
+            await uptimeService.selectFilterItem(key, values[i]);
+          }
+        }
       }
     }
 

@@ -19,7 +19,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import { i18n as t } from '@kbn/i18n';
+import { EuiModal, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -58,6 +59,18 @@ class ModalRef implements OverlayRef {
 }
 
 /**
+ * @public
+ */
+export interface OverlayModalConfirmOptions {
+  title?: string;
+  cancelButtonText?: string;
+  confirmButtonText?: string;
+  className?: string;
+  closeButtonAriaLabel?: string;
+  'data-test-subj'?: string;
+}
+
+/**
  * APIs to open and manage modal dialogs.
  *
  * @public
@@ -72,6 +85,14 @@ export interface OverlayModalStart {
    * @return {@link OverlayRef} A reference to the opened modal.
    */
   open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
+  /**
+   * Opens a confirmation modal with the given text or mountpoint as a message.
+   * Returns a Promise resolving to `true` if user confirmed or `false` otherwise.
+   *
+   * @param message {@link MountPoint} - string or mountpoint to be used a the confirm message body
+   * @param options {@link OverlayModalConfirmOptions} - options for the confirm modal
+   */
+  openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions): Promise<boolean>;
 }
 
 /**
@@ -98,7 +119,7 @@ export class ModalService {
 
     return {
       open: (mount: MountPoint, options: OverlayModalOpenOptions = {}): OverlayRef => {
-        // If there is an active flyout session close it before opening a new one.
+        // If there is an active modal, close it before opening a new one.
         if (this.activeModal) {
           this.activeModal.close();
           this.cleanupDom();
@@ -127,6 +148,65 @@ export class ModalService {
         );
 
         return modal;
+      },
+      openConfirm: (message: MountPoint | string, options?: OverlayModalConfirmOptions) => {
+        // If there is an active modal, close it before opening a new one.
+        if (this.activeModal) {
+          this.activeModal.close();
+          this.cleanupDom();
+        }
+
+        return new Promise((resolve, reject) => {
+          let resolved = false;
+          const closeModal = (confirmed: boolean) => {
+            resolved = true;
+            modal.close();
+            resolve(confirmed);
+          };
+
+          const modal = new ModalRef();
+          modal.onClose.then(() => {
+            if (this.activeModal === modal) {
+              this.cleanupDom();
+            }
+            // modal.close can be called when opening a new modal/confirm, so we need to resolve the promise in that case.
+            if (!resolved) {
+              closeModal(false);
+            }
+          });
+          this.activeModal = modal;
+
+          const props = {
+            ...options,
+            children:
+              typeof message === 'string' ? (
+                message
+              ) : (
+                <MountWrapper mount={message} className="kbnOverlayMountWrapper" />
+              ),
+            onCancel: () => closeModal(false),
+            onConfirm: () => closeModal(true),
+            cancelButtonText:
+              options?.cancelButtonText ||
+              t.translate('core.overlays.confirm.cancelButton', {
+                defaultMessage: 'Cancel',
+              }),
+            confirmButtonText:
+              options?.confirmButtonText ||
+              t.translate('core.overlays.confirm.okButton', {
+                defaultMessage: 'Confirm',
+              }),
+          };
+
+          render(
+            <EuiOverlayMask>
+              <i18n.Context>
+                <EuiConfirmModal {...props} />
+              </i18n.Context>
+            </EuiOverlayMask>,
+            targetDomElement
+          );
+        });
       },
     };
   }

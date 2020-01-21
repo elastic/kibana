@@ -9,6 +9,16 @@ import { AppState } from '../../../state';
 
 describe('state selectors', () => {
   const state: AppState = {
+    overviewFilters: {
+      filters: {
+        locations: [],
+        ports: [],
+        schemes: [],
+        tags: [],
+      },
+      errors: [],
+      loading: false,
+    },
     monitor: {
       monitorDetailsList: [],
       monitorLocationsList: new Map(),
@@ -26,8 +36,14 @@ describe('state selectors', () => {
     },
     ui: {
       basePath: 'yyz',
+      esKuery: '',
       integrationsPopoverOpen: null,
       lastRefresh: 125,
+    },
+    monitorStatus: {
+      status: null,
+      monitor: null,
+      loading: false,
     },
   };
 

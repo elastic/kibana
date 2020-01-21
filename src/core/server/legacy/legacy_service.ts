@@ -31,6 +31,7 @@ import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs } from './plugins';
 import { convertLegacyDeprecationProvider } from './config';
 import {
+  ILegacyInternals,
   LegacyServiceSetupDeps,
   LegacyServiceStartDeps,
   LegacyPlugins,
@@ -82,6 +83,7 @@ export class LegacyService implements CoreService {
   private legacyRawConfig?: LegacyConfig;
   private legacyPlugins?: LegacyPlugins;
   private settings?: LegacyVars;
+  public legacyInternals?: ILegacyInternals;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService } = coreContext;
@@ -125,7 +127,11 @@ export class LegacyService implements CoreService {
       disabledPluginSpecs,
       uiExports,
       navLinks,
-    } = await findLegacyPluginSpecs(this.settings, this.coreContext.logger);
+    } = await findLegacyPluginSpecs(
+      this.settings,
+      this.coreContext.logger,
+      this.coreContext.env.packageInfo
+    );
 
     this.legacyPlugins = {
       pluginSpecs,
@@ -179,6 +185,11 @@ export class LegacyService implements CoreService {
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
     this.legacyRawConfig!.set('server.uuid', setupDeps.core.uuid.getInstanceUuid());
     this.setupDeps = setupDeps;
+    this.legacyInternals = new LegacyInternals(
+      this.legacyPlugins.uiExports,
+      this.legacyRawConfig!,
+      setupDeps.core.http.server
+    );
   }
 
   public async start(startDeps: LegacyServiceStartDeps) {
@@ -245,6 +256,12 @@ export class LegacyService implements CoreService {
     startDeps: LegacyServiceStartDeps,
     legacyPlugins: LegacyPlugins
   ) {
+    const coreStart: CoreStart = {
+      capabilities: startDeps.core.capabilities,
+      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
+      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+    };
+
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
@@ -280,11 +297,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
-    };
-    const coreStart: CoreStart = {
-      capabilities: startDeps.core.capabilities,
-      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
-      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -313,7 +326,7 @@ export class LegacyService implements CoreService {
           rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
-          legacy: new LegacyInternals(legacyPlugins.uiExports, config, setupDeps.core.http.server),
+          legacy: this.legacyInternals,
         },
         logger: this.coreContext.logger,
       },

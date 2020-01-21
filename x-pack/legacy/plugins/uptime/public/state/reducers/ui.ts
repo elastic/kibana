@@ -9,6 +9,7 @@ import {
   PopoverState,
   toggleIntegrationsPopover,
   setBasePath,
+  setEsKueryString,
   triggerAppRefresh,
   UiPayload,
 } from '../actions/ui';
@@ -16,12 +17,14 @@ import {
 export interface UiState {
   integrationsPopoverOpen: PopoverState | null;
   basePath: string;
+  esKuery: string;
   lastRefresh: number;
 }
 
 const initialState: UiState = {
   integrationsPopoverOpen: null,
   basePath: '',
+  esKuery: '',
   lastRefresh: Date.now(),
 };
 
@@ -40,6 +43,11 @@ export const uiReducer = handleActions<UiState, UiPayload>(
     [String(triggerAppRefresh)]: (state, action: Action<number>) => ({
       ...state,
       lastRefresh: action.payload as number,
+    }),
+
+    [String(setEsKueryString)]: (state, action: Action<string>) => ({
+      ...state,
+      esKuery: action.payload as string,
     }),
   },
   initialState

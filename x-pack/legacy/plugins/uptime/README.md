@@ -3,7 +3,7 @@
 ## Purpose
 
 The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
-in their infrasturcture. It's primarily built using React and Apollo's GraphQL tools.
+in their infrastructure. It's primarily built using React and Apollo's GraphQL tools.
 
 ## Layout
 
@@ -44,7 +44,7 @@ From `~/kibana/x-pack`, run `node scripts/jest.js`.
 ### Functional tests
 
 In one shell, from **~/kibana/x-pack**:
-`node scripts/functional_tests-server.js`
+`node scripts/functional_tests_server.js`
 
 In another shell, from **~kibana/x-pack**:
 `node ../scripts/functional_test_runner.js --grep="{TEST_NAME}"`.

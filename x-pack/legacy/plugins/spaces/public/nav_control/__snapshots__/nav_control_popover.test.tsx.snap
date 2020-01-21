@@ -5,7 +5,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
   anchorPosition="downRight"
   button={
     <EuiHeaderSectionItemButton
-      aria-controls="headerSpacesMenuList"
+      aria-controls="headerSpacesMenuContent"
       aria-expanded={false}
       aria-haspopup="true"
       aria-label="loading"
@@ -39,6 +39,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
         },
       }
     }
+    id="headerSpacesMenuContent"
     onManageSpacesClick={[Function]}
   />
 </EuiPopover>

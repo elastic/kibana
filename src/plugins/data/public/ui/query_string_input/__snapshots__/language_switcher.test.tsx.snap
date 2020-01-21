@@ -170,6 +170,9 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
           "logstash": Object {
             "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
           },
+          "management": Object {
+            "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+          },
           "metricbeat": Object {
             "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
           },
@@ -186,7 +189,10 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
             "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
             "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
           },
-          "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+          "siem": Object {
+            "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+            "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+          },
           "winlogbeat": Object {
             "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
           },
@@ -460,6 +466,9 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
           "logstash": Object {
             "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
           },
+          "management": Object {
+            "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+          },
           "metricbeat": Object {
             "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
           },
@@ -476,7 +485,10 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
             "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
             "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
           },
-          "siem": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+          "siem": Object {
+            "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+            "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+          },
           "winlogbeat": Object {
             "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
           },

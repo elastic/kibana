@@ -29,16 +29,7 @@ export const createTestEntryTemplate = defaultUiSettings => bundle => `
  *
  */
 
-// import global polyfills before everything else
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
-import 'childnode-remove-polyfill';
 import fetchMock from 'fetch-mock/es5/client';
-import Symbol_observable from 'symbol-observable';
-
 import { CoreSystem } from '__kibanaCore__';
 
 // Fake uiCapabilities returned to Core in browser tests
@@ -123,7 +114,8 @@ const coreSystem = new CoreSystem({
       },
       mapConfig: {
         includeElasticMapsService: true,
-        manifestServiceUrl: 'https://catalogue-staging.maps.elastic.co/v2/manifest'
+        emsFileApiUrl: 'https://vector-staging.maps.elastic.co',
+        emsTileApiUrl: 'https://tiles.maps.elastic.co',
       },
       vegaConfig: {
         enabled: true,
