@@ -21,9 +21,8 @@ import { handleResponse } from './handle_response';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { notificationServiceMock } from '../../../../../../core/public/notifications/notifications_service.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setNotifications } from '../../../../../../plugins/data/public/services';
+import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
+import { setNotifications } from '../../services';
 
 jest.mock('@kbn/i18n', () => {
   return {

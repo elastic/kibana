@@ -17,12 +17,4 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setOverlays } from '../../../../../../../plugins/data/public/services';
-import { OverlayStart } from 'kibana/public';
-
-export const openModal = jest.fn();
-
-setOverlays(({
-  openModal,
-} as unknown) as OverlayStart);
+export { getFlattenedObject } from '../common';

@@ -19,8 +19,8 @@
 
 import { callClient } from './call_client';
 import { handleResponse } from './handle_response';
-import { FetchHandlers } from '../types';
-import { SearchRequest, SearchStrategySearchParams } from '../../../../../../plugins/data/public';
+import { FetchHandlers } from './types';
+import { SearchRequest, SearchStrategySearchParams } from '../..';
 
 const mockResponses = [{}, {}];
 const mockAbortFns = [jest.fn(), jest.fn()];

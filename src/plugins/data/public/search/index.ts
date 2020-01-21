@@ -54,3 +54,5 @@ export {
 } from './search_strategy';
 
 export { SearchRequest, SearchResponse } from './types';
+
+export { FetchOptions } from './fetch';

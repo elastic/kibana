@@ -20,9 +20,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getOverlays } from '../../../../../../../plugins/data/public/services';
-import { toMountPoint } from '../../../../../../../plugins/kibana_react/public';
+import { getOverlays } from '../../../services';
+import { toMountPoint } from '../../../../../kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ResponseWithShardFailure, Request } from './shard_failure_types';
 

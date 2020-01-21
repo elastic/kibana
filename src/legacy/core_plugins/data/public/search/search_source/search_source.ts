@@ -71,7 +71,6 @@
 
 import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
-import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
 import {
   getHighlightRequest,
@@ -79,10 +78,14 @@ import {
   esQuery,
   SearchRequest,
 } from '../../../../../../plugins/data/public';
-import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchOptions } from '../fetch/types';
+import {
+  fetchSoon,
+  FetchOptions,
+  RequestFailure,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/data/public/search/fetch';
 
 import {
   getSearchService,

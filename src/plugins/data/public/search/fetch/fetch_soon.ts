@@ -19,7 +19,7 @@
 
 import { callClient } from './call_client';
 import { FetchHandlers, FetchOptions } from './types';
-import { SearchRequest, SearchResponse } from '../../../../../../plugins/data/public';
+import { SearchRequest, SearchResponse } from '..';
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue

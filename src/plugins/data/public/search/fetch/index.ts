@@ -18,3 +18,5 @@
  */
 
 export * from './types';
+export { fetchSoon } from './fetch_soon';
+export { RequestFailure } from './errors';

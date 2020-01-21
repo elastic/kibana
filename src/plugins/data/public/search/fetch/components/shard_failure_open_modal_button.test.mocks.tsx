@@ -17,19 +17,11 @@
  * under the License.
  */
 
-import { KbnError } from '../../../../../../plugins/kibana_utils/public';
-import { SearchResponse, SearchError } from '../../../../../../plugins/data/public';
+import { setOverlays } from '../../../services';
+import { OverlayStart } from 'kibana/public';
 
-/**
- * Request Failure - When an entire multi request fails
- * @param {Error} err - the Error that came back
- * @param {Object} resp - optional HTTP response
- */
-export class RequestFailure extends KbnError {
-  public resp: SearchResponse;
-  constructor(err: SearchError | null = null, resp?: SearchResponse) {
-    super(`Request to Elasticsearch failed: ${JSON.stringify(resp || err?.message)}`);
+export const openModal = jest.fn();
 
-    this.resp = resp;
-  }
-}
+setOverlays(({
+  openModal,
+} as unknown) as OverlayStart);
