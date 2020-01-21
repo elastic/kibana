@@ -38,7 +38,6 @@ import { URL_PATH_END_MARKER } from './components/index';
 import { createTokenIterator } from '../../application/factories';
 
 import { Position, Token, Range, CoreEditor } from '../../types';
-import { SenseEditor } from '../../application/models/sense_editor';
 
 let LAST_EVALUATED_TOKEN: any = null;
 
@@ -54,11 +53,20 @@ function isUrlParamsToken(token: any) {
       return false;
   }
 }
-function getCurrentMethodAndTokenPaths(
+
+/**
+ * Get the method and token paths for a specific position in the current editor buffer.
+ *
+ * This function can be used for getting autocomplete information or for getting more information
+ * about the endpoint associated with autocomplete. In future, these concerns should be better
+ * separated.
+ *
+ */
+export function getCurrentMethodAndTokenPaths(
   editor: CoreEditor,
   pos: Position,
   parser: any,
-  forceEndOfUrl?: boolean
+  forceEndOfUrl?: boolean /* Flag for indicating whether we want to avoid early escape optimization. */
 ) {
   const tokenIter = createTokenIterator({
     editor,
@@ -186,7 +194,7 @@ function getCurrentMethodAndTokenPaths(
     }
   }
 
-  if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 0)) {
+  if (walkedSomeBody && (!bodyTokenPath || bodyTokenPath.length === 0) && !forceEndOfUrl) {
     // we had some content and still no path -> the cursor is position after a closed body -> no auto complete
     return {};
   }
@@ -297,20 +305,6 @@ function getCurrentMethodAndTokenPaths(
     ret.method = t.value;
   }
   return ret;
-}
-export function getEndpointFromPosition(senseEditor: SenseEditor, pos: Position, parser: any) {
-  const editor = senseEditor.getCoreEditor();
-  const context = {
-    ...getCurrentMethodAndTokenPaths(
-      editor,
-      { column: pos.column, lineNumber: pos.lineNumber },
-      parser,
-      true
-    ),
-  };
-  const components = getTopLevelUrlCompleteComponents(context.method);
-  populateContext(context.urlTokenPath, context, editor, true, components);
-  return context.endpoint;
 }
 
 // eslint-disable-next-line
@@ -812,7 +806,6 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
     if (!ret.urlTokenPath) {
       // zero length tokenPath is true
 
-      // console.log("Can't extract a valid url token path.");
       return context;
     }
 
@@ -825,13 +818,11 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
     );
 
     if (!context.endpoint) {
-      // console.log("couldn't resolve an endpoint.");
       return context;
     }
 
     if (!ret.urlParamsTokenPath) {
       // zero length tokenPath is true
-      // console.log("Can't extract a valid urlParams token path.");
       return context;
     }
     let tokenPath: any[] = [];
@@ -859,7 +850,6 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
     context.requestStartRow = ret.requestStartRow;
     if (!ret.urlTokenPath) {
       // zero length tokenPath is true
-      // console.log("Can't extract a valid url token path.");
       return context;
     }
 
@@ -875,7 +865,6 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
     if (!ret.bodyTokenPath) {
       // zero length tokenPath is true
 
-      // console.log("Can't extract a valid body token path.");
       return context;
     }
 

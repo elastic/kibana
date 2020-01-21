@@ -18,9 +18,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { aggTypeFilters } from 'ui/agg_types/filter';
-import { IndexPattern, Field } from 'ui/index_patterns';
 import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
 import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 import { AggConfig, VisState } from '../../..';
@@ -28,6 +26,7 @@ import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from '../../config/types';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
+import { IndexPattern, Field } from '../../../../../../../plugins/data/public';
 
 interface ParamInstanceBase {
   agg: AggConfig;
@@ -91,25 +90,11 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
         metricAggs,
         state,
         value: agg.params[param.name],
-      } as ParamInstance);
+      });
     }
   });
 
   return params;
-}
-
-function getError(agg: AggConfig, aggIsTooLow: boolean) {
-  const errors = [];
-  if (aggIsTooLow) {
-    errors.push(
-      i18n.translate('common.ui.vis.editors.aggParams.errors.aggWrongRunOrderErrorMessage', {
-        defaultMessage: '"{schema}" aggs must run before all other buckets!',
-        values: { schema: agg.schema.title },
-      })
-    );
-  }
-
-  return errors;
 }
 
 function getAggTypeOptions(
@@ -148,4 +133,4 @@ function isInvalidParamsTouched(
   return invalidParams.every(param => param.touched);
 }
 
-export { getAggParamsToRender, getError, getAggTypeOptions, isInvalidParamsTouched };
+export { getAggParamsToRender, getAggTypeOptions, isInvalidParamsTouched };

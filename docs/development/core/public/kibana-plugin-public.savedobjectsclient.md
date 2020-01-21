@@ -12,6 +12,10 @@ Saved Objects is Kibana's data persisentence mechanism allowing plugins to use E
 export declare class SavedObjectsClient 
 ```
 
+## Remarks
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsClient` class.
+
 ## Properties
 
 |  Property | Modifiers | Type | Description |
@@ -20,7 +24,7 @@ export declare class SavedObjectsClient
 |  [bulkGet](./kibana-plugin-public.savedobjectsclient.bulkget.md) |  | <code>(objects?: {</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }[]) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;SavedObjectAttributes&gt;&gt;</code> | Returns an array of objects by id |
 |  [create](./kibana-plugin-public.savedobjectsclient.create.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(type: string, attributes: T, options?: SavedObjectsCreateOptions) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Persists an object |
 |  [delete](./kibana-plugin-public.savedobjectsclient.delete.md) |  | <code>(type: string, id: string) =&gt; Promise&lt;{}&gt;</code> | Deletes an object |
-|  [find](./kibana-plugin-public.savedobjectsclient.find.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(options: Pick&lt;SavedObjectFindOptionsServer, &quot;search&quot; &#124; &quot;filter&quot; &#124; &quot;type&quot; &#124; &quot;page&quot; &#124; &quot;fields&quot; &#124; &quot;searchFields&quot; &#124; &quot;defaultSearchOperator&quot; &#124; &quot;hasReference&quot; &#124; &quot;sortField&quot; &#124; &quot;perPage&quot;&gt;) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T&gt;&gt;</code> | Search for objects |
+|  [find](./kibana-plugin-public.savedobjectsclient.find.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(options: Pick&lt;SavedObjectFindOptionsServer, &quot;search&quot; &#124; &quot;filter&quot; &#124; &quot;type&quot; &#124; &quot;page&quot; &#124; &quot;perPage&quot; &#124; &quot;sortField&quot; &#124; &quot;fields&quot; &#124; &quot;searchFields&quot; &#124; &quot;hasReference&quot; &#124; &quot;defaultSearchOperator&quot;&gt;) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T&gt;&gt;</code> | Search for objects |
 |  [get](./kibana-plugin-public.savedobjectsclient.get.md) |  | <code>&lt;T extends SavedObjectAttributes&gt;(type: string, id: string) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Fetches a single object |
 
 ## Methods
@@ -29,8 +33,4 @@ export declare class SavedObjectsClient
 |  --- | --- | --- |
 |  [bulkUpdate(objects)](./kibana-plugin-public.savedobjectsclient.bulkupdate.md) |  | Update multiple documents at once |
 |  [update(type, id, attributes, { version, migrationVersion, references })](./kibana-plugin-public.savedobjectsclient.update.md) |  | Updates an object |
-
-## Remarks
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsClient` class.
 

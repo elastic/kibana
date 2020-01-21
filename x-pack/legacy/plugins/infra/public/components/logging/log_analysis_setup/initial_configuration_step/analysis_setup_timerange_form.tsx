@@ -5,8 +5,6 @@
  */
 
 import {
-  EuiDatePicker,
-  EuiDatePickerProps,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFormControlLayout,
@@ -16,8 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React, { useMemo } from 'react';
-
-import { euiStyled } from '../../../../../../../common/eui_styled_components';
+import { FixedDatePicker } from '../../../fixed_datepicker';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',
@@ -46,11 +43,12 @@ function selectedDateToParam(selectedDate: Moment | null) {
 }
 
 export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
+  disabled?: boolean;
   setStartTime: (startTime: number | undefined) => void;
   setEndTime: (endTime: number | undefined) => void;
   startTime: number | undefined;
   endTime: number | undefined;
-}> = ({ setStartTime, setEndTime, startTime, endTime }) => {
+}> = ({ disabled = false, setStartTime, setEndTime, startTime, endTime }) => {
   const now = useMemo(() => moment(), []);
   const selectedEndTimeIsToday = !endTime || moment(endTime).isSame(now, 'day');
   const startTimeValue = useMemo(() => {
@@ -86,9 +84,11 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
-            clear={startTime ? { onClick: () => setStartTime(undefined) } : undefined}
+            clear={startTime && !disabled ? { onClick: () => setStartTime(undefined) } : undefined}
+            isDisabled={disabled}
           >
             <FixedDatePicker
+              disabled={disabled}
               showTimeSelect
               selected={startTimeValue}
               onChange={date => setStartTime(selectedDateToParam(date))}
@@ -107,9 +107,11 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
-            clear={endTime ? { onClick: () => setEndTime(undefined) } : undefined}
+            clear={endTime && !disabled ? { onClick: () => setEndTime(undefined) } : undefined}
+            isDisabled={disabled}
           >
             <FixedDatePicker
+              disabled={disabled}
               showTimeSelect
               selected={endTimeValue}
               onChange={date => setEndTime(selectedDateToParam(date))}
@@ -133,18 +135,3 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
     </EuiDescribedFormGroup>
   );
 };
-
-const FixedDatePicker = euiStyled(
-  ({
-    className,
-    inputClassName,
-    ...datePickerProps
-  }: {
-    className?: string;
-    inputClassName?: string;
-  } & EuiDatePickerProps) => (
-    <EuiDatePicker {...datePickerProps} className={inputClassName} popperClassName={className} />
-  )
-)`
-  z-index: 3 !important;
-`;

@@ -5,15 +5,13 @@
  */
 
 import { resolve } from 'path';
-
+import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from './common';
-
 import { createDashboardModeRequestInterceptor } from './server';
 
-import { i18n } from '@kbn/i18n';
-
 // Copied largely from plugins/kibana/index.js. The dashboard viewer includes just the dashboard section of
-// the standard kibana plugin.  We don't want to include code for the other links (visualize, dev tools, etc)
+// the standard kibana plugin. We don't want to include code for the other links (visualize, dev tools, etc)
 // since it's view only, but we want the urls to be the same, so we are using largely the same setup.
 export function dashboardMode(kibana) {
   const kbnBaseUrl = '/app/kibana';
@@ -64,6 +62,7 @@ export function dashboardMode(kibana) {
               }
             ),
             icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
+            category: DEFAULT_APP_CATEGORIES.analyze,
           },
         ],
       },

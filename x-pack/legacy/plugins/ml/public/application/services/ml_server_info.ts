@@ -5,12 +5,14 @@
  */
 
 import { ml } from './ml_api_service';
+import { CategorizationAnalyzer } from '../../../common/types/categories';
 
 export interface MlServerDefaults {
   anomaly_detectors: {
     categorization_examples_limit?: number;
     model_memory_limit?: string;
     model_snapshot_retention_days?: number;
+    categorization_analyzer?: CategorizationAnalyzer;
   };
   datafeeds: { scroll_size?: number };
 }

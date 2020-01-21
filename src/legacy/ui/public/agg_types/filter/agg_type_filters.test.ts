@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../../../plugins/data/public';
 import { AggTypeFilters } from './agg_type_filters';
 import { AggType } from '..';
 import { AggConfig } from '../../vis';

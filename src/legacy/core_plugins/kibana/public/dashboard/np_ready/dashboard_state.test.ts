@@ -18,15 +18,17 @@
  */
 
 import './np_core.test.mocks';
+import { createBrowserHistory } from 'history';
 import { DashboardStateManager } from './dashboard_state_manager';
-import { getAppStateMock, getSavedDashboardMock } from '../__tests__';
-import { AppStateClass } from '../legacy_imports';
-import { DashboardAppState } from './types';
-import { TimeRange, TimefilterContract, InputTimeRange } from 'src/plugins/data/public';
+import { getSavedDashboardMock } from '../__tests__';
+import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 
-jest.mock('ui/state_management/state', () => ({
-  State: {},
+jest.mock('ui/agg_types', () => ({
+  aggTypes: {
+    metrics: [],
+    buckets: [],
+  },
 }));
 
 describe('DashboardState', function() {
@@ -46,9 +48,10 @@ describe('DashboardState', function() {
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
-      AppStateClass: getAppStateMock() as AppStateClass<DashboardAppState>,
+      useHashedUrl: false,
       hideWriteControls: false,
       kibanaVersion: '7.0.0',
+      history: createBrowserHistory(),
     });
   }
 

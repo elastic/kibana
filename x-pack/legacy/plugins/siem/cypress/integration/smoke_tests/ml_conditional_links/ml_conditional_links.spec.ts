@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   mlNetworkSingleIpNullKqlQuery,
   mlNetworkSingleIpKqlQuery,
@@ -24,10 +23,6 @@ import { loginAndWaitForPage } from '../../lib/util/helpers';
 import { KQL_INPUT } from '../../lib/url_state';
 
 describe('ml conditional links', () => {
-  afterEach(() => {
-    return logout();
-  });
-
   it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPage(mlNetworkSingleIpKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
@@ -104,7 +99,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPage(mlNetworkSingleIpNullKqlQuery);
     cy.url().should(
       'include',
-      '/app/siem#/network/ip/127.0.0.1?timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))'
+      '/app/siem#/network/ip/127.0.0.1/source?timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))'
     );
   });
 
@@ -112,7 +107,7 @@ describe('ml conditional links', () => {
     loginAndWaitForPage(mlNetworkSingleIpKqlQuery);
     cy.url().should(
       'include',
-      "/app/siem#/network/ip/127.0.0.1?query=(language:kuery,query:'(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)')&timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))"
+      "/app/siem#/network/ip/127.0.0.1/source?query=(language:kuery,query:'(process.name:%20%22conhost.exe%22%20or%20process.name:%20%22sc.exe%22)')&timerange=(global:(linkTo:!(timeline),timerange:(from:1566990000000,kind:absolute,to:1567000799999)),timeline:(linkTo:!(global),timerange:(from:1566990000000,kind:absolute,to:1567000799999)))"
     );
   });
 

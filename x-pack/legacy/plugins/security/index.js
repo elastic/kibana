@@ -28,17 +28,10 @@ export const security = kibana =>
         enabled: Joi.boolean().default(true),
         cookieName: HANDLED_IN_NEW_PLATFORM,
         encryptionKey: HANDLED_IN_NEW_PLATFORM,
-        session: Joi.object({
-          idleTimeout: HANDLED_IN_NEW_PLATFORM,
-          lifespan: HANDLED_IN_NEW_PLATFORM,
-        }).default(),
+        session: HANDLED_IN_NEW_PLATFORM,
         secureCookies: HANDLED_IN_NEW_PLATFORM,
         loginAssistanceMessage: HANDLED_IN_NEW_PLATFORM,
-        authorization: Joi.object({
-          legacyFallback: Joi.object({
-            enabled: Joi.boolean().default(true), // deprecated
-          }).default(),
-        }).default(),
+        authorization: HANDLED_IN_NEW_PLATFORM,
         audit: Joi.object({
           enabled: Joi.boolean().default(false),
         }).default(),
@@ -46,16 +39,7 @@ export const security = kibana =>
       }).default();
     },
 
-    deprecations: function({ rename, unused }) {
-      return [
-        unused('authorization.legacyFallback.enabled'),
-        rename('sessionTimeout', 'session.idleTimeout'),
-      ];
-    },
-
     uiExports: {
-      chromeNavControls: [],
-      managementSections: ['plugins/security/views/management'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       apps: [
         {
@@ -90,7 +74,6 @@ export const security = kibana =>
         'plugins/security/hacks/on_unauthorized_response',
         'plugins/security/hacks/register_account_management_app',
       ],
-      home: ['plugins/security/register_feature'],
       injectDefaultVars: server => {
         const securityPlugin = server.newPlatform.setup.plugins.security;
         if (!securityPlugin) {

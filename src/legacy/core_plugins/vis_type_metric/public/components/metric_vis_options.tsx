@@ -29,16 +29,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { VisOptionsProps } from '../legacy_imports';
 import {
+  ColorModes,
   ColorRanges,
   ColorSchemaOptions,
   SwitchOption,
   RangeOption,
   SetColorSchemaOptionsValue,
-} from '../../../kbn_vislib_vis_types/public/components';
-import { ColorModes } from '../../../kbn_vislib_vis_types/public/utils/collections';
+} from '../../../vis_type_vislib/public';
 import { MetricVisParam, VisParams } from '../types';
+import { SetColorRangeValue } from '../../../vis_type_vislib/public/components/common/color_ranges';
 
 function MetricVisOptions({
   stateParams,
@@ -135,7 +136,7 @@ function MetricVisOptions({
         <ColorRanges
           data-test-subj="metricColorRange"
           colorsRange={stateParams.metric.colorsRange}
-          setValue={setMetricValue}
+          setValue={setMetricValue as SetColorRangeValue}
           setTouched={setTouched}
           setValidity={setValidity}
         />

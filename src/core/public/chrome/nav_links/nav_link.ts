@@ -18,6 +18,7 @@
  */
 
 import { pick } from '../../../utils';
+import { AppCategory } from '../../';
 
 /**
  * @public
@@ -32,6 +33,11 @@ export interface ChromeNavLink {
    * The title of the application.
    */
   readonly title: string;
+
+  /**
+   * The category the app lives in
+   */
+  readonly category?: AppCategory;
 
   /**
    * The base route used to open the root of an application.
@@ -63,7 +69,7 @@ export interface ChromeNavLink {
   /** LEGACY FIELDS */
 
   /**
-   * A url base that legacy apps can set to match deep URLs to an applcation.
+   * A url base that legacy apps can set to match deep URLs to an application.
    *
    * @internalRemarks
    * This should be removed once legacy apps are gone.

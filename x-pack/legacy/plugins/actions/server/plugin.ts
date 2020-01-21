@@ -59,7 +59,7 @@ export class Plugin {
   private licenseState: LicenseState | null = null;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.logger = initializerContext.logger.get('plugins', 'actions');
     this.config$ = initializerContext.config.create();
     this.kibana$ = initializerContext.config.kibana$;
   }
@@ -69,7 +69,7 @@ export class Plugin {
     plugins: ActionsPluginsSetup
   ): Promise<PluginSetupContract> {
     const config = await this.config$.pipe(first()).toPromise();
-    this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+    this.adminClient = core.elasticsearch.adminClient;
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
     this.licenseState = new LicenseState(plugins.licensing.license$);
@@ -93,7 +93,7 @@ export class Plugin {
     const actionsConfigUtils = getActionsConfigurationUtilities(config as ActionsConfigType);
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       actionsConfigUtils,
     });
     this.taskRunnerFactory = taskRunnerFactory;
@@ -164,7 +164,7 @@ export class Plugin {
     });
 
     const executeFn = createExecuteFunction({
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       getScopedSavedObjectsClient: core.savedObjects.getScopedSavedObjectsClient,
       getBasePath,
     });

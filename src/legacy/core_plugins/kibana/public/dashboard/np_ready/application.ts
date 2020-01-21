@@ -31,7 +31,6 @@ import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   GlobalStateProvider,
   StateManagementConfigProvider,
-  AppStateProvider,
   PrivateProvider,
   EventsProvider,
   PersistedState,
@@ -86,11 +85,9 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
   };
 };
 
-const mainTemplate = (basePath: string) => `<div style="height: 100%">
+const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
   <base href="${basePath}" />
-  <div ng-view style="height: 100%;"></div>
-</div>
-`;
+</div>`;
 
 const moduleName = 'app/dashboard';
 
@@ -98,7 +95,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('style', 'height: 100%');
+  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
   // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
@@ -157,12 +154,6 @@ function createLocalStateModule() {
       'app/dashboard/Promise',
       'app/dashboard/PersistedState',
     ])
-    .factory('AppState', function(Private: any) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: any) {
-      return Private(AppStateProvider).getAppState;
-    })
     .service('globalState', function(Private: any) {
       return Private(GlobalStateProvider);
     });
