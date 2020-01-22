@@ -220,14 +220,16 @@ function mockConfig() {
 
 describe('AdvancedSettings', () => {
   it('should render specific setting if given setting key', async () => {
-    const component = shallow(<AdvancedSettings query="test:string:setting" enableSaving={true} />);
+    const component = shallow(
+      <AdvancedSettings queryText="test:string:setting" enableSaving={true} />
+    );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render read-only when saving is disabled', async () => {
     const component = shallow(
-      <AdvancedSettings query="test:string:setting" enableSaving={false} />
+      <AdvancedSettings queryText="test:string:setting" enableSaving={false} />
     );
 
     expect(component).toMatchSnapshot();
