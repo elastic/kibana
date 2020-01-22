@@ -39,7 +39,8 @@ export async function getTraceErrorsPerTransaction(
           should: [
             { bool: { must_not: [{ exists: { field: ERROR_LOG_LEVEL } }] } },
             { terms: { [ERROR_LOG_LEVEL]: includedLogLevels } }
-          ]
+          ],
+          minimum_should_match: 1
         }
       },
       aggs: {

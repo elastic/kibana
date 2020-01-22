@@ -5,6 +5,7 @@
  */
 
 import {
+  ERROR_LOG_LEVEL,
   PROCESSOR_EVENT,
   TRACE_ID,
   PARENT_ID,
@@ -16,6 +17,8 @@ import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+
+const excludedLogLevels = ['debug', 'info', 'warning'];
 
 export async function getTraceItems(
   traceId: string,
@@ -38,9 +41,8 @@ export async function getTraceItems(
             { terms: { [PROCESSOR_EVENT]: ['span', 'transaction', 'error'] } },
             { range: rangeFilter(start, end) }
           ],
-          should: {
-            exists: { field: PARENT_ID }
-          }
+          should: { exists: { field: PARENT_ID } },
+          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } }
         }
       },
       sort: [
