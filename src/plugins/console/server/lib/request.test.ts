@@ -18,7 +18,7 @@
  */
 import http, { ClientRequest } from 'http';
 import * as sinon from 'sinon';
-import { sendRequest } from './request';
+import { proxyRequest } from './request';
 import { URL } from 'url';
 import { fail } from 'assert';
 
@@ -46,7 +46,7 @@ describe(`Console's send request`, () => {
 
   it('correctly implements timeout and abort mechanism', async () => {
     try {
-      await sendRequest({
+      await proxyRequest({
         agent: null as any,
         headers: {},
         method: 'get',

@@ -16,16 +16,49 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { first } from 'rxjs/operators';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { ProxyConfigCollection } from './lib';
+import { ConfigType } from '.';
 
-import { Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { readLegacyEsConfig } from '../../../legacy/core_plugins/console_legacy';
 
-export class ConsoleServerPlugin implements Plugin<void, void> {
+import { registerProxyRoute } from './routes/api/console/proxy';
+import { registerSpecDefinitionsRoute } from './routes/api/console/spec_definitions';
+
+export class ConsoleServerPlugin implements Plugin {
   log: Logger;
 
-  constructor(ctx: PluginInitializerContext) {
-    this.log = ctx.logger.get();
+  constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
+    this.log = this.ctx.logger.get();
   }
-  setup() {}
-  start() {}
+
+  async setup({ http }: CoreSetup) {
+    const config = await this.ctx.config
+      .create()
+      .pipe(first())
+      .toPromise();
+
+    const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+
+    const router = http.createRouter();
+
+    registerProxyRoute({
+      proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
+      readLegacyESConfig: () => {
+        const legacyConfig = readLegacyEsConfig();
+        return {
+          hosts: legacyConfig.hosts,
+          requestHeadersWhitelist: legacyConfig.requestHeadersWhitelist,
+          customHeaders: legacyConfig.customHeaders,
+        };
+      },
+      pathFilters: proxyPathFilters,
+      router,
+    });
+
+    registerSpecDefinitionsRoute({ router });
+  }
+  async start() {}
   stop() {}
 }

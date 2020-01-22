@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import { IRouter, KibanaRequest } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 import * as url from 'url';
 import { IncomingMessage } from 'http';
 import Boom from 'boom';
 import { trimLeft, trimRight } from 'lodash';
-import { sendRequest } from './request';
+import { ProxyConfigCollection, proxyRequest } from '../../../../lib';
 
 function toURL(base: string, path: string) {
   const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
@@ -35,7 +36,9 @@ function toURL(base: string, path: string) {
   return urlResult;
 }
 
-function getProxyHeaders(req: any) {
+function getRequestConfig() {}
+
+function getProxyHeaders(req: KibanaRequest) {
   const headers = Object.create(null);
 
   // Scope this proto-unsafe functionality to where it is being used.
@@ -58,54 +61,58 @@ function getProxyHeaders(req: any) {
   return headers;
 }
 
-export const createProxyRoute = ({
-  hosts,
+export const registerProxyRoute = ({
+  router,
+  readLegacyESConfig,
   pathFilters = [/.*/],
-  getConfigForReq = () => ({}),
 }: {
-  hosts: string[];
+  router: IRouter;
+  readLegacyESConfig: () => {
+    hosts: string[];
+    requestHeadersWhitelist: string[];
+    customHeaders: Record<string, any>;
+  };
   pathFilters: RegExp[];
-  getConfigForReq: (...args: any[]) => any;
-}) => ({
-  path: '/api/console/proxy',
-  method: 'POST',
-  config: {
-    tags: ['access:console'],
-    payload: {
-      output: 'stream',
-      parse: false,
-    },
-    validate: {
-      payload: true,
-      query: Joi.object()
-        .keys({
-          method: Joi.string()
-            .valid('HEAD', 'GET', 'POST', 'PUT', 'DELETE')
-            .insensitive()
-            .required(),
-          path: Joi.string().required(),
-        })
-        .unknown(true),
-    },
-
-    pre: [
-      function filterPath(req: any) {
-        const { path } = req.query;
-
-        if (pathFilters.some(re => re.test(path))) {
-          return null;
-        }
-
-        const err = Boom.forbidden();
-        err.output.payload = `Error connecting to '${path}':\n\nUnable to send requests to that path.` as any;
-        err.output.headers['content-type'] = 'text/plain';
-        throw err;
+  proxyConfigCollection: ProxyConfigCollection;
+}) => {
+  router.post(
+    {
+      path: '/api/console/proxy',
+      options: {
+        tags: ['access:console'],
+        body: {
+          output: 'stream',
+          parse: false,
+        },
       },
-    ],
-
-    handler: async (req: any, h: any) => {
-      const { payload, query } = req;
+      validate: {
+        query: schema.object({
+          method: schema.oneOf([
+            schema.literal('HEAD'),
+            schema.literal('GET'),
+            schema.literal('POST'),
+            schema.literal('PUT'),
+            schema.literal('DELETE'),
+          ]),
+          path: schema.string(),
+        }),
+        body: schema.stream(),
+      },
+    },
+    async (ctx, request, response) => {
+      const { body, query } = request;
       const { path, method } = query;
+
+      if (!pathFilters.some(re => re.test(path))) {
+        return response.forbidden({
+          body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        });
+      }
+
+      const { hosts } = readLegacyESConfig();
 
       let esIncomingMessage: IncomingMessage;
 
@@ -116,24 +123,24 @@ export const createProxyRoute = ({
 
           // Because this can technically be provided by a settings-defined proxy config, we need to
           // preserve these property names to maintain BWC.
-          const { timeout, agent, headers, rejectUnauthorized } = getConfigForReq(
-            req,
-            uri.toString()
-          );
+          // const { timeout, agent, headers, rejectUnauthorized } = getConfigForReq(
+          //   request,
+          //   uri.toString()
+          // );
 
           const requestHeaders = {
             ...headers,
-            ...getProxyHeaders(req),
+            ...getProxyHeaders(request),
           };
 
-          esIncomingMessage = await sendRequest({
-            method,
+          esIncomingMessage = await proxyRequest({
+            method: method.toLowerCase() as any,
             headers: requestHeaders,
             uri,
-            timeout,
-            payload,
-            rejectUnauthorized,
-            agent,
+            // timeout,
+            payload: body,
+            // rejectUnauthorized,
+            // agent,
           });
 
           break;
@@ -155,17 +162,23 @@ export const createProxyRoute = ({
       } = esIncomingMessage!;
 
       if (method.toUpperCase() !== 'HEAD') {
-        return h
-          .response(esIncomingMessage!)
-          .code(statusCode)
-          .header('warning', warning!);
-      } else {
-        return h
-          .response(`${statusCode} - ${statusMessage}`)
-          .code(statusCode)
-          .type('text/plain')
-          .header('warning', warning!);
+        return response.custom({
+          statusCode: statusCode!,
+          body: esIncomingMessage!,
+          headers: {
+            warning: warning || '',
+          },
+        });
       }
-    },
-  },
-});
+
+      return response.custom({
+        statusCode: statusCode!,
+        body: `${statusCode} - ${statusMessage}`,
+        headers: {
+          warning: warning || '',
+          'Content-Type': 'text/plain',
+        },
+      });
+    }
+  );
+};

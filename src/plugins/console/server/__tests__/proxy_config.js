@@ -24,7 +24,7 @@ import sinon from 'sinon';
 import https, { Agent as HttpsAgent } from 'https';
 import { parse as parseUrl } from 'url';
 
-import { ProxyConfig } from '../proxy_config';
+import { ProxyConfig } from '../lib/proxy_config';
 
 const matchGoogle = {
   protocol: 'https',

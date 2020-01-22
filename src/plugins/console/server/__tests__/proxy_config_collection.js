@@ -24,7 +24,7 @@ import sinon from 'sinon';
 import fs from 'fs';
 import { Agent as HttpsAgent } from 'https';
 
-import { ProxyConfigCollection } from '../proxy_config_collection';
+import { ProxyConfigCollection } from '../lib/proxy_config_collection';
 
 describe('ProxyConfigCollection', function() {
   beforeEach(function() {

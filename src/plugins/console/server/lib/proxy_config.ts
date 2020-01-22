@@ -19,12 +19,27 @@
 
 import { values } from 'lodash';
 import { format as formatUrl } from 'url';
-import { Agent as HttpsAgent } from 'https';
+import { Agent as HttpsAgent, AgentOptions } from 'https';
 
 import { WildcardMatcher } from './wildcard_matcher';
 
 export class ProxyConfig {
-  constructor(config) {
+  // @ts-ignore
+  private id: string;
+  private matchers: {
+    protocol: WildcardMatcher;
+    host: WildcardMatcher;
+    port: WildcardMatcher;
+    path: WildcardMatcher;
+  };
+
+  private readonly timeout: number;
+
+  private readonly sslAgent?: HttpsAgent;
+
+  private verifySsl: any;
+
+  constructor(config: { match: any; timeout: number }) {
     config = {
       ...config,
     };
@@ -57,11 +72,11 @@ export class ProxyConfig {
     this.sslAgent = this._makeSslAgent(config);
   }
 
-  _makeSslAgent(config) {
+  _makeSslAgent(config: any) {
     const ssl = config.ssl || {};
     this.verifySsl = ssl.verify;
 
-    const sslAgentOpts = {
+    const sslAgentOpts: AgentOptions = {
       ca: ssl.ca,
       cert: ssl.cert,
       key: ssl.key,
@@ -73,7 +88,12 @@ export class ProxyConfig {
     }
   }
 
-  getForParsedUri({ protocol, hostname, port, pathname }) {
+  getForParsedUri({
+    protocol,
+    hostname,
+    port,
+    pathname,
+  }: Record<'protocol' | 'hostname' | 'port' | 'pathname', string>) {
     let match = this.matchers.protocol.match(protocol.slice(0, -1));
     match = match && this.matchers.host.match(hostname);
     match = match && this.matchers.port.match(port);

@@ -17,6 +17,8 @@
  * under the License.
  */
 
-export { ProxyConfigCollection } from './proxy_config_collection';
-export { getElasticsearchProxyConfig } from './elasticsearch_proxy_config';
-export { createProxyRoute } from './proxy_route';
+export declare function addProcessorDefinition(...args: any[]): any;
+
+export declare function resolveApi(senseVersion: string, apis: string[]): object;
+
+export declare function addExtensionSpecFilePath(...args: any[]): any;

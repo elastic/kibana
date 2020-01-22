@@ -22,9 +22,9 @@ import { request } from 'http';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import { Server } from 'hapi';
-import * as requestModule from '../../request';
+import * as requestModule from '../../lib/request';
 
-import { createProxyRoute } from '../../';
+import { createProxyRoute } from '../../../../../legacy/core_plugins/console_legacy/server';
 
 import { createResponseStub } from './stubs';
 

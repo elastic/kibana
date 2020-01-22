@@ -18,7 +18,7 @@
  */
 
 /* eslint-env mocha */
-import { WildcardMatcher } from '../wildcard_matcher';
+import { WildcardMatcher } from '../lib/wildcard_matcher';
 
 function should(candidate, ...constructorArgs) {
   if (!new WildcardMatcher(...constructorArgs).match(candidate)) {

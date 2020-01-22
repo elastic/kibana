@@ -17,6 +17,21 @@
  * under the License.
  */
 
-export interface PluginServerConfig {
-  elasticsearchUrl: string;
+import { defaultsDeep } from 'lodash';
+import { parse as parseUrl } from 'url';
+
+import { ProxyConfig } from './proxy_config';
+
+export class ProxyConfigCollection {
+  private configs: ProxyConfig[];
+
+  constructor(configs: Array<{ match: any; timeout: number }> = []) {
+    this.configs = configs.map(settings => new ProxyConfig(settings));
+  }
+
+  configForUri(uri: string) {
+    const parsedUri = parseUrl(uri);
+    const settings = this.configs.map(config => config.getForParsedUri(parsedUri as any));
+    return defaultsDeep({}, ...settings);
+  }
 }

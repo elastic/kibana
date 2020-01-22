@@ -17,21 +17,29 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { Minimatch, IMinimatch } from 'minimatch';
 
-const KNOWN_APIS = ['es_6_0'];
+export class WildcardMatcher {
+  pattern: string;
+  matcher: IMinimatch;
 
-export function resolveApi(senseVersion, apis, h) {
-  const result = {};
-  _.each(apis, function(name) {
-    {
-      if (KNOWN_APIS.includes(name)) {
-        // for now we ignore sense_version. might add it in the api name later
-        const api = require('./' + name); // eslint-disable-line import/no-dynamic-require
-        result[name] = api.asJson();
-      }
+  constructor(private readonly wildcardPattern: string, private readonly emptyVal?: string) {
+    this.pattern = String(this.wildcardPattern || '*');
+    this.matcher = new Minimatch(this.pattern, {
+      noglobstar: true,
+      dot: true,
+      nocase: true,
+      matchBase: true,
+      nocomment: true,
+    });
+  }
+
+  match(candidate: string) {
+    const empty = !candidate || candidate === this.emptyVal;
+    if (empty && this.pattern === '*') {
+      return true;
     }
-  });
 
-  return h.response(result).type('application/json');
+    return this.matcher.match(candidate || '');
+  }
 }

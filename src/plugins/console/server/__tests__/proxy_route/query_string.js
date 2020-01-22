@@ -18,11 +18,11 @@
  */
 
 import sinon from 'sinon';
-import * as requestModule from '../../request';
+import * as requestModule from '../../lib/request';
 import expect from '@kbn/expect';
 import { Server } from 'hapi';
 
-import { createProxyRoute } from '../../';
+import { createProxyRoute } from '../../../../../legacy/core_plugins/console_legacy/server';
 
 import { createResponseStub } from './stubs';
 

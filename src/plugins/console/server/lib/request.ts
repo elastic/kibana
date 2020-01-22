@@ -37,7 +37,7 @@ interface Args {
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
 // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
 // diverged too much from current behaviour.
-export const sendRequest = ({
+export const proxyRequest = ({
   method,
   headers,
   agent,

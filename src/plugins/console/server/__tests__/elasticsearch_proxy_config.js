@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { getElasticsearchProxyConfig } from '../elasticsearch_proxy_config';
+import { getElasticsearchProxyConfig } from '../lib/elasticsearch_proxy_config';
 import https from 'https';
 import http from 'http';
 

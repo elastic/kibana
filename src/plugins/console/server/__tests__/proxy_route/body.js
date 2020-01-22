@@ -21,8 +21,8 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import { Server } from 'hapi';
 import { createResponseStub } from './stubs';
-import { createProxyRoute } from '../../';
-import * as requestModule from '../../request';
+import { createProxyRoute } from '../../../../../legacy/core_plugins/console_legacy/server';
+import * as requestModule from '../../lib/request';
 
 describe('Console Proxy Route', () => {
   const sandbox = sinon.createSandbox();

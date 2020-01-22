@@ -24,8 +24,6 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 
 import { FeatureCatalogueCategory } from '../../home/public';
 
-import { PluginConfig } from '../common/types';
-
 import { AppSetupUIPluginDependencies } from './types';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
@@ -58,7 +56,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       enableRouting: false,
       mount: async ({ core: { docLinks, i18n: i18nDep } }, { element }) => {
         const { boot } = await import('./application');
-        const { elasticsearchUrl } = this.ctx.config.get<PluginConfig>();
+        const { elasticsearchUrl } = this.ctx.config.get<any>();
         render(
           boot({
             docLinkVersion: docLinks.DOC_LINK_VERSION,
