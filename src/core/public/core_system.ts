@@ -222,13 +222,6 @@ export class CoreSystem {
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
 
-      // ensure the rootDomElement is empty
-      this.rootDomElement.textContent = '';
-      this.rootDomElement.classList.add('coreSystemRootDomElement');
-      this.rootDomElement.appendChild(coreUiTargetDomElement);
-      this.rootDomElement.appendChild(notificationsTargetDomElement);
-      this.rootDomElement.appendChild(overlayTargetDomElement);
-
       const overlays = this.overlay.start({
         i18n,
         targetDomElement: overlayTargetDomElement,
@@ -277,6 +270,14 @@ export class CoreSystem {
       };
 
       const plugins = await this.plugins.start(core);
+
+      // ensure the rootDomElement is empty
+      this.rootDomElement.textContent = '';
+      this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(coreUiTargetDomElement);
+      this.rootDomElement.appendChild(notificationsTargetDomElement);
+      this.rootDomElement.appendChild(overlayTargetDomElement);
+
       const rendering = this.rendering.start({
         application,
         chrome,
