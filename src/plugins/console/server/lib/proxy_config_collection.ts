@@ -29,7 +29,11 @@ export class ProxyConfigCollection {
     this.configs = configs.map(settings => new ProxyConfig(settings));
   }
 
-  configForUri(uri: string) {
+  hasConfig() {
+    return Boolean(this.configs.length);
+  }
+
+  configForUri(uri: string): object {
     const parsedUri = parseUrl(uri);
     const settings = this.configs.map(config => config.getForParsedUri(parsedUri as any));
     return defaultsDeep({}, ...settings);

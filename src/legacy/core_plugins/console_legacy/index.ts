@@ -32,6 +32,24 @@ export const readLegacyEsConfig = () => {
   return _legacyEsConfig;
 };
 
+import { isPlainObject } from 'lodash';
+
+export function setHeaders(originalHeaders, newHeaders) {
+  if (!isPlainObject(originalHeaders)) {
+    throw new Error(
+      `Expected originalHeaders to be an object, but ${typeof originalHeaders} given`
+    );
+  }
+  if (!isPlainObject(newHeaders)) {
+    throw new Error(`Expected newHeaders to be an object, but ${typeof newHeaders} given`);
+  }
+
+  return {
+    ...originalHeaders,
+    ...newHeaders,
+  };
+}
+
 function filterHeaders(originalHeaders: any, headersToKeep: any) {
   const normalizeHeader = function(header: any) {
     if (!header) {

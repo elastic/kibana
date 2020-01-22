@@ -21,3 +21,4 @@ export { ProxyConfig } from './proxy_config';
 export { ProxyConfigCollection } from './proxy_config_collection';
 export { proxyRequest } from './request';
 export { getElasticsearchProxyConfig } from './elasticsearch_proxy_config';
+export { setHeaders } from './set_headers';

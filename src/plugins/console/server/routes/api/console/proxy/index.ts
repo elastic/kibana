@@ -17,13 +17,25 @@
  * under the License.
  */
 
-import { IRouter, KibanaRequest } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
+import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
-import { IncomingMessage } from 'http';
-import Boom from 'boom';
-import { trimLeft, trimRight } from 'lodash';
-import { ProxyConfigCollection, proxyRequest } from '../../../../lib';
+import { pick, trimLeft, trimRight } from 'lodash';
+
+import { IRouter, KibanaRequest, Logger } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
+
+// TODO: find a better way to get information from the request like remoteAddress and remotePort
+// for forwarding.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ensureRawRequest } from '../../../../../../../core/server/http/router';
+
+import { ESConfigForProxy } from '../../../../types';
+import {
+  ProxyConfigCollection,
+  proxyRequest,
+  setHeaders,
+  getElasticsearchProxyConfig,
+} from '../../../../lib';
 
 function toURL(base: string, path: string) {
   const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
@@ -36,7 +48,42 @@ function toURL(base: string, path: string) {
   return urlResult;
 }
 
-function getRequestConfig() {}
+function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
+  const normalizeHeader = function(header: any) {
+    if (!header) {
+      return '';
+    }
+    header = header.toString();
+    return header.trim().toLowerCase();
+  };
+
+  // Normalize list of headers we want to allow in upstream request
+  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
+
+  return pick(originalHeaders, headersToKeepNormalized);
+}
+
+function getRequestConfig(
+  headers: object,
+  esConfig: ESConfigForProxy,
+  proxyConfigCollection: ProxyConfigCollection,
+  uri: string
+): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
+  const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
+  const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
+
+  if (proxyConfigCollection.hasConfig()) {
+    return {
+      ...proxyConfigCollection.configForUri(uri),
+      headers: newHeaders,
+    } as any;
+  }
+
+  return {
+    ...getElasticsearchProxyConfig(esConfig),
+    headers: newHeaders,
+  };
+}
 
 function getProxyHeaders(req: KibanaRequest) {
   const headers = Object.create(null);
@@ -46,12 +93,14 @@ function getProxyHeaders(req: KibanaRequest) {
     obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
   }
 
-  if (req.info.remotePort && req.info.remoteAddress) {
+  const _req = ensureRawRequest(req);
+
+  if (_req.info.remotePort && _req.info.remoteAddress) {
     // see https://git.io/vytQ7
-    extendCommaList(headers, 'x-forwarded-for', req.info.remoteAddress);
-    extendCommaList(headers, 'x-forwarded-port', req.info.remotePort);
-    extendCommaList(headers, 'x-forwarded-proto', req.server.info.protocol);
-    extendCommaList(headers, 'x-forwarded-host', req.info.host);
+    extendCommaList(headers, 'x-forwarded-for', _req.info.remoteAddress);
+    extendCommaList(headers, 'x-forwarded-port', _req.info.remotePort);
+    extendCommaList(headers, 'x-forwarded-proto', _req.server.info.protocol);
+    extendCommaList(headers, 'x-forwarded-host', _req.info.host);
   }
 
   const contentType = req.headers['content-type'];
@@ -62,16 +111,15 @@ function getProxyHeaders(req: KibanaRequest) {
 }
 
 export const registerProxyRoute = ({
+  log,
   router,
   readLegacyESConfig,
   pathFilters = [/.*/],
+  proxyConfigCollection,
 }: {
+  log: Logger;
   router: IRouter;
-  readLegacyESConfig: () => {
-    hosts: string[];
-    requestHeadersWhitelist: string[];
-    customHeaders: Record<string, any>;
-  };
+  readLegacyESConfig: () => ESConfigForProxy;
   pathFilters: RegExp[];
   proxyConfigCollection: ProxyConfigCollection;
 }) => {
@@ -112,8 +160,8 @@ export const registerProxyRoute = ({
         });
       }
 
-      const { hosts } = readLegacyESConfig();
-
+      const legacyConfig = readLegacyESConfig();
+      const { hosts } = legacyConfig;
       let esIncomingMessage: IncomingMessage;
 
       for (let idx = 0; idx < hosts.length; ++idx) {
@@ -123,10 +171,12 @@ export const registerProxyRoute = ({
 
           // Because this can technically be provided by a settings-defined proxy config, we need to
           // preserve these property names to maintain BWC.
-          // const { timeout, agent, headers, rejectUnauthorized } = getConfigForReq(
-          //   request,
-          //   uri.toString()
-          // );
+          const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
+            request.headers,
+            legacyConfig,
+            proxyConfigCollection,
+            uri.toString()
+          );
 
           const requestHeaders = {
             ...headers,
@@ -137,19 +187,24 @@ export const registerProxyRoute = ({
             method: method.toLowerCase() as any,
             headers: requestHeaders,
             uri,
-            // timeout,
+            timeout,
             payload: body,
-            // rejectUnauthorized,
-            // agent,
+            rejectUnauthorized,
+            agent,
           });
 
           break;
         } catch (e) {
+          log.error(e);
           if (e.code !== 'ECONNREFUSED') {
-            throw Boom.boomify(e);
+            return response.internalError(e);
           }
           if (idx === hosts.length - 1) {
-            throw Boom.badGateway('Could not reach any configured nodes.');
+            log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
+            return response.customError({
+              statusCode: 502,
+              body: e,
+            });
           }
           // Otherwise, try the next host...
         }

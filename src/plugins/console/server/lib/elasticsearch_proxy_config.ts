@@ -21,6 +21,7 @@ import _ from 'lodash';
 import http from 'http';
 import https from 'https';
 import url from 'url';
+import { Duration } from 'moment';
 
 const createAgent = (legacyConfig: any) => {
   const target = url.parse(_.head(legacyConfig.hosts));
@@ -58,7 +59,7 @@ const createAgent = (legacyConfig: any) => {
   return new https.Agent(agentOptions);
 };
 
-export const getElasticsearchProxyConfig = (legacyConfig: any) => {
+export const getElasticsearchProxyConfig = (legacyConfig: { requestTimeout: Duration }) => {
   return {
     timeout: legacyConfig.requestTimeout.asMilliseconds(),
     agent: createAgent(legacyConfig),

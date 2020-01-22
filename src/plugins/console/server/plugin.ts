@@ -25,6 +25,7 @@ import { readLegacyEsConfig } from '../../../legacy/core_plugins/console_legacy'
 
 import { registerProxyRoute } from './routes/api/console/proxy';
 import { registerSpecDefinitionsRoute } from './routes/api/console/spec_definitions';
+import { ESConfigForProxy } from './types';
 
 export class ConsoleServerPlugin implements Plugin {
   log: Logger;
@@ -39,15 +40,19 @@ export class ConsoleServerPlugin implements Plugin {
       .pipe(first())
       .toPromise();
 
+    const { elasticsearch } = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
+
     const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
 
     const router = http.createRouter();
 
     registerProxyRoute({
+      log: this.log,
       proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
-      readLegacyESConfig: () => {
+      readLegacyESConfig: (): ESConfigForProxy => {
         const legacyConfig = readLegacyEsConfig();
         return {
+          ...elasticsearch,
           hosts: legacyConfig.hosts,
           requestHeadersWhitelist: legacyConfig.requestHeadersWhitelist,
           customHeaders: legacyConfig.customHeaders,

@@ -18,7 +18,7 @@
  */
 
 import expect from '@kbn/expect';
-import { setHeaders } from '../../../../legacy/core_plugins/console_legacy/server/set_headers';
+import { setHeaders } from '../lib';
 
 describe('#set_headers', function() {
   it('throws if not given an object as the first argument', function() {
