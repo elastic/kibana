@@ -42,7 +42,7 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  APPLY_FILTER_TRIGGER,
+  VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
@@ -290,7 +290,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
-        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : APPLY_FILTER_TRIGGER;
+        const eventName = event.name === 'brush' ? SELECT_RANGE_TRIGGER : VALUE_CLICK_TRIGGER;
 
         npStart.plugins.uiActions.executeTriggerActions(eventName, {
           embeddable: this,

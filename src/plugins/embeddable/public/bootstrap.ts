@@ -24,6 +24,7 @@ import {
   createFilterAction,
   PANEL_BADGE_TRIGGER,
   SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
 } from './lib';
 
 /**
@@ -57,6 +58,12 @@ export const bootstrap = (uiActions: IUiActionsSetup) => {
     description: 'Applies a range filter',
     actionIds: [],
   };
+  const valueClickTrigger = {
+    id: VALUE_CLICK_TRIGGER,
+    title: 'Value clicked',
+    description: 'Value was clicked',
+    actionIds: [],
+  };
   const actionApplyFilter = createFilterAction();
 
   uiActions.registerTrigger(triggerContext);
@@ -64,5 +71,6 @@ export const bootstrap = (uiActions: IUiActionsSetup) => {
   uiActions.registerAction(actionApplyFilter);
   uiActions.registerTrigger(triggerBadge);
   uiActions.registerTrigger(selectRangeTrigger);
+  uiActions.registerTrigger(valueClickTrigger);
   // uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
 };

@@ -22,48 +22,54 @@ import { toMountPoint } from '../../../kibana_react/public';
 import { IAction, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
+// @ts-ignore
+import { createFiltersFromEvent } from './filters/create_filters_from_event';
 import {
   esFilters,
   FilterManager,
   TimefilterContract,
   changeTimeFilter,
   extractTimeFilter,
+  mapAndFlattenFilters,
 } from '..';
 
-export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
+export const VALUE_CLICK_ACTION = 'VALUE_CLICK_ACTION';
 
 interface ActionContext {
-  filters: esFilters.Filter[];
-  timeFieldName?: string;
+  data: any;
+  timeFieldName: string;
 }
 
 async function isCompatible(context: ActionContext) {
-  return context.filters !== undefined;
+  try {
+    const filters: esFilters.Filter[] = createFiltersFromEvent(context.data) || [];
+    return filters.length > 0;
+  } catch {
+    return false;
+  }
 }
 
-export function createFilterAction(
+export function valueClickAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
 ): IAction<ActionContext> {
   return createAction<ActionContext>({
-    type: GLOBAL_APPLY_FILTER_ACTION,
-    id: GLOBAL_APPLY_FILTER_ACTION,
+    type: VALUE_CLICK_ACTION,
+    id: VALUE_CLICK_ACTION,
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',
       });
     },
     isCompatible,
-    execute: async ({ filters, timeFieldName }: ActionContext) => {
-      if (!filters) {
-        throw new Error('Applying a filter requires a filter');
-      }
-
-      if (!(await isCompatible({ filters }))) {
+    execute: async ({ timeFieldName, data }: ActionContext) => {
+      if (!(await isCompatible({ timeFieldName, data }))) {
         throw new IncompatibleActionError();
       }
 
-      let selectedFilters: esFilters.Filter[] = filters;
+      const filters: esFilters.Filter[] = createFiltersFromEvent(data) || [];
+
+      let selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
 
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(

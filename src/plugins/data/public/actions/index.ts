@@ -19,3 +19,4 @@
 
 export { GLOBAL_APPLY_FILTER_ACTION, createFilterAction } from './apply_filter_action';
 export { SELECT_RANGE_ACTION, selectRangeAction } from './select_range_action';
+export { VALUE_CLICK_ACTION, valueClickAction } from './value_click_action';
