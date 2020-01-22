@@ -12889,7 +12889,6 @@
     "xpack.watcher.deleteSelectedWatchesConfirmModal.deleteButtonLabel": "删除 {numWatchesToDelete, plural, one {个监视} other {# 个监视}} ",
     "xpack.watcher.deleteSelectedWatchesConfirmModal.descriptionText": "无法恢复{numWatchesToDelete, plural, one {已删除监视} other {已删除监视}}。",
     "xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage": "JSON 参数必须包含“{missingProperty}”属性",
-    "xpack.watcher.models.actionStatus.notDetermineActionStatusBadImplementationMessage": "无法确定操作状态；操作 = {actionStatusJson}",
     "xpack.watcher.models.baseAction.selectMessageText": "执行操作。",
     "xpack.watcher.models.baseAction.simulateButtonLabel": "立即模拟此操作",
     "xpack.watcher.models.baseAction.simulateMessage": "已成功模拟操作 {id}",
