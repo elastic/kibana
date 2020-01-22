@@ -741,6 +741,14 @@
         ],
       },
       {
+        groupSlug: 'numeral',
+        groupName: 'numeral related packages',
+        packageNames: [
+          'numeral',
+          '@types/numeral',
+        ],
+      },
+      {
         groupSlug: 'mime',
         groupName: 'mime related packages',
         packageNames: [

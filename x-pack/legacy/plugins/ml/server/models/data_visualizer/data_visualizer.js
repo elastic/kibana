@@ -261,7 +261,7 @@ export class DataVisualizer {
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
       aggs[`${safeFieldName}_count`] = {
-        value_count: { field },
+        filter: { exists: { field } },
       };
       aggs[`${safeFieldName}_cardinality`] = {
         cardinality: { field },
@@ -296,7 +296,7 @@ export class DataVisualizer {
       samplerShardSize > 0 ? _.get(aggregations, ['sample', 'doc_count'], 0) : totalCount;
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
-      const count = _.get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'value'], 0);
+      const count = _.get(aggregations, [...aggsPath, `${safeFieldName}_count`, 'doc_count'], 0);
       if (count > 0) {
         const cardinality = _.get(
           aggregations,
@@ -433,7 +433,12 @@ export class DataVisualizer {
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_field_stats`] = {
-        stats: { field: field.fieldName },
+        filter: { exists: { field: field.fieldName } },
+        aggs: {
+          actual_stats: {
+            stats: { field: field.fieldName },
+          },
+        },
       };
       aggs[`${safeFieldName}_percentiles`] = {
         percentiles: {
@@ -484,10 +489,19 @@ export class DataVisualizer {
     const batchStats = [];
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
-      const fieldStatsResp = _.get(aggregations, [...aggsPath, `${safeFieldName}_field_stats`], {});
+      const docCount = _.get(
+        aggregations,
+        [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
+        0
+      );
+      const fieldStatsResp = _.get(
+        aggregations,
+        [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
+        {}
+      );
       const stats = {
         fieldName: field.fieldName,
-        count: _.get(fieldStatsResp, 'count', 0),
+        count: docCount,
         min: _.get(fieldStatsResp, 'min', 0),
         max: _.get(fieldStatsResp, 'max', 0),
         avg: _.get(fieldStatsResp, 'avg', 0),
@@ -632,7 +646,12 @@ export class DataVisualizer {
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_field_stats`] = {
-        stats: { field: field.fieldName },
+        filter: { exists: { field: field.fieldName } },
+        aggs: {
+          actual_stats: {
+            stats: { field: field.fieldName },
+          },
+        },
       };
     });
 
@@ -651,10 +670,19 @@ export class DataVisualizer {
     const batchStats = [];
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
-      const fieldStatsResp = _.get(aggregations, [...aggsPath, `${safeFieldName}_field_stats`], {});
+      const docCount = _.get(
+        aggregations,
+        [...aggsPath, `${safeFieldName}_field_stats`, 'doc_count'],
+        0
+      );
+      const fieldStatsResp = _.get(
+        aggregations,
+        [...aggsPath, `${safeFieldName}_field_stats`, 'actual_stats'],
+        {}
+      );
       batchStats.push({
         fieldName: field.fieldName,
-        count: _.get(fieldStatsResp, 'count', 0),
+        count: docCount,
         earliest: _.get(fieldStatsResp, 'min', 0),
         latest: _.get(fieldStatsResp, 'max', 0),
       });
@@ -680,7 +708,7 @@ export class DataVisualizer {
     fields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       aggs[`${safeFieldName}_value_count`] = {
-        value_count: { field: field.fieldName },
+        filter: { exists: { field: field.fieldName } },
       };
       aggs[`${safeFieldName}_values`] = {
         terms: {
@@ -707,7 +735,7 @@ export class DataVisualizer {
       const safeFieldName = getSafeAggregationName(field.fieldName, i);
       const stats = {
         fieldName: field.fieldName,
-        count: _.get(aggregations, [...aggsPath, `${safeFieldName}_value_count`, 'value'], 0),
+        count: _.get(aggregations, [...aggsPath, `${safeFieldName}_value_count`, 'doc_count'], 0),
         trueCount: 0,
         falseCount: 0,
       };

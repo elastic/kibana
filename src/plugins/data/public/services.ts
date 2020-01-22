@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { NotificationsStart, HttpStart } from 'src/core/public';
-import { CoreStart } from 'kibana/public';
+import { NotificationsStart } from 'src/core/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
 import { FieldFormatsStart } from '.';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternsContract } from './index_patterns';
@@ -28,11 +28,16 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
   'Notifications'
 );
 
+export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
+  'UiSettings'
+);
+
+export const [getHttp, setHttp] = createGetterSetter<CoreStart['http']>('Http');
+
 export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
   'FieldFormats'
 );
 
-export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
 export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');
 
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
@@ -42,3 +47,11 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
 >('Query');
+
+export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
+  CoreSetup['injectedMetadata']
+>('InjectedMetadata');
+
+export const [getSearchService, setSearchService] = createGetterSetter<
+  DataPublicPluginStart['search']
+>('Search');
