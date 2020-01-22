@@ -32,7 +32,7 @@ export type Render<T> = ExpressionValueBoxed<
   }
 >;
 
-export const render = (): ExpressionTypeDefinition<typeof name, Render<unknown>> => ({
+export const render: ExpressionTypeDefinition<typeof name, Render<unknown>> = {
   name,
   from: {
     '*': <T>(v: T): Render<T> => ({
@@ -41,4 +41,4 @@ export const render = (): ExpressionTypeDefinition<typeof name, Render<unknown>>
       value: v,
     }),
   },
-});
+};
