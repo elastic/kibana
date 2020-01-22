@@ -28,9 +28,6 @@ export class StaticSizeProperty extends StaticStyleProperty {
     const iconPixels =
       this._options.size >= HALF_LARGE_MAKI_ICON_SIZE ? LARGE_MAKI_ICON_SIZE : SMALL_MAKI_ICON_SIZE;
 
-    console.log('size', this._size);
-    console.log('iconPixels', iconPixels);
-
     mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
     const halfIconPixels = iconPixels / 2;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-size', this._options.size / halfIconPixels);
