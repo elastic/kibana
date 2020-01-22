@@ -7,6 +7,7 @@
 import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { getRouter } from '../../public/crud_app/services/routing';
+import { setHttp } from '../../public/crud_app/services';
 import { CRUD_APP_BASE_PATH } from '../../public/crud_app/constants';
 
 jest.mock('ui/new_platform');
@@ -24,6 +25,7 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
 
   beforeAll(() => {
     npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(async () => {

@@ -6,6 +6,7 @@
 
 import { pageHelpers, mockHttpRequest } from './helpers';
 import { first } from 'lodash';
+import { setHttp } from '../../public/crud_app/services';
 import { JOBS } from './helpers/constants';
 
 jest.mock('ui/new_platform');
@@ -26,6 +27,7 @@ describe('Create Rollup Job, step 6: Review', () => {
 
   beforeAll(() => {
     npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {
@@ -123,8 +125,8 @@ describe('Create Rollup Job, step 6: Review', () => {
   });
 
   describe('save()', () => {
-    const jobCreateApiPath = '/api/rollup/create';
-    const jobStartApiPath = '/api/rollup/start';
+    const jobCreateApiPath = '/create';
+    const jobStartApiPath = '/start';
 
     describe('without starting job after creation', () => {
       it('should call the "create" Api server endpoint', async () => {

@@ -6,6 +6,7 @@
 
 import moment from 'moment-timezone';
 
+import { setHttp } from '../../public/crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
@@ -25,6 +26,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
   beforeAll(() => {
     npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
   beforeEach(() => {
     // Set "default" mock responses by not providing any arguments

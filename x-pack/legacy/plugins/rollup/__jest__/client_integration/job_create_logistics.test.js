@@ -13,6 +13,7 @@ import {
   YEAR,
 } from '../../../../../../src/plugins/es_ui_shared/public/components/cron_editor';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { setHttp } from '../../public/crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
 
 jest.mock('ui/new_platform');
@@ -31,6 +32,7 @@ describe('Create Rollup Job, step 1: Logistics', () => {
 
   beforeAll(() => {
     npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {

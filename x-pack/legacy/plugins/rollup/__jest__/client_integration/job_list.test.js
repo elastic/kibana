@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRouter } from '../../public/crud_app/services';
+import { getRouter, setHttp } from '../../public/crud_app/services';
 import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOBS } from './helpers/constants';
 
@@ -29,6 +29,7 @@ describe('<JobList />', () => {
 
     beforeAll(() => {
       npStart = require('ui/new_platform').npStart; // eslint-disable-line
+      setHttp(npStart.core.http);
     });
 
     beforeEach(async () => {

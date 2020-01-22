@@ -12,9 +12,6 @@ const startMock = coreMock.createStart();
 
 const services = {
   setBreadcrumbs: startMock.chrome.setBreadcrumbs,
-  http: startMock.http,
-  notifications: startMock.notifications,
-  chrome: startMock.chrome,
 };
 
 const wrapComponent = (Component: FunctionComponent) => (props: any) => (

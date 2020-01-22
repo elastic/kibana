@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { setHttp } from '../../public/crud_app/services';
 import { pageHelpers, mockHttpRequest } from './helpers';
 
 jest.mock('ui/new_platform');
@@ -23,6 +24,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
 
   beforeAll(() => {
     npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {
