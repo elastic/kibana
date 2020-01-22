@@ -10,14 +10,12 @@ import { track, METRIC_TYPE, TELEMETRY_EVENT } from './';
 import { timelineActions } from '../../store/actions';
 
 export const telemetryMiddleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
-  switch (action.type) {
-    case timelineActions.endTimelineSaving.type:
-      track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.TIMELINE_SAVED);
-      break;
-
-    case timelineActions.showTimeline.type:
+  if (timelineActions.endTimelineSaving.match(action)) {
+    track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.TIMELINE_SAVED);
+  } else if (timelineActions.showTimeline.match(action)) {
+    if (action.payload.show) {
       track(METRIC_TYPE.LOADED, TELEMETRY_EVENT.TIMELINE_OPENED);
-      break;
+    }
   }
 
   return next(action);

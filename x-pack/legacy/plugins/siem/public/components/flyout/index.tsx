@@ -100,9 +100,7 @@ export const FlyoutComponent = React.memo<Props>(
         dataProviders={dataProviders!}
         show={!show}
         timelineId={timelineId}
-        onOpen={() => {
-          showTimeline({ id: timelineId, show: true });
-        }}
+        onOpen={() => showTimeline({ id: timelineId, show: true })}
       />
     </>
   )
