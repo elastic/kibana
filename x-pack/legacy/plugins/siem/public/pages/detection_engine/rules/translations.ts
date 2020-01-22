@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const BACK_TO_DETECTION_ENGINE = i18n.translate(
   'xpack.siem.detectionEngine.rules.backOptionsHeader',
   {
-    defaultMessage: 'Back to detection engine',
+    defaultMessage: 'Back to detections',
   }
 );
 
@@ -18,11 +18,19 @@ export const IMPORT_RULE = i18n.translate('xpack.siem.detectionEngine.rules.impo
 });
 
 export const ADD_NEW_RULE = i18n.translate('xpack.siem.detectionEngine.rules.addNewRuleTitle', {
-  defaultMessage: 'Add new rule',
+  defaultMessage: 'Create new rule',
 });
 
 export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Signal detection rules',
+});
+
+export const ADD_PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.addPageTitle', {
+  defaultMessage: 'Create',
+});
+
+export const EDIT_PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.editPageTitle', {
+  defaultMessage: 'Edit',
 });
 
 export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules.refreshTitle', {
@@ -32,7 +40,7 @@ export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules
 export const BATCH_ACTIONS = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.batchActionsTitle',
   {
-    defaultMessage: 'Batch actions',
+    defaultMessage: 'Bulk actions',
   }
 );
 
@@ -75,10 +83,10 @@ export const BATCH_ACTION_EXPORT_SELECTED = i18n.translate(
   }
 );
 
-export const BATCH_ACTION_EDIT_INDEX_PATTERNS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.batchActions.editIndexPatternsTitle',
+export const BATCH_ACTION_DUPLICATE_SELECTED = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.batchActions.duplicateSelectedTitle',
   {
-    defaultMessage: 'Edit selected index patterns…',
+    defaultMessage: 'Duplicate selected…',
   }
 );
 
@@ -243,7 +251,7 @@ export const COLUMN_TAGS = i18n.translate(
 export const COLUMN_ACTIVATE = i18n.translate(
   'xpack.siem.detectionEngine.rules.allRules.columns.activateTitle',
   {
-    defaultMessage: 'Activate',
+    defaultMessage: 'Activated',
   }
 );
 
@@ -302,3 +310,17 @@ export const UPDATE = i18n.translate('xpack.siem.detectionEngine.rules.updateBut
 export const DELETE = i18n.translate('xpack.siem.detectionEngine.rules.deleteDescription', {
   defaultMessage: 'Delete',
 });
+
+export const LOAD_PREPACKAGED_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.loadPrePackagedRulesButton',
+  {
+    defaultMessage: 'Load Elastic prebuilt rules',
+  }
+);
+
+export const RELOAD_MISSING_PREPACKAGED_RULES = (missingRules: number) =>
+  i18n.translate('xpack.siem.detectionEngine.rules.reloadMissingPrePackagedRulesButton', {
+    values: { missingRules },
+    defaultMessage:
+      'Reload {missingRules} deleted Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
+  });

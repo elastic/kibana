@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScaleType } from '@elastic/charts';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
@@ -26,14 +26,12 @@ import {
   HistogramAggregation,
   MatrixHistogramQueryProps,
 } from './types';
-import { generateTablePaginationOptions } from '../paginated_table/helpers';
 import { ChartSeriesData } from '../charts/common';
 import { InspectButtonContainer } from '../inspect';
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   MatrixHistogramQueryProps> = ({
   activePage,
-
   dataKey,
   defaultStackByOption,
   endDate,
@@ -45,17 +43,15 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
   isAlertsHistogram,
   isAnomaliesHistogram,
   isAuthenticationsHistogram,
-  isDNSHistogram,
-  isEventsType,
-  isPtrIncluded,
+  isDnsHistogram,
+  isEventsHistogram,
   isInspected,
-  legendPosition,
-  limit,
+  legendPosition = 'right',
   mapping,
   query,
   scaleType = ScaleType.Time,
   setQuery,
-  showLegend,
+  showLegend = true,
   skip,
   stackByOptions,
   startDate,
@@ -104,10 +100,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     },
     []
   );
-  const getPagination = () =>
-    activePage != null && limit != null
-      ? generateTablePaginationOptions(activePage, limit)
-      : undefined;
 
   const { data, loading, inspect, totalCount, refetch = noop } = useQuery<{}, HistogramAggregation>(
     {
@@ -118,16 +110,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
       query,
       skip,
       startDate,
-      sort,
       title,
       isAlertsHistogram,
       isAnomaliesHistogram,
       isAuthenticationsHistogram,
-      isDNSHistogram,
-      isEventsType,
+      isDnsHistogram,
+      isEventsHistogram,
       isInspected,
-      isPtrIncluded,
-      pagination: useMemo(() => getPagination(), [activePage, limit]),
       stackByField: selectedStackByOption.value,
     }
   );
@@ -162,6 +151,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
     isInspected,
     loading,
     data,
+    refetch,
   ]);
 
   return !hideHistogram ? (
@@ -179,7 +169,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
         >
           <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
-              {stackByOptions && (
+              {stackByOptions?.length > 1 && (
                 <EuiSelect
                   onChange={setSelectedChartOptionCallback}
                   options={stackByOptions}

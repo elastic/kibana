@@ -479,7 +479,6 @@ export const LinksMenu = injectI18n(
 
       return (
         <EuiPopover
-          id="singlePanel"
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}

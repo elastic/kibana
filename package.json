@@ -71,6 +71,7 @@
     "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
+    "storybook": "node scripts/storybook",
     "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html"
   },
   "repository": {
@@ -91,7 +92,8 @@
     "**/react": "^16.12.0",
     "**/react-test-renderer": "^16.12.0",
     "**/deepmerge": "^4.2.2",
-    "**/serialize-javascript": "^2.1.1"
+    "**/serialize-javascript": "^2.1.1",
+    "**/fast-deep-equal": "^3.1.1"
   },
   "workspaces": {
     "packages": [
@@ -118,7 +120,7 @@
     "@elastic/charts": "^16.1.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "7.6.0",
-    "@elastic/eui": "18.2.0",
+    "@elastic/eui": "18.2.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.3",
@@ -135,6 +137,7 @@
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
     "@kbn/ui-shared-deps": "1.0.0",
+    "@types/flot": "^0.0.31",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.clonedeep": "^4.5.4",
     "@types/node-forge": "^0.9.0",
@@ -345,6 +348,7 @@
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
     "@types/node": "^10.12.27",
+    "@types/numeral": "^0.0.26",
     "@types/opn": "^5.1.0",
     "@types/pegjs": "^0.10.1",
     "@types/pngjs": "^3.3.2",
@@ -460,10 +464,13 @@
     "postcss-url": "^8.0.0",
     "prettier": "^1.19.1",
     "proxyquire": "1.8.0",
+    "react-popper-tooltip": "^2.10.1",
+    "react-textarea-autosize": "^7.1.2",
     "regenerate": "^1.4.0",
     "sass-lint": "^1.12.1",
     "selenium-webdriver": "^4.0.0-alpha.5",
     "simple-git": "1.116.0",
+    "simplebar-react": "^2.1.0",
     "sinon": "^7.4.2",
     "strip-ansi": "^3.0.1",
     "supertest": "^3.1.0",

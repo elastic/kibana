@@ -64,8 +64,8 @@ export interface MatrixHistogramQueryProps {
   isAlertsHistogram?: boolean;
   isAnomaliesHistogram?: boolean;
   isAuthenticationsHistogram?: boolean;
-  isDNSHistogram?: boolean;
-  isEventsType?: boolean;
+  isDnsHistogram?: boolean;
+  isEventsHistogram?: boolean;
   isInspected: boolean;
   isPtrIncluded?: boolean;
   pagination?: PaginationInputPaginated;

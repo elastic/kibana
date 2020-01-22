@@ -19,14 +19,18 @@
 import { SavedObjectLoader } from 'ui/saved_objects';
 import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 
-import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
 // @ts-ignore
 import { findListItems } from './find_list_items';
 import { createSavedVisClass } from './_saved_vis';
-import { createVisualizeEditUrl } from '..';
+import { createVisualizeEditUrl } from '../np_ready/visualize_constants';
+import { VisualizationsStart } from '../../../../visualizations/public/np_ready/public';
 
-export function createSavedVisLoader(services: SavedObjectKibanaServices) {
-  const { savedObjectsClient } = services;
+interface SavedObjectKibanaServicesWithVisualizations extends SavedObjectKibanaServices {
+  visualizations: VisualizationsStart;
+}
+
+export function createSavedVisLoader(services: SavedObjectKibanaServicesWithVisualizations) {
+  const { savedObjectsClient, visualizations } = services;
 
   class SavedObjectLoaderVisualize extends SavedObjectLoader {
     mapHitSource = (source: Record<string, any>, id: string) => {
