@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Reducer } from 'react';
 import { AlertListState } from './types';
-import { AlertAction } from './action';
+import { AppAction } from '../action';
 
 const initialState = (): AlertListState => {
   return {
@@ -13,7 +14,10 @@ const initialState = (): AlertListState => {
   };
 };
 
-export const alertListReducer = (state = initialState(), action: AlertAction) => {
+export const alertListReducer: Reducer<AlertListState, AppAction> = (
+  state = initialState(),
+  action
+) => {
   if (action.type === 'serverReturnedAlertsData') {
     return {
       ...state,

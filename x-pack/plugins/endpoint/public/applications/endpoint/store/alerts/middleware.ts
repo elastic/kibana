@@ -6,6 +6,7 @@
 
 import { Middleware, Dispatch } from 'redux';
 import { CoreStart } from 'kibana/public';
+import { AlertData } from '../../../../../endpoint_app_types';
 import { GlobalState } from '../reducer';
 import { AppAction } from '../action';
 
@@ -15,7 +16,7 @@ export const alertMiddlewareFactory: (
   return store => next => async action => {
     next(action);
     if (action.type === 'appRequestedAlertsData') {
-      const response = await coreStart.http.get('/api/endpoint/alerts');
+      const response: AlertData[] = await coreStart.http.get('/api/endpoint/alerts');
       store.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
   };

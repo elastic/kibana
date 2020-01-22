@@ -14,6 +14,7 @@ export interface GlobalState {
 }
 
 export const appReducer: Reducer<GlobalState, AppAction> = combineReducers({
+  // TODO FIX THIS
   endpointList: endpointListReducer,
   alertList: alertListReducer,
 });

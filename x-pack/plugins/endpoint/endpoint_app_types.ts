@@ -5,28 +5,30 @@
  */
 
 export interface AlertData {
-  endgame: {
-    data: {
-      file_operation: string;
-      malware_classification: {
-        score: number;
+  value: {
+    source: {
+      endgame: {
+        data: {
+          file_operation: string;
+          malware_classification: {
+            score: number;
+          };
+        };
+        metadata: {
+          key: string;
+        };
+        timestamp_utc: Date;
       };
-    };
-    metadata: {
-      key: string;
-    };
-    timestamp_utc: Date;
-  };
-  labels: {
-    endpoint_id: string;
-  };
-  host: {
-    hostname: string;
-    ip: string;
-    os: {
-      name: string; // TODO Union types?
-      platform: string;
-      version: string;
+      labels: {
+        endpoint_id: string;
+      };
+      host: {
+        hostname: string;
+        ip: string;
+        os: {
+          name: string; // TODO Union types?
+        };
+      };
     };
   };
 }
