@@ -24,8 +24,9 @@ export function registerDeleteRoute(deps: RouteDependencies, legacy: ServerShim)
     const { watchId } = request.params;
 
     try {
-      await deleteWatch(callWithRequest, watchId);
-      return response.noContent();
+      return response.ok({
+        body: await deleteWatch(callWithRequest, watchId),
+      });
     } catch (e) {
       // Case: Error from Elasticsearch JS client
       if (isEsError(e)) {

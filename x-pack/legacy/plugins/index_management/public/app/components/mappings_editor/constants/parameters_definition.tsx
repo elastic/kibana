@@ -663,6 +663,11 @@ export const PARAMETERS_DEFINITION = {
     },
     schema: t.boolean,
   },
+  eager_global_ordinals_join: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
   index_phrases: {
     fieldConfig: {
       defaultValue: false,
@@ -893,6 +898,12 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
     schema: t.string,
+  },
+  relations: {
+    fieldConfig: {
+      defaultValue: [] as any, // Needed for FieldParams typing
+    },
+    schema: t.record(t.string, t.union([t.string, t.array(t.string)])),
   },
   max_shingle_size: {
     fieldConfig: {

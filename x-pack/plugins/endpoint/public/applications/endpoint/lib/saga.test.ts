@@ -12,7 +12,7 @@ describe('saga', () => {
   const DELAYED_INCREMENT_COUNTER = 'DELAYED INCREMENT COUNTER';
   const STOP_SAGA_PROCESSING = 'BREAK ASYNC ITERATOR';
 
-  const sleep = (ms = 10) => new Promise(resolve => setTimeout(resolve, ms));
+  const sleep = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
   let store: Store;
   let reducerA: Reducer;
   let sideAffect: (a: unknown, s: unknown) => void;
