@@ -19,19 +19,18 @@
 
 import { get, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import PEG from 'pegjs';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
+import { Parser } from 'pegjs';
+
 // @ts-ignore
-import grammar from 'raw-loader!../../../../../plugins/timelion/common/chain.peg';
+import { parse } from '../_generated_/chain';
 
 import { ArgValueSuggestions, FunctionArg, Location } from '../helpers/arg_value_suggestions';
 import {
   ITimelionFunction,
   TimelionFunctionArgs,
 } from '../../../../../plugins/timelion/common/types';
-
-const Parser = PEG.generate(grammar);
 
 export enum SUGGESTION_TYPE {
   ARGUMENTS = 'arguments',
@@ -60,7 +59,7 @@ function getArgumentsHelp(
 }
 
 async function extractSuggestionsFromParsedResult(
-  result: ReturnType<typeof Parser.parse>,
+  result: ReturnType<Parser['parse']>,
   cursorPosition: number,
   functionList: ITimelionFunction[],
   argValueSuggestions: ArgValueSuggestions
@@ -144,7 +143,7 @@ export async function suggest(
   argValueSuggestions: ArgValueSuggestions
 ) {
   try {
-    const result = await Parser.parse(expression);
+    const result = await parse(expression);
 
     return await extractSuggestionsFromParsedResult(
       result,

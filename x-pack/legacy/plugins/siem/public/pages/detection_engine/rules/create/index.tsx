@@ -29,10 +29,10 @@ import * as i18n from './translations';
 const stepsRuleOrder = [RuleStep.defineRule, RuleStep.aboutRule, RuleStep.scheduleRule];
 
 const MyEuiPanel = styled(EuiPanel)<{
-  zIndex?: number;
+  zindex?: number;
 }>`
   position: relative;
-  z-index: ${props => props.zIndex}; /* ugly fix to allow searchBar to overflow the EuiPanel */
+  z-index: ${props => props.zindex}; /* ugly fix to allow searchBar to overflow the EuiPanel */
 
   .euiAccordion__iconWrapper {
     display: none;
@@ -79,16 +79,6 @@ export const CreateRuleComponent = React.memo(() => {
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-
-  if (
-    isSignalIndexExists != null &&
-    isAuthenticated != null &&
-    (!isSignalIndexExists || !isAuthenticated)
-  ) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-  } else if (userHasNoPermissions) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
-  }
 
   const setStepData = useCallback(
     (step: RuleStep, data: unknown, isValid: boolean) => {
@@ -228,6 +218,16 @@ export const CreateRuleComponent = React.memo(() => {
     return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
   }
 
+  if (
+    isSignalIndexExists != null &&
+    isAuthenticated != null &&
+    (!isSignalIndexExists || !isAuthenticated)
+  ) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  } else if (userHasNoPermissions) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules`} />;
+  }
+
   return (
     <>
       <WrapperPage restrictWidth>
@@ -237,7 +237,7 @@ export const CreateRuleComponent = React.memo(() => {
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
         />
-        <MyEuiPanel zIndex={3}>
+        <MyEuiPanel zindex={3}>
           <EuiAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
@@ -272,7 +272,7 @@ export const CreateRuleComponent = React.memo(() => {
           </EuiAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
-        <MyEuiPanel zIndex={2}>
+        <MyEuiPanel zindex={2}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.aboutRule}
@@ -305,7 +305,7 @@ export const CreateRuleComponent = React.memo(() => {
           </EuiAccordion>
         </MyEuiPanel>
         <EuiSpacer size="l" />
-        <MyEuiPanel zIndex={1}>
+        <MyEuiPanel zindex={1}>
           <EuiAccordion
             initialIsOpen={false}
             id={RuleStep.scheduleRule}
