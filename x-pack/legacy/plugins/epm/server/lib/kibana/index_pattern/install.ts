@@ -110,29 +110,28 @@ export const dedupeFields = (fields: Fields) => {
  */
 export const findFieldByPath = (allFields: Fields, path: string): Field | undefined => {
   const pathParts = path.split('.');
-  const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
-    if (!pathNames.length) return undefined;
-    // get the first rest of path names
-    const [name, ...restPathNames] = pathNames;
-    for (const field of fields) {
-      if (field.name === name) {
-        // check field's fields, passing in the remaining path names
-        if (field.fields && field.fields.length > 0) {
-          return getField(field.fields, restPathNames);
-        }
-        // no nested fields to search, but still more names - not found
-        if (restPathNames.length) {
-          return undefined;
-        }
-        return field;
-      }
-    }
-    return undefined;
-  };
-
   return getField(allFields, pathParts);
 };
 
+const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
+  if (!pathNames.length) return undefined;
+  // get the first rest of path names
+  const [name, ...restPathNames] = pathNames;
+  for (const field of fields) {
+    if (field.name === name) {
+      // check field's fields, passing in the remaining path names
+      if (field.fields && field.fields.length > 0) {
+        return getField(field.fields, restPathNames);
+      }
+      // no nested fields to search, but still more names - not found
+      if (restPathNames.length) {
+        return undefined;
+      }
+      return field;
+    }
+  }
+  return undefined;
+};
 // check for alias type and copy contents of the aliased field
 export const transformField = (field: Field, i: number, fields: Fields): IndexPatternField => {
   const newField: IndexPatternField = {
