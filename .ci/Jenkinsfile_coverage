@@ -98,12 +98,15 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
 
                   # Debugging Ingest and Static Site
+                  echo "### List target dir: ..."
                   ls -R target
 
                   echo "###  Ingesting Code Coverage"
                   export ES_HOST=https://super:changeme@87883974a2984732b6cb134e5c7e240f.us-east-1.aws.staging.foundit.no:9243
                   export BUILD_ID=${BUILD_NUMBER}
+                  echo "### BUILD_ID: ${BUILD_ID}"
                   export TIME_STAMP=\$(date -u +%FT%T)
+                  echo "### TIME_STAMP: ${TIME_STAMP}"
                   node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/jest-combined/coverage-summary.json || echo "### target/kibana-coverage/jest-combined/coverage-summary.json not found?"
                   node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/functional-combined/coverage-summary.json || echo "### target/kibana-coverage/functional-combined/coverage-summary.json not found?"
                   node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/mocha-combined/coverage-summary.json || echo "### target/kibana-coverage/mocha-combined/coverage-summary.json not found?"
