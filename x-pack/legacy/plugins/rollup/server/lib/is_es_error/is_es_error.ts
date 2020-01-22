@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerLicenseChecker } from './register_license_checker';
+import * as legacyElasticsearch from 'elasticsearch';
+
+const esErrorsParent = legacyElasticsearch.errors._Abstract;
+
+export function isEsError(err: Error) {
+  return err instanceof esErrorsParent;
+}

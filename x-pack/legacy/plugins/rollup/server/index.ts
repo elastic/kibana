@@ -3,5 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { PluginInitializerContext } from 'kibana/server';
+import { RollupsServerPlugin } from './plugin';
 
-export { isEsErrorFactory } from './is_es_error_factory';
+export const plugin = (ctx: PluginInitializerContext) => new RollupsServerPlugin();

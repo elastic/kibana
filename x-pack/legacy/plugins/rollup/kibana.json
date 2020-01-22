@@ -1,0 +1,9 @@
+{
+  "id": "rollup",
+  "version": "kibana",
+  "requiredPlugins": [
+    "home"
+  ],
+  "server": true,
+  "ui": false
+}

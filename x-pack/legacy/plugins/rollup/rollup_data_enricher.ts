@@ -22,7 +22,7 @@ export const rollupDataEnricher = async (indicesList, callWithRequest) => {
       };
     });
   } catch (e) {
-    //swallow exceptions and return original list
+    // swallow exceptions and return original list
     return indicesList;
   }
 };
