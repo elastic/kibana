@@ -101,6 +101,7 @@ export type ParameterName =
   | 'null_value_ip'
   | 'copy_to'
   | 'dynamic'
+  | 'dynamic_toggle'
   | 'dynamic_strict'
   | 'enabled'
   | 'boost'

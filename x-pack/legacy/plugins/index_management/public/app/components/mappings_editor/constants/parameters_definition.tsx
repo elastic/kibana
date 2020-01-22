@@ -550,9 +550,24 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       main: '/dynamic.html',
     },
   },
+  dynamic_toggle: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
   dynamic_strict: {
     fieldConfig: {
-      defaultValue: '', // Needed for FieldParams typing
+      defaultValue: false,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicStrictParameter.fieldTitle', {
+        defaultMessage: 'Throw an exception when the object contains an unmapped property',
+      }),
+      helpText: i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.dynamicStrictParameter.fieldHelpText',
+        {
+          defaultMessage:
+            'By default, unmapped properties will be silently ignored when dynamic mapping is disabled. Optionally, you can choose to throw an exception when an object contains an unmapped property.',
+        }
+      ),
     },
   },
   enabled: {

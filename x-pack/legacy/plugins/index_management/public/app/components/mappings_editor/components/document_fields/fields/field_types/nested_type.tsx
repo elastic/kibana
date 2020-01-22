@@ -16,7 +16,9 @@ interface Props {
 export const NestedType = ({ field }: Props) => {
   return (
     <BasicParametersSection>
-      <DynamicParameter field={field} />
+      <DynamicParameter
+        defaultToggleValue={field.source.dynamic === true || field.source.dynamic === undefined}
+      />
     </BasicParametersSection>
   );
 };

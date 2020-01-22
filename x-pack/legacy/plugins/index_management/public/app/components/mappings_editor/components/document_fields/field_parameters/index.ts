@@ -5,6 +5,7 @@
  */
 
 import { relationsSerializer, relationsDeserializer } from './relations_parameter';
+import { dynamicSerializer, dynamicDeserializer } from './dynamic_parameter';
 
 export * from './name_parameter';
 
@@ -62,6 +63,6 @@ export * from './max_shingle_size_parameter';
 
 export * from './relations_parameter';
 
-export const PARAMETER_SERIALIZERS = [relationsSerializer];
+export const PARAMETER_SERIALIZERS = [relationsSerializer, dynamicSerializer];
 
-export const PARAMETER_DESERIALIZERS = [relationsDeserializer];
+export const PARAMETER_DESERIALIZERS = [relationsDeserializer, dynamicDeserializer];
