@@ -94,6 +94,7 @@ kibana_vars=(
     timelion.enabled
     vega.enableExternalUrls
     xpack.apm.enabled
+    xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled
     xpack.apm.ui.maxTraceItems
     apm_oss.apmAgentConfigurationIndex
