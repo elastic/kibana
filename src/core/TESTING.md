@@ -153,6 +153,7 @@ export default function({ getService }: FtrProviderContext) {
         .expect(400);
 
       expect(response.body).to.have.property('message');
+      expect(response.body.message).to.contain('must have a maximum length of [100]');
     });
   });
 ```
@@ -185,9 +186,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('returns NotFound error when cannot find a resource', async () => {
       await supertest
-        .post('/myPlugin/something')
-        .set('content-type', 'application/json')
-        .send({ text: 'missing' })
+        .get('/myPlugin/something/missing')
         .expect(404, 'Saved object [myPlugin-type/missing] not found');
     });
   });
