@@ -26,7 +26,8 @@ import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
-  DETECTION_ENGINE_RULES_STATUS,
+  DETECTION_ENGINE_RULES_STATUS_URL,
+  DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
 } from '../../../../common/constants';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 
@@ -63,7 +64,7 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
+    sortField: 'name',
     sortOrder: 'desc',
   },
   pagination = {
@@ -313,6 +314,7 @@ export const exportRules = async ({
  * Get Rule Status provided Rule ID
  *
  * @param id string of Rule ID's (not rule_id)
+ * @param signal AbortSignal for cancelling request
  *
  * @throws An error if response is not OK
  */
@@ -324,9 +326,42 @@ export const getRuleStatusById = async ({
   signal: AbortSignal;
 }): Promise<Record<string, RuleStatus>> => {
   const response = await fetch(
-    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_STATUS}?ids=${encodeURIComponent(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_STATUS_URL}?ids=${encodeURIComponent(
       JSON.stringify([id])
     )}`,
+    {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'true',
+      },
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response);
+  return response.json();
+};
+
+/**
+ * Get pre packaged rules Status
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getPrePackagedRulesStatus = async ({
+  signal,
+}: {
+  signal: AbortSignal;
+}): Promise<{
+  rules_installed: number;
+  rules_not_installed: number;
+  rules_not_updated: number;
+}> => {
+  const response = await fetch(
+    `${chrome.getBasePath()}${DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL}`,
     {
       method: 'GET',
       credentials: 'same-origin',
