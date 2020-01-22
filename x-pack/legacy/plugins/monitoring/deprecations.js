@@ -27,5 +27,31 @@ export const deprecations = () => {
         );
       }
     },
+    (settings, log) => {
+      const fromPath = 'xpack.monitoring.elasticsearch';
+      const es = get(settings, 'elasticsearch');
+      if (es) {
+        if (es.username === 'elastic') {
+          log(
+            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+          );
+        }
+      }
+    },
+    (settings, log) => {
+      const fromPath = 'xpack.monitoring.elasticsearch.ssl';
+      const ssl = get(settings, 'elasticsearch.ssl');
+      if (ssl) {
+        if (ssl.key !== undefined && ssl.certificate === undefined) {
+          log(
+            `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+          );
+        } else if (ssl.certificate !== undefined && ssl.key === undefined) {
+          log(
+            `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
+          );
+        }
+      }
+    },
   ];
 };

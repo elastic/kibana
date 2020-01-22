@@ -18,11 +18,11 @@
  */
 
 import d3 from 'd3';
+import $ from 'jquery';
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
+
 import series from '../lib/fixtures/mock_data/date_histogram/_series';
 import terms from '../lib/fixtures/mock_data/terms/_columns';
-import $ from 'jquery';
 import { TimeMarker } from '../../visualizations/time_marker';
 
 describe('Vislib Time Marker Test Suite', function() {
@@ -57,26 +57,23 @@ describe('Vislib Time Marker Test Suite', function() {
   let maxDomain;
   let domain;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function() {
-      minDomain = getExtent(series.series, d3.min);
-      maxDomain = getExtent(series.series, d3.max);
-      domain = [minDomain, maxDomain];
-      xScale = d3.time
-        .scale()
-        .domain(domain)
-        .range([0, 500]);
-      defaultMarker = new TimeMarker(times, xScale, height);
-      customMarker = new TimeMarker(myTimes, xScale, height);
+  beforeEach(function() {
+    minDomain = getExtent(series.series, d3.min);
+    maxDomain = getExtent(series.series, d3.max);
+    domain = [minDomain, maxDomain];
+    xScale = d3.time
+      .scale()
+      .domain(domain)
+      .range([0, 500]);
+    defaultMarker = new TimeMarker(times, xScale, height);
+    customMarker = new TimeMarker(myTimes, xScale, height);
 
-      selection = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'marker');
-      selection.datum(series);
-    })
-  );
+    selection = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'marker');
+    selection.datum(series);
+  });
 
   afterEach(function() {
     selection.remove('*');
