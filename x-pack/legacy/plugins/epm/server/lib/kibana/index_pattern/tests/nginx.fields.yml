@@ -103,3 +103,10 @@
       fields:
         - name: continent_name
           type: text
+- name: country
+  type: ""
+  multi_fields: 
+    - name: keyword
+      type: keyword
+    - name: text
+      type: text
