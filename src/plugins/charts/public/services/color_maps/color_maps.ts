@@ -37,7 +37,7 @@ export const vislibColorMaps = {
   // Sequential
   [ColorSchemas.Blues]: {
     id: ColorSchemas.Blues,
-    label: i18n.translate('common.ui.vislib.colormaps.bluesText', {
+    label: i18n.translate('charts.colormaps.bluesText', {
       defaultMessage: 'Blues',
     }),
     value: [
@@ -557,7 +557,7 @@ export const vislibColorMaps = {
   },
   [ColorSchemas.Greens]: {
     id: ColorSchemas.Greens,
-    label: i18n.translate('common.ui.vislib.colormaps.greensText', {
+    label: i18n.translate('charts.colormaps.greensText', {
       defaultMessage: 'Greens',
     }),
     value: [
@@ -1077,7 +1077,7 @@ export const vislibColorMaps = {
   },
   [ColorSchemas.Greys]: {
     id: ColorSchemas.Greys,
-    label: i18n.translate('common.ui.vislib.colormaps.greysText', {
+    label: i18n.translate('charts.colormaps.greysText', {
       defaultMessage: 'Greys',
     }),
     value: [
@@ -1597,7 +1597,7 @@ export const vislibColorMaps = {
   },
   [ColorSchemas.Reds]: {
     id: ColorSchemas.Reds,
-    label: i18n.translate('common.ui.vislib.colormaps.redsText', {
+    label: i18n.translate('charts.colormaps.redsText', {
       defaultMessage: 'Reds',
     }),
     value: [
@@ -2117,7 +2117,7 @@ export const vislibColorMaps = {
   },
   [ColorSchemas.YellowToRed]: {
     id: ColorSchemas.YellowToRed,
-    label: i18n.translate('common.ui.vislib.colormaps.yellowToRedText', {
+    label: i18n.translate('charts.colormaps.yellowToRedText', {
       defaultMessage: 'Yellow to Red',
     }),
     value: [
@@ -2638,7 +2638,7 @@ export const vislibColorMaps = {
 
   [ColorSchemas.GreenToRed]: {
     id: ColorSchemas.GreenToRed,
-    label: i18n.translate('common.ui.vislib.colormaps.greenToRedText', {
+    label: i18n.translate('charts.colormaps.greenToRedText', {
       defaultMessage: 'Green to Red',
     }),
     value: [
