@@ -14,9 +14,8 @@ import { ServerFacade } from '../../../../types';
 import { transformFindAlertsOrError } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createFindRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createFindRulesRoute = (): Hapi.ServerRoute => {
   return {
     method: 'GET',
     path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -32,17 +31,10 @@ export const createFindRulesRoute = (server: ServerFacade): Hapi.ServerRoute => 
     async handler(request: FindRulesRequest, headers) {
       const { query } = request;
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
-
-      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from(request as any)
-      );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
         : null;
-      if (!alertsClient || !actionsClient || !savedObjectsClient) {
+      if (!alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -79,5 +71,5 @@ export const createFindRulesRoute = (server: ServerFacade): Hapi.ServerRoute => 
 };
 
 export const findRulesRoute = (server: ServerFacade) => {
-  server.route(createFindRulesRoute(server));
+  server.route(createFindRulesRoute());
 };
