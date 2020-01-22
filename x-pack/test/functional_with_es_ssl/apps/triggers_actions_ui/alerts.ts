@@ -40,8 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('alerts', function() {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      const alertsTab = await testSubjects.find('alertsTab');
-      await alertsTab.click();
+      await testSubjects.click('alertsTab');
     });
 
     it('should search for alert', async () => {
@@ -81,15 +80,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActionsAfterDisable = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterDisable.click();
+      await testSubjects.click('collapsedItemActions');
 
       const enableSwitchAfterDisable = await testSubjects.find('enableSwitch');
       const isChecked = await enableSwitchAfterDisable.getAttribute('aria-checked');
@@ -101,22 +98,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActionsAfterDisable = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterDisable.click();
+      await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('enableSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActionsAfterReEnable = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterReEnable.click();
+      await testSubjects.click('collapsedItemActions');
 
       const enableSwitchAfterReEnable = await testSubjects.find('enableSwitch');
       const isChecked = await enableSwitchAfterReEnable.getAttribute('aria-checked');
@@ -128,15 +122,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActionsAfterMute = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterMute.click();
+      await testSubjects.click('collapsedItemActions');
 
       const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitchAfterMute.getAttribute('aria-checked');
@@ -148,22 +140,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActionsAfterMute = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterMute.click();
+      await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActionsAfterUnmute = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActionsAfterUnmute.click();
+      await testSubjects.click('collapsedItemActions');
 
       const muteSwitchAfterUnmute = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitchAfterUnmute.getAttribute('aria-checked');
@@ -175,11 +164,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
-      const deleteBtn = await testSubjects.find('deleteAlert');
-      await deleteBtn.click();
+      await testSubjects.click('deleteAlert');
 
       retry.try(async () => {
         await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
@@ -194,22 +181,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const muteAllBtn = await testSubjects.find('muteAll');
-      await muteAllBtn.click();
+      await testSubjects.click('muteAll');
 
       // Unmute all button shows after clicking mute all
       await testSubjects.existOrFail('unmuteAll');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       const muteSwitch = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitch.getAttribute('aria-checked');
@@ -221,25 +204,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const muteAllBtn = await testSubjects.find('muteAll');
-      await muteAllBtn.click();
+      await testSubjects.click('muteAll');
 
-      const unmuteAllBtn = await testSubjects.find('unmuteAll');
-      await unmuteAllBtn.click();
+      await testSubjects.click('unmuteAll');
 
       // Mute all button shows after clicking unmute all
       await testSubjects.existOrFail('muteAll');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       const muteSwitch = await testSubjects.find('muteSwitch');
       const isChecked = await muteSwitch.getAttribute('aria-checked');
@@ -251,22 +229,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const disableAllBtn = await testSubjects.find('disableAll');
-      await disableAllBtn.click();
+      await testSubjects.click('disableAll');
 
       // Enable all button shows after clicking disable all
       await testSubjects.existOrFail('enableAll');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       const enableSwitch = await testSubjects.find('enableSwitch');
       const isChecked = await enableSwitch.getAttribute('aria-checked');
@@ -278,25 +252,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const disableAllBtn = await testSubjects.find('disableAll');
-      await disableAllBtn.click();
+      await testSubjects.click('disableAll');
 
-      const enableAllBtn = await testSubjects.find('enableAll');
-      await enableAllBtn.click();
+      await testSubjects.click('enableAll');
 
       // Disable all button shows after clicking enable all
       await testSubjects.existOrFail('disableAll');
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
-      await collapsedItemActions.click();
+      await testSubjects.click('collapsedItemActions');
 
       const enableSwitch = await testSubjects.find('enableSwitch');
       const isChecked = await enableSwitch.getAttribute('aria-checked');
@@ -308,14 +277,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
-      await checkbox.click();
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
-      const bulkActionBtn = await testSubjects.find('bulkAction');
-      await bulkActionBtn.click();
+      await testSubjects.click('bulkAction');
 
-      const deleteAllBtn = await testSubjects.find('deleteAll');
-      await deleteAllBtn.click();
+      await testSubjects.click('deleteAll');
 
       retry.try(async () => {
         await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);

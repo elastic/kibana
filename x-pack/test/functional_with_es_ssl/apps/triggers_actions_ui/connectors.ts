@@ -20,8 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Connectors', function() {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      const alertsTab = await testSubjects.find('connectorsTab');
-      await alertsTab.click();
+      await testSubjects.click('connectorsTab');
     });
 
     it('should create a connector', async () => {
@@ -29,18 +28,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-      const serverLogCard = await testSubjects.find('.server-log-card');
-      await serverLogCard.click();
+      await testSubjects.click('.server-log-card');
 
       const nameInput = await testSubjects.find('nameInput');
       await nameInput.click();
       await nameInput.clearValue();
       await nameInput.type(connectorName);
 
-      const saveButton = await find.byCssSelector(
-        '[data-test-subj="saveActionButton"]:not(disabled)'
-      );
-      await saveButton.click();
+      await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created '${connectorName}'`);
@@ -63,18 +58,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-      const serverLogCard = await testSubjects.find('.server-log-card');
-      await serverLogCard.click();
+      await testSubjects.click('.server-log-card');
 
       const nameInput = await testSubjects.find('nameInput');
       await nameInput.click();
       await nameInput.clearValue();
       await nameInput.type(connectorName);
 
-      const saveButton = await find.byCssSelector(
-        '[data-test-subj="saveActionButton"]:not(disabled)'
-      );
-      await saveButton.click();
+      await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
 
       await pageObjects.common.closeToast();
 
@@ -83,20 +74,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsBeforeEdit.length).to.eql(1);
 
-      const editConnectorBtn = await find.byCssSelector(
-        '[data-test-subj="connectorsTableCell-name"] button'
-      );
-      await editConnectorBtn.click();
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       const nameInputToUpdate = await testSubjects.find('nameInput');
       await nameInputToUpdate.click();
       await nameInputToUpdate.clearValue();
       await nameInputToUpdate.type(updatedConnectorName);
 
-      const saveEditButton = await find.byCssSelector(
-        '[data-test-subj="saveActionButton"]:not(disabled)'
-      );
-      await saveEditButton.click();
+      await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
@@ -117,18 +102,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       async function createConnector(connectorName: string) {
         await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-        const serverLogCard = await testSubjects.find('.server-log-card');
-        await serverLogCard.click();
+        await testSubjects.click('.server-log-card');
 
         const nameInput = await testSubjects.find('nameInput');
         await nameInput.click();
         await nameInput.clearValue();
         await nameInput.type(connectorName);
 
-        const saveButton = await find.byCssSelector(
-          '[data-test-subj="saveActionButton"]:not(disabled)'
-        );
-        await saveButton.click();
+        await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
         await pageObjects.common.closeToast();
       }
       const connectorName = generateUniqueKey();
@@ -141,8 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsBeforeDelete.length).to.eql(1);
 
-      const deleteConnectorBtn = await testSubjects.find('deleteConnector');
-      await deleteConnectorBtn.click();
+      await testSubjects.click('deleteConnector');
       await testSubjects.existOrFail('deleteConnectorsConfirmation');
       await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteConnectorsConfirmation');
@@ -157,18 +137,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       async function createConnector(connectorName: string) {
         await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-        const serverLogCard = await testSubjects.find('.server-log-card');
-        await serverLogCard.click();
+        await testSubjects.click('.server-log-card');
 
         const nameInput = await testSubjects.find('nameInput');
         await nameInput.click();
         await nameInput.clearValue();
         await nameInput.type(connectorName);
 
-        const saveButton = await find.byCssSelector(
-          '[data-test-subj="saveActionButton"]:not(disabled)'
-        );
-        await saveButton.click();
+        await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
         await pageObjects.common.closeToast();
       }
 
@@ -182,13 +158,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsBeforeDelete.length).to.eql(1);
 
-      const deleteCheckbox = await find.byCssSelector(
-        '.euiTableRowCellCheckbox .euiCheckbox__input'
-      );
-      await deleteCheckbox.click();
+      await find.clickByCssSelector('.euiTableRowCellCheckbox .euiCheckbox__input');
 
-      const bulkDeleteBtn = await testSubjects.find('bulkDelete');
-      await bulkDeleteBtn.click();
+      await testSubjects.click('bulkDelete');
       await testSubjects.existOrFail('deleteConnectorsConfirmation');
       await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteConnectorsConfirmation');
