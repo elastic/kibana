@@ -35,6 +35,13 @@ import {
 } from './routes';
 import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
 import { LicenseState } from './lib/license_state';
+import { IEventLogger } from '../../../../plugins/event_log/server';
+
+const EVENT_LOG_PROVIDER = 'actions';
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeViaHttp: 'execute-via-http',
+};
 
 export interface PluginSetupContract {
   registerType: ActionTypeRegistry['register'];
@@ -57,6 +64,7 @@ export class Plugin {
   private actionExecutor?: ActionExecutor;
   private defaultKibanaIndex?: string;
   private licenseState: LicenseState | null = null;
+  private eventLogger?: IEventLogger;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'actions');
@@ -86,6 +94,11 @@ export class Plugin {
     plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',
       attributesToEncrypt: new Set(['apiKey']),
+    });
+
+    plugins.event_log.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.event_log.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
     });
 
     const actionExecutor = new ActionExecutor();
@@ -156,6 +169,7 @@ export class Plugin {
       getServices,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       actionTypeRegistry: actionTypeRegistry!,
+      eventLogger: this.eventLogger!,
     });
     taskRunnerFactory!.initialize({
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,

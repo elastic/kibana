@@ -6,11 +6,10 @@
 
 import Joi from 'joi';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { ServerFacade, RequestFacade } from '../../../types';
-// @ts-ignore
+import { ServerFacade } from '../../../types';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
-// @ts-ignore
 import { reportingFeaturePreRoutingFactory } from './reporting_feature_pre_routing';
+import { GetReportingFeatureIdFn } from './reporting_feature_pre_routing';
 
 const API_TAG = 'api';
 
@@ -22,19 +21,16 @@ export interface RouteConfigFactory {
   };
 }
 
-type GetFeatureFunction = (request: RequestFacade) => any;
-type PreRoutingFunction = (getFeatureId?: GetFeatureFunction) => any;
-
 export type GetRouteConfigFactoryFn = (
-  getFeatureId?: GetFeatureFunction | undefined
+  getFeatureId?: GetReportingFeatureIdFn
 ) => RouteConfigFactory;
 
 export function getRouteConfigFactoryReportingPre(server: ServerFacade): GetRouteConfigFactoryFn {
-  const authorizedUserPreRouting: PreRoutingFunction = authorizedUserPreRoutingFactory(server);
-  const reportingFeaturePreRouting: PreRoutingFunction = reportingFeaturePreRoutingFactory(server);
+  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
+  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
 
-  return (getFeatureId?: GetFeatureFunction): RouteConfigFactory => {
-    const preRouting = [{ method: authorizedUserPreRouting, assign: 'user' }];
+  return (getFeatureId?: GetReportingFeatureIdFn): RouteConfigFactory => {
+    const preRouting: any[] = [{ method: authorizedUserPreRouting, assign: 'user' }];
     if (getFeatureId) {
       preRouting.push(reportingFeaturePreRouting(getFeatureId));
     }

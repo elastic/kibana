@@ -27,6 +27,7 @@ import {
   SavedObjectsLegacyService,
 } from '../../../../../src/core/server';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
+import { IEventLogService } from '../../../../plugins/event_log/server';
 
 export interface KibanaConfig {
   index: string;
@@ -67,6 +68,7 @@ export interface ActionsPluginsSetup {
   xpack_main: XPackMainPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
   licensing: LicensingPluginSetup;
+  event_log: IEventLogService;
 }
 export interface ActionsPluginsStart {
   security?: SecurityPluginStartContract;
@@ -126,6 +128,7 @@ export function shim(
     encryptedSavedObjects: newPlatform.setup.plugins
       .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
     licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
+    event_log: newPlatform.setup.plugins.event_log as IEventLogService,
   };
 
   const pluginsStart: ActionsPluginsStart = {

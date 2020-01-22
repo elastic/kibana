@@ -15,7 +15,6 @@ import {
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
 import { LevelLogger } from './level_logger';
-// @ts-ignore
 import { createTaggedLogger } from './create_tagged_logger'; // TODO remove createTaggedLogger once esqueue is removed
 
 interface CreateQueueFactoryOpts {

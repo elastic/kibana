@@ -25,6 +25,14 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.pageT
   defaultMessage: 'Signal detection rules',
 });
 
+export const ADD_PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.addPageTitle', {
+  defaultMessage: 'Create',
+});
+
+export const EDIT_PAGE_TITLE = i18n.translate('xpack.siem.detectionEngine.rules.editPageTitle', {
+  defaultMessage: 'Edit',
+});
+
 export const REFRESH = i18n.translate('xpack.siem.detectionEngine.rules.allRules.refreshTitle', {
   defaultMessage: 'Refresh',
 });
@@ -302,3 +310,17 @@ export const UPDATE = i18n.translate('xpack.siem.detectionEngine.rules.updateBut
 export const DELETE = i18n.translate('xpack.siem.detectionEngine.rules.deleteDescription', {
   defaultMessage: 'Delete',
 });
+
+export const LOAD_PREPACKAGED_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.loadPrePackagedRulesButton',
+  {
+    defaultMessage: 'Load Elastic prebuilt rules',
+  }
+);
+
+export const RELOAD_MISSING_PREPACKAGED_RULES = (missingRules: number) =>
+  i18n.translate('xpack.siem.detectionEngine.rules.reloadMissingPrePackagedRulesButton', {
+    values: { missingRules },
+    defaultMessage:
+      'Reload {missingRules} deleted Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
+  });
