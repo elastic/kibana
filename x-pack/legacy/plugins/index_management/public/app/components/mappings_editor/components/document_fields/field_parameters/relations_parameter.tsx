@@ -98,7 +98,7 @@ export const RelationsParameter = () => {
       title={
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.join.multiLevelsParentJoinWarningTitle"
-          defaultMessage="Using multiple levels of relations to replicate a relational model is not recommended. Each level of relation adds an overhead at query time in terms of memory and computation. You should de-normalize your data if you care about performance. {docsLink}"
+          defaultMessage="Avoid using multiple levels to replicate a relational model. Each relation level increases computation time and memory consumption at query time. For best performance, {docsLink}"
           values={{
             docsLink: (
               <EuiLink
@@ -108,7 +108,7 @@ export const RelationsParameter = () => {
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.join.multiLevelsPerformanceDocumentationLink',
                   {
-                    defaultMessage: 'Learn more.',
+                    defaultMessage: 'denormalize your data.',
                   }
                 )}
               </EuiLink>
