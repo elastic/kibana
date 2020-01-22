@@ -75,10 +75,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   echo extracting kibana-oss-tests
                   tar -xzf /tmp/downloaded_coverage/coverage/kibana-oss-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
 
-                  echo extracting kibana-xpack-tests
-                  for i in {1..3}; do
-                    tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-${i}/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-                  done
+
                   tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-1/kibana-coverage.tar.gz -C /tmp/extracted_coverage
 
                   # replace path in json files to have valid html report
