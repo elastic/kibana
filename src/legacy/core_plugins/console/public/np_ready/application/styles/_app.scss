@@ -35,6 +35,8 @@
 .conApp__output {
   display: flex;
   flex: 1 1 1px;
+  // Give the aria selection border priority when the divider is selected
+  z-index: -1;
 }
 
 .conApp__textAreaLabelHack,
