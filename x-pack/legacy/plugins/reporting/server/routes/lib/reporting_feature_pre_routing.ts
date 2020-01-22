@@ -20,7 +20,7 @@ export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRou
   return function reportingFeaturePreRouting(getReportingFeatureId: GetReportingFeatureIdFn) {
     return function licensePreRouting(request: Legacy.Request) {
       const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
-      const reportingFeatureId = getReportingFeatureId(request);
+      const reportingFeatureId = getReportingFeatureId(request) as string;
       const reportingFeature = licenseCheckResults[reportingFeatureId];
       if (!reportingFeature.showLinks || !reportingFeature.enableLinks) {
         throw Boom.forbidden(reportingFeature.message);

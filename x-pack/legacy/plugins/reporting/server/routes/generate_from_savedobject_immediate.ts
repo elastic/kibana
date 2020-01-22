@@ -13,7 +13,7 @@ import {
   HeadlessChromiumDriverFactory,
   ReportingResponseToolkit,
   Logger,
-  JobDocOutputExecuted,
+  JobDocOutput,
 } from '../../types';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
@@ -68,7 +68,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutputExecuted = await executeJobFn(null, jobDocPayload, request);
+      }: JobDocOutput = await executeJobFn(null, jobDocPayload, request);
 
       logger.info(`Job output size: ${jobOutputSize} bytes`);
 

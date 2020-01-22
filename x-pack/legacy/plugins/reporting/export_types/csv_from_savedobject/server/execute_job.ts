@@ -9,7 +9,7 @@ import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import {
   ExecuteJobFactory,
   ImmediateExecuteFn,
-  JobDocOutputExecuted,
+  JobDocOutput,
   ServerFacade,
   RequestFacade,
 } from '../../../types';
@@ -36,7 +36,7 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
     jobId: string | null,
     job: JobDocPayloadPanelCsv,
     realRequest?: RequestFacade
-  ): Promise<JobDocOutputExecuted> {
+  ): Promise<JobDocOutput> {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
