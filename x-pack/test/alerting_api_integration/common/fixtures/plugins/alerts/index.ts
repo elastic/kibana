@@ -63,7 +63,7 @@ export default function(kibana: any) {
           }),
         },
         async executor({ config, secrets, params, services }: ActionTypeExecutorOptions) {
-          return await services.callCluster('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -97,7 +97,7 @@ export default function(kibana: any) {
               source: 'action:test.failing',
             },
           });
-          throw new Error('Failed to execute action type');
+          throw new Error(`expected failure for ${params.index} ${params.reference}`);
         },
       };
       const rateLimitedActionType: ActionType = {
