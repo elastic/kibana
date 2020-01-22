@@ -19,14 +19,13 @@
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import uuid from 'uuid';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
-import { CalculationVars } from './vars';
+import { CalculationVars, newVariable } from './vars';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -53,7 +52,7 @@ export function MathAgg(props) {
   useEffect(() => {
     if (!checkModel(model)) {
       handleChange({
-        variables: [{ id: uuid.v1(), name: '', field: '' }],
+        variables: [newVariable()],
         script: '',
       });
     }
