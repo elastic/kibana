@@ -65,6 +65,7 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
 const createFilter = (table, columnIndex, rowIndex) => {
   // hack until AggConfigs are migrated to the new platform
   const { AggConfigs } = require('../../../../../legacy/ui/public/agg_types/agg_configs');
+  if (!table || !table.columns || !table.columns[columnIndex]) return;
   const column = table.columns[columnIndex];
   const aggConfigs = new AggConfigs();
   aggConfigs.indexPattern = column._meta.indexPattern;
@@ -113,4 +114,4 @@ const createFiltersFromEvent = event => {
   return filters;
 };
 
-export { createFiltersFromEvent };
+export { createFilter, createFiltersFromEvent };

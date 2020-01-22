@@ -26,15 +26,29 @@ describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
 
-  const baseEvent = {
-    aggConfigs: [
-      {
-        params: {},
-        getIndexPattern: () => ({
-          timeFieldName: 'time',
+  const aggConfigs = [
+    {
+      params: {},
+      getIndexPattern: () => ({
+        timeFieldName: 'time',
+      }),
+    },
+  ];
+
+  jest.mock('../../../../../legacy/ui/public/agg_types/agg_configs', () => ({
+    AggConfigs: function AggConfigs() {
+      return {
+        createAggConfig: ({ params }) => ({
+          params,
+          getIndexPattern: () => ({
+            timeFieldName: 'time',
+          }),
         }),
-      },
-    ],
+      };
+    },
+  }));
+
+  const baseEvent = {
     data: {
       fieldFormatter: _.constant({}),
       series: [
@@ -47,6 +61,11 @@ describe('brushEvent', () => {
                   columns: [
                     {
                       id: '1',
+                      _meta: {
+                        type: 'histogram',
+                        indexPattern: aggConfigs[0].getIndexPattern(),
+                        params: aggConfigs[0].params,
+                      },
                     },
                   ],
                 },
@@ -84,8 +103,8 @@ describe('brushEvent', () => {
       };
 
       beforeEach(() => {
+        aggConfigs[0].params.field = dateField;
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.aggConfigs[0].params.field = dateField;
         dateEvent.data.ordered = { date: true };
       });
 
@@ -114,8 +133,8 @@ describe('brushEvent', () => {
       };
 
       beforeEach(() => {
+        aggConfigs[0].params.field = dateField;
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.aggConfigs[0].params.field = dateField;
         dateEvent.data.ordered = { date: true };
       });
 
@@ -142,8 +161,8 @@ describe('brushEvent', () => {
     };
 
     beforeEach(() => {
+      aggConfigs[0].params.field = numberField;
       numberEvent = _.cloneDeep(baseEvent);
-      numberEvent.aggConfigs[0].params.field = numberField;
       numberEvent.data.ordered = { date: false };
     });
 
