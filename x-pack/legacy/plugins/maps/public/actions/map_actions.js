@@ -753,9 +753,9 @@ export function clearMissingStyleProperties(layerId) {
       return;
     }
 
-    const fields = await targetLayer.getFields(); //take into account all fields, since labels can be driven by any field (source or join)
+    const nextFields = await targetLayer.getFields(); //take into account all fields, since labels can be driven by any field (source or join)
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(
-      fields
+      nextFields
     );
     if (hasChanges) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));

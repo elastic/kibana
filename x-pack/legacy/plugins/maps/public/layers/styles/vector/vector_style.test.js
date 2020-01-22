@@ -66,19 +66,19 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
   it('Should return no changes when next oridinal fields contain existing style property fields', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const fields = [new MockField({ fieldName })];
-    const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(fields);
+    const nextFields = [new MockField({ fieldName })];
+    const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields);
     expect(hasChanges).toBe(false);
   });
 
   it('Should clear missing fields when next oridinal fields do not contain existing style property fields', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
-    const fields = [];
+    const nextFields = [];
     const {
       hasChanges,
       nextStyleDescriptor,
-    } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(fields);
+    } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields);
     expect(hasChanges).toBe(true);
     expect(nextStyleDescriptor.properties).toEqual({
       fillColor: {
