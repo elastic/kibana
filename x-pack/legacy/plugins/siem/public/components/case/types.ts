@@ -5,47 +5,30 @@
  */
 
 import { SavedObjectsBaseOptions } from 'kibana/server';
-import { Direction, Maybe } from '../../graphql/types';
-export { Direction };
+export { Direction } from '../../graphql/types';
+
 export interface CasesSavedObjects {
-  saved_objects: Array<Maybe<CaseSavedObject>>;
-
+  saved_objects: CaseSavedObject[] | [];
   page: number;
-
   per_page: number;
-
   total: number;
 }
 
 export interface CaseSavedObject {
   attributes: CaseResult;
-
   id: string;
-
   type: string;
-
   updated_at: string;
-
   version: string;
 }
 export interface CaseResult {
   case_type: string;
-
   created_at: number;
-
   created_by: ElasticUser;
-
   description: string;
-
   state: string;
-
-  tags: Array<Maybe<string>>;
-
+  tags: string[] | [];
   title: string;
-}
-export interface SortCase {
-  field: SortFieldCase;
-  direction: Direction;
 }
 export enum SortFieldCase {
   createdAt = 'created_at',
@@ -74,5 +57,5 @@ export interface CaseFindOptions extends SavedObjectsBaseOptions {
 
 export interface ElasticUser {
   username: string;
-  full_name?: Maybe<string>;
+  full_name?: string;
 }

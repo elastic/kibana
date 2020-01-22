@@ -12,7 +12,7 @@ import { useKibana } from '../../lib/kibana';
 import { EmptyPage } from '../../components/empty_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
-import { CaseView } from '../../components/page/case/case_view';
+import { CaseView } from '../../components/case/views/case_view';
 import * as i18n from './translations';
 import { SpyRoute } from '../../utils/route/spy_routes';
 

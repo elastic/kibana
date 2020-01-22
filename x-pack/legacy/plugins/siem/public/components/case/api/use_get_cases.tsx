@@ -7,9 +7,15 @@
 import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
 
 import chrome from 'ui/chrome';
-import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS, UPDATE_TABLE } from './constants';
-import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
-import { CasesSavedObjects, Direction, SortFieldCase } from './types';
+import {
+  DEFAULT_TABLE_ACTIVE_PAGE,
+  DEFAULT_TABLE_LIMIT,
+  FETCH_FAILURE,
+  FETCH_INIT,
+  FETCH_SUCCESS,
+  UPDATE_TABLE,
+} from './constants';
+import { CasesSavedObjects, Direction, SortFieldCase } from '../types';
 
 interface TableArgs {
   page: number;
@@ -102,9 +108,10 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const queryParams = Object.entries(state.table).reduce((acc, [key, value]) => {
-          return `${acc}${key}=${value}&`;
-        }, '?');
+        const queryParams = Object.entries(state.table).reduce(
+          (acc, [key, value]) => `${acc}${key}=${value}&`,
+          '?'
+        );
         const result = await fetch(`${chrome.getBasePath()}/api/cases${queryParams}`, {
           method: 'GET',
           credentials: 'same-origin',
@@ -117,9 +124,10 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
         if (!didCancel) {
           const resultJson = await result.json();
           if (resultJson.statusCode >= 400) {
-            return dispatch({ type: FETCH_FAILURE });
+            dispatch({ type: FETCH_FAILURE });
+          } else {
+            dispatch({ type: FETCH_SUCCESS, payload: resultJson });
           }
-          dispatch({ type: FETCH_SUCCESS, payload: resultJson });
         }
       } catch (error) {
         if (!didCancel) {

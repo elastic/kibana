@@ -13,13 +13,13 @@ import { EmptyPage } from '../../components/empty_page';
 import { HeaderPage } from '../../components/header_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
-import { CasesTable } from '../../components/page/case/cases_table';
+import { CasesTable } from '../../components/case/views/cases_table';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
-export const CaseComponent = React.memo(() => {
+export const CasePage = React.memo(() => {
   const docLinks = useKibana().services.docLinks;
 
   return (
@@ -62,4 +62,4 @@ export const CaseComponent = React.memo(() => {
     </>
   );
 });
-CaseComponent.displayName = 'CaseComponent';
+CasePage.displayName = 'CasePage';

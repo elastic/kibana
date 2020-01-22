@@ -10,8 +10,8 @@ import * as i18n from './translations';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
 import { getCasesColumns } from './columns';
-import { Direction, SortFieldCase } from '../../../../hooks/case/types';
-import { useGetCases } from '../../../../hooks/case/use_get_cases';
+import { Direction, SortFieldCase } from '../../types';
+import { useGetCases } from '../../api/use_get_cases';
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -23,7 +23,7 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 10,
   },
 ];
-export const CasesPaginatedTable = React.memo(() => {
+export const CasesTable = React.memo(() => {
   const [
     {
       data,
@@ -96,4 +96,4 @@ export const CasesPaginatedTable = React.memo(() => {
   );
 });
 
-CasesPaginatedTable.displayName = 'CasesPaginatedTable';
+CasesTable.displayName = 'CasesTable';

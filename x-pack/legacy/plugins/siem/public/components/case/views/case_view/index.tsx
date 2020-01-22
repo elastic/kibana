@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { HeaderPage } from '../../../header_page';
 import * as i18n from '../../../../pages/case/translations';
 import { getCaseUrl } from '../../../link_to';
-import { useGetCase } from '../../../../hooks/case/use_get_case';
+import { useGetCase } from '../../api/use_get_case';
 
 interface Props {
   caseId: string;
@@ -64,8 +64,8 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       definition:
         data.attributes.tags.length > 0 ? (
           <ul>
-            {data.attributes.tags.map((tag, key) => (
-              <li key={key}>{tag}</li>
+            {data.attributes.tags.map((tag: string, key: number) => (
+              <li key={key + tag}>{tag}</li>
             ))}
           </ul>
         ) : null,
