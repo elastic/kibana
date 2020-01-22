@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { FunctionComponent } from 'react';
+import { ComponentType } from 'react';
 
 type Id = string;
-const registry: Record<Id, FunctionComponent> = {};
+const registry: Record<Id, ComponentType<Record<string, any> | undefined>> = {};
 
 /**
  * Attempts to register the provided component.
@@ -29,7 +29,10 @@ const registry: Record<Id, FunctionComponent> = {};
  * @param {*} id the id of the component to register
  * @param {*} component the component
  */
-export function tryRegisterSettingsComponent(id: Id, component: FunctionComponent) {
+export function tryRegisterSettingsComponent(
+  id: Id,
+  component: ComponentType<Record<string, any> | undefined>
+) {
   if (id in registry) {
     return false;
   }
@@ -50,7 +53,7 @@ export function tryRegisterSettingsComponent(id: Id, component: FunctionComponen
  */
 export function registerSettingsComponent(
   id: Id,
-  component: FunctionComponent<Record<string, any>>,
+  component: ComponentType<Record<string, any> | undefined>,
   allowOverride = false
 ) {
   if (!allowOverride && id in registry) {
@@ -72,7 +75,7 @@ export function registerSettingsComponent(
  *
  * @param {*} id the ID of the component to retrieve
  */
-export function getSettingsComponent(id: Id): FunctionComponent<Record<string, any>> {
+export function getSettingsComponent(id: Id): ComponentType<Record<string, any> | undefined> {
   if (!(id in registry)) {
     throw new Error(`Component not found with id ${id}`);
   }
