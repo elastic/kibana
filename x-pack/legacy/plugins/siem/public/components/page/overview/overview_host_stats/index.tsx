@@ -153,7 +153,7 @@ const hostStatGroups: StatGroup[] = [
     groupId: 'endgame',
     name: (
       <FormattedMessage
-        id="xpack.siem.overview.hostStatGroupEndgame"
+        id="xpack.siem.overview.hostStatGroupElasticEndpointSecurity"
         defaultMessage="Elastic Endpoint Security"
       />
     ),
