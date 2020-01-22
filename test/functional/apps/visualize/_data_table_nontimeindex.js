@@ -78,15 +78,15 @@ export default function({ getService, getPageObjects }) {
     it('should show correct data', function() {
       const expectedChartData = [
         ['0B', '2,088'],
-        ['1.953KB', '2,748'],
-        ['3.906KB', '2,707'],
-        ['5.859KB', '2,876'],
-        ['7.813KB', '2,863'],
-        ['9.766KB', '147'],
-        ['11.719KB', '148'],
-        ['13.672KB', '129'],
-        ['15.625KB', '161'],
-        ['17.578KB', '137'],
+        ['2KB', '2,748'],
+        ['3.9KB', '2,707'],
+        ['5.9KB', '2,876'],
+        ['7.8KB', '2,863'],
+        ['9.8KB', '147'],
+        ['11.7KB', '148'],
+        ['13.7KB', '129'],
+        ['15.6KB', '161'],
+        ['17.6KB', '137'],
       ];
 
       return retry.try(async function() {
