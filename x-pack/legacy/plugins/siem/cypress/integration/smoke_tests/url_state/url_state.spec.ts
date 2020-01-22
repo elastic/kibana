@@ -144,9 +144,9 @@ describe('url state', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT }).type(
-      `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`
-    );
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, {
+      timeout: DEFAULT_TIMEOUT,
+    }).type(`{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`, { force: true });
 
     cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click({ force: true });
 
@@ -156,9 +156,10 @@ describe('url state', () => {
       .first()
       .click({ force: true });
 
-    cy.get(DATE_PICKER_ABSOLUTE_INPUT, { timeout: DEFAULT_TIMEOUT }).type(
-      `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}{enter}`
-    );
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT);
+    cy.get(DATE_PICKER_ABSOLUTE_INPUT, {
+      timeout: DEFAULT_TIMEOUT,
+    }).type(`{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}{enter}`, { force: true });
 
     cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click({ force: true });
 
@@ -172,12 +173,20 @@ describe('url state', () => {
 
   it('sets kql on network page', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
+      'have.attr',
+      'value',
+      'source.ip: "10.142.0.9"'
+    );
   });
 
   it('sets kql on hosts page', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
+      'have.attr',
+      'value',
+      'source.ip: "10.142.0.9"'
+    );
   });
 
   it('sets the url state when kql is set', () => {
@@ -249,7 +258,11 @@ describe('url state', () => {
   it('Do not clears kql when navigating to a new page', () => {
     loginAndWaitForPageUrlState(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(NAVIGATION_NETWORK).click({ force: true });
-    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
+      'have.attr',
+      'value',
+      'source.ip: "10.142.0.9"'
+    );
   });
 
   it('sets and reads the url state for timeline by id', () => {
