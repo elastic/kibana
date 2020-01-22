@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '../../common/cancellation_token';
 import { JobParamPostPayload, JobDocPayload, ServerFacade } from '../../types';
 
 export interface FakeRequest {
@@ -142,75 +141,6 @@ export interface SearchSourceQuery {
 export interface SearchSource {
   query: SearchSourceQuery;
   filter: any[];
-}
-
-export interface SearchRequest {
-  index: string;
-  body:
-    | {
-        _source: {
-          excludes: string[];
-          includes: string[];
-        };
-        docvalue_fields: string[];
-        query:
-          | {
-              bool: {
-                filter: any[];
-                must_not: any[];
-                should: any[];
-                must: any[];
-              };
-            }
-          | any;
-        script_fields: any;
-        sort: Array<{
-          [key: string]: {
-            order: string;
-          };
-        }>;
-        stored_fields: string[];
-      }
-    | any;
-}
-
-export interface SavedSearchGeneratorResult {
-  content: string;
-  maxSizeReached: boolean;
-  size: number;
-}
-
-export interface CsvResultFromSearch {
-  type: string;
-  result: SavedSearchGeneratorResult;
-}
-
-type EndpointCaller = (method: string, params: any) => Promise<any>;
-type FormatsMap = Map<
-  string,
-  {
-    id: string;
-    params: {
-      pattern: string;
-    };
-  }
->;
-
-export interface GenerateCsvParams {
-  searchRequest: SearchRequest;
-  callEndpoint: EndpointCaller;
-  fields: string[];
-  formatsMap: FormatsMap;
-  metaFields: string[]; // FIXME not sure what this is for
-  conflictedTypesFields: string[]; // FIXME not sure what this is for
-  cancellationToken: CancellationToken;
-  settings: {
-    separator: string;
-    quoteValues: boolean;
-    timezone: string | null;
-    maxSizeBytes: number;
-    scroll: { duration: string; size: number };
-  };
 }
 
 /*

@@ -48,6 +48,13 @@ import {
   executeActionRoute,
 } from './routes';
 import { LicenseState } from './lib/license_state';
+import { IEventLogger, IEventLogService } from '../../event_log/server';
+
+const EVENT_LOG_PROVIDER = 'actions';
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeViaHttp: 'execute-via-http',
+};
 
 export interface PluginSetupContract {
   registerType: ActionTypeRegistry['register'];
@@ -62,6 +69,7 @@ export interface ActionsPluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
   licensing: LicensingPluginSetup;
   spaces?: SpacesPluginSetup;
+  event_log: IEventLogService;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsStartContract;
@@ -80,6 +88,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private actionExecutor?: ActionExecutor;
   private licenseState: LicenseState | null = null;
   private spaces?: SpacesServiceSetup;
+  private eventLogger?: IEventLogger;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config
@@ -110,6 +119,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',
       attributesToEncrypt: new Set(['apiKey']),
+    });
+
+    plugins.event_log.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.event_log.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
     });
 
     const actionExecutor = new ActionExecutor();
@@ -161,6 +175,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     actionExecutor!.initialize({
       logger,
+      eventLogger: this.eventLogger!,
       spaces: this.spaces,
       getServices: this.getServicesFactory(core.savedObjects),
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,

@@ -80,4 +80,4 @@ export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';
  * The type name used within the Monitoring index to publish management stats.
  * @type {string}
  */
-export const KIBANA_MANAGEMENT_STATS_TYPE = 'management';
+export const KIBANA_STACK_MANAGEMENT_STATS_TYPE = 'stack_management';
