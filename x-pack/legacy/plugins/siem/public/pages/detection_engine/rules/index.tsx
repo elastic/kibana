@@ -35,7 +35,7 @@ export const RulesComponent = React.memo(() => {
     isSignalIndexExists,
     isAuthenticated,
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
   } = useUserInfo();
   const {
@@ -48,7 +48,7 @@ export const RulesComponent = React.memo(() => {
     rulesNotUpdated,
   } = usePrePackagedRules({
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,
