@@ -25,7 +25,7 @@ import {
   UiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
-} from '../../../../../../../core/server/';
+} from '../../../../../../../core/public';
 import { FieldSetting } from './types';
 import { AdvancedSettings } from './advanced_settings';
 
