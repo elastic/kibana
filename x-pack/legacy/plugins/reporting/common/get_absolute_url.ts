@@ -5,24 +5,27 @@
  */
 
 import url from 'url';
-import { ServerFacade } from '../types';
+import { AbsoluteURLFactoryOptions } from '../types';
 
-export function getAbsoluteUrlFactory(server: ServerFacade) {
-  const config = server.config();
-
+export const getAbsoluteUrlFactory = ({
+  protocol,
+  hostname,
+  port,
+  defaultBasePath,
+}: AbsoluteURLFactoryOptions) => {
   return function getAbsoluteUrl({
-    basePath = config.get('server.basePath'),
+    basePath = defaultBasePath,
     hash = '',
     path = '/app/kibana',
     search = '',
   } = {}) {
     return url.format({
-      protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
-      hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
-      port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
+      protocol,
+      hostname,
+      port,
       pathname: basePath + path,
       hash,
       search,
     });
   };
-}
+};
