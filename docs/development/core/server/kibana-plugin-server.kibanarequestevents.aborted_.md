@@ -4,7 +4,7 @@
 
 ## KibanaRequestEvents.aborted$ property
 
-emits once when the request has been aborted.
+Observable that emits once if and when the request has been aborted.
 
 <b>Signature:</b>
 

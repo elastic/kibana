@@ -48,6 +48,7 @@ describe('KibanaRequest', () => {
   describe('events', () => {
     describe('aborted$', () => {
       it('emits once and completes when request aborted', async done => {
+        expect.assertions(1);
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 

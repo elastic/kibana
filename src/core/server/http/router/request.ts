@@ -54,7 +54,7 @@ export interface KibanaRequestRoute<Method extends RouteMethod> {
  * */
 export interface KibanaRequestEvents {
   /**
-   * emits once when the request has been aborted.
+   * Observable that emits once if and when the request has been aborted.
    */
   aborted$: Observable<void>;
 }
