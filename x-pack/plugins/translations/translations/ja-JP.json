@@ -12931,7 +12931,6 @@
     "xpack.watcher.deleteSelectedWatchesConfirmModal.deleteButtonLabel": "{numWatchesToDelete, plural, one {ウォッチ} other {# ウォッチ}}を削除 ",
     "xpack.watcher.deleteSelectedWatchesConfirmModal.descriptionText": "{numWatchesToDelete, plural, one {削除されたウォッチ} other {削除されたウォッチ}}は回復できません",
     "xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage": "JSON引数には\"{missingProperty}\"プロパティが含まれている必要があります",
-    "xpack.watcher.models.actionStatus.notDetermineActionStatusBadImplementationMessage": "アクションステータスを把握できませんでした; action = {actionStatusJson}",
     "xpack.watcher.models.baseAction.selectMessageText": "アクションを実行します。",
     "xpack.watcher.models.baseAction.simulateButtonLabel": "今すぐこのアクションをシミュレート",
     "xpack.watcher.models.baseAction.simulateMessage": "アクション {id} のシミュレーションが完了しました",
