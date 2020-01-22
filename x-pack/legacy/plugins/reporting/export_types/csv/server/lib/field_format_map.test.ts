@@ -5,13 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-
-import { FieldFormatsService } from '../../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
+import { FieldFormatsService } from '../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
 // Reporting uses an unconventional directory structure so the linter marks this as a violation
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BytesFormat, NumberFormat } from '../../../../../../../../../src/plugins/data/server';
+import { BytesFormat, NumberFormat } from '../../../../../../../../src/plugins/data/server';
+import { fieldFormatMapFactory } from './field_format_map';
 
-import { fieldFormatMapFactory } from '../field_format_map';
+type ConfigValue = { number: { id: string; params: {} } } | string;
 
 describe('field format map', function() {
   const indexPatternSavedObject = {
@@ -26,12 +26,12 @@ describe('field format map', function() {
       fieldFormatMap: '{"field1":{"id":"bytes","params":{"pattern":"0,0.[0]b"}}}',
     },
   };
-  const configMock = {};
+  const configMock: Record<string, ConfigValue> = {};
   configMock['format:defaultTypeMap'] = {
     number: { id: 'number', params: {} },
   };
   configMock['format:number:defaultPattern'] = '0,0.[000]';
-  const getConfig = key => configMock[key];
+  const getConfig = (key: string) => configMock[key];
   const testValue = '4000';
 
   const fieldFormats = new FieldFormatsService([BytesFormat, NumberFormat], getConfig);

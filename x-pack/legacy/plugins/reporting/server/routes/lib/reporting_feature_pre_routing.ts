@@ -5,14 +5,20 @@
  */
 
 import Boom from 'boom';
+import { Legacy } from 'kibana';
+import { ServerFacade } from '../../../types';
 
-export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRoutingFn(server) {
+export type GetReportingFeatureIdFn = (request: Legacy.Request) => string;
+
+export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRoutingFn(
+  server: ServerFacade
+) {
   const xpackMainPlugin = server.plugins.xpack_main;
   const pluginId = 'reporting';
 
   // License checking and enable/disable logic
-  return function reportingFeaturePreRouting(getReportingFeatureId) {
-    return function licensePreRouting(request) {
+  return function reportingFeaturePreRouting(getReportingFeatureId: GetReportingFeatureIdFn) {
+    return function licensePreRouting(request: Legacy.Request) {
       const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
       const reportingFeatureId = getReportingFeatureId(request);
       const reportingFeature = licenseCheckResults[reportingFeatureId];

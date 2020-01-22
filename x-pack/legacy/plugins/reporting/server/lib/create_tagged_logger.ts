@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServerFacade } from '../../types';
+
 /**
  * @function taggedLogger
  * @param {string} message
@@ -17,8 +19,8 @@
  * @param {string[]} tags - tags to always be passed into the `logger` function
  * @returns taggedLogger
  */
-export function createTaggedLogger(server, tags) {
-  return (msg, additionalTags = []) => {
+export function createTaggedLogger(server: ServerFacade, tags: string[]) {
+  return (msg: string, additionalTags = []) => {
     server.log([...tags, ...additionalTags], msg);
   };
 }

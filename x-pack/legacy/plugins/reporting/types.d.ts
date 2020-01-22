@@ -354,3 +354,9 @@ export interface InterceptedRequest {
   frameId: string;
   resourceType: string;
 }
+
+export interface FieldFormats {
+  getConfig: number;
+  getInstance: (config: any) => any;
+  getDefaultInstance: (key: string) => any;
+}
