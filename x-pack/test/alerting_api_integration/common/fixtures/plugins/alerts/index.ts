@@ -98,7 +98,7 @@ export default function(kibana: any) {
               source: 'action:test.failing',
             },
           });
-          throw new Error('Failed to execute action type');
+          throw new Error(`expected failure for ${params.index} ${params.reference}`);
         },
       };
       const rateLimitedActionType: ActionType = {

@@ -16,6 +16,7 @@ import {
   savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
+import { createEventLoggerMock } from '../../../../../plugins/event_log/server/event_logger.mock';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -62,6 +63,7 @@ const actionExecutorInitializerParams = {
   actionTypeRegistry,
   spaces: () => undefined,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
+  eventLogger: createEventLoggerMock(),
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,

@@ -19,20 +19,16 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-
+import { History } from 'history';
+import { Subscription } from 'rxjs';
 import { Moment } from 'moment';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 import { ViewMode } from '../../../../../../plugins/embeddable/public';
+import { migrateLegacyQuery } from '../legacy_imports';
 import {
-  stateMonitorFactory,
-  StateMonitor,
-  AppStateClass as TAppStateClass,
-  migrateLegacyQuery,
-} from '../legacy_imports';
-import {
-  Query,
   esFilters,
+  Query,
   TimefilterContract as Timefilter,
 } from '../../../../../../plugins/data/public';
 
@@ -41,7 +37,20 @@ import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_o
 import { FilterUtils } from './lib/filter_utils';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
-import { SavedDashboardPanel, DashboardAppState, DashboardAppStateDefaults } from './types';
+import {
+  DashboardAppState,
+  DashboardAppStateDefaults,
+  DashboardAppStateTransitions,
+  SavedDashboardPanel,
+} from './types';
+import {
+  createKbnUrlStateStorage,
+  createStateContainer,
+  IKbnUrlStateStorage,
+  ISyncStateRef,
+  ReduxLikeStateContainer,
+  syncState,
+} from '../../../../../../plugins/kibana_utils/public';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -51,7 +60,6 @@ import { SavedDashboardPanel, DashboardAppState, DashboardAppStateDefaults } fro
  */
 export class DashboardStateManager {
   public savedDashboard: SavedObjectDashboard;
-  public appState: DashboardAppState;
   public lastSavedDashboardFilters: {
     timeTo?: string | Moment;
     timeFrom?: string | Moment;
@@ -63,38 +71,78 @@ export class DashboardStateManager {
   private kibanaVersion: string;
   public isDirty: boolean;
   private changeListeners: Array<(status: { dirty: boolean }) => void>;
-  private stateMonitor: StateMonitor<DashboardAppStateDefaults>;
+
+  public get appState(): DashboardAppState {
+    return this.stateContainer.get();
+  }
+
+  private readonly stateContainer: ReduxLikeStateContainer<
+    DashboardAppState,
+    DashboardAppStateTransitions
+  >;
+  private readonly stateContainerChangeSub: Subscription;
+  private readonly STATE_STORAGE_KEY = '_a';
+  private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
+  private readonly stateSyncRef: ISyncStateRef;
+  private readonly history: History;
 
   /**
    *
    * @param savedDashboard
-   * @param AppState The AppState class to use when instantiating a new AppState instance.
    * @param hideWriteControls true if write controls should be hidden.
+   * @param kibanaVersion current kibanaVersion
+   * @param
    */
   constructor({
     savedDashboard,
-    AppStateClass,
     hideWriteControls,
     kibanaVersion,
+    useHashedUrl,
+    history,
   }: {
     savedDashboard: SavedObjectDashboard;
-    AppStateClass: TAppStateClass<DashboardAppState>;
     hideWriteControls: boolean;
     kibanaVersion: string;
+    useHashedUrl: boolean;
+    history: History;
   }) {
+    this.history = history;
     this.kibanaVersion = kibanaVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
 
-    this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
+    // get state defaults from saved dashboard, make sure it is migrated
+    this.stateDefaults = migrateAppState(
+      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
+      kibanaVersion
+    );
 
-    this.appState = new AppStateClass(this.stateDefaults);
+    this.kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: useHashedUrl, history });
 
-    // Initializing appState does two things - first it translates the defaults into AppState, second it updates
-    // appState based on the URL (the url trumps the defaults). This means if we update the state format at all and
-    // want to handle BWC, we must not only migrate the data stored with saved Dashboard, but also any old state in the
-    // url.
-    migrateAppState(this.appState, kibanaVersion);
+    // setup initial state by merging defaults with state from url
+    // also run migration, as state in url could be of older version
+    const initialState = migrateAppState(
+      {
+        ...this.stateDefaults,
+        ...this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
+      },
+      kibanaVersion
+    );
+
+    // setup state container using initial state both from defaults and from url
+    this.stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(
+      initialState,
+      {
+        set: state => (prop, value) => ({ ...state, [prop]: value }),
+        setOption: state => (option, value) => ({
+          ...state,
+          options: {
+            ...state.options,
+            [option]: value,
+          },
+        }),
+      }
+    );
 
     this.isDirty = false;
 
@@ -104,29 +152,35 @@ export class DashboardStateManager {
     // in the 'lose changes' warning message.
     this.lastSavedDashboardFilters = this.getFilterState();
 
-    /**
-     * Creates a state monitor and saves it to this.stateMonitor. Used to track unsaved changes made to appState.
-     */
-    this.stateMonitor = stateMonitorFactory.create<DashboardAppStateDefaults>(
-      this.appState,
-      this.stateDefaults
-    );
-
-    this.stateMonitor.ignoreProps('viewMode');
-    // Filters need to be compared manually because they sometimes have a $$hashkey stored on the object.
-    this.stateMonitor.ignoreProps('filters');
-    // Query needs to be compared manually because saved legacy queries get migrated in app state automatically
-    this.stateMonitor.ignoreProps('query');
-
-    this.stateMonitor.onChange((status: { dirty: boolean }) => {
-      this.isDirty = status.dirty;
-    });
-
     this.changeListeners = [];
 
-    this.stateMonitor.onChange((status: { dirty: boolean }) => {
-      this.changeListeners.forEach(listener => listener(status));
+    this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
+      this.isDirty = this.checkIsDirty();
+      this.changeListeners.forEach(listener => listener({ dirty: this.isDirty }));
     });
+
+    // make sure url ('_a') matches initial state
+    this.kbnUrlStateStorage.set(this.STATE_STORAGE_KEY, initialState, { replace: true });
+
+    // setup state syncing utils. state container will be synched with url into `this.STATE_STORAGE_KEY` query param
+    this.stateSyncRef = syncState<DashboardAppState>({
+      storageKey: this.STATE_STORAGE_KEY,
+      stateContainer: {
+        ...this.stateContainer,
+        set: (state: DashboardAppState | null) => {
+          // sync state required state container to be able to handle null
+          // overriding set() so it could handle null coming from url
+          this.stateContainer.set({
+            ...this.stateDefaults,
+            ...state,
+          });
+        },
+      },
+      stateStorage: this.kbnUrlStateStorage,
+    });
+
+    // actually start syncing state with container
+    this.stateSyncRef.start();
   }
 
   public registerChangeListener(callback: (status: { dirty: boolean }) => void) {
@@ -172,7 +226,7 @@ export class DashboardStateManager {
     });
 
     if (dirty) {
-      this.appState.panels = Object.values(convertedPanelStateMap);
+      this.stateContainer.transitions.set('panels', Object.values(convertedPanelStateMap));
     }
 
     if (input.isFullScreenMode !== this.getFullScreenMode()) {
@@ -184,7 +238,6 @@ export class DashboardStateManager {
     }
 
     this.changeListeners.forEach(listener => listener({ dirty }));
-    this.saveState();
   }
 
   public getFullScreenMode() {
@@ -192,8 +245,11 @@ export class DashboardStateManager {
   }
 
   public setFullScreenMode(fullScreenMode: boolean) {
-    this.appState.fullScreenMode = fullScreenMode;
-    this.saveState();
+    this.stateContainer.transitions.set('fullScreenMode', fullScreenMode);
+  }
+
+  public setFilters(filters: esFilters.Filter[]) {
+    this.stateContainer.transitions.set('filters', filters);
   }
 
   /**
@@ -210,7 +266,10 @@ export class DashboardStateManager {
     // The right way to fix this might be to ensure the defaults object stored on state is a deep
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
-    this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
+    this.stateDefaults = migrateAppState(
+      getAppStateDefaults(this.savedDashboard, this.hideWriteControls),
+      this.kibanaVersion
+    );
     // The original query won't be restored by the above because the query on this.savedDashboard is applied
     // in place in order for it to affect the visualizations.
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
@@ -218,9 +277,7 @@ export class DashboardStateManager {
     this.stateDefaults.filters = [...this.getLastSavedFilterBars()];
 
     this.isDirty = false;
-    this.appState.setDefaults(this.stateDefaults);
-    this.appState.reset();
-    this.stateMonitor.setInitialState(this.appState.toJSON());
+    this.stateContainer.set(this.stateDefaults);
   }
 
   /**
@@ -252,31 +309,28 @@ export class DashboardStateManager {
   }
 
   public setDescription(description: string) {
-    this.appState.description = description;
-    this.saveState();
+    this.stateContainer.transitions.set('description', description);
   }
 
   public setTitle(title: string) {
-    this.appState.title = title;
     this.savedDashboard.title = title;
-    this.saveState();
+    this.stateContainer.transitions.set('title', title);
   }
 
   public getAppState() {
-    return this.appState;
+    return this.stateContainer.get();
   }
 
   public getQuery(): Query {
-    return migrateLegacyQuery(this.appState.query);
+    return migrateLegacyQuery(this.stateContainer.get().query);
   }
 
   public getSavedQueryId() {
-    return this.appState.savedQuery;
+    return this.stateContainer.get().savedQuery;
   }
 
   public setSavedQueryId(id?: string) {
-    this.appState.savedQuery = id;
-    this.saveState();
+    this.stateContainer.transitions.set('savedQuery', id);
   }
 
   public getUseMargins() {
@@ -287,8 +341,7 @@ export class DashboardStateManager {
   }
 
   public setUseMargins(useMargins: boolean) {
-    this.appState.options.useMargins = useMargins;
-    this.saveState();
+    this.stateContainer.transitions.setOption('useMargins', useMargins);
   }
 
   public getHidePanelTitles() {
@@ -296,8 +349,7 @@ export class DashboardStateManager {
   }
 
   public setHidePanelTitles(hidePanelTitles: boolean) {
-    this.appState.options.hidePanelTitles = hidePanelTitles;
-    this.saveState();
+    this.stateContainer.transitions.setOption('hidePanelTitles', hidePanelTitles);
   }
 
   public getTimeRestore() {
@@ -305,8 +357,7 @@ export class DashboardStateManager {
   }
 
   public setTimeRestore(timeRestore: boolean) {
-    this.appState.timeRestore = timeRestore;
-    this.saveState();
+    this.stateContainer.transitions.set('timeRestore', timeRestore);
   }
 
   public getIsTimeSavedWithDashboard() {
@@ -397,7 +448,6 @@ export class DashboardStateManager {
       (panel: SavedDashboardPanel) => panel.panelIndex === panelIndex
     );
     Object.assign(foundPanel, panelAttributes);
-    this.saveState();
     return foundPanel;
   }
 
@@ -456,15 +506,37 @@ export class DashboardStateManager {
   }
 
   /**
-   * Saves the current application state to the URL.
+   * Synchronously writes current state to url
+   * returned boolean indicates whether the update happened and if history was updated
    */
-  public saveState() {
-    this.appState.save();
+  private saveState({ replace }: { replace: boolean }): boolean {
+    // schedules setting current state to url
+    this.kbnUrlStateStorage.set<DashboardAppState>(
+      this.STATE_STORAGE_KEY,
+      this.stateContainer.get()
+    );
+    // immediately forces scheduled updates and changes location
+    return this.kbnUrlStateStorage.flush({ replace });
+  }
+
+  // TODO: find nicer solution for this
+  // this function helps to make just 1 browser history update, when we imperatively changing the dashboard url
+  // It could be that there is pending *dashboardStateManager* updates, which aren't flushed yet to the url.
+  // So to prevent 2 browser updates:
+  // 1. Force flush any pending state updates (syncing state to query)
+  // 2. If url was updated, then apply path change with replace
+  public changeDashboardUrl(pathname: string) {
+    // synchronously persist current state to url with push()
+    const updated = this.saveState({ replace: false });
+    // change pathname
+    this.history[updated ? 'replace' : 'push']({
+      ...this.history.location,
+      pathname,
+    });
   }
 
   public setQuery(query: Query) {
-    this.appState.query = query;
-    this.saveState();
+    this.stateContainer.transitions.set('query', query);
   }
 
   /**
@@ -472,24 +544,33 @@ export class DashboardStateManager {
    * @param filter An array of filter bar filters.
    */
   public applyFilters(query: Query, filters: esFilters.Filter[]) {
-    this.appState.query = query;
     this.savedDashboard.searchSource.setField('query', query);
     this.savedDashboard.searchSource.setField('filter', filters);
-    this.saveState();
+    this.stateContainer.transitions.set('query', query);
   }
 
   public switchViewMode(newMode: ViewMode) {
-    this.appState.viewMode = newMode;
-    this.saveState();
+    this.stateContainer.transitions.set('viewMode', newMode);
   }
 
   /**
    * Destroys and cleans up this object when it's no longer used.
    */
   public destroy() {
-    if (this.stateMonitor) {
-      this.stateMonitor.destroy();
-    }
+    this.stateContainerChangeSub.unsubscribe();
     this.savedDashboard.destroy();
+    if (this.stateSyncRef) {
+      this.stateSyncRef.stop();
+    }
+  }
+
+  private checkIsDirty() {
+    // Filters need to be compared manually because they sometimes have a $$hashkey stored on the object.
+    // Query needs to be compared manually because saved legacy queries get migrated in app state automatically
+    const propsToIgnore: Array<keyof DashboardAppState> = ['viewMode', 'filters', 'query'];
+
+    const initial = _.omit(this.stateDefaults, propsToIgnore);
+    const current = _.omit(this.stateContainer.get(), propsToIgnore);
+    return !_.isEqual(initial, current);
   }
 }
