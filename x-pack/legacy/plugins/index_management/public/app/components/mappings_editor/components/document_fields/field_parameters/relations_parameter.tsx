@@ -154,7 +154,7 @@ export const RelationsParameter = () => {
       })}
       withToggle={false}
     >
-      <UseArray path="relations">
+      <UseArray path="relations" initialNumberOfItems={0}>
         {({ items, addItem, removeItem }) => {
           const columns: Array<EuiBasicTableColumn<any>> = [
             // Parent column
