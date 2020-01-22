@@ -31,6 +31,10 @@ export class ColorMapSelect extends Component {
     const useCustomColorMap = selectedValue === CUSTOM_COLOR_MAP;
     this.props.onChange({
       color: useCustomColorMap ? null : selectedValue,
+      customColorMap:
+        useCustomColorMap && !this.props.customColorMap
+          ? this.props.generateDefaultColorMap() // Seed empty custom color map so users don't start with an empty slate
+          : this.props.customColorMap, // preserve custom color map on select
       useCustomColorMap,
       type: this.props.colorMapType,
     });

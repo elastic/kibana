@@ -14,7 +14,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { VECTOR_STYLES } from '../vector_style_defaults';
-import { DynamicColorProperty } from './dynamic_color_property';
+import { DynamicColorProperty, dynamicRound } from './dynamic_color_property';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 
 const mockField = {
@@ -63,6 +63,12 @@ const defaultLegendParams = {
   isPointsOnly: true,
   isLinesOnly: false,
 };
+
+test('dynamicRound', () => {
+  expect(dynamicRound(1000.1234)).toBe(1000);
+  expect(dynamicRound(1.1234)).toBe(1.12);
+  expect(dynamicRound(0.0012345678)).toBe(0.00123);
+});
 
 test('Should render ordinal legend', async () => {
   const colorStyle = makeProperty(

@@ -92,7 +92,7 @@ export function getLinearGradient(colorStrings) {
   return `${linearGradient} ${colorStrings[colorStrings.length - 1]} 100%)`;
 }
 
-const COLOR_PALETTES_CONFIGS = [
+export const COLOR_PALETTES_CONFIGS = [
   {
     id: 'palette_0',
     colors: DEFAULT_FILL_COLORS.slice(0, COLOR_PALETTE_MAX_SIZE),

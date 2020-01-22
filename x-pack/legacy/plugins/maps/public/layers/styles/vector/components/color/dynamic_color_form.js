@@ -67,6 +67,7 @@ export function DynamicColorForm({
           color={styleOptions.color}
           customColorMap={styleOptions.customColorRamp}
           useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
+          generateDefaultColorMap={styleProperty.generateDefaultColorMap}
           compressed
         />
       );
@@ -83,6 +84,7 @@ export function DynamicColorForm({
         color={styleOptions.colorCategory}
         customColorMap={styleOptions.customColorPalette}
         useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
+        generateDefaultColorMap={styleProperty.generateDefaultColorMap}
         compressed
       />
     );

@@ -7,7 +7,12 @@
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
 import { getComputedFieldName } from '../style_util';
-import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
+import {
+  COLOR_PALETTES_CONFIGS,
+  getOrdinalColorRampStops,
+  getColorPalette,
+  getHexColorRangeStrings,
+} from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
 import {
@@ -27,6 +32,21 @@ import {
 } from '../components/color/color_stops_utils';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
+
+export function dynamicRound(value) {
+  if (value === NaN) {
+    return value;
+  }
+
+  let precision = 0;
+  let threshold = 10;
+  while (value < threshold && precision < 8) {
+    precision++;
+    threshold = threshold / 10;
+  }
+
+  return precision === 0 ? Math.round(value) : parseFloat(value.toFixed(precision + 1));
+}
 
 export class DynamicColorProperty extends DynamicStyleProperty {
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
@@ -103,6 +123,47 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   hasOrdinalBreaks() {
     return (this.isOrdinal() && this.isCustomOrdinalColorRamp()) || this.isCategorical();
   }
+
+  generateDefaultColorMap = () => {
+    const fieldMeta = this.getFieldMeta();
+    if (!fieldMeta) {
+      // Can not generate color map if we do not know anything about the field
+      return null;
+    }
+
+    if (this.isOrdinal()) {
+      const range = fieldMeta.max - fieldMeta.min;
+      const colorStrings = getHexColorRangeStrings(this._options.color);
+      if (!colorStrings || !range || range === NaN || range <= 0) {
+        return;
+      }
+      const stepSize = range / colorStrings.length;
+      return colorStrings.map((color, index) => {
+        const stop = fieldMeta.min + index * stepSize;
+        return { stop: dynamicRound(stop), color };
+      });
+    }
+
+    if (!fieldMeta.categories || fieldMeta.categories.length === 0) {
+      return;
+    }
+
+    const categoryColors = [...COLOR_PALETTES_CONFIGS[0].colors];
+    const otherCategoryColor = categoryColors.pop();
+
+    const colorMap = [{ stop: null, color: otherCategoryColor }];
+    for (let i = 0; i < categoryColors.length; i++) {
+      if (i >= fieldMeta.categories.length) {
+        // no more categories left for color assignment
+        break;
+      }
+      colorMap.push({
+        stop: fieldMeta.categories[i].key,
+        color: categoryColors[i],
+      });
+    }
+    return colorMap;
+  };
 
   _getMbColor() {
     const isDynamicConfigComplete =
