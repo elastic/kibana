@@ -41,6 +41,8 @@ import { DynamicTextProperty } from './properties/dynamic_text_property';
 import { LabelBorderSizeProperty } from './properties/label_border_size_property';
 import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
 import { SymbolizeAsProperty } from './properties/symbolize_as_property';
+import { StaticIconProperty } from './properties/static_icon_property';
+import { DynamicIconProperty } from './properties/dynamic_icon_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -563,16 +565,20 @@ export class VectorStyle extends AbstractStyle {
   }
 
   setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
-    const symbolId = this._getSymbolId();
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(this._getSymbolId()));
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
+    this._iconStyleProperty.syncIconWithMb(
+      symbolLayerId,
+      mbMap,
+      this._iconSizeStyleProperty.getIconPixelSize()
+    );
     // icon-color is only supported on SDF icons.
     this._fillColorStyleProperty.syncIconColorWithMb(symbolLayerId, mbMap);
     this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);
     this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
-    this._iconSizeStyleProperty.syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId);
+    this._iconSizeStyleProperty.syncIconSizeWithMb(symbolLayerId, mbMap);
     this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
   }
 
@@ -668,12 +674,12 @@ export class VectorStyle extends AbstractStyle {
 
   _makeIconProperty(descriptor) {
     if (!descriptor || !descriptor.options) {
-      return new StaticStyleProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.ICON);
+      return new StaticIconProperty({ value: DEFAULT_ICON }, VECTOR_STYLES.ICON);
     } else if (descriptor.type === StaticStyleProperty.type) {
-      return new StaticStyleProperty(descriptor.options, VECTOR_STYLES.ICON);
+      return new StaticIconProperty(descriptor.options, VECTOR_STYLES.ICON);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      return new DynamicStyleProperty(
+      return new DynamicIconProperty(
         descriptor.options,
         VECTOR_STYLES.ICON,
         field,
