@@ -103,6 +103,7 @@ export interface BasicTableProps<T> {
   itemsPerRow?: ItemsPerRow[];
   isInspect?: boolean;
   limit: number;
+  limitResetsActivePage?: boolean;
   loading: boolean;
   loadPage: (activePage: number) => void;
   onChange?: (criteria: Criteria) => void;
@@ -142,6 +143,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   isInspect,
   itemsPerRow,
   limit,
+  limitResetsActivePage = true,
   loading,
   loadPage,
   onChange = noop,
@@ -223,7 +225,9 @@ const PaginatedTableComponent: FC<SiemTables> = ({
         onClick={() => {
           closePopover();
           updateLimitPagination(item.numberOfRow);
-          updateActivePage(0); // reset results to first page
+          if (limitResetsActivePage) {
+            updateActivePage(0);
+          } // reset results to first page
         }}
       >
         {item.text}

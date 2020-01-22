@@ -51,45 +51,39 @@ export const CasesPaginatedTableComponent = React.memo(
       doFetch,
     ] = useCaseApi();
 
-    const updateActivePage = newPage => {
-      console.log('updateActivePage newPage', newPage);
-      return doFetch({
+    const updateActivePage = (newPage: number) =>
+      doFetch({
         page: newPage + 1,
       });
-    };
 
-    const updateLimitPagination = newLimit => {
-      console.log('updateLimitPagination newLimit', newLimit);
-      return doFetch({
+    const updateLimitPagination = (newLimit: number) =>
+      doFetch({
+        page: 1, // reset to first page
         perPage: newLimit,
       });
-    };
 
-    const onChange = useCallback(
-      (criteria: Criteria) => {
-        if (criteria.sort != null && criteria.sort.direction !== sortOrder) {
-          let newSort;
-          switch (criteria.sort.field) {
-            case 'attributes.state':
-              newSort = SortFieldCase.state;
-              break;
-            case 'attributes.created_at':
-              newSort = SortFieldCase.created_at;
-              break;
-            case 'updated_at':
-              newSort = SortFieldCase.updated_at;
-              break;
-            default:
-              newSort = SortFieldCase.created_at;
-          }
-          doFetch({
-            sortField: newSort,
-            sortOrder: criteria.sort.direction as Direction,
-          });
+    const onChange = (criteria: Criteria) => {
+      if (criteria.sort != null && criteria.sort.direction !== sortOrder) {
+        let newSort;
+        switch (criteria.sort.field) {
+          case 'attributes.state':
+            newSort = SortFieldCase.state;
+            break;
+          case 'attributes.created_at':
+            newSort = SortFieldCase.created_at;
+            break;
+          case 'updated_at':
+            newSort = SortFieldCase.updated_at;
+            break;
+          default:
+            newSort = SortFieldCase.created_at;
         }
-      },
-      [sortOrder, updateCaseTable]
-    );
+        doFetch({
+          sortField: newSort,
+          sortOrder: criteria.sort.direction as Direction,
+        });
+      }
+    };
 
     const sorting = { field: `attributes.${sortField}`, direction: sortOrder };
     return isError ? null : (
@@ -105,8 +99,9 @@ export const CasesPaginatedTableComponent = React.memo(
         id={id}
         itemsPerRow={rowItems}
         limit={perPage}
+        limitResetsActivePage={false}
         loading={isLoading}
-        loadPage={newPage => updateActivePage(newPage)}
+        loadPage={newPage => newPage}
         onChange={onChange}
         pageOfItems={data.saved_objects}
         showMorePagesIndicator={false}

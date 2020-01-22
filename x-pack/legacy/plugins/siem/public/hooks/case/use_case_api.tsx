@@ -49,11 +49,12 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
         isError: false,
       };
     case FETCH_SUCCESS:
+      const getSavedObject = a => a as CasesSavedObjects;
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: action.payload,
+        data: getSavedObject(action.payload),
       };
     case FETCH_FAILURE:
       return {
@@ -62,7 +63,6 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
         isError: true,
       };
     case UPDATE_TABLE:
-      console.log('UPDATE_TABLE return');
       return {
         ...state,
         table: {
@@ -95,12 +95,10 @@ export const useCaseApi = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>] 
   const [query, setQuery] = useState(state.table as QueryArgs);
 
   useEffect(() => {
-    console.log('useEffect ONE', { query, table: state.table });
     dispatch({ type: UPDATE_TABLE, payload: query });
   }, [query]);
 
   useEffect(() => {
-    console.log('useEffect TWO', { query, table: state.table });
     let didCancel = false;
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT, payload: {} });
@@ -121,7 +119,6 @@ export const useCaseApi = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>] 
           dispatch({ type: FETCH_SUCCESS, payload: await result.json() });
         }
       } catch (error) {
-        console.log('ERRROR', error);
         if (!didCancel) {
           dispatch({ type: FETCH_FAILURE, payload: {} });
         }
