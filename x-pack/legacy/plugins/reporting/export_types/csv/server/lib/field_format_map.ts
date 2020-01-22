@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { FieldFormats } from '../../../../types';
+import { FieldFormats } from '../../../../../../../../src/plugins/data/server';
 
 interface IndexPatternSavedObject {
   attributes: {

@@ -5,10 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { FieldFormatsService } from '../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
-// Reporting uses an unconventional directory structure so the linter marks this as a violation
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BytesFormat, NumberFormat } from '../../../../../../../../src/plugins/data/server';
+
+import {
+  BytesFormat,
+  NumberFormat,
+  FieldFormats,
+} from '../../../../../../../../src/plugins/data/server';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;
@@ -34,7 +36,7 @@ describe('field format map', function() {
   const getConfig = (key: string) => configMock[key];
   const testValue = '4000';
 
-  const fieldFormats = new FieldFormatsService([BytesFormat, NumberFormat], getConfig);
+  const fieldFormats = new FieldFormats([BytesFormat, NumberFormat], getConfig);
 
   const formatMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
 

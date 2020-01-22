@@ -10,9 +10,6 @@ import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../common/cancellation_token';
-
-// Reporting uses an unconventional directory structure so the linter marks this as a violation
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { StringFormat, FieldFormats } from '../../../../../../../../src/plugins/data/server';
 
 import { executeJobFactory } from '../execute_job';
@@ -84,8 +81,7 @@ describe('CSV Execute Job', function() {
         uiConfigMock['format:defaultTypeMap'] = {
           _default_: { id: 'string', params: {} },
         };
-
-        return new FieldFormats([StringFormat], uiConfigMock);
+        return new FieldFormats([StringFormat], key => uiConfigMock[key]);
       },
       plugins: {
         elasticsearch: {

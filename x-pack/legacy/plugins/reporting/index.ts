@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
+import { IUiSettingsClient } from 'kibana/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 import { config as reportingConfig } from './config';
@@ -22,6 +23,10 @@ import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/ser
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
 };
+
+interface ReportingDeps {
+  data: DataPluginStart;
+}
 
 export const reporting = (kibana: any) => {
   return new kibana.Plugin({
@@ -73,7 +78,12 @@ export const reporting = (kibana: any) => {
         usageCollection: server.newPlatform.setup.plugins.usageCollection,
       };
 
-      const data = server.newPlatform.setup.plugins.data as DataPluginStart;
+      const fieldFormatServiceFactory = async (uiSettings: IUiSettingsClient) => {
+        const [, plugins] = await coreSetup.getStartServices();
+        const { fieldFormats } = (plugins as ReportingDeps).data;
+
+        return fieldFormats.fieldFormatServiceFactory(uiSettings);
+      };
 
       const __LEGACY: LegacySetup = {
         config: server.config,
@@ -85,7 +95,7 @@ export const reporting = (kibana: any) => {
           security: server.plugins.security,
         },
         savedObjects: server.savedObjects,
-        fieldFormatServiceFactory: data.fieldFormats.fieldFormatServiceFactory,
+        fieldFormatServiceFactory,
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
         log: server.log.bind(server),
       };

@@ -5,12 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ExecuteJobFactory,
-  ESQueueWorkerExecuteFn,
-  FieldFormats,
-  ServerFacade,
-} from '../../../types';
+import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../types';
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { JobDocPayloadDiscoverCsv } from '../types';
@@ -89,7 +84,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
-        const fieldFormats = (await server.fieldFormatServiceFactory(uiConfig)) as FieldFormats;
+        const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),
       (async () => {
