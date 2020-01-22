@@ -23,31 +23,33 @@ import {
   clientProviderInstanceMock,
 } from './saved_objects_service.test.mocks';
 
-import { SavedObjectsService, SavedObjectsSetupDeps } from './saved_objects_service';
+import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
 import * as legacyElasticsearch from 'elasticsearch';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('SavedObjectsService', () => {
-  const createSetupDeps = ({ clusterClient = { callAsInternalUser: jest.fn() } }) => {
-    return ({
-      elasticsearch: { adminClient: clusterClient },
-      legacyPlugins: { uiExports: { savedObjectMappings: [] }, pluginExtendedConfig: {} },
-    } as unknown) as SavedObjectsSetupDeps;
+  const createSetupDeps = () => {
+    return {
+      elasticsearch: elasticsearchServiceMock.createInternalSetup(),
+      legacyPlugins: legacyServiceMock.createDiscoverPlugins(),
+    };
   };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   describe('#setup()', () => {
     describe('#setClientFactoryProvider', () => {
       it('registers the factory to the clientProvider', async () => {
         const coreContext = mockCoreContext.create();
         const soService = new SavedObjectsService(coreContext);
-        const setup = await soService.setup(createSetupDeps({}));
+        const setup = await soService.setup(createSetupDeps());
 
         const factory = jest.fn();
         const factoryProvider: SavedObjectsClientFactoryProvider = () => factory;
@@ -61,7 +63,7 @@ describe('SavedObjectsService', () => {
       it('throws if a factory is already registered', async () => {
         const coreContext = mockCoreContext.create();
         const soService = new SavedObjectsService(coreContext);
-        const setup = await soService.setup(createSetupDeps({}));
+        const setup = await soService.setup(createSetupDeps());
 
         const firstFactory = () => jest.fn();
         const secondFactory = () => jest.fn();
@@ -80,7 +82,7 @@ describe('SavedObjectsService', () => {
       it('registers the wrapper to the clientProvider', async () => {
         const coreContext = mockCoreContext.create();
         const soService = new SavedObjectsService(coreContext);
-        const setup = await soService.setup(createSetupDeps({}));
+        const setup = await soService.setup(createSetupDeps());
 
         const wrapperA = jest.fn();
         const wrapperB = jest.fn();
@@ -108,19 +110,18 @@ describe('SavedObjectsService', () => {
   describe('#start()', () => {
     it('creates a KibanaMigrator which retries NoConnections errors from callAsInternalUser', async () => {
       const coreContext = mockCoreContext.create();
-      let i = 0;
-      const clusterClient = {
-        callAsInternalUser: jest
-          .fn()
-          .mockImplementation(() =>
-            i++ <= 2
-              ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
-              : Promise.resolve('success')
-          ),
-      };
 
       const soService = new SavedObjectsService(coreContext);
-      const coreSetup = createSetupDeps({ clusterClient });
+      const coreSetup = createSetupDeps();
+
+      let i = 0;
+      coreSetup.elasticsearch.adminClient.callAsInternalUser = jest
+        .fn()
+        .mockImplementation(() =>
+          i++ <= 2
+            ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
+            : Promise.resolve('success')
+        );
 
       await soService.setup(coreSetup);
       await soService.start({}, 1);
@@ -134,7 +135,7 @@ describe('SavedObjectsService', () => {
       });
       const soService = new SavedObjectsService(coreContext);
 
-      await soService.setup(createSetupDeps({}));
+      await soService.setup(createSetupDeps());
       await soService.start({});
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(true);
     });
@@ -143,7 +144,7 @@ describe('SavedObjectsService', () => {
       const configService = configServiceMock.create({ atPath: { skip: true } });
       const coreContext = mockCoreContext.create({ configService });
       const soService = new SavedObjectsService(coreContext);
-      await soService.setup(createSetupDeps({}));
+      await soService.setup(createSetupDeps());
       await soService.start({});
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(true);
     });
@@ -152,7 +153,7 @@ describe('SavedObjectsService', () => {
       const configService = configServiceMock.create({ atPath: { skip: false } });
       const coreContext = mockCoreContext.create({ configService });
       const soService = new SavedObjectsService(coreContext);
-      await soService.setup(createSetupDeps({}));
+      await soService.setup(createSetupDeps());
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
 
       const startContract = await soService.start({});

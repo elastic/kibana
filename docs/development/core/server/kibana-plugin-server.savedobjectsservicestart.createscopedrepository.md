@@ -14,5 +14,5 @@ createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObj
 
 ## Remarks
 
-The repository should only be used for creating and registering a client factory or client wrapper. Using the repository directly for interacting with Saved Objects is an anti-pattern. Use the Saved Objects client from the [SavedObjectsServiceStart\#getScopedClient](./kibana-plugin-server.savedobjectsservicestart.md) method or the [route handler context](./kibana-plugin-server.requesthandlercontext.md) instead.
+Prefer using `getScopedClient`<!-- -->. This should only be used when using methods not exposed on [SavedObjectsClientContract](./kibana-plugin-server.savedobjectsclientcontract.md)
 

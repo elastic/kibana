@@ -131,28 +131,19 @@ export interface SavedObjectsServiceStart {
    * uses the credentials from the passed in request to authenticate with
    * Elasticsearch.
    *
+   * @param req - The request to create the scoped repository from.
+   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   *
    * @remarks
-   * The repository should only be used for creating and registering a client
-   * factory or client wrapper. Using the repository directly for interacting
-   * with Saved Objects is an anti-pattern. Use the Saved Objects client from
-   * the
-   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
-   * method or the {@link RequestHandlerContext | route handler context}
-   * instead.
+   * Prefer using `getScopedClient`. This should only be used when using methods
+   * not exposed on {@link SavedObjectsClientContract}
    */
   createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
-   * @remarks
-   * The repository should only be used for creating and registering a client
-   * factory or client wrapper. Using the repository directly for interacting
-   * with Saved Objects is an anti-pattern. Use the Saved Objects client from
-   * the
-   * {@link SavedObjectsServiceStart | SavedObjectsServiceStart#getScopedClient }
-   * method or the {@link RequestHandlerContext | route handler context}
-   * instead.
+   * @param extraTypes - A list of additional hidden types the repository should have access to.
    */
   createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
 }
