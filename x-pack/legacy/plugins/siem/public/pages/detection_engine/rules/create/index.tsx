@@ -258,7 +258,7 @@ const CreateRulePageComponent: React.FC = () => {
           isLoading={isLoading || loading}
           title={i18n.PAGE_TITLE}
         />
-        <MyEuiPanel zIndex={3}>
+        <MyEuiPanel zindex={3}>
           <StepDefineRuleAccordion
             initialIsOpen={true}
             id={RuleStep.defineRule}
