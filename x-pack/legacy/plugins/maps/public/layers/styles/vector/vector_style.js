@@ -175,7 +175,7 @@ export class VectorStyle extends AbstractStyle {
    * This method does not update its descriptor. It just returns a new descriptor that the caller
    * can then use to update store state via dispatch.
    */
-  getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
+  getDescriptorWithMissingStylePropsRemoved(nextFields) {
     const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
@@ -192,7 +192,7 @@ export class VectorStyle extends AbstractStyle {
         return;
       }
 
-      const matchingOrdinalField = nextOrdinalFields.find(ordinalField => {
+      const matchingOrdinalField = nextFields.find(ordinalField => {
         return fieldName === ordinalField.getName();
       });
 
