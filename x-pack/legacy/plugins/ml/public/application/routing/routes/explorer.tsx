@@ -24,7 +24,7 @@ import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
-import { getDateFormatTz } from '../../explorer/explorer_utils';
+import { getDateFormatTz, TimeRangeBounds } from '../../explorer/explorer_utils';
 import { useSwimlaneLimit } from '../../explorer/select_limit';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useShowCharts } from '../../components/controls/checkbox_showcharts';
@@ -80,11 +80,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (refresh !== undefined) {
       setLastRefresh(refresh?.lastRefresh);
 
-      const activeBounds = timefilter.getActiveBounds();
-      if (activeBounds !== undefined) {
-        explorerService.setBounds(activeBounds);
-      }
-
       if (refresh.timeRange !== undefined) {
         const { start, end } = refresh.timeRange;
         setGlobalState('time', {
@@ -94,6 +89,26 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       }
     }
   }, [refresh?.lastRefresh]);
+
+  // We cannot simply infer bounds from the globalState's `time` attribute
+  // with `moment` since it can contain custom strings such as `now-15m`.
+  // So when globalState's `time` changes, we update the timefilter and use
+  // `timefilter.getBounds()` to update `bounds` in this component's state.
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+
+      const timefilterBounds = timefilter.getBounds();
+      // Only if both min/max bounds are valid moment times set the bounds.
+      // An invalid string restored from globalState might return `undefined`.
+      if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
+        explorerService.setBounds(timefilterBounds);
+      }
+    }
+  }, [globalState?.time?.from, globalState?.time?.to]);
 
   useEffect(() => {
     timefilter.enableTimeRangeSelector();
@@ -109,19 +124,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.setFilterData(filterData);
     }
   }, []);
-
-  useEffect(() => {
-    if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
-      explorerService.setBounds({
-        min: moment(globalState.time.from),
-        max: moment(globalState.time.to),
-      });
-    }
-  }, [globalState?.time?.from, globalState?.time?.to]);
 
   useEffect(() => {
     if (jobIds.length > 0) {
