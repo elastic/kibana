@@ -63,8 +63,6 @@ describe('updateActionRoute', () => {
 
     expect(await handler(context, req, res)).toEqual({ body: updateResult });
 
-    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
-
     expect(actionsClient.update).toHaveBeenCalledTimes(1);
     expect(actionsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

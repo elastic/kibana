@@ -6,6 +6,7 @@
 
 import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
+import { httpServerMock } from '../../../../../src/core/server/mocks';
 
 export function mockHandlerArguments(
   { actionsClient, listTypes: listTypesRes = [] }: any,
@@ -36,20 +37,7 @@ export function mockHandlerArguments(
 }
 
 export const mockResponseFactory = (resToMock: Array<MethodKeysOf<KibanaResponseFactory>> = []) => {
-  const factory: jest.Mocked<KibanaResponseFactory> = {
-    ok: jest.fn(),
-    accepted: jest.fn(),
-    noContent: jest.fn(),
-    redirected: jest.fn(),
-    badRequest: jest.fn(),
-    unauthorized: jest.fn(),
-    forbidden: jest.fn(),
-    notFound: jest.fn(),
-    conflict: jest.fn(),
-    internalError: jest.fn(),
-    customError: jest.fn(),
-    custom: jest.fn(),
-  };
+  const factory: jest.Mocked<KibanaResponseFactory> = httpServerMock.createResponseFactory();
   resToMock.forEach((key: string) => {
     if (key in factory) {
       Object.defineProperty(factory, key, {

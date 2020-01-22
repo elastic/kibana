@@ -44,13 +44,7 @@ describe('listActionTypesRoute', () => {
       },
     ];
 
-    const [context, req, res] = mockHandlerArguments(
-      { listTypes },
-      {
-        params: { id: '1' },
-      },
-      ['ok']
-    );
+    const [context, req, res] = mockHandlerArguments({ listTypes }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {

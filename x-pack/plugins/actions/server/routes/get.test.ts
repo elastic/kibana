@@ -65,8 +65,6 @@ describe('getActionRoute', () => {
       }
     `);
 
-    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
-
     expect(actionsClient.get).toHaveBeenCalledTimes(1);
     expect(actionsClient.get.mock.calls[0][0].id).toEqual('1');
 
