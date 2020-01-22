@@ -32,7 +32,7 @@ describe('<MappingsEditor />', () => {
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
-      expect(exists('multipleMappingsCallout')).toBe(true);
+      expect(exists('mappingTypesDetectedCallout')).toBe(true);
       expect(exists('documentFields')).toBe(false);
     });
 
@@ -48,7 +48,7 @@ describe('<MappingsEditor />', () => {
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
-      expect(exists('multipleMappingsCallout')).toBe(false);
+      expect(exists('mappingTypesDetectedCallout')).toBe(false);
       expect(exists('documentFields')).toBe(true);
     });
   });

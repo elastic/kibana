@@ -6,32 +6,37 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { documentationService } from '../../../services/documentation';
 
 export const MultipleMappingsWarning = () => (
   <EuiCallOut
-    title={i18n.translate('xpack.idxMgmt.mappingsEditor.multipleMappingsCallOutTitle', {
-      defaultMessage: 'Multiple mappings detected',
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutTitle', {
+      defaultMessage: 'Mapping types detected',
     })}
     iconType="alert"
     color="warning"
-    data-test-subj="multipleMappingsCallout"
+    data-test-subj="mappingTypesDetectedCallout"
   >
     <p>
-      {i18n.translate('xpack.idxMgmt.mappingsEditor.multipleMappingsCallOutDescription1', {
-        defaultMessage:
-          'This template has multiple mappings declared for different document types. In order to edit the mappings you need to migrate to a single-type index mapping.',
-      })}
-    </p>
-
-    <p>
-      <a href={documentationService.getRemovalMappingTypeLink()} target="_blank">
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.multipleMappingsCallOutDescription2', {
-          defaultMessage: 'Learn more about the removal of mapping types.',
-        })}
-      </a>
+      <FormattedMessage
+        id="xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutDescription"
+        defaultMessage="The mappings for this template uses types, which have been removed. {docsLink}"
+        values={{
+          docsLink: (
+            <EuiLink href={documentationService.getRemovalMappingTypeLink()} target="_blank">
+              {i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutDocumentationLink',
+                {
+                  defaultMessage: 'Consider these alternatives to mapping types.',
+                }
+              )}
+            </EuiLink>
+          ),
+        }}
+      />
     </p>
   </EuiCallOut>
 );
