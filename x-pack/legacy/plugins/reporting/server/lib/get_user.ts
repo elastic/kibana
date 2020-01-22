@@ -19,7 +19,7 @@ export function getUserFactory(server: ServerFacade, logger: Logger) {
     try {
       return await server.plugins.security.getUser(request);
     } catch (err) {
-      logger.error(err);
+      logger.error(err, ['getUser']);
       return null;
     }
   };
