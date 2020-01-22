@@ -33,8 +33,9 @@ export async function injectAngularElement(
   template: string,
   scopeProps: DocViewRenderProps,
   Controller: IController,
-  $injector: auto.IInjectorService
+  getInjector: () => Promise<auto.IInjectorService>
 ): Promise<() => void> {
+  const $injector = await getInjector();
   const rootScope: AngularScope = $injector.get('$rootScope');
   const $compile: ICompileService = $injector.get('$compile');
   const newScope = Object.assign(rootScope.$new(), scopeProps);
@@ -66,7 +67,7 @@ export async function injectAngularElement(
  */
 export function convertDirectiveToRenderFn(
   directive: AngularDirective,
-  injector: auto.IInjectorService
+  getInjector: () => Promise<auto.IInjectorService>
 ) {
   return (domNode: Element, props: DocViewRenderProps) => {
     let rejected = false;
@@ -76,7 +77,7 @@ export function convertDirectiveToRenderFn(
       directive.template,
       props,
       directive.controller,
-      injector
+      getInjector
     );
     cleanupFnPromise.catch(e => {
       rejected = true;

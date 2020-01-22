@@ -25,7 +25,7 @@ import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { setAngularModule, setServices, setDocViewsRegistry } from './kibana_services';
+import { setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { buildServices } from './build_services';
@@ -42,10 +42,10 @@ import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
  * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
  * @public
  */
-export type DiscoverStart = Promise<{
+export interface DiscoverSetup {
   addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
-}>;
-export type DiscoverSetup = void;
+}
+export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
   uiActions: IUiActionsSetup;
   embeddable: IEmbeddableSetup;
@@ -72,15 +72,33 @@ const embeddableAngularName = 'app/discoverEmbeddable';
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
-  private injectorEmbeddable: auto.IInjectorService | null = null;
+  private docViewsRegistry: DocViewsRegistry | null = null;
+  private embeddableInjector: auto.IInjectorService | null = null;
+  private getEmbeddableInjector: (() => Promise<auto.IInjectorService>) | null = null;
   /**
    * why are those functions public? they are needed for some mocha tests
    * can be removed once all is Jest
    */
   public initializeInnerAngular?: () => void;
-  public initializeServices?: () => void;
+  public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
+    this.getEmbeddableInjector = this.getInjector.bind(this);
+    this.docViewsRegistry = new DocViewsRegistry(this.getEmbeddableInjector);
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
+        defaultMessage: 'Table',
+      }),
+      order: 10,
+      component: DocViewTable,
+    });
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('kbn.discover.docViews.json.jsonTitle', {
+        defaultMessage: 'JSON',
+      }),
+      order: 20,
+      component: JsonCodeBlock,
+    });
     plugins.kibana_legacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
@@ -101,9 +119,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       },
     });
     registerFeature(plugins.home);
+
+    return {
+      addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
+    };
   }
 
-  async start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+  start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
     // we need to register the application service at setup, but to render it
     // there are some start dependencies necessary, for this reason
     // initializeInnerAngular + initializeServices are assigned at start and used
@@ -120,37 +142,16 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
 
     this.initializeServices = async () => {
       if (this.servicesInitialized) {
-        return;
+        return { core, plugins };
       }
-      const services = await buildServices(core, plugins);
+      const services = await buildServices(core, plugins, this.docViewsRegistry!);
       setServices(services);
       this.servicesInitialized = true;
+
+      return { core, plugins };
     };
-
-    this.injectorEmbeddable = await this.getInjectorEmbeddable(core, plugins);
-    const docViewsRegistry = new DocViewsRegistry(this.injectorEmbeddable);
-    setDocViewsRegistry(docViewsRegistry);
-
-    docViewsRegistry.addDocView({
-      title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
-        defaultMessage: 'Table',
-      }),
-      order: 10,
-      component: DocViewTable,
-    });
-    docViewsRegistry.addDocView({
-      title: i18n.translate('kbn.discover.docViews.json.jsonTitle', {
-        defaultMessage: 'JSON',
-      }),
-      order: 20,
-      component: JsonCodeBlock,
-    });
 
     this.registerEmbeddable(core, plugins);
-
-    return {
-      addDocView: docViewsRegistry.addDocView.bind(docViewsRegistry),
-    };
   }
 
   /**
@@ -158,29 +159,31 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
    */
   private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
     const { SearchEmbeddableFactory } = await import('./np_ready/embeddable');
-    const getInjector = async () => {
-      if (!this.injectorEmbeddable) {
-        throw Error('Discover plugin registerEmbeddable:  injectorEmbeddable is undefined');
-      }
-      return this.injectorEmbeddable;
-    };
     const isEditable = () => core.application.capabilities.discover.save as boolean;
+
+    if (!this.getEmbeddableInjector) {
+      throw Error('Discover plugin method getEmbeddableInjector is undefined');
+    }
 
     const factory = new SearchEmbeddableFactory(
       plugins.uiActions.executeTriggerActions,
-      getInjector,
+      this.getEmbeddableInjector,
       isEditable
     );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
-  private async getInjectorEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
-    if (!this.initializeServices) {
-      throw Error('Discover plugin getInjectorEmbeddable:  initializeServices is undefined');
+  private async getInjector() {
+    if (!this.embeddableInjector) {
+      if (!this.initializeServices) {
+        throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
+      }
+      const { core, plugins } = await this.initializeServices();
+      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
+      const mountpoint = document.createElement('div');
+      this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
     }
-    await this.initializeServices();
-    getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
-    const mountpoint = document.createElement('div');
-    return angular.bootstrap(mountpoint, [embeddableAngularName]);
+
+    return this.embeddableInjector;
   }
 }

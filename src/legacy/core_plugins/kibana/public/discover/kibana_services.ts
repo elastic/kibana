@@ -18,11 +18,9 @@
  */
 import angular from 'angular'; // just used in embeddables and discover controller
 import { DiscoverServices } from './build_services';
-import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
-let docViewsRegistry: DocViewsRegistry | null = null;
 
 /**
  * set bootstrapped inner angular module
@@ -47,17 +45,6 @@ export function getServices(): DiscoverServices {
 
 export function setServices(newServices: any) {
   services = newServices;
-}
-
-export function setDocViewsRegistry(registry: DocViewsRegistry) {
-  docViewsRegistry = registry;
-}
-
-export function getDocViewsRegistry() {
-  if (!docViewsRegistry) {
-    throw new Error('Discover docViewsRegistry are not yet available');
-  }
-  return docViewsRegistry;
 }
 
 // import directives that

@@ -18,17 +18,9 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
 import { DiscoverPlugin } from './plugin';
 
 // Core will be looking for this when loading our plugin in the new platform
 export const plugin = (context: PluginInitializerContext) => {
   return new DiscoverPlugin();
 };
-
-// Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
-export const pluginInstance = plugin({} as PluginInitializerContext);
-export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
-export const start = pluginInstance.start(npStart.core, npStart.plugins);
-
-export { createSavedSearchesService } from './saved_searches/saved_searches';

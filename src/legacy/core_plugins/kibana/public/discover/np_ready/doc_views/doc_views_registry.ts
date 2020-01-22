@@ -24,7 +24,7 @@ import { DocView, DocViewInput, ElasticSearchHit, DocViewInputFn } from './doc_v
 export class DocViewsRegistry {
   private docViews: DocView[] = [];
 
-  constructor(private injector: auto.IInjectorService) {}
+  constructor(private getInjector: () => Promise<auto.IInjectorService>) {}
 
   /**
    * Extends and adds the given doc view to the registry array
@@ -33,7 +33,7 @@ export class DocViewsRegistry {
     const docView = typeof docViewRaw === 'function' ? docViewRaw() : docViewRaw;
     if (docView.directive) {
       // convert angular directive to render function for backwards compatibility
-      docView.render = convertDirectiveToRenderFn(docView.directive, this.injector);
+      docView.render = convertDirectiveToRenderFn(docView.directive, this.getInjector);
     }
     if (typeof docView.shouldShow !== 'function') {
       docView.shouldShow = () => true;
