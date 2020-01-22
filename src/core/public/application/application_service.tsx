@@ -114,11 +114,11 @@ export class ApplicationService {
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    // Only setup history if we're not in legacy mode
-    if (!injectedMetadata.getLegacyMode()) {
-      this.history = history || createBrowserHistory({ basename });
-    } else {
+    if (injectedMetadata.getLegacyMode()) {
       this.currentAppId$.next(injectedMetadata.getLegacyMetadata().app.id);
+    } else {
+      // Only setup history if we're not in legacy mode
+      this.history = history || createBrowserHistory({ basename });
     }
 
     // If we do not have history available, use redirectTo to do a full page refresh.
