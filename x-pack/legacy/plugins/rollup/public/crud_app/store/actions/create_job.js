@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npSetup } from '../../../legacy_imports';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
@@ -23,6 +22,8 @@ import {
   CREATE_JOB_FAILURE,
   CLEAR_CREATE_JOB_ERRORS,
 } from '../action_types';
+
+import { getFatalErrors } from '../../../kibana_services';
 
 export const createJob = jobConfig => async dispatch => {
   dispatch({
@@ -78,7 +79,7 @@ export const createJob = jobConfig => async dispatch => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return npSetup.core.fatalErrors.add(
+    return getFatalErrors().add(
       error,
       i18n.translate('xpack.rollupJobs.createAction.errorTitle', {
         defaultMessage: 'Error creating rollup job',

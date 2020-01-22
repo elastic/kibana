@@ -14,8 +14,6 @@ import first from 'lodash/array/first';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { npSetup } from '../../../legacy_imports';
-
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 
 import {
@@ -58,6 +56,8 @@ import {
   getAffectedStepsFields,
   hasErrors,
 } from './steps_config';
+
+import { getFatalErrors } from '../../../kibana_services';
 
 const stepIdToTitleMap = {
   [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.steps.stepLogisticsTitle', {
@@ -324,7 +324,7 @@ export class JobCreateUi extends Component {
 
         // This error isn't an HTTP error, so let the fatal error screen tell the user something
         // unexpected happened.
-        npSetup.core.fatalErrors.add(
+        getFatalErrors().add(
           error,
           i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
             defaultMessage: 'Rollup Job Wizard index pattern validation',

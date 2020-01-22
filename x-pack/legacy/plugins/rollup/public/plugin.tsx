@@ -43,7 +43,8 @@ import { ManagementStart } from '../../../../../src/plugins/management/public';
 import { rollupJobsStore } from './crud_app/store';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 // @ts-ignore
-import { setEsBaseAndXPackBase } from './crud_app/services';
+import { setEsBaseAndXPackBase, setHttp, setApiPrefix } from './crud_app/services';
+import { setNotifications, setFatalErrors } from './kibana_services';
 
 export interface RollupPluginSetupDependencies {
   __LEGACY: {
@@ -78,6 +79,7 @@ export class RollupPlugin implements Plugin {
       home,
     }: RollupPluginSetupDependencies
   ) {
+    setFatalErrors(core.fatalErrors);
     addBadgeExtension(rollupBadgeExtension);
     addToggleExtension(rollupToggleExtension);
 
@@ -109,6 +111,9 @@ export class RollupPlugin implements Plugin {
   }
 
   start(core: CoreStart, { management }: RollupPluginStartDependencies) {
+    setHttp(core.http);
+    setApiPrefix(core.http.basePath.prepend('/api/rollup'));
+    setNotifications(core.notifications);
     setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
 
     const esSection = management.sections.getSection('elasticsearch');
@@ -133,9 +138,6 @@ export class RollupPlugin implements Plugin {
             <I18nContext>
               <KibanaContextProvider
                 services={{
-                  http: core.http,
-                  notifications: core.notifications,
-                  chrome: core.chrome,
                   setBreadcrumbs: params.setBreadcrumbs,
                 }}
               >

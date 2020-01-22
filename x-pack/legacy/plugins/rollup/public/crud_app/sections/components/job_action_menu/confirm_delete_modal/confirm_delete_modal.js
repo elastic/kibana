@@ -41,19 +41,19 @@ class ConfirmDeleteModal extends Component {
   }
 
   render() {
-    const { isSingleSelection, jobs, onCancel, onConfirm, intl } = this.props;
+    const { isSingleSelection, jobs, onCancel, onConfirm } = this.props;
 
     let title;
     let content;
 
     if (isSingleSelection) {
       const { id, status } = jobs[0];
-      title = intl.formatMessage(
+      title = i18n.translate(
+        'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.deleteSingleJobTitle',
         {
-          id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.deleteSingleJobTitle',
           defaultMessage: "Delete rollup job '{id}'?",
-        },
-        { id }
+          values: { id },
+        }
       );
 
       if (status === 'started') {
@@ -67,12 +67,12 @@ class ConfirmDeleteModal extends Component {
         );
       }
     } else {
-      title = intl.formatMessage(
+      title = i18n.translate(
+        'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.multipleDeletionTitle',
         {
-          id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.multipleDeletionTitle',
           defaultMessage: 'Delete {count} rollup jobs?',
-        },
-        { count: jobs.length }
+          values: { count: jobs.length },
+        }
       );
 
       content = (
@@ -95,15 +95,19 @@ class ConfirmDeleteModal extends Component {
           title={title}
           onCancel={onCancel}
           onConfirm={onConfirm}
-          cancelButtonText={intl.formatMessage({
-            id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.cancelButtonText',
-            defaultMessage: 'Cancel',
-          })}
+          cancelButtonText={i18n.translate(
+            'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.cancelButtonText',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
           buttonColor="danger"
-          confirmButtonText={intl.formatMessage({
-            id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.confirmButtonText',
-            defaultMessage: 'Delete',
-          })}
+          confirmButtonText={i18n.translate(
+            'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.confirmButtonText',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
         >
           {content}
         </EuiConfirmModal>

@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  npSetup,
-  npStart,
-  aggTypeFilters,
-  aggTypeFieldFilters,
-  editorConfigProviders,
-} from './legacy_imports';
+import { npSetup, npStart } from 'ui/new_platform';
+import { aggTypeFilters, aggTypeFieldFilters, editorConfigProviders } from './legacy_imports';
 import { addSearchStrategy } from '../../../../../src/legacy/core_plugins/data/public/search/search_strategy';
 import { RollupPlugin } from './plugin';
 import { setup as management } from '../../../../../src/legacy/core_plugins/management/public/legacy';

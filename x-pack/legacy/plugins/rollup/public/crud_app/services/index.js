@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createJob, deleteJobs, loadJobs, startJobs, stopJobs, validateIndexPattern } from './api';
+export {
+  createJob,
+  deleteJobs,
+  loadJobs,
+  startJobs,
+  stopJobs,
+  validateIndexPattern,
+  setApiPrefix,
+} from './api';
 
 export { showApiError, showApiWarning } from './api_errors';
 
@@ -26,6 +34,8 @@ export { filterItems } from './filter_items';
 export { flattenPanelTree } from './flatten_panel_tree';
 
 export { formatFields } from './format_fields';
+
+export { setHttp, getHttp } from './http_provider';
 
 export { serializeJob, deserializeJob, deserializeJobs } from './jobs';
 
