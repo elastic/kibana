@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Request } from './types';
+import { Response, Request, ExecutionError, JsonObject } from './types';
 
 export function parseJSON(text: string) {
   try {
@@ -38,7 +38,15 @@ export function buildRequestPayload(
   return request;
 }
 
-export function getFromLocalStorage(key: string, defaultValue: any = '', parse = false) {
+/**
+ * Retrieves a value from the browsers local storage, provides a default
+ * if none is given. With the parse flag you can parse textual JSON to an object
+ */
+export function getFromLocalStorage(
+  key: string,
+  defaultValue: string | JsonObject = '',
+  parse = false
+) {
   const value = localStorage.getItem(key);
   if (value && parse) {
     try {
@@ -48,12 +56,14 @@ export function getFromLocalStorage(key: string, defaultValue: any = '', parse =
     }
   } else if (value) {
     return value;
-  } else {
-    return defaultValue;
   }
+  return defaultValue;
 }
 
-export function formatJson(json: any): string {
+/**
+ * Stringify a given object to JSON in a formatted way
+ */
+export function formatJson(json: unknown): string {
   try {
     return JSON.stringify(json, null, 2);
   } catch (e) {
@@ -61,7 +71,16 @@ export function formatJson(json: any): string {
   }
 }
 
-export function formatExecutionError(json: object) {
+export function formatResponse(response: Response) {
+  if (response.result) {
+    return response.result;
+  } else if (response.error) {
+    return formatExecutionError(response.error);
+  }
+  return formatJson(response);
+}
+
+export function formatExecutionError(json: ExecutionError) {
   if (json.script_stack && json.caused_by) {
     return `Unhandled Exception ${json.caused_by.type}
 

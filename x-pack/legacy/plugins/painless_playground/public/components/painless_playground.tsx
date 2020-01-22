@@ -24,12 +24,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
-import {
-  buildRequestPayload,
-  formatJson,
-  formatExecutionError,
-  getFromLocalStorage,
-} from './helpers';
+import { buildRequestPayload, formatJson, getFromLocalStorage, formatResponse } from './helpers';
 import { Request, Response } from './types';
 import { painlessContextOptions } from './constants';
 
@@ -74,7 +69,7 @@ export function PainlessPlayground({
   };
 
   const renderMainControls = () => (
-    <EuiFlexGroup gutter="s">
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiButton
           fill
@@ -332,7 +327,7 @@ export function PainlessPlayground({
                       <EuiSpacer size="s" />
                       <EuiPanel>
                         <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-                          {response.result ?? formatExecutionError(response.error)}
+                          {formatResponse(response)}
                         </EuiCodeBlock>
                       </EuiPanel>
                     </>

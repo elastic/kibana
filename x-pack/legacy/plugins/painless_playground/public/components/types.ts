@@ -16,6 +16,24 @@ export interface Request {
 }
 
 export interface Response {
-  error?: { [key: string]: any };
+  error?: ExecutionError;
   result?: string;
+}
+
+export type ExecutionErrorScriptStack = string[];
+
+export interface ExecutionError {
+  script_stack?: ExecutionErrorScriptStack;
+  caused_by?: {
+    type: string;
+    reason: string;
+  };
+  message?: string;
+}
+
+export type JsonArray = JsonValue[];
+export type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
+
+export interface JsonObject {
+  [key: string]: JsonValue;
 }
