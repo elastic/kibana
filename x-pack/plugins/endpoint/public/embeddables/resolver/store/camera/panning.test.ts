@@ -71,7 +71,7 @@ describe('panning interaction', () => {
         store.dispatch(action);
       });
       it('moves the camera south so that objects appear closer to the bottom of the screen', () => {
-        const actual = translation(store.getState());
+        const actual: Vector2 = translation(store.getState())(new Date(0));
         expect(actual).toMatchInlineSnapshot(`
           Array [
             0,
@@ -86,7 +86,7 @@ describe('panning interaction', () => {
         store.dispatch(action);
       });
       it('moves the camera north so that objects appear closer to the top of the screen', () => {
-        const actual = translation(store.getState());
+        const actual: Vector2 = translation(store.getState())(new Date(0));
         expect(actual).toMatchInlineSnapshot(`
           Array [
             0,
@@ -101,7 +101,7 @@ describe('panning interaction', () => {
         store.dispatch(action);
       });
       it('moves the camera west so that objects appear closer to the left of the screen', () => {
-        const actual = translation(store.getState());
+        const actual: Vector2 = translation(store.getState())(new Date(0));
         expect(actual).toMatchInlineSnapshot(`
           Array [
             -32.49906769231164,
@@ -116,7 +116,7 @@ describe('panning interaction', () => {
         store.dispatch(action);
       });
       it('moves the camera east so that objects appear closer to the right of the screen', () => {
-        const actual = translation(store.getState());
+        const actual: Vector2 = translation(store.getState())(new Date(0));
         expect(actual).toMatchInlineSnapshot(`
           Array [
             32.49906769231164,
