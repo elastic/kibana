@@ -35,6 +35,7 @@ import { StatefulEventChild } from './stateful_event_child';
 
 interface Props {
   actionsColumnWidth: number;
+  containerElementRef: HTMLDivElement;
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
@@ -86,7 +87,7 @@ const TOP_OFFSET = 50;
  * keep around 5 rows rendering below it. All other DOM elements are replaced with their "blank"
  * rows.
  */
-const BOTTOM_OFFSET = -500;
+const BOTTOM_OFFSET = -50;
 
 interface AttributesProps {
   children: React.ReactNode;
@@ -115,6 +116,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
   addNoteToEvent,
   browserFields,
+  containerElementRef,
   columnHeaders,
   columnRenderers,
   event,
@@ -201,6 +203,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     <VisibilitySensor
       partialVisibility={true}
       scrollCheck={true}
+      containment={containerElementRef}
       offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
     >
       {({ isVisible }) => {
