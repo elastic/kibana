@@ -19,7 +19,7 @@ export const createBootstrapIndex = async (
   index: string
 ): Promise<unknown> => {
   return callWithRequest('transport.request', {
-    path: `${index}-000001`,
+    path: `/${index}-000001`,
     method: 'PUT',
     body: {
       aliases: {

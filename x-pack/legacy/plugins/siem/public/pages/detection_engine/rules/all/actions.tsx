@@ -64,13 +64,12 @@ export const deleteRulesAction = async (
   onRuleDeleted?: () => void
 ) => {
   try {
-    dispatch({ type: 'updateLoading', ids, isLoading: true });
+    dispatch({ type: 'loading', isLoading: true });
 
     const response = await deleteRules({ ids });
-    const { rules, errors } = bucketRulesResponse(response);
+    const { errors } = bucketRulesResponse(response);
 
-    dispatch({ type: 'deleteRules', rules });
-
+    dispatch({ type: 'refresh' });
     if (errors.length > 0) {
       displayErrorToast(
         i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ids.length),
