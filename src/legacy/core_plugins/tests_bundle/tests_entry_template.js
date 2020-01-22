@@ -81,7 +81,7 @@ const coreSystem = new CoreSystem({
       app: {
         id: 'karma',
         title: 'Karma',
-      }
+      },
       nav: [],
       version: '1.2.3',
       buildNum: 1234,
