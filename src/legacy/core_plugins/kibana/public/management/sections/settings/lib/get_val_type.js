@@ -31,5 +31,11 @@ export function getValType(def, value) {
     return 'array';
   }
 
-  return def.value != null ? typeof def.value : typeof value;
+  const typeofVal = def.value != null ? typeof def.value : typeof value;
+
+  if (typeofVal === 'undefined') {
+    throw new Error(`uiSettingsType of undefined ${JSON.stringify(def)}`);
+  }
+
+  return typeofVal;
 }
