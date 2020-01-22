@@ -34,6 +34,9 @@ import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/e
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
+// TODO: Remove when converted to jest
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { colorMapsService as colorMaps } from '../../../../../plugins/charts/public/services';
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
@@ -82,6 +85,7 @@ describe('CoordinateMapsVisualizationTest', function() {
         serviceSettings,
         uiSettings,
         $injector,
+        colorMaps,
       };
 
       if (!visRegComplete) {

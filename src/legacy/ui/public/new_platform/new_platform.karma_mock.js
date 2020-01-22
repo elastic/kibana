@@ -135,6 +135,19 @@ export const npSetup = {
         update: sinon.fake(),
       },
     },
+    charts: {
+      colorMaps: {
+        getHeatmapColors: sinon.fake(),
+        vislibColorMaps: {},
+        colorSchemas: [],
+        truncatedColorMaps: {},
+        truncatedColorSchemas: [],
+      },
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
+    },
   },
 };
 
@@ -270,10 +283,26 @@ export const npStart = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        get: sinon.fake(),
+      },
     },
     navigation: {
       ui: {
         TopNavMenu: mockComponent,
+      },
+    },
+    charts: {
+      colorMaps: {
+        getHeatmapColors: sinon.fake(),
+        vislibColorMaps: {},
+        colorSchemas: [],
+        truncatedColorMaps: {},
+        truncatedColorSchemas: [],
+      },
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
       },
     },
   },
