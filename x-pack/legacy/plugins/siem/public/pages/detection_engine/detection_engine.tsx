@@ -54,7 +54,7 @@ export interface DispatchProps {
   }>;
 }
 
-type DetectionEngineComponentProps = ReduxProps & DispatchProps;
+type DetectionEnginePageComponentProps = ReduxProps & DispatchProps;
 
 const detectionsTabs = [
   {
@@ -69,7 +69,7 @@ const detectionsTabs = [
   },
 ];
 
-const DetectionEngineComponent: React.FC<DetectionEngineComponentProps> = ({
+const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> = ({
   filters,
   query,
   setAbsoluteRangeDatePicker,
@@ -238,4 +238,4 @@ const mapDispatchToProps = {
 export const DetectionEnginePage = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(React.memo(DetectionEngineComponent));
+)(React.memo(DetectionEnginePageComponent));

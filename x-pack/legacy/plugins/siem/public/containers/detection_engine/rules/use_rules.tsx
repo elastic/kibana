@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { FetchRulesResponse, FilterOptions, PaginationOptions } from './types';
 import { useStateToaster } from '../../../components/toasters';
@@ -12,36 +12,33 @@ import { fetchRules } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
-type Return = [boolean, FetchRulesResponse];
+type Func = () => void;
+type Return = [boolean, FetchRulesResponse, Func | null];
 
 /**
  * Hook for using the list of Rules from the Detection Engine API
  *
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param filterOptions desired filters (e.g. filter/sortField/sortOrder)
- * @param refetchToggle toggle for refetching data
  */
-export const useRules = (
-  pagination: PaginationOptions,
-  filterOptions: FilterOptions,
-  refetchToggle: boolean
-): Return => {
+export const useRules = (pagination: PaginationOptions, filterOptions: FilterOptions): Return => {
   const [rules, setRules] = useState<FetchRulesResponse>({
     page: 1,
     perPage: 20,
     total: 0,
     data: [],
   });
+  const reFetchRules = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    setLoading(true);
 
     async function fetchData() {
       try {
+        setLoading(true);
         const fetchRulesResult = await fetchRules({
           filterOptions,
           pagination,
@@ -62,12 +59,12 @@ export const useRules = (
     }
 
     fetchData();
+    reFetchRules.current = fetchData;
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
   }, [
-    refetchToggle,
     pagination.page,
     pagination.perPage,
     filterOptions.filter,
@@ -75,5 +72,5 @@ export const useRules = (
     filterOptions.sortOrder,
   ]);
 
-  return [loading, rules];
+  return [loading, rules, reFetchRules.current];
 };
