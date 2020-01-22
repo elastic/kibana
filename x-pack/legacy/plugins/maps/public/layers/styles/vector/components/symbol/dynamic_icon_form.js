@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React, { Fragment } from 'react';
 import { FieldSelect } from '../field_select';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { IconMapSelect } from './icon_map_select';
 
 export function DynamicIconForm({
   fields,
@@ -15,7 +16,6 @@ export function DynamicIconForm({
   onDynamicStyleChange,
   staticDynamicSelect,
   styleProperty,
-  symbolOptions,
 }) {
   const styleOptions = styleProperty.getOptions();
 
@@ -26,6 +26,21 @@ export function DynamicIconForm({
       field: { name, origin },
     });
   };
+
+  const onIconMapChange = newOptions => {
+    onDynamicStyleChange(styleProperty.getStyleName(), {
+      ...styleOptions,
+      ...newOptions,
+    });
+  };
+
+  function renderIconMapSelect() {
+    if (!styleOptions.field || !styleOptions.field.name) {
+      return null;
+    }
+
+    return <IconMapSelect {...styleOptions} onChange={onIconMapChange} isDarkMode={isDarkMode} />;
+  }
 
   return (
     <Fragment>
@@ -41,6 +56,7 @@ export function DynamicIconForm({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
+      {renderIconMapSelect()}
     </Fragment>
   );
 }

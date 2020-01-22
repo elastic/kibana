@@ -76,7 +76,7 @@ export class SymbolIcon extends Component {
       return null;
     }
 
-    return <img width="16px" src={this.state.imgDataUrl} alt={this.props.symbolId} />;
+    return <img width="16px" height="18px" src={this.state.imgDataUrl} alt={this.props.symbolId} />;
   }
 }
 

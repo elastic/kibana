@@ -100,14 +100,23 @@ const ICON_PALETTES = [
 export function getIconPaletteOptions(isDarkMode) {
   return ICON_PALETTES.map(({ id, icons }) => {
     const iconsDisplay = icons.map(iconId => {
+      const style = {
+        width: '10%',
+        position: 'relative',
+        height: '100%',
+        display: 'inline-block',
+        paddingTop: '4px',
+      };
       return (
-        <SymbolIcon
-          key={iconId}
-          symbolId={iconId}
-          fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-          stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
-          strokeWidth={'1px'}
-        />
+        <div style={style} key={iconId}>
+          <SymbolIcon
+            className="mapIcon"
+            symbolId={iconId}
+            fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
+            strokeWidth={'1px'}
+          />
+        </div>
       );
     });
     return {
