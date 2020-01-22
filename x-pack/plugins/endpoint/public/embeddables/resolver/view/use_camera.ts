@@ -5,11 +5,10 @@
  */
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
+import ResizeObserver from 'resize-observer-polyfill';
 import { Matrix3 } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
-import { useAutoUpdatingClientRect } from './use_autoupdating_client_rect';
-import { useNonPassiveWheelHandler } from './use_nonpassive_wheel_handler';
 
 export function useCamera(): {
   ref: (node: HTMLDivElement | null) => void;
@@ -130,7 +129,20 @@ export function useCamera(): {
     [clientRectCallback]
   );
 
-  useNonPassiveWheelHandler(handleWheel, ref);
+  /**
+   * Register an event handler directly on `elementRef` for the `wheel` event, with no options
+   * React sets native event listeners on the `window` and calls provided handlers via event propagation.
+   * As of Chrome 73, `'wheel'` events on `window` are automatically treated as 'passive'.
+   * If you don't need to call `event.preventDefault` then you should use regular React event handling instead.
+   */
+  useEffect(() => {
+    if (ref !== null) {
+      ref.addEventListener('wheel', handleWheel);
+      return () => {
+        ref.removeEventListener('wheel', handleWheel);
+      };
+    }
+  }, [ref, handleWheel]);
 
   const projectionMatrixAtTime = useSelector(selectors.projectionMatrix);
 
@@ -155,27 +167,44 @@ export function useCamera(): {
     setProjectionMatrix(projectionMatrixAtTime(time));
   }, [projectionMatrixAtTime, time]);
 
-  /*
-  useEffect(
-    function updateProjectionMatrixLoop() {
-      // console.count('updateProjectionMatrixLoop');
-      let animationFrameReference = requestAnimationFrame(function handleAnimationFrame() {
-        // console.count('handleAnimationFrame');
-        setProjectionMatrix(projectionMatrixAtTime(new Date()));
-        animationFrameReference = requestAnimationFrame(handleAnimationFrame);
-      });
-      return function cancelProjectionMatrixUpdateLoop() {
-        // console.count('cancelAnimationFrame');
-        cancelAnimationFrame(animationFrameReference);
-      };
-    },
-    [projectionMatrixAtTime]
-  );
-  */
-
   return {
     ref: refCallback,
     onMouseDown: handleMouseDown,
     projectionMatrix,
   };
+}
+
+/**
+ * Returns a nullable DOMRect and a ref callback. Pass the refCallback to the
+ * `ref` property of a native element and this hook will return a DOMRect for
+ * it by calling `getBoundingClientRect`. This hook will observe the element
+ * with a resize observer and call getBoundingClientRect again after resizes.
+ *
+ * Note that the changes to the position of the element aren't automatically
+ * tracked. So if the element's position moves for some reason, be sure to
+ * handle that.
+ */
+function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+  const nodeRef = useRef<Element | null>(null);
+  const ref = useCallback((node: Element | null) => {
+    nodeRef.current = node;
+    if (node !== null) {
+      setRect(node.getBoundingClientRect());
+    }
+  }, []);
+  useEffect(() => {
+    if (nodeRef.current !== null) {
+      const resizeObserver = new ResizeObserver(entries => {
+        if (nodeRef.current !== null && nodeRef.current === entries[0].target) {
+          setRect(nodeRef.current.getBoundingClientRect());
+        }
+      });
+      resizeObserver.observe(nodeRef.current);
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
+  }, [nodeRef]);
+  return [rect, ref];
 }
