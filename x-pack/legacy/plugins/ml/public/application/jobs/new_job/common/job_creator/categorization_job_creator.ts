@@ -16,25 +16,31 @@ import {
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '../../../../../../common/constants/new_job';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
+import {
+  CategorizationAnalyzer,
+  CategoryFieldExample,
+  FieldExampleCheck,
+} from '../../../../../../common/types/categories';
 import { getRichDetectors } from './util/general';
-import { CategorizationExamplesLoader, CategoryExample } from '../results_loader';
-import { CategorizationAnalyzer, getNewJobDefaults } from '../../../../services/ml_server_info';
-
-type CategorizationAnalyzerType = CategorizationAnalyzer | null;
+import { CategorizationExamplesLoader } from '../results_loader';
+import { getNewJobDefaults } from '../../../../services/ml_server_info';
 
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
   private _createCountDetector: () => void = () => {};
   private _createRareDetector: () => void = () => {};
   private _examplesLoader: CategorizationExamplesLoader;
-  private _categoryFieldExamples: CategoryExample[] = [];
-  private _categoryFieldValid: number = 0;
+  private _categoryFieldExamples: CategoryFieldExample[] = [];
+  private _validationChecks: FieldExampleCheck[] = [];
+  private _overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS =
+    CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
   private _detectorType: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE =
     ML_JOB_AGGREGATION.COUNT;
-  private _categorizationAnalyzer: CategorizationAnalyzerType = null;
-  private _defaultCategorizationAnalyzer: CategorizationAnalyzerType;
+  private _categorizationAnalyzer: CategorizationAnalyzer = {};
+  private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
 
   constructor(
     indexPattern: IndexPattern,
@@ -46,7 +52,7 @@ export class CategorizationJobCreator extends JobCreator {
     this._examplesLoader = new CategorizationExamplesLoader(this, indexPattern, query);
 
     const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
-    this._defaultCategorizationAnalyzer = anomalyDetectors.categorization_analyzer || null;
+    this._defaultCategorizationAnalyzer = anomalyDetectors.categorization_analyzer || {};
   }
 
   public setDefaultDetectorProperties(
@@ -93,7 +99,7 @@ export class CategorizationJobCreator extends JobCreator {
     } else {
       delete this._job_config.analysis_config.categorization_field_name;
       this._categoryFieldExamples = [];
-      this._categoryFieldValid = 0;
+      this._validationChecks = [];
     }
   }
 
@@ -102,31 +108,38 @@ export class CategorizationJobCreator extends JobCreator {
   }
 
   public async loadCategorizationFieldExamples() {
-    const { valid, examples, sampleSize } = await this._examplesLoader.loadExamples();
+    const {
+      examples,
+      sampleSize,
+      overallValidStatus,
+      validationChecks,
+    } = await this._examplesLoader.loadExamples();
     this._categoryFieldExamples = examples;
-    this._categoryFieldValid = valid;
-    return { valid, examples, sampleSize };
+    this._validationChecks = validationChecks;
+    this._overallValidStatus = overallValidStatus;
+    return { examples, sampleSize, overallValidStatus, validationChecks };
   }
 
   public get categoryFieldExamples() {
     return this._categoryFieldExamples;
   }
 
-  public get categoryFieldValid() {
-    return this._categoryFieldValid;
+  public get validationChecks() {
+    return this._validationChecks;
+  }
+
+  public get overallValidStatus() {
+    return this._overallValidStatus;
   }
 
   public get selectedDetectorType() {
     return this._detectorType;
   }
 
-  public set categorizationAnalyzer(analyzer: CategorizationAnalyzerType) {
+  public set categorizationAnalyzer(analyzer: CategorizationAnalyzer) {
     this._categorizationAnalyzer = analyzer;
 
-    if (
-      analyzer === null ||
-      isEqual(this._categorizationAnalyzer, this._defaultCategorizationAnalyzer)
-    ) {
+    if (isEqual(this._categorizationAnalyzer, this._defaultCategorizationAnalyzer)) {
       delete this._job_config.analysis_config.categorization_analyzer;
     } else {
       this._job_config.analysis_config.categorization_analyzer = analyzer;

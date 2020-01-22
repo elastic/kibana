@@ -15,6 +15,8 @@ import {
   GetServicesFunction,
   RawAction,
 } from '../types';
+import { EVENT_LOG_ACTIONS } from '../plugin';
+import { IEvent, IEventLogger } from '../../../../../plugins/event_log/server';
 
 export interface ActionExecutorContext {
   logger: Logger;
@@ -22,6 +24,7 @@ export interface ActionExecutorContext {
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   actionTypeRegistry: ActionTypeRegistryContract;
+  eventLogger: IEventLogger;
 }
 
 export interface ExecuteOptions {
@@ -54,11 +57,11 @@ export class ActionExecutor {
     }
 
     const {
-      logger,
       spaces,
       getServices,
       encryptedSavedObjectsPlugin,
       actionTypeRegistry,
+      eventLogger,
     } = this.actionExecutorContext!;
 
     const spacesPlugin = spaces();
@@ -89,9 +92,9 @@ export class ActionExecutor {
     );
     const actionType = actionTypeRegistry.get(actionTypeId);
 
-    let validatedParams;
-    let validatedConfig;
-    let validatedSecrets;
+    let validatedParams: Record<string, any>;
+    let validatedConfig: Record<string, any>;
+    let validatedSecrets: Record<string, any>;
 
     try {
       validatedParams = validateParams(actionType, params);
@@ -101,11 +104,16 @@ export class ActionExecutor {
       return { status: 'error', actionId, message: err.message, retry: false };
     }
 
-    let result: ActionTypeExecutorResult | null = null;
-    const actionLabel = `${actionId} - ${actionTypeId} - ${name}`;
+    const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
+    const event: IEvent = {
+      event: { action: EVENT_LOG_ACTIONS.execute },
+      kibana: { namespace, saved_objects: [{ type: 'action', id: actionId }] },
+    };
 
+    eventLogger.startTiming(event);
+    let rawResult: ActionTypeExecutorResult | null | undefined | void;
     try {
-      result = await actionType.executor({
+      rawResult = await actionType.executor({
         actionId,
         services,
         params: validatedParams,
@@ -113,15 +121,51 @@ export class ActionExecutor {
         secrets: validatedSecrets,
       });
     } catch (err) {
-      logger.warn(`action executed unsuccessfully: ${actionLabel} - ${err.message}`);
-      throw err;
+      rawResult = {
+        actionId,
+        status: 'error',
+        message: 'an error occurred while running the action executor',
+        serviceMessage: err.message,
+        retry: false,
+      };
+    }
+    eventLogger.stopTiming(event);
+
+    // allow null-ish return to indicate success
+    const result = rawResult || {
+      actionId,
+      status: 'ok',
+    };
+
+    if (result.status === 'ok') {
+      event.message = `action executed: ${actionLabel}`;
+    } else if (result.status === 'error') {
+      event.message = `action execution failure: ${actionLabel}`;
+      event.error = event.error || {};
+      event.error.message = actionErrorToMessage(result);
+    } else {
+      event.message = `action execution returned unexpected result: ${actionLabel}`;
+      event.error = event.error || {};
+      event.error.message = 'action execution returned unexpected result';
     }
 
-    logger.debug(`action executed successfully: ${actionLabel}`);
-
-    // return basic response if none provided
-    if (result == null) return { status: 'ok', actionId };
-
+    eventLogger.logEvent(event);
     return result;
   }
+}
+
+function actionErrorToMessage(result: ActionTypeExecutorResult): string {
+  let message = result.message || 'unknown error running action';
+
+  if (result.serviceMessage) {
+    message = `${message}: ${result.serviceMessage}`;
+  }
+
+  if (result.retry instanceof Date) {
+    message = `${message}; retry at ${result.retry.toISOString()}`;
+  } else if (result.retry) {
+    message = `${message}; retry: ${JSON.stringify(result.retry)}`;
+  }
+
+  return message;
 }
