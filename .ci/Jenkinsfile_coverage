@@ -66,39 +66,17 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   source src/dev/ci_setup/setup_env.sh
                   cd x-pack
                   yarn kbn bootstrap --prefer-offline
+                  # Return to project root
                   cd ..
-                  # extract archives
-                  mkdir -p /tmp/extracted_coverage
-                  echo extracting intakes
-                  tar -xzf /tmp/downloaded_coverage/coverage/kibana-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-                  tar -xzf /tmp/downloaded_coverage/coverage/x-pack-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-                  echo extracting kibana-oss-tests
-                  tar -xzf /tmp/downloaded_coverage/coverage/kibana-oss-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
 
-                  echo extracting kibana-xpack-tests
-                  for i in {1..3}; do
-                   tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-${i}/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-                  done
-                  tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-1/kibana-coverage.tar.gz -C /tmp/extracted_coverage
 
-                  # replace path in json files to have valid html report
-                  pwd=\$(pwd)
-                  du -sh /tmp/extracted_coverage/target/kibana-coverage/
+                  . src/dev/code_coverage/shell_scripts/extract_archives.sh
 
-                  # echo replacing path in json files
-                  for i in {1..9}; do
-                    sed -i "s|/dev/shm/workspace/kibana|\$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/${i}*.json &
-                  done
-                  wait
+                  . src/dev/code_coverage/shell_scripts/extract_xpack_tests.sh
 
-                  # merge oss & x-pack reports
-                  echo merging coverage reports
-                  yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/jest --report-dir target/kibana-coverage/jest-combined --reporter=html --reporter=json-summary
-                  yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/functional --report-dir target/kibana-coverage/functional-combined --reporter=html --reporter=json-summary
-                  echo copy mocha reports
-                  mkdir -p target/kibana-coverage/mocha-combined
-                  cp -r /tmp/extracted_coverage/target/kibana-coverage/mocha target/kibana-coverage/mocha-combined
+                  . src/dev/code_coverage/shell_scripts/fix_html_reports.sh
 
+                  . src/dev/code_coverage/shell_scripts/fix_html_reports.sh
 
                   # Debugging Ingest and Static Site
                   ls -R target
