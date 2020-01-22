@@ -17,27 +17,15 @@
  * under the License.
  */
 
-import { legacyChrome, npSetup, npStart } from './legacy_imports';
+import { PluginInitializerContext } from 'kibana/public';
 import { VisualizePlugin } from './plugin';
-import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 
 export * from './np_ready/visualize_constants';
 export { showNewVisModal } from './np_ready/wizard';
 
-(() => {
-  const instance = new VisualizePlugin();
-  instance.setup(npSetup.core, {
-    ...npSetup.plugins,
-    __LEGACY: {
-      legacyChrome,
-    },
-  });
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-    embeddables,
-    visualizations,
-  });
-})();
-
 export { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
+
+// Core will be looking for this when loading our plugin in the new platform
+export const plugin = (context: PluginInitializerContext) => {
+  return new VisualizePlugin();
+};
