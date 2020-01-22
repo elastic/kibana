@@ -14,7 +14,11 @@ import { CategorizationField } from '../categorization_field';
 import { CategorizationDetector } from '../categorization_detector';
 import { FieldExamples } from './field_examples';
 import { ExamplesValidCallout } from './examples_valid_callout';
-import { CategoryExample } from '../../../../../common/results_loader';
+import {
+  CategoryFieldExample,
+  FieldExampleCheck,
+} from '../../../../../../../../../common/types/categories';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/new_job';
 import { LoadingWrapper } from '../../../charts/loading_wrapper';
 
 interface Props {
@@ -31,9 +35,11 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
   const [categorizationAnalyzerString, setCategorizationAnalyzerString] = useState(
     JSON.stringify(jobCreator.categorizationAnalyzer)
   );
-  const [fieldExamples, setFieldExamples] = useState<CategoryExample[] | null>(null);
-  const [examplesValid, setExamplesValid] = useState(0);
-  const [sampleSize, setSampleSize] = useState(0);
+  const [fieldExamples, setFieldExamples] = useState<CategoryFieldExample[] | null>(null);
+  const [overallValidStatus, setOverallValidStatus] = useState(
+    CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID
+  );
+  const [validationChecks, setValidationChecks] = useState<FieldExampleCheck[]>([]);
 
   const [categorizationFieldName, setCategorizationFieldName] = useState(
     jobCreator.categorizationFieldName
@@ -73,28 +79,32 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
       setLoadingData(true);
       try {
         const {
-          valid,
           examples,
-          sampleSize: tempSampleSize,
+          overallValidStatus: tempOverallValidStatus,
+          validationChecks: tempValidationChecks,
         } = await jobCreator.loadCategorizationFieldExamples();
         setFieldExamples(examples);
-        setExamplesValid(valid);
+        setOverallValidStatus(tempOverallValidStatus);
+        setValidationChecks(tempValidationChecks);
         setLoadingData(false);
-        setSampleSize(tempSampleSize);
       } catch (error) {
         setLoadingData(false);
+        setFieldExamples(null);
+        setValidationChecks([]);
+        setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
         mlMessageBarService.notify.error(error);
       }
     } else {
       setFieldExamples(null);
-      setExamplesValid(0);
+      setValidationChecks([]);
+      setOverallValidStatus(CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID);
     }
     setIsValid(categorizationFieldName !== null);
   }
 
   useEffect(() => {
     jobCreatorUpdate();
-  }, [examplesValid]);
+  }, [overallValidStatus]);
 
   return (
     <>
@@ -109,8 +119,8 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
       {fieldExamples !== null && loadingData === false && (
         <>
           <ExamplesValidCallout
-            sampleSize={sampleSize}
-            examplesValid={examplesValid}
+            overallValidStatus={overallValidStatus}
+            validationChecks={validationChecks}
             categorizationAnalyzer={jobCreator.categorizationAnalyzer}
           />
           <FieldExamples fieldExamples={fieldExamples} />

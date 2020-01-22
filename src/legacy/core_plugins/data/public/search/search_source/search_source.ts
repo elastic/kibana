@@ -70,8 +70,6 @@
  */
 
 import _ from 'lodash';
-import { npSetup } from 'ui/new_platform';
-import chrome from 'ui/chrome';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
 import { fieldWildcardFilter } from '../../../../../../plugins/kibana_utils/public';
@@ -79,10 +77,14 @@ import { getHighlightRequest, esFilters, esQuery } from '../../../../../../plugi
 import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { SearchSourceOptions, SearchSourceFields, SearchRequest } from './types';
-import { FetchOptions, ApiCaller } from '../fetch/types';
+import { FetchOptions } from '../fetch/types';
 
-const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout') as number;
-const config = npSetup.core.uiSettings;
+import {
+  getSearchService,
+  getUiSettings,
+  getInjectedMetadata,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/data/public/services';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -192,21 +194,23 @@ export class SearchSource {
    * @async
    */
   async fetch(options: FetchOptions = {}) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const es = $injector.get('es') as ApiCaller;
-
     await this.requestIsStarting(options);
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
 
+    const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
     const response = await fetchSoon(
       searchRequest,
       {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
-      { es, config, esShardTimeout }
+      {
+        searchService: getSearchService(),
+        config: getUiSettings(),
+        esShardTimeout,
+      }
     );
 
     if (response.error) {
@@ -313,7 +317,11 @@ export class SearchSource {
       case 'source':
         return addToBody('_source', val);
       case 'sort':
-        const sort = normalizeSortRequest(val, this.getField('index'), config.get('sort:options'));
+        const sort = normalizeSortRequest(
+          val,
+          this.getField('index'),
+          getUiSettings().get('sort:options')
+        );
         return addToBody(key, sort);
       default:
         return addToBody(key, val);
@@ -359,7 +367,7 @@ export class SearchSource {
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(body._source.excludes, config.get('metaFields'));
+      const filter = fieldWildcardFilter(body._source.excludes, getUiSettings().get('metaFields'));
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
         filter(docvalueField.field)
       );
@@ -377,11 +385,11 @@ export class SearchSource {
       _.set(body, '_source.includes', remainingFields);
     }
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(config);
+    const esQueryConfigs = esQuery.getEsQueryConfig(getUiSettings());
     body.query = esQuery.buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, config.get('doc_table:highlight'));
+      body.highlight = getHighlightRequest(body.query, getUiSettings().get('doc_table:highlight'));
       delete searchRequest.highlightAll;
     }
 

@@ -658,6 +658,14 @@
         ],
       },
       {
+        groupSlug: 'numeral',
+        groupName: 'numeral related packages',
+        packageNames: [
+          'numeral',
+          '@types/numeral',
+        ],
+      },
+      {
         groupSlug: 'object-hash',
         groupName: 'object-hash related packages',
         packageNames: [
