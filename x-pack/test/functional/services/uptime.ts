@@ -64,5 +64,10 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
         down: await testSubjects.getVisibleText('xpack.uptime.snapshot.donutChart.down'),
       };
     },
+    async locationMissingExists() {
+      return await testSubjects.existOrFail('xpack.uptime.locationMap.locationMissing', {
+        timeout: 3000,
+      });
+    },
   };
 }

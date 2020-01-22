@@ -89,5 +89,9 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     public async getSnapshotCount() {
       return await uptimeService.getSnapshotCount();
     }
+
+    public async locationMissingIsDisplayed() {
+      return await uptimeService.locationMissingExists();
+    }
   })();
 }
