@@ -26,10 +26,12 @@ import {
   UserProvidedValues,
 } from '../../server/types';
 import { deepFreeze } from '../../utils/';
+import { AppCategory } from '../';
 
 /** @public */
 export interface LegacyNavLink {
   id: string;
+  category?: AppCategory;
   title: string;
   order: number;
   url: string;
@@ -52,6 +54,7 @@ export interface InjectedMetadataParams {
     buildNumber: number;
     branch: string;
     basePath: string;
+    category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
     };
@@ -75,6 +78,7 @@ export interface InjectedMetadataParams {
       basePath: string;
       serverName: string;
       devMode: boolean;
+      category?: AppCategory;
       uiSettings: {
         defaults: Record<string, UiSettingsParams>;
         user?: Record<string, UserProvidedValues>;
