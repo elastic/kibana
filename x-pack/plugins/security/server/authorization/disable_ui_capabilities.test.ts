@@ -9,6 +9,7 @@ import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 
 import { httpServerMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { authorizationMock } from './index.mock';
+import { Feature } from '../../../features/server';
 
 type MockAuthzOptions = { rejectCheckPrivileges: any } | { resolveCheckPrivileges: any };
 
@@ -42,7 +43,7 @@ describe('usingPrivileges', () => {
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [{ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo', privileges: {} }],
+        [new Feature({ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo' })],
         mockLoggers.get(),
         mockAuthz
       );
@@ -108,7 +109,7 @@ describe('usingPrivileges', () => {
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [{ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo', privileges: {} }],
+        [new Feature({ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo' })],
         mockLoggers.get(),
         mockAuthz
       );
@@ -226,20 +227,18 @@ describe('usingPrivileges', () => {
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        {
+        new Feature({
           id: 'fooFeature',
           name: 'Foo Feature',
           navLinkId: 'foo',
           app: [],
-          privileges: {},
-        },
-        {
+        }),
+        new Feature({
           id: 'barFeature',
           name: 'Bar Feature',
           navLinkId: 'bar',
           app: [],
-          privileges: {},
-        },
+        }),
       ],
       loggingServiceMock.create().get(),
       mockAuthz
@@ -312,20 +311,18 @@ describe('usingPrivileges', () => {
     const { usingPrivileges } = disableUICapabilitiesFactory(
       mockRequest,
       [
-        {
+        new Feature({
           id: 'fooFeature',
           name: 'Foo Feature',
           navLinkId: 'foo',
           app: [],
-          privileges: {},
-        },
-        {
+        }),
+        new Feature({
           id: 'barFeature',
           name: 'Bar Feature',
           navLinkId: 'bar',
           app: [],
-          privileges: {},
-        },
+        }),
       ],
       loggingServiceMock.create().get(),
       mockAuthz
@@ -383,7 +380,7 @@ describe('all', () => {
 
     const { all } = disableUICapabilitiesFactory(
       mockRequest,
-      [{ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo', privileges: {} }],
+      [new Feature({ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo' })],
       loggingServiceMock.create().get(),
       mockAuthz
     );

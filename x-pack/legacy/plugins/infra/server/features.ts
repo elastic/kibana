@@ -17,6 +17,7 @@ export const METRICS_FEATURE = {
   catalogue: ['infraops'],
   privileges: {
     all: {
+      name: 'All',
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -25,6 +26,7 @@ export const METRICS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
+      name: 'Read',
       api: ['infra'],
       savedObject: {
         all: [],
@@ -46,6 +48,7 @@ export const LOGS_FEATURE = {
   catalogue: ['infralogging'],
   privileges: {
     all: {
+      name: 'All',
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -54,6 +57,7 @@ export const LOGS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
+      name: 'Read',
       api: ['infra'],
       savedObject: {
         all: [],

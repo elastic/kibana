@@ -21,16 +21,16 @@ import {
   RoleKibanaPrivilege,
   copyRole,
 } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
-import { FeatureTable } from '../feature_table';
+import { FeatureTable } from '../poc_feature_table';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
+import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 
 interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
-  privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
+  privilegeCalculator: POCPrivilegeCalculator;
   features: Feature[];
   onChange: (role: Role) => void;
   editable: boolean;
@@ -58,20 +58,16 @@ export class SimplePrivilegeSection extends Component<Props, State> {
   public render() {
     const kibanaPrivilege = this.getDisplayedBasePrivilege();
 
-    const privilegeCalculator = this.props.privilegeCalculatorFactory.getInstance(this.props.role);
-
-    const calculatedPrivileges = privilegeCalculator.calculateEffectivePrivileges()[
+    const effectivePrivileges = this.props.privilegeCalculator.explainAllEffectiveFeaturePrivileges(
+      this.props.role,
       this.state.globalPrivsIndex
-    ];
+    );
 
-    const allowedPrivileges = privilegeCalculator.calculateAllowedPrivileges()[
-      this.state.globalPrivsIndex
-    ];
-
-    const hasReservedPrivileges =
-      calculatedPrivileges &&
-      calculatedPrivileges.reserved != null &&
-      calculatedPrivileges.reserved.length > 0;
+    // TODO: bad logic here.
+    const hasReservedPrivileges = effectivePrivileges.exists(
+      (featureId, privilegeId, explanation) =>
+        explanation.isGranted() && !explanation.privilege.actions
+    );
 
     const description = (
       <p>
@@ -97,13 +93,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
         >
           <EuiFormRow hasEmptyLabelSpace>
             {hasReservedPrivileges ? (
-              <EuiComboBox
-                fullWidth
-                selectedOptions={calculatedPrivileges.reserved!.map(privilege => ({
-                  label: privilege,
-                }))}
-                isDisabled
-              />
+              <EuiComboBox fullWidth selectedOptions={[]} isDisabled />
             ) : (
               <EuiSuperSelect
                 disabled={!this.props.editable}
@@ -228,10 +218,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
               <FeatureTable
                 role={this.props.role}
                 kibanaPrivileges={this.props.kibanaPrivileges}
-                calculatedPrivileges={calculatedPrivileges}
-                allowedPrivileges={allowedPrivileges}
-                rankedFeaturePrivileges={privilegeCalculator.rankedFeaturePrivileges}
-                features={this.props.features}
+                privilegeCalculator={this.props.privilegeCalculator}
                 onChange={this.onFeaturePrivilegeChange}
                 onChangeAll={this.onChangeAllFeaturePrivileges}
                 spacesIndex={this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))}

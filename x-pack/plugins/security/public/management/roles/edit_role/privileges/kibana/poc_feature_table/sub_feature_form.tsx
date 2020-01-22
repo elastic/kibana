@@ -6,14 +6,18 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
-import { SubFeature, SubFeaturePrivilegeGroup } from '../../../../../../../common/model';
+import {
+  SecuredSubFeature,
+  SubFeaturePrivilegeGroup,
+  SubFeaturePrivilege,
+} from '../../../../../../../common/model';
 import { FeaturePrivilegesExplanations } from '../../../../../../../common/model/poc_kibana_privileges/feature_privileges_explanations';
 
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props {
   featureId: string;
-  subFeature: SubFeature;
+  subFeature: SecuredSubFeature;
   selectedPrivileges: string[];
   privilegeExplanations: FeaturePrivilegesExplanations;
   onChange: (selectedPrivileges: string[]) => void;
@@ -26,7 +30,7 @@ export const SubFeatureForm = (props: Props) => {
       <EuiFlexItem>
         <EuiText size="s">{props.subFeature.name}</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>{props.subFeature.privilegeGroups.map(renderPrivilegeGroup)}</EuiFlexItem>
+      <EuiFlexItem>{props.subFeature.getPrivilegeGroups().map(renderPrivilegeGroup)}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -47,7 +51,7 @@ export const SubFeatureForm = (props: Props) => {
   ) {
     return (
       <div key={index}>
-        {privilegeGroup.privileges.map(privilege => {
+        {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
           const isSelected = props.privilegeExplanations.isGranted(props.featureId, privilege.id);
           const isInherited = props.privilegeExplanations.isInherited(
             props.featureId,

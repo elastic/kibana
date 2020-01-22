@@ -5,6 +5,7 @@
  */
 
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+import { SubFeatureConfig } from './sub_feature';
 
 export class Feature {
   constructor(protected readonly config: IFeature) {}
@@ -43,6 +44,10 @@ export class Feature {
 
   public get subFeatures() {
     return this.config.subFeatures;
+  }
+
+  public get reserved() {
+    return this.config.reserved;
   }
 
   public toRaw() {
@@ -159,20 +164,4 @@ export interface IFeature {
     privilege: FeatureKibanaPrivileges;
     description: string;
   };
-}
-
-export interface SubFeatureConfig {
-  id: string;
-  name: string;
-  privilegeGroups: SubFeaturePrivilegeGroupConfig[];
-}
-export interface SubFeaturePrivilegeGroupConfig {
-  name: string;
-  groupType: 'mutually_exclusive' | 'independent';
-  privileges: SubFeaturePrivilegeConfig[];
-}
-
-export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
-  id: string;
-  includeIn: 'all' | 'read' | 'none';
 }

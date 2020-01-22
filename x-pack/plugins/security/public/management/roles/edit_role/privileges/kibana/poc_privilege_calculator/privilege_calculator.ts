@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { Role } from '../../../../../../plugins/security/common/model';
-import { PrivilegeExplanation } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/privilege_explanation';
-import { FeaturePrivilegesExplanations } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/feature_privileges_explanations';
-import { Privilege } from '../../../../../../plugins/security/common/model/poc_kibana_privileges/privilege_instance';
-import { KibanaPrivileges } from '../../../../../../plugins/security/common/model/poc_kibana_privileges';
+import {
+  KibanaPrivileges,
+  Role,
+  Privilege,
+  PrivilegeExplanation,
+  FeaturePrivilegesExplanations,
+} from '../../../../../../../common/model';
 
 export class POCPrivilegeCalculator {
   constructor(private readonly kibanaPrivileges: KibanaPrivileges) {}

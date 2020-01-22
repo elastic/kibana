@@ -14,7 +14,6 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { getSpaceColor } from 'plugins/spaces/space_avatar';
 import {
   Role,
@@ -27,6 +26,7 @@ import { PrivilegeDisplay } from './privilege_display';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
+import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -198,13 +198,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           );
 
           const showCustom = hasNonSupersededCustomizations;
-
-          console.log({
-            role: this.props.role,
-            basePrivilege,
-            explanations,
-            hasNonSupersededCustomizations,
-          });
 
           return (
             <PrivilegeDisplay

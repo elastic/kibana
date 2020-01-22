@@ -9,12 +9,11 @@ import { Space } from '../../common/model/space';
 import { toggleUICapabilities } from './toggle_ui_capabilities';
 import { Capabilities } from 'src/core/public';
 
-const features: Feature[] = [
+const features = ([
   {
     id: 'feature_1',
     name: 'Feature 1',
     app: [],
-    privileges: {},
   },
   {
     id: 'feature_2',
@@ -56,7 +55,7 @@ const features: Feature[] = [
       },
     },
   },
-];
+] as unknown) as Feature[];
 
 const buildCapabilities = () =>
   Object.freeze({

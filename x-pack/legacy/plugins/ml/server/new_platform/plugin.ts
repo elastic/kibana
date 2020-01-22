@@ -167,9 +167,9 @@ export class Plugin {
       navLinkId: 'ml',
       app: ['ml', 'kibana'],
       catalogue: ['ml'],
-      privileges: {},
       reserved: {
         privilege: {
+          name: 'reserved',
           savedObject: {
             all: [],
             read: [],

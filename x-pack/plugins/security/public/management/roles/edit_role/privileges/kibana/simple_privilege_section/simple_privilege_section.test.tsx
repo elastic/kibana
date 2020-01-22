@@ -9,22 +9,25 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Feature } from '../../../../../../../../features/public';
 import { KibanaPrivileges, Role } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
+import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 
 const buildProps = (customProps: any = {}) => {
-  const kibanaPrivileges = new KibanaPrivileges({
-    features: {
-      feature1: {
-        all: ['*'],
-        read: ['read'],
+  const kibanaPrivileges = new KibanaPrivileges(
+    {
+      features: {
+        feature1: {
+          all: ['*'],
+          read: ['read'],
+        },
       },
+      global: {},
+      space: {},
+      reserved: {},
     },
-    global: {},
-    space: {},
-    reserved: {},
-  });
+    []
+  );
 
   const role = {
     name: '',
@@ -40,15 +43,16 @@ const buildProps = (customProps: any = {}) => {
   return {
     editable: true,
     kibanaPrivileges,
-    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(kibanaPrivileges),
+    privilegeCalculator: new POCPrivilegeCalculator(kibanaPrivileges),
     features: [
-      {
+      new Feature({
         id: 'feature1',
         name: 'Feature 1',
         app: ['app'],
         icon: 'spacesApp',
         privileges: {
           all: {
+            name: 'All',
             app: ['app'],
             savedObject: {
               all: ['foo'],
@@ -57,6 +61,7 @@ const buildProps = (customProps: any = {}) => {
             ui: ['app-ui'],
           },
           read: {
+            name: 'Read',
             app: ['app'],
             savedObject: {
               all: [],
@@ -65,7 +70,7 @@ const buildProps = (customProps: any = {}) => {
             ui: ['app-ui'],
           },
         },
-      },
+      }),
     ] as Feature[],
     onChange: jest.fn(),
     ...customProps,

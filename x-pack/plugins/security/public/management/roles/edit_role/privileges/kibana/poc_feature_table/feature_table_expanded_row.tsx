@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { Role, SecuredFeature, PrimaryFeaturePrivilege } from '../../../../../../../common/model';
 import { SubFeatureForm } from './sub_feature_form';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
+import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 
 interface Props {
   feature: SecuredFeature;

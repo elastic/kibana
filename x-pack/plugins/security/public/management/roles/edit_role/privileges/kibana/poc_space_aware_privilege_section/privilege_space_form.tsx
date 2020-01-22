@@ -24,13 +24,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { Role, KibanaPrivileges, copyRole } from '../../../../../../../common/model';
-import { Feature } from '../../../../../../../../features/common';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceSelector } from './space_selector';
 import { FeatureTable } from '../poc_feature_table';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
+import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 
 interface Props {
   role: Role;
@@ -268,7 +267,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
         <FeatureTable
           role={this.state.role}
-          intl={this.props.intl}
           privilegeCalculator={this.props.privilegeCalculator}
           onChange={this.onFeaturePrivilegesChange}
           onChangeAll={this.onChangeAllFeaturePrivileges}
@@ -507,31 +505,26 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private onChangeAllFeaturePrivileges = (privileges: string[]) => {
-    const role = copyRole(this.state.role);
-    const form = role.kibana[this.state.editingIndex];
-
-    const calculator = this.props.privilegeCalculator;
-    // TODO
-    return;
-    const allowedPrivs = calculator.calculateAllowedPrivileges();
-
-    if (privileges.length === 0) {
-      form.feature = {};
-    } else {
-      this.props.features.forEach(feature => {
-        const allowedPrivilegesFeature = allowedPrivs[this.state.editingIndex].feature[feature.id];
-        const canAssign =
-          allowedPrivilegesFeature && allowedPrivilegesFeature.privileges.includes(privileges[0]);
-
-        if (canAssign) {
-          form.feature[feature.id] = [...privileges];
-        }
-      });
-    }
-
-    this.setState({
-      role,
-    });
+    // const role = copyRole(this.state.role);
+    // const form = role.kibana[this.state.editingIndex];
+    // const calculator = this.props.privilegeCalculator;
+    // // TODO
+    // const allowedPrivs = calculator.calculateAllowedPrivileges();
+    // if (privileges.length === 0) {
+    //   form.feature = {};
+    // } else {
+    //   this.props.features.forEach(feature => {
+    //     const allowedPrivilegesFeature = allowedPrivs[this.state.editingIndex].feature[feature.id];
+    //     const canAssign =
+    //       allowedPrivilegesFeature && allowedPrivilegesFeature.privileges.includes(privileges[0]);
+    //     if (canAssign) {
+    //       form.feature[feature.id] = [...privileges];
+    //     }
+    //   });
+    // }
+    // this.setState({
+    //   role,
+    // });
   };
 
   private canSave = () => {

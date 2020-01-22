@@ -14,18 +14,13 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { Capabilities } from 'src/core/public';
-import {
-  KibanaPrivileges,
-  Role,
-  isReservedRole,
-  SecuredFeature,
-} from '../../../../../../../common/model';
+import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
+import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;

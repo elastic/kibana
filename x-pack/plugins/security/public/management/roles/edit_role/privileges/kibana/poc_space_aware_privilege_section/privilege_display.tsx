@@ -6,8 +6,8 @@
 import { EuiIcon, EuiIconTip, EuiText, IconType, PropsOf, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
-import React, { ReactNode, SFC, FC } from 'react';
-import { PrivilegeExplanation } from '../../../../../../../common/model/poc_kibana_privileges/privilege_explanation';
+import React, { ReactNode, FC } from 'react';
+import { PrivilegeExplanation } from '../../../../../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props extends PropsOf<typeof EuiText> {
@@ -29,7 +29,7 @@ export const PrivilegeDisplay: FC<Props> = (props: Props) => {
   //   return <SupersededPrivilegeDisplay {...props} />;
   // }
 
-  if (!explanation.isDirectlyAssigned) {
+  if (!explanation.isDirectlyAssigned()) {
     return <EffectivePrivilegeDisplay {...props} />;
   }
 
@@ -53,8 +53,8 @@ const SimplePrivilegeDisplay: FC<Props> = (props: Props) => {
 };
 
 export const SupersededPrivilegeDisplay: FC<Props> = (props: Props) => {
-  const { supersededPrivilege, actualPrivilegeSource } =
-    props.explanation || ({} as PrivilegeExplanation);
+  const supersededPrivilege = 'TODO';
+  const actualPrivilegeSource = 'MORE TODO';
 
   return (
     <SimplePrivilegeDisplay
@@ -77,7 +77,7 @@ export const SupersededPrivilegeDisplay: FC<Props> = (props: Props) => {
 export const EffectivePrivilegeDisplay: FC<Props> = (props: Props) => {
   const { explanation, ...rest } = props;
 
-  const source = getReadablePrivilegeSource(explanation!.actualPrivilegeSource);
+  const source = getReadablePrivilegeSource('TODO');
 
   const iconTooltipContent = (
     <FormattedMessage
@@ -141,30 +141,30 @@ function coerceToArray(privilege: string | string[] | undefined): string[] {
   return [privilege];
 }
 
-function getReadablePrivilegeSource(privilegeSource: PRIVILEGE_SOURCE) {
+function getReadablePrivilegeSource(privilegeSource: string) {
   switch (privilegeSource) {
-    case PRIVILEGE_SOURCE.GLOBAL_BASE:
+    case 'global_base':
       return (
         <FormattedMessage
           id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalBasePrivilegeSource"
           defaultMessage="global base privilege"
         />
       );
-    case PRIVILEGE_SOURCE.GLOBAL_FEATURE:
+    case 'global_feature':
       return (
         <FormattedMessage
           id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalFeaturePrivilegeSource"
           defaultMessage="global feature privilege"
         />
       );
-    case PRIVILEGE_SOURCE.SPACE_BASE:
+    case 'space_base':
       return (
         <FormattedMessage
           id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.spaceBasePrivilegeSource"
           defaultMessage="space base privilege"
         />
       );
-    case PRIVILEGE_SOURCE.SPACE_FEATURE:
+    case 'space_feature':
       return (
         <FormattedMessage
           id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.spaceFeaturePrivilegeSource"

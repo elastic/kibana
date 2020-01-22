@@ -25,6 +25,7 @@ describe('features', () => {
         },
         privileges: {
           all: {
+            name: 'All',
             savedObject: {
               all: [],
               read: [],
@@ -32,6 +33,7 @@ describe('features', () => {
             ui: [],
           },
           read: {
+            name: 'Read',
             savedObject: {
               all: [],
               read: [],
@@ -86,6 +88,7 @@ describe('features', () => {
         },
         privileges: {
           all: {
+            name: 'All',
             app: ['all-app-1', 'all-app-2'],
             catalogue: ['catalogue-all-1', 'catalogue-all-2'],
             management: {
@@ -98,6 +101,7 @@ describe('features', () => {
             ui: [],
           },
           read: {
+            name: 'Read',
             app: ['read-app-1', 'read-app-2'],
             catalogue: ['catalogue-read-1', 'catalogue-read-2'],
             management: {
@@ -154,6 +158,7 @@ describe('features', () => {
         app: [],
         privileges: {
           all: {
+            name: 'All',
             savedObject: {
               all: ['all-savedObject-all-1', 'all-savedObject-all-2'],
               read: ['all-savedObject-read-1', 'all-savedObject-read-2'],
@@ -161,6 +166,7 @@ describe('features', () => {
             ui: ['all-ui-1', 'all-ui-2'],
           },
           read: {
+            name: 'Read',
             savedObject: {
               all: ['read-savedObject-all-1', 'read-savedObject-all-2'],
               read: ['read-savedObject-read-1', 'read-savedObject-read-2'],
@@ -246,7 +252,6 @@ describe('features', () => {
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
-        privileges: {},
       },
     ];
 
@@ -290,6 +295,7 @@ describe('features', () => {
           },
           privileges: {
             all: {
+              name: 'All',
               savedObject: {
                 all: [],
                 read: [],
@@ -297,6 +303,7 @@ describe('features', () => {
               ui: [],
             },
             read: {
+              name: 'Read',
               savedObject: {
                 all: [],
                 read: [],
@@ -363,6 +370,7 @@ describe('features', () => {
           },
           privileges: {
             bar: {
+              name: 'Bar',
               management: {
                 'bar-management': ['bar-management-1', 'bar-management-2'],
               },
@@ -374,6 +382,7 @@ describe('features', () => {
               ui: ['bar-ui-1', 'bar-ui-2'],
             },
             all: {
+              name: 'All',
               management: {
                 'all-management': ['all-management-1', 'all-management-2'],
               },
@@ -385,6 +394,7 @@ describe('features', () => {
               ui: ['all-ui-1', 'all-ui-2'],
             },
             read: {
+              name: 'Read',
               management: {
                 'read-management': ['read-management-1', 'read-management-2'],
               },
@@ -395,7 +405,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1', 'read-ui-2'],
             },
-          },
+          } as any,
         },
       ];
 
@@ -520,6 +530,7 @@ describe('features', () => {
           },
           privileges: {
             bar: {
+              name: 'Bar',
               management: {
                 'ignore-me': ['ignore-me-1', 'ignore-me-2'],
               },
@@ -531,6 +542,7 @@ describe('features', () => {
               ui: ['ignore-me-1', 'ignore-me-2'],
             },
             all: {
+              name: 'All',
               management: {
                 'ignore-me': ['ignore-me-1', 'ignore-me-2'],
               },
@@ -542,6 +554,7 @@ describe('features', () => {
               ui: ['ignore-me-1', 'ignore-me-2'],
             },
             read: {
+              name: 'Read',
               management: {
                 'read-management': ['read-management-1', 'read-management-2'],
               },
@@ -552,7 +565,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1', 'read-ui-2'],
             },
-          },
+          } as any,
         },
       ];
 
@@ -610,9 +623,9 @@ describe('features', () => {
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
-          privileges: {},
           reserved: {
             privilege: {
+              name: '',
               savedObject: {
                 all: ['ignore-me-1', 'ignore-me-2'],
                 read: ['ignore-me-1', 'ignore-me-2'],
@@ -662,6 +675,7 @@ describe('features', () => {
           },
           privileges: {
             bar: {
+              name: 'Bar',
               management: {
                 'bar-management': ['bar-management-1'],
               },
@@ -673,6 +687,7 @@ describe('features', () => {
               ui: ['bar-ui-1'],
             },
             all: {
+              name: 'All',
               management: {
                 'all-management': ['all-management-1'],
               },
@@ -684,6 +699,7 @@ describe('features', () => {
               ui: ['all-ui-1'],
             },
             read: {
+              name: 'Read',
               management: {
                 'read-management': ['read-management-1'],
               },
@@ -694,7 +710,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1'],
             },
-          },
+          } as any,
         },
       ];
 
@@ -735,6 +751,7 @@ describe('features', () => {
           },
           privileges: {
             bar: {
+              name: 'Bar',
               excludeFromBasePrivileges: true,
               management: {
                 'bar-management': ['bar-management-1'],
@@ -747,6 +764,7 @@ describe('features', () => {
               ui: ['bar-ui-1'],
             },
             all: {
+              name: 'All',
               excludeFromBasePrivileges: true,
               management: {
                 'all-management': ['all-management-1'],
@@ -759,6 +777,7 @@ describe('features', () => {
               ui: ['all-ui-1'],
             },
             read: {
+              name: 'Read',
               excludeFromBasePrivileges: true,
               management: {
                 'read-management': ['read-management-1'],
@@ -770,7 +789,7 @@ describe('features', () => {
               },
               ui: ['read-ui-1'],
             },
-          },
+          } as any,
         },
       ];
 
@@ -812,9 +831,9 @@ describe('reserved', () => {
         management: {
           foo: ['management-1', 'management-2'],
         },
-        privileges: {},
         reserved: {
           privilege: {
+            name: '',
             savedObject: {
               all: [],
               read: [],
@@ -856,9 +875,9 @@ describe('reserved', () => {
         management: {
           foo: ['ignore-me-1', 'ignore-me-2'],
         },
-        privileges: {},
         reserved: {
           privilege: {
+            name: '',
             app: ['app-1', 'app-2'],
             catalogue: ['catalogue-1', 'catalogue-2'],
             management: {
@@ -900,9 +919,9 @@ describe('reserved', () => {
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
-        privileges: {},
         reserved: {
           privilege: {
+            name: '',
             savedObject: {
               all: ['savedObject-all-1', 'savedObject-all-2'],
               read: ['savedObject-read-1', 'savedObject-read-2'],
@@ -959,6 +978,15 @@ describe('reserved', () => {
         app: [],
         privileges: {
           all: {
+            name: 'All',
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['foo'],
+          },
+          read: {
+            name: 'Read',
             savedObject: {
               all: [],
               read: [],

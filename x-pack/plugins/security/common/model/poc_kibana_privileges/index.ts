@@ -5,3 +5,6 @@
  */
 
 export { KibanaPrivileges } from './kibana_privileges';
+export { PrivilegeExplanation } from './privilege_explanation';
+export { FeaturePrivilegesExplanations } from './feature_privileges_explanations';
+export { Privilege } from './privilege_instance';

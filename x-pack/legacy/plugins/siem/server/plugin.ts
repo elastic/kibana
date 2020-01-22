@@ -49,6 +49,7 @@ export class Plugin {
       catalogue: ['siem'],
       privileges: {
         all: {
+          name: 'All',
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: [
@@ -74,6 +75,7 @@ export class Plugin {
           ],
         },
         read: {
+          name: 'Read',
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
           savedObject: {
             all: ['alert', 'action', 'action_task_params'],

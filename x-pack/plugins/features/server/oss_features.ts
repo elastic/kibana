@@ -296,7 +296,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       },
     },
     ...(includeTimelion ? [timelionFeature] : []),
-  ];
+  ] as IFeature[];
 };
 
 const timelionFeature: IFeature = {

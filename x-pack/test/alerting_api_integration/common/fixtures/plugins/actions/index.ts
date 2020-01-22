@@ -56,6 +56,7 @@ export default function(kibana: any) {
         app: ['actions', 'kibana'],
         privileges: {
           all: {
+            name: 'All',
             savedObject: {
               all: ['action', 'action_task_params'],
               read: [],
@@ -64,6 +65,7 @@ export default function(kibana: any) {
             api: ['actions-read', 'actions-all'],
           },
           read: {
+            name: 'Read',
             savedObject: {
               all: ['action_task_params'],
               read: ['action'],

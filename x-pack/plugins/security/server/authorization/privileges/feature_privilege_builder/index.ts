@@ -6,7 +6,6 @@
 
 import { flatten } from 'lodash';
 import { FeaturePrivilege, SecuredFeature } from '../../../../common/model';
-import { Feature } from '../../../../../features/server';
 import { Actions } from '../../actions';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';

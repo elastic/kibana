@@ -6,7 +6,6 @@
 
 import React, { Component } from 'react';
 import { Capabilities } from 'src/core/public';
-import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
 import { Space } from '../../../../../../../spaces/common/model/space';
 import { KibanaPrivileges, Role, SecuredFeature } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';
@@ -14,6 +13,7 @@ import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './poc_space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
+import { POCPrivilegeCalculator } from './poc_privilege_calculator';
 
 interface Props {
   role: Role;

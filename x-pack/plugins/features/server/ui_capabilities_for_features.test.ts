@@ -5,6 +5,7 @@
  */
 
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
+import { Feature, IFeature } from '.';
 
 function createFeaturePrivilege(key: string, capabilities: string[] = []) {
   return {
@@ -27,14 +28,14 @@ describe('populateUICapabilities', () => {
   it('handles features with no registered capabilities', () => {
     expect(
       uiCapabilitiesForFeatures([
-        {
+        new Feature({
           id: 'newFeature',
           name: 'my new feature',
           app: ['bar-app'],
-          privileges: {
+          privileges: ({
             ...createFeaturePrivilege('all'),
-          },
-        },
+          } as unknown) as IFeature['privileges'],
+        }),
       ])
     ).toEqual({
       catalogue: {},
@@ -45,15 +46,15 @@ describe('populateUICapabilities', () => {
   it('augments the original uiCapabilities with registered feature capabilities', () => {
     expect(
       uiCapabilitiesForFeatures([
-        {
+        new Feature({
           id: 'newFeature',
           name: 'my new feature',
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
-          privileges: {
+          privileges: ({
             ...createFeaturePrivilege('all', ['capability1', 'capability2']),
-          },
-        },
+          } as unknown) as IFeature['privileges'],
+        }),
       ])
     ).toEqual({
       catalogue: {},
@@ -67,18 +68,18 @@ describe('populateUICapabilities', () => {
   it('combines catalogue entries from multiple features', () => {
     expect(
       uiCapabilitiesForFeatures([
-        {
+        new Feature({
           id: 'newFeature',
           name: 'my new feature',
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
           catalogue: ['anotherFooEntry', 'anotherBarEntry'],
-          privileges: {
+          privileges: ({
             ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
             ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
             ...createFeaturePrivilege('baz'),
-          },
-        },
+          } as unknown) as IFeature['privileges'],
+        }),
       ])
     ).toEqual({
       catalogue: {
@@ -97,17 +98,17 @@ describe('populateUICapabilities', () => {
   it(`merges capabilities from all feature privileges`, () => {
     expect(
       uiCapabilitiesForFeatures([
-        {
+        new Feature({
           id: 'newFeature',
           name: 'my new feature',
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
-          privileges: {
+          privileges: ({
             ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
             ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
             ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
-          },
-        },
+          } as unknown) as IFeature['privileges'],
+        }),
       ])
     ).toEqual({
       catalogue: {},
@@ -124,32 +125,32 @@ describe('populateUICapabilities', () => {
   it('supports merging multiple features with multiple privileges each', () => {
     expect(
       uiCapabilitiesForFeatures([
-        {
+        new Feature({
           id: 'newFeature',
           name: 'my new feature',
           navLinkId: 'newFeatureNavLink',
           app: ['bar-app'],
-          privileges: {
+          privileges: ({
             ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
             ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
             ...createFeaturePrivilege('baz', ['capability1', 'capability5']),
-          },
-        },
-        {
+          } as unknown) as IFeature['privileges'],
+        }),
+        new Feature({
           id: 'anotherNewFeature',
           name: 'another new feature',
           app: ['bar-app'],
-          privileges: {
+          privileges: ({
             ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
             ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
-          },
-        },
-        {
+          } as unknown) as IFeature['privileges'],
+        }),
+        new Feature({
           id: 'yetAnotherNewFeature',
           name: 'yet another new feature',
           navLinkId: 'yetAnotherNavLink',
           app: ['bar-app'],
-          privileges: {
+          privileges: ({
             ...createFeaturePrivilege('all', ['capability1', 'capability2']),
             ...createFeaturePrivilege('read', []),
             ...createFeaturePrivilege('somethingInBetween', [
@@ -157,8 +158,8 @@ describe('populateUICapabilities', () => {
               'something2',
               'something3',
             ]),
-          },
-        },
+          } as unknown) as IFeature['privileges'],
+        }),
       ])
     ).toEqual({
       anotherNewFeature: {

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Feature, FeatureWithAllOrReadPrivileges, FeatureKibanaPrivileges } from '../common';
+export { Feature, FeatureKibanaPrivileges } from '../common';

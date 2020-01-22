@@ -21,7 +21,6 @@ describe('GET /api/features', () => {
       id: 'feature_1',
       name: 'Feature 1',
       app: [],
-      privileges: {},
     });
 
     featureRegistry.register({
@@ -29,7 +28,6 @@ describe('GET /api/features', () => {
       name: 'Licensed Feature',
       app: ['bar-app'],
       validLicenses: ['gold'],
-      privileges: {},
     });
 
     const routerMock = httpServiceMock.createRouter();

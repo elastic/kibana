@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeaturePrivilege } from '../../../../../features/common/feature_privilege';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { FeaturePrivilege } from '../../../../common/model';
+import { Feature } from '../../../../../features/server';
 import { Actions } from '../../actions';
 
 export interface FeaturePrivilegeBuilder {

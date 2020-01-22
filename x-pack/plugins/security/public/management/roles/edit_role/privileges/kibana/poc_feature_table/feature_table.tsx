@@ -15,22 +15,27 @@ import {
   EuiButtonIcon,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { POCPrivilegeCalculator } from 'plugins/security/lib/poc_privilege_calculator/poc_privilege_calculator';
-import { Role, KibanaPrivileges, SecuredFeature } from '../../../../../../../common/model';
-import { PrivilegeDisplay } from '../space_aware_privilege_section/privilege_display';
+import {
+  Role,
+  KibanaPrivileges,
+  SecuredFeature,
+  Privilege,
+} from '../../../../../../../common/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-import { Privilege } from '../../../../../../../common/model/poc_kibana_privileges/privilege_instance';
 import { NO_PRIVILEGE_VALUE } from '../constants';
+import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
+// TODO: move htis up to a common spot if it's to be used here...
+import { PrivilegeDisplay } from '../poc_space_aware_privilege_section/privilege_display';
 
 interface Props {
   role: Role;
   privilegeCalculator: POCPrivilegeCalculator;
   kibanaPrivileges: KibanaPrivileges;
-  intl: InjectedIntl;
   spacesIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
@@ -139,11 +144,12 @@ export class FeatureTable extends Component<Props, State> {
     const columns = [
       {
         field: 'feature',
-        name: this.props.intl.formatMessage({
-          id:
-            'xpack.security.management.editRole.featureTable.enabledRoleFeaturesFeatureColumnTitle',
-          defaultMessage: 'Feature',
-        }),
+        name: i18n.translate(
+          'xpack.security.management.editRole.featureTable.enabledRoleFeaturesFeatureColumnTitle',
+          {
+            defaultMessage: 'Feature',
+          }
+        ),
         render: (feature: SecuredFeature) => {
           let tooltipElement = null;
           if (feature.privilegesTooltip) {

@@ -7,14 +7,14 @@
 import { Feature, IFeature } from '../../../features/common';
 import { FeaturePrivilege } from './feature_privilege';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
-import { SubFeature } from './sub_feature';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
+import { SecuredSubFeature } from './secured_sub_feature';
 
 export class SecuredFeature extends Feature {
   public readonly primaryFeaturePrivileges: PrimaryFeaturePrivilege[];
   public readonly minimalPrimaryFeaturePrivileges: PrimaryFeaturePrivilege[];
 
-  public readonly subFeatures: SubFeature[];
+  public readonly subFeatures: SecuredSubFeature[];
 
   constructor(config: IFeature, actionMapping: { [privilegeId: string]: string[] } = {}) {
     super(config);
@@ -27,7 +27,8 @@ export class SecuredFeature extends Feature {
         new PrimaryFeaturePrivilege(`minimal_${id}`, privilege, actionMapping[`minimal_${id}`])
     );
 
-    this.subFeatures = this.config.subFeatures?.map(sf => new SubFeature(sf, actionMapping)) ?? [];
+    this.subFeatures =
+      this.config.subFeatures?.map(sf => new SecuredSubFeature(sf, actionMapping)) ?? [];
   }
 
   public get excludeFromBasePrivileges() {

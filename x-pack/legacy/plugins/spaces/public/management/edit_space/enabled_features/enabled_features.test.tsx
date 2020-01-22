@@ -13,20 +13,18 @@ import { SectionPanel } from '../section_panel';
 import { EnabledFeatures } from './enabled_features';
 
 const features: Feature[] = [
-  {
+  new Feature({
     id: 'feature-1',
     name: 'Feature 1',
     icon: 'spacesApp',
     app: [],
-    privileges: {},
-  },
-  {
+  }),
+  new Feature({
     id: 'feature-2',
     name: 'Feature 2',
     icon: 'spacesApp',
     app: [],
-    privileges: {},
-  },
+  }),
 ];
 
 const space: Space = {

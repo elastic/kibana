@@ -44,6 +44,7 @@ export class Plugin {
       catalogue: ['canvas'],
       privileges: {
         all: {
+          name: 'All',
           savedObject: {
             all: ['canvas-workpad', 'canvas-element'],
             read: ['index-pattern'],
@@ -51,6 +52,7 @@ export class Plugin {
           ui: ['save', 'show'],
         },
         read: {
+          name: 'Read',
           savedObject: {
             all: [],
             read: ['index-pattern', 'canvas-workpad', 'canvas-element'],

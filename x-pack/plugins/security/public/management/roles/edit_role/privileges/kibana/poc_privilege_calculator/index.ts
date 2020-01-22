@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { KibanaPrivilegeCalculatorFactory } from './kibana_privileges_calculator_factory';
-export * from './kibana_privilege_calculator_types';
+export { POCPrivilegeCalculator } from './privilege_calculator';
