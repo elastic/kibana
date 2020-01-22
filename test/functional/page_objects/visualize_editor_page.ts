@@ -358,13 +358,22 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
 
-    public async clickYAxisAdvancedOptions(axisId: string) {
-      await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
+    public async changeYAxisShowCheckbox(axisId: string, enabled: boolean) {
+      const selector = `valueAxisShow-${axisId}`;
+      const button = await testSubjects.find(selector);
+      const isEnabled = (await button.getAttribute('aria-checked')) === 'true';
+      if (enabled !== isEnabled) {
+        await button.click();
+      }
     }
 
     public async changeYAxisFilterLabelsCheckbox(axisId: string, enabled: boolean) {
       const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
-      await testSubjects.setCheckbox(selector, enabled ? 'check' : 'uncheck');
+      const button = await testSubjects.find(selector);
+      const isEnabled = (await button.getAttribute('aria-checked')) === 'true';
+      if (enabled !== isEnabled) {
+        await button.click();
+      }
     }
 
     public async setSize(newValue: string, aggId: string) {
@@ -380,9 +389,17 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async selectYAxisScaleType(axisId: string, scaleType: string) {
-      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[value="${scaleType}"]`);
+      const selector = await find.byCssSelector(
+        `#scaleSelectYAxis-${axisId} > option[value="${scaleType}"]`
+      );
       await selector.click();
+    }
+
+    public async selectXAxisPosition(position: string) {
+      const option = await (await testSubjects.find('categoryAxisPosition')).findByCssSelector(
+        `option[value="${position}"]`
+      );
+      await option.click();
     }
 
     public async selectYAxisMode(mode: string) {

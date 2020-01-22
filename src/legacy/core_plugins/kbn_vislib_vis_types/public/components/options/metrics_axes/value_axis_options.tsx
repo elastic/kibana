@@ -156,6 +156,7 @@ function ValueAxisOptions(props: ValueAxisOptionsParams) {
         label={i18n.translate('kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabel', {
           defaultMessage: 'Show axis lines and labels',
         })}
+        data-test-subj={`valueAxisShow-${axis.id}`}
         paramName="show"
         value={axis.show}
         setValue={setValueAxis}
