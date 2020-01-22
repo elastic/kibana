@@ -21,8 +21,8 @@ import {
   UiSettingsType,
   StringValidation,
   ImageValidation,
+  SavedObjectAttribute,
 } from '../../../../../../../core/public';
-import { SavedObjectAttribute } from '../../../../../../../core/server';
 
 export interface FieldSetting {
   displayName: string;

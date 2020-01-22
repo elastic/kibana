@@ -1941,30 +1941,12 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
 }>;
 
+// Warning: (ae-forgotten-export) The symbol "StringValidationRegex" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "StringValidationRegexString" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "StringValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
-
-// Warning: (ae-missing-release-tag) "StringValidationRegex" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface StringValidationRegex {
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    regex: RegExp;
-}
-
-// Warning: (ae-missing-release-tag) "StringValidationRegexString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface StringValidationRegexString {
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    regexString: string;
-}
 
 // @public
 export interface UiSettingsParams {

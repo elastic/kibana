@@ -76,6 +76,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md)<!-- -->. |
 |  [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) |  |
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
+|  [ImageValidation](./kibana-plugin-public.imagevalidation.md) |  |
 |  [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) |
 |  [LegacyCoreSetup](./kibana-plugin-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
@@ -110,7 +111,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMigrationVersion](./kibana-plugin-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsStart](./kibana-plugin-public.savedobjectsstart.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-public.savedobjectsupdateoptions.md) |  |
+|  [StringValidationRegex](./kibana-plugin-public.stringvalidationregex.md) |  |
+|  [StringValidationRegexString](./kibana-plugin-public.stringvalidationregexstring.md) |  |
+|  [UiSettingsParams](./kibana-plugin-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
+|  [UserProvidedValues](./kibana-plugin-public.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Type Aliases
 
@@ -144,10 +149,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) |
+|  [StringValidation](./kibana-plugin-public.stringvalidation.md) |  |
 |  [Toast](./kibana-plugin-public.toast.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) | Inputs for [IToasts](./kibana-plugin-public.itoasts.md) APIs. |
 |  [ToastInputFields](./kibana-plugin-public.toastinputfields.md) | Allowed fields for [ToastInput](./kibana-plugin-public.toastinput.md)<!-- -->. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
 |  [ToastsStart](./kibana-plugin-public.toastsstart.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
+|  [UiSettingsType](./kibana-plugin-public.uisettingstype.md) | UI element type to represent the settings. |
 |  [UnmountCallback](./kibana-plugin-public.unmountcallback.md) | A function that will unmount the element previously mounted by the associated [MountPoint](./kibana-plugin-public.mountpoint.md) |
 

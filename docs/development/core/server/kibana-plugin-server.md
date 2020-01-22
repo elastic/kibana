@@ -142,8 +142,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorage](./kibana-plugin-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
-|  [StringValidationRegex](./kibana-plugin-server.stringvalidationregex.md) |  |
-|  [StringValidationRegexString](./kibana-plugin-server.stringvalidationregexstring.md) |  |
 |  [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md) |  |

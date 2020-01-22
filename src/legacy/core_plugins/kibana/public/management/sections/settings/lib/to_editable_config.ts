@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { UiSettingsParams, UserProvidedValues, StringValidationRegexString } from 'src/core/public';
+import {
+  UiSettingsParams,
+  UserProvidedValues,
+  StringValidationRegexString,
+  SavedObjectAttribute,
+} from 'src/core/public';
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
 import { DEFAULT_CATEGORY } from './default_category';
-import { SavedObjectAttribute } from '../../../../../../../../core/server/saved_objects/types';
 
 /**
  * @param {object} advanced setting definition object
