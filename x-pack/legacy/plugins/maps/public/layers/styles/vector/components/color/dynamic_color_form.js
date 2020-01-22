@@ -55,7 +55,7 @@ export function DynamicColorForm({
       return null;
     }
 
-    if (styleProperty.isOrdinal()) {
+    if (styleOptions.type === COLOR_MAP_TYPE.ORDINAL) {
       return (
         <ColorMapSelect
           colorMapOptions={COLOR_GRADIENTS}
@@ -95,7 +95,7 @@ export function DynamicColorForm({
         <EuiFlexItem>
           <FieldSelect
             fields={fields}
-            selectedFieldName={styleProperty.getField() ? styleProperty.getField().getName() : ''}
+            selectedFieldName={_.get(styleOptions, 'field.name')}
             onChange={onFieldChange}
             compressed
           />
