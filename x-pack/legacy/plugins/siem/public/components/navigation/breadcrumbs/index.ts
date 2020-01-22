@@ -11,6 +11,7 @@ import { APP_NAME } from '../../../../common/constants';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../pages/case/utils';
+import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../pages/detection_engine/rules/utils';
 import { SiemPageName } from '../../../pages/home/types';
 import { RouteSpyState, HostRouteSpyState, NetworkRouteSpyState } from '../../../utils/route/types';
 import { getOverviewUrl } from '../../link_to';
@@ -42,6 +43,9 @@ const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =
 const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
   spyState != null && spyState.pageName === SiemPageName.case;
 
+const isDetectionsRoutes = (spyState: RouteSpyState) =>
+  spyState != null && spyState.pageName === SiemPageName.detections;
+
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps
 ): Breadcrumb[] | null => {
@@ -72,6 +76,24 @@ export const getBreadcrumbsForRoute = (
     return [
       ...siemRootBreadcrumb,
       ...getIPDetailsBreadcrumbs(
+        spyState,
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        )
+      ),
+    ];
+  }
+  if (isDetectionsRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
+    }
+
+    return [
+      ...siemRootBreadcrumb,
+      ...getDetectionRulesBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],

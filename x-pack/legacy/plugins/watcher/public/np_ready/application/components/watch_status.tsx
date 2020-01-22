@@ -23,6 +23,8 @@ function StatusIcon({ status }: { status: string }) {
       return <EuiIcon type="minusInCircleFilled" color="subdued" />;
     case WATCH_STATES.CONFIG_ERROR:
     case WATCH_STATES.ERROR:
+    case ACTION_STATES.UNKNOWN:
+      return <EuiIcon type="cross" color="subdued" />;
     case ACTION_STATES.CONFIG_ERROR:
     case ACTION_STATES.ERROR:
       return <EuiIcon type="crossInACircleFilled" color="danger" />;
