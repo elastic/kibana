@@ -13,7 +13,7 @@ import { APP_ID } from '../../../common/constants';
 
 export { METRIC_TYPE };
 
-export const trackUiAction = createUiStatsReporter(APP_ID);
+export const track = createUiStatsReporter(APP_ID);
 
 export enum TELEMETRY_EVENT {
   // ML
