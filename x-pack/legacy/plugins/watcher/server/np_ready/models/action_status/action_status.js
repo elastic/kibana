@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { badImplementation, badRequest } from 'boom';
+import { badRequest } from 'boom';
 import { getMoment } from '../../../../common/lib/get_moment';
 import { ACTION_STATES } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +46,11 @@ export class ActionStatus {
       return ACTION_STATES.ACKNOWLEDGED;
     }
 
+    // A user could potentially land in this state if running on multiple nodes and timing is off
+    if (ackState === 'acked' && this.lastAcknowledged < this.lastExecution) {
+      return ACTION_STATES.ERROR;
+    }
+
     if (ackState === 'ackable' && this.lastThrottled >= this.lastExecution) {
       return ACTION_STATES.THROTTLED;
     }
@@ -58,20 +63,10 @@ export class ActionStatus {
       return ACTION_STATES.ERROR;
     }
 
-    // At this point, we cannot determine the action status so we thrown an error.
+    // At this point, we cannot determine the action status so mark it as "unknown".
     // We should never get to this point in the code. If we do, it means we are
     // missing an action status and the logic to determine it.
-    throw badImplementation(
-      i18n.translate(
-        'xpack.watcher.models.actionStatus.notDetermineActionStatusBadImplementationMessage',
-        {
-          defaultMessage: 'Could not determine action status; action = {actionStatusJson}',
-          values: {
-            actionStatusJson: JSON.stringify(actionStatusJson),
-          },
-        }
-      )
-    );
+    return ACTION_STATES.UNKNOWN;
   }
 
   get isAckable() {
