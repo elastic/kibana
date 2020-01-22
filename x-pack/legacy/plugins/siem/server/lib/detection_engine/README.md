@@ -1,6 +1,38 @@
 README.md for developers working on the backend detection engine on how to get started
 using the CURL scripts in the scripts folder.
 
+### Privileges
+
+Privilege matrix
+
+#### Example permissions that work for managing all signal indexes across all spaces so that the user in question can create it for each space
+
+Elasticsearch cluster privileges: `manage`
+Index privileges on `.siem-signals-*`: `manage`
+
+#### Example permissions that work for managing only a specific signal index
+
+Elasticsearch cluster privileges: `manage_api_key`
+Index privileges on `.siem-signals-default`: `read`, `write`, `create`, `view_index_metadata`
+
+#### Example permissions that work for an end user using signals across all spaces
+
+Elasticsearch cluster privileges: `manage_api_key`
+Index privileges on `.siem-signals-*`: `read`, `write`, `create`, `view_index_metadata`
+
+#### Example permissions that work for an end user using signals for a a specific index
+
+Elasticsearch cluster privileges: `manage_api_key`
+Index privileges on `.siem-signals-default`: `read`, `write`, `create`, `view_index_metadata`
+
+#### Check privileges
+
+The developer can quickly check their users privileges by running the following script located in the `scripts` folder
+
+```bash
+./get_privileges.sh
+```
+
 The scripts rely on CURL and jq:
 
 - [CURL](https://curl.haxx.se)
