@@ -49,7 +49,7 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
         isError: false,
       };
     case FETCH_SUCCESS:
-      const getSavedObject = a => a as CasesSavedObjects;
+      const getSavedObject = (a: Action['payload']) => a as CasesSavedObjects;
       return {
         ...state,
         isLoading: false,
@@ -80,7 +80,7 @@ const initialData: CasesSavedObjects = {
   total: 0,
   saved_objects: [],
 };
-export const useCaseApi = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>] => {
+export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,

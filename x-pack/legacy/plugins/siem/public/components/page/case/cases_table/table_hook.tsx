@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -15,7 +15,7 @@ import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table'
 import { getCasesColumns } from './columns';
 import { Direction, SortFieldCase } from '../../../../graphql/types';
 import { caseActions, caseModel } from '../../../../store/case';
-import { useCaseApi } from '../../../../hooks/case/use_case_api';
+import { useGetCases } from '../../../../hooks/case/use_get_cases';
 
 interface CasesTableProps {
   id: string;
@@ -49,7 +49,7 @@ export const CasesPaginatedTableComponent = React.memo(
         table: { page, perPage, sortOrder, sortField },
       },
       doFetch,
-    ] = useCaseApi();
+    ] = useGetCases();
 
     const updateActivePage = (newPage: number) =>
       doFetch({
