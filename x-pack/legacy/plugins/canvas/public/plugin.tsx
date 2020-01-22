@@ -43,7 +43,6 @@ export interface CanvasStartDeps {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
     QueryString: any;
-    setRootController: Chrome['setRootController'];
     storage: typeof Storage;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
   };

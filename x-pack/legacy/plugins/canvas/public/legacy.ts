@@ -23,6 +23,9 @@ const shimCoreStart = {
   ...npStart.core,
 };
 const shimSetupPlugins = {
+  // When the frontend Canvas plugin is moved to NP, we can declare reporting as an optional dependency
+  // and enable exports based on existence of the plugin.
+  // For now, use an injected config to mimic this behavior in the meantime.
   reporting: npSetup.core.injectedMetadata.getInjectedVar('reportingBrowserType') ? {} : undefined,
 };
 
@@ -34,8 +37,6 @@ const shimStartPlugins: CanvasStartDeps = {
     // ToDo: Copy directly into canvas
     formatMsg,
     QueryString,
-    // ToDo: Remove in favor of core.application.register
-    setRootController: chrome.setRootController,
     storage: Storage,
     // ToDo: Won't be a part of New Platform. Will need to handle internally
     trackSubUrlForApp: chrome.trackSubUrlForApp,
