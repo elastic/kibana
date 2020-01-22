@@ -10,6 +10,7 @@ import React, { Component, useState } from 'react';
 import { EuiDatePicker, EuiFieldText } from '@elastic/eui';
 
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -116,6 +117,7 @@ export class TimeRangeSelector extends Component {
             onChange={this.setStartTime}
             maxDate={datePickerTimes.end}
             setIsValid={this.props.setTimeRangeValid}
+            tab={this.state.startTab}
           />
         ),
       },
@@ -144,6 +146,7 @@ export class TimeRangeSelector extends Component {
             onChange={this.setEndTime}
             minDate={datePickerTimes.start}
             setIsValid={this.props.setTimeRangeValid}
+            tab={this.state.endTab}
           />
         ),
       },
@@ -215,8 +218,15 @@ function TabStack({ title, items, switchState, switchFunc }) {
   );
 }
 
-const DatePickerWithInput = ({ date, onChange, minDate, setIsValid }) => {
+const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
   const [dateString, setDateString] = useState(date.format(TIME_FORMAT));
+  const [currentTab, setCurrentTab] = useState(tab);
+
+  if (currentTab !== tab) {
+    // if the tab has changed, reset the text to be the same as the date prop
+    setDateString(date.format(TIME_FORMAT));
+    setCurrentTab(tab);
+  }
 
   function onTextChange(e) {
     const val = e.target.value;
@@ -243,7 +253,9 @@ const DatePickerWithInput = ({ date, onChange, minDate, setIsValid }) => {
         value={dateString}
         onChange={onTextChange}
         placeholder={TIME_FORMAT}
-        aria-label="CHANGE ME"
+        aria-label={i18n.translate('xpack.ml.jobsList.startDatafeedModal.enterDateText"', {
+          defaultMessage: 'Enter date',
+        })}
       />
       <EuiDatePicker
         selected={date}
