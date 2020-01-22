@@ -37,12 +37,7 @@ export function getValType(def: Partial<FieldSetting>, value?: any): UiSettingsT
 
   const typeofVal = def.value != null ? typeof def.value : typeof value;
 
-  if (
-    typeofVal === 'symbol' ||
-    typeofVal === 'undefined' ||
-    typeofVal === 'object' ||
-    typeofVal === 'function'
-  ) {
+  if (typeofVal === 'symbol' || typeofVal === 'object' || typeofVal === 'function') {
     throw new Error(
       `incompatible UiSettingsType: '${def.name}' type ${typeofVal} | ${JSON.stringify(def)}`
     );
