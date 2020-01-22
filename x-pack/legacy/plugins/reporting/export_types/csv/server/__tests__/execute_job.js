@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../common/cancellation_token';
-import { StringFormat, FieldFormats } from '../../../../../../../../src/plugins/data/server';
+import { StringFormat, FieldFormatRegisty } from '../../../../../../../../src/plugins/data/server';
 
 import { executeJobFactory } from '../execute_job';
 
@@ -81,7 +81,12 @@ describe('CSV Execute Job', function() {
         uiConfigMock['format:defaultTypeMap'] = {
           _default_: { id: 'string', params: {} },
         };
-        return new FieldFormats([StringFormat], key => uiConfigMock[key]);
+
+        const fieldFormatsService = new FieldFormatRegisty();
+
+        fieldFormatsService.init(key => uiConfigMock[key], {}, [StringFormat]);
+
+        return fieldFormatsService;
       },
       plugins: {
         elasticsearch: {

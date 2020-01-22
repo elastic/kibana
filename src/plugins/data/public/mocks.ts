@@ -37,7 +37,6 @@ const autocompleteMock: any = {
 
 const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
   getByFieldType: jest.fn(),
-  getConfig: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn() as any,
   getDefaultInstanceCacheResolver: jest.fn(),

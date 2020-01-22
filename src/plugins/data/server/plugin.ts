@@ -25,19 +25,15 @@ import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
-import {
-  FieldFormatsService,
-  FieldFormatsServiceSetup,
-  FieldFormatsServiceStart,
-} from './field_formats';
+import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
-  fieldFormats: FieldFormatsServiceSetup;
+  fieldFormats: FieldFormatsSetup;
 }
 
 export interface DataPluginStart {
-  fieldFormats: FieldFormatsServiceStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export interface DataPluginSetupDependencies {

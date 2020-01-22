@@ -17,10 +17,40 @@
  * under the License.
  */
 
-import { IFieldFormatId } from '../../common';
+import { IFieldFormatType } from './field_format';
 
-export interface FieldType {
-  id: IFieldFormatId;
-  params: Record<string, any>;
-  es?: boolean;
-}
+import {
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  StringFormat,
+  TruncateFormat,
+  UrlFormat,
+} from './converters';
+
+export const baseConverters: IFieldFormatType[] = [
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  StringFormat,
+  TruncateFormat,
+  UrlFormat,
+];

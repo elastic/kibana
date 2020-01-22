@@ -16,32 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, IUiSettingsClient } from 'kibana/public';
-
-import { FieldFormatRegisty } from './field_formats';
-import {
-  BoolFormat,
-  IFieldFormatType,
-  PercentFormat,
-  StringFormat,
-} from '../../common/field_formats';
-import { coreMock } from '../../../../core/public/mocks';
+import { FieldFormatRegisty } from './field_formats_registry';
+import { BoolFormat, PercentFormat, StringFormat } from './converters';
+import { IFieldFormatType } from './field_format';
 import { KBN_FIELD_TYPES } from '../../common';
 
 const getValueOfPrivateField = (instance: any, field: string) => instance[field];
-const getUiSettingsMock = (data: any): IUiSettingsClient['get'] => () => data;
 
 describe('FieldFormatRegisty', () => {
-  let mockCoreSetup: CoreSetup;
   let fieldFormatRegisty: FieldFormatRegisty;
+  let defaultMap = {};
+  const getConfig = (key: string) => defaultMap;
 
   beforeEach(() => {
-    mockCoreSetup = coreMock.createSetup();
     fieldFormatRegisty = new FieldFormatRegisty();
+    fieldFormatRegisty.init(
+      getConfig,
+      {
+        parsedUrl: {
+          origin: '',
+          pathname: '',
+          basePath: '',
+        },
+      },
+      []
+    );
   });
 
   test('should allows to create an instance of "FieldFormatRegisty"', () => {
     expect(fieldFormatRegisty).toBeDefined();
+
     expect(getValueOfPrivateField(fieldFormatRegisty, 'fieldFormats')).toBeDefined();
     expect(getValueOfPrivateField(fieldFormatRegisty, 'defaultMap')).toEqual({});
   });
@@ -52,21 +56,12 @@ describe('FieldFormatRegisty', () => {
       expect(typeof fieldFormatRegisty.init).toBe('function');
     });
 
-    test('should set basePath value from "init" method', () => {
-      fieldFormatRegisty.init(mockCoreSetup);
-
-      expect(getValueOfPrivateField(fieldFormatRegisty, 'basePath')).toBe(
-        mockCoreSetup.http.basePath.get()
-      );
-    });
-
     test('should populate the "defaultMap" object', () => {
-      const defaultMap = {
+      defaultMap = {
         number: { id: 'number', params: {} },
       };
 
-      mockCoreSetup.uiSettings.get = getUiSettingsMock(defaultMap);
-      fieldFormatRegisty.init(mockCoreSetup);
+      fieldFormatRegisty.init(getConfig, {}, []);
       expect(getValueOfPrivateField(fieldFormatRegisty, 'defaultMap')).toEqual(defaultMap);
     });
   });

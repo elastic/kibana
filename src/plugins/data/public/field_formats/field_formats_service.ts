@@ -18,49 +18,25 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { FieldFormatRegisty } from './field_formats';
-
-import {
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TruncateFormat,
-  UrlFormat,
-} from '../../common/';
+import { FieldFormatRegisty } from '../../common/field_formats';
 
 export class FieldFormatsService {
   private readonly fieldFormats: FieldFormatRegisty = new FieldFormatRegisty();
 
   public setup(core: CoreSetup) {
-    this.fieldFormats.init(core);
+    core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
+      if (key === 'format:defaultTypeMap') {
+        this.fieldFormats.parseDefaultTypeMap(newValue);
+      }
+    });
 
-    this.fieldFormats.register([
-      BoolFormat,
-      BytesFormat,
-      ColorFormat,
-      DateFormat,
-      DateNanosFormat,
-      DurationFormat,
-      IpFormat,
-      NumberFormat,
-      PercentFormat,
-      RelativeDateFormat,
-      SourceFormat,
-      StaticLookupFormat,
-      StringFormat,
-      TruncateFormat,
-      UrlFormat,
-    ]);
+    this.fieldFormats.init(core.uiSettings.get, {
+      parsedUrl: {
+        origin: window.location.origin,
+        pathname: window.location.pathname,
+        basePath: core.http.basePath.get(),
+      },
+    });
 
     return this.fieldFormats as FieldFormatsSetup;
   }
@@ -68,12 +44,10 @@ export class FieldFormatsService {
   public start() {
     return this.fieldFormats as FieldFormatsStart;
   }
-
-  public stop() {
-    // nothing to do here yet
-  }
 }
 
 /** @public */
 export type FieldFormatsSetup = Omit<FieldFormatRegisty, 'init'>;
+
+/** @public */
 export type FieldFormatsStart = Omit<FieldFormatRegisty, 'init' & 'register'>;

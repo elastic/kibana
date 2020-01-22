@@ -37,6 +37,7 @@ export {
   IFieldFormat,
   IFieldFormatId,
   IFieldFormatType,
+  FieldFormatRegisty,
   // index patterns
   IIndexPattern,
   IFieldType,
@@ -51,7 +52,7 @@ export {
   TimeRange,
 } from '../common';
 
-export * from './field_formats_provider';
+export * from './field_formats';
 export * from './index_patterns';
 export * from './search';
 export * from './query';

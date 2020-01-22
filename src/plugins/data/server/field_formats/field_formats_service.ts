@@ -17,50 +17,15 @@
  * under the License.
  */
 import { has } from 'lodash';
-import { FieldFormats } from './field_formats';
-import { IFieldFormatType } from '../../common/field_formats';
+import { FieldFormatRegisty, IFieldFormatType, baseConverters } from '../../common/field_formats';
 import { IUiSettingsClient } from '../../../../core/server';
 
-import {
-  UrlFormat,
-  StringFormat,
-  NumberFormat,
-  BytesFormat,
-  TruncateFormat,
-  RelativeDateFormat,
-  PercentFormat,
-  IpFormat,
-  DurationFormat,
-  DateNanosFormat,
-  DateFormat,
-  ColorFormat,
-  BoolFormat,
-  SourceFormat,
-  StaticLookupFormat,
-} from '../../common/field_formats';
-
 export class FieldFormatsService {
-  private readonly fieldFormatClasses: IFieldFormatType[] = [
-    UrlFormat,
-    StringFormat,
-    NumberFormat,
-    BytesFormat,
-    TruncateFormat,
-    RelativeDateFormat,
-    PercentFormat,
-    IpFormat,
-    DurationFormat,
-    DateNanosFormat,
-    DateFormat,
-    ColorFormat,
-    BoolFormat,
-    SourceFormat,
-    StaticLookupFormat,
-  ];
+  private readonly fieldFormatClasses: IFieldFormatType[] = baseConverters;
 
   public setup() {
     return {
-      registerFieldFormat: (customFieldFormat: IFieldFormatType) =>
+      register: (customFieldFormat: IFieldFormatType) =>
         this.fieldFormatClasses.push(customFieldFormat),
     };
   }
@@ -68,6 +33,7 @@ export class FieldFormatsService {
   public start() {
     return {
       fieldFormatServiceFactory: async (uiSettings: IUiSettingsClient) => {
+        const fieldFormats = new FieldFormatRegisty();
         const uiConfigs = await uiSettings.getAll();
         const registeredUiSettings = uiSettings.getRegistered();
 
@@ -77,11 +43,16 @@ export class FieldFormatsService {
           }
         });
 
-        return new FieldFormats(this.fieldFormatClasses, (key: string) => uiConfigs[key]);
+        fieldFormats.init((key: string) => uiConfigs[key], {}, this.fieldFormatClasses);
+
+        return fieldFormats;
       },
     };
   }
 }
 
-export type FieldFormatsServiceSetup = ReturnType<FieldFormatsService['setup']>;
-export type FieldFormatsServiceStart = ReturnType<FieldFormatsService['start']>;
+/** @public */
+export type FieldFormatsSetup = ReturnType<FieldFormatsService['setup']>;
+
+/** @public */
+export type FieldFormatsStart = ReturnType<FieldFormatsService['start']>;

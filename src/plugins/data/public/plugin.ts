@@ -33,7 +33,7 @@ import {
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
-import { FieldFormatsService } from './field_formats_provider';
+import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import { IndexPatterns } from './index_patterns';

@@ -24,8 +24,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
 
-export { FieldFormatsService, FieldFormats } from './field_formats';
-
 /**
  * Types to be shared externally
  * @public
@@ -37,6 +35,8 @@ export {
   IFieldFormat,
   IFieldFormatId,
   IFieldFormatType,
+  IFieldFormatConfig,
+  FieldFormatRegisty,
   // index patterns
   IIndexPattern,
   IFieldType,
