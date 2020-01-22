@@ -47,7 +47,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         return headers.response().code(404);
       }
 
-      const rules = Promise.all(
+      const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
             created_at: createdAt,
