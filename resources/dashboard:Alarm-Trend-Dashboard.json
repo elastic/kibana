@@ -5,93 +5,87 @@
    "references": [
       {
          "type": "visualization", 
-         "id": "Count-of-Total-Alarms-Fired-by-Name-(Bar-Chart)", 
-         "name": "panel_0"
+         "name": "panel_0", 
+         "id": "Count-of-Total-Alarms-Fired-by-Name-(Bar-Chart)"
       }, 
       {
          "type": "search", 
-         "id": "Alarms-Table", 
-         "name": "panel_1"
+         "name": "panel_1", 
+         "id": "Alarms-Table"
       }, 
       {
          "type": "visualization", 
-         "id": "Total-Alarms-Fired-(Count)", 
-         "name": "panel_2"
+         "name": "panel_2", 
+         "id": "Total-Alarms-Fired-(Count)"
       }, 
       {
          "type": "visualization", 
-         "id": "103ccf70-ff2e-11e9-b97c-935442fb8ac3", 
-         "name": "panel_3"
+         "name": "panel_3", 
+         "id": "103ccf70-ff2e-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "bb4b8d20-ff2e-11e9-b97c-935442fb8ac3", 
-         "name": "panel_4"
+         "name": "panel_4", 
+         "id": "bb4b8d20-ff2e-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "d5d7ef50-ffdb-11e9-b97c-935442fb8ac3", 
-         "name": "panel_5"
+         "name": "panel_5", 
+         "id": "d5d7ef50-ffdb-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "e6262110-ffdb-11e9-b97c-935442fb8ac3", 
-         "name": "panel_6"
+         "name": "panel_6", 
+         "id": "e6262110-ffdb-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "f3f9b5e0-ffdb-11e9-b97c-935442fb8ac3", 
-         "name": "panel_7"
+         "name": "panel_7", 
+         "id": "f3f9b5e0-ffdb-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "b85f5490-ff2c-11e9-b97c-935442fb8ac3", 
-         "name": "panel_8"
+         "name": "panel_8", 
+         "id": "b85f5490-ff2c-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "d3541e20-ff2c-11e9-b97c-935442fb8ac3", 
-         "name": "panel_9"
+         "name": "panel_9", 
+         "id": "d3541e20-ff2c-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "1f0d5750-ff2d-11e9-b97c-935442fb8ac3", 
-         "name": "panel_10"
+         "name": "panel_10", 
+         "id": "1f0d5750-ff2d-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "14f67c60-ff2d-11e9-b97c-935442fb8ac3", 
-         "name": "panel_11"
+         "name": "panel_11", 
+         "id": "14f67c60-ff2d-11e9-b97c-935442fb8ac3"
       }, 
       {
          "type": "visualization", 
-         "id": "Summary-of-Total-Alarms-Fired-(Pie-Chart)", 
-         "name": "panel_12"
+         "name": "panel_12", 
+         "id": "Summary-of-Total-Alarms-Fired-(Pie-Chart)"
       }, 
       {
          "type": "visualization", 
-         "id": "8a62e1e0-0019-11ea-a805-f766c8673742", 
-         "name": "panel_13"
+         "name": "panel_13", 
+         "id": "8a62e1e0-0019-11ea-a805-f766c8673742"
       }
    ], 
    "type": "dashboard", 
    "dashboard": {
       "hits": 0, 
-      "timeFrom": "now-7d", 
-      "timeRestore": true, 
+      "timeRestore": false, 
       "description": "", 
       "title": "Alarm Trend Dashboard", 
       "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"1\",\"w\":24,\"x\":0,\"y\":18},\"panelIndex\":\"1\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"columns\":[\"SrcIP\",\"DestIP\",\"RuleName\",\"RuleSeverity\",\"Application\",\"TotalBytes\"]},\"gridData\":{\"h\":15,\"i\":\"3\",\"w\":24,\"x\":24,\"y\":18},\"panelIndex\":\"3\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"4\",\"w\":24,\"x\":0,\"y\":33},\"panelIndex\":\"4\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"10\",\"w\":24,\"x\":0,\"y\":48},\"panelIndex\":\"10\",\"title\":\"Query and DPA Rules\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"11\",\"w\":24,\"x\":24,\"y\":33},\"panelIndex\":\"11\",\"title\":\"Alarm Applications\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"12\",\"w\":18,\"x\":30,\"y\":0},\"panelIndex\":\"12\",\"title\":\"Low Severity Alarms\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"13\",\"w\":15,\"x\":15,\"y\":0},\"panelIndex\":\"13\",\"title\":\"Medium Severity Alarms\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"14\",\"w\":15,\"x\":0,\"y\":0},\"panelIndex\":\"14\",\"title\":\"High Severity Alarms\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":7,\"i\":\"15\",\"w\":8,\"x\":0,\"y\":11},\"panelIndex\":\"15\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":7,\"i\":\"16\",\"w\":11,\"x\":8,\"y\":11},\"panelIndex\":\"16\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":7,\"i\":\"17\",\"w\":9,\"x\":29,\"y\":11},\"panelIndex\":\"17\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":7,\"i\":\"18\",\"w\":10,\"x\":19,\"y\":11},\"panelIndex\":\"18\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"25\",\"w\":24,\"x\":24,\"y\":48},\"panelIndex\":\"25\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":7,\"i\":\"27\",\"w\":10,\"x\":38,\"y\":11},\"panelIndex\":\"27\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_13\"}]", 
-      "timeTo": "now", 
       "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
       "version": 1, 
-      "refreshInterval": {
-         "pause": false, 
-         "value": 60000
-      }, 
       "kibanaSavedObjectMeta": {
          "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
       }
    }, 
-   "updated_at": "2020-01-14T21:04:04.730Z"
+   "updated_at": "2020-01-22T16:42:29.745Z"
 }
