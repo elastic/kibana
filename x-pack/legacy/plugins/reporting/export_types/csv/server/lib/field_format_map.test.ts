@@ -13,10 +13,10 @@ import {
   DefaultNumberFormat,
   StaticLookupFormat,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../../../src/plugins/data/server';
+} from '../../../../../../../../src/plugins/data/server';
 import { fieldFormatMapFactory } from './field_format_map';
 
-type ConfigValue = { number: { id: string; params: {} } } | string;
+type ConfigValue = { [key: string]: { id: string; params: {} } } | string;
 
 describe('field format map', function() {
   const indexPatternSavedObject = {

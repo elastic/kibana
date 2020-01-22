@@ -35,7 +35,7 @@ export class DateFormat extends FieldFormat {
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
-  constructor(params: IFieldFormatMetaParams, getConfig: Function) {
+  constructor(params: IFieldFormatMetaParams, getConfig?: Function) {
     super(params, getConfig);
 
     this.memoizedConverter = memoize((val: any) => {
