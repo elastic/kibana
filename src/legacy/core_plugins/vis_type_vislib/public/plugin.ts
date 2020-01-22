@@ -46,10 +46,6 @@ type ResponseHandlerProvider = () => {
 type KbnVislibVisTypesCoreSetup = CoreSetup<KbnVislibVisTypesPluginStartDependencies>;
 
 export interface LegacyDependencies {
-  initializeHierarchicalTooltipFormatter: () => Promise<void>;
-  getHierarchicalTooltipFormatter: () => Promise<void>;
-  initializePointSeriesTooltipFormatter: () => void;
-  getPointSeriesTooltipFormatter: () => void;
   vislibSeriesResponseHandlerProvider: ResponseHandlerProvider;
   vislibSlicesResponseHandlerProvider: ResponseHandlerProvider;
   vislibColor: (colors: Array<string | number>, mappings: any) => (value: any) => any;

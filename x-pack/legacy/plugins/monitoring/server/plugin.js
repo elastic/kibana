@@ -16,6 +16,7 @@ import { initMonitoringXpackInfo } from './init_monitoring_xpack_info';
 import { initBulkUploader, registerCollectors } from './kibana_monitoring';
 import { registerMonitoringCollection } from './telemetry_collection';
 import { getLicenseExpiration } from './alerts/license_expiration';
+import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 
 export class Plugin {
   setup(core, plugins) {
@@ -41,6 +42,12 @@ export class Plugin {
      * fetch methods and uploads to the ES monitoring bulk endpoint
      */
     const xpackMainPlugin = plugins.xpack_main;
+
+    /*
+     * Parse the Elasticsearch config and read any certificates/keys if necessary
+     */
+    const elasticsearchConfig = parseElasticsearchConfig(config);
+
     xpackMainPlugin.status.once('green', async () => {
       // first time xpack_main turns green
       /*
@@ -52,7 +59,7 @@ export class Plugin {
         await instantiateClient({
           log: core.log,
           events: core.events,
-          config,
+          elasticsearchConfig,
           elasticsearchPlugin: plugins.elasticsearch,
         }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({

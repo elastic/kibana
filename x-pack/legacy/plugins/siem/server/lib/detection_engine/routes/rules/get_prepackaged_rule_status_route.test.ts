@@ -33,7 +33,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
           to: 'now',
           index: ['index-1'],
           name: 'some-name',
-          severity: 'severity',
+          severity: 'low',
           interval: '5m',
           type: 'query',
           version: 2, // set one higher than the mocks which is set to 1 to trigger updates

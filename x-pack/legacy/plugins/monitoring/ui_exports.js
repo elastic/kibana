@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS } from './common/constants';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 /**
  * Configuration of dependency objects for the UI, which are needed for the
@@ -27,6 +28,7 @@ export const getUiExports = () => ({
     euiIconType: 'monitoringApp',
     linkToLastSubUrl: false,
     main: 'plugins/monitoring/monitoring',
+    category: DEFAULT_APP_CATEGORIES.management,
   },
   injectDefaultVars(server) {
     const config = server.config();

@@ -19,7 +19,7 @@
 
 import { Server } from 'hapi';
 import { size } from 'lodash';
-import { KIBANA_MANAGEMENT_STATS_TYPE } from '../../../common/constants';
+import { KIBANA_STACK_MANAGEMENT_STATS_TYPE } from '../../../common/constants';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 import { SavedObjectsClient } from '../../../../../../core/server';
 
@@ -54,7 +54,7 @@ export function registerManagementUsageCollector(
   server: any
 ) {
   const collector = usageCollection.makeUsageCollector({
-    type: KIBANA_MANAGEMENT_STATS_TYPE,
+    type: KIBANA_STACK_MANAGEMENT_STATS_TYPE,
     isReady: () => true,
     fetch: createCollectorFetch(server),
   });

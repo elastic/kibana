@@ -38,9 +38,6 @@ import { initInternalSpacesApi } from './routes/api/internal';
  */
 export interface LegacyAPI {
   savedObjects: SavedObjectsLegacyService;
-  tutorial: {
-    addScopedTutorialContextFactory: (factory: any) => void;
-  };
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
   };
@@ -190,9 +187,6 @@ export class Plugin {
       Number.MIN_SAFE_INTEGER,
       'spaces',
       spacesSavedObjectsClientWrapperFactory(spacesService, types)
-    );
-    legacyAPI.tutorial.addScopedTutorialContextFactory(
-      createSpacesTutorialContextFactory(spacesService)
     );
     // Register a function with server to manage the collection of usage stats
     registerSpacesUsageCollector(usageCollectionSetup, {
