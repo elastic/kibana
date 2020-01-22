@@ -11,8 +11,9 @@ import {
 } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { APP_ID } from '../../../common/constants';
 
-export const trackUiAction = createUiStatsReporter(APP_ID);
 export { METRIC_TYPE };
+
+export const trackUiAction = createUiStatsReporter(APP_ID);
 
 export enum TELEMETRY_EVENT {
   // ML
