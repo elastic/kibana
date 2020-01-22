@@ -25,7 +25,7 @@ import {
   Render,
 } from '../../../../plugins/expressions/public';
 // @ts-ignore
-import { vislibSeriesResponseHandler } from './response_handler';
+import { vislibSeriesResponseHandler } from './vislib/response_handler';
 
 const name = 'vislib';
 
@@ -43,7 +43,7 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
+type Return = Render<RenderValue>;
 
 export const createKbnVislibVisTypesFn = () => (): ExpressionFunction<
   typeof name,
@@ -71,9 +71,9 @@ export const createKbnVislibVisTypesFn = () => (): ExpressionFunction<
       help: '',
     },
   },
-  async fn(context, args) {
+  fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-    const convertedData = await vislibSeriesResponseHandler(context, visConfigParams.dimensions);
+    const convertedData = vislibSeriesResponseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',

@@ -18,22 +18,21 @@
  */
 
 import { buildHierarchicalData } from './build_hierarchical_data';
-import { legacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
+import { tableResponseHandler } from '../../../../core_plugins/vis_type_table/public';
 
 jest.mock('ui/new_platform');
-
-jest.mock('../../chrome', () => ({
-  getUiSettingsClient: jest.fn(),
+jest.mock('ui/chrome', () => ({
+  getUiSettingsClient: jest.fn().mockReturnValue({
+    get: jest.fn().mockReturnValue('KQL'),
+  }),
 }));
 
 describe('buildHierarchicalData convertTable', () => {
-  const responseHandler = legacyResponseHandlerProvider().handler;
-
   describe('metric only', () => {
     let dimensions;
     let table;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       const tabifyResponse = {
         columns: [{ id: 'col-0-agg_1', name: 'Average bytes' }],
         rows: [{ 'col-0-agg_1': 412032 }],
@@ -42,7 +41,7 @@ describe('buildHierarchicalData convertTable', () => {
         metric: { accessor: 0 },
       };
 
-      const tableGroup = await responseHandler(tabifyResponse, dimensions);
+      const tableGroup = tableResponseHandler(tabifyResponse, dimensions);
       table = tableGroup.tables[0];
     });
 
@@ -180,7 +179,7 @@ describe('buildHierarchicalData convertTable', () => {
         metric: { accessor: 5 },
         buckets: [{ accessor: 2 }, { accessor: 4 }],
       };
-      const tableGroup = await responseHandler(tabifyResponse, dimensions);
+      const tableGroup = await tableResponseHandler(tabifyResponse, dimensions);
       tables = tableGroup.tables;
     });
 
@@ -250,7 +249,7 @@ describe('buildHierarchicalData convertTable', () => {
         metric: { accessor: 1 },
         buckets: [{ accessor: 0, params: { field: 'bytes', interval: 8192 } }],
       };
-      const tableGroup = await responseHandler(tabifyResponse, dimensions);
+      const tableGroup = await tableResponseHandler(tabifyResponse, dimensions);
       table = tableGroup.tables[0];
     });
 
@@ -283,7 +282,7 @@ describe('buildHierarchicalData convertTable', () => {
         metric: { accessor: 1 },
         buckets: [{ accessor: 0, format: { id: 'range', params: { id: 'agg_2' } } }],
       };
-      const tableGroup = await responseHandler(tabifyResponse, dimensions);
+      const tableGroup = await tableResponseHandler(tabifyResponse, dimensions);
       table = tableGroup.tables[0];
     });
 
@@ -320,7 +319,7 @@ describe('buildHierarchicalData convertTable', () => {
           },
         ],
       };
-      const tableGroup = await responseHandler(tabifyResponse, dimensions);
+      const tableGroup = await tableResponseHandler(tabifyResponse, dimensions);
       table = tableGroup.tables[0];
     });
 

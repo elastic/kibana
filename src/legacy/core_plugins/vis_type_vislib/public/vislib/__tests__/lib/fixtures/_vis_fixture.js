@@ -31,10 +31,6 @@ import {
   setPointSeriesTooltipFormatter,
   getPointSeriesTooltipFormatter,
 } from 'ui/vis/components/tooltip/_pointseries_tooltip_formatter';
-import {
-  vislibSeriesResponseHandlerProvider,
-  vislibSlicesResponseHandlerProvider,
-} from 'ui/vis/response_handlers/vislib';
 import { vislibColor } from 'ui/vis/components/color/color';
 
 const $visCanvas = $('<div>')
@@ -75,8 +71,6 @@ const getDeps = () => {
     vislibColor,
     getHierarchicalTooltipFormatter,
     getPointSeriesTooltipFormatter,
-    vislibSeriesResponseHandlerProvider,
-    vislibSlicesResponseHandlerProvider,
   };
 };
 

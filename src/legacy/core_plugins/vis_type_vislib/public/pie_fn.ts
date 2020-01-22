@@ -25,7 +25,7 @@ import {
   Render,
 } from '../../../../plugins/expressions/public';
 // @ts-ignore
-import { vislibSlicesResponseHandler } from './response_handler';
+import { vislibSlicesResponseHandler } from './vislib/response_handler';
 
 const name = 'kibana_pie';
 
@@ -41,7 +41,7 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
+type Return = Render<RenderValue>;
 
 export const createPieVisFn = () => (): ExpressionFunction<
   typeof name,
@@ -64,9 +64,9 @@ export const createPieVisFn = () => (): ExpressionFunction<
       help: '',
     },
   },
-  async fn(context, args) {
+  fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
-    const convertedData = await vislibSlicesResponseHandler(context, visConfig.dimensions);
+    const convertedData = vislibSlicesResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',

@@ -37,11 +37,25 @@ Object {
         "Count",
       ],
       "raw": Object {
-        "columns": Array [],
-        "rows": Array [],
+        "columns": Array [
+          Object {
+            "id": "col-0-1",
+            "name": "Count",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "col-0-1": 0,
+          },
+        ],
       },
       "slices": Object {
-        "children": Array [],
+        "children": Array [
+          Object {
+            "name": "Count",
+            "size": 0,
+          },
+        ],
       },
       "tooltipFormatter": Object {
         "id": "number",

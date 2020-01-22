@@ -17,41 +17,10 @@
  * under the License.
  */
 
-import { Required } from '@kbn/utility-types';
+import { buildHierarchicalData, buildPointSeriesData, getFormat } from '../legacy_imports';
 
-import { getFormat } from './legacy_imports';
-import { Context } from './table_vis_fn';
-
-export type ConvertedContext = Context & {
-  tables: Array<TableGroup | Table>;
-  direction?: 'row' | 'column';
-};
-
-export interface TableGroup {
-  $parent: ConvertedContext;
-  table: Context;
-  tables: Table[];
-  title: string;
-  name: string;
-  key: any;
-  column: number;
-  row: number;
-}
-
-export interface Table {
-  $parent?: TableGroup;
-  columns: Context['columns'];
-  rows: Context['rows'];
-}
-
-export function tableVisResponseHandler(table: Context, dimensions: any): ConvertedContext {
-  const converted: ConvertedContext = {
-    type: 'kibana_datatable',
-    tables: [],
-    rows: [],
-    columns: [],
-  };
-
+function tableResponseHandler(table, dimensions) {
+  const converted = { tables: [] };
   const split = dimensions.splitColumn || dimensions.splitRow;
 
   if (split) {
@@ -63,12 +32,11 @@ export function tableVisResponseHandler(table: Context, dimensions: any): Conver
     let splitIndex = 0;
 
     table.rows.forEach((row, rowIndex) => {
-      const splitValue: any = row[splitColumn.id];
+      const splitValue = row[splitColumn.id];
 
-      if (!splitMap.hasOwnProperty(splitValue as any)) {
-        // @ts-ignore
+      if (!splitMap.hasOwnProperty(splitValue)) {
         splitMap[splitValue] = splitIndex++;
-        const tableGroup: Required<TableGroup, 'tables'> = {
+        const tableGroup = {
           $parent: converted,
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
           name: splitColumn.name,
@@ -87,9 +55,7 @@ export function tableVisResponseHandler(table: Context, dimensions: any): Conver
         converted.tables.push(tableGroup);
       }
 
-      // @ts-ignore
       const tableIndex = splitMap[splitValue];
-      // @ts-ignore
       converted.tables[tableIndex].tables[0].rows.push(row);
     });
   } else {
@@ -101,3 +67,58 @@ export function tableVisResponseHandler(table: Context, dimensions: any): Conver
 
   return converted;
 }
+
+function convertTableGroup(tableGroup, convertTable) {
+  const tables = tableGroup.tables;
+
+  if (!tables.length) return;
+
+  const firstChild = tables[0];
+  if (firstChild.columns) {
+    const chart = convertTable(firstChild);
+    // if chart is within a split, assign group title to its label
+    if (tableGroup.$parent) {
+      chart.label = tableGroup.title;
+    }
+    return chart;
+  }
+
+  const out = {};
+  let outList;
+
+  tables.forEach(function(table) {
+    if (!outList) {
+      const direction = tableGroup.direction === 'row' ? 'rows' : 'columns';
+      outList = out[direction] = [];
+    }
+
+    let output;
+    if ((output = convertTableGroup(table, convertTable))) {
+      outList.push(output);
+    }
+  });
+
+  return out;
+}
+
+function handlerFunction(convertTable) {
+  return function(response, dimensions) {
+    const tableGroup = tableResponseHandler(response, dimensions);
+    let converted = convertTableGroup(tableGroup, table => {
+      return convertTable(table, dimensions);
+    });
+    if (!converted) {
+      // mimic a row of tables that doesn't have any tables
+      // https://github.com/elastic/kibana/blob/7bfb68cd24ed42b1b257682f93c50cd8d73e2520/src/kibana/components/vislib/components/zero_injection/inject_zeros.js#L32
+      converted = { rows: [] };
+    }
+
+    converted.hits = response.rows.length;
+
+    return converted;
+  };
+}
+
+export const vislibSeriesResponseHandler = handlerFunction(buildPointSeriesData);
+
+export const vislibSlicesResponseHandler = handlerFunction(buildHierarchicalData);

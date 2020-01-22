@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { tableVisResponseHandler } from './table_vis_response_handler';
 
 import {
@@ -45,7 +46,7 @@ interface RenderValue {
   };
 }
 
-type Return = Promise<Render<RenderValue>>;
+type Return = Render<RenderValue>;
 
 export const createTableVisFn = (): ExpressionFunction<
   typeof name,
@@ -68,9 +69,9 @@ export const createTableVisFn = (): ExpressionFunction<
       help: '',
     },
   },
-  async fn(context, args) {
+  fn(context, args) {
     const visConfig = args.visConfig && JSON.parse(args.visConfig);
-    const convertedData = await tableVisResponseHandler(context, visConfig.dimensions);
+    const convertedData = tableVisResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',

@@ -845,11 +845,9 @@ function discoverController(
           timeRange: $scope.timeRange,
           searchSource: $scope.searchSource,
         })
-      )
-        .then(resp => discoverResponseHandler(tabifiedData, resp))
-        .then(resp => {
-          $scope.histogramData = resp;
-        });
+      ).then(resp => {
+        $scope.histogramData = discoverResponseHandler(tabifiedData, resp);
+      });
     }
 
     $scope.hits = resp.hits.total;
