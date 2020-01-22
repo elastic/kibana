@@ -21,6 +21,7 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiTitle,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
@@ -96,7 +97,9 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
-          <EuiFlyoutBody>{this.getForm()}</EuiFlyoutBody>
+          <EuiFlyoutBody>
+            <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>
+          </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>

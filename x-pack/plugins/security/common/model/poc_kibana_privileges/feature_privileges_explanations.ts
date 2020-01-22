@@ -51,6 +51,12 @@ export class FeaturePrivilegesExplanations {
     return this.explanations[featureId][privilegeId].isInherited();
   }
 
+  public isInheritedByGlobal(featureId: string, privilegeId: string) {
+    const explanation = this.explanations[featureId][privilegeId];
+    const { global } = explanation.getGrantSources();
+    return global.filter(gp => !gp.equals(explanation.privilege)).length > 0;
+  }
+
   public *explanationsIterator(): IterableIterator<{
     featureId: string;
     privilegeId: string;

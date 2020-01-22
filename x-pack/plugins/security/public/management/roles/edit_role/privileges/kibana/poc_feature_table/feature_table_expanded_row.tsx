@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { Role, SecuredFeature, PrimaryFeaturePrivilege } from '../../../../../../../common/model';
+import {
+  Role,
+  SecuredFeature,
+  PrimaryFeaturePrivilege,
+  SubFeaturePrivilege,
+} from '../../../../../../../common/model';
 import { SubFeatureForm } from './sub_feature_form';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
@@ -28,6 +33,10 @@ export const FeatureTableExpandedRow = ({
   privilegeCalculator,
   disabled,
 }: Props) => {
+  const [isCustomizing, setIsCustomizing] = useState(false);
+  const [canCustomize, setCanCustomize] = useState(false);
+  const [hasInheritedCustomizations, setHasInheritedCustomizations] = useState(false);
+
   const selectedPrivileges = role.kibana[spacesIndex].feature[feature.id] ?? [];
 
   const selectedPrimaryFeaturePrivileges: PrimaryFeaturePrivilege[] = feature.primaryFeaturePrivileges.filter(
@@ -38,16 +47,44 @@ export const FeatureTableExpandedRow = ({
     mpfp => selectedPrivileges.includes(mpfp.id)
   );
 
-  const subFeaturePrivileges: string[] = [];
-  for (const sfp of feature.subFeaturePrivilegeIterator()) {
-    subFeaturePrivileges.push(sfp.id);
-  }
-
   const privilegeExplanations = privilegeCalculator.explainEffectiveFeaturePrivileges(
     role,
     spacesIndex,
     feature.id
   );
+
+  useEffect(() => {
+    setCanCustomize(
+      Boolean(disabled) &&
+        privilegeExplanations.exists((featureId, privilegeId, explanation) => {
+          return (
+            !explanation.isGranted() ||
+            !explanation.getGrantSources().global.some(source => source.type === 'base') ||
+            !explanation.getGrantSources().space.some(source => source.type === 'base')
+          );
+        })
+    );
+
+    setHasInheritedCustomizations(
+      !isGlobalPrivilegeDefinition(role.kibana[spacesIndex]) &&
+        privilegeExplanations.exists((featureId, privilegeId, explanation) => {
+          return explanation
+            .getGrantSources()
+            .global.some(source => source instanceof SubFeaturePrivilege);
+        })
+    );
+
+    setIsCustomizing(
+      selectedMinimalPrimaryFeaturePrivileges.length > 0 || hasInheritedCustomizations
+    );
+  }, [
+    disabled,
+    hasInheritedCustomizations,
+    privilegeExplanations,
+    role.kibana,
+    selectedMinimalPrimaryFeaturePrivileges.length,
+    spacesIndex,
+  ]);
 
   // TODO: externalize
   const isMinimumFeaturePrivilege = (privilege: string) => privilege.startsWith('minimal_');
@@ -64,60 +101,38 @@ export const FeatureTableExpandedRow = ({
     if (customizeSubFeatures) {
       const selectedPrimaryFeaturePrivilege = selectedPrimaryFeaturePrivileges[0];
 
-      if (!selectedPrimaryFeaturePrivilege) {
-        return;
+      let updatedSelectedPrivileges = [...selectedPrivileges];
+      if (selectedPrimaryFeaturePrivilege) {
+        updatedSelectedPrivileges = selectedPrivileges.filter(
+          sp => sp !== selectedPrimaryFeaturePrivilege.id
+        );
+        updatedSelectedPrivileges.push(
+          getMinimumFeaturePrivilege(selectedPrimaryFeaturePrivilege.id)
+        );
       }
-
-      const updatedSelectedPrivileges = selectedPrivileges.filter(
-        sp => sp !== selectedPrimaryFeaturePrivilege.id
-      );
-      updatedSelectedPrivileges.push(
-        getMinimumFeaturePrivilege(selectedPrimaryFeaturePrivilege.id)
-      );
-
+      setIsCustomizing(customizeSubFeatures);
       onChange(feature.id, updatedSelectedPrivileges);
     } else {
       const selectedMinimalPrimaryFeaturePrivilege = selectedMinimalPrimaryFeaturePrivileges[0];
 
-      if (!selectedMinimalPrimaryFeaturePrivilege) {
-        return;
+      const updatedSelectedPrivileges = [];
+      if (selectedMinimalPrimaryFeaturePrivilege) {
+        updatedSelectedPrivileges.push(
+          getRegularFeaturePrivilege(selectedMinimalPrimaryFeaturePrivilege.id)
+        );
       }
 
-      const updatedSelectedPrivileges = [
-        getRegularFeaturePrivilege(selectedMinimalPrimaryFeaturePrivilege.id),
-      ];
-
+      setIsCustomizing(customizeSubFeatures);
       onChange(feature.id, updatedSelectedPrivileges);
     }
   };
-
-  const canCustomize =
-    !disabled &&
-    privilegeExplanations.exists((featureId, privilegeId, explanation) => {
-      return (
-        !explanation.isGranted() ||
-        !explanation.getGrantSources().global.some(source => source.type === 'base') ||
-        !explanation.getGrantSources().space.some(source => source.type === 'base')
-      );
-    });
-
-  const hasInheritedCustomizations =
-    !isGlobalPrivilegeDefinition(role.kibana[spacesIndex]) &&
-    privilegeExplanations.exists((featureId, privilegeId, explanation) => {
-      return explanation
-        .getGrantSources()
-        .global.some(source => subFeaturePrivileges.includes(privilegeId));
-    });
-
-  const isCustomizingSubFeaturePrivileges =
-    selectedMinimalPrimaryFeaturePrivileges.length > 0 || hasInheritedCustomizations;
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiSwitch
           label="Customize sub-feature privileges"
-          checked={isCustomizingSubFeaturePrivileges}
+          checked={isCustomizing}
           onChange={onCustomizeSubFeatureChange}
           disabled={!canCustomize || hasInheritedCustomizations}
         />

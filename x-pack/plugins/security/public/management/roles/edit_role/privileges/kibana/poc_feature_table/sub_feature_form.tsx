@@ -91,18 +91,37 @@ export const SubFeatureForm = (props: Props) => {
       firstSelectedPrivilege &&
       props.privilegeExplanations.isInherited(props.featureId, firstSelectedPrivilege.id);
 
+    const areAnyInherited = props.privilegeExplanations.exists(
+      (featureId, privilegeId, explanation) =>
+        privilegeGroup.privileges.some(
+          pgp => explanation.isInherited() && pgp.equals(explanation.privilege)
+        )
+    );
+
+    // When to disable privilege group privilege:
+    // if inherited, and if a more permissive privilege in the group is NOT inherited
+
     const options = [
-      privilegeGroup.privileges.map(privilege => {
+      privilegeGroup.privileges.map((privilege, privilegeIndex) => {
         return {
           id: privilege.id,
           label: privilege.name,
-          isDisabled: props.privilegeExplanations.isInherited(props.featureId, privilege.id),
+          isDisabled: props.privilegeExplanations.exists((featureId, privilegeId, explanation) => {
+            const morePermissiveGroupPrivileges = privilegeGroup.privileges.slice(
+              0,
+              privilegeIndex
+            );
+
+            return morePermissiveGroupPrivileges.some(
+              pgp => pgp.equals(explanation.privilege) && explanation.isInherited()
+            );
+          }),
         };
       }),
       {
         id: NO_PRIVILEGE_VALUE,
         label: 'None',
-        isDisabled: isInherited,
+        isDisabled: areAnyInherited,
       },
     ].flat();
 

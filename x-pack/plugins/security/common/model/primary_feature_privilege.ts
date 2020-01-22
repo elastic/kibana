@@ -7,7 +7,7 @@ import _ from 'lodash';
 import { FeaturePrivilege } from './feature_privilege';
 
 export class PrimaryFeaturePrivilege extends FeaturePrivilege {
-  public get isMinimalFeaturePrivilege() {
+  public isMinimalFeaturePrivilege() {
     return this.id.startsWith('minimal_');
   }
 

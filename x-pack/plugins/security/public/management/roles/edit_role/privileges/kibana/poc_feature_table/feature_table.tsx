@@ -24,6 +24,7 @@ import {
   KibanaPrivileges,
   SecuredFeature,
   Privilege,
+  PrimaryFeaturePrivilege,
 } from '../../../../../../../common/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
@@ -31,6 +32,7 @@ import { NO_PRIVILEGE_VALUE } from '../constants';
 import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 // TODO: move htis up to a common spot if it's to be used here...
 import { PrivilegeDisplay } from '../poc_space_aware_privilege_section/privilege_display';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
 interface Props {
   role: Role;
@@ -243,7 +245,25 @@ export class FeatureTable extends Component<Props, State> {
           // TODO
           const allowsNone =
             !selectedPrivilegeId ||
-            !featurePrivilegeExplanations.exists((fid, privilegeId, explanation) => true);
+            !featurePrivilegeExplanations.exists((fid, privilegeId, explanation) => {
+              const isPrimaryFeaturePrivilege =
+                explanation.privilege instanceof PrimaryFeaturePrivilege;
+
+              const isMinimalPrimaryFeaturePrivilege =
+                isPrimaryFeaturePrivilege &&
+                (explanation.privilege as PrimaryFeaturePrivilege).isMinimalFeaturePrivilege();
+
+              const isInheritedByGlobal =
+                !isGlobalPrivilegeDefinition(this.props.role.kibana[this.props.spacesIndex]) &&
+                explanation.getGrantSources().global.length > 0;
+
+              // Cannot deselect a primary (non-minimal) feature privilege if it is inherited
+              return (
+                isPrimaryFeaturePrivilege &&
+                !isMinimalPrimaryFeaturePrivilege &&
+                isInheritedByGlobal
+              );
+            });
 
           const canChangePrivilege =
             !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);
