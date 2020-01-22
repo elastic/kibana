@@ -59,6 +59,7 @@ export const usePrivilegeUser = (): Return => {
           setAuthenticated(false);
           setHasIndexManage(false);
           setHasIndexWrite(false);
+          setHasManageApiKey(false);
           errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
         }
       }
