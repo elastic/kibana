@@ -74,19 +74,22 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   tar -xzf /tmp/downloaded_coverage/coverage/x-pack-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
                   echo extracting kibana-oss-tests
                   tar -xzf /tmp/downloaded_coverage/coverage/kibana-oss-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+
                   echo extracting kibana-xpack-tests
-#                  for i in {1..3}; do
-#                    tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-${i}/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-#                  done
+                  # for i in {1..3}; do
+                  #  tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-${i}/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+                  # done
                   tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-1/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+
                   # replace path in json files to have valid html report
                   pwd=\$(pwd)
                   du -sh /tmp/extracted_coverage/target/kibana-coverage/
-                  echo replacing path in json files
-                  for i in {1..9}; do
-                    sed -i "s|/dev/shm/workspace/kibana|\$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/${i}*.json &
-                  done
-                  wait
+
+                  # echo replacing path in json files
+                  # for i in {1..9}; do
+                  #  sed -i "s|/dev/shm/workspace/kibana|\$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/${i}*.json &
+                  # done
+                  # wait
 
                   # merge oss & x-pack reports
                   echo merging coverage reports
@@ -98,7 +101,6 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
 
                   # Debugging Ingest and Static Site
-                  echo "### List target dir: ..."
                   ls -R target
 
                   echo "###  Ingesting Code Coverage"
