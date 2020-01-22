@@ -241,6 +241,14 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+      search: {
+        __LEGACY: {
+          esClient: {
+            search: sinon.fake(),
+            msearch: sinon.fake(),
+          },
+        },
+      },
       fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {

@@ -42,6 +42,10 @@ const WrappedByAutoSizer = styled.div`
 `; // required by AutoSizer
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
+const StyledEuiPanel = styled(EuiPanel)`
+  max-width: 100%;
+`;
+
 interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeader[];
@@ -113,7 +117,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiPanel data-test-subj="events-viewer-panel">
+    <StyledEuiPanel data-test-subj="events-viewer-panel">
       <AutoSizer detectAnyWindowResize={true} content>
         {({ measureRef, content: { width = 0 } }) => (
           <>
@@ -225,7 +229,7 @@ const EventsViewerComponent: React.FC<Props> = ({
           </>
         )}
       </AutoSizer>
-    </EuiPanel>
+    </StyledEuiPanel>
   );
 };
 
