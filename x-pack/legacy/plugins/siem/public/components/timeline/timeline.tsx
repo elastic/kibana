@@ -65,11 +65,13 @@ interface Props {
   flyoutHeight: number;
   id: string;
   indexPattern: IIndexPattern;
+  indexToAdd: string[];
   isLive: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: KqlMode;
   kqlQueryExpression: string;
+  loadingIndexName: boolean;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
@@ -95,11 +97,13 @@ export const TimelineComponent = ({
   flyoutHeight,
   id,
   indexPattern,
+  indexToAdd,
   isLive,
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  loadingIndexName,
   onChangeDataProviderKqlQuery,
   onChangeDroppableAndProvider,
   onChangeItemsPerPage,
@@ -156,6 +160,7 @@ export const TimelineComponent = ({
           {combinedQueries != null ? (
             <TimelineQuery
               id={id}
+              indexToAdd={indexToAdd}
               fields={columnsHeader.map(c => c.id)}
               sourceId="default"
               limit={itemsPerPage}
@@ -175,7 +180,7 @@ export const TimelineComponent = ({
                 getUpdatedAt,
                 refetch,
               }) => (
-                <ManageTimelineContext loading={loading} width={width}>
+                <ManageTimelineContext loading={loading || loadingIndexName} width={width}>
                   <TimelineRefetch
                     id={id}
                     inputId="timeline"
@@ -201,7 +206,7 @@ export const TimelineComponent = ({
                     hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                     height={footerHeight}
                     isLive={isLive}
-                    isLoading={loading}
+                    isLoading={loading || loadingIndexName}
                     itemsCount={events.length}
                     itemsPerPage={itemsPerPage}
                     itemsPerPageOptions={itemsPerPageOptions}

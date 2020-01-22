@@ -6,12 +6,41 @@
 
 import React from 'react';
 import moment from 'moment';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../';
 
+// Failing: https://github.com/elastic/kibana/issues/54818
 describe('LocationStatusTags component', () => {
   let monitorLocations: MonitorLocation[];
+
+  it('renders properly against props', () => {
+    monitorLocations = [
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Islamabad', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: moment()
+          .subtract('5', 'w')
+          .toISOString(),
+      },
+      {
+        summary: { up: 4, down: 0 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: moment()
+          .subtract('5', 'w')
+          .toISOString(),
+      },
+      {
+        summary: { up: 0, down: 2 },
+        geo: { name: 'Berlin', location: { lat: '52.487448', lon: ' 13.394798' } },
+        timestamp: moment()
+          .subtract('5', 'w')
+          .toISOString(),
+      },
+    ];
+    const component = shallowWithIntl(<LocationStatusTags locations={monitorLocations} />);
+    expect(component).toMatchSnapshot();
+  });
 
   it('renders when there are many location', () => {
     monitorLocations = [

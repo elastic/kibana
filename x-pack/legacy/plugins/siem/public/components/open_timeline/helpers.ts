@@ -58,7 +58,7 @@ export const isUntitled = ({ title }: OpenTimelineResult): boolean =>
 const omitTypename = (key: string, value: keyof TimelineModel) =>
   key === '__typename' ? undefined : value;
 
-const omitTypenameInTimeline = (timeline: TimelineResult): TimelineResult =>
+export const omitTypenameInTimeline = (timeline: TimelineResult): TimelineResult =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
 
 const parseString = (params: string) => {

@@ -1,17 +1,37 @@
 {
-  "rule_id": "f545ff26-3c94-4fd0-bd33-3c7f95a3a0fc",
-  "risk_score": 50,
-  "description": "EQL - Windows Script Executing PowerShell",
+  "description": "Identifies a PowerShell process launched by either CScript or WScript. Observing Windows scripting processes executing a PowerShell script, may be indicative of malicious activity.",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
   "immutable": true,
   "interval": "5m",
-  "name": "EQL - Windows Script Executing PowerShell",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:(\"wscript.exe\" or \"cscript.exe\") and process.name:\"powershell.exe\"",
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "Windows Script Executing PowerShell",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:(\"wscript.exe\" or \"cscript.exe\") and process.name:\"powershell.exe\"",
+  "risk_score": 50,
+  "rule_id": "f545ff26-3c94-4fd0-bd33-3c7f95a3a0fc",
+  "severity": "low",
+  "tags": [
+    "EIA"
+  ],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "techniques": [
+        {
+          "id": "T1193",
+          "name": "Spearphishing Attachment",
+          "reference": "https://attack.mitre.org/techniques/T1193/"
+        }
+      ]
+    }
+  ],
+  "to": "now",
+  "type": "query",
   "version": 1
 }

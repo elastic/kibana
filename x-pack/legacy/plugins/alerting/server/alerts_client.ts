@@ -362,7 +362,6 @@ export class AlertsClient {
     });
 
     if (attributes.enabled === false) {
-      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
@@ -372,11 +371,11 @@ export class AlertsClient {
           enabled: true,
           ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
           updatedBy: username,
-
-          scheduledTaskId: scheduledTask.id,
         },
         { version }
       );
+      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
+      await this.savedObjectsClient.update('alert', id, { scheduledTaskId: scheduledTask.id });
       await this.invalidateApiKey({ apiKey: attributes.apiKey });
     }
   }

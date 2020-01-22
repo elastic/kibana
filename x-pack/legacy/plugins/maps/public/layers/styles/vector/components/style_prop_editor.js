@@ -5,7 +5,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { FieldMetaOptionsPopover } from './field_meta_options_popover';
 import { getVectorStyleLabel } from './get_vector_style_label';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { VectorStyle } from '../vector_style';
@@ -80,12 +79,9 @@ export class StylePropEditor extends Component {
   }
 
   render() {
-    const fieldMetaOptionsPopover = this.props.styleProperty.isDynamic() ? (
-      <FieldMetaOptionsPopover
-        styleProperty={this.props.styleProperty}
-        onChange={this._onFieldMetaOptionsChange}
-      />
-    ) : null;
+    const fieldMetaOptionsPopover = this.props.styleProperty.renderFieldMetaPopover(
+      this._onFieldMetaOptionsChange
+    );
 
     return (
       <EuiFormRow

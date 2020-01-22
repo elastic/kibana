@@ -5,13 +5,14 @@
  */
 
 import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
-import { RequestBasicOptions } from '../framework';
+import { MatrixHistogramRequestOptions } from '../framework';
 
 export const buildAnomaliesOverTimeQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: RequestBasicOptions) => {
+  stackByField = 'job_id',
+}: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -42,7 +43,7 @@ export const buildAnomaliesOverTimeQuery = ({
     return {
       anomalyActionGroup: {
         terms: {
-          field: 'job_id',
+          field: stackByField,
           order: {
             _count: 'desc',
           },

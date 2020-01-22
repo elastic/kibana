@@ -33,7 +33,7 @@ export interface AggsState {
   [aggId: string]: AggsItem;
 }
 
-interface AggsAction {
+export interface AggsAction {
   type: AGGS_ACTION_KEYS;
   payload: boolean;
   aggId: string;

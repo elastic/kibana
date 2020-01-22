@@ -124,6 +124,11 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
     }
 
+    async isOff() {
+      const element = await find.byClassName('euiDatePickerRange--readOnly');
+      return !!element;
+    }
+
     async isQuickSelectMenuOpen() {
       return await testSubjects.exists('superDatePickerQuickMenu');
     }

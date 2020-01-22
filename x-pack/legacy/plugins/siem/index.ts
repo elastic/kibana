@@ -25,11 +25,14 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
   DEFAULT_SIGNALS_INDEX,
+  ENABLE_NEWS_FEED_SETTING,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
   SIGNALS_INDEX_KEY,
-  DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { initServerWithKibana } from './server/kibana.index';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -60,6 +63,7 @@ export const siem = (kibana: any) => {
           order: 9000,
           title: APP_NAME,
           url: `/app/${APP_ID}`,
+          category: DEFAULT_APP_CATEGORIES.security,
         },
       ],
       uiSettingDefaults: {
@@ -106,20 +110,6 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
-        // DEPRECATED: This should be removed once the front end is no longer using any parts of it.
-        // TODO: Remove this as soon as no code is left that is pulling data from it.
-        [DEFAULT_SIGNALS_INDEX_KEY]: {
-          name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
-            defaultMessage: 'Elasticsearch signals index',
-          }),
-          value: DEFAULT_SIGNALS_INDEX,
-          description: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexDescription', {
-            defaultMessage:
-              '<p>Elasticsearch signals index from which outputted signals will appear by default</p>',
-          }),
-          category: ['siem'],
-          requiresPageReload: true,
-        },
         [DEFAULT_ANOMALY_SCORE]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
             defaultMessage: 'Anomaly threshold',
@@ -129,6 +119,29 @@ export const siem = (kibana: any) => {
           description: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreDescription', {
             defaultMessage:
               '<p>Value above which Machine Learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [ENABLE_NEWS_FEED_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.enableNewsFeedLabel', {
+            defaultMessage: 'News feed',
+          }),
+          value: true,
+          description: i18n.translate('xpack.siem.uiSettings.enableNewsFeedDescription', {
+            defaultMessage: '<p>Enables the News feed</p>',
+          }),
+          type: 'boolean',
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [NEWS_FEED_URL_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.newsFeedUrl', {
+            defaultMessage: 'News feed URL',
+          }),
+          value: NEWS_FEED_URL_SETTING_DEFAULT,
+          description: i18n.translate('xpack.siem.uiSettings.newsFeedUrlDescription', {
+            defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,

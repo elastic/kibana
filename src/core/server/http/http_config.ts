@@ -22,6 +22,7 @@ import { hostname } from 'os';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
+import { Env } from '../config';
 
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -148,7 +149,7 @@ export class HttpConfig {
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
+  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType, env: Env) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
@@ -162,7 +163,7 @@ export class HttpConfig {
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.csp = new CspConfig(rawCspConfig);
+    this.csp = new CspConfig(env, rawCspConfig);
     this.xsrf = rawHttpConfig.xsrf;
   }
 }

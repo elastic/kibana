@@ -17,6 +17,9 @@
  * under the License.
  */
 
+// import global polyfills before everything else
+require('./polyfills');
+
 // must load before angular
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;

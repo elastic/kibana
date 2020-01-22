@@ -88,6 +88,7 @@ describe('Epic Timeline', () => {
         deletedEventIds: [],
         description: '',
         eventIdToNoteIds: {},
+        eventType: 'all',
         highlightedDropAndProviderId: '',
         historyIds: [],
         filters: [
@@ -227,6 +228,7 @@ describe('Epic Timeline', () => {
           start: 1572469587644,
         },
         description: '',
+        eventType: 'all',
         filters: [
           {
             exists: null,

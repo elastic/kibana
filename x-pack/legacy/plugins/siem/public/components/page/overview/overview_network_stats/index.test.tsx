@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { OverviewNetworkStats } from '.';
 import { mockData } from './mock';
+import { TestProviders } from '../../../../mock/test_providers';
 
 describe('Overview Network Stat Data', () => {
   describe('rendering', () => {
@@ -20,28 +21,52 @@ describe('Overview Network Stat Data', () => {
     });
   });
   describe('loading', () => {
-    test('it does not show loading indicator when not loading', () => {
-      const wrapper = shallow(
-        <OverviewNetworkStats data={mockData.OverviewNetwork} loading={false} />
+    test('it does NOT show loading indicator when loading is false', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <OverviewNetworkStats data={mockData.OverviewNetwork} loading={false} />
+        </TestProviders>
       );
 
-      const loadingWrapper = wrapper
-        .dive()
-        .find('[data-test-subj="network-stat-auditbeatSocket"]')
+      // click the accordion to expand it
+      wrapper
+        .find('button')
         .first()
-        .childAt(0);
-      expect(loadingWrapper.prop('isLoading')).toBe(false);
+        .simulate('click');
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="network-stat-auditbeatSocket"]')
+          .first()
+          .find('[data-test-subj="stat-value-loading-spinner"]')
+          .first()
+          .exists()
+      ).toBe(false);
     });
-    test('it does show loading indicator when not loading', () => {
-      const wrapper = shallow(
-        <OverviewNetworkStats data={mockData.OverviewNetwork} loading={true} />
+
+    test('it shows the loading indicator when loading is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <OverviewNetworkStats data={mockData.OverviewNetwork} loading={true} />
+        </TestProviders>
       );
-      const loadingWrapper = wrapper
-        .dive()
-        .find('[data-test-subj="network-stat-auditbeatSocket"]')
+
+      // click the accordion to expand it
+      wrapper
+        .find('button')
         .first()
-        .childAt(0);
-      expect(loadingWrapper.prop('isLoading')).toBe(true);
+        .simulate('click');
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('[data-test-subj="network-stat-auditbeatSocket"]')
+          .first()
+          .find('[data-test-subj="stat-value-loading-spinner"]')
+          .first()
+          .exists()
+      ).toBe(true);
     });
   });
 });

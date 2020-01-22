@@ -204,8 +204,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     public async filterLegend(name: string) {
       await this.toggleLegend();
       await testSubjects.click(`legend-${name}`);
-      const filters = await testSubjects.find(`legend-${name}-filters`);
-      const [filterIn] = await filters.findAllByCssSelector(`input`);
+      const filterIn = await testSubjects.find(`legend-${name}-filterIn`);
       await filterIn.click();
       await this.waitForVisualizationRenderingStabilized();
     }

@@ -7,6 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import ApolloClient from 'apollo-client';
 import React from 'react';
 
 import { esFilters } from '../../../../../../../../../src/plugins/data/common/es_query';
@@ -20,7 +21,7 @@ import {
 import { SubsetTimelineModel, timelineDefaults } from '../../../../store/timeline/model';
 
 import { FILTER_OPEN } from './signals_filter_group';
-import { sendSignalsToTimelineAction, updateSignalStatusAction } from './actions';
+import { sendSignalToTimelineAction, updateSignalStatusAction } from './actions';
 import * as i18n from './translations';
 import { CreateTimeline, SetEventsDeletedProps, SetEventsLoadingProps } from './types';
 
@@ -93,15 +94,21 @@ export const signalsHeaders: ColumnHeader[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
+    id: 'signal.rule.version',
+    label: i18n.SIGNALS_HEADERS_VERSION,
+    width: 100,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.type',
     label: i18n.SIGNALS_HEADERS_METHOD,
-    width: 80,
+    width: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.severity',
     label: i18n.SIGNALS_HEADERS_SEVERITY,
-    width: 80,
+    width: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -140,7 +147,7 @@ export const signalsHeaders: ColumnHeader[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
-    width: 120,
+    width: 140,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -168,66 +175,71 @@ export const requiredFieldsForActions = [
 ];
 
 export const getSignalsActions = ({
+  apolloClient,
   canUserCRUD,
   hasIndexWrite,
   setEventsLoading,
   setEventsDeleted,
   createTimeline,
   status,
+  updateTimelineIsLoading,
 }: {
+  apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
   hasIndexWrite: boolean;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
-}): TimelineAction[] => {
-  const actions = [
-    {
-      getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
-        <EuiToolTip
-          data-test-subj="send-signal-to-timeline-tool-tip"
-          content={i18n.ACTION_VIEW_IN_TIMELINE}
-        >
-          <EuiButtonIcon
-            data-test-subj={'send-signal-to-timeline-tool-tip'}
-            onClick={() => sendSignalsToTimelineAction({ createTimeline, data: [data] })}
-            iconType="tableDensityNormal"
-            aria-label="Next"
-          />
-        </EuiToolTip>
-      ),
-      id: 'sendSignalToTimeline',
-      width: 26,
-    },
-  ];
-  return canUserCRUD && hasIndexWrite
-    ? [
-        ...actions,
-        {
-          getAction: ({ eventId, data }: TimelineActionProps): JSX.Element => (
-            <EuiToolTip
-              data-test-subj="update-signal-status-tool-tip"
-              content={status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL}
-            >
-              <EuiButtonIcon
-                data-test-subj={'update-signal-status-button'}
-                onClick={() =>
-                  updateSignalStatusAction({
-                    signalIds: [eventId],
-                    status,
-                    setEventsLoading,
-                    setEventsDeleted,
-                  })
-                }
-                iconType={status === FILTER_OPEN ? 'indexOpen' : 'indexClose'}
-                aria-label="Next"
-              />
-            </EuiToolTip>
-          ),
-          id: 'updateSignalStatus',
-          width: 26,
-        },
-      ]
-    : actions;
-};
+  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
+}): TimelineAction[] => [
+  {
+    getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
+      <EuiToolTip
+        data-test-subj="send-signal-to-timeline-tool-tip"
+        content={i18n.ACTION_VIEW_IN_TIMELINE}
+      >
+        <EuiButtonIcon
+          data-test-subj="send-signal-to-timeline-button"
+          onClick={() =>
+            sendSignalToTimelineAction({
+              apolloClient,
+              createTimeline,
+              ecsData,
+              updateTimelineIsLoading,
+            })
+          }
+          iconType="timeline"
+          aria-label="Next"
+        />
+      </EuiToolTip>
+    ),
+    id: 'sendSignalToTimeline',
+    width: 26,
+  },
+  {
+    getAction: ({ eventId }: TimelineActionProps): JSX.Element => (
+      <EuiToolTip
+        data-test-subj="update-signal-status-tool-tip"
+        content={status === FILTER_OPEN ? i18n.ACTION_OPEN_SIGNAL : i18n.ACTION_CLOSE_SIGNAL}
+      >
+        <EuiButtonIcon
+          data-test-subj={'update-signal-status-button'}
+          onClick={() =>
+            updateSignalStatusAction({
+              signalIds: [eventId],
+              status,
+              setEventsLoading,
+              setEventsDeleted,
+            })
+          }
+          isDisabled={!canUserCRUD || !hasIndexWrite}
+          iconType={status === FILTER_OPEN ? 'securitySignalDetected' : 'securitySignalResolved'}
+          aria-label="Next"
+        />
+      </EuiToolTip>
+    ),
+    id: 'updateSignalStatus',
+    width: 26,
+  },
+];

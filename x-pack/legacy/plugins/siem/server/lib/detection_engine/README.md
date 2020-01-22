@@ -94,7 +94,7 @@ You should see the new rules created like so:
       "interval": "5m",
       "rule_id": "rule-1",
       "language": "kuery",
-      "output_index": ".siem-signals-frank-hassanabad",
+      "output_index": ".siem-signals-some-name",
       "max_signals": 100,
       "risk_score": 1,
       "name": "Detect Root/Admin Users",

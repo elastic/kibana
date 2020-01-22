@@ -42,7 +42,7 @@ export const usePrivilegeUser = (): Return => {
         });
 
         if (isSubscribed && privilege != null) {
-          setAuthenticated(privilege.isAuthenticated);
+          setAuthenticated(privilege.is_authenticated);
           if (privilege.index != null && Object.keys(privilege.index).length > 0) {
             const indexName = Object.keys(privilege.index)[0];
             setHasIndexManage(privilege.index[indexName].manage);
@@ -59,6 +59,7 @@ export const usePrivilegeUser = (): Return => {
           setAuthenticated(false);
           setHasIndexManage(false);
           setHasIndexWrite(false);
+          setHasManageApiKey(false);
           errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
         }
       }

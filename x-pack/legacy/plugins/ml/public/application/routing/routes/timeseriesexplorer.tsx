@@ -26,7 +26,10 @@ import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_co
 import {
   createTimeSeriesJobData,
   getAutoZoomDuration,
+  validateJobSelection,
 } from '../../timeseriesexplorer/timeseriesexplorer_utils';
+import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
+import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { useUrlState } from '../../util/url_state';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
@@ -74,13 +77,14 @@ interface TimeSeriesExplorerUrlStateManager {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
+export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
   config,
   jobsWithTimeRange,
 }) => {
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
+  const [selectedJobId, setSelectedJobId] = useState<string>();
 
   const refresh = useRefresh();
   useEffect(() => {
@@ -102,22 +106,26 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
     timefilter.enableAutoRefreshSelector();
   }, []);
 
+  // We cannot simply infer bounds from the globalState's `time` attribute
+  // with `moment` since it can contain custom strings such as `now-15m`.
+  // So when globalState's `time` changes, we update the timefilter and use
+  // `timefilter.getBounds()` to update `bounds` in this component's state.
+  const [bounds, setBounds] = useState<TimeRangeBounds | undefined>(undefined);
   useEffect(() => {
     if (globalState?.time !== undefined) {
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
       });
+
+      const timefilterBounds = timefilter.getBounds();
+      // Only if both min/max bounds are valid moment times set the bounds.
+      // An invalid string restored from globalState might return `undefined`.
+      if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
+        setBounds(timefilter.getBounds());
+      }
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
-
-  let bounds: TimeRangeBounds | undefined;
-  if (globalState?.time !== undefined) {
-    bounds = {
-      min: moment(globalState.time.from),
-      max: moment(globalState.time.to),
-    };
-  }
 
   const selectedJobIds = globalState?.ml?.jobIds;
   // Sort selectedJobIds so we can be sure comparison works when stringifying.
@@ -137,26 +145,31 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
       setLastRefresh(Date.now());
       appStateHandler(APP_STATE_ACTION.CLEAR);
     }
+    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
+    if (typeof validatedJobId === 'string') {
+      setSelectedJobId(validatedJobId);
+    }
   }, [JSON.stringify(selectedJobIds)]);
 
   // Next we get globalState and appState information to pass it on as props later.
-  // If a job change is going on, we fall back to defaults (as if appState was already cleard),
+  // If a job change is going on, we fall back to defaults (as if appState was already cleared),
   // otherwise the page could break.
   const selectedDetectorIndex = isJobChange
     ? 0
     : +appState?.mlTimeSeriesExplorer?.detectorIndex || 0;
   const selectedEntities = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.forecastId;
-  const zoom = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
+  const zoom: {
+    from: string;
+    to: string;
+  } = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
 
-  const selectedJob = selectedJobIds && mlJobService.getJob(selectedJobIds[0]);
+  const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
+  const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
 
   let autoZoomDuration: number | undefined;
-  if (selectedJobIds !== undefined && selectedJobIds.length === 1 && selectedJob !== undefined) {
-    autoZoomDuration = getAutoZoomDuration(
-      createTimeSeriesJobData(mlJobService.jobs),
-      mlJobService.getJob(selectedJobIds[0])
-    );
+  if (selectedJobId !== undefined && selectedJob !== undefined) {
+    autoZoomDuration = getAutoZoomDuration(timeSeriesJobs, selectedJob);
   }
 
   const appStateHandler = useCallback(
@@ -257,6 +270,18 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
+  if (timeSeriesJobs.length === 0) {
+    return (
+      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz}>
+        <TimeseriesexplorerNoJobsFound />
+      </TimeSeriesExplorerPage>
+    );
+  }
+
+  if (selectedJobId === undefined || autoZoomDuration === undefined || bounds === undefined) {
+    return null;
+  }
+
   return (
     <TimeSeriesExplorer
       {...{
@@ -264,9 +289,8 @@ const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> =
         autoZoomDuration,
         bounds,
         dateFormatTz,
-        jobsWithTimeRange,
         lastRefresh,
-        selectedJobIds,
+        selectedJobId,
         selectedDetectorIndex,
         selectedEntities,
         selectedForecastId,

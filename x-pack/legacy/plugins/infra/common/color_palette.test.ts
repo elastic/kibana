@@ -32,7 +32,7 @@ describe('Color Palette', () => {
   });
   describe('colorTransformer()', () => {
     it('should just work', () => {
-      expect(colorTransformer(MetricsExplorerColor.color0)).toBe('#3185FC');
+      expect(colorTransformer(MetricsExplorerColor.color0)).toBe('#6092C0');
     });
   });
 });

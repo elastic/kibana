@@ -17,141 +17,40 @@
  * under the License.
  */
 
-import Url from 'url';
-
-import React, { Component, createRef } from 'react';
-import * as Rx from 'rxjs';
-
 import {
-  // TODO: add type annotations
   EuiHeader,
-  EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
-  EuiHorizontalRule,
   EuiIcon,
-  EuiImage,
   // @ts-ignore
   EuiNavDrawer,
   // @ts-ignore
-  EuiNavDrawerGroup,
-  // @ts-ignore
   EuiShowFor,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-
-import { HeaderBadge } from './header_badge';
-import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderNavControls } from './header_nav_controls';
-
+import React, { Component, createRef } from 'react';
+import * as Rx from 'rxjs';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
+  ChromeNavControl,
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
-  ChromeNavControl,
 } from '../..';
+import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { InternalApplicationStart } from '../../../application/types';
+import { HeaderBadge } from './header_badge';
+import { NavSetting, OnIsLockedUpdate } from './';
+import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderHelpMenu } from './header_help_menu';
+import { HeaderNavControls } from './header_nav_controls';
+import { euiNavLink } from './nav_link';
+import { HeaderLogo } from './header_logo';
+import { NavDrawer } from './nav_drawer';
 
-// Providing a buffer between the limit and the cut off index
-// protects from truncating just the last couple (6) characters
-const TRUNCATE_LIMIT: number = 64;
-const TRUNCATE_AT: number = 58;
-
-/**
- *
- * @param {string} url - a relative or root relative url.  If a relative path is given then the
- * absolute url returned will depend on the current page where this function is called from. For example
- * if you are on page "http://www.mysite.com/shopping/kids" and you pass this function "adults", you would get
- * back "http://www.mysite.com/shopping/adults".  If you passed this function a root relative path, or one that
- * starts with a "/", for example "/account/cart", you would get back "http://www.mysite.com/account/cart".
- * @return {string} the relative url transformed into an absolute url
- */
-function relativeToAbsolute(url: string) {
-  // convert all link urls to absolute urls
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}
-
-function extendRecentlyAccessedHistoryItem(
-  navLinks: ChromeNavLink[],
-  recentlyAccessed: ChromeRecentlyAccessedHistoryItem,
-  basePath: HttpStart['basePath']
-) {
-  const href = relativeToAbsolute(basePath.prepend(recentlyAccessed.link));
-  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase || nl.baseUrl));
-
-  let titleAndAriaLabel = recentlyAccessed.label;
-  if (navLink) {
-    const objectTypeForAriaAppendix = navLink.title;
-    titleAndAriaLabel = i18n.translate('core.ui.recentLinks.linkItem.screenReaderLabel', {
-      defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
-      values: {
-        recentlyAccessedItemLinklabel: recentlyAccessed.label,
-        pageType: objectTypeForAriaAppendix,
-      },
-    });
-  }
-
-  return {
-    ...recentlyAccessed,
-    href,
-    euiIconType: navLink ? navLink.euiIconType : undefined,
-    title: titleAndAriaLabel,
-  };
-}
-
-function extendNavLink(navLink: ChromeNavLink) {
-  if (navLink.legacy) {
-    return {
-      ...navLink,
-      href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
-    };
-  }
-
-  return {
-    ...navLink,
-    href: navLink.baseUrl,
-  };
-}
-
-function isModifiedEvent(event: MouseEvent) {
-  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-}
-
-function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
-  let current = element;
-  while (current) {
-    if (current.tagName === 'A') {
-      return current as HTMLAnchorElement;
-    }
-
-    if (!current.parentElement || current.parentElement === document.body) {
-      return undefined;
-    }
-
-    current = current.parentElement;
-  }
-}
-
-function truncateRecentItemLabel(label: string): string {
-  if (label.length > TRUNCATE_LIMIT) {
-    label = `${label.substring(0, TRUNCATE_AT)}…`;
-  }
-
-  return label;
-}
-
-export type HeaderProps = Pick<Props, Exclude<keyof Props, 'intl'>>;
-
-interface Props {
+export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
   appTitle$: Rx.Observable<string>;
@@ -168,28 +67,29 @@ interface Props {
   legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
-  intl: InjectedIntl;
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
-  onIsLockedUpdate?: (isLocked: boolean) => void;
+  navSetting$: Rx.Observable<NavSetting>;
+  onIsLockedUpdate?: OnIsLockedUpdate;
 }
 
 interface State {
   appTitle: string;
-  currentAppId?: string;
   isVisible: boolean;
-  navLinks: ReadonlyArray<ReturnType<typeof extendNavLink>>;
-  recentlyAccessed: ReadonlyArray<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
+  navLinks: ChromeNavLink[];
+  recentlyAccessed: ChromeRecentlyAccessedHistoryItem[];
   forceNavigation: boolean;
   navControlsLeft: readonly ChromeNavControl[];
   navControlsRight: readonly ChromeNavControl[];
+  navSetting: NavSetting;
+  currentAppId: string | undefined;
 }
 
-class HeaderUI extends Component<Props, State> {
+export class Header extends Component<HeaderProps, State> {
   private subscription?: Rx.Subscription;
   private navDrawerRef = createRef<EuiNavDrawer>();
 
-  constructor(props: Props) {
+  constructor(props: HeaderProps) {
     super(props);
 
     this.state = {
@@ -200,6 +100,8 @@ class HeaderUI extends Component<Props, State> {
       forceNavigation: false,
       navControlsLeft: [],
       navControlsRight: [],
+      navSetting: 'grouped',
+      currentAppId: '',
     };
   }
 
@@ -214,7 +116,8 @@ class HeaderUI extends Component<Props, State> {
       Rx.combineLatest(
         this.props.navControlsLeft$,
         this.props.navControlsRight$,
-        this.props.application.currentAppId$
+        this.props.application.currentAppId$,
+        this.props.navSetting$
       )
     ).subscribe({
       next: ([
@@ -223,18 +126,17 @@ class HeaderUI extends Component<Props, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId],
+        [navControlsLeft, navControlsRight, currentAppId, navSetting],
       ]) => {
         this.setState({
           appTitle,
           isVisible,
           forceNavigation,
-          navLinks: navLinks.map(extendNavLink),
-          recentlyAccessed: recentlyAccessed.map(ra =>
-            extendRecentlyAccessedHistoryItem(navLinks, ra, this.props.basePath)
-          ),
+          navLinks: navLinks.filter(navLink => !navLink.hidden),
+          recentlyAccessed,
           navControlsLeft,
           navControlsRight,
+          navSetting,
           currentAppId,
         });
       },
@@ -247,26 +149,12 @@ class HeaderUI extends Component<Props, State> {
     }
   }
 
-  public renderLogo() {
-    const { homeHref, intl } = this.props;
-    return (
-      <EuiHeaderLogo
-        data-test-subj="logo"
-        iconType="logoKibana"
-        onClick={this.onNavClick}
-        href={homeHref}
-        aria-label={intl.formatMessage({
-          id: 'core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
-          defaultMessage: 'Go to home page',
-        })}
-      />
-    );
-  }
-
   public renderMenuTrigger() {
     return (
       <EuiHeaderSectionItemButton
-        aria-label="Toggle side navigation"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.toggleSideNavAriaLabel', {
+          defaultMessage: 'Toggle side navigation',
+        })}
         onClick={() => this.navDrawerRef.current.toggleOpen()}
       >
         <EuiIcon type="apps" size="m" />
@@ -275,97 +163,28 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
+    const { appTitle, isVisible, navControlsLeft, navControlsRight } = this.state;
     const {
-      application,
       badge$,
-      basePath,
       breadcrumbs$,
       helpExtension$,
       helpSupportUrl$,
-      intl,
-      isLocked,
       kibanaDocLink,
       kibanaVersion,
-      onIsLockedUpdate,
-      legacyMode,
     } = this.props;
-    const {
-      appTitle,
-      currentAppId,
-      isVisible,
-      navControlsLeft,
-      navControlsRight,
-      navLinks,
-      recentlyAccessed,
-    } = this.state;
+    const navLinks = this.state.navLinks.map(link =>
+      euiNavLink(
+        link,
+        this.props.legacyMode,
+        this.state.currentAppId,
+        this.props.basePath,
+        this.props.application.navigateToApp
+      )
+    );
 
     if (!isVisible) {
       return null;
     }
-
-    const navLinksArray = navLinks
-      .filter(navLink => !navLink.hidden)
-      .map(navLink => ({
-        key: navLink.id,
-        label: navLink.tooltip ?? navLink.title,
-
-        // Use href and onClick to support "open in new tab" and SPA navigation in the same link
-        href: navLink.href,
-        onClick: (event: MouseEvent) => {
-          if (
-            !legacyMode && // ignore when in legacy mode
-            !navLink.legacy && // ignore links to legacy apps
-            !event.defaultPrevented && // onClick prevented default
-            event.button === 0 && // ignore everything but left clicks
-            !isModifiedEvent(event) // ignore clicks with modifier keys
-          ) {
-            event.preventDefault();
-            application.navigateToApp(navLink.id);
-          }
-        },
-
-        // Legacy apps use `active` property, NP apps should match the current app
-        isActive: navLink.active || currentAppId === navLink.id,
-        isDisabled: navLink.disabled,
-
-        iconType: navLink.euiIconType,
-        icon:
-          !navLink.euiIconType && navLink.icon ? (
-            <EuiImage
-              size="s"
-              alt=""
-              aria-hidden={true}
-              url={basePath.prepend(`/${navLink.icon}`)}
-            />
-          ) : (
-            undefined
-          ),
-        'data-test-subj': 'navDrawerAppsMenuLink',
-      }));
-
-    const recentLinksArray = [
-      {
-        label: intl.formatMessage({
-          id: 'core.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
-          defaultMessage: 'Recently viewed',
-        }),
-        iconType: 'clock',
-        isDisabled: recentlyAccessed.length > 0 ? false : true,
-        flyoutMenu: {
-          title: intl.formatMessage({
-            id: 'core.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle',
-            defaultMessage: 'Recent items',
-          }),
-          listItems: recentlyAccessed.map(item => ({
-            label: truncateRecentItemLabel(item.label),
-            title: item.title,
-            'aria-label': item.title,
-            href: item.href,
-            iconType: item.euiIconType,
-          })),
-        },
-      },
-    ];
 
     return (
       <header>
@@ -375,7 +194,13 @@ class HeaderUI extends Component<Props, State> {
               <EuiHeaderSectionItem border="right">{this.renderMenuTrigger()}</EuiHeaderSectionItem>
             </EuiShowFor>
 
-            <EuiHeaderSectionItem border="right">{this.renderLogo()}</EuiHeaderSectionItem>
+            <EuiHeaderSectionItem border="right">
+              <HeaderLogo
+                href={this.props.homeHref}
+                forceNavigation={this.state.forceNavigation}
+                navLinks={navLinks}
+              />
+            </EuiHeaderSectionItem>
 
             <HeaderNavControls side="left" navControls={navControlsLeft} />
           </EuiHeaderSection>
@@ -399,75 +224,17 @@ class HeaderUI extends Component<Props, State> {
             <HeaderNavControls side="right" navControls={navControlsRight} />
           </EuiHeaderSection>
         </EuiHeader>
-
-        <EuiNavDrawer
+        <NavDrawer
+          navSetting={this.state.navSetting}
+          isLocked={this.props.isLocked}
+          onIsLockedUpdate={this.props.onIsLockedUpdate}
+          navLinks={navLinks}
+          chromeNavLinks={this.state.navLinks}
+          recentlyAccessedItems={this.state.recentlyAccessed}
+          basePath={this.props.basePath}
           ref={this.navDrawerRef}
-          data-test-subj="navDrawer"
-          isLocked={isLocked}
-          onIsLockedUpdate={onIsLockedUpdate}
-          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
-            defaultMessage: 'Primary',
-          })}
-        >
-          <EuiNavDrawerGroup
-            listItems={recentLinksArray}
-            aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
-              defaultMessage: 'Recently viewed links, navigation',
-            })}
-          />
-          <EuiHorizontalRule margin="none" />
-          <EuiNavDrawerGroup
-            data-test-subj="navDrawerAppsMenu"
-            listItems={navLinksArray}
-            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
-              defaultMessage: 'Primary navigation links',
-            })}
-          />
-        </EuiNavDrawer>
+        />
       </header>
     );
   }
-
-  private onNavClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    const anchor = findClosestAnchor((event as any).nativeEvent.target);
-    if (!anchor) {
-      return;
-    }
-
-    const navLink = this.state.navLinks.find(item => item.href === anchor.href);
-    if (navLink && navLink.disabled) {
-      event.preventDefault();
-      return;
-    }
-
-    if (
-      !this.state.forceNavigation ||
-      event.isDefaultPrevented() ||
-      event.altKey ||
-      event.metaKey ||
-      event.ctrlKey
-    ) {
-      return;
-    }
-
-    const toParsed = Url.parse(anchor.href);
-    const fromParsed = Url.parse(document.location.href);
-    const sameProto = toParsed.protocol === fromParsed.protocol;
-    const sameHost = toParsed.host === fromParsed.host;
-    const samePath = toParsed.path === fromParsed.path;
-
-    if (sameProto && sameHost && samePath) {
-      if (toParsed.hash) {
-        document.location.reload();
-      }
-
-      // event.preventDefault() keeps the browser from seeing the new url as an update
-      // and even setting window.location does not mimic that behavior, so instead
-      // we use stopPropagation() to prevent angular from seeing the click and
-      // starting a digest cycle/attempting to handle it in the router.
-      event.stopPropagation();
-    }
-  };
 }
-
-export const Header = injectI18n(HeaderUI);

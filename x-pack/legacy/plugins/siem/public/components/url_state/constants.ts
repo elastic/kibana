@@ -6,7 +6,7 @@
 
 export enum CONSTANTS {
   appQuery = 'query',
-  detectionEnginePage = 'detectionEngine.page',
+  detectionsPage = 'detections.page',
   filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
@@ -20,4 +20,4 @@ export enum CONSTANTS {
   unknown = 'unknown',
 }
 
-export type UrlStateType = 'detection-engine' | 'host' | 'network' | 'overview' | 'timeline';
+export type UrlStateType = 'detections' | 'host' | 'network' | 'overview' | 'timeline';

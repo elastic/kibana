@@ -56,7 +56,7 @@ export class LocalApplicationService {
         outerAngularWrapperRoute: true,
         reloadOnSearch: false,
         reloadOnUrl: false,
-        template: `<div style="height:100%" id="${wrapperElementId}"></div>`,
+        template: `<div class="kbnLocalApplicationWrapper" id="${wrapperElementId}"></div>`,
         controller($scope: IScope) {
           const element = document.getElementById(wrapperElementId)!;
           let unmountHandler: AppUnmount | null = null;

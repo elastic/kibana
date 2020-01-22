@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 
 import React from 'react';
 import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   formatHumanReadableDate,
@@ -65,7 +66,16 @@ export function getColumns(
 ) {
   const columns = [
     {
-      name: '',
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.showDetailsColumn.screenReaderDescription"
+              defaultMessage="This column contains clickable controls for showing more details on each anomaly"
+            />
+          </p>
+        </EuiScreenReaderOnly>
+      ),
       render: item => (
         <EuiButtonIcon
           onClick={() => toggleRow(item)}
@@ -91,6 +101,7 @@ export function getColumns(
         defaultMessage: 'time',
       }),
       dataType: 'date',
+      scope: 'row',
       render: date => renderTime(date, interval),
       textOnly: true,
       sortable: true,

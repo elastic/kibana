@@ -49,7 +49,7 @@ exports[`Columns it renders the expected columns 1`] = `
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -72,7 +72,7 @@ exports[`Columns it renders the expected columns 1`] = `
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -95,7 +95,7 @@ exports[`Columns it renders the expected columns 1`] = `
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -118,7 +118,7 @@ exports[`Columns it renders the expected columns 1`] = `
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -141,7 +141,7 @@ exports[`Columns it renders the expected columns 1`] = `
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
@@ -164,7 +164,7 @@ exports[`Columns it renders the expected columns 1`] = `
     <styled.div
       data-test-subj="cell-container"
     >
-      <FormattedFieldValue
+      <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
