@@ -34,7 +34,7 @@ export type ExpressionValueConverter<I extends ExpressionValue, O extends Expres
  * A generic type which represents a custom Expression Type Definition that's
  * registered to the Interpreter.
  */
-export interface ExpressionType<
+export interface ExpressionTypeDefinition<
   Name extends string,
   Value extends ExpressionValueUnboxed | ExpressionValueBoxed,
   SerializedType = undefined
@@ -54,4 +54,4 @@ export interface ExpressionType<
   help?: string;
 }
 
-export type AnyExpressionType = ExpressionType<string, ExpressionValueBoxed>;
+export type AnyExpressionTypeDefinition = ExpressionTypeDefinition<string, ExpressionValueBoxed>;

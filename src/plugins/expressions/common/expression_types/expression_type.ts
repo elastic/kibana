@@ -19,27 +19,11 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { get, identity } from 'lodash';
-import { AnyExpressionType, ExpressionValue } from './types';
+import { get } from 'lodash';
+import { AnyExpressionTypeDefinition, ExpressionValue } from './types';
 import { getType } from './get_type';
 
-export function serializeProvider(types: any) {
-  function provider(key: any) {
-    return (context: any) => {
-      const type = getType(context);
-      const typeDef = types[type];
-      const fn: any = get(typeDef, key) || identity;
-      return fn(context);
-    };
-  }
-
-  return {
-    serialize: provider('serialize'),
-    deserialize: provider('deserialize'),
-  };
-}
-
-export class Type {
+export class ExpressionType {
   name: string;
 
   /**
@@ -60,22 +44,24 @@ export class Type {
   serialize?: (value: ExpressionValue) => any;
   deserialize?: (serialized: any) => ExpressionValue;
 
-  constructor(private readonly config: AnyExpressionType) {
-    const { name, help, deserialize, serialize, validate } = config;
+  constructor(private readonly definition: AnyExpressionTypeDefinition) {
+    const { name, help, deserialize, serialize, validate } = definition;
 
     this.name = name;
     this.help = help || '';
     this.validate = validate || (() => {});
 
     // Optional
-    this.create = (config as any).create;
+    this.create = (definition as any).create;
 
     this.serialize = serialize;
     this.deserialize = deserialize;
   }
 
-  getToFn = (value: any) => get(this.config, ['to', value]) || get(this.config, ['to', '*']);
-  getFromFn = (value: any) => get(this.config, ['from', value]) || get(this.config, ['from', '*']);
+  getToFn = (value: any) =>
+    get(this.definition, ['to', value]) || get(this.definition, ['to', '*']);
+  getFromFn = (value: any) =>
+    get(this.definition, ['from', value]) || get(this.definition, ['from', '*']);
 
   castsTo = (value: any) => typeof this.getToFn(value) === 'function';
   castsFrom = (value: any) => typeof this.getFromFn(value) === 'function';

@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
+import { ExpressionTypeDefinition } from '../types';
 import { Datatable } from './datatable';
 import { Render } from './render';
 
 const name = 'boolean';
 
-export const boolean = (): ExpressionType<'boolean', boolean> => ({
+export const boolean = (): ExpressionTypeDefinition<'boolean', boolean> => ({
   name,
   from: {
     null: () => false,

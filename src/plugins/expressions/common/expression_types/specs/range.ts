@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
+import { ExpressionTypeDefinition } from '../types';
 import { Render } from '.';
 
 const name = 'range';
@@ -28,7 +28,7 @@ export interface Range {
   to: number;
 }
 
-export const range = (): ExpressionType<typeof name, Range> => ({
+export const range = (): ExpressionTypeDefinition<typeof name, Range> => ({
   name,
   from: {
     null: (): Range => {

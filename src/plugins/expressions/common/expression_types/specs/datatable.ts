@@ -19,7 +19,7 @@
 
 import { map, pick, zipObject } from 'lodash';
 
-import { ExpressionType } from '../types';
+import { ExpressionTypeDefinition } from '../types';
 import { PointSeries } from './pointseries';
 import { Render } from './render';
 
@@ -70,7 +70,11 @@ interface RenderedDatatable {
   showHeader: boolean;
 }
 
-export const datatable = (): ExpressionType<typeof name, Datatable, SerializedDatatable> => ({
+export const datatable = (): ExpressionTypeDefinition<
+  typeof name,
+  Datatable,
+  SerializedDatatable
+> => ({
   name,
   validate: table => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.

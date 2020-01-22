@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType, ExpressionValueBoxed } from '../types';
+import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { Render } from './render';
 import { getType } from '../get_type';
 
@@ -41,7 +41,7 @@ export const isExpressionValueError = (value: any): value is ExpressionValueErro
  */
 export type InterpreterErrorType = ExpressionValueError;
 
-export const error = (): ExpressionType<'error', ExpressionValueError> => ({
+export const error = (): ExpressionTypeDefinition<'error', ExpressionValueError> => ({
   name,
   to: {
     render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {

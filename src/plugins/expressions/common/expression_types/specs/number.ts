@@ -18,13 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionType } from '../types';
+import { ExpressionTypeDefinition } from '../types';
 import { Datatable } from './datatable';
 import { Render } from './render';
 
 const name = 'number';
 
-export const number = (): ExpressionType<typeof name, number> => ({
+export const number = (): ExpressionTypeDefinition<typeof name, number> => ({
   name,
   from: {
     null: () => 0,

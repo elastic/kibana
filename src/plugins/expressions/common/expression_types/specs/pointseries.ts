@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType, ExpressionValueBoxed } from '../types';
+import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { Datatable } from './datatable';
 import { Render } from './render';
 
@@ -55,7 +55,7 @@ export type PointSeries = ExpressionValueBoxed<
   }
 >;
 
-export const pointseries = (): ExpressionType<'pointseries', PointSeries> => ({
+export const pointseries = (): ExpressionTypeDefinition<'pointseries', PointSeries> => ({
   name,
   from: {
     null: () => {

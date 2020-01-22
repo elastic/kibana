@@ -28,12 +28,12 @@ import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Logger } from 'src/core/server';
 import { ExpressionsServerSetupDependencies } from './plugin';
-import { typeSpecs as types, Type } from '../common';
+import { typeSpecs as types, ExpressionType } from '../common';
 import { serializeProvider } from '../common';
 
 export class TypesRegistry extends Registry<any, any> {
   wrapper(obj: any) {
-    return new (Type as any)(obj);
+    return new (ExpressionType as any)(obj);
   }
 }
 

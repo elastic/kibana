@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
+import { ExpressionTypeDefinition } from '../types';
 import { Render } from './render';
 
 const name = 'image';
@@ -28,7 +28,7 @@ export interface ExpressionImage {
   dataurl: string;
 }
 
-export const image = (): ExpressionType<typeof name, ExpressionImage> => ({
+export const image = (): ExpressionTypeDefinition<typeof name, ExpressionImage> => ({
   name,
   to: {
     render: (input): Render<Pick<ExpressionImage, 'mode' | 'dataurl'>> => {

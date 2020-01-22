@@ -19,5 +19,6 @@
 
 export * from './types';
 export * from './get_type';
-export * from './expression_types';
+export * from './serialize_provider';
+export * from './expression_type';
 export * from './specs';

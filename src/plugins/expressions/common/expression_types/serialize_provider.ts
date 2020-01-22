@@ -17,20 +17,13 @@
  * under the License.
  */
 
-import { ExpressionTypeDefinition } from '../types';
-import { ExpressionTypeStyle } from '../../types/style';
+import { ExpressionType } from './type';
+import { ExpressionValue } from './types';
+import { getType } from './get_type';
 
-const name = 'style';
+const identity = <T>(x: T) => x;
 
-export const style = (): ExpressionTypeDefinition<typeof name, ExpressionTypeStyle> => ({
-  name,
-  from: {
-    null: () => {
-      return {
-        type: 'style',
-        spec: {},
-        css: '',
-      };
-    },
-  },
+export const serializeProvider = (types: Record<string, ExpressionType>) => ({
+  serialize: (value: ExpressionValue) => (types[getType(value)].serialize || identity)(value),
+  deserialize: (value: ExpressionValue) => (types[getType(value)].deserialize || identity)(value),
 });
