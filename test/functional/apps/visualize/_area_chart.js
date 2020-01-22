@@ -33,7 +33,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe.skip('area charts', function indexPatternCreation() {
+  describe('area charts', function indexPatternCreation() {
     const vizName1 = 'Visualization AreaChart Name Test';
 
     const initAreaChart = async () => {
@@ -287,7 +287,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('switch between Y axis scale types', () => {
+    describe.skip('switch between Y axis scale types', () => {
       before(initAreaChart);
       const axisId = 'ValueAxis-1';
 
@@ -301,25 +301,23 @@ export default function({ getService, getPageObjects }) {
         const expectedLabels = [
           '2',
           '3',
-          '4',
           '5',
           '7',
-          '9',
+          '10',
           '20',
           '30',
           '40',
           '50',
           '70',
-          '90',
+          '100',
           '200',
           '300',
           '400',
           '500',
           '700',
-          '900',
+          '1,000',
           '2,000',
           '3,000',
-          '4,000',
           '5,000',
           '7,000',
         ];
@@ -333,25 +331,23 @@ export default function({ getService, getPageObjects }) {
         const expectedLabels = [
           '2',
           '3',
-          '4',
           '5',
           '7',
-          '9',
+          '10',
           '20',
           '30',
           '40',
           '50',
           '70',
-          '90',
+          '100',
           '200',
           '300',
           '400',
           '500',
           '700',
-          '900',
+          '1,000',
           '2,000',
           '3,000',
-          '4,000',
           '5,000',
           '7,000',
         ];

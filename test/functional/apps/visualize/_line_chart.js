@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe.skip('line charts', function() {
+  describe('line charts', function() {
     const vizName1 = 'Visualization LineChart';
 
     const initLineChart = async function() {
@@ -181,7 +181,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visChart.waitForVisualization();
     });
 
-    describe('switch between Y axis scale types', () => {
+    describe.skip('switch between Y axis scale types', () => {
       before(initLineChart);
       const axisId = 'ValueAxis-1';
 
@@ -195,24 +195,23 @@ export default function({ getService, getPageObjects }) {
         const expectedLabels = [
           '2',
           '3',
-          '4',
-          '6',
-          '8',
+          '5',
+          '7',
+          '10',
           '20',
           '30',
-          '40',
-          '60',
-          '80',
+          '50',
+          '70',
+          '100',
           '200',
           '300',
-          '400',
-          '600',
-          '800',
+          '500',
+          '700',
+          '1,000',
           '2,000',
           '3,000',
-          '4,000',
-          '6,000',
-          '8,000',
+          '5,000',
+          '7,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -224,24 +223,23 @@ export default function({ getService, getPageObjects }) {
         const expectedLabels = [
           '2',
           '3',
-          '4',
-          '6',
-          '8',
+          '5',
+          '7',
+          '10',
           '20',
           '30',
-          '40',
-          '60',
-          '80',
+          '50',
+          '70',
+          '100',
           '200',
           '300',
-          '400',
-          '600',
-          '800',
+          '500',
+          '700',
+          '1,000',
           '2,000',
           '3,000',
-          '4,000',
-          '6,000',
-          '8,000',
+          '5,000',
+          '7,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -251,19 +249,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '0',
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-          '10,000',
-        ];
+        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -271,17 +257,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-        ];
+        const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -291,19 +267,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         log.debug(labels);
-        const expectedLabels = [
-          '0',
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-          '10,000',
-        ];
+        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000', '10,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -311,17 +275,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-        ];
+        const expectedLabels = ['2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });
     });
