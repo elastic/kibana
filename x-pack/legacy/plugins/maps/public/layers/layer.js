@@ -340,14 +340,6 @@ export class AbstractLayer {
     return [];
   }
 
-  async getOrdinalFields() {
-    return [];
-  }
-
-  async getOrdinalAndCategoricalFields() {
-    return [];
-  }
-
   async getCategoricalFields() {
     return [];
   }
