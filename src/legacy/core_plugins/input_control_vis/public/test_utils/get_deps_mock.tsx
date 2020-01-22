@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { FieldList } from 'src/plugins/data/public';
-import { InputControlVisDependencies } from '../../../plugin';
+import { InputControlVisDependencies } from '../plugin';
 
 const fields: FieldList = [] as any;
 fields.push({ name: 'myField' } as any);
