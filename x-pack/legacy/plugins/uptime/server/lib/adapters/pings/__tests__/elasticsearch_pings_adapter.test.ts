@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { elasticsearchPingsAdapter as adapter } from '../elasticsearch_pings_adapter';
+import { elasticsearchPingsAdapter as adapter } from '../es_pings';
 import { assertCloseTo } from '../../../helper';
 
 describe('ElasticsearchPingsAdapter class', () => {
@@ -98,9 +98,9 @@ describe('ElasticsearchPingsAdapter class', () => {
       });
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-        filters: null,
+        dateStart: 'now-15m',
+        dateEnd: 'now',
+        filters: '',
       });
       assertCloseTo(result.interval, 36000, 100);
       result.interval = 36000;
@@ -116,9 +116,9 @@ describe('ElasticsearchPingsAdapter class', () => {
 
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-        filters: null,
+        dateStart: 'now-15m',
+        dateEnd: 'now',
+        filters: '',
       });
       assertCloseTo(result.interval, 36000, 100);
       result.interval = 36000;
@@ -175,8 +175,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       };
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: '1234',
-        dateRangeEnd: '5678',
+        dateStart: '1234',
+        dateEnd: '5678',
         filters: JSON.stringify(searchFilter),
         monitorId: undefined,
         statusFilter: 'down',
@@ -229,8 +229,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       const filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
+        dateStart: 'now-15m',
+        dateEnd: 'now',
         filters,
       });
 
@@ -246,8 +246,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       mockEsClient.mockReturnValue(standardMockResponse);
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: '1234',
-        dateRangeEnd: '5678',
+        dateStart: '1234',
+        dateEnd: '5678',
         filters: '',
         monitorId: undefined,
         statusFilter: 'down',
@@ -267,8 +267,8 @@ describe('ElasticsearchPingsAdapter class', () => {
 
       const result = await adapter.getPingHistogram({
         callES: mockEsClient,
-        dateRangeStart: '1234',
-        dateRangeEnd: '5678',
+        dateStart: '1234',
+        dateEnd: '5678',
         filters: '',
         monitorId: undefined,
         statusFilter: 'up',

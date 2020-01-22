@@ -88,7 +88,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": 5609564928000,
+  "interval": undefined,
 }
 `;
 

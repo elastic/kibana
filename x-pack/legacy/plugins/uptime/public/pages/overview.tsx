@@ -140,7 +140,6 @@ export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
           dateRangeEnd={dateRangeEnd}
           filters={filters}
           statusFilter={statusFilter}
-          sharedProps={sharedProps}
         />
         <EuiSpacer size="s" />
         <MonitorList

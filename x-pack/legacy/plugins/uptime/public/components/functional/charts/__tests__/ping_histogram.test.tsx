@@ -6,17 +6,16 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { SnapshotHistogram, SnapshotHistogramProps } from '../snapshot_histogram';
+import { PingHistogramComponent, PingHistogramComponentProps } from '../ping_histogram';
 
-describe('SnapshotHistogram component', () => {
-  const props: SnapshotHistogramProps = {
+describe('PingHistogram component', () => {
+  const props: PingHistogramComponentProps = {
     absoluteStartDate: 1548697920000,
     absoluteEndDate: 1548700920000,
-    isResponsive: false,
   };
 
   it('renders the component without errors', () => {
-    const component = shallowWithIntl(<SnapshotHistogram {...props} variables={{}} />);
+    const component = shallowWithIntl(<PingHistogramComponent {...props} />);
     expect(component).toMatchSnapshot();
   });
 });

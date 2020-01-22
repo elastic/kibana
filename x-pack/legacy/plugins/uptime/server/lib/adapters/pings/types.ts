@@ -5,8 +5,8 @@
  */
 
 import { DocCount, Ping, PingResults } from '../../../../common/graphql/types';
-import { HistogramResult } from '../../../../common/domain_types';
 import { UMElasticsearchQueryFn } from '../framework';
+import { GetPingHistogramParams, HistogramResult } from '../../../../common/types';
 
 export interface GetAllParams {
   /** @member dateRangeStart timestamp bounds */
@@ -40,19 +40,6 @@ export interface GetLatestMonitorDocsParams {
 
   /** @member monitorId optional limit to monitorId */
   monitorId?: string | null;
-}
-
-export interface GetPingHistogramParams {
-  /** @member dateRangeStart timestamp bounds */
-  dateRangeStart: string;
-  /** @member dateRangeEnd timestamp bounds */
-  dateRangeEnd: string;
-  /** @member filters user-defined filters */
-  filters?: string | null;
-  /** @member monitorId optional limit to monitorId */
-  monitorId?: string | null;
-  /** @member statusFilter special filter targeting the latest status of each monitor */
-  statusFilter?: string | null;
 }
 
 /**
