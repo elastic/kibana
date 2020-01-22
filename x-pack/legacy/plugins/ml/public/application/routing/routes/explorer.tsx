@@ -70,7 +70,7 @@ interface ExplorerUrlStateManagerProps {
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const [appState, setAppState] = useUrlState('_a');
-  const [globalState] = useUrlState('_g');
+  const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
 
   const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
@@ -79,9 +79,18 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   useEffect(() => {
     if (refresh !== undefined) {
       setLastRefresh(refresh?.lastRefresh);
+
       const activeBounds = timefilter.getActiveBounds();
       if (activeBounds !== undefined) {
         explorerService.setBounds(activeBounds);
+      }
+
+      if (refresh.timeRange !== undefined) {
+        const { start, end } = refresh.timeRange;
+        setGlobalState('time', {
+          from: start,
+          to: end,
+        });
       }
     }
   }, [refresh?.lastRefresh]);
