@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointListAction } from './endpoint_list';
+import { AlertData } from '../../../../../endpoint_app_types';
 
-export type AppAction = EndpointListAction;
+export interface AlertListData {
+  alerts: AlertData[];
+}
+
+export type AlertListState = AlertListData;

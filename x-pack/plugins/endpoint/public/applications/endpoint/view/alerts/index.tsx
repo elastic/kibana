@@ -7,7 +7,9 @@
 import { memo, useState, useMemo } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
-import json from './sampledata.json';
+import { useDispatch, useSelector } from 'react-redux';
+import { AlertAction } from '../../store/alerts/action';
+import * as selectors from '../../store/alerts/selectors';
 
 export const AlertIndex = memo(() => {
   const columns: Array<{ id: string }> = [
@@ -23,8 +25,16 @@ export const AlertIndex = memo(() => {
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
+  const dispatch: (action: AlertAction) => unknown = useDispatch();
+  dispatch({ type: 'appRequestedAlertsData' });
+
+  const json = useSelector(selectors.alertListData);
+
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+      if (json === undefined) {
+        return null;
+      }
       if (columnId === 'alert_type') {
         return json[rowIndex].value.source.endgame.metadata.key;
       } else if (columnId === 'event_type') {
@@ -44,13 +54,12 @@ export const AlertIndex = memo(() => {
       }
       return '';
     };
-  }, []);
+  }, [json]);
 
   return (
     <EuiDataGrid
       aria-label="Data grid demo"
-      // Required. There are 200 total records.
-      rowCount={json.length}
+      rowCount={3}
       // Required. Sets up three columns, the last of which has a custom schema we later define down below.
       // The second column B won't allow clicking in to see the content in a popup.
       // The first column defines an starting width of 150px and prevents the user from resizing it

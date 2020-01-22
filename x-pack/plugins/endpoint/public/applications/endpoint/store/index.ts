@@ -8,6 +8,7 @@ import { createStore, compose, applyMiddleware, Store } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { appSagaFactory } from './saga';
 import { appReducer } from './reducer';
+import { alertMiddlewareFactory } from './alerts/middleware';
 
 export { GlobalState } from './reducer';
 
@@ -19,7 +20,9 @@ export const appStoreFactory = (coreStart: CoreStart): [Store, () => void] => {
   const sagaReduxMiddleware = appSagaFactory(coreStart);
   const store = createStore(
     appReducer,
-    composeWithReduxDevTools(applyMiddleware(sagaReduxMiddleware))
+    composeWithReduxDevTools(
+      applyMiddleware(alertMiddlewareFactory(coreStart), appSagaFactory(coreStart))
+    )
   );
 
   sagaReduxMiddleware.start();
