@@ -31,7 +31,7 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.gaugeOptions.labelsTitle"
+            id="visTypeVislib.controls.gaugeOptions.labelsTitle"
             defaultMessage="Labels"
           />
         </h3>
@@ -39,7 +39,7 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
       <EuiSpacer size="s" />
 
       <SwitchOption
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.showLabelsLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.showLabelsLabel', {
           defaultMessage: 'Show labels',
         })}
         paramName="show"
@@ -52,7 +52,7 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
 
       <TextInputOption
         disabled={!stateParams.gauge.labels.show}
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.subTextLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.subTextLabel', {
           defaultMessage: 'Sub label',
         })}
         paramName="subText"
@@ -64,10 +64,10 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
 
       <SwitchOption
         disabled={!stateParams.gauge.labels.show}
-        label={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.displayWarningsLabel', {
+        label={i18n.translate('visTypeVislib.controls.gaugeOptions.displayWarningsLabel', {
           defaultMessage: 'Display warnings',
         })}
-        tooltip={i18n.translate('kbnVislibVisTypes.controls.gaugeOptions.switchWarningsTooltip', {
+        tooltip={i18n.translate('visTypeVislib.controls.gaugeOptions.switchWarningsTooltip', {
           defaultMessage:
             'Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed.',
         })}

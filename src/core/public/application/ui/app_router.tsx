@@ -18,15 +18,18 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
 import { History } from 'history';
-import { Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Observable } from 'rxjs';
+import { useObservable } from 'react-use';
 
-import { Mounter, AppLeaveHandler } from '../types';
+import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
 
 interface Props {
   mounters: Map<string, Mounter>;
   history: History;
+  appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
 }
 
@@ -34,45 +37,59 @@ interface Params {
   appId: string;
 }
 
-export const AppRouter: FunctionComponent<Props> = ({ history, mounters, setAppLeaveHandler }) => (
-  <Router history={history}>
-    <Switch>
-      {[...mounters].flatMap(([appId, mounter]) =>
-        // Remove /app paths from the routes as they will be handled by the
-        // "named" route parameter `:appId` below
-        mounter.appBasePath.startsWith('/app')
-          ? []
-          : [
-              <Route
-                key={mounter.appRoute}
-                path={mounter.appRoute}
-                render={() => (
-                  <AppContainer
-                    mounter={mounter}
-                    appId={appId}
-                    setAppLeaveHandler={setAppLeaveHandler}
-                  />
-                )}
-              />,
-            ]
-      )}
-      <Route
-        path="/app/:appId"
-        render={({
-          match: {
-            params: { appId },
-          },
-        }: RouteComponentProps<Params>) => {
-          // Find the mounter including legacy mounters with subapps:
-          const [id, mounter] = mounters.has(appId)
-            ? [appId, mounters.get(appId)]
-            : [...mounters].filter(([key]) => key.split(':')[0] === appId)[0] ?? [];
+export const AppRouter: FunctionComponent<Props> = ({
+  history,
+  mounters,
+  setAppLeaveHandler,
+  appStatuses$,
+}) => {
+  const appStatuses = useObservable(appStatuses$, new Map());
+  return (
+    <Router history={history}>
+      <Switch>
+        {[...mounters].flatMap(([appId, mounter]) =>
+          // Remove /app paths from the routes as they will be handled by the
+          // "named" route parameter `:appId` below
+          mounter.appBasePath.startsWith('/app')
+            ? []
+            : [
+                <Route
+                  key={mounter.appRoute}
+                  path={mounter.appRoute}
+                  render={() => (
+                    <AppContainer
+                      mounter={mounter}
+                      appId={appId}
+                      appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                      setAppLeaveHandler={setAppLeaveHandler}
+                    />
+                  )}
+                />,
+              ]
+        )}
+        <Route
+          path="/app/:appId"
+          render={({
+            match: {
+              params: { appId },
+            },
+          }: RouteComponentProps<Params>) => {
+            // Find the mounter including legacy mounters with subapps:
+            const [id, mounter] = mounters.has(appId)
+              ? [appId, mounters.get(appId)]
+              : [...mounters].filter(([key]) => key.split(':')[0] === appId)[0] ?? [];
 
-          return (
-            <AppContainer mounter={mounter} appId={id} setAppLeaveHandler={setAppLeaveHandler} />
-          );
-        }}
-      />
-    </Switch>
-  </Router>
-);
+            return (
+              <AppContainer
+                mounter={mounter}
+                appId={id}
+                appStatus={appStatuses.get(id) ?? AppStatus.inaccessible}
+                setAppLeaveHandler={setAppLeaveHandler}
+              />
+            );
+          }}
+        />
+      </Switch>
+    </Router>
+  );
+};
