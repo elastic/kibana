@@ -170,8 +170,13 @@ export function useCamera(): {
     isAnimatingAtTimeRef.current = isAnimatingAtTime;
   }, [isAnimatingAtTime]);
 
+  /**
+   * Keep the projection matrix state in sync with the selector.
+   * This isn't needed during animation.
+   */
   useLayoutEffect(() => {
     setProjectionMatrix(projectionMatrixAtTime(new Date()));
+    // TODO why does projectionMatrixAtTime change when the mouse moves???
   }, [projectionMatrixAtTime]);
 
   /**

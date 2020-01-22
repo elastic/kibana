@@ -91,23 +91,6 @@ export const isAnimating: (state: CameraState) => (time: Date) => boolean = crea
 );
 
 /**
- * The `useCamera` hook uses changes to this referenece to optionally trigger a new rAF loop.
- * TODO delete this
- */
-export function animationReference(state: CameraState): CameraAnimationState | undefined {
-  return state.animation;
-}
-
-// TODO, use this
-/*
-export const animationEndTime: (state: CameraState) => Date | null = createSelector(
-  state => state.animation,
-  animation =>
-    animation === undefined ? null : new Date(animation.startTime.getTime() + animationDuration)
-);
-*/
-
-/**
  * The camera has a translation value (not counting any current panning.) This is initialized to (0, 0) and
  * updating any time panning ends.
  *
