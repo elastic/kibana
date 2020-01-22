@@ -518,6 +518,22 @@ describe('#start()', () => {
     expect([...availableApps.keys()]).toEqual(['app1', 'legacyApp1']);
   });
 
+  describe('currentAppId$', () => {
+    it('emits the legacy app id when in legacy mode', async () => {
+      setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
+      setupDeps.injectedMetadata.getLegacyMetadata.mockReturnValue({
+        app: {
+          id: 'legacy',
+          title: 'Legacy App',
+        },
+      } as any);
+      await service.setup(setupDeps);
+      const { currentAppId$ } = await service.start(startDeps);
+
+      expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('legacy');
+    });
+  });
+
   describe('getComponent', () => {
     it('returns renderable JSX tree', async () => {
       service.setup(setupDeps);

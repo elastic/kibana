@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
@@ -117,6 +117,8 @@ export class ApplicationService {
     // Only setup history if we're not in legacy mode
     if (!injectedMetadata.getLegacyMode()) {
       this.history = history || createBrowserHistory({ basename });
+    } else {
+      this.currentAppId$.next(injectedMetadata.getLegacyMetadata().app.id);
     }
 
     // If we do not have history available, use redirectTo to do a full page refresh.
@@ -264,7 +266,7 @@ export class ApplicationService {
     return {
       applications$,
       capabilities,
-      currentAppId$: this.currentAppId$.pipe(takeUntil(this.stop$)),
+      currentAppId$: this.currentAppId$.pipe(distinctUntilChanged(), takeUntil(this.stop$)),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
