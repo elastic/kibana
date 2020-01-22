@@ -21,23 +21,23 @@ import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { getServices, getDocViewsRegistry } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 jest.mock('../../../kibana_services', () => {
   let registry: any[] = [];
   return {
     getServices: () => ({
+      docViewsRegistry: {
+        addDocView(view: any) {
+          registry.push(view);
+        },
+        getDocViewsSorted() {
+          return registry;
+        },
+      },
       resetRegistry: () => {
         registry = [];
-      },
-    }),
-    getDocViewsRegistry: () => ({
-      addDocView(view: any) {
-        registry.push(view);
-      },
-      getDocViewsSorted() {
-        return registry;
       },
     }),
     formatMsg: (x: any) => String(x),
@@ -51,7 +51,7 @@ beforeEach(() => {
 });
 
 test('Render <DocViewer/> with 3 different tabs', () => {
-  const registry = getDocViewsRegistry();
+  const registry = getServices().docViewsRegistry;
   registry.addDocView({ order: 10, title: 'Render function', render: jest.fn() });
   registry.addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
   registry.addDocView({ order: 30, title: 'Invalid doc view' });
@@ -69,7 +69,7 @@ test('Render <DocViewer/> with 1 tab displaying error message', () => {
     return null;
   }
 
-  const registry = getDocViewsRegistry();
+  const registry = getServices().docViewsRegistry;
   registry.addDocView({
     order: 10,
     title: 'React component',
