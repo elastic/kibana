@@ -57,7 +57,7 @@ import { ExpressionRendererImplementation } from './expression_renderer';
 import { ExpressionLoader, loader } from './loader';
 import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
-import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
+import { ExpressionFunctionDefinition, AnyExpressionType } from '../common/types';
 import { serializeProvider } from '../common';
 
 export interface ExpressionsSetupDeps {
@@ -71,7 +71,9 @@ export interface ExpressionsStartDeps {
 }
 
 export interface ExpressionsSetup {
-  registerFunction: (fn: AnyExpressionFunction | (() => AnyExpressionFunction)) => void;
+  registerFunction: (
+    fn: ExpressionFunctionDefinition | (() => ExpressionFunctionDefinition)
+  ) => void;
   registerRenderer: (renderer: any) => void;
   registerType: (type: () => AnyExpressionType) => void;
   __LEGACY: {

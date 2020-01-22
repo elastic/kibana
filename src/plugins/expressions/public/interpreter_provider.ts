@@ -25,7 +25,7 @@ import { createError } from './create_error';
 import {
   ExpressionAST,
   ExpressionFunctionAST,
-  AnyExpressionFunction,
+  AnyExpressionFunctionDefinition,
   ArgumentType,
 } from '../common/types';
 import { getType } from '../common/type';
@@ -109,7 +109,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
   }
 
   async function invokeFunction(
-    fnDef: AnyExpressionFunction,
+    fnDef: AnyExpressionFunctionDefinition,
     context: any,
     args: Record<string, unknown>
   ): Promise<any> {
@@ -143,7 +143,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
   async function resolveArgs(
-    fnDef: AnyExpressionFunction,
+    fnDef: AnyExpressionFunctionDefinition,
     context: any,
     argAsts: any
   ): Promise<any> {

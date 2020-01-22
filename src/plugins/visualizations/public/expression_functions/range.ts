@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, KibanaDatatable, Range } from '../../../expressions/public';
+import { ExpressionFunctionDefinition, KibanaDatatable, Range } from '../../../expressions/public';
 
 const name = 'range';
 
@@ -29,7 +29,7 @@ interface Arguments {
   to: number;
 }
 
-export const range = (): ExpressionFunction<typeof name, Context, Arguments, Range> => ({
+export const range = (): ExpressionFunctionDefinition<typeof name, Context, Arguments, Range> => ({
   name,
   help: i18n.translate('visualizations.function.range.help', {
     defaultMessage: 'Generates range object',

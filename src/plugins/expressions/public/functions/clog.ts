@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { ExpressionFunction } from '../../common/types';
+import { ExpressionFunctionDefinition } from '../../common/types';
 
 const name = 'clog';
 
 type Context = any;
-type ClogExpressionFunction = ExpressionFunction<typeof name, Context, {}, Context>;
+type ClogExpressionFunction = ExpressionFunctionDefinition<typeof name, Context, {}, Context>;
 
 export const clog = (): ClogExpressionFunction => ({
   name,

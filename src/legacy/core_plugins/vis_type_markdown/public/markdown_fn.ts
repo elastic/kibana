@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, Render } from '../../../../plugins/expressions/public';
+import { ExpressionFunctionDefinition, Render } from '../../../../plugins/expressions/public';
 import { Arguments, MarkdownVisParams } from './types';
 
 const name = 'markdownVis';
@@ -32,7 +32,7 @@ interface RenderValue {
 
 type Return = Promise<Render<RenderValue>>;
 
-export const createMarkdownVisFn = (): ExpressionFunction<
+export const createMarkdownVisFn = (): ExpressionFunctionDefinition<
   typeof name,
   Context,
   Arguments,

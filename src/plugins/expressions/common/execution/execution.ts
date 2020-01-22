@@ -23,13 +23,16 @@ import { fromExpression, getByAlias } from '@kbn/interpreter/common';
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import {
   ExpressionAST,
-  AnyExpressionFunction,
+  AnyExpressionFunctionDefinition,
   ExpressionFunctionAST,
   ArgumentType,
+  ExecutionContext,
 } from '../types';
 import { Executor, getType } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
+import { Defer } from '../../../kibana_utils/common';
+import { isExpressionValueError } from '../expression_types/error';
 
 export interface ExecutionParams {
   executor: Executor;
@@ -37,7 +40,31 @@ export interface ExecutionParams {
 }
 
 export class Execution {
+  /**
+   * Dynamic state of the execution.
+   */
   state: ExecutionContainer;
+
+  /**
+   * Initial input of the execution.
+   *
+   * N.B. It is initialized to `null` rather than `undefined` for legacy reasons,
+   * because in legacy interpreter it was set to `null` by default.
+   */
+  input: unknown = null;
+
+  /**
+   * Execution context - object that allows to do side-effects, which is passed
+   * to every function.
+   */
+  context: ExecutionContext;
+
+  private hasStarted: boolean = false;
+  private firstResultFuture: Defer<unknown> = new Defer<unknown>();
+
+  public get result(): Promise<unknown> {
+    return this.firstResultFuture.promise;
+  }
 
   constructor(public readonly params: ExecutionParams) {
     const { executor, ast } = params;
@@ -45,6 +72,28 @@ export class Execution {
       ...executor.state.get(),
       ast,
     });
+    this.context = {
+      ...executor.context,
+      getInitialInput: () => this.input,
+      getInitialContext: () => this.input,
+      variables: {},
+      types: executor.getTypes(),
+    };
+  }
+
+  /**
+   * Call this method to start execution.
+   *
+   * N.B. `input` is initialized to `null` rather than `undefined` for legacy reasons,
+   * because in legacy interpreter it was set to `null` by default.
+   */
+  public start(input: unknown = null) {
+    if (!this.hasStarted) throw new Error('Execution already started.');
+    this.hasStarted = true;
+
+    this.input = input;
+    const { resolve, reject } = this.firstResultFuture;
+    this.invokeChain(this.state.get().ast.chain, input).then(resolve, reject);
   }
 
   public cast(node: any, toTypeNames: any) {
@@ -73,13 +122,13 @@ export class Execution {
   }
 
   async invokeFunction(
-    fnDef: AnyExpressionFunction,
-    context: any,
+    fnDef: AnyExpressionFunctionDefinition,
+    input: unknown,
     args: Record<string, unknown>
   ): Promise<any> {
     // Check function input.
-    const acceptableContext = this.cast(context, fnDef.context ? fnDef.context.types : undefined);
-    const fnOutput = await fnDef.fn(acceptableContext, args, handlers);
+    const castedInput = this.cast(input, fnDef.context ? fnDef.context.types : undefined);
+    const fnOutput = await fnDef.fn(castedInput, args, this.context);
 
     // Validate that the function returned the type it said it would.
     // This isn't really required, but it keeps function developers honest.
@@ -93,7 +142,7 @@ export class Execution {
     }
 
     // Validate the function output against the type definition's validate function
-    const type = handlers.types[fnDef.type];
+    const type = this.context.types[fnDef.type];
     if (type && type.validate) {
       try {
         type.validate(fnOutput);
@@ -106,7 +155,11 @@ export class Execution {
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
-  async resolveArgs(fnDef: AnyExpressionFunction, context: any, argAsts: any): Promise<any> {
+  async resolveArgs(
+    fnDef: AnyExpressionFunctionDefinition,
+    input: unknown,
+    argAsts: any
+  ): Promise<any> {
     const argDefs = fnDef.args;
 
     // Use the non-alias name from the argument definition
@@ -114,11 +167,9 @@ export class Execution {
       argAsts,
       (acc, argAst, argName) => {
         const argDef = getByAlias(argDefs, argName);
-        // TODO: Implement a system to allow for undeclared arguments
         if (!argDef) {
           throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
         }
-
         acc[argDef.name] = (acc[argDef.name] || []).concat(argAst);
         return acc;
       },
@@ -138,7 +189,8 @@ export class Execution {
         if (!aliases || aliases.length === 0) {
           throw new Error(`${fnDef.name} requires an argument`);
         } else {
-          const errorArg = argName === '_' ? aliases[0] : argName; // use an alias if _ is the missing arg
+          // use an alias if _ is the missing arg
+          const errorArg = argName === '_' ? aliases[0] : argName;
           throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
         }
       }
@@ -160,12 +212,12 @@ export class Execution {
     // Create the functions to resolve the argument ASTs into values
     // These are what are passed to the actual functions if you opt out of resolving
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
-      return asts.map((item: any) => {
-        return async (ctx = context) => {
-          const newContext = await this.interpret(item, ctx);
+      return asts.map((item: ExpressionAST) => {
+        return async (subInput = input) => {
+          const output = await this.params.executor.interpret(item, subInput);
           // This is why when any sub-expression errors, the entire thing errors
-          if (getType(newContext) === 'error') throw newContext.error;
-          return this.cast(newContext, argDefs[argName as any].types);
+          if (isExpressionValueError(output)) throw output.error;
+          return this.cast(output, argDefs[argName as any].types);
         };
       });
     });
@@ -197,7 +249,7 @@ export class Execution {
   async invokeChain(chainArr: ExpressionFunctionAST[], context: any): Promise<any> {
     if (!chainArr.length) return context;
     // if execution was aborted return error
-    if (handlers.abortSignal && handlers.abortSignal.aborted) {
+    if (this.context.abortSignal && this.context.abortSignal.aborted) {
       return createError({
         message: 'The expression was aborted.',
         name: 'AbortError',
@@ -231,9 +283,5 @@ export class Execution {
       e.message = `[${fnName}] > ${e.message}`;
       return createError(e);
     }
-  }
-
-  public async execute(input: any = null) {
-    return this.invokeChain(this.state.get().ast.chain, input);
   }
 }

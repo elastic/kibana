@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Range,
   Render,
@@ -58,7 +58,7 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createMetricVisFn = (): ExpressionFunction<
+export const createMetricVisFn = (): ExpressionFunctionDefinition<
   typeof name,
   Context,
   Arguments,

@@ -19,6 +19,7 @@
 
 import { ArgumentType } from './arguments';
 import { TypeToString, UnwrapPromise } from './common';
+import { Type } from '../executor/expression_types';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
@@ -26,38 +27,43 @@ import { TypeToString, UnwrapPromise } from './common';
  */
 export interface ExecutionContext {
   /**
-   * Adds ability to abort current execution.
-   */
-  abortSignal?: AbortSignal;
-
-  /**
    * Get initial input with which execution started.
    */
-  getInitialInput?: () => unknown;
+  getInitialInput: () => unknown;
 
   /**
    * Same as `getInitialInput`, use `getInitialInput` instead, `getInitialContext` is deprecated.
    *
    * @deprecated
    */
-  getInitialContext?: () => unknown;
+  getInitialContext: () => unknown;
+
+  /**
+   * Context variables that can be consumed using `var` and `var_set` functions.
+   */
+  variables: Record<string, unknown>;
+
+  /**
+   * A map of available expression types.
+   */
+  types: Record<string, Type>;
+
+  /**
+   * Adds ability to abort current execution.
+   */
+  abortSignal?: AbortSignal;
 
   /**
    * Adapters for `inspector` plugin.
    */
   inspectorAdapters?: unknown;
-
-  /**
-   * Context variables that can consumed using `var` and `var_set` functions.
-   */
-  variables?: Record<string, unknown>;
 }
 
 /**
- * `IExpressionFunction` is the interface plugins have to implement to register
- * a function in `expressions` plugin.
+ * `ExpressionFunctionDefinition` is the interface plugins have to implement to
+ * register a function in `expressions` plugin.
  */
-export interface IExpressionFunction<Name extends string, Input, Arguments, Return> {
+export interface ExpressionFunctionDefinition<Name extends string, Input, Arguments, Return> {
   /**
    * The name of the function, as will be used in expression.
    */
@@ -97,4 +103,4 @@ export interface IExpressionFunction<Name extends string, Input, Arguments, Retu
   fn(input: Input, args: Arguments, context: ExecutionContext): Return;
 }
 
-export type AnyExpressionFunction = IExpressionFunction<string, any, any, any>;
+export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<string, any, any, any>;

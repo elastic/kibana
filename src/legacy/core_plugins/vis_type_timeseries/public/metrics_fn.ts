@@ -20,7 +20,11 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { PersistedState } from 'ui/persisted_state';
-import { ExpressionFunction, KibanaContext, Render } from '../../../../plugins/expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  KibanaContext,
+  Render,
+} from '../../../../plugins/expressions/public';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
@@ -45,7 +49,12 @@ interface RenderValue {
 
 type Return = Promise<Render<RenderValue>>;
 
-export const createMetricsFn = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const createMetricsFn = (): ExpressionFunctionDefinition<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
   name,
   type: 'render',
   context: {

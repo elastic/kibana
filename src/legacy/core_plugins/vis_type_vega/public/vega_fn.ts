@@ -20,7 +20,11 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunction, KibanaContext, Render } from '../../../../plugins/expressions/public';
+import {
+  ExpressionFunctionDefinition,
+  KibanaContext,
+  Render,
+} from '../../../../plugins/expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 
@@ -43,7 +47,7 @@ type Return = Promise<Render<RenderValue>>;
 
 export const createVegaFn = (
   dependencies: VegaVisualizationDependencies
-): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+): ExpressionFunctionDefinition<typeof name, Context, Arguments, Return> => ({
   name,
   type: 'render',
   context: {

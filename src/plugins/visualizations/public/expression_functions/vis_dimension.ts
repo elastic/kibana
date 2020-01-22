@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, KibanaDatatable } from '../../../expressions/public';
+import { ExpressionFunctionDefinition, KibanaDatatable } from '../../../expressions/public';
 
 const name = 'visdimension';
 
@@ -32,7 +32,12 @@ interface Arguments {
 
 type Return = any;
 
-export const visDimension = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const visDimension = (): ExpressionFunctionDefinition<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
   name: 'visdimension',
   help: i18n.translate('visualizations.function.visDimension.help', {
     defaultMessage: 'Generates visConfig dimension object',

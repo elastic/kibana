@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
@@ -47,7 +47,7 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createTableVisFn = (): ExpressionFunction<
+export const createTableVisFn = (): ExpressionFunctionDefinition<
   typeof name,
   Context,
   Arguments,

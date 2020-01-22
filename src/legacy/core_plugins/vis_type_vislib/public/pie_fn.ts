@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
@@ -43,7 +43,9 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createPieVisFn = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const createPieVisFn = (
+  deps: KbnVislibVisTypesDependencies
+) => (): ExpressionFunctionDefinition<typeof name, Context, Arguments, Return> => ({
   name: 'kibana_pie',
   type: 'render',
   context: {

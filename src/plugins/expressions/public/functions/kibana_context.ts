@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from '../../common/types';
+import { ExpressionFunctionDefinition } from '../../common/types';
 import { KibanaContext } from '../../common/expression_types';
 import { savedObjects } from '../services';
 
@@ -29,7 +29,7 @@ interface Arguments {
   savedSearchId?: string | null;
 }
 
-export type ExpressionFunctionKibanaContext = ExpressionFunction<
+export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   'kibana_context',
   KibanaContext | null,
   Arguments,

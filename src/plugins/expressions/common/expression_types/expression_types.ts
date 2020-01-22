@@ -21,8 +21,6 @@
 
 import { get, identity } from 'lodash';
 import { AnyExpressionType, ExpressionValue } from '../types';
-import { IRegistry } from './types';
-import { Executor } from './executor';
 
 export function getType(node: any) {
   if (node == null) return 'null';
@@ -107,24 +105,4 @@ export class Type {
 
     return (this.getFromFn(typeName) as any)(node, types);
   };
-}
-
-export class TypesRegistry implements IRegistry<Type> {
-  constructor(private readonly executor: Executor) {}
-
-  public register(typeDefinition: AnyExpressionType | (() => AnyExpressionType)) {
-    this.executor.registerType(typeDefinition);
-  }
-
-  public get(id: string): Type | null {
-    return this.executor.state.selectors.getType(id);
-  }
-
-  public toJS(): Record<string, undefined | Type> {
-    return this.executor.getTypes();
-  }
-
-  public toArray(): Type[] {
-    return Object.values(this.toJS() as Record<string, Type>);
-  }
 }

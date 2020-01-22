@@ -26,18 +26,21 @@ export interface ExecutorState {
   functions: Record<string, ExpressionFunction>;
   types: Record<string, Type>;
   renderers: Record<string, ExpressionRenderFunction>;
+  context: Record<string, unknown>;
 }
 
 export const defaultState: ExecutorState = {
   functions: {},
   renderers: {},
   types: {},
+  context: {},
 };
 
 export interface ExecutorPureTransitions {
   addFunction: (state: ExecutorState) => (fn: ExpressionFunction) => ExecutorState;
   addType: (state: ExecutorState) => (type: Type) => ExecutorState;
   addRenderer: (state: ExecutorState) => (renderer: ExpressionRenderFunction) => ExecutorState;
+  extendContext: (state: ExecutorState) => (extraContext: Record<string, unknown>) => ExecutorState;
 }
 
 export const pureTransitions: ExecutorPureTransitions = {
@@ -47,18 +50,24 @@ export const pureTransitions: ExecutorPureTransitions = {
     ...state,
     renderers: { ...state.renderers, [renderer.name]: renderer },
   }),
+  extendContext: state => extraContext => ({
+    ...state,
+    context: { ...state.context, ...extraContext },
+  }),
 };
 
 export interface ExecutorPureSelectors {
   getFunction: (state: ExecutorState) => (id: string) => ExpressionFunction | null;
   getType: (state: ExecutorState) => (id: string) => Type | null;
   getRenderer: (state: ExecutorState) => (id: string) => ExpressionRenderFunction | null;
+  getContext: (state: ExecutorState) => () => ExecutorState['context'];
 }
 
 export const pureSelectors: ExecutorPureSelectors = {
   getFunction: state => id => state.functions[id] || null,
   getType: state => id => state.types[id] || null,
   getRenderer: state => id => state.renderers[id] || null,
+  getContext: ({ context }) => () => context,
 };
 
 export type ExecutorContainer = StateContainer<
@@ -72,6 +81,6 @@ export const createExecutorContainer = (state: ExecutorState = defaultState): Ex
     ExecutorState,
     ExecutorPureTransitions,
     ExecutorPureSelectors
-  >(state, pureTransitions);
+  >(state, pureTransitions, pureSelectors);
   return container;
 };

@@ -19,9 +19,12 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ArgumentType, ExpressionValue, AnyExpressionFunction, ExecutionContext } from '../types';
-import { IRegistry } from './types';
-import { Executor } from './executor';
+import {
+  ArgumentType,
+  ExpressionValue,
+  ExpressionFunctionDefinition,
+  ExecutionContext,
+} from '../types';
 
 export class ExpressionFunctionParameter {
   name: string;
@@ -94,7 +97,7 @@ export class ExpressionFunction {
 
   context: { types?: string[] };
 
-  constructor(functionDefinition: AnyExpressionFunction) {
+  constructor(functionDefinition: ExpressionFunctionDefinition) {
     const { name, type, aliases, fn, help, args, context } = functionDefinition;
 
     this.name = name;
@@ -114,24 +117,4 @@ export class ExpressionFunction {
     if (!this.context.types) return true;
     return this.context.types.indexOf(type) > -1;
   };
-}
-
-export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
-  constructor(private readonly executor: Executor) {}
-
-  public register(functionDefinition: AnyExpressionFunction | (() => AnyExpressionFunction)) {
-    this.executor.registerFunction(functionDefinition);
-  }
-
-  public get(id: string): ExpressionFunction | null {
-    return this.executor.state.selectors.getFunction(id);
-  }
-
-  public toJS(): Record<string, ExpressionFunction> {
-    return { ...this.executor.state.get().functions };
-  }
-
-  public toArray(): ExpressionFunction[] {
-    return Object.values(this.executor.state.get().functions);
-  }
 }

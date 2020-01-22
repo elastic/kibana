@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { openSans, FontLabel as FontFamily } from '../fonts';
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   CSSStyle,
   FontStyle,
   FontWeight,
@@ -59,7 +59,7 @@ interface Arguments {
   weight?: FontWeight;
 }
 
-export function font(): ExpressionFunction<'font', null, Arguments, Style> {
+export function font(): ExpressionFunctionDefinition<'font', null, Arguments, Style> {
   return {
     name: 'font',
     aliases: [],

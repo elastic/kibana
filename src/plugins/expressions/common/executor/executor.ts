@@ -17,17 +17,63 @@
  * under the License.
  */
 
+/* eslint-disable max-classes-per-file */
+
+import { ExpressionArgAST } from '@kbn/interpreter/target/common/lib/ast';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { FunctionsRegistry, ExpressionFunction } from './expression_functions';
-import { TypesRegistry, Type, getType } from './expression_types';
-import { AnyExpressionFunction, AnyExpressionType, ExpressionAST } from '../types';
+import { Type, getType } from './expression_types';
+import { AnyExpressionFunctionDefinition, AnyExpressionType, ExpressionAST } from '../types';
 import {
   ExpressionRenderFunction,
   ExpressionRenderDefinition,
   RenderFunctionsRegistry,
 } from './expression_renderers';
 import { Execution } from '../execution/execution';
+import { IRegistry } from './types';
+
+export class TypesRegistry implements IRegistry<Type> {
+  constructor(private readonly executor: Executor) {}
+
+  public register(typeDefinition: AnyExpressionType | (() => AnyExpressionType)) {
+    this.executor.registerType(typeDefinition);
+  }
+
+  public get(id: string): Type | null {
+    return this.executor.state.selectors.getType(id);
+  }
+
+  public toJS(): Record<string, undefined | Type> {
+    return this.executor.getTypes();
+  }
+
+  public toArray(): Type[] {
+    return Object.values(this.toJS() as Record<string, Type>);
+  }
+}
+
+export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
+  constructor(private readonly executor: Executor) {}
+
+  public register(
+    functionDefinition: ExpressionFunctionDefinition | (() => ExpressionFunctionDefinition)
+  ) {
+    this.executor.registerFunction(functionDefinition);
+  }
+
+  public get(id: string): ExpressionFunction | null {
+    return this.executor.state.selectors.getFunction(id);
+  }
+
+  public toJS(): Record<string, ExpressionFunction> {
+    return { ...this.executor.state.get().functions };
+  }
+
+  public toArray(): ExpressionFunction[] {
+    return Object.values(this.executor.state.get().functions);
+  }
+}
 
 export class Executor {
   public readonly state: ExecutorContainer;
@@ -43,7 +89,7 @@ export class Executor {
   }
 
   public registerFunction(
-    functionDefinition: AnyExpressionFunction | (() => AnyExpressionFunction)
+    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
   ) {
     const fn = new ExpressionFunction(
       typeof functionDefinition === 'object' ? functionDefinition : functionDefinition()
@@ -60,8 +106,8 @@ export class Executor {
     this.state.transitions.addType(type);
   }
 
-  public getTypes(): Record<string, undefined | Type> {
-    return { ...(this.state.get().types as Record<string, undefined | Type>) };
+  public getTypes(): Record<string, Type> {
+    return { ...this.state.get().types };
   }
 
   public registerRenderer(
@@ -77,17 +123,18 @@ export class Executor {
     return { ...this.state.get().renderers };
   }
 
-  public executeExpression<T>(ast: ExpressionAST, input: T): Execution {
-    const execution = new Execution(this, ast);
-    return execution;
+  public extendContext(extraContext: Record<string, unknown>) {
+    this.state.transitions.extendContext(extraContext);
   }
 
-  public interpret<T>(ast: ExpressionAST, input: T) {
-    // const handlers = { ...config.handlers, types };
-    const type = getType(ast);
-    switch (type) {
+  public get context(): Record<string, unknown> {
+    return this.state.selectors.getContext();
+  }
+
+  public async interpret<T>(ast: ExpressionArgAST, input: T): Promise<unknown> {
+    switch (getType(ast)) {
       case 'expression':
-        return this.executeExpression<T>(ast, input);
+        return await this.interpretExpression(ast as ExpressionAST, input);
       case 'string':
       case 'number':
       case 'null':
@@ -96,5 +143,14 @@ export class Executor {
       default:
         throw new Error(`Unknown AST object: ${JSON.stringify(ast)}`);
     }
+  }
+
+  public async interpretExpression<T>(ast: ExpressionAST, input: T): Promise<unknown> {
+    const execution = new Execution({
+      ast,
+      executor: this,
+    });
+    execution.start(input);
+    return await execution.result;
   }
 }

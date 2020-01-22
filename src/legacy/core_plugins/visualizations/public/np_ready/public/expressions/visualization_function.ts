@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
-import { ExpressionFunction, Render } from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
 import { PersistedState } from '../../../legacy_imports';
 import { getTypes, getIndexPatterns, getFilterManager } from '../services';
 
@@ -34,7 +34,7 @@ interface Arguments {
   uiState?: string;
 }
 
-export type ExpressionFunctionVisualization = ExpressionFunction<
+export type ExpressionFunctionVisualization = ExpressionFunctionDefinition<
   'visualization',
   any,
   Arguments,

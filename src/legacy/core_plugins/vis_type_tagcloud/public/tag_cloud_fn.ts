@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
@@ -44,7 +44,7 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createTagCloudFn = (): ExpressionFunction<
+export const createTagCloudFn = (): ExpressionFunctionDefinition<
   typeof name,
   Context,
   Arguments,

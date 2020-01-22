@@ -20,6 +20,7 @@
 import { ExpressionType } from '../types';
 import { Render } from './render';
 import { ExpressionValueBoxed } from '../types/types';
+import { getType } from '../executor';
 
 const name = 'error';
 
@@ -30,6 +31,9 @@ export type ExpressionValueError = ExpressionValueBoxed<
     info: unknown;
   }
 >;
+
+export const isExpressionValueError = (value: any): value is ExpressionValueError =>
+  getType(value) === 'error';
 
 /**
  * @deprecated

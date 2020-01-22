@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from '../../common/types';
+import { ExpressionFunctionDefinition } from '../../common/types';
 
 interface Arguments {
   name: string;
@@ -26,7 +26,12 @@ interface Arguments {
 }
 
 type Context = any;
-type ExpressionFunctionVarSet = ExpressionFunction<'var_set', Context, Arguments, Context>;
+type ExpressionFunctionVarSet = ExpressionFunctionDefinition<
+  'var_set',
+  Context,
+  Arguments,
+  Context
+>;
 
 export const variableSet = (): ExpressionFunctionVarSet => ({
   name: 'var_set',

@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
@@ -45,12 +45,9 @@ interface RenderValue {
 
 type Return = Render<RenderValue>;
 
-export const createVisTypeVislibVisFn = (): ExpressionFunction<
-  typeof name,
-  Context,
-  Arguments,
-  Return
-> => ({
+export const createKbnVislibVisTypesFn = (
+  deps: KbnVislibVisTypesDependencies
+) => (): ExpressionFunctionDefinition<typeof name, Context, Arguments, Return> => ({
   name: 'vislib',
   type: 'render',
   context: {

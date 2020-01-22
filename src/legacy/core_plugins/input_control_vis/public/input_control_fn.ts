@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
@@ -42,7 +42,7 @@ interface RenderValue {
 
 type Return = Promise<Render<RenderValue>>;
 
-export const createInputControlVisFn = (): ExpressionFunction<
+export const createInputControlVisFn = (): ExpressionFunctionDefinition<
   typeof name,
   Context,
   Arguments,

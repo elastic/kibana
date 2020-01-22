@@ -24,7 +24,7 @@ import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,
   KibanaDatatable,
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
 import {
@@ -221,7 +221,12 @@ const handleCourierRequest = async ({
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const esaggs = (): ExpressionFunctionDefinition<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
   name,
   type: 'kibana_datatable',
   context: {
