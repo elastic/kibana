@@ -13,6 +13,7 @@ import {
   savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
+import { createEventLoggerMock } from '../../../../../plugins/event_log/server/event_logger.mock';
 
 const actionExecutor = new ActionExecutor();
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -58,6 +59,7 @@ actionExecutor.initialize({
   getServices,
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
+  eventLogger: createEventLoggerMock(),
 });
 
 beforeEach(() => jest.resetAllMocks());

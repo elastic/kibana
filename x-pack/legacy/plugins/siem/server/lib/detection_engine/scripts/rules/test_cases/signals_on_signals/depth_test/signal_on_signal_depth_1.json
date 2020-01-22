@@ -1,0 +1,13 @@
+{
+  "name": "Signal on Signals Rule 1 Depth 1",
+  "description": "Example Signal on Signal where it reports everything as a signal at depth 1",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "from": "now-1d",
+  "interval": "30s",
+  "to": "now",
+  "query": "signal.parent.depth: 1 and _id: *",
+  "enabled": true,
+  "index": ".siem-signals-default"
+}
