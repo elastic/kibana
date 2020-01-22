@@ -17,7 +17,6 @@ import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
 import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/helpers';
-import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../lib/telemetry';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
 export const flyoutHeaderHeight: number = 60;
@@ -102,7 +101,6 @@ export const FlyoutComponent = React.memo<Props>(
         show={!show}
         timelineId={timelineId}
         onOpen={() => {
-          track(METRIC_TYPE.LOADED, TELEMETRY_EVENT.TIMELINE_OPENED);
           showTimeline({ id: timelineId, show: true });
         }}
       />
