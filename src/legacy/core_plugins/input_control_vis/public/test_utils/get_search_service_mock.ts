@@ -17,19 +17,30 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../../../../../../plugins/data/public';
+import { SearchSource } from '../legacy_imports';
 
-/**
- * Returns forced **Partial** IndexPattern for use in tests
- */
-export const getIndexPatternMock = (): Promise<IIndexPattern> => {
-  return Promise.resolve({
-    id: 'mockIndexPattern',
-    title: 'mockIndexPattern',
-    fields: [
-      { name: 'keywordField', type: 'string', aggregatable: true },
-      { name: 'textField', type: 'string', aggregatable: false },
-      { name: 'numberField', type: 'number', aggregatable: true },
-    ],
-  } as IIndexPattern);
-};
+export const getSearchSourceMock = (esSearchResponse?: any): SearchSource =>
+  jest.fn().mockImplementation(() => ({
+    setParent: jest.fn(),
+    setField: jest.fn(),
+    fetch: jest.fn().mockResolvedValue(
+      esSearchResponse
+        ? esSearchResponse
+        : {
+            aggregations: {
+              termsAgg: {
+                buckets: [
+                  {
+                    key: 'Zurich Airport',
+                    doc_count: 691,
+                  },
+                  {
+                    key: 'Xi an Xianyang International Airport',
+                    doc_count: 526,
+                  },
+                ],
+              },
+            },
+          }
+    ),
+  }));
