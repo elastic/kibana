@@ -26,6 +26,7 @@ import { ShapeType } from './shape_type';
 import { DenseVectorType } from './dense_vector_type';
 import { ObjectType } from './object_type';
 import { NestedType } from './nested_type';
+import { JoinType } from './join_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -48,6 +49,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   dense_vector: DenseVectorType,
   object: ObjectType,
   nested: NestedType,
+  join: JoinType,
 };
 
 export const getParametersFormForType = (

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { relationsSerializer, relationsDeserializer } from './relations_parameter';
+
 export * from './name_parameter';
 
 export * from './index_parameter';
@@ -57,3 +59,9 @@ export * from './dynamic_parameter';
 export * from './enabled_parameter';
 
 export * from './max_shingle_size_parameter';
+
+export * from './relations_parameter';
+
+export const PARAMETER_SERIALIZERS = [relationsSerializer];
+
+export const PARAMETER_DESERIALIZERS = [relationsDeserializer];

@@ -113,6 +113,7 @@ export type ParameterName =
   | 'index_options_flattened'
   | 'index_options_keyword'
   | 'eager_global_ordinals'
+  | 'eager_global_ordinals_join'
   | 'index_prefixes'
   | 'index_phrases'
   | 'norms'
@@ -134,6 +135,7 @@ export type ParameterName =
   | 'path'
   | 'dims'
   | 'depth_limit'
+  | 'relations'
   | 'max_shingle_size';
 
 export interface Parameter {

@@ -194,6 +194,10 @@ class DocumentationService {
     return `${this.esDocsBase}/index-options.html`;
   }
 
+  public getJoinMultiLevelsPerformanceLink() {
+    return `${this.esDocsBase}/parent-join.html#_parent_join_and_performance`;
+  }
+
   public getWellKnownTextLink() {
     return 'http://docs.opengeospatial.org/is/12-063r5/12-063r5.html';
   }
