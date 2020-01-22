@@ -6,12 +6,14 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
 
 import { getCasesColumns } from './columns';
 import { Direction, SortFieldCase } from '../../types';
 import { useGetCases } from '../../api/use_get_cases';
+import { CasesSearchBar } from '../search_bar';
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -70,29 +72,38 @@ export const CasesTable = React.memo(() => {
 
   const sorting = { field: `attributes.${sortField}`, direction: sortOrder };
   return isError ? null : (
-    <PaginatedTable
-      activePage={page - 1}
-      columns={getCasesColumns()}
-      headerCount={data.total}
-      headerTitle={
-        <FormattedMessage id="xpack.siem.casesTable.header" defaultMessage={i18n.ALL_CASES} />
-      }
-      headerUnit={i18n.UNIT(data.total)}
-      hideInspect={true}
-      id={'getCasesTable'}
-      itemsPerRow={rowItems}
-      limit={perPage}
-      limitResetsActivePage={false}
-      loading={isLoading}
-      loadPage={newPage => newPage}
-      onChange={onChange}
-      pageOfItems={data.saved_objects}
-      showMorePagesIndicator={false}
-      sorting={sorting}
-      totalCount={data.total}
-      updateActivePage={updateActivePage}
-      updateLimitPagination={updateLimitPagination}
-    />
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <CasesSearchBar />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PaginatedTable
+            activePage={page - 1}
+            columns={getCasesColumns()}
+            headerCount={data.total}
+            headerTitle={
+              <FormattedMessage id="xpack.siem.casesTable.header" defaultMessage={i18n.ALL_CASES} />
+            }
+            headerUnit={i18n.UNIT(data.total)}
+            hideInspect={true}
+            id={'getCasesTable'}
+            itemsPerRow={rowItems}
+            limit={perPage}
+            limitResetsActivePage={false}
+            loading={isLoading}
+            loadPage={newPage => newPage}
+            onChange={onChange}
+            pageOfItems={data.saved_objects}
+            showMorePagesIndicator={false}
+            sorting={sorting}
+            totalCount={data.total}
+            updateActivePage={updateActivePage}
+            updateLimitPagination={updateLimitPagination}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 });
 
