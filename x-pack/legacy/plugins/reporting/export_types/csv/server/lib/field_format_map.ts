@@ -5,6 +5,16 @@
  */
 
 import _ from 'lodash';
+import { FieldFormats } from '../../../../types';
+
+interface IndexPatternSavedObject {
+  attributes: {
+    fieldFormatMap: string;
+  };
+  id: string;
+  type: string;
+  version: string;
+}
 
 /**
  *  Create a map of FieldFormat instances for index pattern fields
@@ -13,10 +23,13 @@ import _ from 'lodash';
  *  @param {FieldFormatsService} fieldFormats
  *  @return {Map} key: field name, value: FieldFormat instance
  */
-export function fieldFormatMapFactory(indexPatternSavedObject, fieldFormats) {
+export function fieldFormatMapFactory(
+  indexPatternSavedObject: IndexPatternSavedObject,
+  fieldFormats: FieldFormats
+) {
   const formatsMap = new Map();
 
-  //Add FieldFormat instances for fields with custom formatters
+  // Add FieldFormat instances for fields with custom formatters
   if (_.has(indexPatternSavedObject, 'attributes.fieldFormatMap')) {
     const fieldFormatMap = JSON.parse(indexPatternSavedObject.attributes.fieldFormatMap);
     Object.keys(fieldFormatMap).forEach(fieldName => {
@@ -28,9 +41,9 @@ export function fieldFormatMapFactory(indexPatternSavedObject, fieldFormats) {
     });
   }
 
-  //Add default FieldFormat instances for all other fields
+  // Add default FieldFormat instances for all other fields
   const indexFields = JSON.parse(_.get(indexPatternSavedObject, 'attributes.fields', '[]'));
-  indexFields.forEach(field => {
+  indexFields.forEach((field: any) => {
     if (!formatsMap.has(field.name)) {
       formatsMap.set(field.name, fieldFormats.getDefaultInstance(field.type));
     }

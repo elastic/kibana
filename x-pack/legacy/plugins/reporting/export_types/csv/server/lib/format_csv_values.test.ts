@@ -5,12 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { createFormatCsvValues } from '../format_csv_values';
+import { createFormatCsvValues } from './format_csv_values';
 
 describe('formatCsvValues', function() {
   const separator = ',';
   const fields = ['foo', 'bar'];
-  const mockEscapeValue = val => val;
+  const mockEscapeValue = (value: any, index: number, array: any[]) => value || '';
   describe('with _source as one of the fields', function() {
     const formatsMap = new Map();
     const formatCsvValues = createFormatCsvValues(
@@ -62,7 +62,7 @@ describe('formatCsvValues', function() {
 
   describe('with field formats', function() {
     const mockFieldFormat = {
-      convert: val => String(val).toUpperCase(),
+      convert: (val: string) => String(val).toUpperCase(),
     };
     const formatsMap = new Map();
     formatsMap.set('bar', mockFieldFormat);

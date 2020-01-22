@@ -5,21 +5,48 @@
  */
 
 import { get } from 'lodash';
+import { ServerFacade, JobSource } from '../../types';
 
 const defaultSize = 10;
 
-export function jobsQueryFactory(server) {
+interface QueryBody {
+  size?: number;
+  from?: number;
+  _source?: {
+    excludes: string[];
+  };
+  query: {
+    constant_score: {
+      filter: {
+        bool: {
+          must: Array<Record<string, any>>;
+        };
+      };
+    };
+  };
+}
+
+interface GetOpts {
+  includeContent?: boolean;
+}
+
+interface CountAggResult {
+  count: number;
+}
+
+export function jobsQueryFactory(server: ServerFacade) {
   const index = server.config().get('xpack.reporting.index');
+  // @ts-ignore `errors` does not exist on type Cluster
   const { callWithInternalUser, errors: esErrors } = server.plugins.elasticsearch.getCluster(
     'admin'
   );
 
-  function getUsername(user) {
+  function getUsername(user: any) {
     return get(user, 'username', false);
   }
 
-  function execQuery(queryType, body) {
-    const defaultBody = {
+  function execQuery(queryType: string, body: QueryBody) {
+    const defaultBody: Record<string, object> = {
       search: {
         _source: {
           excludes: ['output.content'],
@@ -42,15 +69,17 @@ export function jobsQueryFactory(server) {
     });
   }
 
-  function getHits(query) {
+  type Result = number;
+
+  function getHits(query: Promise<Result>) {
     return query.then(res => get(res, 'hits.hits', []));
   }
 
   return {
-    list(jobTypes, user, page = 0, size = defaultSize, jobIds) {
+    list(jobTypes: string[], user: any, page = 0, size = defaultSize, jobIds: string[] | null) {
       const username = getUsername(user);
 
-      const body = {
+      const body: QueryBody = {
         size,
         from: size * page,
         query: {
@@ -73,10 +102,10 @@ export function jobsQueryFactory(server) {
       return getHits(execQuery('search', body));
     },
 
-    count(jobTypes, user) {
+    count(jobTypes: string[], user: any) {
       const username = getUsername(user);
 
-      const body = {
+      const body: QueryBody = {
         query: {
           constant_score: {
             filter: {
@@ -88,18 +117,18 @@ export function jobsQueryFactory(server) {
         },
       };
 
-      return execQuery('count', body).then(doc => {
+      return execQuery('count', body).then((doc: CountAggResult) => {
         if (!doc) return 0;
         return doc.count;
       });
     },
 
-    get(user, id, opts = {}) {
+    get(user: any, id: string, opts: GetOpts = {}): Promise<JobSource<unknown> | void> {
       if (!id) return Promise.resolve();
 
       const username = getUsername(user);
 
-      const body = {
+      const body: QueryBody = {
         query: {
           constant_score: {
             filter: {

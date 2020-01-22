@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { MaxSizeStringBuilder } from '../max_size_string_builder';
+import { MaxSizeStringBuilder } from './max_size_string_builder';
 
 describe('MaxSizeStringBuilder', function() {
   describe('tryAppend', function() {

@@ -5,9 +5,15 @@
  */
 
 import { isObject, isNull, isUndefined } from 'lodash';
+import { RawValue } from './types';
 
-export function createFormatCsvValues(escapeValue, separator, fields, formatsMap) {
-  return function formatCsvValues(values) {
+export function createFormatCsvValues(
+  escapeValue: (value: RawValue, index: number, array: RawValue[]) => string,
+  separator: string,
+  fields: string[],
+  formatsMap: any
+) {
+  return function formatCsvValues(values: Record<string, RawValue>) {
     return fields
       .map(field => {
         let value;
@@ -29,7 +35,7 @@ export function createFormatCsvValues(escapeValue, separator, fields, formatsMap
         return formattedValue;
       })
       .map(value => (isObject(value) ? JSON.stringify(value) : value))
-      .map(value => value.toString())
+      .map(value => (value ? value.toString() : value))
       .map(escapeValue)
       .join(separator);
   };
