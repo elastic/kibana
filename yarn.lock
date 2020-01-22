@@ -4688,13 +4688,6 @@
   dependencies:
     "@types/lodash" "*"
 
-"@types/lodash.intersectionby@^4.7.6":
-  version "4.7.6"
-  resolved "https://registry.yarnpkg.com/@types/lodash.intersectionby/-/lodash.intersectionby-4.7.6.tgz#2eef2e1c90e9d12474350d7185012508c6aa7321"
-  integrity sha512-8/SPmDqdwB2eo5KX6NnKk8rPMbMy9MHHTGRXBHL5YOGQbwYrZzoswI02jQqZqG2i0cq0SXJt78YBwBDcjmZsew==
-  dependencies:
-    "@types/lodash" "*"
-
 "@types/lodash@*", "@types/lodash@^4.14.110", "@types/lodash@^4.14.116":
   version "4.14.137"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.137.tgz#8a4804937dc6462274ffcc088df8f14fc1b368e2"

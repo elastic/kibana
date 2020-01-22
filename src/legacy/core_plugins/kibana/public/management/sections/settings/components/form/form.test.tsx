@@ -18,11 +18,23 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../../../../core/public';
+
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { SettingsChanges } from '../../types';
 import { Form } from './form';
+
+jest.mock('ui/notify', () => ({
+  toastNotifications: {
+    addDanger: () => {},
+    add: jest.fn(),
+  },
+}));
+
+import { toastNotifications } from 'ui/notify';
 
 jest.mock('../field', () => ({
   Field: () => {
@@ -51,49 +63,52 @@ const defaults = {
 const settings = {
   dashboard: [
     {
+      ...defaults,
       name: 'dashboard:test:setting',
       ariaName: 'dashboard test setting',
       displayName: 'Dashboard test setting',
       category: ['dashboard'],
-      ...defaults,
+      requiresPageReload: true,
     },
   ],
   general: [
     {
+      ...defaults,
       name: 'general:test:date',
       ariaName: 'general test date',
       displayName: 'Test date',
       description: 'bar',
       category: ['general'],
-      ...defaults,
     },
     {
+      ...defaults,
       name: 'setting:test',
       ariaName: 'setting test',
       displayName: 'Test setting',
       description: 'foo',
       category: ['general'],
-      ...defaults,
     },
   ],
   'x-pack': [
     {
+      ...defaults,
       name: 'xpack:test:setting',
       ariaName: 'xpack test setting',
       displayName: 'X-Pack test setting',
       category: ['x-pack'],
       description: 'bar',
-      ...defaults,
     },
   ],
 };
+
 const categories = ['general', 'dashboard', 'hiddenCategory', 'x-pack'];
 const categoryCounts = {
   general: 2,
   dashboard: 1,
   'x-pack': 10,
 };
-const save = (changes: SettingsChanges) => Promise.resolve([true]);
+const save = jest.fn((changes: SettingsChanges) => Promise.resolve([true]));
+
 const clearQuery = () => {};
 
 describe('Form', () => {
@@ -159,5 +174,40 @@ describe('Form', () => {
     );
 
     expect(component).toMatchSnapshot();
+  });
+
+  // it('should reset this.state.unsavedChanges to empty object when clicking on the cancel changes button')
+
+  it('should show a reload toast when saving setting requiring a page reload', async () => {
+    const wrapper = mountWithI18nProvider(
+      <Form
+        settings={settings}
+        categories={categories}
+        categoryCounts={categoryCounts}
+        save={save}
+        clearQuery={clearQuery}
+        showNoResultsMessage={true}
+        enableSaving={false}
+      />
+    );
+    (wrapper.instance() as Form).setState({
+      unsavedChanges: {
+        'dashboard:test:setting': {
+          value: 'changedValue',
+        },
+      },
+    });
+    const updated = wrapper.update();
+
+    findTestSubject(updated, `advancedSetting-saveButton`).simulate('click');
+    expect(save).toHaveBeenCalled();
+    await save({ 'dashboard:test:setting': 'changedValue' });
+    expect(toastNotifications.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: expect.stringContaining(
+          'One or more of the saved settings requires a page reload to take effect'
+        ),
+      })
+    );
   });
 });

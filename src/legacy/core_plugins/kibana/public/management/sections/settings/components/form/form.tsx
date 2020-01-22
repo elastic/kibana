@@ -36,6 +36,7 @@ import {
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
+// @ts-ignore
 import intersectionBy from 'lodash.intersectionby';
 import { i18n } from '@kbn/i18n';
 
@@ -334,7 +335,9 @@ export class Form extends PureComponent<FormProps> {
                     defaultMessage: 'Cancel all changes',
                   })}
                 >
-                  Cancel all changes
+                  {i18n.translate('kbn.management.settings.form.cancelButtonLabel', {
+                    defaultMessage: 'Cancel all changes',
+                  })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -350,6 +353,7 @@ export class Form extends PureComponent<FormProps> {
                   }
                 >
                   <EuiButton
+                    className="mgtAdvancedSettingsForm__button"
                     disabled={this.areChangesValid()}
                     color="secondary"
                     fill
@@ -360,8 +364,11 @@ export class Form extends PureComponent<FormProps> {
                       defaultMessage: 'Save changes',
                     })}
                     isLoading={this.state.loading}
+                    data-test-subj="advancedSetting-saveButton"
                   >
-                    Save changes
+                    {i18n.translate('kbn.management.settings.form.saveButtonLabel', {
+                      defaultMessage: 'Save changes',
+                    })}
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>

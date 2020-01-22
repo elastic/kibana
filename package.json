@@ -140,7 +140,6 @@
     "@types/flot": "^0.0.31",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.clonedeep": "^4.5.4",
-    "@types/lodash.intersectionby": "^4.7.6",
     "@types/node-forge": "^0.9.0",
     "@types/react-grid-layout": "^0.16.7",
     "@types/recompose": "^0.30.5",

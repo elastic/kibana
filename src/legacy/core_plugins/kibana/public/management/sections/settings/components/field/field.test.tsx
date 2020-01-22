@@ -20,13 +20,13 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
 import { UiSettingsType, StringValidation } from '../../../../../../../../../core/public';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { Field } from './field';
+import { Field, getEditableValue } from './field';
 
 jest.mock('ui/notify', () => ({
   toastNotifications: {
@@ -34,8 +34,6 @@ jest.mock('ui/notify', () => ({
     add: jest.fn(),
   },
 }));
-
-import { toastNotifications } from 'ui/notify';
 
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
 jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
@@ -174,7 +172,7 @@ const settings: Record<string, FieldSetting> = {
     description: 'Description for String test validation setting',
     type: 'string',
     validation: {
-      regex: new RegExp('/^foo'),
+      regex: new RegExp('^foo'),
       message: 'must start with "foo"',
     },
     value: undefined,
@@ -195,10 +193,22 @@ const userValues = {
   string: 'foo',
   stringWithValidation: 'fooUserValue',
 };
+
 const invalidUserValues = {
   stringWithValidation: 'invalidUserValue',
 };
+
 const handleChange = jest.fn();
+const clearChange = jest.fn();
+
+const getFieldSettingValue = (wrapper: ReactWrapper, name: string, type: string) => {
+  const field = findTestSubject(wrapper, `advancedSetting-editField-${name}`);
+  if (type === 'boolean') {
+    return field.props()['aria-checked'];
+  } else {
+    return field.props().value;
+  }
+};
 
 describe('Field', () => {
   Object.keys(settings).forEach(type => {
@@ -306,207 +316,153 @@ describe('Field', () => {
       });
     }
 
-    // const setup = () => {
-    //   const Wrapper = (props: Record<string, any>) => (
-    //     <I18nProvider>
-    //       <Field setting={setting} handleChange={handleChange} enableSaving={true} {...props} />
-    //     </I18nProvider>
-    //   );
-    //   const wrapper = mount(<Wrapper />);
-    //   const component = wrapper.find(I18nProvider).find(Field);
+    const setup = () => {
+      const Wrapper = (props: Record<string, any>) => (
+        <I18nProvider>
+          <Field
+            setting={setting}
+            clearChange={clearChange}
+            handleChange={handleChange}
+            enableSaving={true}
+            {...props}
+          />
+        </I18nProvider>
+      );
+      const wrapper = mount(<Wrapper />);
+      const component = wrapper.find(I18nProvider).find(Field);
 
-    //   return {
-    //     wrapper,
-    //     component,
-    //   };
-    // };
+      return {
+        wrapper,
+        component,
+      };
+    };
 
-    // if (type === 'image') {
-    //   describe(`for changing ${type} setting`, () => {
-    //     const { wrapper, component } = setup();
-    //     const userValue = userValues[type];
-    //     (component.instance() as Field).getImageAsBase64 = ({}: Blob) => Promise.resolve('');
+    if (type === 'image') {
+      describe(`for changing ${type} setting`, () => {
+        const { wrapper, component } = setup();
+        const userValue = userValues[type];
+        (component.instance() as Field).getImageAsBase64 = ({}: Blob) => Promise.resolve('');
 
-    //     it('should be able to change value from no value and cancel', async () => {
-    //       await (component.instance() as Field).onImageChange([userValue]);
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-    //         'click'
-    //       );
-    //       expect(
-    //         (component.instance() as Field).state.unsavedValue ===
-    //           (component.instance() as Field).state.savedValue
-    //       ).toBe(true);
-    //     });
+        it('should be able to change value and cancel', async () => {
+          (component.instance() as Field).onImageChange([userValue]);
+          expect(handleChange).toBeCalled();
+          await wrapper.setProps({
+            unsavedChanges: {
+              value: userValue,
+              changeImage: true,
+            },
+            setting: {
+              ...(component.instance() as Field).props.setting,
+              value: userValue,
+            },
+          });
+          await (component.instance() as Field).cancelChangeImage();
+          expect(clearChange).toBeCalledWith(setting.name);
+          wrapper.update();
+        });
 
-    //     it('should be able to change value and save', async () => {
-    //       await (component.instance() as Field).onImageChange([userValue]);
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-    //         'click'
-    //       );
-    //       expect(save).toBeCalled();
-    //       component.setState({ savedValue: userValue });
-    //       await wrapper.setProps({
-    //         setting: {
-    //           ...(component.instance() as Field).props.setting,
-    //           value: userValue,
-    //         },
-    //       });
+        it('should be able to change value from existing value', async () => {
+          await wrapper.setProps({
+            unsavedChanges: {},
+          });
+          const updated = wrapper.update();
+          findTestSubject(updated, `advancedSetting-changeImage-${setting.name}`).simulate('click');
+          const newUserValue = `${userValue}=`;
+          await (component.instance() as Field).onImageChange([newUserValue]);
+          expect(handleChange).toBeCalled();
+        });
 
-    //       await (component.instance() as Field).cancelChangeImage();
-    //       wrapper.update();
-    //     });
+        it('should be able to reset to default value', async () => {
+          const updated = wrapper.update();
+          findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
+          expect(handleChange).toBeCalledWith(setting.name, {
+            value: getEditableValue(setting.type, setting.defVal),
+            changeImage: true,
+          });
+        });
+      });
+    } else if (type === 'markdown' || type === 'json') {
+      describe(`for changing ${type} setting`, () => {
+        const { wrapper, component } = setup();
+        const userValue = userValues[type];
 
-    //     it('should be able to change value from existing value and save', async () => {
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-changeImage-${setting.name}`).simulate('click');
+        it('should be able to change value', async () => {
+          (component.instance() as Field).onCodeEditorChange(userValue as UiSettingsType);
+          expect(handleChange).toBeCalledWith(setting.name, { value: userValue });
+          await wrapper.setProps({
+            setting: {
+              ...(component.instance() as Field).props.setting,
+              value: userValue,
+            },
+          });
+          wrapper.update();
+        });
 
-    //       const newUserValue = `${userValue}=`;
-    //       await (component.instance() as Field).onImageChange([newUserValue]);
-    //       const updated2 = wrapper.update();
-    //       findTestSubject(updated2, `advancedSetting-saveEditField-${setting.name}`).simulate(
-    //         'click'
-    //       );
-    //       expect(save).toBeCalled();
-    //       component.setState({ savedValue: newUserValue });
-    //       await wrapper.setProps({
-    //         setting: {
-    //           ...(component.instance() as Field).props.setting,
-    //           value: newUserValue,
-    //         },
-    //       });
-    //       wrapper.update();
-    //     });
+        it('should be able to reset to default value', async () => {
+          const updated = wrapper.update();
+          findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
+          expect(handleChange).toBeCalledWith(setting.name, {
+            value: getEditableValue(setting.type, setting.defVal),
+          });
+        });
 
-    //     it('should be able to reset to default value', async () => {
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
-    //       expect(clear).toBeCalled();
-    //     });
-    //   });
-    // } else if (type === 'markdown' || type === 'json') {
-    //   describe(`for changing ${type} setting`, () => {
-    //     const { wrapper, component } = setup();
-    //     const userValue = userValues[type];
-    //     const fieldUserValue = userValue;
+        if (type === 'json') {
+          it('should be able to clear value and have empty object populate', async () => {
+            await (component.instance() as Field).onCodeEditorChange('' as UiSettingsType);
+            wrapper.update();
+            expect(handleChange).toBeCalledWith(setting.name, { value: setting.defVal });
+          });
+        }
+      });
+    } else {
+      describe(`for changing ${type} setting`, () => {
+        const { wrapper, component } = setup();
+        // @ts-ignore
+        const userValue = userValues[type];
+        const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
 
-    //     it('should be able to change value and cancel', async () => {
-    //       (component.instance() as Field).onCodeEditorChange(fieldUserValue as UiSettingsType);
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-    //         'click'
-    //       );
-    //       expect(
-    //         (component.instance() as Field).state.unsavedValue ===
-    //           (component.instance() as Field).state.savedValue
-    //       ).toBe(true);
-    //     });
+        if (setting.validation) {
+          // @ts-ignore
+          const invalidUserValue = invalidUserValues[type];
+          it('should display an error when validation fails', async () => {
+            await (component.instance() as Field).onFieldChange(invalidUserValue);
+            const expectedUnsavedChanges = {
+              value: invalidUserValue,
+              error: (setting.validation as StringValidation).message,
+              isInvalid: true,
+            };
+            expect(handleChange).toBeCalledWith(setting.name, expectedUnsavedChanges);
+            wrapper.setProps({ unsavedChanges: expectedUnsavedChanges });
+            const updated = wrapper.update();
+            const errorMessage = updated.find('.euiFormErrorText').text();
+            expect(errorMessage).toEqual(expectedUnsavedChanges.error);
+          });
+        }
 
-    //     it('should be able to change value and save', async () => {
-    //       (component.instance() as Field).onCodeEditorChange(fieldUserValue as UiSettingsType);
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-    //         'click'
-    //       );
-    //       expect(save).toBeCalled();
-    //       component.setState({ savedValue: fieldUserValue });
-    //       await wrapper.setProps({
-    //         setting: {
-    //           ...(component.instance() as Field).props.setting,
-    //           value: userValue,
-    //         },
-    //       });
-    //       wrapper.update();
-    //     });
+        it('should be able to change value', async () => {
+          await (component.instance() as Field).onFieldChange(fieldUserValue);
+          const updated = wrapper.update();
+          expect(handleChange).toBeCalledWith(setting.name, { value: fieldUserValue });
+          updated.setProps({ unsavedChanges: { value: fieldUserValue } });
+          const currentValue = getFieldSettingValue(updated, setting.name, type);
+          expect(currentValue).toEqual(fieldUserValue);
+        });
 
-    //     if (type === 'json') {
-    //       it('should be able to clear value and have empty object populate', async () => {
-    //         (component.instance() as Field).onCodeEditorChange('' as UiSettingsType);
-    //         wrapper.update();
-    //         expect((component.instance() as Field).state.unsavedValue).toEqual('{}');
-    //       });
-    //     }
-
-    //     it('should be able to reset to default value', async () => {
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
-    //       expect(clear).toBeCalled();
-    //     });
-    //   });
-    // } else {
-    //   describe(`for changing ${type} setting`, () => {
-    //     const { wrapper, component } = setup();
-    //     // @ts-ignore
-    //     const userValue = userValues[type];
-    //     const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
-
-    //     if (setting.validation) {
-    //       // @ts-ignore
-    //       const invalidUserValue = invalidUserValues[type];
-    //       it('should display an error when validation fails', async () => {
-    //         (component.instance() as Field).onFieldChange(invalidUserValue);
-    //         const updated = wrapper.update();
-    //         const errorMessage = updated.find('.euiFormErrorText').text();
-    //         expect(errorMessage).toEqual((setting.validation as StringValidation).message);
-    //       });
-    //     }
-
-    //     it('should be able to change value and cancel', async () => {
-    //       (component.instance() as Field).onFieldChange(fieldUserValue);
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-cancelEditField-${setting.name}`).simulate(
-    //         'click'
-    //       );
-    //       expect(
-    //         (component.instance() as Field).state.unsavedValue ===
-    //           (component.instance() as Field).state.savedValue
-    //       ).toBe(true);
-    //     });
-
-    //     it('should be able to change value and save', async () => {
-    //       (component.instance() as Field).onFieldChange(fieldUserValue);
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate(
-    //         'click'
-    //       );
-    //       expect(save).toBeCalled();
-    //       component.setState({ savedValue: fieldUserValue });
-    //       await wrapper.setProps({
-    //         setting: {
-    //           ...(component.instance() as Field).props.setting,
-    //           value: userValue,
-    //         },
-    //       });
-    //       wrapper.update();
-    //     });
-
-    //     it('should be able to reset to default value', async () => {
-    //       const updated = wrapper.update();
-    //       findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
-    //       expect(clear).toBeCalled();
-    //     });
-    //   });
-    // }
+        it('should be able to reset to default value', async () => {
+          await wrapper.setProps({
+            unsavedChanges: {},
+            setting: { ...setting, value: fieldUserValue },
+          });
+          const updated = wrapper.update();
+          findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
+          expect(handleChange).toBeCalledWith(setting.name, {
+            value: getEditableValue(setting.type, setting.defVal),
+          });
+          updated.setProps({ unsavedChanges: { value: setting.defVal } });
+          const currentValue = getFieldSettingValue(updated, setting.name, type);
+          expect(currentValue).toEqual(setting.defVal);
+        });
+      });
+    }
   });
-
-  // it('should show a reload toast when saving setting requiring a page reload', async () => {
-  //   const setting = {
-  //     ...settings.string,
-  //     requiresPageReload: true,
-  //   };
-  //   const wrapper = mountWithI18nProvider(
-  //     <Field setting={setting} handleChange={handleChange} enableSaving={true} />
-  //   );
-  //   (wrapper.instance() as Field).onFieldChange({ target: { value: 'a new value' } });
-  //   const updated = wrapper.update();
-  //   findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
-  //   expect(handleChange).toHaveBeenCalled();
-  //   await handleChange();
-  //   expect(toastNotifications.add).toHaveBeenCalledWith(
-  //     expect.objectContaining({
-  //       title: expect.stringContaining('Please reload the page'),
-  //     })
-  //   );
-  // });
 });

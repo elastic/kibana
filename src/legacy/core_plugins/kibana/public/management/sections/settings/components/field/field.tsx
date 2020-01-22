@@ -140,8 +140,7 @@ export class Field extends PureComponent<FieldProps> {
     const { defVal, type } = this.props.setting;
 
     let newUnsavedValue;
-    let isInvalid = false;
-    let error = null;
+    let errorParams = {};
 
     switch (type) {
       case 'json':
@@ -150,10 +149,12 @@ export class Field extends PureComponent<FieldProps> {
         try {
           JSON.parse(newUnsavedValue);
         } catch (e) {
-          isInvalid = true;
-          error = i18n.translate('kbn.management.settings.field.codeEditorSyntaxErrorMessage', {
-            defaultMessage: 'Invalid JSON syntax',
-          });
+          errorParams = {
+            error: i18n.translate('kbn.management.settings.field.codeEditorSyntaxErrorMessage', {
+              defaultMessage: 'Invalid JSON syntax',
+            }),
+            isInvalid: true,
+          };
         }
         break;
       default:
@@ -162,8 +163,7 @@ export class Field extends PureComponent<FieldProps> {
 
     this.handleChange({
       value: newUnsavedValue,
-      error,
-      isInvalid,
+      ...errorParams,
     });
   };
 
@@ -193,20 +193,20 @@ export class Field extends PureComponent<FieldProps> {
         newUnsavedValue = targetValue;
     }
 
-    let isInvalid = false;
-    let error = null;
+    let errorParams = {};
 
-    if (validation && (validation as StringValidationRegex).regex) {
+    if ((validation as StringValidationRegex)?.regex) {
       if (!(validation as StringValidationRegex).regex!.test(newUnsavedValue.toString())) {
-        error = (validation as StringValidationRegex).message;
-        isInvalid = true;
+        errorParams = {
+          error: (validation as StringValidationRegex).message,
+          isInvalid: true,
+        };
       }
     }
 
     this.handleChange({
       value: newUnsavedValue,
-      isInvalid,
-      error,
+      ...errorParams,
     });
   };
 
@@ -226,20 +226,23 @@ export class Field extends PureComponent<FieldProps> {
         base64Image = (await this.getImageAsBase64(file)) as string;
       }
 
+      let errorParams = {};
       const isInvalid = !!(maxSize?.length && base64Image.length > maxSize.length);
+      if (isInvalid) {
+        errorParams = {
+          isInvalid,
+          error: i18n.translate('kbn.management.settings.field.imageTooLargeErrorMessage', {
+            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
+            values: {
+              maxSizeDescription: maxSize.description,
+            },
+          }),
+        };
+      }
       this.handleChange({
         changeImage: true,
         value: base64Image,
-
-        isInvalid,
-        error: isInvalid
-          ? i18n.translate('kbn.management.settings.field.imageTooLargeErrorMessage', {
-              defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-              values: {
-                maxSizeDescription: maxSize.description,
-              },
-            })
-          : null,
+        ...errorParams,
       });
     } catch (err) {
       toastNotifications.addDanger(
@@ -277,8 +280,9 @@ export class Field extends PureComponent<FieldProps> {
       this.changeImageForm.current.fileInput.value = null;
       this.changeImageForm.current.handleChange({});
     }
-
-    this.props.clearChange(this.props.setting.name);
+    if (this.props.clearChange) {
+      this.props.clearChange(this.props.setting.name);
+    }
   };
 
   renderField(setting: FieldSetting) {
