@@ -17,30 +17,8 @@
  * under the License.
  */
 
-import { SearchSource } from '../../../legacy_imports';
-
-export const getSearchSourceMock = (esSearchResponse?: any): SearchSource =>
-  jest.fn().mockImplementation(() => ({
-    setParent: jest.fn(),
-    setField: jest.fn(),
-    fetch: jest.fn().mockResolvedValue(
-      esSearchResponse
-        ? esSearchResponse
-        : {
-            aggregations: {
-              termsAgg: {
-                buckets: [
-                  {
-                    key: 'Zurich Airport',
-                    doc_count: 691,
-                  },
-                  {
-                    key: 'Xi an Xianyang International Airport',
-                    doc_count: 526,
-                  },
-                ],
-              },
-            },
-          }
-    ),
-  }));
+export { getDepsMock } from './get_deps_mock';
+export { getIndexPatternMock } from './get_index_pattern_mock';
+export { getIndexPatternsMock } from './get_index_patterns_mock';
+export { getSearchSourceMock } from './get_search_service_mock';
+export { updateComponent } from './update_component';
