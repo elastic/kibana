@@ -70,9 +70,15 @@ test(`passes browserTimezone to generatePng`, async () => {
 
   const executeJob = executeJobFactory(mockServer, { browserDriverFactory: {} });
   const browserTimezone = 'UTC';
+  const browserLocales = ['de'];
   await executeJob(
     'pngJobId',
-    { relativeUrl: '/app/kibana#/something', browserTimezone, headers: encryptedHeaders },
+    {
+      relativeUrl: '/app/kibana#/something',
+      browserTimezone,
+      browserLocales,
+      headers: encryptedHeaders,
+    },
     cancellationToken
   );
 
@@ -80,6 +86,7 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.any(LevelLogger),
     'http://localhost:5601/sbp/app/kibana#/something',
     browserTimezone,
+    browserLocales,
     expect.anything(),
     undefined
   );
