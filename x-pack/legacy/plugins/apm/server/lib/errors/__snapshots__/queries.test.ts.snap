@@ -240,6 +240,7 @@ Object {
             },
           },
         ],
+        "minimum_should_match": 1,
         "should": Array [
           Object {
             "bool": Object {

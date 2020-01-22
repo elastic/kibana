@@ -30,6 +30,15 @@ Object {
             },
           },
         ],
+        "must_not": Object {
+          "terms": Object {
+            "error.log.level": Array [
+              "debug",
+              "info",
+              "warning",
+            ],
+          },
+        },
         "should": Object {
           "exists": Object {
             "field": "parent.id",
