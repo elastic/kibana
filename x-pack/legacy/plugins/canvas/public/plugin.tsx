@@ -34,8 +34,11 @@ export { CoreStart };
  * @internal
  */
 // This interface will be built out as we require other plugins for setup
-export interface CanvasSetupDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface CanvasSetupDeps {
+  reporting?: {};
+}
 export interface CanvasStartDeps {
+  reporting?: {};
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
@@ -69,10 +72,10 @@ export class CanvasPlugin
       title: 'Canvas App',
       async mount(context, params) {
         // Load application bundle
-        const { renderApp } = await import('./applications/canvas');
+        const { renderApp } = await import('./application');
 
         // Setup our store
-        const canvasStore = await createStore(core);
+        const canvasStore = await createStore(core, plugins);
 
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();

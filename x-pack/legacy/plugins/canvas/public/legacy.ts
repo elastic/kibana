@@ -22,7 +22,10 @@ const shimCoreSetup = {
 const shimCoreStart = {
   ...npStart.core,
 };
-const shimSetupPlugins = {};
+const shimSetupPlugins = {
+  reporting: npSetup.core.injectedMetadata.getInjectedVar('reportingBrowserType') ? {} : undefined,
+};
+
 const shimStartPlugins: CanvasStartDeps = {
   ...npStart.plugins,
   __LEGACY: {

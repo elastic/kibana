@@ -13,8 +13,8 @@ import { Provider } from 'react-redux';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 
 // @ts-ignore Untyped local
-import { App } from '../components/app';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { App } from './components/app';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export const renderApp = (
   coreStart: CoreStart,

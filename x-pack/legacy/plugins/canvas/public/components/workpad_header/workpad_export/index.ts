@@ -10,7 +10,7 @@ import { jobCompletionNotifications } from '../../../../../reporting/public/lib/
 // @ts-ignore Untyped local
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
 // @ts-ignore Untyped local
-import { getReportingBrowserType } from '../../../state/selectors/app';
+import { getHasReporting } from '../../../state/selectors/app';
 // @ts-ignore Untyped local
 import { notify } from '../../../lib/notify';
 import { getWindow } from '../../../lib/get_window';
@@ -34,7 +34,7 @@ const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
   pageCount: getPages(state).length,
-  enabled: getReportingBrowserType(state) === 'chromium',
+  enabled: getHasReporting(state),
 });
 
 const getAbsoluteUrl = (path: string) => {

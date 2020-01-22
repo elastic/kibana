@@ -9,22 +9,22 @@ import { createStore as createReduxStore } from './state/store';
 // @ts-ignore Untyped local
 import { getInitialState } from './state/initial_state';
 
-import { FUNCTIONS_URL } from '../../../../../src/legacy/core_plugins/interpreter/public/canvas/consts';
 import { CoreSetup } from '../../../../../src/core/public';
+import { CanvasSetupDeps } from './plugin';
 
-export async function createStore(core: CoreSetup) {
+export async function createStore(core: CoreSetup, plugins: CanvasSetupDeps) {
   const initialState = getInitialState();
 
   const basePath = core.http.basePath.get();
-  const reportingBrowserType = core.injectedMetadata.getInjectedVar('reportingBrowserType');
+  const hasReporting = !!plugins.reporting;
 
   // Retrieve server functions
-  const serverFunctionsResponse = await core.http.get(FUNCTIONS_URL);
+  const serverFunctionsResponse = await core.http.get(`/api/interpreter/fns`);
   const serverFunctions = Object.values(serverFunctionsResponse);
 
   initialState.app = {
     basePath,
-    reportingBrowserType,
+    hasReporting,
     serverFunctions,
     ready: false,
   };

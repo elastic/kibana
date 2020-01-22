@@ -13,11 +13,10 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     routes(core);
 
-    const { serverFunctions } = plugins.interpreter.register({ serverFunctions: functions });
+    plugins.interpreter.register({ serverFunctions: functions });
 
     core.injectUiAppVars('canvas', async () => {
       const config = core.getServerConfig();
-      const basePath = config.get('server.basePath');
       const reportingBrowserType = (() => {
         const configKey = 'xpack.reporting.capture.browser.type';
         if (!config.has(configKey)) {
@@ -28,9 +27,6 @@ export class Plugin {
 
       return {
         ...plugins.kibana.injectedUiAppVars,
-        kbnIndex: config.get('kibana.index'),
-        serverFunctions: serverFunctions.toArray(),
-        basePath,
         reportingBrowserType,
       };
     });
