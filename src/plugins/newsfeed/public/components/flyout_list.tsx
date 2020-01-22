@@ -34,29 +34,40 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 // eslint-disable-next-line
 import { PulseChannel } from 'src/core/server/pulse/channel';
+// eslint-disable-next-line
+import { NotificationInstruction } from 'src/core/public/pulse/collectors/notifications';
+import moment from 'moment';
 import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
-import { NewsfeedContext } from './newsfeed_header_nav_button';
+import { NewsfeedContext, shouldUpdateHash, getLastItemHash } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
 interface Props {
-  notificationsChannel: PulseChannel;
+  notificationsChannel: PulseChannel<NotificationInstruction>;
 }
 
 export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
+
   if (newsFetchResult && newsFetchResult.feedItems.length) {
-    notificationsChannel.sendPulse(
-      newsFetchResult.feedItems.map(feedItem => {
-        return {
-          hash: feedItem.hash,
-          status: 'seen',
-          seenOn: Date.now(),
-        };
-      })
-    );
+    const lastNotificationHash = getLastItemHash(newsFetchResult.feedItems);
+    const hasNew = newsFetchResult.feedItems.some(item => item.status === 'new');
+    const shouldUpdateResults = hasNew || shouldUpdateHash(lastNotificationHash);
+    if (shouldUpdateResults) {
+      notificationsChannel.sendPulse(
+        newsFetchResult.feedItems.map(feedItem => {
+          return {
+            ...feedItem,
+            publishOn: feedItem.publishOn.format('x'),
+            expireOn: feedItem.expireOn.format('x'),
+            status: 'seen',
+            seenOn: moment().format('x'),
+          };
+        })
+      );
+    }
   }
 
   return (
@@ -91,7 +102,7 @@ export const NewsfeedFlyout = ({ notificationsChannel }: Props) => {
                     <EuiIcon type="popout" size="s" />
                   </EuiLink>
                 }
-                date={item.publishOn.format('DD MMMM YYYY')}
+                date={moment(item.publishOn).format('DD MMMM YYYY')}
                 badge={<EuiBadge color="hollow">{item.badge}</EuiBadge>}
               />
             );

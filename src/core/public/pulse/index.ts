@@ -26,6 +26,10 @@ import { PulseChannel, PulseInstruction } from './channel';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fetcher, sendPulse } from '../../server/pulse/send_pulse';
 
+import * as defaultCollector from './collectors/default';
+import * as notificationsCollector from './collectors/notifications';
+import * as errorsCollector from './collectors/errors';
+
 export interface PulseServiceSetup {
   getChannel: (id: string) => PulseChannel;
 }
@@ -33,7 +37,11 @@ export interface PulseServiceSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PulseServiceStart {}
 
-const channelNames = ['default', 'notifications', 'errors'];
+const regChannels = [
+  { id: 'default', collector: defaultCollector },
+  { id: 'notifications', collector: notificationsCollector },
+  { id: 'errors', collector: errorsCollector },
+];
 
 export class PulseService {
   private retriableErrors = 0;
@@ -42,10 +50,10 @@ export class PulseService {
 
   constructor() {
     this.channels = new Map(
-      channelNames.map((id): [string, PulseChannel] => {
+      regChannels.map(({ id, collector }) => {
         const instructions$ = new Subject<PulseInstruction>();
         this.instructions.set(id, instructions$);
-        const channel = new PulseChannel({ id, instructions$ });
+        const channel = new PulseChannel({ id, instructions$ }, collector);
         return [channel.id, channel];
       })
     );

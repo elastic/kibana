@@ -6,7 +6,7 @@
 
 import { IScopedClusterClient } from 'src/core/server';
 
-export async function check(es: IScopedClusterClient, deploymentId: string) {
+export async function check(es: IScopedClusterClient, { deploymentId }: { deploymentId: string }) {
   const response = await es.callAsInternalUser('search', {
     index: 'pulse-poc-raw*',
     size: 0,

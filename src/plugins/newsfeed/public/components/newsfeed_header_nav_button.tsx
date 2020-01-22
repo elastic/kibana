@@ -21,7 +21,10 @@ import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
 // eslint-disable-next-line
-import { PulseChannel, PulseInstruction } from 'src/core/server/pulse/channel';
+import { PulseChannel } from 'src/core/server/pulse/channel';
+// eslint-disable-next-line
+import { NotificationInstruction } from 'src/core/public/pulse/collectors/notifications';
+import moment from 'moment';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../../types';
 
@@ -35,42 +38,94 @@ export type NewsfeedApiFetchResult = Rx.Observable<void | FetchResult | null>;
 
 export interface Props {
   apiFetchResult: NewsfeedApiFetchResult;
-  notificationsChannel: PulseChannel;
+  notificationsChannel: PulseChannel<NotificationInstruction>;
 }
+
+const NEWSFEED_LAST_HASH = 'pulse_news_last_hash';
+
+export function updateLastHash(lastNotificationHash: string) {
+  sessionStorage.setItem(NEWSFEED_LAST_HASH, lastNotificationHash);
+}
+
+export function shouldUpdateHash(lastNotificationHash: string): boolean {
+  const lastStoredHash: string | null = sessionStorage.getItem(NEWSFEED_LAST_HASH);
+  if (lastStoredHash !== lastNotificationHash) {
+    return true;
+  }
+  return false;
+}
+
+export function getLastItemHash(instructions: Array<{ hash: string }>) {
+  return instructions[instructions.length - 1].hash;
+}
+/**
+window.notificationsChannel.sendPulse([{
+  "hash": "test_hash",
+  "title": "Some error fixed in 8.0.1",
+  "description": "The error you have encountered on jan 3rd has been fixed in the upcoming 8.0.1 release. Thanks for reporting!",
+  "linkUrl": "https://www.youtube.com/watch?v=oHg5SJYRHA0",
+  "linkText": "Link to github issue",
+  "badge": null,
+  "publishOn": moment().format('x'),
+  "expireOn": moment().add(1, 'days').format('x'),
+  "status": "new",
+}])
+*/
+
+// on every fresh page reload, fetch news all over again.
+updateLastHash('');
 
 export const NewsfeedNavButton = ({ apiFetchResult, notificationsChannel }: Props) => {
   const [showBadge, setShowBadge] = useState<boolean>(false);
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
-
+  // hack to test updating news;
+  (window as any).moment = moment;
+  (window as any).notificationsChannel = notificationsChannel;
   // Pulse notifications
   const notificationsInstructions$ = notificationsChannel.instructions$();
   useEffect(() => {
-    function handleStatusChange(pulseInstruction: PulseInstruction) {
-      // console.log('pulseInstruction::', pulseInstruction);
-      // if (pulseInstruction) {
-      //   setShowBadge(fetchResult.hasNew);
-      // }
-      // setNewsFetchResult(fetchResult);
+    function handleStatusChange(instructions: NotificationInstruction[]) {
+      const lastNotificationHash = getLastItemHash(instructions);
+      const hasNew = instructions.some(instruction => instruction.status === 'new');
+      const shouldUpdateResults = hasNew || shouldUpdateHash(lastNotificationHash);
+      if (shouldUpdateResults) {
+        if (hasNew) {
+          setShowBadge(hasNew);
+        }
+        updateLastHash(lastNotificationHash);
+        setNewsFetchResult({
+          hasNew,
+          feedItems: instructions.map(instruction => ({
+            ...instruction,
+            publishOn: moment(instruction.publishOn, 'x'),
+            expireOn: moment(instruction.expireOn, 'x'),
+          })),
+          kibanaVersion: '8.0.0',
+          error: null,
+        });
+      }
     }
 
-    const subscription = notificationsInstructions$.subscribe(instruction =>
-      handleStatusChange(instruction)
+    const subscription = notificationsInstructions$.subscribe(instructions =>
+      handleStatusChange(instructions)
     );
     return () => subscription.unsubscribe();
   }, [notificationsInstructions$]);
 
-  useEffect(() => {
-    function handleStatusChange(fetchResult: FetchResult | void | null) {
-      if (fetchResult) {
-        setShowBadge(fetchResult.hasNew);
-      }
-      setNewsFetchResult(fetchResult);
-    }
+  // FOR THE POC: JUST USE PULSE AS THE SOURCE OF TRUTH FOR NEWS!
+  // useEffect(() => {
+  //   function handleStatusChange(fetchResult: FetchResult | void | null) {
+  //     if (fetchResult) {
+  //       setShowBadge(fetchResult.hasNew);
+  //     }
+  //     console.log('fetchResult::', fetchResult)
+  //     setNewsFetchResult(fetchResult);
+  //   }
 
-    const subscription = apiFetchResult.subscribe(res => handleStatusChange(res));
-    return () => subscription.unsubscribe();
-  }, [apiFetchResult]);
+  //   const subscription = apiFetchResult.subscribe(res => handleStatusChange(res));
+  //   return () => subscription.unsubscribe();
+  // }, [apiFetchResult]);
 
   function showFlyout() {
     setShowBadge(false);

@@ -78,6 +78,9 @@ export class PulsePocPlugin {
                 properties: {
                   channel_id: { type: 'keyword' },
                   deployment_id: { type: 'keyword' },
+                  timestamp: { type: 'date' },
+                  // newsfeed specific mapping
+                  publishOn: { type: 'date' },
                 },
               },
             };
@@ -91,8 +94,10 @@ export class PulsePocPlugin {
           for (const record of channel.records) {
             await es.callAsInternalUser('index', {
               index,
+              id: record.hash,
               body: {
                 ...record,
+                timestamp: new Date(),
                 channel_id: channel.channel_id,
                 deployment_id: deploymentId,
               },

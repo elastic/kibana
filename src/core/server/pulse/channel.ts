@@ -25,16 +25,16 @@ export interface PulseInstruction {
   value: unknown;
 }
 
-interface ChannelConfig {
+interface ChannelConfig<I = PulseInstruction> {
   id: string;
-  instructions$: Subject<PulseInstruction>;
+  instructions$: Subject<I[]>;
 }
 
-export class PulseChannel {
+export class PulseChannel<I = PulseInstruction> {
   public readonly getRecords: () => Promise<Record<string, any>>;
   private readonly collector: any;
-  constructor(private readonly config: ChannelConfig) {
-    this.collector = require(`${__dirname}/collectors/${this.id}`);
+  constructor(private readonly config: ChannelConfig<I>, collector?: any) {
+    this.collector = collector || require(`${__dirname}/collectors/${this.id}`);
     this.getRecords = this.collector.getRecords;
   }
 
@@ -47,6 +47,12 @@ export class PulseChannel {
       throw Error(`this.collector.putRecord not implemented for ${this.id}.`);
     }
     this.collector.putRecord(payload);
+  }
+
+  public clearRecords(ids: string[]) {
+    if (this.collector.clearRecords) {
+      this.collector.clearRecords(ids);
+    }
   }
 
   public instructions$() {

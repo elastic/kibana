@@ -17,6 +17,49 @@
  * under the License.
  */
 
+export type Payload = Exclude<
+  NotificationInstruction,
+  'channel_id' | 'deployment_id' | 'timestamp'
+>;
+
+export interface NotificationInstruction {
+  hash: string;
+  timestamp: number;
+  channel_id: string;
+  deployment_id: string;
+  title: string;
+  status: 'new' | 'seen';
+  description: string;
+  linkUrl: string;
+  linkText: string;
+  badge: string;
+  publishOn: string;
+  expireOn: string;
+  seenOn: string;
+}
+
+const records = new Map();
+
+export async function putRecord(entry: Payload | Payload[]) {
+  const payloads = Array.isArray(entry) ? entry : [entry];
+  payloads.forEach(payload => {
+    if (!payload.hash) {
+      throw Error(`notification payload does not contain hash: ${JSON.stringify(payload)}.`);
+    }
+    records.set(payload.hash, {
+      ...payload,
+      channel_id: 'notifications',
+      deployment_id: '123',
+    });
+  });
+}
+
 export async function getRecords() {
-  return [{}];
+  return [...records.values()];
+}
+
+export async function clearRecords(ids: string[]) {
+  for (const id of ids) {
+    records.delete(id);
+  }
 }
