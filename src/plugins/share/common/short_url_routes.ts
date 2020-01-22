@@ -17,4 +17,15 @@
  * under the License.
  */
 
-export { urlShorteningMixin } from './url_shortening_mixin';
+export const GOTO_PREFIX = '/goto';
+
+export const getUrlIdFromGotoRoute = (path: string) =>
+  path.match(new RegExp(`${GOTO_PREFIX}/(.*)$`))?.[1];
+
+export const getGotoPath = (urlId: string) => `${GOTO_PREFIX}/${urlId}`;
+
+export const GETTER_PREFIX = '/api/short_url';
+
+export const getUrlPath = (urlId: string) => `${GETTER_PREFIX}/${urlId}`;
+
+export const CREATE_PATH = '/api/shorten_url';
