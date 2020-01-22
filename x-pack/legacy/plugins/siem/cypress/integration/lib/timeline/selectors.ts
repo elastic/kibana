@@ -7,6 +7,9 @@
 /** A data provider rendered in the timeline's data providers drop area */
 export const DATA_PROVIDER = '[data-test-subj="providerContainer"]';
 
+export const TIMELINE_FIELDS_BUTTON =
+  '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
+
 /** Data providers are dropped and rendered in this area of the timeline */
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
