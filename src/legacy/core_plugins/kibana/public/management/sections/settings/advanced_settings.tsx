@@ -40,7 +40,7 @@ import {
 import { getSettingsComponent } from './components/component_registry';
 
 interface AdvancedSettingsProps {
-  query: string;
+  queryText: string;
   enableSaving: boolean;
 }
 
@@ -61,8 +61,8 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   constructor(props: AdvancedSettingsProps) {
     super(props);
-    const { query } = this.props;
-    const parsedQuery = Query.parse(query ? `ariaName:"${getAriaName(query)}"` : '');
+    const { queryText } = this.props;
+    const parsedQuery = Query.parse(queryText ? `ariaName:"${getAriaName(queryText)}"` : '');
 
     this.config = npStart.core.uiSettings;
     this.settings = this.initSettings(this.config);

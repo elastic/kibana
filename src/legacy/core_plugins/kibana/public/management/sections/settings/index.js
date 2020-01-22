@@ -67,7 +67,7 @@ uiModules.get('apps/management').directive('kbnManagementAdvanced', function($ro
 const AdvancedSettingsApp = ({ query = '' }) => {
   return (
     <I18nContext>
-      <AdvancedSettings query={query} enableSaving={capabilities.get().advancedSettings.save} />
+      <AdvancedSettings queryText={query} enableSaving={capabilities.get().advancedSettings.save} />
     </I18nContext>
   );
 };
