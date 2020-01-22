@@ -17,26 +17,15 @@
  * under the License.
  */
 
-module.exports = function(grunt) {
-  grunt.registerTask('jenkins:docs', ['docker:docs']);
+export const LOCKFILE_GLOBS = ['**/yarn.lock'];
 
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:sasslint',
-    'run:checkTsProjects',
-    'run:checkCoreApiChanges',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'run:checkLockfileSymlinks',
-    'run:licenses',
-    'run:verifyDependencyVersions',
-    'run:verifyNotice',
-    'run:mocha',
-    'run:test_jest',
-    'run:test_jest_integration',
-    'run:test_projects',
-    'run:test_browser_ci',
-    'run:apiIntegrationTests',
-  ]);
-};
+export const MANIFEST_GLOBS = ['**/package.json'];
+
+export const IGNORE_FILE_GLOBS = [
+  // tests aren't used in production, ignore them
+  '**/test/**/*',
+  // fixtures aren't used in production, ignore them
+  '**/*fixtures*/**/*',
+  // cypress isn't used in production, ignore it
+  'x-pack/legacy/plugins/apm/cypress/*',
+];
