@@ -35,6 +35,13 @@ import {
 } from './routes';
 import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
 import { LicenseState } from './lib/license_state';
+import { IEventLogger } from '../../../../plugins/event_log/server';
+
+const EVENT_LOG_PROVIDER = 'actions';
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeViaHttp: 'execute-via-http',
+};
 
 export interface PluginSetupContract {
   registerType: ActionTypeRegistry['register'];
@@ -57,6 +64,7 @@ export class Plugin {
   private actionExecutor?: ActionExecutor;
   private defaultKibanaIndex?: string;
   private licenseState: LicenseState | null = null;
+  private eventLogger?: IEventLogger;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'actions');
@@ -69,7 +77,7 @@ export class Plugin {
     plugins: ActionsPluginsSetup
   ): Promise<PluginSetupContract> {
     const config = await this.config$.pipe(first()).toPromise();
-    this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+    this.adminClient = core.elasticsearch.adminClient;
     this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
     this.licenseState = new LicenseState(plugins.licensing.license$);
@@ -88,12 +96,17 @@ export class Plugin {
       attributesToEncrypt: new Set(['apiKey']),
     });
 
+    plugins.event_log.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.event_log.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
+    });
+
     const actionExecutor = new ActionExecutor();
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
     const actionsConfigUtils = getActionsConfigurationUtilities(config as ActionsConfigType);
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       actionsConfigUtils,
     });
     this.taskRunnerFactory = taskRunnerFactory;
@@ -156,6 +169,7 @@ export class Plugin {
       getServices,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       actionTypeRegistry: actionTypeRegistry!,
+      eventLogger: this.eventLogger!,
     });
     taskRunnerFactory!.initialize({
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
@@ -164,7 +178,7 @@ export class Plugin {
     });
 
     const executeFn = createExecuteFunction({
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       getScopedSavedObjectsClient: core.savedObjects.getScopedSavedObjectsClient,
       getBasePath,
     });

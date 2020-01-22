@@ -282,7 +282,7 @@ describe('IndexPattern Data Panel', () => {
         const parts = url.split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
-          indexPatternTitle,
+          indexPatternTitle: `${indexPatternTitle}_testtitle`,
           existingFieldNames: ['field_1', 'field_2'].map(
             fieldName => `${indexPatternTitle}_${fieldName}`
           ),
@@ -352,9 +352,9 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a_testtitle: {
+          a_field_1: true,
+          a_field_2: true,
         },
       });
     });
@@ -369,13 +369,13 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a_testtitle: {
+          a_field_1: true,
+          a_field_2: true,
         },
-        bbb: {
-          bbb_field_1: true,
-          bbb_field_2: true,
+        b_testtitle: {
+          b_field_1: true,
+          b_field_2: true,
         },
       });
     });
@@ -397,7 +397,7 @@ describe('IndexPattern Data Panel', () => {
       expect(setState).toHaveBeenCalledTimes(2);
       expect(core.http.get).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -405,7 +405,7 @@ describe('IndexPattern Data Panel', () => {
         },
       });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-02',
@@ -418,9 +418,9 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a_testtitle: {
+          a_field_1: true,
+          a_field_2: true,
         },
       });
     });
@@ -436,7 +436,7 @@ describe('IndexPattern Data Panel', () => {
 
       expect(setState).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/aaa', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -444,7 +444,7 @@ describe('IndexPattern Data Panel', () => {
         },
       });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/bbb', {
+      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/b', {
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -457,13 +457,13 @@ describe('IndexPattern Data Panel', () => {
       });
 
       expect(nextState.existingFields).toEqual({
-        aaa: {
-          aaa_field_1: true,
-          aaa_field_2: true,
+        a_testtitle: {
+          a_field_1: true,
+          a_field_2: true,
         },
-        bbb: {
-          bbb_field_1: true,
-          bbb_field_2: true,
+        b_testtitle: {
+          b_field_1: true,
+          b_field_2: true,
         },
       });
     });

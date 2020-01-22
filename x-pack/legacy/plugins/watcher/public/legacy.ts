@@ -43,6 +43,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
               app.mount(npStart as any, {
                 element: elem,
                 appBasePath: '/management/elasticsearch/watcher/',
+                onAppLeave: () => undefined,
               });
           },
         },

@@ -8,15 +8,22 @@ import { pick, mapValues, omit } from 'lodash';
 import { Logger } from '../../../../../../src/core/server';
 import { SavedObject } from '../../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance } from '../../../task_manager';
+import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
-import { AlertType, RawAlert, IntervalSchedule, Services, State } from '../types';
-import { promiseResult, map } from '../lib/result_type';
+import { AlertType, RawAlert, IntervalSchedule, Services, State, AlertInfoParams } from '../types';
+import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 
 type AlertInstances = Record<string, AlertInstance>;
+
+const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
+
+interface AlertTaskRunResult {
+  state: State;
+  runAt: Date;
+}
 
 export class TaskRunner {
   private context: TaskRunnerContext;
@@ -118,13 +125,25 @@ export class TaskRunner {
 
   async executeAlertInstances(
     services: Services,
-    { params, throttle, muteAll, mutedInstanceIds }: SavedObject['attributes'],
-    executionHandler: ReturnType<typeof createExecutionHandler>
+    alertInfoParams: AlertInfoParams,
+    executionHandler: ReturnType<typeof createExecutionHandler>,
+    spaceId: string
   ): Promise<State> {
+    const {
+      params,
+      throttle,
+      muteAll,
+      mutedInstanceIds,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
+    } = alertInfoParams;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
+    const namespace = this.context.spaceIdToNamespace(spaceId);
 
     const alertInstances = mapValues<AlertInstances>(
       alertRawInstances,
@@ -140,7 +159,13 @@ export class TaskRunner {
       params,
       state: alertTypeState,
       startedAt: this.taskInstance.startedAt!,
-      previousStartedAt,
+      previousStartedAt: previousStartedAt && new Date(previousStartedAt),
+      spaceId,
+      namespace,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
     });
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -172,10 +197,10 @@ export class TaskRunner {
     };
   }
 
-  async validateAndRunAlert(
+  async validateAndExecuteAlert(
     services: Services,
     apiKey: string | null,
-    attributes: SavedObject['attributes'],
+    attributes: RawAlert,
     references: SavedObject['references']
   ) {
     const {
@@ -191,14 +216,17 @@ export class TaskRunner {
       attributes.actions,
       references
     );
-    return this.executeAlertInstances(services, { ...attributes, params }, executionHandler);
+    return this.executeAlertInstances(
+      services,
+      { ...attributes, params },
+      executionHandler,
+      spaceId
+    );
   }
 
-  async run() {
+  async loadAlertAttributesAndRun(): Promise<Resultable<AlertTaskRunResult, Error>> {
     const {
       params: { alertId, spaceId },
-      startedAt: previousStartedAt,
-      state: originalState,
     } = this.taskInstance;
 
     const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
@@ -211,10 +239,33 @@ export class TaskRunner {
     );
 
     return {
+      state: await promiseResult<State, Error>(
+        this.validateAndExecuteAlert(services, apiKey, attributes, references)
+      ),
+      runAt: asOk(
+        getNextRunAt(
+          new Date(this.taskInstance.startedAt!),
+          // we do not currently have a good way of returning the type
+          // from SavedObjectsClient, and as we currenrtly require a schedule
+          // and we only support `interval`, we can cast this safely
+          attributes.schedule as IntervalSchedule
+        )
+      ),
+    };
+  }
+
+  async run(): Promise<AlertTaskRunResult> {
+    const {
+      params: { alertId },
+      startedAt: previousStartedAt,
+      state: originalState,
+    } = this.taskInstance;
+
+    const { state, runAt } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
+
+    return {
       state: map<State, Error, State>(
-        await promiseResult<State, Error>(
-          this.validateAndRunAlert(services, apiKey, attributes, references)
-        ),
+        state,
         (stateUpdates: State) => {
           return {
             ...stateUpdates,
@@ -229,13 +280,32 @@ export class TaskRunner {
           };
         }
       ),
-      runAt: getNextRunAt(
-        new Date(this.taskInstance.startedAt!),
-        // we do not currently have a good way of returning the type
-        // from SavedObjectsClient, and as we currenrtly require a schedule
-        // and we only support `interval`, we can cast this safely
-        attributes.schedule as IntervalSchedule
+      runAt: resolveErr<Date, Error>(runAt, () =>
+        getNextRunAt(
+          new Date(),
+          // if we fail at this point we wish to recover but don't have access to the Alert's
+          // attributes, so we'll use a default interval to prevent the underlying task from
+          // falling into a failed state
+          FALLBACK_RETRY_INTERVAL
+        )
       ),
+    };
+  }
+}
+
+/**
+ * If an error is thrown, wrap it in an AlertTaskRunResult
+ * so that we can treat each field independantly
+ */
+async function errorAsAlertTaskRunResult(
+  future: Promise<Resultable<AlertTaskRunResult, Error>>
+): Promise<Resultable<AlertTaskRunResult, Error>> {
+  try {
+    return await future;
+  } catch (e) {
+    return {
+      state: asErr(e),
+      runAt: asErr(e),
     };
   }
 }

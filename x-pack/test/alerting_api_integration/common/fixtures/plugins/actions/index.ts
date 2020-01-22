@@ -6,16 +6,18 @@
 import Hapi from 'hapi';
 import { ActionType } from '../../../../../../legacy/plugins/actions';
 
+import { initPlugin as initPagerduty } from './pagerduty_simulation';
+import { initPlugin as initServiceNow } from './servicenow_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
-import { initPlugin as initPagerduty } from './pagerduty_simulation';
 
 const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
+  PAGERDUTY = 'pagerduty',
+  SERVICENOW = 'servicenow',
   SLACK = 'slack',
   WEBHOOK = 'webhook',
-  PAGERDUTY = 'pagerduty',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
@@ -23,9 +25,11 @@ export function getExternalServiceSimulatorPath(service: ExternalServiceSimulato
 }
 
 export function getAllExternalServiceSimulatorPaths(): string[] {
-  return Object.values(ExternalServiceSimulator).map(service =>
+  const allPaths = Object.values(ExternalServiceSimulator).map(service =>
     getExternalServiceSimulatorPath(service)
   );
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v1/table/incident`);
+  return allPaths;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -67,9 +71,10 @@ export default function(kibana: any) {
         },
       });
 
+      initPagerduty(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
+      initServiceNow(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
       initSlack(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
       initWebhook(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK));
-      initPagerduty(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     },
   });
 }

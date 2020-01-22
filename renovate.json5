@@ -211,6 +211,14 @@
         ],
       },
       {
+        groupSlug: 'deep-freeze-strict',
+        groupName: 'deep-freeze-strict related packages',
+        packageNames: [
+          'deep-freeze-strict',
+          '@types/deep-freeze-strict',
+        ],
+      },
+      {
         groupSlug: 'delete-empty',
         groupName: 'delete-empty related packages',
         packageNames: [
@@ -271,6 +279,14 @@
         packageNames: [
           'file-saver',
           '@types/file-saver',
+        ],
+      },
+      {
+        groupSlug: 'flot',
+        groupName: 'flot related packages',
+        packageNames: [
+          'flot',
+          '@types/flot',
         ],
       },
       {
@@ -626,11 +642,27 @@
         ],
       },
       {
+        groupSlug: 'node-forge',
+        groupName: 'node-forge related packages',
+        packageNames: [
+          'node-forge',
+          '@types/node-forge',
+        ],
+      },
+      {
         groupSlug: 'nodemailer',
         groupName: 'nodemailer related packages',
         packageNames: [
           'nodemailer',
           '@types/nodemailer',
+        ],
+      },
+      {
+        groupSlug: 'numeral',
+        groupName: 'numeral related packages',
+        packageNames: [
+          'numeral',
+          '@types/numeral',
         ],
       },
       {
@@ -671,6 +703,14 @@
         packageNames: [
           'parse-link-header',
           '@types/parse-link-header',
+        ],
+      },
+      {
+        groupSlug: 'pegjs',
+        groupName: 'pegjs related packages',
+        packageNames: [
+          'pegjs',
+          '@types/pegjs',
         ],
       },
       {

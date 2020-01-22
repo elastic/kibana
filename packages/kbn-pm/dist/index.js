@@ -4489,6 +4489,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = __webpack_require__(36);
 var proc_runner_1 = __webpack_require__(37);
 exports.withProcRunner = proc_runner_1.withProcRunner;
+exports.ProcRunner = proc_runner_1.ProcRunner;
 var tooling_log_1 = __webpack_require__(415);
 exports.ToolingLog = tooling_log_1.ToolingLog;
 exports.ToolingLogTextWriter = tooling_log_1.ToolingLogTextWriter;
@@ -4500,6 +4501,14 @@ var certs_1 = __webpack_require__(422);
 exports.CA_CERT_PATH = certs_1.CA_CERT_PATH;
 exports.ES_KEY_PATH = certs_1.ES_KEY_PATH;
 exports.ES_CERT_PATH = certs_1.ES_CERT_PATH;
+exports.ES_P12_PATH = certs_1.ES_P12_PATH;
+exports.ES_P12_PASSWORD = certs_1.ES_P12_PASSWORD;
+exports.ES_EMPTYPASSWORD_P12_PATH = certs_1.ES_EMPTYPASSWORD_P12_PATH;
+exports.ES_NOPASSWORD_P12_PATH = certs_1.ES_NOPASSWORD_P12_PATH;
+exports.KBN_KEY_PATH = certs_1.KBN_KEY_PATH;
+exports.KBN_CERT_PATH = certs_1.KBN_CERT_PATH;
+exports.KBN_P12_PATH = certs_1.KBN_P12_PATH;
+exports.KBN_P12_PASSWORD = certs_1.KBN_P12_PASSWORD;
 var run_1 = __webpack_require__(423);
 exports.run = run_1.run;
 exports.createFailError = run_1.createFailError;
@@ -4753,6 +4762,8 @@ function __importDefault(mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var with_proc_runner_1 = __webpack_require__(38);
 exports.withProcRunner = with_proc_runner_1.withProcRunner;
+var proc_runner_1 = __webpack_require__(39);
+exports.ProcRunner = proc_runner_1.ProcRunner;
 
 
 /***/ }),
@@ -36986,6 +36997,14 @@ const path_1 = __webpack_require__(16);
 exports.CA_CERT_PATH = path_1.resolve(__dirname, '../certs/ca.crt');
 exports.ES_KEY_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.key');
 exports.ES_CERT_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.crt');
+exports.ES_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch.p12');
+exports.ES_P12_PASSWORD = 'storepass';
+exports.ES_EMPTYPASSWORD_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch_emptypassword.p12');
+exports.ES_NOPASSWORD_P12_PATH = path_1.resolve(__dirname, '../certs/elasticsearch_nopassword.p12');
+exports.KBN_KEY_PATH = path_1.resolve(__dirname, '../certs/kibana.key');
+exports.KBN_CERT_PATH = path_1.resolve(__dirname, '../certs/kibana.crt');
+exports.KBN_P12_PATH = path_1.resolve(__dirname, '../certs/kibana.p12');
+exports.KBN_P12_PASSWORD = 'storepass';
 
 
 /***/ }),
@@ -37053,6 +37072,7 @@ const exit_hook_1 = tslib_1.__importDefault(__webpack_require__(348));
 const tooling_log_1 = __webpack_require__(415);
 const fail_1 = __webpack_require__(425);
 const flags_1 = __webpack_require__(426);
+const proc_runner_1 = __webpack_require__(37);
 async function run(fn, options = {}) {
     var _a;
     const flags = flags_1.getFlags(process.argv.slice(2), options);
@@ -37102,10 +37122,13 @@ async function run(fn, options = {}) {
             throw fail_1.createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
         }
         try {
-            await fn({
-                log,
-                flags,
-                addCleanupTask: (task) => cleanupTasks.push(task),
+            await proc_runner_1.withProcRunner(log, async (procRunner) => {
+                await fn({
+                    log,
+                    flags,
+                    procRunner,
+                    addCleanupTask: (task) => cleanupTasks.push(task),
+                });
             });
         }
         finally {
@@ -58252,6 +58275,7 @@ function getProjectPaths({
 
   if (!ossOnly) {
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/plugins/*'));
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/legacy/plugins/*'));
   }
 

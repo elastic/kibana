@@ -18,6 +18,8 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
+import * as autocomplete from './autocomplete';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
 }
@@ -49,11 +51,6 @@ export {
   TimeRange,
 } from '../common';
 
-/**
- * Static code to be shared externally
- * @public
- */
-export * from './autocomplete_provider';
 export * from './field_formats_provider';
 export * from './index_patterns';
 export * from './search';
@@ -90,8 +87,12 @@ export {
   castEsToKbnFieldTypeName,
   getKbnFieldType,
   getKbnTypeNames,
+  // utils
+  parseInterval,
 } from '../common';
 
 // Export plugin after all other imports
 import { DataPublicPlugin } from './plugin';
 export { DataPublicPlugin as Plugin };
+
+export { autocomplete };

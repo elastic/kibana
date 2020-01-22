@@ -152,6 +152,7 @@ module.exports = function(grunt) {
       args: [
         'nyc',
         '--reporter=html',
+        '--reporter=json-summary',
         '--report-dir=./target/kibana-coverage/mocha',
         NODE,
         'scripts/mocha',

@@ -22,8 +22,15 @@ export function subscribeResizeChecker(el: HTMLElement, ...editors: any[]) {
   const checker = new ResizeChecker(el);
   checker.on('resize', () =>
     editors.forEach(e => {
-      e.resize();
-      if (e.updateActionsBar) e.updateActionsBar();
+      if (e.getCoreEditor) {
+        e.getCoreEditor().resize();
+      } else {
+        e.resize();
+      }
+
+      if (e.updateActionsBar) {
+        e.updateActionsBar();
+      }
     })
   );
   return () => checker.destroy();

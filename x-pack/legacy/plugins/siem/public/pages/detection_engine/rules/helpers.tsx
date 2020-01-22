@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick } from 'lodash/fp';
+import { get, pick } from 'lodash/fp';
+import { useLocation } from 'react-router-dom';
 
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
+import { FormData, FormHook, FormSchema } from './components/shared_imports';
 import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
 
 interface GetStepsData {
@@ -33,7 +35,6 @@ export const getStepsData = ({
             filters: rule.filters as esFilters.Filter[],
             saved_id: rule.saved_id ?? null,
           },
-          useIndicesConfig: 'true',
         }
       : null;
   const aboutRuleData: AboutStepRule | null =
@@ -45,6 +46,10 @@ export const getStepsData = ({
           threats: rule.threats as IMitreEnterpriseAttack[],
           falsePositives: rule.false_positives,
           riskScore: rule.risk_score,
+          timeline: {
+            id: rule.timeline_id ?? null,
+            title: rule.timeline_title ?? null,
+          },
         }
       : null;
   const scheduleRuleData: ScheduleStepRule | null =
@@ -61,3 +66,63 @@ export const getStepsData = ({
 
   return { aboutRuleData, defineRuleData, scheduleRuleData };
 };
+
+export const useQuery = () => new URLSearchParams(useLocation().search);
+
+export type PrePackagedRuleStatus =
+  | 'ruleInstalled'
+  | 'ruleNotInstalled'
+  | 'ruleNeedUpdate'
+  | 'someRuleUninstall'
+  | 'unknown';
+
+export const getPrePackagedRuleStatus = (
+  rulesInstalled: number | null,
+  rulesNotInstalled: number | null,
+  rulesNotUpdated: number | null
+): PrePackagedRuleStatus => {
+  if (
+    rulesNotInstalled != null &&
+    rulesInstalled === 0 &&
+    rulesNotInstalled > 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'ruleNotInstalled';
+  } else if (
+    rulesInstalled != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled === 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'ruleInstalled';
+  } else if (
+    rulesInstalled != null &&
+    rulesNotInstalled != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled > 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'someRuleUninstall';
+  } else if (
+    rulesInstalled != null &&
+    rulesNotInstalled != null &&
+    rulesNotUpdated != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled >= 0 &&
+    rulesNotUpdated > 0
+  ) {
+    return 'ruleNeedUpdate';
+  }
+  return 'unknown';
+};
+export const setFieldValue = (
+  form: FormHook<FormData>,
+  schema: FormSchema<FormData>,
+  defaultValues: unknown
+) =>
+  Object.keys(schema).forEach(key => {
+    const val = get(key, defaultValues);
+    if (val != null) {
+      form.setFieldValue(key, val);
+    }
+  });

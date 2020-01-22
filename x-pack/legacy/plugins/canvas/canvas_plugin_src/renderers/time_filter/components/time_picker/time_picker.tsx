@@ -11,7 +11,7 @@ import { EuiButton } from '@elastic/eui';
 import moment from 'moment';
 import { DatetimeQuickList } from '../datetime_quick_list';
 import { DatetimeRangeAbsolute } from '../datetime_range_absolute';
-import { ComponentStrings } from '../../../../../i18n';
+import { ComponentStrings } from '../../../../../i18n/components';
 
 const { TimePicker: strings } = ComponentStrings;
 

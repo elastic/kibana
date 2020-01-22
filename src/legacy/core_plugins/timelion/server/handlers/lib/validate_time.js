@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
-import toMS from '../../lib/to_milliseconds.js';
+import { toMS } from '../../../../vis_type_timelion/common/lib';
 
 export default function validateTime(time, tlConfig) {
   const span = moment.duration(moment(time.to).diff(moment(time.from))).asMilliseconds();

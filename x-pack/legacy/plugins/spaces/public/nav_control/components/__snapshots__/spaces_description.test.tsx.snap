@@ -4,6 +4,7 @@ exports[`SpacesDescription renders without crashing 1`] = `
 <EuiContextMenuPanel
   className="spcDescription"
   hasFocus={true}
+  id="foo"
   items={Array []}
   title="Spaces"
 >

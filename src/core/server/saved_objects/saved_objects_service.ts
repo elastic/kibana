@@ -29,7 +29,7 @@ import {
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy';
-import { ElasticsearchServiceSetup, APICaller } from '../elasticsearch';
+import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
@@ -174,7 +174,7 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
 /** @internal */
 export interface SavedObjectsSetupDeps {
   legacyPlugins: LegacyServiceDiscoverPlugins;
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
 }
 
 /** @internal */
@@ -206,8 +206,6 @@ export class SavedObjectsService
 
     const savedObjectSchemas = new SavedObjectsSchema(savedObjectsSchemasDefinition);
 
-    const adminClient = await setupDeps.elasticsearch.adminClient$.pipe(first()).toPromise();
-
     const kibanaConfig = await this.coreContext.configService
       .atPath<KibanaConfigType>('kibana')
       .pipe(first())
@@ -217,6 +215,8 @@ export class SavedObjectsService
       .atPath<SavedObjectsConfigType>('migrations')
       .pipe(first())
       .toPromise();
+
+    const adminClient = setupDeps.elasticsearch.adminClient;
 
     const migrator = (this.migrator = new KibanaMigrator({
       savedObjectSchemas,

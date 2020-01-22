@@ -7,17 +7,16 @@
 import { EuiFieldSearch } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { noop } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
+import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 import { TestProviders } from '../../mock';
 
 import { AutocompleteField } from '.';
 
-const mockAutoCompleteData: AutocompleteSuggestion[] = [
+const mockAutoCompleteData: autocomplete.QuerySuggestion[] = [
   {
     type: 'field',
     text: 'agent.ephemeral_id ',
@@ -117,7 +116,7 @@ describe('Autocomplete', () => {
           value={''}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it is rendering with placeholder', () => {

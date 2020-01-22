@@ -100,7 +100,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       // FLAKY: https://github.com/elastic/kibana/issues/43938
-      it.skip('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
+      it('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
         const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
 

@@ -34,6 +34,7 @@ export function nodeSetupStatusRoute(server) {
           skipLiveData: Joi.boolean().default(false),
         }),
         payload: Joi.object({
+          ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
             max: Joi.date().required(),
@@ -49,7 +50,7 @@ export function nodeSetupStatusRoute(server) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        const indexPatterns = getIndexPatterns(server);
+        const indexPatterns = getIndexPatterns(server, {}, req.payload.ccs);
         status = await getCollectionStatus(
           req,
           indexPatterns,

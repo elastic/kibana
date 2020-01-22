@@ -9,7 +9,7 @@ import chrome from 'ui/chrome';
 
 import { useKibana } from '../../lib/kibana';
 import { EmptyPage } from '../../components/empty_page';
-import * as i18n from './translations';
+import * as i18n from '../common/translations';
 
 const basePath = chrome.getBasePath();
 
@@ -21,8 +21,9 @@ export const DetectionEngineEmptyPage = React.memo(() => (
     actionSecondaryIcon="popout"
     actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
     actionSecondaryTarget="_blank"
-    actionSecondaryUrl={useKibana().services.docLinks.links.siem}
+    actionSecondaryUrl={useKibana().services.docLinks.links.siem.gettingStarted}
     data-test-subj="empty-page"
+    message={i18n.EMPTY_MESSAGE}
     title={i18n.EMPTY_TITLE}
   />
 ));

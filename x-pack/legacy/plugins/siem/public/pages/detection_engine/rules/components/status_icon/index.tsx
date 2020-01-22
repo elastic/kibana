@@ -27,7 +27,7 @@ const RuleStatusIconStyled = styled.div`
 
 const RuleStatusIconComponent: React.FC<RuleStatusIconProps> = ({ name, type }) => {
   const theme = useEuiTheme();
-  const color = type === 'passive' ? theme.euiColorLightestShade : theme.euiColorDarkestShade;
+  const color = type === 'passive' ? theme.euiColorLightestShade : theme.euiColorPrimary;
   return (
     <RuleStatusIconStyled>
       <EuiAvatar color={color} name={type === 'valid' ? '' : name} size="l" />

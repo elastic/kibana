@@ -34,7 +34,7 @@ import { IIndexPattern } from '../../../../../../plugins/data/public';
 import { VisSavedObject } from '../legacy_imports';
 
 import { createSavedSearchesService } from '../../discover';
-import { VisualizeConstants } from '..';
+import { VisualizeConstants } from '../np_ready/visualize_constants';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
   await _getLinkedSavedSearch(savedVis, services);

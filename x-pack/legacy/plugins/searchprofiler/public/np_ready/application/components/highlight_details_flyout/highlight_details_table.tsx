@@ -36,7 +36,7 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
     {
       name: 'Percentage',
       render: (item: BreakdownItem) => (
-        <PercentageBadge timePercentage={item.relative as number} label={item.relative + '%'} />
+        <PercentageBadge timePercentage={String(item.relative)} label={item.relative + '%'} />
       ),
     },
   ];

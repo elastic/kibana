@@ -17,12 +17,5 @@
  * under the License.
  */
 
-export {
-  TimelionFunctionInterface,
-  TimelionFunctionConfig,
-  TimelionFunctionArgs,
-  TimelionFunctionArgsSuggestion,
-  TimelionFunctionArgsTypes,
-} from './lib/classes/timelion_function';
-
+export { TimelionFunctionInterface, TimelionFunctionConfig } from './lib/classes/timelion_function';
 export { TimelionRequestQuery } from './routes/run';

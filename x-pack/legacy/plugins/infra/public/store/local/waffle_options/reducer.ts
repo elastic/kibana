@@ -6,13 +6,7 @@
 
 import { combineReducers } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-
-import {
-  InfraSnapshotMetricInput,
-  InfraSnapshotMetricType,
-  InfraNodeType,
-  InfraSnapshotGroupbyInput,
-} from '../../../graphql/types';
+import { SnapshotMetricInput, SnapshotGroupBy } from '../../../../common/http_api/snapshot_api';
 import { InfraGroupByOptions, InfraWaffleMapBounds } from '../../../lib/lib';
 import {
   changeAutoBounds,
@@ -25,11 +19,12 @@ import {
   changeAccount,
   changeRegion,
 } from './actions';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface WaffleOptionsState {
-  metric: InfraSnapshotMetricInput;
-  groupBy: InfraSnapshotGroupbyInput[];
-  nodeType: InfraNodeType;
+  metric: SnapshotMetricInput;
+  groupBy: SnapshotGroupBy;
+  nodeType: InventoryItemType;
   view: string;
   customOptions: InfraGroupByOptions[];
   boundsOverride: InfraWaffleMapBounds;
@@ -39,9 +34,9 @@ export interface WaffleOptionsState {
 }
 
 export const initialWaffleOptionsState: WaffleOptionsState = {
-  metric: { type: InfraSnapshotMetricType.cpu },
+  metric: { type: 'cpu' },
   groupBy: [],
-  nodeType: InfraNodeType.host,
+  nodeType: 'host',
   view: 'map',
   customOptions: [],
   boundsOverride: { max: 1, min: 0 },

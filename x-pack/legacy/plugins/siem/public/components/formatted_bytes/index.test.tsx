@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { useUiSetting$ } from '../../lib/kibana';
@@ -23,7 +22,7 @@ describe('PreferenceFormattedBytes', () => {
     mockUseUiSetting$.mockImplementation(() => [DEFAULT_BYTES_FORMAT_VALUE]);
     const wrapper = shallow(<PreferenceFormattedBytesComponent value={bytes} />);
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders bytes to Numeral formatting when no format setting exists', () => {

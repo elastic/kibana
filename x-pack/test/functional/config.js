@@ -69,7 +69,7 @@ export default async function({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['path.repo=/tmp/'],
     },
 
     kbnTestServer: {
@@ -159,6 +159,10 @@ export default async function({ readConfigFile }) {
       },
       ml: {
         pathname: '/app/ml',
+      },
+      roleMappings: {
+        pathname: '/app/kibana',
+        hash: '/management/security/role_mappings',
       },
       rollupJob: {
         pathname: '/app/kibana',

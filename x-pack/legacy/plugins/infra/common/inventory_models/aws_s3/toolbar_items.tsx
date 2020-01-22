@@ -6,17 +6,17 @@
 
 import React from 'react';
 import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
-import { InfraSnapshotMetricType } from '../../../public/graphql/types';
 import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
 import { CloudToolbarItems } from '../shared/compontents/cloud_toolbar_items';
+import { SnapshotMetricType } from '../types';
 
 export const AwsS3ToolbarItems = (props: ToolbarProps) => {
-  const metricTypes = [
-    InfraSnapshotMetricType.s3BucketSize,
-    InfraSnapshotMetricType.s3NumberOfObjects,
-    InfraSnapshotMetricType.s3TotalRequests,
-    InfraSnapshotMetricType.s3DownloadBytes,
-    InfraSnapshotMetricType.s3UploadBytes,
+  const metricTypes: SnapshotMetricType[] = [
+    's3BucketSize',
+    's3NumberOfObjects',
+    's3TotalRequests',
+    's3DownloadBytes',
+    's3UploadBytes',
   ];
   const groupByFields = ['cloud.region'];
   return (

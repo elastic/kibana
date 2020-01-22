@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { parseInterval } from 'ui/utils/parse_interval';
 import { GTE_INTERVAL_RE } from '../../common/interval_regexp';
 import { i18n } from '@kbn/i18n';
+import { parseInterval } from '../../../../../plugins/data/public';
 
 export function validateInterval(bounds, panel, maxBuckets) {
   const { interval } = panel;

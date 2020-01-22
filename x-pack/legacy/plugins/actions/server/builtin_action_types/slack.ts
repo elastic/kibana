@@ -49,7 +49,9 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.slack',
-    name: 'slack',
+    name: i18n.translate('xpack.actions.builtin.slackTitle', {
+      defaultMessage: 'Slack',
+    }),
     validate: {
       secrets: schema.object(secretsSchemaProps, {
         validate: curry(valdiateActionTypeConfig)(configurationUtilities),

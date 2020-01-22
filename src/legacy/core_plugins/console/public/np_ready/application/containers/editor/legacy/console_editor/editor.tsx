@@ -35,13 +35,21 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { registerCommands } from './keyboard_shortcuts';
 import { applyCurrentSettings } from './apply_editor_settings';
 
-import { useSendCurrentRequestToES, useSetInputEditor } from '../../../../hooks';
+import {
+  useSendCurrentRequestToES,
+  useSetInputEditor,
+  useSaveCurrentTextObject,
+} from '../../../../hooks';
 
 import * as senseEditor from '../../../../models/sense_editor';
 // @ts-ignore
 import mappings from '../../../../../lib/mappings/mappings';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
+
+export interface EditorProps {
+  initialTextValue: string;
+}
 
 const abs: CSSProperties = {
   position: 'absolute',
@@ -58,7 +66,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
-function EditorUI() {
+function EditorUI({ initialTextValue }: EditorProps) {
   const {
     services: { history, notifications },
     docLinkVersion,
@@ -68,6 +76,7 @@ function EditorUI() {
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
   const sendCurrentRequestToES = useSendCurrentRequestToES();
+  const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
@@ -132,10 +141,7 @@ function EditorUI() {
     if (initialQueryParams.load_from) {
       loadBufferFromRemote(initialQueryParams.load_from);
     } else {
-      const { content: text } = history.getSavedEditorState() || {
-        content: DEFAULT_INPUT_VALUE,
-      };
-      editor.update(text);
+      editor.update(initialTextValue || DEFAULT_INPUT_VALUE);
     }
 
     function setupAutosave() {
@@ -153,7 +159,7 @@ function EditorUI() {
     function saveCurrentState() {
       try {
         const content = editor.getCoreEditor().getValue();
-        history.updateCurrentState(content);
+        saveCurrentTextObject(content);
       } catch (e) {
         // Ignoring saving error
       }
@@ -164,7 +170,7 @@ function EditorUI() {
 
     mappings.retrieveAutoCompleteInfo();
 
-    const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor.getCoreEditor());
+    const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
@@ -172,7 +178,7 @@ function EditorUI() {
       mappings.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [history, setInputEditor]);
+  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;

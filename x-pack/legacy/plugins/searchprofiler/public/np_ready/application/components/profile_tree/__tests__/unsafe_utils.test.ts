@@ -17,13 +17,16 @@ describe('normalizeBreakdown', function() {
   });
 });
 
-describe('normalizeTimes', function() {
+describe('normalizeTime', function() {
   it('returns correct normalization', function() {
     const totalTime = 0.447365;
 
     // Deep clone the object to preserve the original
     const input = JSON.parse(JSON.stringify(inputTimes));
-    util.normalizeTimes(input, totalTime, 0);
+
+    // Simulate recursive application to the tree.
+    input.forEach((i: any) => util.normalizeTime(i, totalTime));
+    input[0].children.forEach((i: any) => util.normalizeTime(i, totalTime));
 
     // Modifies in place, so inputTimes will change
     expect(input).to.eql(normalizedTimes);

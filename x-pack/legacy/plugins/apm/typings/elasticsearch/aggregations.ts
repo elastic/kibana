@@ -36,6 +36,19 @@ interface MetricsAggregationResponsePart {
   value: number | null;
 }
 
+type GetCompositeKeys<
+  TAggregationOptionsMap extends AggregationOptionsMap
+> = TAggregationOptionsMap extends {
+  composite: { sources: Array<infer Source> };
+}
+  ? keyof Source
+  : never;
+
+type CompositeOptionsSource = Record<
+  string,
+  { terms: { field: string; missing_bucket?: boolean } } | undefined
+>;
+
 export interface AggregationOptionsByType {
   terms: {
     field: string;
@@ -96,6 +109,22 @@ export interface AggregationOptionsByType {
   bucket_script: {
     buckets_path: BucketsPath;
     script?: Script;
+  };
+  composite: {
+    size?: number;
+    sources: CompositeOptionsSource[];
+    after?: Record<string, string | number | null>;
+  };
+  diversified_sampler: {
+    shard_size?: number;
+    max_docs_per_value?: number;
+  } & ({ script: Script } | { field: string }); // TODO use MetricsAggregationOptions if possible
+  scripted_metric: {
+    params?: Record<string, any>;
+    init_script?: Script;
+    map_script: Script;
+    combine_script: Script;
+    reduce_script: Script;
   };
 }
 
@@ -229,6 +258,24 @@ interface AggregationResponsePart<
         value: number | null;
       }
     | undefined;
+  composite: {
+    after_key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
+    buckets: Array<
+      {
+        key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
+        doc_count: number;
+      } & BucketSubAggregationResponse<
+        TAggregationOptionsMap['aggs'],
+        TDocument
+      >
+    >;
+  };
+  diversified_sampler: {
+    doc_count: number;
+  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+  scripted_metric: {
+    value: unknown;
+  };
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap

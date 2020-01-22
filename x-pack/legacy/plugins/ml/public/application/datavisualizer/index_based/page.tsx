@@ -13,11 +13,13 @@ import { timefilter } from 'ui/timefilter';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -585,84 +587,96 @@ export const Page: FC = () => {
     setNonMetricConfigs(configs);
   }
 
+  const wizardPanelWidth = '280px';
+
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
       <EuiPage data-test-subj="mlPageIndexDataVisualizer">
         <EuiPageBody>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle size="l">
-                <h1>{currentIndexPattern.title}</h1>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-            {currentIndexPattern.timeFieldName !== undefined && (
-              <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
-                <FullTimeRangeSelector
-                  indexPattern={currentIndexPattern}
-                  query={combinedQuery}
-                  disabled={false}
-                />
-              </EuiPageContentHeaderSection>
-            )}
-          </EuiPageContentHeader>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <EuiPageContentHeader>
+                <EuiPageContentHeaderSection>
+                  <EuiTitle size="l">
+                    <h1>{currentIndexPattern.title}</h1>
+                  </EuiTitle>
+                </EuiPageContentHeaderSection>
+                {currentIndexPattern.timeFieldName !== undefined && (
+                  <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
+                    <FullTimeRangeSelector
+                      indexPattern={currentIndexPattern}
+                      query={combinedQuery}
+                      disabled={false}
+                    />
+                  </EuiPageContentHeaderSection>
+                )}
+              </EuiPageContentHeader>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }} />
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiPageContentBody>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <SearchPanel
-                  indexPattern={currentIndexPattern}
-                  searchString={searchString}
-                  setSearchString={setSearchString}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  searchQueryLanguage={searchQueryLanguage}
-                  samplerShardSize={samplerShardSize}
-                  setSamplerShardSize={setSamplerShardSize}
-                  totalCount={overallStats.totalCount}
-                />
-                <EuiSpacer size="m" />
-                <EuiFlexGroup gutterSize="m">
-                  <EuiFlexItem>
-                    {totalMetricFieldCount > 0 && (
-                      <Fragment>
-                        <FieldsPanel
-                          title={i18n.translate('xpack.ml.datavisualizer.page.metricsPanelTitle', {
-                            defaultMessage: 'Metrics',
-                          })}
-                          totalFieldCount={totalMetricFieldCount}
-                          populatedFieldCount={populatedMetricFieldCount}
-                          fieldTypes={[ML_JOB_FIELD_TYPES.NUMBER]}
-                          showFieldType={ML_JOB_FIELD_TYPES.NUMBER}
-                          showAllFields={showAllMetrics}
-                          setShowAllFields={setShowAllMetrics}
-                          fieldSearchBarQuery={metricFieldQuery}
-                          setFieldSearchBarQuery={setMetricFieldQuery}
-                          fieldVisConfigs={metricConfigs}
-                        />
-                        <EuiSpacer size="m" />
-                      </Fragment>
-                    )}
-                    <FieldsPanel
-                      title={i18n.translate('xpack.ml.datavisualizer.page.fieldsPanelTitle', {
-                        defaultMessage: 'Fields',
-                      })}
-                      totalFieldCount={totalNonMetricFieldCount}
-                      populatedFieldCount={populatedNonMetricFieldCount}
-                      showAllFields={showAllNonMetrics}
-                      setShowAllFields={setShowAllNonMetrics}
-                      fieldTypes={indexedFieldTypes}
-                      showFieldType={nonMetricShowFieldType}
-                      setShowFieldType={setNonMetricShowFieldType}
-                      fieldSearchBarQuery={nonMetricFieldQuery}
-                      setFieldSearchBarQuery={setNonMetricFieldQuery}
-                      fieldVisConfigs={nonMetricConfigs}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiPanel>
+                  <SearchPanel
+                    indexPattern={currentIndexPattern}
+                    searchString={searchString}
+                    setSearchString={setSearchString}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    searchQueryLanguage={searchQueryLanguage}
+                    samplerShardSize={samplerShardSize}
+                    setSamplerShardSize={setSamplerShardSize}
+                    totalCount={overallStats.totalCount}
+                  />
+                  <EuiHorizontalRule />
+                  <EuiFlexGroup gutterSize="m">
+                    <EuiFlexItem>
+                      {totalMetricFieldCount > 0 && (
+                        <Fragment>
+                          <FieldsPanel
+                            title={i18n.translate(
+                              'xpack.ml.datavisualizer.page.metricsPanelTitle',
+                              {
+                                defaultMessage: 'Metrics',
+                              }
+                            )}
+                            totalFieldCount={totalMetricFieldCount}
+                            populatedFieldCount={populatedMetricFieldCount}
+                            fieldTypes={[ML_JOB_FIELD_TYPES.NUMBER]}
+                            showFieldType={ML_JOB_FIELD_TYPES.NUMBER}
+                            showAllFields={showAllMetrics}
+                            setShowAllFields={setShowAllMetrics}
+                            fieldSearchBarQuery={metricFieldQuery}
+                            setFieldSearchBarQuery={setMetricFieldQuery}
+                            fieldVisConfigs={metricConfigs}
+                          />
+                          <EuiSpacer size="xl" />
+                        </Fragment>
+                      )}
+                      <FieldsPanel
+                        title={i18n.translate('xpack.ml.datavisualizer.page.fieldsPanelTitle', {
+                          defaultMessage: 'Fields',
+                        })}
+                        totalFieldCount={totalNonMetricFieldCount}
+                        populatedFieldCount={populatedNonMetricFieldCount}
+                        showAllFields={showAllNonMetrics}
+                        setShowAllFields={setShowAllNonMetrics}
+                        fieldTypes={indexedFieldTypes}
+                        showFieldType={nonMetricShowFieldType}
+                        setShowFieldType={setNonMetricShowFieldType}
+                        fieldSearchBarQuery={nonMetricFieldQuery}
+                        setFieldSearchBarQuery={setNonMetricFieldQuery}
+                        fieldVisConfigs={nonMetricConfigs}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
               </EuiFlexItem>
               {showActionsPanel === true && (
-                <EuiFlexItem grow={false} style={{ width: '280px' }}>
+                <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }}>
                   <ActionsPanel indexPattern={currentIndexPattern} />
                 </EuiFlexItem>
               )}

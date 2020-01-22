@@ -104,4 +104,5 @@ export type TestSubjects =
   | 'webhookPathInput'
   | 'webhookPortInput'
   | 'webhookMethodSelect'
+  | 'webhookSchemeSelect'
   | 'webhookUsernameInput';

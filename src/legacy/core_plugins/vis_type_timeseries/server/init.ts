@@ -26,12 +26,17 @@ import { SearchStrategiesRegister } from './lib/search_strategies/search_strateg
 // @ts-ignore
 import { getVisData } from './lib/get_vis_data';
 import { Framework } from '../../../../plugins/vis_type_timeseries/server';
+import { ValidationTelemetryServiceSetup } from '../../../../plugins/vis_type_timeseries/server';
 
-export const init = async (framework: Framework, __LEGACY: any) => {
+export const init = async (
+  framework: Framework,
+  __LEGACY: any,
+  validationTelemetry: ValidationTelemetryServiceSetup
+) => {
   const { core } = framework;
   const router = core.http.createRouter();
 
-  visDataRoutes(router, framework);
+  visDataRoutes(router, framework, validationTelemetry);
 
   // [LEGACY_TODO]
   fieldsRoutes(__LEGACY.server);

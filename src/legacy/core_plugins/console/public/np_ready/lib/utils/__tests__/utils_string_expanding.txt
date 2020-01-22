@@ -52,3 +52,33 @@ Correctly handle new lines in triple quotes
     SELECT * FROM "TABLE"
     """
 }
+==========
+Single quotes escaped special case, start and end
+-------------------------------------
+{
+  "query": "\"test\""
+}
+-------------------------------------
+{
+  "query": "\"test\""
+}
+==========
+Single quotes escaped special case, start
+-------------------------------------
+{
+  "query": "\"test"
+}
+-------------------------------------
+{
+  "query": "\"test"
+}
+==========
+Single quotes escaped special case, end
+-------------------------------------
+{
+  "query": "test\""
+}
+-------------------------------------
+{
+  "query": "test\""
+}

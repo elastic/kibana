@@ -12,7 +12,12 @@ import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  FilterManager,
+  IFieldType,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
@@ -60,6 +65,10 @@ function createMockFilterManager() {
       subscriber();
     },
     getFilters: () => filters,
+    getGlobalFilters: () => {
+      // @ts-ignore
+      return filters.filter(esFilters.isFilterPinned);
+    },
     removeAll: () => {
       filters = [];
       subscriber();
@@ -80,6 +89,7 @@ describe('Lens App', () => {
     docId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (id?: string) => void;
+    addToDashboardMode?: boolean;
   }> {
     return ({
       editorFrame: createMockFrame(),
@@ -126,6 +136,7 @@ describe('Lens App', () => {
       docId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (id?: string) => void;
+      addToDashboardMode?: boolean;
     }>;
   }
 
@@ -306,6 +317,7 @@ describe('Lens App', () => {
         docId?: string;
         docStorage: SavedObjectStore;
         redirectTo: (id?: string) => void;
+        addToDashboardMode?: boolean;
       }>;
 
       beforeEach(() => {
@@ -344,14 +356,19 @@ describe('Lens App', () => {
 
       async function save({
         initialDocId,
+        addToDashboardMode,
         ...saveProps
       }: SaveProps & {
         initialDocId?: string;
+        addToDashboardMode?: boolean;
       }) {
         const args = {
           ...defaultArgs,
           docId: initialDocId,
         };
+        if (addToDashboardMode) {
+          args.addToDashboardMode = addToDashboardMode;
+        }
         args.editorFrame = frame;
         (args.docStorage.load as jest.Mock).mockResolvedValue({
           id: '1234',
@@ -542,6 +559,23 @@ describe('Lens App', () => {
         await waitForPromises();
 
         expect(getButton(instance).disableButton).toEqual(false);
+      });
+
+      it('saves new doc and redirects to dashboard', async () => {
+        const { args } = await save({
+          initialDocId: undefined,
+          addToDashboardMode: true,
+          newCopyOnSave: false,
+          newTitle: 'hello there',
+        });
+
+        expect(args.docStorage.save).toHaveBeenCalledWith({
+          expression: 'kibana 3',
+          id: undefined,
+          title: 'hello there',
+        });
+
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
       });
     });
   });
@@ -796,7 +830,7 @@ describe('Lens App', () => {
       );
     });
 
-    it('clears all existing filters when the active saved query is cleared', () => {
+    it('clears all existing unpinned filters when the active saved query is cleared', () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
 
@@ -809,8 +843,13 @@ describe('Lens App', () => {
 
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
 
-      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
+      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
+      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+
+      args.data.query.filterManager.setFilters([pinned, unpinned]);
       instance.update();
 
       instance.find(TopNavMenu).prop('onClearSavedQuery')!();
@@ -819,7 +858,7 @@ describe('Lens App', () => {
       expect(frame.mount).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          filters: [],
+          filters: [pinned],
         })
       );
     });

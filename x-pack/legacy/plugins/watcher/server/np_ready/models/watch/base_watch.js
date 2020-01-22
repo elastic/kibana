@@ -66,16 +66,6 @@ export class BaseWatch {
     return json;
   }
 
-  // to Elasticsearch
-  get upstreamJson() {
-    const watch = this.watchJson;
-
-    return {
-      id: this.id,
-      watch,
-    };
-  }
-
   // from Kibana
   static getPropsFromDownstreamJson(json) {
     const actions = map(json.actions, action => {

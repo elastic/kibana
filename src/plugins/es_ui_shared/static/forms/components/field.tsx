@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
 
 interface Props {
   field: FieldHook;
-  euiFieldProps?: Record<string, any>;
+  euiFieldProps?: { [key: string]: any };
   idAria?: string;
   [key: string]: any;
 }
@@ -37,10 +37,11 @@ import {
   RadioGroupField,
   RangeField,
   SelectField,
+  SuperSelectField,
   ToggleField,
 } from './fields';
 
-const mapTypeToFieldComponent = {
+const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
   [FIELD_TYPES.TEXT]: TextField,
   [FIELD_TYPES.TEXTAREA]: TextAreaField,
   [FIELD_TYPES.NUMBER]: NumericField,
@@ -50,6 +51,7 @@ const mapTypeToFieldComponent = {
   [FIELD_TYPES.RADIO_GROUP]: RadioGroupField,
   [FIELD_TYPES.RANGE]: RangeField,
   [FIELD_TYPES.SELECT]: SelectField,
+  [FIELD_TYPES.SUPER_SELECT]: SuperSelectField,
   [FIELD_TYPES.TOGGLE]: ToggleField,
 };
 

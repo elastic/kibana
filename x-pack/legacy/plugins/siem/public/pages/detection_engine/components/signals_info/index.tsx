@@ -9,7 +9,7 @@ import { FormattedRelative } from '@kbn/i18n/react';
 import React, { useState, useEffect } from 'react';
 
 import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
-import { buildlastSignalsQuery } from './query.dsl';
+import { buildLastSignalsQuery } from './query.dsl';
 import { Aggs } from './types';
 
 interface SignalInfo {
@@ -26,14 +26,7 @@ export const useSignalInfo = ({ ruleId = null }: SignalInfo): Return => {
     <EuiLoadingSpinner size="m" />
   );
 
-  let query = '';
-  try {
-    query = JSON.stringify(buildlastSignalsQuery(ruleId));
-  } catch {
-    query = '';
-  }
-
-  const [loading, signals] = useQuerySignals<unknown, Aggs>(query);
+  const [loading, signals] = useQuerySignals<unknown, Aggs>(buildLastSignalsQuery(ruleId));
 
   useEffect(() => {
     if (signals != null) {

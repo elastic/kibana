@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { Direction } from '../../../../../graphql/types';
@@ -33,14 +32,12 @@ describe('Header', () => {
       <HeaderComponent
         header={columnHeader}
         onColumnRemoved={jest.fn()}
-        onColumnResized={jest.fn()}
         onColumnSorted={jest.fn()}
-        setIsResizing={jest.fn()}
         sort={sort}
         timelineId={timelineId}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('rendering', () => {
@@ -50,9 +47,7 @@ describe('Header', () => {
           <HeaderComponent
             header={columnHeader}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -75,9 +70,7 @@ describe('Header', () => {
           <HeaderComponent
             header={headerWithLabel}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -99,9 +92,7 @@ describe('Header', () => {
           <HeaderComponent
             header={headerSortable}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -127,9 +118,7 @@ describe('Header', () => {
           <HeaderComponent
             header={columnWithFilter}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -154,9 +143,7 @@ describe('Header', () => {
           <HeaderComponent
             header={headerSortable}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -182,9 +169,7 @@ describe('Header', () => {
           <HeaderComponent
             header={headerSortable}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -202,9 +187,7 @@ describe('Header', () => {
           <HeaderComponent
             header={headerSortable}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -222,9 +205,7 @@ describe('Header', () => {
           <HeaderComponent
             header={headerSortable}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={mockOnColumnSorted}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -335,9 +316,7 @@ describe('Header', () => {
           <HeaderComponent
             header={columnHeader}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -358,9 +337,7 @@ describe('Header', () => {
           <HeaderComponent
             header={columnHeader}
             onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
@@ -368,27 +345,6 @@ describe('Header', () => {
       );
 
       expect(wrapper.find('[data-test-subj="header-tooltip"]').exists()).toEqual(true);
-    });
-  });
-
-  describe('setIsResizing', () => {
-    test('setIsResizing have been call when it renders actions', () => {
-      const mockSetIsResizing = jest.fn();
-      mount(
-        <TestProviders>
-          <HeaderComponent
-            header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnResized={jest.fn()}
-            onColumnSorted={jest.fn()}
-            setIsResizing={mockSetIsResizing}
-            sort={sort}
-            timelineId={timelineId}
-          />
-        </TestProviders>
-      );
-
-      expect(mockSetIsResizing).toHaveBeenCalled();
     });
   });
 });
