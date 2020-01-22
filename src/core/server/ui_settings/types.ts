@@ -89,6 +89,7 @@ export interface DeprecationSettings {
  * @public
  * */
 export type UiSettingsType =
+  | 'undefined' // I don't know why malformed UiSettings objects exist
   | 'json'
   | 'markdown'
   | 'number'
