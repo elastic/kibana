@@ -88,7 +88,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     const quantizeDomain = min !== max ? [min, max] : d3.scale.quantize().domain();
 
-    this._legendColors = makeLegendColors(this._colorRamp);
+    this._legendColors = this.getLegendColors();
     this._legendQuantizer = d3.scale
       .quantize()
       .domain(quantizeDomain)
@@ -223,11 +223,11 @@ export class ScaledCirclesMarkers extends EventEmitter {
   getBounds() {
     return this._leafletLayer.getBounds();
   }
-}
 
-function makeLegendColors(colorRampKey) {
-  const colorRamp = _.get(this._colorMaps.truncatedColorMaps[colorRampKey], 'value');
-  return colorUtil.getLegendColors(colorRamp);
+  getLegendColors() {
+    const colorRamp = _.get(this._colorMaps.truncatedColorMaps[this._colorRamp], 'value');
+    return colorUtil.getLegendColors(colorRamp);
+  }
 }
 
 function makeColorDarker(color) {

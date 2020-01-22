@@ -24,7 +24,7 @@ import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { npStart } from 'ui/new_platform';
 import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
 
-export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
+export const createTileMapVisualization = ({ serviceSettings, $injector, colorMaps }) => {
   const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
   const tooltipFormatter = new TileMapTooltipFormatterProvider($injector);
 
@@ -141,7 +141,8 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
         this._geoJsonFeatureCollectionAndMeta.meta,
         geohashOptions,
         this._kibanaMap.getZoomLevel(),
-        this._kibanaMap
+        this._kibanaMap,
+        colorMaps
       );
       this._kibanaMap.addLayer(this._geohashLayer);
     }

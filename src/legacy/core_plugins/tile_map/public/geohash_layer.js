@@ -61,6 +61,7 @@ export class GeohashLayer extends KibanaMapLayer {
           markerOptions,
           this._zoom,
           this._kibanaMap,
+          undefined,
           this._colorMaps
         );
         break;
@@ -71,6 +72,7 @@ export class GeohashLayer extends KibanaMapLayer {
           markerOptions,
           this._zoom,
           this._kibanaMap,
+          undefined,
           this._colorMaps
         );
         break;
@@ -81,6 +83,7 @@ export class GeohashLayer extends KibanaMapLayer {
           markerOptions,
           this._zoom,
           this._kibanaMap,
+          undefined,
           this._colorMaps
         );
         break;
