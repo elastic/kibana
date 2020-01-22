@@ -23,7 +23,6 @@ import {
   UseArray,
   ArrayItem,
   FieldConfig,
-  fieldValidators,
   TextField,
   ComboBoxField,
 } from '../../../shared_imports';
@@ -86,35 +85,8 @@ export const relationsDeserializer = (field: Field): Field => {
   };
 };
 
-const parentConfig: FieldConfig = {
-  validations: [
-    {
-      validator: fieldValidators.emptyField(
-        i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.joinType.validations.parentIsRequiredErrorMessage',
-          {
-            defaultMessage: 'Specify a parent',
-          }
-        )
-      ),
-    },
-  ],
-};
-
 const childConfig: FieldConfig = {
   defaultValue: [],
-  validations: [
-    {
-      validator: fieldValidators.emptyField(
-        i18n.translate(
-          'xpack.idxMgmt.mappingsEditor.joinType.validations.childIsRequiredErrorMessage',
-          {
-            defaultMessage: 'Specify at least one child',
-          }
-        )
-      ),
-    },
-  ],
 };
 
 export const RelationsParameter = () => {
@@ -173,7 +145,6 @@ export const RelationsParameter = () => {
                   <div style={{ width: '100%' }}>
                     <UseField
                       path={`${item.path}.parent`}
-                      config={parentConfig}
                       component={TextField}
                       componentProps={{
                         euiFieldProps: {
