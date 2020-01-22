@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { LoginLayout, LoginState } from '../../../../../common/login_state';
+import { LoginLayout, LoginState } from '../../login_state';
 import { LoginPage } from './login_page';
 
 const createMockHttp = ({ simulateError = false } = {}) => {

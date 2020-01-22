@@ -32,6 +32,7 @@ import { getUiSettingDefaults } from './ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
@@ -58,7 +59,12 @@ export default function(kibana) {
     },
 
     uiExports: {
-      hacks: ['plugins/kibana/discover', 'plugins/kibana/dev_tools', 'plugins/kibana/visualize'],
+      hacks: [
+        'plugins/kibana/discover/legacy',
+        'plugins/kibana/dev_tools',
+        'plugins/kibana/visualize/legacy',
+        'plugins/kibana/dashboard/legacy',
+      ],
       savedObjectTypes: ['plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register'],
       app: {
         id: 'kibana',
@@ -76,6 +82,7 @@ export default function(kibana) {
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
           euiIconType: 'discoverApp',
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:visualize',
@@ -85,6 +92,7 @@ export default function(kibana) {
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
           euiIconType: 'visualizeApp',
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:dashboard',
@@ -100,6 +108,7 @@ export default function(kibana) {
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           euiIconType: 'dashboardApp',
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:dev_tools',
@@ -109,16 +118,18 @@ export default function(kibana) {
           order: 9001,
           url: '/app/kibana#/dev_tools',
           euiIconType: 'devToolsApp',
+          category: DEFAULT_APP_CATEGORIES.management,
         },
         {
-          id: 'kibana:management',
+          id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Management',
+            defaultMessage: 'Stack Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
           euiIconType: 'managementApp',
           linkToLastSubUrl: false,
+          category: DEFAULT_APP_CATEGORIES.management,
         },
       ],
 
