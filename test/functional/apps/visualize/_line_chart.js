@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('line charts', function() {
+  describe.skip('line charts', function() {
     const vizName1 = 'Visualization LineChart';
 
     const initLineChart = async function() {

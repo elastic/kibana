@@ -33,7 +33,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('area charts', function indexPatternCreation() {
+  describe.skip('area charts', function indexPatternCreation() {
     const vizName1 = 'Visualization AreaChart Name Test';
 
     const initAreaChart = async () => {
