@@ -132,7 +132,8 @@ export class Plugin {
         const request = KibanaRequest.from(rawRequest);
         return {
           callCluster: (...args) => adminClient!.asScoped(request).callAsCurrentUser(...args),
-          savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(request),
+          // rawRequest is actually a fake request, converting it to KibanaRequest causes issue in SO access
+          savedObjectsClient: core.savedObjects.getScopedSavedObjectsClient(rawRequest as any),
         };
       },
       spaceIdToNamespace,
