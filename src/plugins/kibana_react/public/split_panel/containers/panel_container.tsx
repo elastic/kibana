@@ -99,7 +99,7 @@ export function PanelsContainer({
         '[Split Panels Container] Detected more than two children; ignoring additional children.'
       );
     }
-  });
+  }, [thirdChild ? 1 : 0]);
 
   const childrenWithResizer = [
     firstChild,
