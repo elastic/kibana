@@ -28,7 +28,7 @@ export function createCspCollector(server: Server) {
       const {
         strict,
         warnLegacyBrowsers,
-        headerChangedFromDefault: rulesChangedFromDefault,
+        rulesChangedFromDefault,
       } = server.newPlatform.setup.core.http.csp;
 
       return {

@@ -587,9 +587,9 @@ export class CspConfig implements ICspConfig {
     // (undocumented)
     readonly header: string;
     // (undocumented)
-    readonly headerChangedFromDefault: boolean;
-    // (undocumented)
     readonly rules: string[];
+    // (undocumented)
+    readonly rulesChangedFromDefault: boolean;
     // (undocumented)
     readonly strict: boolean;
     // (undocumented)
@@ -773,8 +773,8 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 // @public
 export interface ICspConfig {
     readonly header: string;
-    readonly headerChangedFromDefault: boolean;
     readonly rules: string[];
+    readonly rulesChangedFromDefault: boolean;
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }

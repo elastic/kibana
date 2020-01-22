@@ -40,12 +40,12 @@ describe('CspConfig', () => {
     expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-        "headerChangedFromDefault": false,
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
+        "rulesChangedFromDefault": false,
         "strict": true,
         "warnLegacyBrowsers": true,
       }
@@ -58,12 +58,12 @@ describe('CspConfig', () => {
     expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-        "headerChangedFromDefault": false,
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
+        "rulesChangedFromDefault": false,
         "strict": false,
         "warnLegacyBrowsers": false,
       }
@@ -76,12 +76,12 @@ describe('CspConfig', () => {
     expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
         "header": "alpha; beta; gamma",
-        "headerChangedFromDefault": true,
         "rules": Array [
           "alpha",
           "beta",
           "gamma",
         ],
+        "rulesChangedFromDefault": true,
         "strict": true,
         "warnLegacyBrowsers": true,
       }
@@ -94,12 +94,12 @@ describe('CspConfig', () => {
     expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src blob: 'unsafe-inline' 'self'",
-        "headerChangedFromDefault": false,
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
           "worker-src blob: 'self'",
           "style-src blob: 'unsafe-inline' 'self'",
         ],
+        "rulesChangedFromDefault": false,
         "strict": true,
         "warnLegacyBrowsers": true,
       }

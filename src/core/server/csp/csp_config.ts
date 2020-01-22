@@ -54,7 +54,7 @@ export interface ICspConfig {
    * Flag indicating that the configuraion changes the csp
    * rules from the defaults
    */
-  readonly headerChangedFromDefault: boolean;
+  readonly rulesChangedFromDefault: boolean;
 }
 
 /**
@@ -66,7 +66,7 @@ export class CspConfig implements ICspConfig {
   public readonly strict: boolean;
   public readonly warnLegacyBrowsers: boolean;
   public readonly header: string;
-  public readonly headerChangedFromDefault: boolean;
+  public readonly rulesChangedFromDefault: boolean;
 
   /**
    * Returns the default CSP configuration when passed with no config
@@ -89,10 +89,10 @@ export class CspConfig implements ICspConfig {
 
     // only check to see if the csp values are customized when `rawCspConfig` was received.
     if (!rawCspConfig) {
-      this.headerChangedFromDefault = false;
+      this.rulesChangedFromDefault = false;
     } else {
       const defaultCsp = new CspConfig(env);
-      this.headerChangedFromDefault = defaultCsp.header !== this.header;
+      this.rulesChangedFromDefault = defaultCsp.header !== this.header;
     }
   }
 }

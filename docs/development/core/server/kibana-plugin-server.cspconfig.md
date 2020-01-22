@@ -21,8 +21,8 @@ The constructor for this class is marked as internal. Third-party code should no
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [header](./kibana-plugin-server.cspconfig.header.md) |  | <code>string</code> |  |
-|  [headerChangedFromDefault](./kibana-plugin-server.cspconfig.headerchangedfromdefault.md) |  | <code>boolean</code> |  |
 |  [rules](./kibana-plugin-server.cspconfig.rules.md) |  | <code>string[]</code> |  |
+|  [rulesChangedFromDefault](./kibana-plugin-server.cspconfig.ruleschangedfromdefault.md) |  | <code>boolean</code> |  |
 |  [strict](./kibana-plugin-server.cspconfig.strict.md) |  | <code>boolean</code> |  |
 |  [warnLegacyBrowsers](./kibana-plugin-server.cspconfig.warnlegacybrowsers.md) |  | <code>boolean</code> |  |
 
