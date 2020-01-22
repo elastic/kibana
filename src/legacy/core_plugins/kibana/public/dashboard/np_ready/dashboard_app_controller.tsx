@@ -23,7 +23,6 @@ import React from 'react';
 import angular from 'angular';
 
 import { Subscription } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -35,8 +34,6 @@ import {
   subscribeWithScope,
 } from '../legacy_imports';
 import {
-  esFilters,
-  FilterManager,
   IndexPattern,
   IndexPatternsContract,
   Query,
@@ -76,10 +73,8 @@ import {
   SavedObjectFinderUi,
 } from '../../../../../../plugins/kibana_react/public';
 import { removeQueryParam, unhashUrl } from '../../../../../../plugins/kibana_utils/public';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-} from '../../../../../../plugins/data/public/query/filter_manager/lib/compare_filters';
+import { COMPARE_ALL_OPTIONS, compareFilters } from '../../../../../../plugins/data/public';
+import { startSyncingAppFilters } from './lib/sync_app_filters';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -138,47 +133,7 @@ export class DashboardAppController {
       history,
     });
 
-    // make sure initial filters are picked up from url
-    filterManager.setFilters([
-      ...filterManager.getGlobalFilters(),
-      ..._.cloneDeep(dashboardStateManager.appState.filters),
-    ]);
-
-    // this should go away after: https://github.com/elastic/kibana/issues/55339
-    // is resolved
-    // sync filterManager's appFilters with dashboardStateManager
-    // dashboardStateManager then sync it to url '_a'
-    const appFiltersSubscription = filterManager
-      .getUpdates$()
-      .pipe(
-        map(() => filterManager.getAppFilters()),
-        filter(
-          // continue only if app state filters updated
-          appFilters =>
-            !compareFilters(appFilters, dashboardStateManager.appState.filters, COMPARE_ALL_OPTIONS)
-        )
-      )
-      .subscribe(appFilters => {
-        dashboardStateManager.setFilters(appFilters);
-      });
-
-    // this should go away after: https://github.com/elastic/kibana/issues/55339
-    // is resolved
-    // if appFilters in dashboardStateManager changed (e.g browser history update),
-    // sync it to filterManager
-    dashboardStateManager.registerChangeListener(() => {
-      if (
-        !compareFilters(
-          dashboardStateManager.appState.filters,
-          filterManager.getAppFilters(),
-          COMPARE_ALL_OPTIONS
-        )
-      ) {
-        const newAppFilters = _.cloneDeep(dashboardStateManager.appState.filters);
-        FilterManager.setFiltersStore(newAppFilters, esFilters.FilterStateStore.APP_STATE);
-        filterManager.setFilters([...filterManager.getGlobalFilters(), ...newAppFilters]);
-      }
-    });
+    const stopSyncingAppFilters = startSyncingAppFilters(filterManager, dashboardStateManager);
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
@@ -441,9 +396,7 @@ export class DashboardAppController {
       const containerInput = dashboardContainer.getInput();
       const differences: Partial<DashboardContainerInput> = {};
 
-      // Filters can't be compared using regular isEqual
-      // this should go away after: https://github.com/elastic/kibana/issues/55339
-      // is resolved
+      // Filters shouldn't  be compared using regular isEqual
       if (
         !compareFilters(containerInput.filters, appStateDashboardInput.filters, COMPARE_ALL_OPTIONS)
       ) {
@@ -917,7 +870,7 @@ export class DashboardAppController {
 
     $scope.$on('$destroy', () => {
       updateSubscription.unsubscribe();
-      appFiltersSubscription.unsubscribe();
+      stopSyncingAppFilters();
       visibleSubscription.unsubscribe();
       $scope.timefilterSubscriptions$.unsubscribe();
 
