@@ -36,8 +36,9 @@ import dateMath from '@elastic/datemath';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import { getDocLink } from '../../../../documentation_links';
-import { AggParamEditorProps } from '..';
+
+import { AggParamEditorProps } from '../agg_param_props';
+import { getDocLink } from '../../legacy_imports';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';
 const TO_PLACEHOLDER = '+\u221E';

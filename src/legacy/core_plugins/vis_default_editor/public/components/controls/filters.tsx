@@ -21,10 +21,11 @@ import React, { useState, useEffect } from 'react';
 import { omit, isEqual } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import chrome from 'ui/chrome';
 import { Query } from 'src/plugins/data/public';
-import chrome from '../../../../chrome';
 import { FilterRow } from './filter';
-import { AggParamEditorProps } from '..';
+import { AggParamEditorProps } from '../agg_param_props';
 
 const generateId = htmlIdGenerator();
 const config = chrome.getUiSettingsClient();

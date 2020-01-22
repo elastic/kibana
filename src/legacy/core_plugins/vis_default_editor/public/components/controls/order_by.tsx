@@ -20,13 +20,14 @@
 import React, { useEffect } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import {
   isCompatibleAggregation,
   useAvailableOptions,
   useFallbackMetric,
   useValidation,
-} from './agg_utils';
-import { AggParamEditorProps } from '..';
+} from './utils';
+import { AggParamEditorProps } from '../agg_param_props';
 
 const DEFAULT_VALUE = '_key';
 const DEFAULT_OPTIONS = [

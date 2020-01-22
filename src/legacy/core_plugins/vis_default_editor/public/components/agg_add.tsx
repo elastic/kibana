@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../..';
+import { AggConfig } from '../legacy_imports';
 import { Schema } from '../schemas';
 import { AggGroupNames } from '../agg_groups';
 

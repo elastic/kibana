@@ -22,12 +22,12 @@ import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../..';
-import { Field } from '../../../../../../../plugins/data/public';
-import { formatListAsProse, parseCommaSeparatedList } from '../../../../../../utils';
-import { AggParam, FieldParamType } from '../../../../agg_types';
-import { useValidation } from './agg_utils';
-import { AggParamEditorProps, ComboBoxGroupedOptions } from '..';
+
+import { Field } from 'src/plugins/data/public';
+import { AggConfig, AggParam, FieldParamType } from '../../legacy_imports';
+import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
+import { AggParamEditorProps } from '../agg_param_props';
+import { ComboBoxGroupedOptions } from '../../utils';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
 

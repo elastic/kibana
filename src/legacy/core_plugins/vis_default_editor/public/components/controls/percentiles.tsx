@@ -18,11 +18,11 @@
  */
 
 import React, { useState } from 'react';
-
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { NumberList } from './components/number_list';
-import { AggParamEditorProps } from '..';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function PercentilesEditor({
   agg,

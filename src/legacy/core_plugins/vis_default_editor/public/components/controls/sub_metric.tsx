@@ -21,10 +21,11 @@ import React, { useEffect } from 'react';
 import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParamType } from 'ui/agg_types/param_types/agg';
-import { AggConfig } from '../../../../agg_types/agg_config';
+import { AggParamType, AggConfig } from '../../legacy_imports';
 import { useSubAggParamsHandlers } from './utils';
-import { AggParamEditorProps, DefaultEditorAggParams, AggGroupNames } from '..';
+import { AggParamEditorProps } from '../agg_param_props';
+import { AggGroupNames } from '../../agg_groups';
+import { DefaultEditorAggParams } from '../agg_params';
 
 function SubMetricParamEditor({
   agg,

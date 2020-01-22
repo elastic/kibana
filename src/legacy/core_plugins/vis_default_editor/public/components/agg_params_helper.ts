@@ -18,15 +18,22 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { aggTypeFilters } from 'ui/agg_types/filter';
-import { aggTypes, AggParam, FieldParamType, AggType } from 'ui/agg_types';
-import { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
-import { AggConfig, VisState } from '../../..';
+
+import { IndexPattern, Field } from 'src/plugins/data/public';
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
-import { EditorConfig } from '../../config/types';
+import { EditorConfig } from '../config/types';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
-import { IndexPattern, Field } from '../../../../../../../plugins/data/public';
+import {
+  aggTypeFilters,
+  aggTypeFieldFilters,
+  aggTypes,
+  AggConfig,
+  AggParam,
+  FieldParamType,
+  AggType,
+} from '../legacy_imports';
 
 interface ParamInstanceBase {
   agg: AggConfig;

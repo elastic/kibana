@@ -21,8 +21,7 @@ import _ from 'lodash';
 
 import { Optional } from '@kbn/utility-types';
 
-import { AggParam } from '../../../agg_types';
-import { IndexedArray } from '../../../indexed_array';
+import { AggParam, IndexedArray } from './legacy_imports';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
 import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 import { AggGroupNames } from './agg_groups';

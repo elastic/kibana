@@ -23,7 +23,8 @@ import React, { useEffect, useCallback } from 'react';
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamEditorProps } from '..';
+
+import { AggParamEditorProps } from '../agg_param_props';
 
 const label = (
   <>

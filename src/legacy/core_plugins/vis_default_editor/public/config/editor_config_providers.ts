@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import { TimeIntervalParam } from 'ui/vis/editors/config/types';
-import { AggConfig } from '../..';
-import { IndexPattern } from '../../../../../../plugins/data/public';
-import { leastCommonMultiple } from '../../lib/least_common_multiple';
-import { parseEsInterval } from '../../../../../core_plugins/data/public';
-import { leastCommonInterval } from '../../lib/least_common_interval';
-import { EditorConfig, EditorParamConfig, FixedParam, NumericIntervalParam } from './types';
+import { IndexPattern } from 'src/plugins/data/public';
+import { parseEsInterval } from 'src/legacy/core_plugins/data/public';
+import { AggConfig, leastCommonMultiple, leastCommonInterval } from '../legacy_imports';
+import {
+  TimeIntervalParam,
+  EditorConfig,
+  EditorParamConfig,
+  FixedParam,
+  NumericIntervalParam,
+} from './types';
 
 type EditorConfigProvider = (indexPattern: IndexPattern, aggConfig: AggConfig) => EditorConfig;
 

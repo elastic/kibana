@@ -19,13 +19,13 @@
 
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { AggConfig } from '../../..';
 import {
   AggregateValueProp,
   TopAggregateParamEditor,
   TopAggregateParamEditorProps,
 } from './top_aggregate';
 import { aggParamCommonPropsMock } from './test_utils';
+import { AggConfig } from '../../legacy_imports';
 
 describe('TopAggregateParamEditor', () => {
   let agg: AggConfig;

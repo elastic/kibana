@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from '../../../../agg_types/agg_config';
+import { AggConfig } from '../legacy_imports';
 import {
   isAggRemovable,
   calcAggIsTooLow,

@@ -16,6 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { AggConfig } from '../agg_types/agg_config';
-export { Vis, VisParams, VisState, VisType } from '../../../core_plugins/visualizations/public';

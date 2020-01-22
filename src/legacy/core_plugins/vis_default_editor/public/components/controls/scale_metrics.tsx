@@ -19,8 +19,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+
 import { SwitchParamEditor } from './switch';
-import { AggParamEditorProps } from '..';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function ScaleMetricsParamEditor(props: AggParamEditorProps<boolean>) {
   return (

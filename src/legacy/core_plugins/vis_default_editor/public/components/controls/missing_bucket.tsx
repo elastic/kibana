@@ -20,8 +20,9 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SwitchParamEditor } from './switch';
-import { isStringType } from '../../../../agg_types/buckets/migrate_include_exclude_format';
-import { AggParamEditorProps } from '..';
+
+import { isStringType } from '../../legacy_imports';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
   const fieldTypeIsNotString = !isStringType(props.agg);

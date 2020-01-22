@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { PersistedState } from 'ui/persisted_state';
-import { AggConfigs } from 'ui/agg_types/agg_configs';
-import { Vis } from './../..';
+import { AggConfigs, PersistedState } from './legacy_imports';
+import { Vis } from '../../visualizations/public';
 
 export interface VisOptionsProps<VisParamType = unknown> {
   aggs: AggConfigs;

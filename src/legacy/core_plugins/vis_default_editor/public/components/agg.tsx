@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggConfig } from '../../..';
+import { AggConfig } from '../legacy_imports';
 import { DefaultEditorAggParams } from './agg_params';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
@@ -113,7 +113,7 @@ function DefaultEditorAgg({
         agg.type.name === 'histogram' ? true : 0
       );
     }
-  }, [lastParentPipelineAggTitle, isLastBucket, agg.type]);
+  }, [lastParentPipelineAggTitle, agg.type, isLastBucketAgg, agg.id, setAggParamValue]);
 
   const setTouched = useCallback(
     (touched: boolean) => {
@@ -123,7 +123,7 @@ function DefaultEditorAgg({
         aggId: agg.id,
       });
     },
-    [setAggsState]
+    [agg.id, setAggsState]
   );
 
   const setValidity = useCallback(
@@ -135,7 +135,7 @@ function DefaultEditorAgg({
       });
       setValidState(isValid);
     },
-    [setAggsState]
+    [agg.id, setAggsState]
   );
 
   const onToggle = useCallback(

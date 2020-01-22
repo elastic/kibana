@@ -38,5 +38,3 @@ export {
   createMapStream,
   createReplaceStream,
 } from './streams';
-
-export { parseCommaSeparatedList, formatListAsProse } from './strings';

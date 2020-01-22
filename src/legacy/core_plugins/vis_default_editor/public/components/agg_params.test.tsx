@@ -19,10 +19,12 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { AggConfig, VisState } from '../../..';
+
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
 import { AggGroupNames } from '../agg_groups';
-import { IndexPattern } from '../../../../../../../plugins/data/public';
+import { AggConfig } from '../legacy_imports';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },

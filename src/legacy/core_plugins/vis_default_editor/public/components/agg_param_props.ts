@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { AggParam } from 'ui/agg_types';
-import { AggConfig } from '../../../../agg_types/agg_config';
+import { Field } from 'src/plugins/data/public';
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { AggConfig, AggParam } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
-import { EditorConfig } from '../../config/types';
-import { VisState } from '../../..';
-import { Field } from '../../../../../../../plugins/data/public';
+import { EditorConfig } from '../config/types';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it

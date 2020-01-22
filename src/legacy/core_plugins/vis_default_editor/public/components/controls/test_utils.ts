@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { AggConfig, VisState } from '../../..';
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { EditorConfig } from '../../config/types';
-import { AggParam } from '../../../../agg_types';
+import { AggConfig, AggParam } from '../../legacy_imports';
 
 export const aggParamCommonPropsMock = {
   agg: {} as AggConfig,

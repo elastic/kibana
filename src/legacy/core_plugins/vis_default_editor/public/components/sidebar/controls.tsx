@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDebounce } from 'react-use';
 
-import { Vis } from 'ui/vis';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { discardChanges, EditorAction } from './state';
 
 interface DefaultEditorControlsProps {

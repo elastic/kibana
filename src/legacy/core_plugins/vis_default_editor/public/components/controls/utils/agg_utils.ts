@@ -19,7 +19,8 @@
 
 import { useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from 'ui/agg_types';
+
+import { AggConfig } from '../../../legacy_imports';
 
 type AggFilter = string[];
 
@@ -103,7 +104,7 @@ function useValidation(setValidity: (isValid: boolean) => void, isValid: boolean
     setValidity(isValid);
 
     return () => setValidity(true);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 }
 
 function safeMakeLabel(agg: AggConfig): string {

@@ -22,10 +22,10 @@ import React, { useEffect, useCallback } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggType } from 'ui/agg_types';
-import { documentationLinks } from '../../../../documentation_links/documentation_links';
+
+import { IndexPattern } from 'src/plugins/data/public';
+import { AggType, documentationLinks } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
-import { IndexPattern } from '../../../../../../../plugins/data/public';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 
 interface DefaultEditorAggSelectProps {
@@ -121,13 +121,13 @@ function DefaultEditorAggSelect({
 
   useEffect(() => {
     setValidity(isValid);
-  }, [isValid]);
+  }, [isValid, setValidity]);
 
   useEffect(() => {
     if (errors.length) {
       setTouched();
     }
-  }, [errors.length]);
+  }, [errors.length, setTouched]);
 
   return (
     <EuiFormRow

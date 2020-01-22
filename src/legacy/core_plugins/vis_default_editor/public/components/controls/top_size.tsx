@@ -20,9 +20,10 @@
 import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { SizeParamEditor } from './size';
 import { getCompatibleAggs } from './top_aggregate';
-import { AggParamEditorProps } from '..';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function TopSizeParamEditor(props: AggParamEditorProps<number | ''>) {
   const iconTip = (

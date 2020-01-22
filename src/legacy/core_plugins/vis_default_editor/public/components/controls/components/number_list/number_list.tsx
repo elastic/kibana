@@ -34,7 +34,7 @@ import {
   getUpdatedModels,
   hasInvalidValues,
 } from './utils';
-import { useValidation } from '../../agg_utils';
+import { useValidation } from '../../utils';
 
 export interface NumberListProps {
   labelledbyId: string;
@@ -85,7 +85,7 @@ function NumberList({
     if (!numberArray.length) {
       onChange([models[0].value as number]);
     }
-  }, []);
+  }, [models, numberArray.length, onChange]);
 
   const isValid = !hasInvalidValues(models);
   useValidation(setValidity, isValid);

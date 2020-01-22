@@ -19,9 +19,8 @@
 
 import { cloneDeep } from 'lodash';
 
-import { AggConfigs, AggConfig } from 'ui/agg_types';
-import { Vis, VisState } from 'ui/vis';
-import { move } from 'ui/utils/collection';
+import { Vis, VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { AggConfigs, AggConfig, move } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
 import { AggGroupNames } from '../../../agg_groups';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';

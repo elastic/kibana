@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { AggConfig, Vis, VisParams } from 'ui/vis';
+import { Vis, VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { AggConfig } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
 import { Schema } from '../../../schemas';
 

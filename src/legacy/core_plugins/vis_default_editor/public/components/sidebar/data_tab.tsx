@@ -21,10 +21,8 @@ import React, { useMemo, useCallback } from 'react';
 import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
-import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
-import { AggConfig } from 'ui/agg_types';
-import { MetricAggType } from 'ui/agg_types/metrics/metric_agg_type';
-import { VisState } from 'ui/vis';
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { AggConfig, parentPipelineAggHelper, MetricAggType } from '../../legacy_imports';
 import { DefaultEditorAggGroup } from '../agg_group';
 import { AggGroupNames } from '../../agg_groups';
 import {

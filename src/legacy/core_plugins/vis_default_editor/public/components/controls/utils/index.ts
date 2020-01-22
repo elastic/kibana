@@ -17,19 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-
-import { Field } from 'src/plugins/data/public';
-import { FieldParamEditor } from './field';
-import { AggParamEditorProps } from '../agg_param_props';
-
-function TopSortFieldParamEditor(props: AggParamEditorProps<Field>) {
-  const customLabel = i18n.translate('common.ui.aggTypes.sortOnLabel', {
-    defaultMessage: 'Sort on',
-  });
-
-  return <FieldParamEditor {...props} customLabel={customLabel} />;
-}
-
-export { TopSortFieldParamEditor };
+export { useSubAggParamsHandlers } from './use_handlers';
+export * from './strings';
+export * from './agg_utils';

@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { AggType } from '../../../agg_types';
-import { aggTypeFilters, propFilter } from '../../../agg_types/filter';
-import { IndexPattern } from '../../../../../../plugins/data/public';
-import { AggConfig } from '../../../vis';
+import { IndexPattern } from 'src/plugins/data/public';
+import { AggType, AggConfig, aggTypeFilters, propFilter } from './legacy_imports';
 
 const filterByName = propFilter('name');
 

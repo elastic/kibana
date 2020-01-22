@@ -18,9 +18,9 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { AggParamEditorProps } from '..';
+
+import { AggParamEditorProps } from '../agg_param_props';
 
 function StringParamEditor({
   agg,

@@ -21,7 +21,7 @@ import React from 'react';
 
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggParamEditorProps } from '..';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function AutoPrecisionParamEditor({ value = false, setValue }: AggParamEditorProps<boolean>) {
   const label = i18n.translate('common.ui.aggTypes.changePrecisionLabel', {

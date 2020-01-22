@@ -75,7 +75,7 @@ function DefaultEditorAggParam<T>(props: DefaultEditorAggParamProps<T>) {
     if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
       setValidity(true);
     }
-  }, [agg, agg.params.field]);
+  }, [agg, agg.params.field, aggParam, setValidity]);
 
   if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
     return null;

@@ -21,8 +21,9 @@ import React from 'react';
 
 import { EuiRange, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import chrome from '../../../../chrome';
-import { AggParamEditorProps } from '..';
+
+import chrome from 'ui/chrome';
+import { AggParamEditorProps } from '../agg_param_props';
 
 const config = chrome.getUiSettingsClient();
 

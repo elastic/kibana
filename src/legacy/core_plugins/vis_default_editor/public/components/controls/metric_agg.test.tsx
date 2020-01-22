@@ -20,9 +20,8 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { AggConfig } from 'ui/agg_types';
+import { AggConfig } from '../../legacy_imports';
 import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
-import { AggParamEditorProps } from '..';
 
 jest.mock('./agg_utils', () => ({
   useAvailableOptions: jest.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
@@ -36,7 +35,8 @@ jest.mock('./agg_utils', () => ({
   useValidation: jest.fn(),
 }));
 
-import { useAvailableOptions, useFallbackMetric, useValidation } from './agg_utils';
+import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
+import { AggParamEditorProps } from '../agg_param_props';
 
 const agg = {
   id: '1',

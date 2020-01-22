@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { AggType } from 'ui/agg_types';
-import { AggConfig, VisState, VisParams } from 'ui/vis';
+import { VisState, VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { AggType, AggConfig } from '../legacy_imports';
 import { AggGroupNames } from '../agg_groups';
 import { Schema } from '../schemas';
 

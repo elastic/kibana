@@ -20,14 +20,14 @@
 import React, { FunctionComponent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { AggConfig } from 'ui/agg_types';
+import { AggConfig } from '../../legacy_imports';
 import {
   safeMakeLabel,
   useAvailableOptions,
   useFallbackMetric,
   useValidation,
   CUSTOM_METRIC,
-} from './agg_utils';
+} from './utils';
 
 type Callback = () => void;
 

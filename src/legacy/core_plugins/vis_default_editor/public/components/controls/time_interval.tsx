@@ -19,13 +19,12 @@
 
 import { get, find } from 'lodash';
 import React, { useEffect } from 'react';
-
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamOption } from '../../../../agg_types/agg_params';
-import { isValidInterval } from '../../../../agg_types/utils';
-import { AggParamEditorProps } from '..';
+
+import { isValidInterval, AggParamOption } from '../../legacy_imports';
+import { AggParamEditorProps } from '../agg_param_props';
 
 interface ComboBoxOption extends EuiComboBoxOptionProps {
   key: string;

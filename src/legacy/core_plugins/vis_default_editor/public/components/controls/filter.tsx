@@ -20,11 +20,13 @@
 import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../..';
-import { npStart } from '../../../../new_platform';
-import { Query, QueryStringInput } from '../../../../../../../plugins/data/public';
-import { Storage } from '../../../../../../../plugins/kibana_utils/public';
-import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
+
+import { npStart } from 'ui/new_platform';
+import { Query, QueryStringInput } from 'src/plugins/data/public';
+import { Storage } from 'src/plugins/kibana_utils/public';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { AggConfig } from '../../legacy_imports';
+
 const localStorage = new Storage(window.localStorage);
 
 interface FilterRowProps {

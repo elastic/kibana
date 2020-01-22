@@ -19,11 +19,12 @@
 
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { AggParamType } from '../../../../agg_types/param_types/agg';
-import { AggConfig } from '../../..';
+
+import { AggParamType, AggConfig } from '../../legacy_imports';
 import { useSubAggParamsHandlers } from './utils';
-import { AggGroupNames } from '../agg_groups';
-import { AggParamEditorProps, DefaultEditorAggParams } from '..';
+import { AggGroupNames } from '../../agg_groups';
+import { AggParamEditorProps } from '../agg_param_props';
+import { DefaultEditorAggParams } from '../agg_params';
 
 function OrderAggParamEditor({
   agg,

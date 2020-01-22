@@ -21,10 +21,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
-import { Field } from '../../../../../../../plugins/data/public';
-import { ComboBoxGroupedOptions } from '..';
+
+import { Field } from 'src/plugins/data/public';
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { ComboBoxGroupedOptions } from '../../utils';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
-import { AggConfig, VisState } from '../../..';
+import { AggConfig } from '../../legacy_imports';
 
 function callComboBoxOnChange(comp: ReactWrapper, value: any = []) {
   const comboBoxProps: EuiComboBoxProps<string> = comp.find(EuiComboBox).props();

@@ -18,8 +18,8 @@
  */
 
 import { useCallback } from 'react';
-import { AggConfig } from 'ui/vis';
-import { AggParamType } from 'ui/agg_types/param_types/agg';
+
+import { AggConfig, AggParamType } from '../../../legacy_imports';
 
 type SetValue = (value?: AggConfig) => void;
 

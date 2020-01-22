@@ -21,7 +21,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { ExtendedBoundsParamEditor, Bounds } from './extended_bounds';
-import { AggParamEditorProps } from '..';
+import { AggParamEditorProps } from '../agg_param_props';
 
 describe('ExtendedBoundsParamEditor', () => {
   let defaultProps: Partial<AggParamEditorProps<Bounds>>;

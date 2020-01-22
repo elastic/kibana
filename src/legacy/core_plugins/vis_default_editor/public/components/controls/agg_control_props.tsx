@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { AggConfig, VisParams } from 'ui/vis';
-import { DefaultEditorAggCommonProps } from '../components/agg_common_props';
+import { VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { AggConfig } from '../../legacy_imports';
+import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 export interface AggControlProps {
   agg: AggConfig;

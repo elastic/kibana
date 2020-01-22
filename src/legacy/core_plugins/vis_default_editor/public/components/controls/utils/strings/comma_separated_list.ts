@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function parseCommaSeparatedList(input) {
+export function parseCommaSeparatedList(input: any) {
   if (Array.isArray(input)) {
     return input;
   }

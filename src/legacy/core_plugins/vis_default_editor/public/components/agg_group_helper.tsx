@@ -18,7 +18,7 @@
  */
 
 import { findIndex, isEmpty } from 'lodash';
-import { AggConfig } from '../../../../agg_types/agg_config';
+import { AggConfig } from '../legacy_imports';
 import { AggsState } from './agg_group_state';
 
 const isAggRemovable = (agg: AggConfig, group: AggConfig[]) => {

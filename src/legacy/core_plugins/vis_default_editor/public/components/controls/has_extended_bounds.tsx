@@ -19,9 +19,10 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import { SwitchParamEditor } from './switch';
-import { isType } from '../../../../agg_types/buckets/migrate_include_exclude_format';
-import { AggParamEditorProps } from '..';
+import { isType } from '../../legacy_imports';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
   useEffect(() => {

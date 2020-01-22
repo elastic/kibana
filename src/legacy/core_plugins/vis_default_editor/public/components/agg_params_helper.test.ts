@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import { AggConfig, VisState } from '../../..';
-import { AggType } from 'ui/agg_types';
-import { IndexedArray } from 'ui/indexed_array';
+import { IndexPattern, Field } from 'src/plugins/data/public';
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { AggConfig, AggType, IndexedArray } from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
   isInvalidParamsTouched,
 } from './agg_params_helper';
-import { EditorConfig } from '../../config/types';
-import { IndexPattern, Field } from '../../../../../../../plugins/data/public';
+import { EditorConfig } from '../config/types';
 
 jest.mock('ui/agg_types', () => ({
   aggTypes: {

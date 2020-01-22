@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggConfig } from '../../../../agg_types/agg_config';
+import { AggConfig } from '../legacy_imports';
 import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
@@ -73,7 +73,7 @@ function DefaultEditorAggGroup({
   // e.g. buckets can have no aggs
   const group: AggConfig[] = useMemo(
     () => state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [],
-    [state.aggs.aggs]
+    [groupName, state.aggs.aggs]
   );
 
   const stats = {
@@ -120,7 +120,7 @@ function DefaultEditorAggGroup({
         });
       });
     }
-  }, [formIsTouched]);
+  }, [aggsState, formIsTouched, isAllAggsTouched]);
 
   useEffect(() => {
     setValidity(`aggGroup__${groupName}`, isGroupValid);

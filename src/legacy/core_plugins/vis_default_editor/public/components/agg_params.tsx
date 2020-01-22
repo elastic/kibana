@@ -22,8 +22,8 @@ import { EuiForm, EuiAccordion, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
-import { AggConfig } from 'ui/agg_types/';
-import { IndexPattern } from '../../../../../../../plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
+import { AggConfig } from '../legacy_imports';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
@@ -38,8 +38,8 @@ import {
   AGG_PARAMS_ACTION_KEYS,
   initAggParamsState,
 } from './agg_params_state';
-import { editorConfigProviders } from '../../config/editor_config_providers';
-import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../../config/types';
+import { editorConfigProviders } from '../config/editor_config_providers';
+import { FixedParam, TimeIntervalParam, EditorParamConfig } from '../config/types';
 import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorCommonProps } from './agg_common_props';
 
@@ -160,20 +160,21 @@ function DefaultEditorAggParams({
         }
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorConfig]);
 
   useEffect(() => {
     setTouched(false);
-  }, [agg.type]);
+  }, [agg.type, setTouched]);
 
   useEffect(() => {
     setValidity(isFormValid);
-  }, [isFormValid, agg.type]);
+  }, [isFormValid, agg.type, setValidity]);
 
   useEffect(() => {
     // when all invalid controls were touched or they are untouched
     setTouched(isAllInvalidParamsTouched);
-  }, [isAllInvalidParamsTouched]);
+  }, [isAllInvalidParamsTouched, setTouched]);
 
   return (
     <EuiForm

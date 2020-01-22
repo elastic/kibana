@@ -21,6 +21,7 @@ import React, { useEffect, useCallback } from 'react';
 import { EuiFormRow, EuiIconTip, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { AggControlProps } from './agg_control_props';
 
 const DEFAULT_VALUE = 50;

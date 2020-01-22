@@ -19,19 +19,19 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
-import { EditorRenderProps } from '../../../../../core_plugins/kibana/public/visualize/np_ready/types';
-import { VisualizeEmbeddable } from '../../../../../core_plugins/visualizations/public/embeddable';
-import { VisualizeEmbeddableFactory } from '../../../../../core_plugins/visualizations/public/embeddable/visualize_embeddable_factory';
+import { start as embeddables } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
+import { VisualizeEmbeddable } from 'src/legacy/core_plugins/visualizations/public/embeddable';
+import { VisualizeEmbeddableFactory } from 'src/legacy/core_plugins/visualizations/public/embeddable/visualize_embeddable_factory';
 import {
   PanelsContainer,
   Panel,
-} from '../../../../../core_plugins/console/public/np_ready/application/components/split_panel';
+} from 'src/legacy/core_plugins/console/public/np_ready/application/components/split_panel';
 
 import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorControllerState } from './default_editor_controller';
-import { getInitialWidth } from '../../editor_size';
+import { getInitialWidth } from './editor_size';
 
 function DefaultEditor({
   savedObj,

@@ -22,8 +22,9 @@ import React, { ChangeEvent } from 'react';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
-import { useValidation } from './agg_utils';
-import { AggParamEditorProps } from '..';
+
+import { useValidation } from './utils';
+import { AggParamEditorProps } from '../agg_param_props';
 
 export interface Bounds {
   min: number | '';

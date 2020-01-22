@@ -20,7 +20,7 @@
 import { useEffect, useReducer, useCallback } from 'react';
 import { isEqual } from 'lodash';
 
-import { Vis, VisState, VisParams } from 'ui/vis';
+import { Vis, VisState, VisParams } from 'src/legacy/core_plugins/visualizations/public';
 import { editorStateReducer, initEditorState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction, updateStateParams } from './actions';

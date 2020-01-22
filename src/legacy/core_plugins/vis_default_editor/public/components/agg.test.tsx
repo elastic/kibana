@@ -19,13 +19,15 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { VisState } from '../../..';
+import { act } from 'react-dom/test-utils';
+
+import { IndexPattern } from 'src/plugins/data/public';
+import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+
 import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
-import { act } from 'react-dom/test-utils';
 import { DefaultEditorAggParams } from './agg_params';
 import { AggType } from 'ui/agg_types';
-import { IndexPattern } from '../../../../../../../plugins/data/public';
 import { AGGS_ACTION_KEYS } from './agg_group_state';
 
 jest.mock('./agg_params', () => ({

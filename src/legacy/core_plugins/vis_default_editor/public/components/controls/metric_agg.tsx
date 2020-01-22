@@ -20,8 +20,9 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAvailableOptions, useFallbackMetric, useValidation } from './agg_utils';
-import { AggParamEditorProps } from '..';
+
+import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
+import { AggParamEditorProps } from '../agg_param_props';
 
 const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
 const EMPTY_VALUE = 'EMPTY_VALUE';
