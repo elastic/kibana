@@ -109,6 +109,7 @@ export {
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
