@@ -19,13 +19,13 @@
 
 import _ from 'lodash';
 import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
-import { AppState } from '../../legacy_imports';
 import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../../saved_dashboard/saved_dashboard';
+import { DashboardAppState } from '../types';
 
 export function updateSavedDashboard(
   savedDashboard: SavedObjectDashboard,
-  appState: AppState,
+  appState: DashboardAppState,
   timeFilter: TimefilterContract,
   toJson: <T>(object: T) => string
 ) {

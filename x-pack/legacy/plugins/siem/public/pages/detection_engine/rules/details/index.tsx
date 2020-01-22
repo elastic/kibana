@@ -10,8 +10,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiHealth,
   EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -60,10 +60,10 @@ import { inputsSelectors } from '../../../../store/inputs';
 import { State } from '../../../../store';
 import { InputsRange } from '../../../../store/inputs/model';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../../store/inputs/actions';
-import { getEmptyTagValue } from '../../../../components/empty_value';
+import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
-import { RuleActionsOverflow } from '../components/rule_actions_overflow';
+import { RuleStatus } from '../components/rule_status';
 
 interface ReduxProps {
   filters: esFilters.Filter[];
@@ -78,14 +78,19 @@ export interface DispatchProps {
   }>;
 }
 
+enum RuleDetailTabs {
+  signals = 'signals',
+  failures = 'failures',
+}
+
 const ruleDetailTabs = [
   {
-    id: 'signal',
+    id: RuleDetailTabs.signals,
     name: detectionI18n.SIGNAL,
     disabled: false,
   },
   {
-    id: 'failure',
+    id: RuleDetailTabs.failures,
     name: i18n.FAILURE_HISTORY_TAB,
     disabled: false,
   },
@@ -104,9 +109,11 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       hasIndexWrite,
       signalIndexName,
     } = useUserInfo();
-    const { ruleId } = useParams();
+    const { detailName: ruleId } = useParams();
     const [isLoading, rule] = useRule(ruleId);
-    const [ruleDetailTab, setRuleDetailTab] = useState('signal');
+    // This is used to re-trigger api rule status when user de/activate rule
+    const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
+    const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
     const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
       rule,
       detailsView: true,
@@ -114,14 +121,6 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
     const [lastSignals] = useSignalInfo({ ruleId });
     const userHasNoPermissions =
       canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
-
-    if (
-      isSignalIndexExists != null &&
-      isAuthenticated != null &&
-      (!isSignalIndexExists || !isAuthenticated)
-    ) {
-      return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
-    }
 
     const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
     const subTitle = useMemo(
@@ -175,34 +174,28 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       filters,
     ]);
 
-    const statusColor =
-      rule?.status == null
-        ? 'subdued'
-        : rule?.status === 'succeeded'
-        ? 'success'
-        : rule?.status === 'failed'
-        ? 'danger'
-        : rule?.status === 'executing'
-        ? 'warning'
-        : 'subdued';
-
     const tabs = useMemo(
-      () =>
-        ruleDetailTabs.map(tab => (
-          <EuiTab
-            onClick={() => setRuleDetailTab(tab.id)}
-            isSelected={tab.id === ruleDetailTab}
-            disabled={tab.disabled}
-            key={tab.name}
-          >
-            {tab.name}
-          </EuiTab>
-        )),
+      () => (
+        <EuiTabs>
+          {ruleDetailTabs.map(tab => (
+            <EuiTab
+              onClick={() => setRuleDetailTab(tab.id)}
+              isSelected={tab.id === ruleDetailTab}
+              disabled={tab.disabled}
+              key={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ),
       [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
     );
     const ruleError = useMemo(
       () =>
-        rule?.status === 'failed' && ruleDetailTab === 'signal' && rule?.last_failure_at != null ? (
+        rule?.status === 'failed' &&
+        ruleDetailTab === RuleDetailTabs.signals &&
+        rule?.last_failure_at != null ? (
           <RuleStatusFailedCallOut
             message={rule?.last_failure_message ?? ''}
             date={rule?.last_failure_at}
@@ -217,6 +210,23 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
       },
       [setAbsoluteRangeDatePicker]
     );
+
+    const handleOnChangeEnabledRule = useCallback(
+      (enabled: boolean) => {
+        if (ruleEnabled == null || enabled !== ruleEnabled) {
+          setRuleEnabled(enabled);
+        }
+      },
+      [ruleEnabled, setRuleEnabled]
+    );
+
+    if (
+      isSignalIndexExists != null &&
+      isAuthenticated != null &&
+      (!isSignalIndexExists || !isAuthenticated)
+    ) {
+      return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+    }
 
     return (
       <>
@@ -238,7 +248,6 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           href: `#${DETECTION_ENGINE_PAGE_NAME}/rules`,
                           text: i18n.BACK_TO_RULES,
                         }}
-                        badgeOptions={{ text: i18n.EXPERIMENTAL }}
                         border
                         subtitle={subTitle}
                         subtitle2={[
@@ -251,34 +260,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                                 </>,
                               ]
                             : []),
-                          <EuiFlexGroup
-                            gutterSize="xs"
-                            alignItems="center"
-                            justifyContent="flexStart"
-                          >
-                            <EuiFlexItem grow={false}>
-                              {i18n.STATUS}
-                              {':'}
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiHealth color={statusColor}>
-                                {rule?.status ?? getEmptyTagValue()}
-                              </EuiHealth>
-                            </EuiFlexItem>
-                            {rule?.status_date && (
-                              <>
-                                <EuiFlexItem grow={false}>
-                                  <>{i18n.STATUS_AT}</>
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={true}>
-                                  <FormattedDate
-                                    value={rule?.status_date}
-                                    fieldName={i18n.STATUS_DATE}
-                                  />
-                                </EuiFlexItem>
-                              </>
-                            )}
-                          </EuiFlexGroup>,
+                          <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
                         ]}
                         title={title}
                       >
@@ -289,6 +271,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                               isDisabled={userHasNoPermissions}
                               enabled={rule?.enabled ?? false}
                               optionLabel={i18n.ACTIVATE_RULE}
+                              onChange={handleOnChangeEnabledRule}
                             />
                           </EuiFlexItem>
 
@@ -316,7 +299,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                       {ruleError}
                       {tabs}
                       <EuiSpacer />
-                      {ruleDetailTab === 'signal' && (
+                      {ruleDetailTab === RuleDetailTabs.signals && (
                         <>
                           <EuiFlexGroup>
                             <EuiFlexItem component="section" grow={1}>
@@ -381,7 +364,9 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
                           )}
                         </>
                       )}
-                      {ruleDetailTab === 'failure' && <FailureHistory id={rule?.id} />}
+                      {ruleDetailTab === RuleDetailTabs.failures && (
+                        <FailureHistory id={rule?.id} />
+                      )}
                     </WrapperPage>
                   </StickyContainer>
                 )}
@@ -396,7 +381,7 @@ const RuleDetailsComponent = memo<RuleDetailsComponentProps>(
           }}
         </WithSource>
 
-        <SpyRoute />
+        <SpyRoute state={{ ruleName: rule?.name }} />
       </>
     );
   }
@@ -417,8 +402,10 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const RuleDetails = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(RuleDetailsComponent);
+};
+
+export const RuleDetails = connect(makeMapStateToProps, mapDispatchToProps)(RuleDetailsComponent);
 
 RuleDetails.displayName = 'RuleDetails';

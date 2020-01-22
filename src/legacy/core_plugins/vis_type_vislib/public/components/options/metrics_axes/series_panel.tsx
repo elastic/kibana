@@ -41,7 +41,7 @@ function SeriesPanel(props: SeriesPanelProps) {
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
-            id="kbnVislibVisTypes.controls.pointSeries.series.metricsTitle"
+            id="visTypeVislib.controls.pointSeries.series.metricsTitle"
             defaultMessage="Metrics"
           />
         </h3>
@@ -57,7 +57,7 @@ function SeriesPanel(props: SeriesPanelProps) {
           buttonContent={chart.data.label}
           buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
           aria-label={i18n.translate(
-            'kbnVislibVisTypes.controls.pointSeries.seriesAccordionAriaLabel',
+            'visTypeVislib.controls.pointSeries.seriesAccordionAriaLabel',
             {
               defaultMessage: 'Toggle {agg} options',
               values: { agg: chart.data.label },

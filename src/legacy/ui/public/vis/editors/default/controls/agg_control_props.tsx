@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { VisParams } from '../../..';
-import { AggParams } from '../agg_params';
-import { OnAggParamsChange } from '../components/agg_common_props';
+import { AggConfig, VisParams } from 'ui/vis';
+import { DefaultEditorAggCommonProps } from '../components/agg_common_props';
 
 export interface AggControlProps {
-  aggParams: AggParams;
+  agg: AggConfig;
   editorStateParams: VisParams;
-  setValue: OnAggParamsChange;
+  setAggParamValue: DefaultEditorAggCommonProps['setAggParamValue'];
+  setStateParamValue: DefaultEditorAggCommonProps['setStateParamValue'];
 }

@@ -42,7 +42,7 @@ export const getBarchartConfigs = ({
   settings: {
     legendPosition: legendPosition ?? Position.Bottom,
     onBrushEnd,
-    showLegend: showLegend || true,
+    showLegend: showLegend ?? true,
     theme: {
       scales: {
         barsPadding: 0.08,

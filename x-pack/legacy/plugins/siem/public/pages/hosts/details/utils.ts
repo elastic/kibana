@@ -5,8 +5,8 @@
  */
 
 import { Breadcrumb } from 'ui/chrome';
+import { get, isEmpty } from 'lodash/fp';
 
-import { get } from 'lodash/fp';
 import { hostsModel } from '../../../store';
 import { HostsTableType } from '../../../store/hosts/model';
 import { getHostsUrl, getHostDetailsUrl } from '../../../components/link_to/redirect_to_hosts';
@@ -29,7 +29,7 @@ export const getBreadcrumbs = (params: HostRouteSpyState, search: string[]): Bre
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: `${getHostsUrl()}${search && search[0] ? search[0] : ''}`,
+      href: `${getHostsUrl()}${!isEmpty(search[0]) ? search[0] : ''}`,
     },
   ];
 
@@ -38,7 +38,7 @@ export const getBreadcrumbs = (params: HostRouteSpyState, search: string[]): Bre
       ...breadcrumb,
       {
         text: params.detailName,
-        href: `${getHostDetailsUrl(params.detailName)}${search && search[1] ? search[1] : ''}`,
+        href: `${getHostDetailsUrl(params.detailName)}${!isEmpty(search[1]) ? search[1] : ''}`,
       },
     ];
   }

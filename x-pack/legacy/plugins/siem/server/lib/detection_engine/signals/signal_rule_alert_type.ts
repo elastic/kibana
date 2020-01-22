@@ -96,7 +96,7 @@ export const signalRulesAlertType = ({
         >(ruleStatusSavedObjectType, {
           alertId, // do a search for this id.
           statusDate: date,
-          status: 'executing',
+          status: 'going to run',
           lastFailureAt: null,
           lastSuccessAt: null,
           lastFailureMessage: null,
@@ -106,7 +106,7 @@ export const signalRulesAlertType = ({
         // update 0th to executing.
         currentStatusSavedObject = ruleStatusSavedObjects.saved_objects[0];
         const sDate = new Date().toISOString();
-        currentStatusSavedObject.attributes.status = 'executing';
+        currentStatusSavedObject.attributes.status = 'going to run';
         currentStatusSavedObject.attributes.statusDate = sDate;
         await services.savedObjectsClient.update(
           ruleStatusSavedObjectType,
@@ -246,7 +246,7 @@ export const signalRulesAlertType = ({
           // TODO: Error handling and writing of errors into a signal that has error
           // handling/conditions
           logger.error(
-            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", ${err.message}`
           );
           const sDate = new Date().toISOString();
           currentStatusSavedObject.attributes.status = 'failed';

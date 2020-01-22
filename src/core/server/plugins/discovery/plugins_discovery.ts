@@ -112,7 +112,7 @@ function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
  * @param coreContext Kibana core context.
  */
 function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
-  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
+  return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);

@@ -60,7 +60,7 @@ export const mockTableData: TableData[] = [
     lastResponse: { type: '—' },
     method: 'saved_query',
     rule: {
-      href: '#/detection-engine/rules/id/abe6c564-050d-45a5-aaf0-386c37dd1f61',
+      href: '#/detections/rules/id/abe6c564-050d-45a5-aaf0-386c37dd1f61',
       name: 'Home Grown!',
       status: 'Status Placeholder',
     },
@@ -112,7 +112,7 @@ export const mockTableData: TableData[] = [
     lastResponse: { type: '—' },
     method: 'saved_query',
     rule: {
-      href: '#/detection-engine/rules/id/63f06f34-c181-4b2d-af35-f2ace572a1ee',
+      href: '#/detections/rules/id/63f06f34-c181-4b2d-af35-f2ace572a1ee',
       name: 'Home Grown!',
       status: 'Status Placeholder',
     },
