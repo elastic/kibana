@@ -37,11 +37,15 @@ export function getValType(def: Partial<FieldSetting>, value?: any): UiSettingsT
 
   const typeofVal = def.value != null ? typeof def.value : typeof value;
 
+  if (typeofVal === 'bigint') {
+    return 'number';
+  }
+
   if (typeofVal === 'symbol' || typeofVal === 'object' || typeofVal === 'function') {
     throw new Error(
       `incompatible UiSettingsType: '${def.name}' type ${typeofVal} | ${JSON.stringify(def)}`
     );
   }
 
-  return typeofVal === 'bigint' ? 'number' : typeofVal;
+  return typeofVal;
 }

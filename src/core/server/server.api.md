@@ -1993,7 +1993,7 @@ export interface UiSettingsServiceStart {
 }
 
 // @public
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
+export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
 
 // @public
 export interface UserProvidedValues<T = any> {
