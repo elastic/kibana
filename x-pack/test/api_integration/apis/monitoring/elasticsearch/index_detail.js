@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import indexDetailFixture from './fixtures/index_detail';
 import indexDetailAdvancedFixture from './fixtures/index_detail_advanced';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -16,7 +16,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
     const timeRange = {
       min: '2017-10-05T20:31:48.000Z',
-      max: '2017-10-05T20:35:12.000Z'
+      max: '2017-10-05T20:35:12.000Z',
     };
 
     before('load archive', () => {
@@ -29,11 +29,13 @@ export default function ({ getService }) {
 
     it('should summarize index with chart metrics data for the non-advanced view', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices/avocado-tweets-2017.10.02')
+        .post(
+          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices/avocado-tweets-2017.10.02'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({
           timeRange,
-          is_advanced: false
+          is_advanced: false,
         })
         .expect(200);
 
@@ -42,11 +44,13 @@ export default function ({ getService }) {
 
     it('should summarize index with chart metrics data for the advanced view', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices/avocado-tweets-2017.10.02')
+        .post(
+          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/indices/avocado-tweets-2017.10.02'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({
           timeRange,
-          is_advanced: true
+          is_advanced: true,
         })
         .expect(200);
 

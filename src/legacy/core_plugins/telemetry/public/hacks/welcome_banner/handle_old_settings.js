@@ -27,8 +27,9 @@ import { CONFIG_TELEMETRY } from '../../../common/constants';
  * @param {Object} config The advanced settings config object.
  * @return {Boolean} {@code true} if the banner should still be displayed. {@code false} if the banner should not be displayed.
  */
+const CONFIG_ALLOW_REPORT = 'xPackMonitoring:allowReport';
+
 export async function handleOldSettings(config, telemetryOptInProvider) {
-  const CONFIG_ALLOW_REPORT = 'xPackMonitoring:allowReport';
   const CONFIG_SHOW_BANNER = 'xPackMonitoring:showBanner';
   const oldAllowReportSetting = config.get(CONFIG_ALLOW_REPORT, null);
   const oldTelemetrySetting = config.get(CONFIG_TELEMETRY, null);
@@ -61,4 +62,24 @@ export async function handleOldSettings(config, telemetryOptInProvider) {
   }
 
   return true;
+}
+
+export async function isOptInHandleOldSettings(config, telemetryOptInProvider) {
+  const currentOptInSettting = telemetryOptInProvider.getOptIn();
+
+  if (typeof currentOptInSettting === 'boolean') {
+    return currentOptInSettting;
+  }
+
+  const oldTelemetrySetting = config.get(CONFIG_TELEMETRY, null);
+  if (typeof oldTelemetrySetting === 'boolean') {
+    return oldTelemetrySetting;
+  }
+
+  const oldAllowReportSetting = config.get(CONFIG_ALLOW_REPORT, null);
+  if (typeof oldAllowReportSetting === 'boolean') {
+    return oldAllowReportSetting;
+  }
+
+  return null;
 }

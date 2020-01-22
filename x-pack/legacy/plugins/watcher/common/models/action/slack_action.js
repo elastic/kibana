@@ -22,7 +22,7 @@ export class SlackAction extends BaseAction {
     const result = super.downstreamJson;
     Object.assign(result, {
       to: this.to,
-      text: this.text
+      text: this.text,
     });
 
     return result;
@@ -36,7 +36,7 @@ export class SlackAction extends BaseAction {
 
     Object.assign(props, {
       to: json.to,
-      text: json.text
+      text: json.text,
     });
 
     const action = new SlackAction(props, errors);
@@ -51,9 +51,9 @@ export class SlackAction extends BaseAction {
       slack: {
         message: {
           to: this.to,
-          text: this.text
-        }
-      }
+          text: this.text,
+        },
+      },
     };
 
     return result;
@@ -66,7 +66,7 @@ export class SlackAction extends BaseAction {
 
     Object.assign(props, {
       to: json.actionJson.slack.message.to,
-      text: json.actionJson.slack.message.text
+      text: json.actionJson.slack.message.text,
     });
 
     const action = new SlackAction(props, errors);
@@ -80,24 +80,30 @@ export class SlackAction extends BaseAction {
     if (!json.slack) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.slackAction.actionJsonSlackPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonSlack} property',
-          values: {
-            actionJsonSlack: 'actionJson.slack'
+        message: i18n.translate(
+          'xpack.watcher.models.slackAction.actionJsonSlackPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonSlack} property',
+            values: {
+              actionJsonSlack: 'actionJson.slack',
+            },
           }
-        })
+        ),
       });
     }
 
     if (json.slack && !json.slack.message) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.slackAction.actionJsonSlackMessagePropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonSlackMessage} property',
-          values: {
-            actionJsonSlackMessage: 'actionJson.slack.message'
+        message: i18n.translate(
+          'xpack.watcher.models.slackAction.actionJsonSlackMessagePropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonSlackMessage} property',
+            values: {
+              actionJsonSlackMessage: 'actionJson.slack.message',
+            },
           }
-        }),
+        ),
       });
     }
 

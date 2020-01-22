@@ -22,20 +22,13 @@ export interface KibanaRouteOptions {
 
 export interface KibanaServer extends Server {
   route: (options: KibanaRouteOptions) => void;
-  usage: {
-    collectorSet: {
-      register: (usageCollector: any) => any;
-    };
-  };
 }
 
 export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
-  const { usageCollector, xpack } = plugins;
-  const libs = compose(
-    server,
-    plugins
-  );
-  usageCollector.collectorSet.register(KibanaTelemetryAdapter.initUsageCollector(usageCollector));
+  const { usageCollection, xpack } = plugins;
+  const libs = compose(server, plugins);
+  KibanaTelemetryAdapter.registerUsageCollector(usageCollection);
+
   initUptimeServer(libs);
 
   xpack.registerFeature({

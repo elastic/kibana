@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { words } from 'lodash';
 
 /**
@@ -28,5 +27,7 @@ import { words } from 'lodash';
  * Example: 'xPack:fooBar:foo_bar_baz' -> 'x pack foo bar foo bar baz'
  */
 export function getAriaName(name) {
-  return words(name).map(word => word.toLowerCase()).join(' ');
+  return words(name)
+    .map(word => word.toLowerCase())
+    .join(' ');
 }

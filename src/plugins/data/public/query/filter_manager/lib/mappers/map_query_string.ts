@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter, FILTERS, isQueryStringFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../common';
 
-export const mapQueryString = (filter: Filter) => {
-  if (isQueryStringFilter(filter)) {
+export const mapQueryString = (filter: esFilters.Filter) => {
+  if (esFilters.isQueryStringFilter(filter)) {
     return {
-      type: FILTERS.QUERY_STRING,
+      type: esFilters.FILTERS.QUERY_STRING,
       key: 'query',
       value: filter.query.query_string.query,
     };

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../common';
 
-export function getFiltersArray(): Filter[] {
+export function getFiltersArray(): esFilters.Filter[] {
   return [
     {
       query: { match: { extension: { query: 'jpg', type: 'phrase' } } },

@@ -7,19 +7,20 @@
 import sinon from 'sinon';
 import { ExecutorError } from './executor_error';
 import { ActionExecutor } from './action_executor';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
+import { ConcreteTaskInstance, TaskStatus } from '../../../../../plugins/task_manager/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/plugin.mock';
+import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
 import {
   savedObjectsClientMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
+import { createEventLoggerMock } from '../../../../../plugins/event_log/server/event_logger.mock';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
-const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.create();
+const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
 const mockedActionExecutor = actionExecutorMock.create();
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -34,7 +35,7 @@ beforeAll(() => {
     state: {},
     attempts: 0,
     ownerId: '',
-    status: 'running' as TaskStatus,
+    status: TaskStatus.Running,
     startedAt: new Date(),
     scheduledAt: new Date(),
     retryAt: new Date(Date.now() + 5 * 60 * 1000),
@@ -62,6 +63,7 @@ const actionExecutorInitializerParams = {
   actionTypeRegistry,
   spaces: () => undefined,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
+  eventLogger: createEventLoggerMock(),
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
@@ -94,7 +96,7 @@ test('executes the task by calling the executor with proper parameters', async (
     taskInstance: mockedTaskInstance,
   });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -111,11 +113,9 @@ test('executes the task by calling the executor with proper parameters', async (
 
   expect(runnerResult).toBeUndefined();
   expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
-  expect(mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
-    'action_task_params',
-    '3',
-    { namespace: 'namespace-test' }
-  );
+  expect(
+    mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser
+  ).toHaveBeenCalledWith('action_task_params', '3', { namespace: 'namespace-test' });
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
@@ -156,6 +156,7 @@ test('throws an error with suggested retry logic when return status is error', a
   });
   mockedActionExecutor.execute.mockResolvedValueOnce({
     status: 'error',
+    actionId: '2',
     message: 'Error message',
     data: { foo: true },
     retry: false,
@@ -176,7 +177,7 @@ test('uses API key when provided', async () => {
     taskInstance: mockedTaskInstance,
   });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',
@@ -219,7 +220,7 @@ test(`doesn't use API key when not provided`, async () => {
   factory.initialize(taskRunnerFactoryInitializerParams);
   const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
 
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
   spaceIdToNamespace.mockReturnValueOnce('namespace-test');
   mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
     id: '3',

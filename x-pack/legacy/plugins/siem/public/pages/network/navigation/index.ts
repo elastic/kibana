@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './anomalies_query_tab_body';
 export * from './network_routes';
 export * from './network_routes_loading';
 export * from './nav_tabs';

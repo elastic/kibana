@@ -89,10 +89,6 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 export const AssetManager = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withProps({ onAssetCopy: asset => notify.success(`Copied '${asset.id}' to clipboard`) })
 )(Component);

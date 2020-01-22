@@ -34,6 +34,10 @@ kibana_vars=(
     elasticsearch.ssl.certificateAuthorities
     elasticsearch.ssl.key
     elasticsearch.ssl.keyPassphrase
+    elasticsearch.ssl.keystore.path
+    elasticsearch.ssl.keystore.password
+    elasticsearch.ssl.truststore.path
+    elasticsearch.ssl.truststore.password
     elasticsearch.ssl.verificationMode
     elasticsearch.startupTimeout
     elasticsearch.username
@@ -42,6 +46,11 @@ kibana_vars=(
     kibana.index
     logging.dest
     logging.quiet
+    logging.rotate.enabled
+    logging.rotate.everyBytes
+    logging.rotate.keepFiles
+    logging.rotate.pollingInterval
+    logging.rotate.usePolling
     logging.silent
     logging.useUTC
     logging.verbose
@@ -50,7 +59,6 @@ kibana_vars=(
     path.data
     pid.file
     regionmap
-    regionmap.includeElasticMapsService
     server.basePath
     server.customResponseHeaders
     server.defaultRoute
@@ -68,6 +76,10 @@ kibana_vars=(
     server.ssl.enabled
     server.ssl.key
     server.ssl.keyPassphrase
+    server.ssl.keystore.path
+    server.ssl.keystore.password
+    server.ssl.truststore.path
+    server.ssl.truststore.password
     server.ssl.redirectHttpFromPort
     server.ssl.supportedProtocols
     server.xsrf.whitelist
@@ -180,7 +192,11 @@ kibana_vars=(
     xpack.security.encryptionKey
     xpack.security.secureCookies
     xpack.security.sessionTimeout
+    xpack.security.session.idleTimeout
+    xpack.security.session.lifespan
+    xpack.security.loginAssistanceMessage
     telemetry.enabled
+    telemetry.sendUsageFrom
 )
 
 longopts=''

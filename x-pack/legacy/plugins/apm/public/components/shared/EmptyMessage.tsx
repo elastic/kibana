@@ -14,7 +14,7 @@ interface Props {
   hideSubheading?: boolean;
 }
 
-const EmptyMessage: React.SFC<Props> = ({
+const EmptyMessage: React.FC<Props> = ({
   heading = i18n.translate('xpack.apm.emptyMessage.noDataFoundLabel', {
     defaultMessage: 'No data found.'
   }),

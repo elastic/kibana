@@ -30,9 +30,6 @@ export interface Query {
   /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
 
-  getFilterBar?: FilterBar | null;
-
-  getMonitorPageTitle?: MonitorPageTitle | null;
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
   /** Fetches details about the uptime index. */
@@ -419,8 +416,6 @@ export interface SnapshotCount {
 
   down: number;
 
-  mixed: number;
-
   total: number;
 }
 
@@ -470,29 +465,7 @@ export interface StatusData {
   /** The total down counts for this point. */
   total?: number | null;
 }
-/** The data used to enrich the filter bar. */
-export interface FilterBar {
-  /** A series of monitor IDs in the heartbeat indices. */
-  ids?: string[] | null;
-  /** The location values users have configured for the agents. */
-  locations?: string[] | null;
-  /** The ports of the monitored endpoints. */
-  ports?: number[] | null;
-  /** The schemes used by the monitors. */
-  schemes?: string[] | null;
-  /** The possible status values contained in the indices. */
-  statuses?: string[] | null;
-  /** The list of URLs */
-  urls?: string[] | null;
-}
 
-export interface MonitorPageTitle {
-  id: string;
-
-  url?: string | null;
-
-  name?: string | null;
-}
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
   /** Used to go to the next page of results */
@@ -738,24 +711,12 @@ export interface GetMonitorChartsDataQueryArgs {
 
   location?: string | null;
 }
-export interface GetLatestMonitorsQueryArgs {
-  /** The lower limit of the date range. */
-  dateRangeStart: string;
-  /** The upper limit of the date range. */
-  dateRangeEnd: string;
-  /** Optional: a specific monitor ID filter. */
-  monitorId?: string | null;
-  /** Optional: a specific instance location filter. */
-  location?: string | null;
-}
 export interface GetFilterBarQueryArgs {
   dateRangeStart: string;
 
   dateRangeEnd: string;
 }
-export interface GetMonitorPageTitleQueryArgs {
-  monitorId: string;
-}
+
 export interface GetMonitorStatesQueryArgs {
   dateRangeStart: string;
 

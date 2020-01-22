@@ -16,16 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  GeoBoundingBoxFilter,
-  Filter,
-  FILTERS,
-  isGeoBoundingBoxFilter,
-  FilterValueFormatter,
-} from '@kbn/es-query';
+import { esFilters } from '../../../../../common';
 
 const getFormattedValueFn = (params: any) => {
-  return (formatter?: FilterValueFormatter) => {
+  return (formatter?: esFilters.FilterValueFormatter) => {
     const corners = formatter
       ? {
           topLeft: formatter.convert(params.top_left),
@@ -40,20 +34,20 @@ const getFormattedValueFn = (params: any) => {
   };
 };
 
-const getParams = (filter: GeoBoundingBoxFilter) => {
+const getParams = (filter: esFilters.GeoBoundingBoxFilter) => {
   const key = Object.keys(filter.geo_bounding_box).filter(k => k !== 'ignore_unmapped')[0];
   const params = filter.geo_bounding_box[key];
 
   return {
     key,
     params,
-    type: FILTERS.GEO_BOUNDING_BOX,
+    type: esFilters.FILTERS.GEO_BOUNDING_BOX,
     value: getFormattedValueFn(params),
   };
 };
 
-export const mapGeoBoundingBox = (filter: Filter) => {
-  if (!isGeoBoundingBoxFilter(filter)) {
+export const mapGeoBoundingBox = (filter: esFilters.Filter) => {
+  if (!esFilters.isGeoBoundingBoxFilter(filter)) {
     throw filter;
   }
 

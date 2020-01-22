@@ -2,21 +2,10 @@
 
 [Home](./index.md) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeNavControl](./kibana-plugin-public.chromenavcontrol.md) &gt; [mount](./kibana-plugin-public.chromenavcontrol.mount.md)
 
-## ChromeNavControl.mount() method
+## ChromeNavControl.mount property
 
 <b>Signature:</b>
 
 ```typescript
-mount(targetDomElement: HTMLElement): () => void;
+mount: MountPoint;
 ```
-
-## Parameters
-
-|  Parameter | Type | Description |
-|  --- | --- | --- |
-|  targetDomElement | <code>HTMLElement</code> |  |
-
-<b>Returns:</b>
-
-`() => void`
-

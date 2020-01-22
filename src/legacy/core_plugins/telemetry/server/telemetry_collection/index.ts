@@ -19,6 +19,5 @@
 
 // @ts-ignore
 export { getLocalStats } from './get_local_stats';
-
-// @ts-ignore
-export { getStats } from './get_stats';
+export { getClusterUuids } from './get_cluster_stats';
+export { registerCollection } from './register_collection';

@@ -25,7 +25,7 @@ fetch.Promise = require('bluebird');
 
 import Datasource from '../lib/classes/datasource';
 
-export default new Datasource ('quandl', {
+export default new Datasource('quandl', {
   dataSource: true,
   args: [
     {
@@ -42,11 +42,10 @@ export default new Datasource ('quandl', {
         defaultMessage:
           'Some quandl sources return multiple series, which one should I use? 1 based index.',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.quandlHelpText', {
-    defaultMessage:
-      `
+    defaultMessage: `
     [experimental]
     Pull data from quandl.com using the quandl code. Set {quandlKeyField} to your free API key in Kibana's
     Advanced Settings. The API has a really low rate limit without a key.`,
@@ -66,13 +65,14 @@ export default new Datasource ('quandl', {
       code: 'WIKI/AAPL',
       position: 1,
       interval: intervalMap[tlConfig.time.interval],
-      apikey: tlConfig.settings['timelion:quandl.key']
+      apikey: tlConfig.settings['timelion:quandl.key'],
     });
 
     if (!config.interval) {
       throw new Error(
         i18n.translate('timelion.serverSideErrors.quandlFunction.unsupportedIntervalErrorMessage', {
-          defaultMessage: 'quandl() unsupported interval: {interval}. quandl() supports: {intervals}',
+          defaultMessage:
+            'quandl() unsupported interval: {interval}. quandl() supports: {intervals}',
           values: {
             interval: tlConfig.time.interval,
             intervals: _.keys(intervalMap).join(', '),
@@ -83,7 +83,7 @@ export default new Datasource ('quandl', {
 
     const time = {
       min: moment.utc(tlConfig.time.from).format('YYYY-MM-DD'),
-      max: moment.utc(tlConfig.time.to).format('YYYY-MM-DD')
+      max: moment.utc(tlConfig.time.to).format('YYYY-MM-DD'),
     };
 
     // POSITIONS
@@ -93,29 +93,43 @@ export default new Datasource ('quandl', {
     // 4. close
     // 5. volume
 
-    const URL = 'https://www.quandl.com/api/v1/datasets/' + config.code + '.json' +
+    const URL =
+      'https://www.quandl.com/api/v1/datasets/' +
+      config.code +
+      '.json' +
       '?sort_order=asc' +
-      '&trim_start=' + time.min +
-      '&trim_end=' + time.max +
-      '&collapse=' + config.interval +
-      '&auth_token=' + config.apikey;
+      '&trim_start=' +
+      time.min +
+      '&trim_end=' +
+      time.max +
+      '&collapse=' +
+      config.interval +
+      '&auth_token=' +
+      config.apikey;
 
-    return fetch(URL).then(function (resp) { return resp.json(); }).then(function (resp) {
-      const data = _.map(resp.data, function (bucket) {
-        return [moment(bucket[0]).valueOf(), bucket[config.position]];
+    return fetch(URL)
+      .then(function(resp) {
+        return resp.json();
+      })
+      .then(function(resp) {
+        const data = _.map(resp.data, function(bucket) {
+          return [moment(bucket[0]).valueOf(), bucket[config.position]];
+        });
+
+        return {
+          type: 'seriesList',
+          list: [
+            {
+              data: data,
+              type: 'series',
+              fit: 'nearest',
+              label: resp.name,
+            },
+          ],
+        };
+      })
+      .catch(function(e) {
+        throw e;
       });
-
-      return {
-        type: 'seriesList',
-        list: [{
-          data: data,
-          type: 'series',
-          fit: 'nearest',
-          label: resp.name
-        }]
-      };
-    }).catch(function (e) {
-      throw e;
-    });
-  }
+  },
 });

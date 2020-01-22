@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const chance = getService('chance');
+  const randomness = getService('randomness');
 
   describe('params', () => {
     before(() => esArchiver.load('index_patterns/basic_index'));
@@ -63,8 +63,8 @@ export default function ({ getService }) {
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
-          pattern: chance.word(),
-          [chance.word()]: chance.word(),
+          pattern: randomness.word(),
+          [randomness.word()]: randomness.word(),
         })
         .expect(400));
   });

@@ -16,36 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-
-import { FiltersService, FiltersSetup } from './filters';
 import { TypesService, TypesSetup, TypesStart } from './types';
-
-/**
- * Interface for any dependencies on other plugins' contracts.
- *
- * @internal
- */
-interface VisualizationsPluginSetupDependencies {
-  __LEGACY: {
-    VisFiltersProvider: any;
-    createFilter: any;
-  };
-}
-
+import {
+  setUISettings,
+  setTypes,
+  setI18n,
+  setCapabilities,
+  setHttp,
+  setIndexPatterns,
+  setSavedObjects,
+  setUsageCollector,
+  setFilterManager,
+} from './services';
+import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
+import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
+import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
+import { visualization as visualizationFunction } from './expressions/visualization_function';
+import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
+import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
  * @public
  */
 export interface VisualizationsSetup {
-  filters: FiltersSetup;
   types: TypesSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisualizationsStart {
   types: TypesStart;
+}
+
+export interface VisualizationsSetupDeps {
+  expressions: ExpressionsSetup;
+  embeddable: IEmbeddableSetup;
+  usageCollection: UsageCollectionSetup;
+}
+
+export interface VisualizationsStartDeps {
+  data: DataPublicPluginStart;
 }
 
 /**
@@ -58,32 +72,50 @@ export interface VisualizationsStart {
  */
 export class VisualizationsPlugin
   implements
-    Plugin<VisualizationsSetup, VisualizationsStart, VisualizationsPluginSetupDependencies> {
-  private readonly filters: FiltersService = new FiltersService();
+    Plugin<
+      VisualizationsSetup,
+      VisualizationsStart,
+      VisualizationsSetupDeps,
+      VisualizationsStartDeps
+    > {
   private readonly types: TypesService = new TypesService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { __LEGACY }: VisualizationsPluginSetupDependencies) {
-    const { VisFiltersProvider, createFilter } = __LEGACY;
+  public setup(
+    core: CoreSetup,
+    { expressions, embeddable, usageCollection }: VisualizationsSetupDeps
+  ) {
+    setUISettings(core.uiSettings);
+    setUsageCollector(usageCollection);
+
+    expressions.registerFunction(visualizationFunction);
+    expressions.registerRenderer(visualizationRenderer);
+
+    const embeddableFactory = new VisualizeEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
-      filters: this.filters.setup({
-        VisFiltersProvider,
-        createFilter,
-      }),
       types: this.types.setup(),
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { data }: VisualizationsStartDeps) {
+    const types = this.types.start();
+    setI18n(core.i18n);
+    setTypes(types);
+    setCapabilities(core.application.capabilities);
+    setHttp(core.http);
+    setSavedObjects(core.savedObjects);
+    setIndexPatterns(data.indexPatterns);
+    setFilterManager(data.query.filterManager);
+
     return {
-      types: this.types.start(),
+      types,
     };
   }
 
   public stop() {
-    this.filters.stop();
     this.types.stop();
   }
 }

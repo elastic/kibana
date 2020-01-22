@@ -7,39 +7,12 @@
 import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
-  "The data used to enrich the filter bar."
-  type FilterBar {
-    "A series of monitor IDs in the heartbeat indices."
-    ids: [String!]
-    "The location values users have configured for the agents."
-    locations: [String!]
-    "The ports of the monitored endpoints."
-    ports: [Int!]
-    "The schemes used by the monitors."
-    schemes: [String!]
-    "The possible status values contained in the indices."
-    statuses: [String!]
-    "The list of URLs"
-    urls: [String!]
-  }
-
   type HistogramDataPoint {
     upCount: Int
     downCount: Int
     x: UnsignedInteger
     x0: UnsignedInteger
     y: UnsignedInteger
-  }
-
-  type SnapshotCount {
-    up: Int!
-    down: Int!
-    mixed: Int!
-    total: Int!
-  }
-
-  type Snapshot {
-    counts: SnapshotCount!
   }
 
   type DataPoint {
@@ -125,12 +98,6 @@ export const monitorsSchema = gql`
     interval: UnsignedInteger!
   }
 
-  type MonitorPageTitle {
-    id: String!
-    url: String
-    name: String
-  }
-
   extend type Query {
     getMonitors(
       dateRangeStart: String!
@@ -138,13 +105,6 @@ export const monitorsSchema = gql`
       filters: String
       statusFilter: String
     ): LatestMonitorsResult
-
-    getSnapshot(
-      dateRangeStart: String!
-      dateRangeEnd: String!
-      filters: String
-      statusFilter: String
-    ): Snapshot
 
     getSnapshotHistogram(
       dateRangeStart: String!
@@ -160,21 +120,5 @@ export const monitorsSchema = gql`
       dateRangeEnd: String!
       location: String
     ): MonitorChart
-
-    "Fetch the most recent event data for a monitor ID, date range, location."
-    getLatestMonitors(
-      "The lower limit of the date range."
-      dateRangeStart: String!
-      "The upper limit of the date range."
-      dateRangeEnd: String!
-      "Optional: a specific monitor ID filter."
-      monitorId: String
-      "Optional: a specific instance location filter."
-      location: String
-    ): [Ping!]!
-
-    getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
-
-    getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }
 `;

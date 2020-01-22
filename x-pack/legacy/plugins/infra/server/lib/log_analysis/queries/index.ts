@@ -5,3 +5,4 @@
  */
 
 export * from './log_entry_rate';
+export * from './top_log_entry_categories';

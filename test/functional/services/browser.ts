@@ -30,13 +30,7 @@ import { Browsers } from './remote/browsers';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const { driver, browserType, consoleLog$ } = await getService('__webdriver__').init();
-
-  consoleLog$.subscribe(({ message, level }) => {
-    log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
-      `browser[${level}] ${message}`
-    );
-  });
+  const { driver, browserType } = await getService('__webdriver__').init();
 
   const isW3CEnabled = (driver as any).executor_.w3c === true;
 
@@ -206,6 +200,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Pauses the execution in the browser, similar to setting a breakpoint for debugging.
+     * @return {Promise<void>}
+     */
+    public async pause() {
+      await driver.executeAsyncScript(`(async () => { debugger; return Promise.resolve(); })()`);
+    }
+
+    /**
      * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
      * offset to browser page top left corner.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
@@ -238,8 +240,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: any },
-      to: { offset: { x: any; y: any }; location: any }
+      from: { offset?: { x: any; y: any }; location: any },
+      to: { offset?: { x: any; y: any }; location: any }
     ) {
       if (this.isW3CEnabled) {
         // The offset should be specified in pixels relative to the center of the element's bounding box
@@ -430,6 +432,15 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Clears session storage for the focused window/frame.
+     *
+     * @return {Promise<void>}
+     */
+    public async clearSessionStorage(): Promise<void> {
+      await driver.executeScript('return window.sessionStorage.clear();');
+    }
+
+    /**
      * Closes the currently focused window. In most environments, after the window has been
      * closed, it is necessary to explicitly switch to whatever window is now focused.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#close
@@ -461,9 +472,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<A extends any[], R>(
-      fn: string | ((...args: A) => R),
-      ...args: A
+    public async executeAsync<R>(
+      fn: string | ((...args: any[]) => Promise<R>),
+      ...args: any[]
     ): Promise<R> {
       return await driver.executeAsyncScript(
         fn,

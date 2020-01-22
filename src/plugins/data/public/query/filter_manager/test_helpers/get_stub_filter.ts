@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { esFilters } from '../../../../common';
 
 export function getFilter(
-  store: FilterStateStore,
+  store: esFilters.FilterStateStore,
   disabled: boolean,
   negated: boolean,
   queryKey: string,
   queryValue: any
-): Filter {
+): esFilters.Filter {
   return {
     $state: {
       store,

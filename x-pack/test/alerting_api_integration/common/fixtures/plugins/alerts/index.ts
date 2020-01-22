@@ -14,7 +14,38 @@ export default function(kibana: any) {
     require: ['actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
     init(server: any) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'alerting',
+        name: 'Alerting',
+        app: ['alerting', 'kibana'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['alert'],
+              read: [],
+            },
+            ui: [],
+            api: ['alerting-read', 'alerting-all'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['alert'],
+            },
+            ui: [],
+            api: ['alerting-read'],
+          },
+        },
+      });
+
       // Action types
+      const noopActionType: ActionType = {
+        id: 'test.noop',
+        name: 'Test: Noop',
+        async executor() {
+          return { status: 'ok', actionId: '' };
+        },
+      };
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
@@ -32,7 +63,7 @@ export default function(kibana: any) {
           }),
         },
         async executor({ config, secrets, params, services }: ActionTypeExecutorOptions) {
-          return await services.callCluster('index', {
+          await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
             body: {
@@ -66,7 +97,7 @@ export default function(kibana: any) {
               source: 'action:test.failing',
             },
           });
-          throw new Error('Failed to execute action type');
+          throw new Error(`expected failure for ${params.index} ${params.reference}`);
         },
       };
       const rateLimitedActionType: ActionType = {
@@ -94,6 +125,7 @@ export default function(kibana: any) {
           return {
             status: 'error',
             retry: new Date(params.retryAt),
+            actionId: '',
           };
         },
       };
@@ -155,9 +187,11 @@ export default function(kibana: any) {
           });
           return {
             status: 'ok',
+            actionId: '',
           };
         },
       };
+      server.plugins.actions.setup.registerType(noopActionType);
       server.plugins.actions.setup.registerType(indexRecordActionType);
       server.plugins.actions.setup.registerType(failingActionType);
       server.plugins.actions.setup.registerType(rateLimitedActionType);
@@ -168,8 +202,21 @@ export default function(kibana: any) {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
         actionGroups: ['default', 'other'],
-        async executor({ services, params, state }: AlertExecutorOptions) {
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const {
+            services,
+            params,
+            state,
+            alertId,
+            spaceId,
+            namespace,
+            name,
+            tags,
+            createdBy,
+            updatedBy,
+          } = alertExecutorOptions;
           let group = 'default';
+          const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
           if (params.groupsToScheduleActionsInSeries) {
             const index = state.groupInSeriesIndex || 0;
@@ -192,6 +239,7 @@ export default function(kibana: any) {
               params,
               reference: params.reference,
               source: 'alert:test.always-firing',
+              alertInfo,
             },
           });
           return {
@@ -311,7 +359,7 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: [],
+        actionGroups: ['default'],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.plugins.alerting.setup.registerType(alwaysFiringAlertType);

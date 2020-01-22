@@ -17,9 +17,9 @@ import {
   fontSize,
   fontSizes
 } from '../../../../style/variables';
-import Legend from '../Legend';
+import { Legend } from '../Legend';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { asAbsoluteTime } from '../../TimestampTooltip';
+import { asAbsoluteDateTime } from '../../../../utils/formatters';
 
 const TooltipElm = styled.div`
   margin: 0 ${px(unit)};
@@ -87,9 +87,7 @@ export default function Tooltip({
   return (
     <Hint {...props} value={{ x, y }}>
       <TooltipElm>
-        <Header>
-          {header || asAbsoluteTime({ time: x, precision: 'seconds' })}
-        </Header>
+        <Header>{header || asAbsoluteDateTime(x, 'seconds')}</Header>
 
         <Content>
           {showLegends ? (

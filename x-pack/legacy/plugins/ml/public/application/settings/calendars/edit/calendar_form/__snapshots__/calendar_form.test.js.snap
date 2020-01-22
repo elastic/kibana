@@ -1,0 +1,206 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CalendarForm CalendarId shown as title when editing 1`] = `
+<EuiTitle>
+  <h1
+    className="euiTitle euiTitle--medium"
+  >
+    <FormattedMessage
+      defaultMessage="Calendar {calendarId}"
+      id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
+      values={
+        Object {
+          "calendarId": "test-calendar",
+        }
+      }
+    >
+      Calendar test-calendar
+    </FormattedMessage>
+  </h1>
+</EuiTitle>
+`;
+
+exports[`CalendarForm Renders calendar form 1`] = `
+<EuiForm>
+  <EuiTitle>
+    <h1>
+      <FormattedMessage
+        defaultMessage="Create new calendar"
+        id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+        values={Object {}}
+      />
+    </h1>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={true}
+    label={
+      <FormattedMessage
+        defaultMessage="Calendar ID"
+        id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      disabled={false}
+      name="calendarId"
+      onChange={[MockFunction]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Description"
+        id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      disabled={false}
+      name="description"
+      onChange={[MockFunction]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Jobs"
+        id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiComboBox
+      compressed={false}
+      fullWidth={false}
+      isClearable={true}
+      isDisabled={false}
+      onChange={[MockFunction]}
+      options={Array []}
+      selectedOptions={Array []}
+      singleSelection={false}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Groups"
+        id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiComboBox
+      compressed={false}
+      fullWidth={false}
+      isClearable={true}
+      isDisabled={false}
+      onChange={[MockFunction]}
+      onCreateOption={[MockFunction]}
+      options={Array []}
+      selectedOptions={Array []}
+      singleSelection={false}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="xl"
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Events"
+        id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <InjectIntl(EventsTable)
+      canCreateCalendar={true}
+      canDeleteCalendar={true}
+      eventsList={Array []}
+      onDeleteClick={[MockFunction]}
+      showImportModal={[MockFunction]}
+      showNewEventModal={[MockFunction]}
+      showSearchBar={true}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiFlexGroup
+    justifyContent="flexEnd"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        href="#/settings/calendars_list"
+        isDisabled={false}
+      >
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-testid="ml_save_calendar_button"
+        fill={true}
+        isDisabled={true}
+        onClick={[MockFunction]}
+      >
+        <FormattedMessage
+          defaultMessage="Save"
+          id="xpack.ml.calendarsEdit.calendarForm.saveButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiForm>
+`;

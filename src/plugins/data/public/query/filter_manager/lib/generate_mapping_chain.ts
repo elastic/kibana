@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Filter } from '@kbn/es-query';
+import { esFilters } from '../../../../common';
 
 const noop = () => {
   throw new Error('No mappings have been found for filter.');
 };
 
 export const generateMappingChain = (fn: Function, next: Function = noop) => {
-  return (filter: Filter) => {
+  return (filter: esFilters.Filter) => {
     try {
       return fn(filter);
     } catch (result) {

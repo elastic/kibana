@@ -24,7 +24,7 @@ export const TranspileScssTask = {
   async run(config, log, build) {
     await buildSass({
       log,
-      kibanaDir: build.resolvePath('.')
+      kibanaDir: build.resolvePath('.'),
     });
-  }
+  },
 };

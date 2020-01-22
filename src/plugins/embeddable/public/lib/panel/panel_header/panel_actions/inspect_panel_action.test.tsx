@@ -28,7 +28,6 @@ import {
 } from '../../../test_samples';
 // eslint-disable-next-line
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import { FilterStateStore } from '@kbn/es-query';
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -37,6 +36,7 @@ import {
 } from '../../../embeddables';
 import { GetEmbeddableFactory } from '../../../types';
 import { of } from '../../../../tests/helpers';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 const setup = async () => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
@@ -48,7 +48,7 @@ const setup = async () => {
       panels: {},
       filters: [
         {
-          $state: { store: FilterStateStore.APP_STATE },
+          $state: { store: esFilters.FilterStateStore.APP_STATE },
           meta: { disabled: false, alias: 'name', negate: false },
           query: { match: {} },
         },

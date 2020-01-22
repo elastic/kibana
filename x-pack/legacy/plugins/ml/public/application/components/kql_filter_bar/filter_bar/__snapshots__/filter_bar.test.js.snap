@@ -1,0 +1,133 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterBar snapshot suggestions not shown 1`] = `
+<ClickOutside
+  onClickOutside={[Function]}
+  style={
+    Object {
+      "position": "relative",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "position": "relative",
+      }
+    }
+  >
+    <EuiFieldSearch
+      autoComplete="off"
+      compressed={false}
+      disabled={false}
+      fullWidth={true}
+      incremental={false}
+      inputRef={[Function]}
+      isClearable={true}
+      isLoading={false}
+      onChange={[Function]}
+      onClick={[Function]}
+      onKeyDown={[Function]}
+      onKeyUp={[Function]}
+      placeholder="Test placeholder"
+      spellCheck={false}
+      style={
+        Object {
+          "backgroundImage": "none",
+        }
+      }
+      value=""
+    />
+  </div>
+  <Suggestions
+    index={null}
+    onClick={[Function]}
+    onMouseEnter={[Function]}
+    show={false}
+    suggestions={
+      Array [
+        Object {
+          "description": "<p>Test description for fieldValueOne</p>",
+          "end": 1,
+          "start": 0,
+          "text": "fieldValueOne",
+          "type": "field",
+        },
+        Object {
+          "description": "<p>Test description for fieldValueTwo</p>",
+          "end": 1,
+          "start": 0,
+          "text": "fieldValueTwo",
+          "type": "field",
+        },
+      ]
+    }
+  />
+</ClickOutside>
+`;
+
+exports[`FilterBar snapshot suggestions shown 1`] = `
+<ClickOutside
+  onClickOutside={[Function]}
+  style={
+    Object {
+      "position": "relative",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "position": "relative",
+      }
+    }
+  >
+    <EuiFieldSearch
+      autoComplete="off"
+      compressed={false}
+      disabled={false}
+      fullWidth={true}
+      incremental={false}
+      inputRef={[Function]}
+      isClearable={true}
+      isLoading={false}
+      onChange={[Function]}
+      onClick={[Function]}
+      onKeyDown={[Function]}
+      onKeyUp={[Function]}
+      placeholder="Test placeholder"
+      spellCheck={false}
+      style={
+        Object {
+          "backgroundImage": "none",
+        }
+      }
+      value=""
+    />
+  </div>
+  <Suggestions
+    index={null}
+    onClick={[Function]}
+    onMouseEnter={[Function]}
+    show={true}
+    suggestions={
+      Array [
+        Object {
+          "description": "<p>Test description for fieldValueOne</p>",
+          "end": 1,
+          "start": 0,
+          "text": "fieldValueOne",
+          "type": "field",
+        },
+        Object {
+          "description": "<p>Test description for fieldValueTwo</p>",
+          "end": 1,
+          "start": 0,
+          "text": "fieldValueTwo",
+          "type": "field",
+        },
+      ]
+    }
+  />
+</ClickOutside>
+`;

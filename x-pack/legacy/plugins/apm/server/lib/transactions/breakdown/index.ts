@@ -5,7 +5,6 @@
  */
 
 import { flatten, sortByOrder, last } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -16,10 +15,15 @@ import {
   TRANSACTION_BREAKDOWN_COUNT,
   PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
-import { MAX_KPIS, COLORS } from './constants';
+import { MAX_KPIS } from './constants';
+import { getVizColorForIndex } from '../../../../common/viz_colors';
 
 export async function getTransactionBreakdown({
   setup,
@@ -27,7 +31,7 @@ export async function getTransactionBreakdown({
   transactionName,
   transactionType
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   transactionName?: string;
   transactionType: string;
@@ -143,64 +147,61 @@ export async function getTransactionBreakdown({
   const kpis = sortByOrder(visibleKpis, 'name').map((kpi, index) => {
     return {
       ...kpi,
-      color: COLORS[index % COLORS.length]
+      color: getVizColorForIndex(index)
     };
   });
 
   const kpiNames = kpis.map(kpi => kpi.name);
 
-  const bucketsByDate = idx(resp.aggregations, _ => _.by_date.buckets) || [];
+  const bucketsByDate = resp.aggregations?.by_date.buckets || [];
 
-  const timeseriesPerSubtype = bucketsByDate.reduce(
-    (prev, bucket) => {
-      const formattedValues = formatBucket(bucket);
-      const time = bucket.key;
+  const timeseriesPerSubtype = bucketsByDate.reduce((prev, bucket) => {
+    const formattedValues = formatBucket(bucket);
+    const time = bucket.key;
 
-      const updatedSeries = kpiNames.reduce((p, kpiName) => {
-        const { name, percentage } = formattedValues.find(
-          val => val.name === kpiName
-        ) || {
-          name: kpiName,
-          percentage: null
-        };
+    const updatedSeries = kpiNames.reduce((p, kpiName) => {
+      const { name, percentage } = formattedValues.find(
+        val => val.name === kpiName
+      ) || {
+        name: kpiName,
+        percentage: null
+      };
 
-        if (!p[name]) {
-          p[name] = [];
-        }
-        return {
-          ...p,
-          [name]: p[name].concat({
-            x: time,
-            y: percentage
-          })
-        };
-      }, prev);
-
-      const lastValues = Object.values(updatedSeries).map(last);
-
-      // If for a given timestamp, some series have data, but others do not,
-      // we have to set any null values to 0 to make sure the stacked area chart
-      // is drawn correctly.
-      // If we set all values to 0, the chart always displays null values as 0,
-      // and the chart looks weird.
-      const hasAnyValues = lastValues.some(value => value.y !== null);
-      const hasNullValues = lastValues.some(value => value.y === null);
-
-      if (hasAnyValues && hasNullValues) {
-        Object.values(updatedSeries).forEach(series => {
-          const value = series[series.length - 1];
-          const isEmpty = value.y === null;
-          if (isEmpty) {
-            // local mutation to prevent complicated map/reduce calls
-            value.y = 0;
-          }
-        });
+      if (!p[name]) {
+        p[name] = [];
       }
+      return {
+        ...p,
+        [name]: p[name].concat({
+          x: time,
+          y: percentage
+        })
+      };
+    }, prev);
 
-      return updatedSeries;
-    },
-    {} as Record<string, Array<{ x: number; y: number | null }>>
-  );
+    const lastValues = Object.values(updatedSeries).map(last);
+
+    // If for a given timestamp, some series have data, but others do not,
+    // we have to set any null values to 0 to make sure the stacked area chart
+    // is drawn correctly.
+    // If we set all values to 0, the chart always displays null values as 0,
+    // and the chart looks weird.
+    const hasAnyValues = lastValues.some(value => value.y !== null);
+    const hasNullValues = lastValues.some(value => value.y === null);
+
+    if (hasAnyValues && hasNullValues) {
+      Object.values(updatedSeries).forEach(series => {
+        const value = series[series.length - 1];
+        const isEmpty = value.y === null;
+        if (isEmpty) {
+          // local mutation to prevent complicated map/reduce calls
+          value.y = 0;
+        }
+      });
+    }
+
+    return updatedSeries;
+  }, {} as Record<string, Array<{ x: number; y: number | null }>>);
 
   const timeseries = kpis.map(kpi => ({
     title: kpi.name,

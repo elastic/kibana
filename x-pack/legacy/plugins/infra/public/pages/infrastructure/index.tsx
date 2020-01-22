@@ -8,8 +8,6 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -22,15 +20,14 @@ import { WithSource } from '../../containers/with_source';
 import { Source } from '../../containers/source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './snapshot';
-import { SettingsPage } from '../shared/settings';
+import { MetricsSettingsPage } from './settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
+import { SourceLoadingPage } from '../../components/source_loading_page';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-interface InfrastructurePageProps extends RouteComponentProps {
-  uiCapabilities: UICapabilities;
-}
-
-export const InfrastructurePage = injectUICapabilities(
-  ({ match, uiCapabilities }: InfrastructurePageProps) => (
+export const InfrastructurePage = ({ match }: RouteComponentProps) => {
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  return (
     <Source.Provider sourceId="default">
       <ColumnarPage>
         <DocumentTitle
@@ -41,10 +38,9 @@ export const InfrastructurePage = injectUICapabilities(
 
         <HelpCenterContent
           feedbackLink="https://discuss.elastic.co/c/metrics"
-          feedbackLinkText={i18n.translate(
-            'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
-            { defaultMessage: 'Provide feedback for Metrics' }
-          )}
+          appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+            defaultMessage: 'Metrics',
+          })}
         />
 
         <Header
@@ -55,7 +51,7 @@ export const InfrastructurePage = injectUICapabilities(
               }),
             },
           ]}
-          readOnlyBadge={!uiCapabilities.infrastructure.save}
+          readOnlyBadge={!uiCapabilities?.infrastructure?.save}
         />
 
         <AppNavigation
@@ -96,19 +92,23 @@ export const InfrastructurePage = injectUICapabilities(
                 {({ configuration, createDerivedIndexPattern }) => (
                   <MetricsExplorerOptionsContainer.Provider>
                     <WithMetricsExplorerOptionsUrlState />
-                    <MetricsExplorerPage
-                      derivedIndexPattern={createDerivedIndexPattern('metrics')}
-                      source={configuration}
-                      {...props}
-                    />
+                    {configuration ? (
+                      <MetricsExplorerPage
+                        derivedIndexPattern={createDerivedIndexPattern('metrics')}
+                        source={configuration}
+                        {...props}
+                      />
+                    ) : (
+                      <SourceLoadingPage />
+                    )}
                   </MetricsExplorerOptionsContainer.Provider>
                 )}
               </WithSource>
             )}
           />
-          <Route path={`${match.path}/settings`} component={SettingsPage} />
+          <Route path={`${match.path}/settings`} component={MetricsSettingsPage} />
         </Switch>
       </ColumnarPage>
     </Source.Provider>
-  )
-);
+  );
+};

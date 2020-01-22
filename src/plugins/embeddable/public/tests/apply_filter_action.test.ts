@@ -32,7 +32,7 @@ import {
 } from '../lib/test_samples';
 // eslint-disable-next-line
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import { FilterStateStore } from '@kbn/es-query';
+import { esFilters } from '../../../../plugins/data/public';
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
   const { doStart } = testPlugin();
@@ -76,7 +76,7 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
   }
 
   const filter: any = {
-    $state: { store: FilterStateStore.APP_STATE },
+    $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: {
       disabled: false,
       negate: false,

@@ -15,6 +15,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiFieldNumber,
   EuiSelect,
   EuiFlexItem,
@@ -154,7 +155,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       restrictedInterval(field!.aggregationRestrictions)
     );
 
-    function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
+    function onChangeAutoInterval(ev: EuiSwitchEvent) {
       const value = ev.target.checked ? autoIntervalFromDateRange(dateRange) : autoInterval;
       setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
     }
@@ -207,7 +208,11 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   <EuiFlexItem>
                     <EuiFieldNumber
                       data-test-subj="lensDateHistogramValue"
-                      value={interval.value}
+                      value={
+                        typeof interval.value === 'number' || interval.value === ''
+                          ? interval.value
+                          : parseInt(interval.value, 10)
+                      }
                       disabled={calendarOnlyIntervals.has(interval.unit)}
                       isInvalid={!isValid}
                       onChange={e => {
@@ -317,7 +322,7 @@ function parseInterval(currentInterval: string) {
   };
 }
 
-function restrictedInterval(aggregationRestrictions?: AggregationRestrictions) {
+function restrictedInterval(aggregationRestrictions?: Partial<AggregationRestrictions>) {
   if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
     return;
   }

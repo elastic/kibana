@@ -5,17 +5,23 @@
  */
 
 import React from 'react';
-import { ExpressionRendererProps } from 'src/legacy/core_plugins/expressions/public';
 import {
+  ExpressionRendererProps,
   ExpressionsSetup,
   ExpressionsStart,
-} from '../../../../../../src/legacy/core_plugins/expressions/public';
-import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
+} from '../../../../../../src/plugins/expressions/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     id: 'TEST_VIS',
+    clearLayer: jest.fn((state, _layerId) => state),
+    getLayerIds: jest.fn(_state => ['layer1']),
     visualizationTypes: [
       {
         icon: 'empty',
@@ -28,7 +34,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_frame, _state?) => ({})),
-    renderConfigPanel: jest.fn(),
+    renderLayerConfigPanel: jest.fn(),
     toExpression: jest.fn((_state, _frame) => null),
     toPreviewExpression: jest.fn((_state, _frame) => null),
   };
@@ -44,13 +50,12 @@ export function createMockDatasource(): DatasourceMock {
     getOperationForColumnId: jest.fn(),
     renderDimensionPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
-    removeColumnInTableSpec: jest.fn(),
-    moveColumnTo: jest.fn(),
-    duplicateColumn: jest.fn(),
   };
 
   return {
-    getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
+    id: 'mockindexpattern',
+    clearLayer: jest.fn((state, _layerId) => state),
+    getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
@@ -101,10 +106,8 @@ export function createExpressionRendererMock(): jest.Mock<
 export function createMockSetupDependencies() {
   return ({
     data: {},
-    expressions: {
-      registerFunction: jest.fn(),
-      registerRenderer: jest.fn(),
-    },
+    embeddable: embeddablePluginMock.createSetupContract(),
+    expressions: expressionsPluginMock.createSetupContract(),
     chrome: {
       getSavedObjectsClient: () => {},
     },
@@ -118,11 +121,7 @@ export function createMockStartDependencies() {
         indexPatterns: {},
       },
     },
-    expressions: {
-      ExpressionRenderer: jest.fn(() => null),
-    },
-    embeddables: {
-      registerEmbeddableFactory: jest.fn(),
-    },
+    embeddable: embeddablePluginMock.createStartContract(),
+    expressions: expressionsPluginMock.createStartContract(),
   } as unknown) as MockedStartDependencies;
 }

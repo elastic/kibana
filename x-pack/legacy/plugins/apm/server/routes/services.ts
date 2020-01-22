@@ -6,7 +6,10 @@
 
 import * as t from 'io-ts';
 import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
-import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
+import {
+  createApmTelementry,
+  storeApmServicesTelemetry
+} from '../lib/apm_telemetry';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -14,24 +17,23 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getServiceMap } from '../lib/services/map';
+import { getServiceAnnotations } from '../lib/services/annotations';
 
-export const servicesRoute = createRoute(core => ({
+export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
   params: {
     query: t.intersection([uiFiltersRt, rangeRt])
   },
-  handler: async req => {
-    const setup = await setupRequest(req);
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
     const services = await getServices(setup);
-    const { server } = core.http;
 
     // Store telemetry data derived from services
     const agentNames = services.items.map(
       ({ agentName }) => agentName as AgentName
     );
     const apmTelemetry = createApmTelementry(agentNames);
-    storeApmTelemetry(server, apmTelemetry);
+    storeApmServicesTelemetry(context.__LEGACY.server, apmTelemetry);
 
     return services;
   }
@@ -45,9 +47,9 @@ export const serviceAgentNameRoute = createRoute(() => ({
     }),
     query: rangeRt
   },
-  handler: async (req, { path }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
     return getServiceAgentName(serviceName, setup);
   }
 }));
@@ -60,9 +62,9 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
     }),
     query: rangeRt
   },
-  handler: async (req, { path }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
     return getServiceTransactionTypes(serviceName, setup);
   }
 }));
@@ -76,24 +78,35 @@ export const serviceNodeMetadataRoute = createRoute(() => ({
     }),
     query: t.intersection([uiFiltersRt, rangeRt])
   },
-  handler: async (req, { path }) => {
-    const setup = await setupRequest(req);
-    const { serviceName, serviceNodeName } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName, serviceNodeName } = context.params.path;
     return getServiceNodeMetadata({ setup, serviceName, serviceNodeName });
   }
 }));
 
-export const serviceMapRoute = createRoute(() => ({
-  path: '/api/apm/service-map',
+export const serviceAnnotationsRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/annotations',
   params: {
-    query: rangeRt
+    path: t.type({
+      serviceName: t.string
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.partial({
+        environment: t.string
+      })
+    ])
   },
-  handler: async (request, _response, hapi) => {
-    const setup = await setupRequest(request);
-    if (setup.config.get('xpack.apm.serviceMapEnabled')) {
-      return getServiceMap();
-    } else {
-      return hapi.response().code(404);
-    }
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { environment } = context.params.query;
+
+    return getServiceAnnotations({
+      setup,
+      serviceName,
+      environment
+    });
   }
 }));

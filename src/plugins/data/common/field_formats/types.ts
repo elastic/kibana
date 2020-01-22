@@ -24,15 +24,19 @@ export type ContentType = 'html' | 'text';
 export { IFieldFormat } from './field_format';
 
 /** @internal **/
-export type HtmlContextTypeConvert = (
-  value: any,
-  field?: any,
-  hit?: Record<string, any>,
-  meta?: any
-) => string;
+export interface HtmlContextTypeOptions {
+  field?: any;
+  hit?: Record<string, any>;
+}
 
 /** @internal **/
-export type TextContextTypeConvert = (value: any) => string;
+export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
+
+/** @internal **/
+export type TextContextTypeOptions = Record<string, any>;
+
+/** @internal **/
+export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
 
 /** @internal **/
 export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
@@ -41,4 +45,24 @@ export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTyp
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
   html: HtmlContextTypeConvert;
+}
+
+/** @public **/
+export enum FIELD_FORMAT_IDS {
+  _SOURCE = '_source',
+  BOOLEAN = 'boolean',
+  BYTES = 'bytes',
+  COLOR = 'color',
+  CUSTOM = 'custom',
+  DATE = 'date',
+  DATE_NANOS = 'date_nanos',
+  DURATION = 'duration',
+  IP = 'ip',
+  NUMBER = 'number',
+  PERCENT = 'percent',
+  RELATIVE_DATE = 'relative_date',
+  STATIC_LOOKUP = 'static_lookup',
+  STRING = 'string',
+  TRUNCATE = 'truncate',
+  URL = 'url',
 }

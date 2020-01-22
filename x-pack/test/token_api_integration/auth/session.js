@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
@@ -19,7 +19,7 @@ export default function ({ getService }) {
 
   async function createSessionCookie() {
     const response = await supertest
-      .post('/api/security/v1/login')
+      .post('/internal/security/login')
       .set('kbn-xsrf', 'true')
       .send({ username: 'elastic', password: 'changeme' });
 
@@ -36,7 +36,7 @@ export default function ({ getService }) {
       const cookie = await createSessionCookie();
 
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', cookie.cookieString())
         .expect(200);
@@ -47,20 +47,20 @@ export default function ({ getService }) {
 
       // try it once
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', cookie.cookieString())
         .expect(200);
 
       // try it again to verity it isn't invalidated after a single request
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', cookie.cookieString())
         .expect(200);
     });
 
-    describe('API access with expired access token.', function () {
+    describe('API access with expired access token.', function() {
       const expectNewSessionCookie = (originalCookie, newCookie) => {
         if (!newCookie) {
           throw new Error('No session cookie set after token refresh');
@@ -73,7 +73,7 @@ export default function ({ getService }) {
         }
       };
 
-      it('expired access token should be automatically refreshed', async function () {
+      it('expired access token should be automatically refreshed', async function() {
         this.timeout(40000);
 
         const originalCookie = await createSessionCookie();
@@ -85,7 +85,7 @@ export default function ({ getService }) {
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const firstResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'true')
           .set('cookie', originalCookie.cookieString())
           .expect(200);
@@ -96,7 +96,7 @@ export default function ({ getService }) {
         // Request with old cookie should return another valid cookie we can use to authenticate requests
         // if it happens within 60 seconds of the refresh token being used
         const secondResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'true')
           .set('Cookie', originalCookie.cookieString())
           .expect(200);
@@ -110,14 +110,14 @@ export default function ({ getService }) {
 
         // The first new cookie should authenticate a subsequent request
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'true')
           .set('Cookie', firstNewCookie.cookieString())
           .expect(200);
 
         // The second new cookie should authenticate a subsequent request
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'true')
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
@@ -126,20 +126,23 @@ export default function ({ getService }) {
 
     describe('API access with missing access token document.', () => {
       let sessionCookie;
-      beforeEach(async () => sessionCookie = await createSessionCookie());
+      beforeEach(async () => (sessionCookie = await createSessionCookie()));
 
-      it('should clear cookie and redirect to login', async function () {
+      it('should clear cookie and redirect to login', async function() {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
-        const esResponse = await getService('es').deleteByQuery({
+        const esResponse = await getService('legacyEs').deleteByQuery({
           index: '.security-tokens',
           q: 'doc_type:token',
           refresh: true,
         });
-        expect(esResponse).to.have.property('deleted').greaterThan(0);
+        expect(esResponse)
+          .to.have.property('deleted')
+          .greaterThan(0);
 
-        const response = await supertest.get('/abc/xyz/')
+        const response = await supertest
+          .get('/abc/xyz/')
           .set('Cookie', sessionCookie.cookieString())
           .expect('location', '/login?next=%2Fabc%2Fxyz%2F')
           .expect(302);

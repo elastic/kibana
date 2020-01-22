@@ -12,9 +12,7 @@ export const LISTING_METRICS_NAMES = [
   'node_cpu_utilization',
   'node_load_average',
   'node_jvm_mem_percent',
-  'node_free_space'
+  'node_free_space',
 ];
 
-export const LISTING_METRICS_PATHS = [
-  `aggregations.nodes.buckets.by_date.buckets`,
-];
+export const LISTING_METRICS_PATHS = [`aggregations.nodes.buckets.by_date.buckets`];

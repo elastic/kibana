@@ -18,8 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction } from '../types';
-import { KibanaContext } from '../expression_types';
+import { ExpressionFunction } from '../../common/types';
+import { KibanaContext } from '../../common/expression_types';
 
 export type ExpressionFunctionKibana = ExpressionFunction<
   'kibana',
@@ -36,7 +36,7 @@ export const kibana = (): ExpressionFunctionKibana => ({
     types: ['kibana_context', 'null'],
   },
 
-  help: i18n.translate('expressions_np.functions.kibana.help', {
+  help: i18n.translate('expressions.functions.kibana.help', {
     defaultMessage: 'Gets kibana global context',
   }),
   args: {},

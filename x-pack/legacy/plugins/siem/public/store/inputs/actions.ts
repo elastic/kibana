@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import actionCreatorFactory from 'typescript-fsa';
 
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { InspectQuery, Refetch } from './model';
 import { InputsModelId } from './constants';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/inputs');
 
@@ -83,5 +83,5 @@ export const setSavedQuery = actionCreator<{
 
 export const setSearchBarFilter = actionCreator<{
   id: InputsModelId;
-  filters: Filter[];
+  filters: esFilters.Filter[];
 }>('SET_SEARCH_BAR_FILTER');

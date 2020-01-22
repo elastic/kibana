@@ -25,9 +25,6 @@ Open the **Spaces** selection control to specify whether to grant the role acces
 
 Use the **Privilege** menu to grant access to features. The default is **Custom**, which you can use to grant access to individual features. Otherwise, you can grant read and write access to all current and future features by selecting **All**, or grant read access to all current and future features by selecting **Read**.
 
-[IMPORTANT]
-If a feature is hidden using the Spaces disabled features, it will remain hidden even if the user has the necessary privileges.
-
 When using the **Customize by feature** option, you can choose either **All**, **Read** or **None** for access to each feature. As new features are added to Kibana, roles that use the custom option do not automatically get access to the new features. You must manually update the roles.
 
 NOTE: Machine Learning and Stack Monitoring rely on built-in roles to grant access. When a user is assigned the appropriate roles, the Machine Learning and Stack Monitoring application are available; otherwise, these applications are not visible.
@@ -37,6 +34,30 @@ To apply your changes, click **Create space privilege**. The space privilege sho
 
 [role="screenshot"]
 image::user/security/images/create-space-privilege.png[Create space privilege]
+
+==== Feature availability
+
+Features are available to users when their roles grant access to the features, **and** those features are visible in their current space. The following matrix explains when features are available to users when controlling access via <<spaces-managing, spaces>> and role-based access control:
+
+|===
+|**Spaces config** |**Role config** |**Result**
+
+|Feature hidden
+|Feature disabled
+|Feature not available
+
+|Feature hidden
+|Feature enabled
+|Feature not available
+
+|Feature visible
+|Feature disabled
+|Feature not available
+
+|Feature visible
+|Feature enabled
+|**Feature available**
+|===
 
 ==== Assigning different privileges to different spaces
 

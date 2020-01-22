@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CustomFilter, buildEmptyFilter, buildQueryFilter } from '@kbn/es-query';
+
 import { mapDefault } from './map_default';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapDefault()', () => {
     test('should return the key and value for matching filters', async () => {
-      const filter: CustomFilter = buildQueryFilter({ match_all: {} }, 'index');
+      const filter = esFilters.buildQueryFilter({ match_all: {} }, 'index', '');
       const result = mapDefault(filter);
 
       expect(result).toHaveProperty('key', 'query');
@@ -30,7 +31,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return undefined if there is no valid key', async () => {
-      const filter = buildEmptyFilter(true) as CustomFilter;
+      const filter = esFilters.buildEmptyFilter(true);
 
       try {
         mapDefault(filter);

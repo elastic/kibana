@@ -5,13 +5,13 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
-import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
+import { LICENSE_CHECK_STATE } from '../../../../../licensing/server';
 
 export const mockRouteContext = ({
   licensing: {
     license: {
       check: jest.fn().mockReturnValue({
-        check: LICENSE_STATUS.Valid,
+        state: LICENSE_CHECK_STATE.Valid,
       }),
     },
   },
@@ -21,7 +21,7 @@ export const mockRouteContextWithInvalidLicense = ({
   licensing: {
     license: {
       check: jest.fn().mockReturnValue({
-        check: LICENSE_STATUS.Invalid,
+        state: LICENSE_CHECK_STATE.Invalid,
         message: 'License is invalid for spaces',
       }),
     },

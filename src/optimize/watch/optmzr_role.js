@@ -25,12 +25,13 @@ import { DllCompiler } from '../dynamic_dll_plugin';
 import { WatchCache } from './watch_cache';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
-  const logWithMetadata = (tags, message, metadata) => kibanaHapiServer.logWithMetadata(tags, message, metadata);
+  const logWithMetadata = (tags, message, metadata) =>
+    kibanaHapiServer.logWithMetadata(tags, message, metadata);
 
   const watchOptimizer = new WatchOptimizer({
     logWithMetadata,
     uiBundles: kbnServer.uiBundles,
-    discoveredPlugins: kbnServer.newPlatform.__internals.uiPlugins.internal,
+    newPlatformPluginInfo: kbnServer.newPlatform.__internals.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
     workers: config.get('optimize.workers'),
@@ -52,10 +53,13 @@ export default async (kbnServer, kibanaHapiServer, config) => {
 
   watchOptimizer.status$.subscribe({
     next(status) {
-      process.send(['OPTIMIZE_STATUS', {
-        success: status.type === STATUS.SUCCESS
-      }]);
-    }
+      process.send([
+        'OPTIMIZE_STATUS',
+        {
+          success: status.type === STATUS.SUCCESS,
+        },
+      ]);
+    },
   });
 
   let ready = false;
@@ -65,10 +69,9 @@ export default async (kbnServer, kibanaHapiServer, config) => {
     process.send(['WORKER_BROADCAST', { optimizeReady: ready }]);
   };
 
-  process.on('message', (msg) => {
+  process.on('message', msg => {
     if (msg && msg.optimizeReady === '?') sendReady();
   });
-
 
   sendReady();
 

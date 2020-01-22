@@ -4,11 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  logFilterActions,
-  logPositionActions,
-  waffleFilterActions,
-  waffleTimeActions,
-  waffleOptionsActions,
-} from './local';
-export { logEntriesActions } from './remote';
+export { waffleFilterActions, waffleTimeActions, waffleOptionsActions } from './local';

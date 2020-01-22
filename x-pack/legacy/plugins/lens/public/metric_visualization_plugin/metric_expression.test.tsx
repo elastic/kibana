@@ -9,7 +9,7 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
-import { FieldFormat } from 'ui/registry/field_formats';
+import { FieldFormat } from '../../../../../../src/plugins/data/public';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -17,7 +17,11 @@ function sampleArgs() {
     tables: {
       l1: {
         type: 'kibana_datatable',
-        columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+        columns: [
+          { id: 'a', name: 'a' },
+          { id: 'b', name: 'b' },
+          { id: 'c', name: 'c' },
+        ],
         rows: [{ a: 10110, b: 2, c: 3 }],
       },
     },

@@ -30,8 +30,7 @@
     ],
     "patterns": [
       "_count",
-      "{indices}/_count",
-      "{indices}/{type}/_count"
+      "{indices}/_count"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-count.html"
   }

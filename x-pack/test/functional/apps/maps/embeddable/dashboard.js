@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
@@ -17,8 +17,8 @@ export default function ({ getPageObjects, getService }) {
   describe('embed in dashboard', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'c698b940-e149-11e8-a35a-370a8516603a',
-        'courier:ignoreFilterIfFieldNotInIndex': true
+        defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
+        'courier:ignoreFilterIfFieldNotInIndex': true,
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
@@ -26,21 +26,24 @@ export default function ({ getPageObjects, getService }) {
 
     after(async () => {
       await kibanaServer.uiSettings.replace({
-        'courier:ignoreFilterIfFieldNotInIndex': false
+        'courier:ignoreFilterIfFieldNotInIndex': false,
       });
     });
 
     async function getRequestTimestamp() {
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
+        requestStats,
+        'Request timestamp'
+      );
       await inspector.close();
       return requestTimestamp;
     }
 
     it('should pass index patterns to container', async () => {
       const indexPatterns = await filterBar.getIndexPatterns();
-      expect(indexPatterns).to.equal('geo_shapes*,meta_for_geo_shapes*,logstash-*');
+      expect(indexPatterns).to.equal('meta_for_geo_shapes*,logstash-*');
     });
 
     it('should populate inspector with requests for map embeddable', async () => {
@@ -58,7 +61,7 @@ export default function ({ getPageObjects, getService }) {
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const requestStats = await inspector.getTableData();
-      const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+      const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
       await inspector.close();
       expect(totalHits).to.equal('6');
     });
@@ -71,7 +74,10 @@ export default function ({ getPageObjects, getService }) {
 
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const geoGridRequestStats = await inspector.getTableData();
-      const geoGridTotalHits =  PageObjects.maps.getInspectorStatRowHit(geoGridRequestStats, 'Hits (total)');
+      const geoGridTotalHits = PageObjects.maps.getInspectorStatRowHit(
+        geoGridRequestStats,
+        'Hits (total)'
+      );
       await inspector.close();
       expect(geoGridTotalHits).to.equal('1');
 
@@ -79,7 +85,10 @@ export default function ({ getPageObjects, getService }) {
       await testSubjects.click('inspectorRequestChooser');
       await testSubjects.click('inspectorRequestChoosermeta_for_geo_shapes*.shape_name');
       const joinRequestStats = await inspector.getTableData();
-      const joinTotalHits =  PageObjects.maps.getInspectorStatRowHit(joinRequestStats, 'Hits (total)');
+      const joinTotalHits = PageObjects.maps.getInspectorStatRowHit(
+        joinRequestStats,
+        'Hits (total)'
+      );
       await inspector.close();
       expect(joinTotalHits).to.equal('3');
     });

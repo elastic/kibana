@@ -1,0 +1,17 @@
+{
+  "description": "Network - RDP (Remote Desktop Protocol) from the Internet\t",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Network - RDP (Remote Desktop Protocol) from the Internet\t",
+  "query": "(destination.port:8080 or destination.port:3128) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "risk_score": 50,
+  "rule_id": "8c1bdde8-4204-45c0-9e0c-c85ca3902488",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

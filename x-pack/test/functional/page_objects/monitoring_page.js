@@ -5,11 +5,23 @@
  */
 
 export function MonitoringPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'shield', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
 
-  return new class MonitoringPage {
-    async navigateTo() {
+  return new (class MonitoringPage {
+    async navigateTo(useSuperUser = false) {
+      // always create this because our tear down tries to delete it
+      await security.user.create('basic_monitoring_user', {
+        password: 'monitoring_user_password',
+        roles: ['monitoring_user', 'kibana_user'],
+        full_name: 'basic monitoring',
+      });
+
+      if (!useSuperUser) {
+        await PageObjects.common.navigateToApp('login');
+        await PageObjects.shield.login('basic_monitoring_user', 'monitoring_user_password');
+      }
       await PageObjects.common.navigateToApp('monitoring');
     }
 
@@ -22,7 +34,7 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     }
 
     async assertTableNoData(subj) {
-      if (!await testSubjects.exists(subj)) {
+      if (!(await testSubjects.exists(subj))) {
         throw new Error('Expected to find the no data message');
       }
     }
@@ -47,5 +59,5 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     async tableClearFilter(subj) {
       return await testSubjects.setValue(subj, ' \uE003'); // space and backspace to trigger onChange event
     }
-  };
+  })();
 }

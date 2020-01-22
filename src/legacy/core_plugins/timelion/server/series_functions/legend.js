@@ -20,13 +20,13 @@
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
-import { DEFAULT_TIME_FORMAT } from '../../common/lib';
+import { DEFAULT_TIME_FORMAT } from '../../../vis_type_timelion/common/lib';
 
 export default new Chainable('legend', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'position',
@@ -81,8 +81,8 @@ export default new Chainable('legend', {
               defaultMessage: 'place legend in south west corner',
             }
           ),
-        }
-      ]
+        },
+      ],
     },
     {
       name: 'columns',
@@ -107,13 +107,19 @@ export default new Chainable('legend', {
           defaultTimeFormat: DEFAULT_TIME_FORMAT,
         },
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.legendHelpText', {
     defaultMessage: 'Set the position and style of the legend on the plot',
   }),
   fn: function legendFn(args) {
-    return alter(args, function (eachSeries, position, columns, showTime = true, timeFormat = DEFAULT_TIME_FORMAT) {
+    return alter(args, function(
+      eachSeries,
+      position,
+      columns,
+      showTime = true,
+      timeFormat = DEFAULT_TIME_FORMAT
+    ) {
       eachSeries._global = eachSeries._global || {};
       eachSeries._global.legend = eachSeries._global.legend || {};
       eachSeries._global.legend.noColumns = columns;
@@ -129,5 +135,5 @@ export default new Chainable('legend', {
 
       return eachSeries;
     });
-  }
+  },
 });

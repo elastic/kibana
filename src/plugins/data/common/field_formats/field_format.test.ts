@@ -32,7 +32,7 @@ const getTestFormat = (
 
     textConvert = textConvert;
     htmlConvert = htmlConvert;
-  })(_params);
+  })(_params, jest.fn());
 
 describe('FieldFormat class', () => {
   describe('params', () => {

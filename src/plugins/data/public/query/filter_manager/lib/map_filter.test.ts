@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { mapFilter } from './map_filter';
+import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
-  function getDisplayName(filter: Filter) {
+  function getDisplayName(filter: esFilters.Filter) {
     return typeof filter.meta.value === 'function' ? filter.meta.value() : filter.meta.value;
   }
 
@@ -31,7 +31,7 @@ describe('filter manager utilities', () => {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
       };
-      const after = mapFilter(before as Filter);
+      const after = mapFilter(before as esFilters.Filter);
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', '_type');
@@ -43,7 +43,7 @@ describe('filter manager utilities', () => {
 
     test('should map exists filters', async () => {
       const before: any = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
-      const after = mapFilter(before as Filter);
+      const after = mapFilter(before as esFilters.Filter);
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', '@timestamp');
@@ -55,7 +55,7 @@ describe('filter manager utilities', () => {
 
     test('should map missing filters', async () => {
       const before: any = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
-      const after = mapFilter(before as Filter);
+      const after = mapFilter(before as esFilters.Filter);
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', '@timestamp');
@@ -67,7 +67,7 @@ describe('filter manager utilities', () => {
 
     test('should map json filter', async () => {
       const before: any = { meta: { index: 'logstash-*' }, query: { match_all: {} } };
-      const after = mapFilter(before as Filter);
+      const after = mapFilter(before as esFilters.Filter);
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', 'query');
@@ -81,7 +81,7 @@ describe('filter manager utilities', () => {
       const before: any = { meta: { index: 'logstash-*' } };
 
       try {
-        mapFilter(before as Filter);
+        mapFilter(before as esFilters.Filter);
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
         expect(e.message).toBe('No mappings have been found for filter.');

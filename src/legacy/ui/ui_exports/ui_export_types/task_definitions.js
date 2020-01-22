@@ -21,8 +21,4 @@ import { mergeAtType } from './reduce';
 import { alias, wrap, uniqueKeys } from './modify_reduce';
 
 // How plugins define tasks that the task manager can run.
-export const taskDefinitions = wrap(
-  alias('taskDefinitions'),
-  uniqueKeys(),
-  mergeAtType,
-);
+export const taskDefinitions = wrap(alias('taskDefinitions'), uniqueKeys(), mergeAtType);

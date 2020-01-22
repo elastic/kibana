@@ -16,38 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  GeoPolygonFilter,
-  Filter,
-  FILTERS,
-  isGeoPolygonFilter,
-  FilterValueFormatter,
-} from '@kbn/es-query';
+
+import { esFilters } from '../../../../../common';
 
 const POINTS_SEPARATOR = ', ';
 
 const getFormattedValueFn = (points: string[]) => {
-  return (formatter?: FilterValueFormatter) => {
+  return (formatter?: esFilters.FilterValueFormatter) => {
     return points
       .map((point: string) => (formatter ? formatter.convert(point) : JSON.stringify(point)))
       .join(POINTS_SEPARATOR);
   };
 };
 
-function getParams(filter: GeoPolygonFilter) {
+function getParams(filter: esFilters.GeoPolygonFilter) {
   const key = Object.keys(filter.geo_polygon).filter(k => k !== 'ignore_unmapped')[0];
   const params = filter.geo_polygon[key];
 
   return {
     key,
     params,
-    type: FILTERS.GEO_POLYGON,
+    type: esFilters.FILTERS.GEO_POLYGON,
     value: getFormattedValueFn(params.points || []),
   };
 }
 
-export function mapGeoPolygon(filter: Filter) {
-  if (!isGeoPolygonFilter(filter)) {
+export function mapGeoPolygon(filter: esFilters.Filter) {
+  if (!esFilters.isGeoPolygonFilter(filter)) {
     throw filter;
   }
   return getParams(filter);

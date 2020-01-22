@@ -30,7 +30,6 @@ import {
   CleanTypescriptTask,
   CleanNodeBuildsTask,
   CleanTask,
-  CleanCtagBuildTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
   CreateArchivesTask,
@@ -135,7 +134,6 @@ export async function buildDistributables(options) {
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
-  await run(CleanCtagBuildTask);
 
   await run(PathLengthTask);
 

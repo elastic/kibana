@@ -17,30 +17,35 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/public';
-import { createSavedQueryService } from './search_bar/lib/saved_query_service';
+import { Plugin, CoreSetup, CoreStart } from '../../../../../core/public';
+import { SearchSource } from './search_source';
+import { defaultSearchStrategy } from './search_strategy';
+import { SearchStrategyProvider } from './search_strategy/types';
+
+export interface SearchSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+export interface SearchStart {
+  defaultSearchStrategy: SearchStrategyProvider;
+  SearchSource: typeof SearchSource;
+}
 
 /**
- * Search Service
- * @internal
+ * The contract provided here is a new platform shim for ui/courier.
+ *
+ * Once it has been refactored to work with new platform services,
+ * it will move into the existing search service in src/plugins/data/public/search
  */
-
-export class SearchService {
-  public setup() {
-    // Service requires index patterns, which are only available in `start`
+export class SearchService implements Plugin<SearchSetup, SearchStart> {
+  public setup(core: CoreSetup): SearchSetup {
+    return {};
   }
 
-  public start(savedObjectsClient: SavedObjectsClientContract) {
+  public start(core: CoreStart): SearchStart {
     return {
-      services: {
-        savedQueryService: createSavedQueryService(savedObjectsClient),
-      },
+      defaultSearchStrategy,
+      SearchSource,
     };
   }
 
   public stop() {}
 }
-
-/** @public */
-
-export type SearchStart = ReturnType<SearchService['start']>;

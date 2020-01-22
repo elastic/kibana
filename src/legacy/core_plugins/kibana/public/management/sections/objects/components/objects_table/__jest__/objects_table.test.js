@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { mockManagementPlugin } from '../../../../../../../../management/public/np_ready/mocks';
 import { Query } from '@elastic/eui';
 
 import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
@@ -28,6 +29,11 @@ import { findObjects } from '../../../lib';
 import { extractExportDetails } from '../../../lib/extract_export_details';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
+jest.mock('../../../../../../../../management/public/legacy', () => ({
+  setup: mockManagementPlugin.createSetupContract(),
+  start: mockManagementPlugin.createStartContract(),
+}));
 
 jest.mock('../../../lib/find_objects', () => ({
   findObjects: jest.fn(),
@@ -256,7 +262,6 @@ describe('ObjectsTable', () => {
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
-        _type: obj._type,
         _source: {},
       }));
 
@@ -297,7 +302,6 @@ describe('ObjectsTable', () => {
 
       const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
         _id: obj.id,
-        _type: obj._type,
         _source: {},
       }));
 

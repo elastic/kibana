@@ -52,5 +52,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(AddLayerPanel);
+const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(
+  AddLayerPanel
+);
 export { connectedFlyOut as AddLayerPanel };

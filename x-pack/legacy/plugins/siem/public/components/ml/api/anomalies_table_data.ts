@@ -21,20 +21,15 @@ export interface Body {
   maxExamples: number;
 }
 
-export const anomaliesTableData = async (
-  body: Body,
-  kbnVersion: string,
-  signal: AbortSignal
-): Promise<Anomalies> => {
+export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/results/anomalies_table_data`, {
     method: 'POST',
     credentials: 'same-origin',
     body: JSON.stringify(body),
     headers: {
-      'kbn-system-api': 'true',
       'content-Type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      'kbn-version': kbnVersion,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
     signal,
   });

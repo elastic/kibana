@@ -14,9 +14,7 @@ However, these docs will be kept up-to-date to reflect the current implementatio
 [float]
 [[reporting-nav-bar-extensions]]
 === Share menu extensions
-X-Pack uses the `ShareContextMenuExtensionsRegistryProvider` to register actions in the share menu.
-
-This integration will likely be changing in the near future as we move towards a unified actions abstraction across {kib}.
+X-Pack uses the `share` plugin of the Kibana platform to register actions in the share menu.
 
 [float]
 === Generate job URL

@@ -87,14 +87,8 @@ export function copyToSpaceTestSuiteFactory(
       body: {
         size: 0,
         query: {
-          bool: {
-            must_not: {
-              term: {
-                // exclude spaces from the result set.
-                // we don't assert on these.
-                type: 'space',
-              },
-            },
+          terms: {
+            type: ['visualization', 'dashboard', 'index-pattern'],
           },
         },
         aggs: {
@@ -139,19 +133,16 @@ export function copyToSpaceTestSuiteFactory(
     }
 
     const { countByType } = spaceBucket;
-    const expectedBuckets = Object.entries(expectedCounts).reduce(
-      (acc, entry) => {
-        const [type, count] = entry;
-        return [
-          ...acc,
-          {
-            key: type,
-            doc_count: count,
-          },
-        ];
-      },
-      [] as CountByTypeBucket[]
-    );
+    const expectedBuckets = Object.entries(expectedCounts).reduce((acc, entry) => {
+      const [type, count] = entry;
+      return [
+        ...acc,
+        {
+          key: type,
+          doc_count: count,
+        },
+      ];
+    }, [] as CountByTypeBucket[]);
 
     expectedBuckets.sort(bucketSorter);
     countByType.buckets.sort(bucketSorter);

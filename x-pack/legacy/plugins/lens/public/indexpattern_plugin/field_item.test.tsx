@@ -10,63 +10,58 @@ import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { FieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { npStart } from 'ui/new_platform';
+import { FieldFormatsStart } from '../../../../../../src/plugins/data/public';
+import { IndexPattern } from './types';
 
 jest.mock('ui/new_platform');
 
-// Formatter must be mocked to return a string, or the rendering will fail
-jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats', () => ({
-  fieldFormats: {
-    getDefaultInstance: jest.fn().mockReturnValue({
-      convert: jest.fn().mockReturnValue((s: unknown) => JSON.stringify(s)),
-    }),
-  },
-}));
-
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
-
-const indexPattern = {
-  id: '1',
-  title: 'my-fake-index-pattern',
-  timeFieldName: 'timestamp',
-  fields: [
-    {
-      name: 'timestamp',
-      type: 'date',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'bytes',
-      type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'memory',
-      type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'unsupported',
-      type: 'geo',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'source',
-      type: 'string',
-      aggregatable: true,
-      searchable: true,
-    },
-  ],
-};
 
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
+  let indexPattern: IndexPattern;
   let core: ReturnType<typeof coreMock['createSetup']>;
 
   beforeEach(() => {
+    indexPattern = {
+      id: '1',
+      title: 'my-fake-index-pattern',
+      timeFieldName: 'timestamp',
+      fields: [
+        {
+          name: 'timestamp',
+          type: 'date',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'memory',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'unsupported',
+          type: 'geo',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'source',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    } as IndexPattern;
+
     core = coreMock.createSetup();
     core.http.post.mockClear();
     defaultProps = {
@@ -87,6 +82,12 @@ describe('IndexPattern Field Item', () => {
       },
       exists: true,
     };
+
+    npStart.plugins.data.fieldFormats = ({
+      getDefaultInstance: jest.fn(() => ({
+        convert: jest.fn((s: unknown) => JSON.stringify(s)),
+      })),
+    } as unknown) as FieldFormatsStart;
   });
 
   it('should request field stats every time the button is clicked', async () => {

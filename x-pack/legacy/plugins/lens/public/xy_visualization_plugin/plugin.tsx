@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, UiSettingsClientContract } from 'src/core/public';
+import { npSetup } from 'ui/new_platform';
+import { CoreSetup, IUiSettingsClient } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import moment from 'moment-timezone';
 import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { ExpressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public';
-import { setup as expressionsSetup } from '../../../../../../src/legacy/core_plugins/expressions/public/legacy';
+import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
@@ -24,7 +24,7 @@ export interface XyVisualizationPluginSetupPlugins {
   };
 }
 
-function getTimeZone(uiSettings: UiSettingsClientContract) {
+function getTimeZone(uiSettings: IUiSettingsClient) {
   const configuredTimeZone = uiSettings.get('dateFormat:tz');
   if (configuredTimeZone === 'Browser') {
     return moment.tz.guess();
@@ -66,7 +66,7 @@ const plugin = new XyVisualizationPlugin();
 
 export const xyVisualizationSetup = () =>
   plugin.setup(null, {
-    expressions: expressionsSetup,
+    expressions: npSetup.plugins.expressions,
     fieldFormat: {
       formatFactory: getFormat,
     },

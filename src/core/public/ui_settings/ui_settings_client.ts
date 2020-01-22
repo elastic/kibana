@@ -18,37 +18,25 @@
  */
 
 import { cloneDeep, defaultsDeep } from 'lodash';
-import * as Rx from 'rxjs';
+import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { UiSettingsParams, UserProvidedValues } from 'src/core/server/types';
-import { UiSettingsState } from './types';
+import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
 
-/** @public */
 interface UiSettingsClientParams {
   api: UiSettingsApi;
   defaults: Record<string, UiSettingsParams>;
   initialSettings?: UiSettingsState;
+  done$: Observable<unknown>;
 }
 
-/**
- * Client-side client that provides access to the advanced settings stored in elasticsearch.
- * The settings provide control over the behavior of the Kibana application.
- * For example, a user can specify how to display numeric or date fields.
- * Users can adjust the settings via Management UI.
- * {@link UiSettingsClient}
- *
- * @public
- */
-export type UiSettingsClientContract = PublicMethodsOf<UiSettingsClient>;
-
-/** @public */
-export class UiSettingsClient {
-  private readonly update$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
-  private readonly saved$ = new Rx.Subject<{ key: string; newValue: any; oldValue: any }>();
-  private readonly updateErrors$ = new Rx.Subject<Error>();
+export class UiSettingsClient implements IUiSettingsClient {
+  private readonly update$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
+  private readonly saved$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
+  private readonly updateErrors$ = new Subject<Error>();
 
   private readonly api: UiSettingsApi;
   private readonly defaults: Record<string, UiSettingsParams>;
@@ -58,24 +46,21 @@ export class UiSettingsClient {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
+
+    params.done$.subscribe({
+      complete: () => {
+        this.update$.complete();
+        this.saved$.complete();
+        this.updateErrors$.complete();
+      },
+    });
   }
 
-  /**
-   * Gets the metadata about all uiSettings, including the type, default value, and user value
-   * for each key.
-   */
-  public getAll() {
+  getAll() {
     return cloneDeep(this.cache);
   }
 
-  /**
-   * Gets the value for a specific uiSetting. If this setting has no user-defined value
-   * then the `defaultOverride` parameter is returned (and parsed if setting is of type
-   * "json" or "number). If the parameter is not defined and the key is not defined by a
-   * uiSettingDefaults then an error is thrown, otherwise the default is read
-   * from the uiSettingDefaults.
-   */
-  public get(key: string, defaultOverride?: any) {
+  get<T = any>(key: string, defaultOverride?: T) {
     const declared = this.isDeclared(key);
 
     if (!declared && defaultOverride !== undefined) {
@@ -84,10 +69,10 @@ export class UiSettingsClient {
 
     if (!declared) {
       throw new Error(
-        `Unexpected \`config.get("${key}")\` call on unrecognized configuration setting "${key}".
-Setting an initial value via \`config.set("${key}", value)\` before attempting to retrieve
+        `Unexpected \`IUiSettingsClient.get("${key}")\` call on unrecognized configuration setting "${key}".
+Setting an initial value via \`IUiSettingsClient.set("${key}", value)\` before attempting to retrieve
 any custom setting value for "${key}" may fix this issue.
-You can use \`config.get("${key}", defaultValue)\`, which will just return
+You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just return
 \`defaultValue\` when the key is unrecognized.`
       );
     }
@@ -108,13 +93,9 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     return value;
   }
 
-  /**
-   * Gets an observable of the current value for a config key, and all updates to that config
-   * key in the future. Providing a `defaultOverride` argument behaves the same as it does in #get()
-   */
-  public get$(key: string, defaultOverride?: any) {
-    return Rx.concat(
-      Rx.defer(() => Rx.of(this.get(key, defaultOverride))),
+  get$<T = any>(key: string, defaultOverride?: T) {
+    return concat(
+      defer(() => of(this.get(key, defaultOverride))),
       this.update$.pipe(
         filter(update => update.key === key),
         map(() => this.get(key, defaultOverride))
@@ -122,63 +103,31 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     );
   }
 
-  /**
-   * Sets the value for a uiSetting. If the setting is not defined in the uiSettingDefaults
-   * it will be stored as a custom setting. The new value will be synchronously available via
-   * the `get()` method and sent to the server in the background. If the request to the
-   * server fails then a toast notification will be displayed and the setting will be
-   * reverted it its value before `set()` was called.
-   */
-  public async set(key: string, val: any) {
-    return await this.update(key, val);
+  async set(key: string, value: any) {
+    return await this.update(key, value);
   }
 
-  /**
-   * Removes the user-defined value for a setting, causing it to revert to the default. This
-   * method behaves the same as calling `set(key, null)`, including the synchronization, custom
-   * setting, and error behavior of that method.
-   */
-  public async remove(key: string) {
+  async remove(key: string) {
     return await this.update(key, null);
   }
 
-  /**
-   * Returns true if the key is a "known" uiSetting, meaning it is either defined in the
-   * uiSettingDefaults or was previously added as a custom setting via the `set()` method.
-   */
-  public isDeclared(key: string) {
+  isDeclared(key: string) {
     return key in this.cache;
   }
 
-  /**
-   * Returns true if the setting has no user-defined value or is unknown
-   */
-  public isDefault(key: string) {
+  isDefault(key: string) {
     return !this.isDeclared(key) || this.cache[key].userValue == null;
   }
 
-  /**
-   * Returns true if the setting is not a part of the uiSettingDefaults, but was either
-   * added directly via `set()`, or is an unknown setting found in the uiSettings saved
-   * object
-   */
-  public isCustom(key: string) {
+  isCustom(key: string) {
     return this.isDeclared(key) && !('value' in this.cache[key]);
   }
 
-  /**
-   * Returns true if a settings value is overridden by the server. When a setting is overridden
-   * its value can not be changed via `set()` or `remove()`.
-   */
-  public isOverridden(key: string) {
+  isOverridden(key: string) {
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
   }
 
-  /**
-   * Overrides the default value for a setting in this specific browser tab. If the page
-   * is reloaded the default override is lost.
-   */
-  public overrideLocalDefault(key: string, newDefault: any) {
+  overrideLocalDefault(key: string, newDefault: any) {
     // capture the previous value
     const prevDefault = this.defaults[key] ? this.defaults[key].value : undefined;
 
@@ -201,37 +150,16 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     }
   }
 
-  /**
-   * Returns an Observable that notifies subscribers of each update to the uiSettings,
-   * including the key, newValue, and oldValue of the setting that changed.
-   */
-  public getUpdate$() {
+  getUpdate$() {
     return this.update$.asObservable();
   }
 
-  /**
-   * Returns an Observable that notifies subscribers of each update to the uiSettings,
-   * including the key, newValue, and oldValue of the setting that changed.
-   */
-  public getSaved$() {
+  getSaved$() {
     return this.saved$.asObservable();
   }
 
-  /**
-   * Returns an Observable that notifies subscribers of each error while trying to update
-   * the settings, containing the actual Error class.
-   */
-  public getUpdateErrors$() {
+  getUpdateErrors$() {
     return this.updateErrors$.asObservable();
-  }
-
-  /**
-   * Prepares the uiSettingsClient to be discarded, completing any update$ observables
-   * that have been created.
-   */
-  public stop() {
-    this.update$.complete();
-    this.saved$.complete();
   }
 
   private assertUpdateAllowed(key: string) {
@@ -242,7 +170,7 @@ You can use \`config.get("${key}", defaultValue)\`, which will just return
     }
   }
 
-  private async update(key: string, newVal: any) {
+  private async update(key: string, newVal: any): Promise<boolean> {
     this.assertUpdateAllowed(key);
 
     const declared = this.isDeclared(key);

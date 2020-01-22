@@ -1,8 +1,0 @@
-# index a doc
-PUT index/type/1
-{
-  "body": "here"
-}
-
-# and get it ...
-GET index/type/1

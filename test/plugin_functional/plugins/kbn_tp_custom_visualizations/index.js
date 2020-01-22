@@ -17,12 +17,10 @@
  * under the License.
  */
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
-      visTypes: [
-        'plugins/kbn_tp_custom_visualizations/self_changing_vis/self_changing_vis',
-      ],
+      visTypes: ['plugins/kbn_tp_custom_visualizations/self_changing_vis/self_changing_vis'],
     },
   });
 }

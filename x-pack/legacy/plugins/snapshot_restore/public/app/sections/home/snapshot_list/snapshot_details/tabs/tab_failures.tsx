@@ -16,7 +16,7 @@ interface Props {
   snapshotState: string;
 }
 
-export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) => {
+export const TabFailures: React.FC<Props> = ({ indexFailures, snapshotState }) => {
   const {
     core: {
       i18n: { FormattedMessage },

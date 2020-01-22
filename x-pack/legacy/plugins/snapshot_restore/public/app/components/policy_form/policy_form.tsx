@@ -83,9 +83,12 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
     errors: {},
   });
 
-  const updatePolicy = (updatedFields: any): void => {
+  const updatePolicy = (
+    updatedFields: Partial<SlmPolicyPayload>,
+    validationHelperData = {}
+  ): void => {
     const newPolicy = { ...policy, ...updatedFields };
-    const newValidation = validatePolicy(newPolicy);
+    const newValidation = validatePolicy(newPolicy, validationHelperData);
     setPolicy(newPolicy);
     setValidation(newValidation);
   };
@@ -187,8 +190,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep === lastStep ? (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
-                    color="secondary"
+                    fill={isEditing && policy.isManagedPolicy ? false : true}
+                    color={isEditing && policy.isManagedPolicy ? 'warning' : 'secondary'}
                     iconType="check"
                     onClick={() => savePolicy()}
                     isLoading={isSaving}

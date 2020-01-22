@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProgressInline it renders 1`] = `
+<Wrapper
+  className="siemProgressInline"
+>
+  <dt
+    className="siemProgressInline__title"
+  >
+    Test progress
+  </dt>
+  <dd
+    className="siemProgressInline__bar"
+  >
+    <EuiProgress
+      color="secondary"
+      max={100}
+      value={50}
+    />
+  </dd>
+  <dd
+    className="siemProgressInline__ratio"
+  >
+    50
+    /
+    100
+     
+    tests
+  </dd>
+</Wrapper>
+`;

@@ -18,19 +18,14 @@
  */
 
 import dedent from 'dedent';
-import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/dev-utils';
 
-import { createFailureIssue, updatedFailureIssue } from './report_failure';
+import { createFailureIssue, updateFailureIssue } from './report_failure';
 
 jest.mock('./github_api');
 const { GithubApi } = jest.requireMock('./github_api');
 
 describe('createFailureIssue()', () => {
   it('creates new github issue with failure text, link to issue, and valid metadata', async () => {
-    const log = new ToolingLog();
-    const writer = new ToolingLogCollectingWriter();
-    log.setWriters([writer]);
-
     const api = new GithubApi();
 
     await createFailureIssue(
@@ -40,8 +35,8 @@ describe('createFailureIssue()', () => {
         failure: 'this is the failure text',
         name: 'test name',
         time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
       },
-      log,
       api
     );
 
@@ -72,23 +67,14 @@ describe('createFailureIssue()', () => {
         ],
       }
     `);
-    expect(writer.messages).toMatchInlineSnapshot(`
-      Array [
-        " [34minfo[39m Created issue undefined",
-      ]
-    `);
   });
 });
 
-describe('updatedFailureIssue()', () => {
+describe('updateFailureIssue()', () => {
   it('increments failure count and adds new comment to issue', async () => {
-    const log = new ToolingLog();
-    const writer = new ToolingLogCollectingWriter();
-    log.setWriters([writer]);
-
     const api = new GithubApi();
 
-    await updatedFailureIssue(
+    await updateFailureIssue(
       'https://build-url',
       {
         html_url: 'https://github.com/issues/1234',
@@ -101,7 +87,6 @@ describe('updatedFailureIssue()', () => {
           <!-- kibanaCiData = {"failed-test":{"test.failCount":10}} -->"
         `,
       },
-      log,
       api
     );
 
@@ -138,11 +123,6 @@ describe('updatedFailureIssue()', () => {
           },
         ],
       }
-    `);
-    expect(writer.messages).toMatchInlineSnapshot(`
-      Array [
-        " [34minfo[39m Updated issue https://github.com/issues/1234, failCount: 11",
-      ]
     `);
   });
 });

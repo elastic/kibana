@@ -17,13 +17,13 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
+export default function({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  describe('Getting Started ', function () {
+  describe('Getting Started ', function() {
     this.tags(['ciGroup6', 'smoke']);
 
-    before(async function () {
+    before(async function() {
       await browser.setWindowSize(1200, 800);
     });
     // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html

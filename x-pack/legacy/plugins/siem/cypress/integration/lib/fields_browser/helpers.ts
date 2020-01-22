@@ -19,7 +19,7 @@ import { TIMELINE_DATA_PROVIDERS } from '../timeline/selectors';
 
 /** Opens the timeline's Field Browser */
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).click();
+  cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
 
   cy.get(FIELDS_BROWSER_CONTAINER).should('exist');
 };
@@ -41,4 +41,8 @@ export const clickOutsideFieldsBrowser = () => {
 /** Filters the Field Browser by typing `fieldName` in the input */
 export const filterFieldsBrowser = (fieldName: string) => {
   cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName);
+};
+
+export const clearFieldsBrowser = () => {
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
 };

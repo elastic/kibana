@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class UpdateSourceEditor extends Component {
@@ -57,20 +57,26 @@ export class UpdateSourceEditor extends Component {
 
   render() {
     return (
-      <>
-        <EuiTitle size="xxs">
-          <h6>
-            <FormattedMessage id="xpack.maps.source.pewPew.metricsLabel" defaultMessage="Metrics" />
-          </h6>
-        </EuiTitle>
+      <Fragment>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h6>
+              <FormattedMessage
+                id="xpack.maps.source.pewPew.metricsLabel"
+                defaultMessage="Metrics"
+              />
+            </h6>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <MetricsEditor
+            allowMultipleMetrics={true}
+            fields={this.state.fields}
+            metrics={this.props.metrics}
+            onChange={this._onMetricsChange}
+          />
+        </EuiPanel>
         <EuiSpacer size="s" />
-        <MetricsEditor
-          allowMultipleMetrics={true}
-          fields={this.state.fields}
-          metrics={this.props.metrics}
-          onChange={this._onMetricsChange}
-        />
-      </>
+      </Fragment>
     );
   }
 }

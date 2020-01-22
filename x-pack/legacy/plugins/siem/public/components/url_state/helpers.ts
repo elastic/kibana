@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '@kbn/es-query';
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
-import { Query } from 'src/plugins/data/common';
+import { Query, esFilters } from 'src/plugins/data/public';
 
 import { inputsSelectors, State, timelineSelectors } from '../../store';
 import { SiemPageName } from '../../pages/home/types';
@@ -73,12 +72,14 @@ export const replaceQueryStringInLocation = (location: Location, queryString: st
 };
 
 export const getUrlType = (pageName: string): UrlStateType => {
-  if (pageName === SiemPageName.hosts) {
+  if (pageName === SiemPageName.overview) {
+    return 'overview';
+  } else if (pageName === SiemPageName.hosts) {
     return 'host';
   } else if (pageName === SiemPageName.network) {
     return 'network';
-  } else if (pageName === SiemPageName.overview) {
-    return 'overview';
+  } else if (pageName === SiemPageName.detections) {
+    return 'detections';
   } else if (pageName === SiemPageName.timelines) {
     return 'timeline';
   }
@@ -98,7 +99,9 @@ export const getCurrentLocation = (
   pageName: string,
   detailName: string | undefined
 ): LocationTypes => {
-  if (pageName === SiemPageName.hosts) {
+  if (pageName === SiemPageName.overview) {
+    return CONSTANTS.overviewPage;
+  } else if (pageName === SiemPageName.hosts) {
     if (detailName != null) {
       return CONSTANTS.hostsDetails;
     }
@@ -108,29 +111,12 @@ export const getCurrentLocation = (
       return CONSTANTS.networkDetails;
     }
     return CONSTANTS.networkPage;
-  } else if (pageName === SiemPageName.overview) {
-    return CONSTANTS.overviewPage;
+  } else if (pageName === SiemPageName.detections) {
+    return CONSTANTS.detectionsPage;
   } else if (pageName === SiemPageName.timelines) {
     return CONSTANTS.timelinePage;
   }
   return CONSTANTS.unknown;
-};
-
-export const isKqlForRoute = (
-  pageName: string,
-  detailName: string | undefined,
-  queryLocation: LocationTypes | null = null
-): boolean => {
-  const currentLocation = getCurrentLocation(pageName, detailName);
-  if (
-    (currentLocation === CONSTANTS.hostsPage && queryLocation === CONSTANTS.hostsPage) ||
-    (currentLocation === CONSTANTS.networkPage && queryLocation === CONSTANTS.networkPage) ||
-    (currentLocation === CONSTANTS.hostsDetails && queryLocation === CONSTANTS.hostsDetails) ||
-    (currentLocation === CONSTANTS.networkDetails && queryLocation === CONSTANTS.networkDetails)
-  ) {
-    return true;
-  }
-  return false;
 };
 
 export const makeMapStateToProps = () => {
@@ -154,7 +140,7 @@ export const makeMapStateToProps = () => {
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: Filter[];
+      [CONSTANTS.filters]?: esFilters.Filter[];
       [CONSTANTS.savedQuery]?: string;
     } = {
       [CONSTANTS.appQuery]: getGlobalQuerySelector(state),

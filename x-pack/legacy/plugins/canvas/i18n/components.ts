@@ -228,11 +228,11 @@ export const ComponentStrings = {
   DatasourceDatasourceComponent: {
     getChangeButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.changeButtonLabel', {
-        defaultMessage: 'Change your data source',
+        defaultMessage: 'Change element data source',
       }),
     getPreviewButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
-        defaultMessage: 'Preview',
+        defaultMessage: 'Preview data',
       }),
     getSaveButtonLabel: () =>
       i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
@@ -294,7 +294,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.elementConfig.title', {
-        defaultMessage: 'Elements',
+        defaultMessage: 'Element status',
         description:
           '"Elements" refers to the individual text, images, or visualizations that you can add to a Canvas workpad',
       }),
@@ -531,7 +531,7 @@ export const ComponentStrings = {
       }),
     getKeyboardShortcutsLinkLabel: () =>
       i18n.translate('xpack.canvas.helpMenu.keyboardShortcutsLinkLabel', {
-        defaultMessage: 'Keyboard Shortcuts',
+        defaultMessage: 'Keyboard shortcuts',
       }),
   },
   KeyboardShortcutsDoc: {
@@ -547,7 +547,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.keyboardShortcutsDoc.flyoutHeaderTitle', {
-        defaultMessage: 'Keyboard Shortcuts',
+        defaultMessage: 'Keyboard shortcuts',
       }),
   },
   Link: {
@@ -581,7 +581,7 @@ export const ComponentStrings = {
       }),
     getBackgroundColorLabel: () =>
       i18n.translate('xpack.canvas.pageConfig.backgroundColorLabel', {
-        defaultMessage: 'Background Color',
+        defaultMessage: 'Background',
       }),
     getNoTransitionDropDownOptionLabel: () =>
       i18n.translate('xpack.canvas.pageConfig.transitions.noneDropDownOptionLabel', {
@@ -592,7 +592,7 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.pageConfig.title', {
-        defaultMessage: 'Page',
+        defaultMessage: 'Page styles',
       }),
     getTransitionLabel: () =>
       i18n.translate('xpack.canvas.pageConfig.transitionLabel', {
@@ -912,6 +912,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
         defaultMessage: 'Underline',
       }),
+    getFontColorLabel: () =>
+      i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
+        defaultMessage: 'Font Color',
+      }),
   },
   TimePicker: {
     getApplyButtonLabel: () =>
@@ -1002,12 +1006,16 @@ export const ComponentStrings = {
       }),
     getTitle: () =>
       i18n.translate('xpack.canvas.workpadConfig.title', {
-        defaultMessage: 'Workpad',
+        defaultMessage: 'Workpad settings',
       }),
     getUSLetterButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadConfig.USLetterButtonLabel', {
         defaultMessage: 'US Letter',
-        description: 'This is referring to the dimentions of U.S. standard letter paper.',
+        description: 'This is referring to the dimensions of U.S. standard letter paper.',
+      }),
+    getBackgroundColorLabel: () =>
+      i18n.translate('xpack.canvas.workpadConfig.backgroundColorLabel', {
+        defaultMessage: 'Background color',
       }),
   },
   WorkpadCreate: {

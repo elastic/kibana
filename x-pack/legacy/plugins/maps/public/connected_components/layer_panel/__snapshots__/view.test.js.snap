@@ -97,7 +97,9 @@ exports[`LayerPanel is rendered 1`] = `
       >
         <LayerErrors />
         <LayerSettings />
-        <SourceSettings />
+        <div>
+          mockSourceSettings
+        </div>
         <EuiPanel>
           <JoinEditor />
         </EuiPanel>

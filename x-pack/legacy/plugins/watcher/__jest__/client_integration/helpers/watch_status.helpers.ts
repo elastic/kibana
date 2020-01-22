@@ -13,9 +13,10 @@ import {
   TestBedConfig,
   nextTick,
 } from '../../../../../../test_utils';
-import { WatchStatus } from '../../../public/sections/watch_status/components/watch_status';
+import { WatchStatus } from '../../../public/np_ready/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './constants';
+import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -25,7 +26,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WatchStatus, testBedConfig);
+const initTestBed = registerTestBed(withAppContext(WatchStatus), testBedConfig);
 
 export interface WatchStatusTestBed extends TestBed<WatchStatusTestSubjects> {
   actions: {
@@ -57,7 +58,6 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
     const { component } = testBed;
     const button = testBed.find('toggleWatchActivationButton');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
@@ -71,7 +71,6 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
     const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
     const button = findTestSubject(lastColumn, 'acknowledgeWatchButton');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
@@ -82,7 +81,6 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
     const { component } = testBed;
     const button = testBed.find('deleteWatchButton');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
@@ -97,7 +95,6 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
 
     const button = findTestSubject(firstColumn, `watchStartTimeColumn-${tableCellText}`);
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       await nextTick(100);

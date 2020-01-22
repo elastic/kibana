@@ -209,7 +209,10 @@ export class HistogramInner extends PureComponent {
             )}
 
             <Voronoi
-              extent={[[XY_MARGIN.left, XY_MARGIN.top], [XY_WIDTH, XY_HEIGHT]]}
+              extent={[
+                [XY_MARGIN.left, XY_MARGIN.top],
+                [XY_WIDTH, XY_HEIGHT]
+              ]}
               nodes={this.props.buckets.map(bucket => {
                 return {
                   ...bucket,

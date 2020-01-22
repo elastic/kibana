@@ -17,7 +17,9 @@
  * under the License.
  */
 
-// @ts-ignore no types
 export { indexPatternsMixin } from './mixin';
-export { IndexPatternsService, FieldDescriptor } from './service';
+export {
+  IndexPatternsFetcher,
+  FieldDescriptor,
+} from '../../../plugins/data/server/index_patterns/fetcher';
 export { IndexPatternsServiceFactory } from './mixin';

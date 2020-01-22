@@ -18,21 +18,24 @@
  */
 
 import { ColorFormat } from './color';
-import { HTML_CONTEXT_TYPE } from '../../index';
+import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Color Format', () => {
   describe('field is a number', () => {
     test('should add colors if the value is in range', () => {
-      const colorer = new ColorFormat({
-        fieldType: 'number',
-        colors: [
-          {
-            range: '100:150',
-            text: 'blue',
-            background: 'yellow',
-          },
-        ],
-      });
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'number',
+          colors: [
+            {
+              range: '100:150',
+              text: 'blue',
+              background: 'yellow',
+            },
+          ],
+        },
+        jest.fn()
+      );
 
       expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>99</span>');
       expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(
@@ -45,16 +48,19 @@ describe('Color Format', () => {
     });
 
     test('should not convert invalid ranges', () => {
-      const colorer = new ColorFormat({
-        fieldType: 'number',
-        colors: [
-          {
-            range: '100150',
-            text: 'blue',
-            background: 'yellow',
-          },
-        ],
-      });
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'number',
+          colors: [
+            {
+              range: '100150',
+              text: 'blue',
+              background: 'yellow',
+            },
+          ],
+        },
+        jest.fn()
+      );
 
       expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>99</span>');
     });
@@ -62,16 +68,19 @@ describe('Color Format', () => {
 
   describe('field is a string', () => {
     test('should add colors if the regex matches', () => {
-      const colorer = new ColorFormat({
-        fieldType: 'string',
-        colors: [
-          {
-            regex: 'A.*',
-            text: 'blue',
-            background: 'yellow',
-          },
-        ],
-      });
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'string',
+          colors: [
+            {
+              regex: 'A.*',
+              text: 'blue',
+              background: 'yellow',
+            },
+          ],
+        },
+        jest.fn()
+      );
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>B</span>');
@@ -97,16 +106,19 @@ describe('Color Format', () => {
     });
 
     test('returns original value (escaped) when regex is invalid', () => {
-      const colorer = new ColorFormat({
-        fieldType: 'string',
-        colors: [
-          {
-            regex: 'A.*',
-            text: 'blue',
-            background: 'yellow',
-          },
-        ],
-      });
+      const colorer = new ColorFormat(
+        {
+          fieldType: 'string',
+          colors: [
+            {
+              regex: 'A.*',
+              text: 'blue',
+              background: 'yellow',
+            },
+          ],
+        },
+        jest.fn()
+      );
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('<', HTML_CONTEXT_TYPE)).toBe('<span ng-non-bindable>&lt;</span>');

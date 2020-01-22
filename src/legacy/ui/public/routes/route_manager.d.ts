@@ -23,7 +23,7 @@
 
 import { ChromeBreadcrumb } from '../../../../core/public';
 
-interface RouteConfiguration {
+export interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
   redirectTo?: string;
   resolveRedirectTo?: (...args: any[]) => void;

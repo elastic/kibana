@@ -15,16 +15,16 @@ const schema = {
     properties: {
       /**
        * Type of object that is triggering this report. Should be either search, visualization or dashboard.
-       * Used for phone home stats only.
+       * Used for job listing and telemetry stats only.
        */
       objectType: {
         type: 'text',
         fields: {
           keyword: {
             type: 'keyword',
-            ignore_above: 256
-          }
-        }
+            ignore_above: 256,
+          },
+        },
       },
       /**
        * Can be either preserve_layout, print or none (in the case of csv export).
@@ -35,11 +35,11 @@ const schema = {
         fields: {
           keyword: {
             type: 'keyword',
-            ignore_above: 256
-          }
-        }
+            ignore_above: 256,
+          },
+        },
       },
-    }
+    },
   },
   browser_type: { type: 'keyword' },
   jobtype: { type: 'keyword' },
@@ -61,31 +61,33 @@ const schema = {
     properties: {
       content_type: { type: 'keyword' },
       size: { type: 'long' },
-      content: { type: 'object', enabled: false }
-    }
-  }
+      content: { type: 'object', enabled: false },
+    },
+  },
 };
 
 export function createIndex(client, indexName, indexSettings = {}) {
   const body = {
     settings: {
       ...constants.DEFAULT_SETTING_INDEX_SETTINGS,
-      ...indexSettings
+      ...indexSettings,
     },
     mappings: {
-      properties: schema
-    }
+      properties: schema,
+    },
   };
 
-  return client.callWithInternalUser('indices.exists', {
-    index: indexName,
-  })
-    .then((exists) => {
+  return client
+    .callWithInternalUser('indices.exists', {
+      index: indexName,
+    })
+    .then(exists => {
       if (!exists) {
-        return client.callWithInternalUser('indices.create', {
-          index: indexName,
-          body: body
-        })
+        return client
+          .callWithInternalUser('indices.create', {
+            index: indexName,
+            body: body,
+          })
           .then(() => true)
           .catch(err => {
             /* FIXME creating the index will fail if there were multiple jobs staged in parallel.
@@ -95,7 +97,11 @@ export function createIndex(client, indexName, indexSettings = {}) {
              * This catch block is in place to not fail a job if the job runner hits this race condition.
              * Unfortunately we don't have a logger in scope to log a warning.
              */
-            const isIndexExistsError = err && err.body && err.body.error && err.body.error.type === 'resource_already_exists_exception';
+            const isIndexExistsError =
+              err &&
+              err.body &&
+              err.body.error &&
+              err.body.error.type === 'resource_already_exists_exception';
             if (isIndexExistsError) {
               return true;
             }

@@ -98,6 +98,7 @@ When run without any arguments the `FunctionalTestRunner` automatically loads th
 * `--config test/functional/config.js` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Chrome.
 * `--config test/functional/config.firefox.js` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run in Firefox.
 * `--config test/api_integration/config.js` starts Elasticsearch and Kibana servers with the api integration tests configuration.
+* `--config test/accessibility/config.ts` starts Elasticsearch and Kibana servers with the WebDriver tests configured to run an accessibility audit using https://www.deque.com/axe/[axe].
 
 There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. For instance, use `--grep=foo` to run only tests that match a regular expression.
 
@@ -281,7 +282,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 * Source: {blob}src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
-* Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`, `phaseStart`, `phaseEnd`
+* Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`
 
 [float]
 ===== Kibana Services
@@ -362,7 +363,7 @@ Full list of services that are used in functional tests can be found here: {blob
 ** Source: {blob}test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
 ** Instance of https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebDriver.html[WebDriver] class
 ** Responsible for all communication with the browser
-** To perform browser actions, use `remote` service 
+** To perform browser actions, use `remote` service
 ** For searching and manipulating with DOM elements, use `testSubjects` and `find` services
 ** See the https://seleniumhq.github.io/selenium/docs/api/javascript/[selenium-webdriver docs] for the full API.
 

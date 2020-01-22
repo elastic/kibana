@@ -5,24 +5,25 @@
  */
 import { shallow } from 'enzyme';
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+
+import { useUiSetting } from '../../lib/kibana';
 import {
   checkIfAllValuesAreZero,
   defaultChartHeight,
   getChartHeight,
   getChartWidth,
-  getSeriesStyle,
-  getTheme,
-  SeriesType,
   WrappedByAutoSizer,
   ChartSeriesData,
+  useTheme,
 } from './common';
-import 'jest-styled-components';
-import { mergeWithDefaultTheme, LIGHT_THEME } from '@elastic/charts';
+
+jest.mock('../../lib/kibana');
 
 jest.mock('@elastic/charts', () => {
   return {
+    ...jest.requireActual('@elastic/charts'),
     getSpecId: jest.fn(() => {}),
-    mergeWithDefaultTheme: jest.fn(),
   };
 });
 
@@ -35,41 +36,6 @@ describe('WrappedByAutoSizer', () => {
   it('should render correct given height', () => {
     const wrapper = shallow(<WrappedByAutoSizer height="100px" />);
     expect(wrapper).toHaveStyleRule('height', '100px');
-  });
-});
-
-describe('getSeriesStyle', () => {
-  it('should not create style mapping if color is not given', () => {
-    const mockSeriesKey = 'mockSeriesKey';
-    const color = '';
-    const customSeriesColors = getSeriesStyle(mockSeriesKey, color, SeriesType.BAR);
-    expect(customSeriesColors).toBeUndefined();
-  });
-
-  it('should create correct style mapping for series of a chart', () => {
-    const mockSeriesKey = 'mockSeriesKey';
-    const color = 'red';
-    const customSeriesColors = getSeriesStyle(mockSeriesKey, color, SeriesType.BAR);
-    const expectedKey = { colorValues: [mockSeriesKey] };
-    customSeriesColors!.forEach((value, key) => {
-      expect(JSON.stringify(key)).toEqual(JSON.stringify(expectedKey));
-      expect(value).toEqual(color);
-    });
-  });
-});
-
-describe('getTheme', () => {
-  it('should merge custom theme with default theme', () => {
-    const defaultTheme = {
-      chartMargins: { bottom: 0, left: 0, right: 0, top: 4 },
-      chartPaddings: { bottom: 0, left: 0, right: 0, top: 0 },
-      scales: {
-        barsPadding: 0.05,
-      },
-    };
-    getTheme();
-    expect((mergeWithDefaultTheme as jest.Mock).mock.calls[0][0]).toMatchObject(defaultTheme);
-    expect((mergeWithDefaultTheme as jest.Mock).mock.calls[0][1]).toEqual(LIGHT_THEME);
   });
 });
 
@@ -109,20 +75,70 @@ describe('getChartWidth', () => {
 
 describe('checkIfAllValuesAreZero', () => {
   const mockInvalidDataSets: Array<[ChartSeriesData[]]> = [
-    [[{ key: 'mockKey', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] }]],
     [
       [
-        { key: 'mockKeyA', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 1 }] },
-        { key: 'mockKeyB', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 1, y: 0 }] },
+        {
+          key: 'mockKey',
+          color: 'mockColor',
+          value: [
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+          ],
+        },
+      ],
+    ],
+    [
+      [
+        {
+          key: 'mockKeyA',
+          color: 'mockColor',
+          value: [
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+          ],
+        },
+        {
+          key: 'mockKeyB',
+          color: 'mockColor',
+          value: [
+            { x: 1, y: 0 },
+            { x: 1, y: 0 },
+          ],
+        },
       ],
     ],
   ];
   const mockValidDataSets: Array<[ChartSeriesData[]]> = [
-    [[{ key: 'mockKey', color: 'mockColor', value: [{ x: 0, y: 0 }, { x: 1, y: 0 }] }]],
     [
       [
-        { key: 'mockKeyA', color: 'mockColor', value: [{ x: 1, y: 0 }, { x: 3, y: 0 }] },
-        { key: 'mockKeyB', color: 'mockColor', value: [{ x: 2, y: 0 }, { x: 4, y: 0 }] },
+        {
+          key: 'mockKey',
+          color: 'mockColor',
+          value: [
+            { x: 0, y: 0 },
+            { x: 1, y: 0 },
+          ],
+        },
+      ],
+    ],
+    [
+      [
+        {
+          key: 'mockKeyA',
+          color: 'mockColor',
+          value: [
+            { x: 1, y: 0 },
+            { x: 3, y: 0 },
+          ],
+        },
+        {
+          key: 'mockKeyB',
+          color: 'mockColor',
+          value: [
+            { x: 2, y: 0 },
+            { x: 4, y: 0 },
+          ],
+        },
       ],
     ],
   ];
@@ -146,6 +162,25 @@ describe('checkIfAllValuesAreZero', () => {
 
     it(`should return true`, () => {
       expect(result).toBeTruthy();
+    });
+  });
+
+  describe('useTheme', () => {
+    it('merges our spacing with the default theme', () => {
+      const { result } = renderHook(() => useTheme());
+
+      expect(result.current).toEqual(
+        expect.objectContaining({ chartMargins: expect.objectContaining({ top: 4, bottom: 0 }) })
+      );
+    });
+
+    it('returns a different theme depending on user settings', () => {
+      const { result: defaultResult } = renderHook(() => useTheme());
+      (useUiSetting as jest.Mock).mockImplementation(() => true);
+
+      const { result: darkResult } = renderHook(() => useTheme());
+
+      expect(defaultResult.current).not.toMatchObject(darkResult.current);
     });
   });
 });

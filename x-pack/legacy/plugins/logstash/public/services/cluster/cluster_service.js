@@ -15,13 +15,12 @@ export class ClusterService {
   }
 
   loadCluster() {
-    return this.$http.get(`${this.basePath}/cluster`)
-      .then(response => {
-        if (!response.data) {
-          return;
-        }
-        return Cluster.fromUpstreamJSON(response.data.cluster);
-      });
+    return this.$http.get(`${this.basePath}/cluster`).then(response => {
+      if (!response.data) {
+        return;
+      }
+      return Cluster.fromUpstreamJSON(response.data.cluster);
+    });
   }
 
   isClusterInfoAvailable() {

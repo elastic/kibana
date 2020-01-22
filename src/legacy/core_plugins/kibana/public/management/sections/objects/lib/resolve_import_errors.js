@@ -34,9 +34,16 @@ async function callResolveImportErrorsApi(file, retries) {
   });
 }
 
-function mapImportFailureToRetryObject({ failure, overwriteDecisionCache, replaceReferencesCache, state }) {
+function mapImportFailureToRetryObject({
+  failure,
+  overwriteDecisionCache,
+  replaceReferencesCache,
+  state,
+}) {
   const { isOverwriteAllChecked, unmatchedReferences } = state;
-  const isOverwriteGranted = isOverwriteAllChecked || overwriteDecisionCache.get(`${failure.obj.type}:${failure.obj.id}`) === true;
+  const isOverwriteGranted =
+    isOverwriteAllChecked ||
+    overwriteDecisionCache.get(`${failure.obj.type}:${failure.obj.id}`) === true;
 
   // Conflicts wihtout overwrite granted are skipped
   if (!isOverwriteGranted && failure.error.type === 'conflict') {
@@ -45,7 +52,8 @@ function mapImportFailureToRetryObject({ failure, overwriteDecisionCache, replac
 
   // Replace references if user chose a new reference
   if (failure.error.type === 'missing_references') {
-    const objReplaceReferences = replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [];
+    const objReplaceReferences =
+      replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [];
     const indexPatternRefs = failure.error.references.filter(obj => obj.type === 'index-pattern');
     for (const reference of indexPatternRefs) {
       for (const unmatchedReference of unmatchedReferences) {
@@ -71,7 +79,9 @@ function mapImportFailureToRetryObject({ failure, overwriteDecisionCache, replac
   return {
     id: failure.obj.id,
     type: failure.obj.type,
-    overwrite: isOverwriteAllChecked || overwriteDecisionCache.get(`${failure.obj.type}:${failure.obj.id}`) === true,
+    overwrite:
+      isOverwriteAllChecked ||
+      overwriteDecisionCache.get(`${failure.obj.type}:${failure.obj.id}`) === true,
     replaceReferences: replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [],
   };
 }
@@ -88,16 +98,25 @@ export async function resolveImportErrors({ getConflictResolutions, state }) {
   const getOverwriteDecision = ({ obj }) => {
     return overwriteDecisionCache.get(`${obj.type}:${obj.id}`);
   };
-  const callMapImportFailure = (failure) => {
-    return mapImportFailureToRetryObject({ failure, overwriteDecisionCache, replaceReferencesCache, state });
+  const callMapImportFailure = failure => {
+    return mapImportFailureToRetryObject({
+      failure,
+      overwriteDecisionCache,
+      replaceReferencesCache,
+      state,
+    });
   };
-  const isNotSkipped = (failure) => {
-    return (failure.error.type !== 'conflict' && failure.error.type !== 'missing_references') ||
-      getOverwriteDecision(failure);
+  const isNotSkipped = failure => {
+    return (
+      (failure.error.type !== 'conflict' && failure.error.type !== 'missing_references') ||
+      getOverwriteDecision(failure)
+    );
   };
 
   // Loop until all issues are resolved
-  while (importFailures.some(failure => ['conflict', 'missing_references'].includes(failure.error.type))) {
+  while (
+    importFailures.some(failure => ['conflict', 'missing_references'].includes(failure.error.type))
+  ) {
     // Ask for overwrites
     if (!isOverwriteAllChecked) {
       const result = await getConflictResolutions(
@@ -112,9 +131,7 @@ export async function resolveImportErrors({ getConflictResolutions, state }) {
     }
 
     // Build retries array
-    const retries = importFailures
-      .map(callMapImportFailure)
-      .filter(obj => !!obj);
+    const retries = importFailures.map(callMapImportFailure).filter(obj => !!obj);
     for (const { error, obj } of importFailures) {
       if (error.type !== 'missing_references') {
         continue;

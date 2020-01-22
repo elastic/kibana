@@ -22,6 +22,7 @@ import {
   ActionsCoreStart,
   ActionsPluginsSetup,
   ActionsPluginsStart,
+  KibanaConfig,
 } from './shim';
 import {
   createActionRoute,
@@ -32,6 +33,15 @@ import {
   listActionTypesRoute,
   getExecuteActionRoute,
 } from './routes';
+import { extendRouteWithLicenseCheck } from './extend_route_with_license_check';
+import { LicenseState } from './lib/license_state';
+import { IEventLogger } from '../../../../plugins/event_log/server';
+
+const EVENT_LOG_PROVIDER = 'actions';
+export const EVENT_LOG_ACTIONS = {
+  execute: 'execute',
+  executeViaHttp: 'execute-via-http',
+};
 
 export interface PluginSetupContract {
   registerType: ActionTypeRegistry['register'];
@@ -44,6 +54,7 @@ export interface PluginStartContract {
 }
 
 export class Plugin {
+  private readonly kibana$: Observable<KibanaConfig>;
   private readonly config$: Observable<ActionsConfigType>;
   private readonly logger: Logger;
   private serverBasePath?: string;
@@ -51,10 +62,14 @@ export class Plugin {
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
+  private defaultKibanaIndex?: string;
+  private licenseState: LicenseState | null = null;
+  private eventLogger?: IEventLogger;
 
   constructor(initializerContext: ActionsPluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.logger = initializerContext.logger.get('plugins', 'actions');
     this.config$ = initializerContext.config.create();
+    this.kibana$ = initializerContext.config.kibana$;
   }
 
   public async setup(
@@ -62,51 +77,37 @@ export class Plugin {
     plugins: ActionsPluginsSetup
   ): Promise<PluginSetupContract> {
     const config = await this.config$.pipe(first()).toPromise();
-    this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
+    this.adminClient = core.elasticsearch.adminClient;
+    this.defaultKibanaIndex = (await this.kibana$.pipe(first()).toPromise()).index;
 
-    plugins.xpack_main.registerFeature({
-      id: 'actions',
-      name: 'Actions',
-      app: ['actions', 'kibana'],
-      privileges: {
-        all: {
-          savedObject: {
-            all: ['action', 'action_task_params'],
-            read: [],
-          },
-          ui: [],
-          api: ['actions-read', 'actions-all'],
-        },
-        read: {
-          savedObject: {
-            all: ['action_task_params'],
-            read: ['action'],
-          },
-          ui: [],
-          api: ['actions-read'],
-        },
-      },
-    });
+    this.licenseState = new LicenseState(plugins.licensing.license$);
 
     // Encrypted attributes
     // - `secrets` properties will be encrypted
     // - `config` will be included in AAD
     // - everything else excluded from AAD
-    plugins.encrypted_saved_objects.registerType({
+    plugins.encryptedSavedObjects.registerType({
       type: 'action',
       attributesToEncrypt: new Set(['secrets']),
-      attributesToExcludeFromAAD: new Set(['description']),
+      attributesToExcludeFromAAD: new Set(['name']),
     });
-    plugins.encrypted_saved_objects.registerType({
+    plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',
       attributesToEncrypt: new Set(['apiKey']),
     });
 
+    plugins.event_log.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.event_log.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
+    });
+
     const actionExecutor = new ActionExecutor();
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
+    const actionsConfigUtils = getActionsConfigurationUtilities(config as ActionsConfigType);
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
+      actionsConfigUtils,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -116,17 +117,19 @@ export class Plugin {
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
-      actionsConfigUtils: getActionsConfigurationUtilities(config as ActionsConfigType),
+      actionsConfigUtils,
     });
 
     // Routes
-    core.http.route(createActionRoute);
-    core.http.route(deleteActionRoute);
-    core.http.route(getActionRoute);
-    core.http.route(findActionRoute);
-    core.http.route(updateActionRoute);
-    core.http.route(listActionTypesRoute);
-    core.http.route(getExecuteActionRoute(actionExecutor));
+    core.http.route(extendRouteWithLicenseCheck(createActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(deleteActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(getActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(findActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(updateActionRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(listActionTypesRoute, this.licenseState));
+    core.http.route(
+      extendRouteWithLicenseCheck(getExecuteActionRoute(actionExecutor), this.licenseState)
+    );
 
     return {
       registerType: actionTypeRegistry.register.bind(actionTypeRegistry),
@@ -141,6 +144,7 @@ export class Plugin {
       adminClient,
       serverBasePath,
       taskRunnerFactory,
+      defaultKibanaIndex,
     } = this;
 
     function getServices(request: any): Services {
@@ -163,17 +167,18 @@ export class Plugin {
       logger,
       spaces: plugins.spaces,
       getServices,
-      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       actionTypeRegistry: actionTypeRegistry!,
+      eventLogger: this.eventLogger!,
     });
     taskRunnerFactory!.initialize({
-      encryptedSavedObjectsPlugin: plugins.encrypted_saved_objects,
+      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath,
       spaceIdToNamespace,
     });
 
     const executeFn = createExecuteFunction({
-      taskManager: plugins.task_manager,
+      taskManager: plugins.taskManager,
       getScopedSavedObjectsClient: core.savedObjects.getScopedSavedObjectsClient,
       getBasePath,
     });
@@ -186,8 +191,16 @@ export class Plugin {
         return new ActionsClient({
           savedObjectsClient,
           actionTypeRegistry: actionTypeRegistry!,
+          defaultKibanaIndex: defaultKibanaIndex!,
+          scopedClusterClient: adminClient!.asScoped(request),
         });
       },
     };
+  }
+
+  public stop() {
+    if (this.licenseState) {
+      this.licenseState.clean();
+    }
   }
 }

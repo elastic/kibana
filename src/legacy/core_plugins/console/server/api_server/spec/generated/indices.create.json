@@ -1,7 +1,6 @@
 {
   "indices.create": {
     "url_params": {
-      "include_type_name": "__flag__",
       "wait_for_active_shards": "",
       "timeout": "",
       "master_timeout": ""

@@ -8,7 +8,7 @@ import { indexPatternService } from './kibana_services';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
-  indexPatternIds.forEach((id) => {
+  indexPatternIds.forEach(id => {
     const indexPatternPromise = indexPatternService.get(id);
     if (indexPatternPromise) {
       promises.push(indexPatternPromise);
@@ -28,6 +28,7 @@ export function getTermsFields(fields) {
 export function getSourceFields(fields) {
   return fields.filter(field => {
     // Multi fields are not stored in _source and only exist in index.
-    return field.subType && field.subType.multi;
+    const isMultiField = field.subType && field.subType.multi;
+    return !isMultiField;
   });
 }

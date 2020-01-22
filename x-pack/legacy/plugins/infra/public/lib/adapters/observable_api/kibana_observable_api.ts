@@ -16,13 +16,13 @@ import {
 export class InfraKibanaObservableApiAdapter implements InfraObservableApi {
   private basePath: string;
   private defaultHeaders: {
-    [headerName: string]: string;
+    [headerName: string]: boolean | string;
   };
 
-  constructor({ basePath, xsrfToken }: { basePath: string; xsrfToken: string }) {
+  constructor({ basePath }: { basePath: string }) {
     this.basePath = basePath;
     this.defaultHeaders = {
-      'kbn-version': xsrfToken,
+      'kbn-xsrf': true,
     };
   }
 

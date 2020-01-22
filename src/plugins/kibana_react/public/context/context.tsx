@@ -32,12 +32,11 @@ const defaultContextValue = {
 
 export const context = createContext<KibanaReactContextValue<KibanaServices>>(defaultContextValue);
 
-export const useKibana = <Extra extends object = {}>(): KibanaReactContextValue<
-  KibanaServices & Extra
-> =>
-  useContext((context as unknown) as React.Context<
-    KibanaReactContextValue<KibanaServices & Extra>
-  >);
+export const useKibana = <Extra extends object = {}>(): KibanaReactContextValue<KibanaServices &
+  Extra> =>
+  useContext(
+    (context as unknown) as React.Context<KibanaReactContextValue<KibanaServices & Extra>>
+  );
 
 export const withKibana = <Props extends { kibana: KibanaReactContextValue<any> }>(
   type: React.ComponentType<Props>

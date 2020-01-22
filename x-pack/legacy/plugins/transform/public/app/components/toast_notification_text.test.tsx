@@ -5,12 +5,10 @@
  */
 
 import React from 'react';
-import { cleanup, render } from 'react-testing-library';
+import { render } from '@testing-library/react';
 import { ToastNotificationText } from './toast_notification_text';
 
 describe('ToastNotificationText', () => {
-  afterEach(cleanup);
-
   test('should render the text as plain text', () => {
     const props = {
       text: 'a short text message',

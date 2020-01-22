@@ -8,6 +8,8 @@ import { ISessionTimeout } from './session_timeout';
 
 export function createSessionTimeoutMock() {
   return {
+    start: jest.fn(),
+    stop: jest.fn(),
     extend: jest.fn(),
   } as jest.Mocked<ISessionTimeout>;
 }

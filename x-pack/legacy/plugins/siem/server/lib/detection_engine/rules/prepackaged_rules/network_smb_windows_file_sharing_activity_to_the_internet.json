@@ -1,0 +1,17 @@
+{
+  "description": "Network - SMB (Windows File Sharing) Activity to the Internet\t",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Network - SMB (Windows File Sharing) Activity to the Internet\t",
+  "query": "(destination.port:139 or destination.port:445) and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
+  "risk_score": 50,
+  "rule_id": "c82b2bd8-d701-420c-ba43-f11a155b681a",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

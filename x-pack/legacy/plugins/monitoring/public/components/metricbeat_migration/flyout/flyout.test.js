@@ -13,12 +13,12 @@ import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
   APM_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID
+  LOGSTASH_SYSTEM_ID,
 } from '../../../../common/constants';
 
 jest.mock('ui/documentation_links', () => ({
   ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-  DOC_LINK_VERSION: 'current'
+  DOC_LINK_VERSION: 'current',
 }));
 
 jest.mock('../../../../common', () => ({
@@ -27,20 +27,20 @@ jest.mock('../../../../common', () => ({
 
 const PRODUCTS = [
   {
-    name: ELASTICSEARCH_SYSTEM_ID
+    name: ELASTICSEARCH_SYSTEM_ID,
   },
   {
-    name: KIBANA_SYSTEM_ID
+    name: KIBANA_SYSTEM_ID,
   },
   {
-    name: LOGSTASH_SYSTEM_ID
+    name: LOGSTASH_SYSTEM_ID,
   },
   {
-    name: BEATS_SYSTEM_ID
+    name: BEATS_SYSTEM_ID,
   },
   {
-    name: APM_SYSTEM_ID
-  }
+    name: APM_SYSTEM_ID,
+  },
 ];
 
 describe('Flyout', () => {
@@ -48,13 +48,7 @@ describe('Flyout', () => {
     describe(`${name}`, () => {
       describe('part one', () => {
         it('should render normally', () => {
-          const component = shallow(
-            <Flyout
-              onClose={() => {}}
-              product={{}}
-              productName={name}
-            />
-          );
+          const component = shallow(<Flyout onClose={() => {}} product={{}} productName={name} />);
           expect(component).toMatchSnapshot();
         });
       });
@@ -65,7 +59,7 @@ describe('Flyout', () => {
             <Flyout
               onClose={() => {}}
               product={{
-                isInternalCollector: true
+                isInternalCollector: true,
               }}
               productName={name}
             />
@@ -84,7 +78,7 @@ describe('Flyout', () => {
                 lastInternallyCollectedTimestamp: 0,
               }}
               meta={{
-                secondsAgo: 30
+                secondsAgo: 30,
               }}
               productName={name}
             />
@@ -104,10 +98,10 @@ describe('Flyout', () => {
         <Flyout
           onClose={() => {}}
           product={{
-            isPartiallyMigrated: true
+            isPartiallyMigrated: true,
           }}
           meta={{
-            secondsAgo: 10
+            secondsAgo: 10,
           }}
           productName={name}
         />
@@ -133,7 +127,7 @@ describe('Flyout', () => {
         onClose={() => {}}
         product={{
           isInternalCollector: true,
-          beatType: 'filebeat'
+          beatType: 'filebeat',
         }}
         productName={BEATS_SYSTEM_ID}
       />
@@ -149,10 +143,10 @@ describe('Flyout', () => {
         onClose={() => {}}
         product={{
           isPartiallyMigrated: true,
-          beatType: 'filebeat'
+          beatType: 'filebeat',
         }}
         meta={{
-          secondsAgo: 30
+          secondsAgo: 30,
         }}
         productName={BEATS_SYSTEM_ID}
       />
@@ -168,10 +162,10 @@ describe('Flyout', () => {
         onClose={() => {}}
         product={{
           isPartiallyMigrated: true,
-          isPrimary: true
+          isPrimary: true,
         }}
         meta={{
-          secondsAgo: 30
+          secondsAgo: 30,
         }}
         productName={KIBANA_SYSTEM_ID}
       />

@@ -8,7 +8,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface HttpErrorResponse extends HttpResponse 
+export interface HttpErrorResponse extends IHttpResponse 
 ```
 
 ## Properties

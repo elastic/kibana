@@ -8,45 +8,37 @@ import Hapi from 'hapi';
 import { Legacy } from 'kibana';
 import * as Rx from 'rxjs';
 import { ActionsConfigType } from './types';
-import { TaskManager } from '../../task_manager';
-import { XPackMainPlugin } from '../../xpack_main/xpack_main';
+import {
+  TaskManagerStartContract,
+  TaskManagerSetupContract,
+} from '../../../../plugins/task_manager/server';
+import { getTaskManagerSetup, getTaskManagerStart } from '../../task_manager/server';
+import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import KbnServer from '../../../../../src/legacy/server/kbn_server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../spaces';
-import { EncryptedSavedObjectsPlugin } from '../../encrypted_saved_objects';
+import {
+  PluginSetupContract as EncryptedSavedObjectsSetupContract,
+  PluginStartContract as EncryptedSavedObjectsStartContract,
+} from '../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
 import {
   CoreSetup,
   LoggerFactory,
   SavedObjectsLegacyService,
 } from '../../../../../src/core/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
+import { IEventLogService } from '../../../../plugins/event_log/server';
 
-// Extend PluginProperties to indicate which plugins are guaranteed to exist
-// due to being marked as dependencies
-interface Plugins extends Hapi.PluginProperties {
-  task_manager: TaskManager;
-  encrypted_saved_objects: EncryptedSavedObjectsPlugin;
-}
-
-export interface Server extends Legacy.Server {
-  plugins: Plugins;
+export interface KibanaConfig {
+  index: string;
 }
 
 /**
  * Shim what we're thinking setup and start contracts will look like
  */
-export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
-export type SecurityPluginSetupContract = Pick<SecurityPlugin, 'config' | 'registerLegacyAPI'>;
+export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
 export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
-export type EncryptedSavedObjectsSetupContract = Pick<EncryptedSavedObjectsPlugin, 'registerType'>;
-export type TaskManagerSetupContract = Pick<
-  TaskManager,
-  'addMiddleware' | 'registerTaskDefinitions'
->;
-export type EncryptedSavedObjectsStartContract = Pick<
-  EncryptedSavedObjectsPlugin,
-  'isEncryptionError' | 'getDecryptedAsInternalUser'
->;
 
 /**
  * New platform interfaces
@@ -54,6 +46,7 @@ export type EncryptedSavedObjectsStartContract = Pick<
 export interface ActionsPluginInitializerContext {
   logger: LoggerFactory;
   config: {
+    kibana$: Rx.Observable<KibanaConfig>;
     create(): Rx.Observable<ActionsConfigType>;
   };
 }
@@ -71,15 +64,17 @@ export interface ActionsCoreStart {
 }
 export interface ActionsPluginsSetup {
   security?: SecurityPluginSetupContract;
-  task_manager: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   xpack_main: XPackMainPluginSetupContract;
-  encrypted_saved_objects: EncryptedSavedObjectsSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsSetupContract;
+  licensing: LicensingPluginSetup;
+  event_log: IEventLogService;
 }
 export interface ActionsPluginsStart {
   security?: SecurityPluginStartContract;
   spaces: () => SpacesPluginStartContract | undefined;
-  encrypted_saved_objects: EncryptedSavedObjectsStartContract;
-  task_manager: TaskManagerStartContract;
+  encryptedSavedObjects: EncryptedSavedObjectsStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -88,7 +83,7 @@ export interface ActionsPluginsStart {
  * @param server Hapi server instance
  */
 export function shim(
-  server: Server
+  server: Legacy.Server
 ): {
   initializerContext: ActionsPluginInitializerContext;
   coreSetup: ActionsCoreSetup;
@@ -101,10 +96,14 @@ export function shim(
   const initializerContext: ActionsPluginInitializerContext = {
     logger: newPlatform.coreContext.logger,
     config: {
+      kibana$: Rx.of({
+        index: server.config().get('kibana.index'),
+      }),
       create() {
         return Rx.of({
           enabled: server.config().get('xpack.actions.enabled') as boolean,
           whitelistedHosts: server.config().get('xpack.actions.whitelistedHosts') as string[],
+          enabledActionTypes: server.config().get('xpack.actions.enabledActionTypes') as string[],
         }) as Rx.Observable<ActionsConfigType>;
       },
     },
@@ -124,9 +123,12 @@ export function shim(
 
   const pluginsSetup: ActionsPluginsSetup = {
     security: newPlatform.setup.plugins.security as SecurityPluginSetupContract | undefined,
-    task_manager: server.plugins.task_manager,
+    taskManager: getTaskManagerSetup(server)!,
     xpack_main: server.plugins.xpack_main,
-    encrypted_saved_objects: server.plugins.encrypted_saved_objects,
+    encryptedSavedObjects: newPlatform.setup.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsSetupContract,
+    licensing: newPlatform.setup.plugins.licensing as LicensingPluginSetup,
+    event_log: newPlatform.setup.plugins.event_log as IEventLogService,
   };
 
   const pluginsStart: ActionsPluginsStart = {
@@ -134,8 +136,9 @@ export function shim(
     // TODO: Currently a function because it's an optional dependency that
     // initializes after this function is called
     spaces: () => server.plugins.spaces,
-    encrypted_saved_objects: server.plugins.encrypted_saved_objects,
-    task_manager: server.plugins.task_manager,
+    encryptedSavedObjects: newPlatform.start.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
+    taskManager: getTaskManagerStart(server)!,
   };
 
   return {

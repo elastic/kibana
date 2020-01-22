@@ -1,0 +1,396 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DiscoverNoResults props queryLanguage supports lucene and renders doc link 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
+    >
+      <div
+        class="euiCallOut euiCallOut--warning"
+        data-test-subj="discoverNoResults"
+      >
+        <div
+          class="euiCallOutHeader"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            class="euiCallOutHeader__title"
+          >
+            No results match your search criteria
+          </span>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <h3>
+          Refine your query
+        </h3>
+        <p>
+          The search bar at the top uses Elasticsearch’s support for Lucene 
+          <a
+            class="euiLink euiLink--primary"
+            href="documentation-link"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Query String syntax
+          </a>
+          . Here are some examples of how you can search for web server logs that have been parsed into a few fields.
+        </p>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <dl
+        class="euiDescriptionList euiDescriptionList--column"
+      >
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <strong>
+              Find requests that contain the number 200, in any field
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              200
+            </code>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <strong>
+              Find 200 in the status field
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              status:200
+            </code>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <strong>
+              Find all status codes between 400-499
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              status:[400 TO 499]
+            </code>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <strong>
+              Find status codes 400-499 with the extension php
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              status:[400 TO 499] AND extension:PHP
+            </code>
+          </span>
+        </dd>
+        <dt
+          class="euiDescriptionList__title"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <strong>
+              Find status codes 400-499 with the extension php or html
+            </strong>
+          </div>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          <span
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
+          >
+            <code
+              class="euiCodeBlock__code"
+            >
+              status:[400 TO 499] AND (extension:php OR extension:html)
+            </code>
+          </span>
+        </dd>
+      </dl>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+  </div>,
+]
+`;
+
+exports[`DiscoverNoResults props shardFailures doesn't render failures list when there are no failures 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
+    >
+      <div
+        class="euiCallOut euiCallOut--warning"
+        data-test-subj="discoverNoResults"
+      >
+        <div
+          class="euiCallOutHeader"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            class="euiCallOutHeader__title"
+          >
+            No results match your search criteria
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`DiscoverNoResults props shardFailures renders failures list when there are failures 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
+    >
+      <div
+        class="euiCallOut euiCallOut--warning"
+        data-test-subj="discoverNoResults"
+      >
+        <div
+          class="euiCallOutHeader"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            class="euiCallOutHeader__title"
+          >
+            No results match your search criteria
+          </span>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <h3>
+          Address shard failures
+        </h3>
+        <p>
+          The following shard failures occurred:
+        </p>
+        <div>
+          <div
+            class="euiText euiText--extraSmall"
+          >
+            <strong>
+              Index &lsquo;A&rsquo;
+            </strong>
+            , shard &lsquo;1&rsquo;
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s"
+          />
+          <div
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
+          >
+            <pre
+              class="euiCodeBlock__pre"
+            >
+              <code
+                class="euiCodeBlock__code"
+              >
+                {"reason":"Awful error"}
+              </code>
+            </pre>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+        </div>
+        <div>
+          <div
+            class="euiText euiText--extraSmall"
+          >
+            <strong>
+              Index &lsquo;B&rsquo;
+            </strong>
+            , shard &lsquo;2&rsquo;
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s"
+          />
+          <div
+            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
+          >
+            <pre
+              class="euiCodeBlock__pre"
+            >
+              <code
+                class="euiCodeBlock__code"
+              >
+                {"reason":"Bad error"}
+              </code>
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`DiscoverNoResults props timeFieldName renders time range feedback 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--xl"
+  />,
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero dscNoResults"
+    >
+      <div
+        class="euiCallOut euiCallOut--warning"
+        data-test-subj="discoverNoResults"
+      >
+        <div
+          class="euiCallOutHeader"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            class="euiCallOutHeader__title"
+          >
+            No results match your search criteria
+          </span>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+      <div
+        class="euiText euiText--medium"
+      >
+        <h2
+          data-test-subj="discoverNoResultsTimefilter"
+        >
+          Expand your time range
+        </h2>
+        <p>
+          One or more of the indices you’re looking at contains a date field. Your query may not match anything in the current time range, or there may not be any data at all in the currently selected time range. You can try changing the time range to one which contains data.
+        </p>
+      </div>
+    </div>
+  </div>,
+]
+`;

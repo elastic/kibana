@@ -5,13 +5,34 @@
 <titleabbrev>APM settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use APM. It is enabled by default.
-If you'd like to change any of the default values,
-copy and paste the relevant settings below into your `kibana.yml` configuration file.
+You do not need to configure any settings to use the APM app. It is enabled by default.
+
+[float]
+[[apm-indices-settings-kb]]
+==== APM Indices
+
+// This content is reused in the APM app documentation.
+// Any changes made in this file will be seen there as well.
+// tag::apm-indices-settings[]
+
+Index defaults can be changed in Kibana. Navigate to *APM* > *Settings* > *Indices*.
+Index settings in the APM app take precedence over those set in `kibana.yml`.
+
+[role="screenshot"]
+image::settings/images/apm-settings.png[APM app settings in Kibana]
+
+// end::apm-indices-settings[]
 
 [float]
 [[general-apm-settings-kb]]
 ==== General APM settings
+
+// This content is reused in the APM app documentation.
+// Any changes made in this file will be seen there as well.
+// tag::general-apm-settings[]
+
+If you'd like to change any of the default values,
+copy and paste the relevant settings below into your `kibana.yml` configuration file.
 
 xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 `true`.
@@ -23,8 +44,6 @@ xpack.apm.ui.transactionGroupBucketSize:: Number of top transaction groups displ
 
 xpack.apm.ui.maxTraceItems:: Max number of child items displayed when viewing trace details. Defaults to `1000`.
 
-apm_oss.apmAgentConfigurationIndex:: Index containing agent configuration settings. Defaults to `.apm-agent-configuration`.
-
 apm_oss.indexPattern:: Index pattern is used for integrations with Machine Learning and Kuery Bar. It must match all apm indices. Defaults to `apm-*`.
 
 apm_oss.errorIndices:: Matcher for indices containing error documents. Defaults to `apm-*`.
@@ -34,3 +53,9 @@ apm_oss.onboardingIndices:: Matcher for indices containing onboarding documents.
 apm_oss.spanIndices:: Matcher for indices containing span documents. Defaults to `apm-*`.
 
 apm_oss.transactionIndices:: Matcher for indices containing transaction documents. Defaults to `apm-*`.
+
+apm_oss.metricsIndices:: Matcher for indices containing metric documents. Defaults to `apm-*`.
+
+apm_oss.sourcemapIndices:: Matcher for indices containing sourcemap documents. Defaults to `apm-*`.
+
+// end::general-apm-settings[]

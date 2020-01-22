@@ -44,16 +44,14 @@ exports[`DateFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="dateEditorPattern"
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="MMMM Do YYYY, HH:mm:ss.SSS"
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {

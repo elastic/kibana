@@ -13,38 +13,55 @@ const liveClusterUuid = 'a12';
 const mockReq = (searchResult = {}) => {
   return {
     server: {
+      newPlatform: {
+        setup: {
+          plugins: {
+            usageCollection: {
+              getCollectorByType: () => ({
+                isReady: () => false,
+              }),
+            },
+          },
+        },
+      },
       config() {
         return {
-          get: sinon.stub()
-            .withArgs('server.uuid').returns('kibana-1234')
+          get: sinon
+            .stub()
+            .withArgs('server.uuid')
+            .returns('kibana-1234'),
         };
       },
       usage: {
         collectorSet: {
           getCollectorByType: () => ({
-            isReady: () => false
-          })
-        }
+            isReady: () => false,
+          }),
+        },
       },
       plugins: {
         elasticsearch: {
           getCluster() {
             return {
               callWithRequest(_req, type, params) {
-                if (type === 'transport.request' && (params && params.path === '/_cluster/state/cluster_uuid')) {
+                if (
+                  type === 'transport.request' &&
+                  params &&
+                  params.path === '/_cluster/state/cluster_uuid'
+                ) {
                   return Promise.resolve({ cluster_uuid: liveClusterUuid });
                 }
-                if (type === 'transport.request' && (params && params.path === '/_nodes')) {
+                if (type === 'transport.request' && params && params.path === '/_nodes') {
                   return Promise.resolve({ nodes: {} });
                 }
                 if (type === 'cat.indices') {
                   return Promise.resolve([1]);
                 }
                 return Promise.resolve(searchResult);
-              }
+              },
             };
-          }
-        }
+          },
+        },
       },
     },
   };
@@ -58,26 +75,28 @@ describe('getCollectionStatus', () => {
           buckets: [
             {
               key: '.monitoring-es-7-2019',
-              es_uuids: { buckets: [{ key: 'es_1' }] }
+              es_uuids: { buckets: [{ key: 'es_1' }] },
             },
             {
               key: '.monitoring-kibana-7-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1' }] }
+              kibana_uuids: { buckets: [{ key: 'kibana_1' }] },
             },
             {
               key: '.monitoring-beats-7-2019',
-              beats_uuids: { buckets: [
-                { key: 'apm_1', beat_type: { buckets: [ { key: 'apm-server' }] } },
-                { key: 'beats_1' }
-              ] }
+              beats_uuids: {
+                buckets: [
+                  { key: 'apm_1', beat_type: { buckets: [{ key: 'apm-server' }] } },
+                  { key: 'beats_1' },
+                ],
+              },
             },
             {
               key: '.monitoring-logstash-7-2019',
-              logstash_uuids: { buckets: [{ key: 'logstash_1' }] }
-            }
-          ]
-        }
-      }
+              logstash_uuids: { buckets: [{ key: 'logstash_1' }] },
+            },
+          ],
+        },
+      },
     });
 
     const result = await getCollectionStatus(req, getIndexPatterns(req.server));
@@ -110,23 +129,23 @@ describe('getCollectionStatus', () => {
           buckets: [
             {
               key: '.monitoring-es-7-mb-2019',
-              es_uuids: { buckets: [{ key: 'es_1' }] }
+              es_uuids: { buckets: [{ key: 'es_1' }] },
             },
             {
               key: '.monitoring-kibana-7-mb-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1' }] }
+              kibana_uuids: { buckets: [{ key: 'kibana_1' }] },
             },
             {
               key: '.monitoring-beats-7-2019',
-              beats_uuids: { buckets: [{ key: 'beats_1' }] }
+              beats_uuids: { buckets: [{ key: 'beats_1' }] },
             },
             {
               key: '.monitoring-logstash-7-2019',
-              logstash_uuids: { buckets: [{ key: 'logstash_1' }] }
-            }
-          ]
-        }
-      }
+              logstash_uuids: { buckets: [{ key: 'logstash_1' }] },
+            },
+          ],
+        },
+      },
     });
 
     const result = await getCollectionStatus(req, getIndexPatterns(req.server));
@@ -155,27 +174,27 @@ describe('getCollectionStatus', () => {
           buckets: [
             {
               key: '.monitoring-es-7-mb-2019',
-              es_uuids: { buckets: [{ key: 'es_1' }] }
+              es_uuids: { buckets: [{ key: 'es_1' }] },
             },
             {
               key: '.monitoring-kibana-7-mb-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1' }, { key: 'kibana_2' }] }
+              kibana_uuids: { buckets: [{ key: 'kibana_1' }, { key: 'kibana_2' }] },
             },
             {
               key: '.monitoring-kibana-7-2019',
-              kibana_uuids: { buckets: [{ key: 'kibana_1', by_timestamp: { value: 12 } }] }
+              kibana_uuids: { buckets: [{ key: 'kibana_1', by_timestamp: { value: 12 } }] },
             },
             {
               key: '.monitoring-beats-7-2019',
-              beats_uuids: { buckets: [{ key: 'beats_1' }] }
+              beats_uuids: { buckets: [{ key: 'beats_1' }] },
             },
             {
               key: '.monitoring-logstash-7-2019',
-              logstash_uuids: { buckets: [{ key: 'logstash_1' }] }
-            }
-          ]
-        }
-      }
+              logstash_uuids: { buckets: [{ key: 'logstash_1' }] },
+            },
+          ],
+        },
+      },
     });
 
     const result = await getCollectionStatus(req, getIndexPatterns(req.server));
@@ -199,15 +218,18 @@ describe('getCollectionStatus', () => {
   });
 
   it('should detect products based on other indices', async () => {
-    const req = mockReq({}, {
-      responses: [
-        { hits: { total: { value: 1 } } },
-        { hits: { total: { value: 1 } } },
-        { hits: { total: { value: 1 } } },
-        { hits: { total: { value: 1 } } },
-        { hits: { total: { value: 1 } } }
-      ]
-    });
+    const req = mockReq(
+      {},
+      {
+        responses: [
+          { hits: { total: { value: 1 } } },
+          { hits: { total: { value: 1 } } },
+          { hits: { total: { value: 1 } } },
+          { hits: { total: { value: 1 } } },
+          { hits: { total: { value: 1 } } },
+        ],
+      }
+    );
 
     const result = await getCollectionStatus(req, getIndexPatterns(req.server), liveClusterUuid);
 

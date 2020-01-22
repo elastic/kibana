@@ -23,6 +23,7 @@ it('calls the list function', async () => {
     {
       id: '1',
       name: 'One',
+      enabled: true,
     },
   ];
 

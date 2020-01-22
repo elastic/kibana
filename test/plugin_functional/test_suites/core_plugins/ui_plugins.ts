@@ -19,6 +19,7 @@
 
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
+import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -31,29 +32,44 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         await PageObjects.common.navigateToApp('settings');
       });
 
-      it('should attach string to window.corePluginB', async () => {
-        const corePluginB = await browser.execute('return window.corePluginB');
-        expect(corePluginB).to.equal(`Plugin A said: Hello from Plugin A!`);
+      it('should run the new platform plugins', async () => {
+        expect(
+          await browser.execute(() => {
+            return window.__coreProvider.setup.plugins.core_plugin_b.sayHi();
+          })
+        ).to.be('Plugin A said: Hello from Plugin A!');
       });
     });
-    describe('have injectedMetadata service provided', function describeIndexTests() {
+
+    describe('should have access to the core services', function describeIndexTests() {
       before(async () => {
-        await PageObjects.common.navigateToApp('bar');
+        await PageObjects.common.navigateToApp('settings');
       });
 
-      it('should attach string to window.corePluginB', async () => {
-        const hasAccessToInjectedMetadata = await browser.execute(
-          'return window.hasAccessToInjectedMetadata'
-        );
-        expect(hasAccessToInjectedMetadata).to.equal(true);
+      it('to injectedMetadata service', async () => {
+        expect(
+          await browser.execute(() => {
+            return window.__coreProvider.setup.core.injectedMetadata.getKibanaBuildNumber();
+          })
+        ).to.be.a('number');
+      });
+
+      it('to start services via coreSetup.getStartServices', async () => {
+        expect(
+          await browser.executeAsync(async cb => {
+            const [coreStart] = await window.__coreProvider.setup.core.getStartServices();
+            cb(Boolean(coreStart.overlays));
+          })
+        ).to.be(true);
       });
     });
+
     describe('have env data provided', function describeIndexTests() {
       before(async () => {
         await PageObjects.common.navigateToApp('bar');
       });
 
-      it('should attach pluginContext to window.corePluginB', async () => {
+      it('should attach pluginContext to window.env', async () => {
         const envData: any = await browser.execute('return window.env');
         expect(envData.mode.dev).to.be(true);
         expect(envData.packageInfo.version).to.be.a('string');

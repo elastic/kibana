@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { DraggableBadge } from '../../../../draggables';
 import { TokensFlexItem } from '../helpers';
@@ -18,7 +17,7 @@ interface Props {
   packageVersion: string | null | undefined;
 }
 
-export const Package = pure<Props>(
+export const Package = React.memo<Props>(
   ({ contextId, eventId, packageName, packageSummary, packageVersion }) => {
     if (packageName != null || packageSummary != null || packageVersion != null) {
       return (

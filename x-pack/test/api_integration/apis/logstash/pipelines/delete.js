@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   describe('delete', () => {
@@ -12,16 +12,8 @@ export default function ({ getService }) {
 
     before('load pipelines archive', async () => {
       await esArchiver.load(archive);
-      await supertest
-        .get(
-          '/api/logstash/pipeline/empty_pipeline_1'
-        )
-        .expect(200);
-      await supertest
-        .get(
-          '/api/logstash/pipeline/empty_pipeline_2'
-        )
-        .expect(200);
+      await supertest.get('/api/logstash/pipeline/empty_pipeline_1').expect(200);
+      await supertest.get('/api/logstash/pipeline/empty_pipeline_2').expect(200);
     });
 
     after('unload pipelines archive', () => {
@@ -30,25 +22,15 @@ export default function ({ getService }) {
 
     it('should delete the specified pipelines', async () => {
       await supertest
-        .post(
-          '/api/logstash/pipelines/delete'
-        )
+        .post('/api/logstash/pipelines/delete')
         .set('kbn-xsrf', 'xxx')
         .send({
-          pipelineIds: [ 'empty_pipeline_1', 'empty_pipeline_2' ]
+          pipelineIds: ['empty_pipeline_1', 'empty_pipeline_2'],
         })
         .expect(200);
 
-      await supertest
-        .get(
-          '/api/logstash/pipeline/empty_pipeline_1'
-        )
-        .expect(404);
-      await supertest
-        .get(
-          '/api/logstash/pipeline/empty_pipeline_2'
-        )
-        .expect(404);
+      await supertest.get('/api/logstash/pipeline/empty_pipeline_1').expect(404);
+      await supertest.get('/api/logstash/pipeline/empty_pipeline_2').expect(404);
     });
   });
 }

@@ -21,8 +21,7 @@ import * as React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/constants';
-import { OptInExampleFlyout } from './opt_in_details_component';
+import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 
 interface Props {
   fetchTelemetry: () => Promise<any[]>;
@@ -46,60 +45,22 @@ export class OptInMessage extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { showDetails, showExample } = this.state;
-
-    const getDetails = () => (
-      <FormattedMessage
-        id="telemetry.welcomeBanner.telemetryConfigDetailsDescription"
-        defaultMessage="No information about the data you process or store will be sent. This feature
-          will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
-          You can disable this feature at any time."
-        values={{
-          exampleLink: (
-            <EuiLink onClick={this.toggleShowExample}>
-              <FormattedMessage
-                id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText"
-                defaultMessage="example"
-              />
-            </EuiLink>
-          ),
-          telemetryPrivacyStatementLink: (
-            <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
-              <FormattedMessage
-                id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
-                defaultMessage="telemetry privacy statement"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    );
-
-    const getFlyoutDetails = () => (
-      <OptInExampleFlyout
-        onClose={() => this.setState({ showExample: false })}
-        fetchTelemetry={this.props.fetchTelemetry}
-      />
-    );
-
-    const getReadMore = () => (
-      <EuiLink onClick={() => this.setState({ showDetails: true })}>
-        <FormattedMessage
-          id="telemetry.welcomeBanner.telemetryConfigDescription.readMoreLinkText"
-          defaultMessage="Read more"
-        />
-      </EuiLink>
-    );
-
     return (
       <React.Fragment>
-        {getConfigTelemetryDesc()} {!showDetails && getReadMore()}
-        {showDetails && (
-          <span style={{ display: 'block', paddingTop: '10px' }}>
-            {getDetails()}
-            {showExample && getFlyoutDetails()}
-          </span>
-        )}
+        <FormattedMessage
+          id="telemetry.telemetryBannerDescription"
+          defaultMessage="Want to help us improve the Elastic Stack? Data usage collection is currently disabled. Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
+          values={{
+            privacyStatementLink: (
+              <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                <FormattedMessage
+                  id="telemetry.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
+                  defaultMessage="Privacy Statement"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       </React.Fragment>
     );
   }

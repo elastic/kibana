@@ -11,11 +11,12 @@ import { createTimeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getTimezone } from '../get_timezone';
+import { detectReasonFromException } from './detect_reason_from_exception';
 
 async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const result = {
     enabled: false,
-    logs: []
+    logs: [],
   };
 
   const timezone = await getTimezone(req);
@@ -37,21 +38,25 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
         message: get(source, 'message'),
       };
     });
-  }
-  else {
+  } else {
     result.reason = await detectReason(req, filebeatIndexPattern, opts);
   }
 
   return result;
 }
 
-export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end }) {
+export async function getLogs(
+  config,
+  req,
+  filebeatIndexPattern,
+  { clusterUuid, nodeUuid, indexUuid, start, end }
+) {
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
 
   const metric = { timestampField: '@timestamp' };
   const filter = [
     { term: { 'service.type': 'elasticsearch' } },
-    createTimeFilter({ start, end, metric })
+    createTimeFilter({ start, end, metric }),
   ];
   if (clusterUuid) {
     filter.push({ term: { 'elasticsearch.cluster.uuid': clusterUuid } });
@@ -81,14 +86,27 @@ export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, 
       query: {
         bool: {
           filter,
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'search', params);
-  const result = await handleResponse(response, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end });
+
+  let result = {};
+  try {
+    const response = await callWithRequest(req, 'search', params);
+    result = await handleResponse(response, req, filebeatIndexPattern, {
+      clusterUuid,
+      nodeUuid,
+      indexUuid,
+      start,
+      end,
+    });
+  } catch (err) {
+    result.reason = detectReasonFromException(err);
+  }
+
   return {
     ...result,
     limit: params.size,

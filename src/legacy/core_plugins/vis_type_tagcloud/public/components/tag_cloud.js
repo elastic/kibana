@@ -23,24 +23,22 @@ import { seedColors } from 'ui/vis/components/color/seed_colors';
 import { EventEmitter } from 'events';
 
 const ORIENTATIONS = {
-  'single': () => 0,
-  'right angled': (tag) => {
+  single: () => 0,
+  'right angled': tag => {
     return hashWithinRange(tag.text, 2) * 90;
   },
-  'multiple': (tag) => {
-    return ((hashWithinRange(tag.text, 12)) * 15) - 90;//fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
-  }
+  multiple: tag => {
+    return hashWithinRange(tag.text, 12) * 15 - 90; //fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
+  },
 };
 const D3_SCALING_FUNCTIONS = {
-  'linear': () => d3.scale.linear(),
-  'log': () => d3.scale.log(),
-  'square root': () => d3.scale.sqrt()
+  linear: () => d3.scale.linear(),
+  log: () => d3.scale.log(),
+  'square root': () => d3.scale.sqrt(),
 };
 
 export class TagCloud extends EventEmitter {
-
   constructor(domNode) {
-
     super();
 
     //DOM
@@ -54,8 +52,8 @@ export class TagCloud extends EventEmitter {
     this._fontFamily = 'Open Sans, sans-serif';
     this._fontStyle = 'normal';
     this._fontWeight = 'normal';
-    this._spiral = 'archimedean';//layout shape
-    this._timeInterval = 1000;//time allowed for layout algorithm
+    this._spiral = 'archimedean'; //layout shape
+    this._timeInterval = 1000; //time allowed for layout algorithm
     this._padding = 5;
 
     //OPTIONS
@@ -74,11 +72,9 @@ export class TagCloud extends EventEmitter {
     this._layoutIsUpdating = null;
     this._allInViewBox = false;
     this._DOMisUpdating = false;
-
   }
 
   setOptions(options) {
-
     if (JSON.stringify(options) === this._optionsAsString) {
       return;
     }
@@ -89,7 +85,6 @@ export class TagCloud extends EventEmitter {
     this._textScale = options.scale;
     this._invalidate(false);
   }
-
 
   resize() {
     const newWidth = this._element.offsetWidth;
@@ -108,7 +103,6 @@ export class TagCloud extends EventEmitter {
     } else {
       this._invalidate(false);
     }
-
   }
 
   setData(data) {
@@ -133,11 +127,10 @@ export class TagCloud extends EventEmitter {
   }
 
   _isJobRunning() {
-    return (this._setTimeoutId || this._layoutIsUpdating || this._DOMisUpdating);
+    return this._setTimeoutId || this._layoutIsUpdating || this._DOMisUpdating;
   }
 
   async _processPendingJob() {
-
     if (!this._pendingJob) {
       return;
     }
@@ -145,7 +138,6 @@ export class TagCloud extends EventEmitter {
     if (this._isJobRunning()) {
       return;
     }
-
 
     this._completedJob = null;
     const job = await this._pickPendingJob();
@@ -157,7 +149,8 @@ export class TagCloud extends EventEmitter {
       const cloudBBox = this._svgGroup[0][0].getBBox();
       this._cloudWidth = cloudBBox.width;
       this._cloudHeight = cloudBBox.height;
-      this._allInViewBox = cloudBBox.x >= 0 &&
+      this._allInViewBox =
+        cloudBBox.x >= 0 &&
         cloudBBox.y >= 0 &&
         cloudBBox.x + cloudBBox.width <= this._element.offsetWidth &&
         cloudBBox.y + cloudBBox.height <= this._element.offsetHeight;
@@ -166,16 +159,15 @@ export class TagCloud extends EventEmitter {
     }
 
     if (this._pendingJob) {
-      this._processPendingJob();//pick up next job
+      this._processPendingJob(); //pick up next job
     } else {
       this._completedJob = job;
       this.emit('renderComplete');
     }
-
   }
 
   async _pickPendingJob() {
-    return await new Promise((resolve) => {
+    return await new Promise(resolve => {
       this._setTimeoutId = setTimeout(async () => {
         const job = this._pendingJob;
         this._pendingJob = null;
@@ -184,7 +176,6 @@ export class TagCloud extends EventEmitter {
       }, 0);
     });
   }
-
 
   _emptyDOM() {
     this._svgGroup.selectAll('text').remove();
@@ -195,7 +186,6 @@ export class TagCloud extends EventEmitter {
   }
 
   async _updateDOM(job) {
-
     const canSkipDomUpdate = this._pendingJob || this._setTimeoutId;
     if (canSkipDomUpdate) {
       this._DOMisUpdating = false;
@@ -203,12 +193,15 @@ export class TagCloud extends EventEmitter {
     }
 
     this._DOMisUpdating = true;
-    const affineTransform = positionWord.bind(null, this._element.offsetWidth / 2, this._element.offsetHeight / 2);
+    const affineTransform = positionWord.bind(
+      null,
+      this._element.offsetWidth / 2,
+      this._element.offsetHeight / 2
+    );
     const svgTextNodes = this._svgGroup.selectAll('text');
     const stage = svgTextNodes.data(job.words, getText);
 
-    await new Promise((resolve) => {
-
+    await new Promise(resolve => {
       const enterSelection = stage.enter();
       const enteringTags = enterSelection.append('text');
       enteringTags.style('font-size', getSizeInPixels);
@@ -223,15 +216,15 @@ export class TagCloud extends EventEmitter {
 
       const self = this;
       enteringTags.on({
-        click: function (event) {
+        click: function(event) {
           self.emit('select', event);
         },
-        mouseover: function () {
+        mouseover: function() {
           d3.select(this).style('cursor', 'pointer');
         },
-        mouseout: function () {
+        mouseout: function() {
           d3.select(this).style('cursor', 'default');
-        }
+        },
       });
 
       const movingTags = stage.transition();
@@ -267,13 +260,15 @@ export class TagCloud extends EventEmitter {
         moves--;
         resolveWhenDone();
       });
-
     });
   }
 
   _makeTextSizeMapper() {
     const mapSizeToFontSize = D3_SCALING_FUNCTIONS[this._textScale]();
-    const range = this._words.length === 1 ? [this._maxFontSize, this._maxFontSize] : [this._minFontSize, this._maxFontSize];
+    const range =
+      this._words.length === 1
+        ? [this._maxFontSize, this._maxFontSize]
+        : [this._minFontSize, this._maxFontSize];
     mapSizeToFontSize.range(range);
     if (this._words) {
       mapSizeToFontSize.domain(d3.extent(this._words, getValue));
@@ -285,7 +280,7 @@ export class TagCloud extends EventEmitter {
     return {
       refreshLayout: true,
       size: this._size.slice(),
-      words: this._words
+      words: this._words,
     };
   }
 
@@ -303,12 +298,11 @@ export class TagCloud extends EventEmitter {
           displayText: tag.displayText,
           meta: tag.meta,
         };
-      })
+      }),
     };
   }
 
   _invalidate(keepLayout) {
-
     if (!this._words) {
       return;
     }
@@ -316,13 +310,11 @@ export class TagCloud extends EventEmitter {
     this._updateContainerSize();
 
     const canReuseLayout = keepLayout && !this._isJobRunning() && this._completedJob;
-    this._pendingJob = (canReuseLayout) ? this._makeJobPreservingLayout() : this._makeNewJob();
+    this._pendingJob = canReuseLayout ? this._makeJobPreservingLayout() : this._makeNewJob();
     this._processPendingJob();
   }
 
-
   async _updateLayout(job) {
-
     if (job.size[0] <= 0 || job.size[1] <= 0) {
       // If either width or height isn't above 0 we don't relayout anything,
       // since the d3-cloud will be stuck in an infinite loop otherwise.
@@ -345,7 +337,7 @@ export class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.timeInterval(this._timeInterval);
 
     this._layoutIsUpdating = true;
-    await new Promise((resolve) => {
+    await new Promise(resolve => {
       tagCloudLayoutGenerator.on('end', () => {
         this._layoutIsUpdating = false;
         resolve(true);
@@ -354,35 +346,35 @@ export class TagCloud extends EventEmitter {
     });
   }
 
-
   /**
    * Returns debug info. For debugging only.
    * @return {*}
    */
   getDebugInfo() {
     const debug = {};
-    debug.positions = this._completedJob ? this._completedJob.words.map(tag => {
-      return {
-        displayText: tag.displayText,
-        rawText: tag.rawText || tag.text,
-        x: tag.x,
-        y: tag.y,
-        rotate: tag.rotate
-      };
-    }) : [];
+    debug.positions = this._completedJob
+      ? this._completedJob.words.map(tag => {
+          return {
+            displayText: tag.displayText,
+            rawText: tag.rawText || tag.text,
+            x: tag.x,
+            y: tag.y,
+            rotate: tag.rotate,
+          };
+        })
+      : [];
     debug.size = {
       width: this._size[0],
-      height: this._size[1]
+      height: this._size[1],
     };
     return debug;
   }
-
 }
 
 TagCloud.STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
 
 function seed() {
-  return 0.5;//constant seed (not random) to ensure constant layouts for identical data
+  return 0.5; //constant seed (not random) to ensure constant layouts for identical data
 }
 
 function getText(word) {
@@ -394,7 +386,6 @@ function getDisplayText(word) {
 }
 
 function positionWord(xTranslate, yTranslate, word) {
-
   if (isNaN(word.x) || isNaN(word.y) || isNaN(word.rotate)) {
     //move off-screen
     return `translate(${xTranslate * 3}, ${yTranslate * 3})rotate(0)`;
@@ -420,7 +411,7 @@ function hashWithinRange(str, max) {
   str = JSON.stringify(str);
   let hash = 0;
   for (const ch of str) {
-    hash = ((hash * 31) + ch.charCodeAt(0)) % max;
+    hash = (hash * 31 + ch.charCodeAt(0)) % max;
   }
   return Math.abs(hash) % max;
 }

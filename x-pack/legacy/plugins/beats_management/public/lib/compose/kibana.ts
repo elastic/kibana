@@ -35,7 +35,7 @@ const onKibanaReady = chrome.dangerouslyGetActiveInjector;
 
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
-  const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
+  const esAdapter = new RestElasticsearchAdapter(INDEX_NAMES.BEATS);
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
   const configBlocks = new ConfigBlocksLib(
     new RestConfigBlocksAdapter(api),

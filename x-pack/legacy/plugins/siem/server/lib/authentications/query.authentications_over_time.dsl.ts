@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createQueryFilterClauses, calculateTimeseriesInterval } from '../../utils/build_query';
-import { RequestBasicOptions } from '../framework';
+import { MatrixHistogramRequestOptions } from '../framework';
 
 export const buildAuthenticationsOverTimeQuery = ({
   filterQuery,
@@ -13,7 +13,8 @@ export const buildAuthenticationsOverTimeQuery = ({
   sourceConfiguration: {
     fields: { timestamp },
   },
-}: RequestBasicOptions) => {
+  stackByField = 'event.type',
+}: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -27,8 +28,7 @@ export const buildAuthenticationsOverTimeQuery = ({
   ];
 
   const getHistogramAggregation = () => {
-    const minIntervalSeconds = 10;
-    const interval = calculateTimeseriesInterval(from, to, minIntervalSeconds);
+    const interval = calculateTimeseriesInterval(from, to);
     const histogramTimestampField = '@timestamp';
     const dateHistogram = {
       date_histogram: {
@@ -45,7 +45,7 @@ export const buildAuthenticationsOverTimeQuery = ({
     return {
       eventActionGroup: {
         terms: {
-          field: 'event.type',
+          field: stackByField,
           include: ['authentication_success', 'authentication_failure'],
           order: {
             _count: 'desc',

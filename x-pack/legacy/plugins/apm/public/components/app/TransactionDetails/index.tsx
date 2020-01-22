@@ -29,6 +29,7 @@ import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { HeightRetainer } from '../../shared/HeightRetainer';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -49,7 +50,7 @@ export function TransactionDetails() {
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['transactionResult'],
+      filterNames: ['transactionResult', 'serviceVersion'],
       projection: PROJECTION.TRANSACTIONS,
       params: {
         transactionName,
@@ -59,6 +60,16 @@ export function TransactionDetails() {
     };
     return config;
   }, [transactionName, transactionType, serviceName]);
+
+  const bucketIndex = distributionData.buckets.findIndex(bucket =>
+    bucket.samples.some(
+      sample =>
+        sample.transactionId === urlParams.transactionId &&
+        sample.traceId === urlParams.traceId
+    )
+  );
+
+  const traceSamples = distributionData.buckets[bucketIndex]?.samples;
 
   return (
     <div>
@@ -93,18 +104,22 @@ export function TransactionDetails() {
               distribution={distributionData}
               isLoading={distributionStatus === FETCH_STATUS.LOADING}
               urlParams={urlParams}
+              bucketIndex={bucketIndex}
             />
           </EuiPanel>
 
           <EuiSpacer size="s" />
 
-          <WaterfallWithSummmary
-            location={location}
-            urlParams={urlParams}
-            waterfall={waterfall}
-            isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-            exceedsMax={exceedsMax}
-          />
+          <HeightRetainer>
+            <WaterfallWithSummmary
+              location={location}
+              urlParams={urlParams}
+              waterfall={waterfall}
+              isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+              exceedsMax={exceedsMax}
+              traceSamples={traceSamples}
+            />
+          </HeightRetainer>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

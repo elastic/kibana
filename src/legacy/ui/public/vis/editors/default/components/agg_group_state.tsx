@@ -33,7 +33,7 @@ export interface AggsState {
   [aggId: string]: AggsItem;
 }
 
-interface AggsAction {
+export interface AggsAction {
   type: AGGS_ACTION_KEYS;
   payload: boolean;
   aggId: string;
@@ -53,13 +53,10 @@ function aggGroupReducer(state: AggsState, action: AggsAction): AggsState {
 }
 
 function initAggsState(group: AggConfig[]): AggsState {
-  return group.reduce(
-    (state, agg) => {
-      state[agg.id] = { touched: false, valid: true };
-      return state;
-    },
-    {} as AggsState
-  );
+  return group.reduce((state, agg) => {
+    state[agg.id] = { touched: false, valid: true };
+    return state;
+  }, {} as AggsState);
 }
 
 export { aggGroupReducer, initAggsState };

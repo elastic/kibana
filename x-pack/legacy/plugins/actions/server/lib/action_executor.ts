@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { EncryptedSavedObjectsStartContract } from '../shim';
+import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../../spaces';
 import { Logger } from '../../../../../../src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
@@ -15,6 +15,8 @@ import {
   GetServicesFunction,
   RawAction,
 } from '../types';
+import { EVENT_LOG_ACTIONS } from '../plugin';
+import { IEvent, IEventLogger } from '../../../../../plugins/event_log/server';
 
 export interface ActionExecutorContext {
   logger: Logger;
@@ -22,6 +24,7 @@ export interface ActionExecutorContext {
   getServices: GetServicesFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
   actionTypeRegistry: ActionTypeRegistryContract;
+  eventLogger: IEventLogger;
 }
 
 export interface ExecuteOptions {
@@ -54,11 +57,11 @@ export class ActionExecutor {
     }
 
     const {
-      logger,
       spaces,
       getServices,
       encryptedSavedObjectsPlugin,
       actionTypeRegistry,
+      eventLogger,
     } = this.actionExecutorContext!;
 
     const spacesPlugin = spaces();
@@ -67,8 +70,15 @@ export class ActionExecutor {
 
     // Ensure user can read the action before processing
     const {
-      attributes: { actionTypeId, config, description },
+      attributes: { actionTypeId, config, name },
     } = await services.savedObjectsClient.get<RawAction>('action', actionId);
+
+    try {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    } catch (err) {
+      return { status: 'error', actionId, message: err.message, retry: false };
+    }
+
     // Only get encrypted attributes here, the remaining attributes can be fetched in
     // the savedObjectsClient call
     const {
@@ -82,23 +92,28 @@ export class ActionExecutor {
     );
     const actionType = actionTypeRegistry.get(actionTypeId);
 
-    let validatedParams;
-    let validatedConfig;
-    let validatedSecrets;
+    let validatedParams: Record<string, any>;
+    let validatedConfig: Record<string, any>;
+    let validatedSecrets: Record<string, any>;
 
     try {
       validatedParams = validateParams(actionType, params);
       validatedConfig = validateConfig(actionType, config);
       validatedSecrets = validateSecrets(actionType, secrets);
     } catch (err) {
-      return { status: 'error', message: err.message, retry: false };
+      return { status: 'error', actionId, message: err.message, retry: false };
     }
 
-    let result: ActionTypeExecutorResult | null = null;
-    const actionLabel = `${actionId} - ${actionTypeId} - ${description}`;
+    const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
+    const event: IEvent = {
+      event: { action: EVENT_LOG_ACTIONS.execute },
+      kibana: { namespace, saved_objects: [{ type: 'action', id: actionId }] },
+    };
 
+    eventLogger.startTiming(event);
+    let rawResult: ActionTypeExecutorResult | null | undefined | void;
     try {
-      result = await actionType.executor({
+      rawResult = await actionType.executor({
         actionId,
         services,
         params: validatedParams,
@@ -106,15 +121,51 @@ export class ActionExecutor {
         secrets: validatedSecrets,
       });
     } catch (err) {
-      logger.warn(`action executed unsuccessfully: ${actionLabel} - ${err.message}`);
-      throw err;
+      rawResult = {
+        actionId,
+        status: 'error',
+        message: 'an error occurred while running the action executor',
+        serviceMessage: err.message,
+        retry: false,
+      };
+    }
+    eventLogger.stopTiming(event);
+
+    // allow null-ish return to indicate success
+    const result = rawResult || {
+      actionId,
+      status: 'ok',
+    };
+
+    if (result.status === 'ok') {
+      event.message = `action executed: ${actionLabel}`;
+    } else if (result.status === 'error') {
+      event.message = `action execution failure: ${actionLabel}`;
+      event.error = event.error || {};
+      event.error.message = actionErrorToMessage(result);
+    } else {
+      event.message = `action execution returned unexpected result: ${actionLabel}`;
+      event.error = event.error || {};
+      event.error.message = 'action execution returned unexpected result';
     }
 
-    logger.debug(`action executed successfully: ${actionLabel}`);
-
-    // return basic response if none provided
-    if (result == null) return { status: 'ok' };
-
+    eventLogger.logEvent(event);
     return result;
   }
+}
+
+function actionErrorToMessage(result: ActionTypeExecutorResult): string {
+  let message = result.message || 'unknown error running action';
+
+  if (result.serviceMessage) {
+    message = `${message}: ${result.serviceMessage}`;
+  }
+
+  if (result.retry instanceof Date) {
+    message = `${message}; retry at ${result.retry.toISOString()}`;
+  } else if (result.retry) {
+    message = `${message}; retry: ${JSON.stringify(result.retry)}`;
+  }
+
+  return message;
 }

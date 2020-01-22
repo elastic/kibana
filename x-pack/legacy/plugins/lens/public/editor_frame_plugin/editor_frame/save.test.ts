@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildExistsFilter } from '@kbn/es-query';
 import { getSavedObjectFormat, Props } from './save';
 import { createMockDatasource, createMockVisualization } from '../mocks';
+import { esFilters, IIndexPattern, IFieldType } from '../../../../../../../src/plugins/data/public';
 
 describe('save editor frame state', () => {
   const mockVisualization = createMockVisualization();
   mockVisualization.getPersistableState.mockImplementation(x => x);
   const mockDatasource = createMockDatasource();
+  const mockIndexPattern = ({ id: 'indexpattern' } as unknown) as IIndexPattern;
+  const mockField = ({ name: '@timestamp' } as unknown) as IFieldType;
+
   mockDatasource.getPersistableState.mockImplementation(x => x);
   const saveArgs: Props = {
     activeDatasources: {
@@ -37,7 +40,7 @@ describe('save editor frame state', () => {
       },
       query: { query: '', language: 'lucene' },
       dateRange: { fromDate: 'now-7d', toDate: 'now' },
-      filters: [buildExistsFilter({ name: '@timestamp' }, { id: 'indexpattern' })],
+      filters: [esFilters.buildExistsFilter(mockField, mockIndexPattern)],
     },
   };
 

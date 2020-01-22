@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { ColorFormatEditor, ColorFormatEditorComponent } from './color';
+import { ColorFormatEditor } from './color';
 import { DEFAULT_CONVERTER_COLOR } from '../../../../../../../../plugins/data/public';
 
 const fieldType = 'string';
@@ -37,12 +37,10 @@ describe('ColorFormatEditor', () => {
   it('should have a formatId', () => {
     expect(ColorFormatEditor.formatId).toEqual('color');
   });
-});
 
-describe('ColorFormatEditorComponent', () => {
   it('should render string type normally (regex field)', async () => {
-    const component = shallowWithIntl(
-      <ColorFormatEditorComponent
+    const component = shallowWithI18nProvider(
+      <ColorFormatEditor
         fieldType={fieldType}
         format={format}
         formatParams={formatParams}
@@ -55,8 +53,8 @@ describe('ColorFormatEditorComponent', () => {
   });
 
   it('should render other type normally (range field)', async () => {
-    const component = shallowWithIntl(
-      <ColorFormatEditorComponent
+    const component = shallowWithI18nProvider(
+      <ColorFormatEditor
         fieldType={'number'}
         format={format}
         formatParams={formatParams}
@@ -69,8 +67,8 @@ describe('ColorFormatEditorComponent', () => {
   });
 
   it('should render multiple colors', async () => {
-    const component = shallowWithIntl(
-      <ColorFormatEditorComponent
+    const component = shallowWithI18nProvider(
+      <ColorFormatEditor
         fieldType={fieldType}
         format={format}
         formatParams={{ colors: [...formatParams.colors, ...formatParams.colors] }}

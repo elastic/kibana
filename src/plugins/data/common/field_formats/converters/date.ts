@@ -19,28 +19,23 @@
 
 import { memoize, noop } from 'lodash';
 import moment from 'moment';
-import { FieldFormat, KBN_FIELD_TYPES, TextContextTypeConvert } from '../../index';
+import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class DateFormat extends FieldFormat {
-  static id = 'date';
+  static id = FIELD_FORMAT_IDS.DATE;
   static title = 'Date';
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  private getConfig: Function;
   private memoizedConverter: Function = noop;
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
-  constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
-
-    this.getConfig = getConfig;
-  }
-
   getParamDefaults() {
     return {
-      pattern: this.getConfig('dateFormat'),
-      timezone: this.getConfig('dateFormat:tz'),
+      pattern: this.getConfig!('dateFormat'),
+      timezone: this.getConfig!('dateFormat:tz'),
     };
   }
 

@@ -15,27 +15,42 @@ import {
   NetworkTopCountriesData,
   NetworkTopCountriesEdges,
   NetworkTopNFlowData,
+  NetworkHttpData,
+  NetworkHttpEdges,
   NetworkTopNFlowEdges,
+  NetworkDsOverTimeData,
+  MatrixOverTimeHistogramData,
 } from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
-import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
+import {
+  DatabaseSearchResponse,
+  FrameworkAdapter,
+  FrameworkRequest,
+  MatrixHistogramRequestOptions,
+} from '../framework';
 import { TermAggregation } from '../types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 
 import {
   NetworkDnsRequestOptions,
   NetworkTopCountriesRequestOptions,
+  NetworkHttpRequestOptions,
   NetworkTopNFlowRequestOptions,
 } from './index';
 import { buildDnsQuery } from './query_dns.dsl';
+import { buildDnsHistogramQuery } from './query_dns_histogram.dsl';
 import { buildTopNFlowQuery, getOppositeField } from './query_top_n_flow.dsl';
+import { buildHttpQuery } from './query_http.dsl';
 import { buildTopCountriesQuery } from './query_top_countries.dsl';
 import {
   NetworkAdapter,
   NetworkDnsBuckets,
   NetworkTopCountriesBuckets,
+  NetworkHttpBuckets,
   NetworkTopNFlowBuckets,
+  DnsHistogramGroupData,
 } from './types';
+import { EventHit } from '../events/types';
 
 export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -151,7 +166,76 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       totalCount,
     };
   }
+
+  public async getNetworkHttp(
+    request: FrameworkRequest,
+    options: NetworkHttpRequestOptions
+  ): Promise<NetworkHttpData> {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
+    const dsl = buildHttpQuery(options);
+    const response = await this.framework.callWithRequest<NetworkHttpData, TermAggregation>(
+      request,
+      'search',
+      dsl
+    );
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
+    const totalCount = getOr(0, 'aggregations.http_count.value', response);
+    const networkHttpEdges: NetworkHttpEdges[] = getHttpEdges(response);
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const edges = networkHttpEdges.splice(cursorStart, querySize - cursorStart);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
+
+    return {
+      edges,
+      inspect,
+      pageInfo: {
+        activePage: activePage ? activePage : 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
+      },
+      totalCount,
+    };
+  }
+
+  public async getNetworkDnsHistogramData(
+    request: FrameworkRequest,
+    options: MatrixHistogramRequestOptions
+  ): Promise<NetworkDsOverTimeData> {
+    const dsl = buildDnsHistogramQuery(options);
+    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
+      request,
+      'search',
+      dsl
+    );
+    const totalCount = getOr(0, 'hits.total.value', response);
+    const matrixHistogramData = getOr([], 'aggregations.NetworkDns.buckets', response);
+    const inspect = {
+      dsl: [inspectStringifyObject(dsl)],
+      response: [inspectStringifyObject(response)],
+    };
+    return {
+      inspect,
+      matrixHistogramData: getHistogramData(matrixHistogramData),
+      totalCount,
+    };
+  }
 }
+
+const getHistogramData = (data: DnsHistogramGroupData[]): MatrixOverTimeHistogramData[] => {
+  return data.reduce(
+    (acc: MatrixOverTimeHistogramData[], { key: time, histogram: { buckets } }) => {
+      const temp = buckets.map(({ key, doc_count }) => ({ x: time, y: doc_count, g: key }));
+      return [...acc, ...temp];
+    },
+    []
+  );
+};
 
 const getTopNFlowEdges = (
   response: DatabaseSearchResponse<NetworkTopNFlowData, TermAggregation>,
@@ -171,6 +255,12 @@ const getTopCountriesEdges = (
     getOr([], `aggregations.${options.flowTarget}.buckets`, response),
     options.flowTarget
   );
+};
+
+const getHttpEdges = (
+  response: DatabaseSearchResponse<NetworkHttpData, TermAggregation>
+): NetworkHttpEdges[] => {
+  return formatHttpEdges(getOr([], `aggregations.url.buckets`, response));
 };
 
 const getFlowTargetFromString = (flowAsString: string) =>
@@ -280,6 +370,24 @@ const formatDnsEdges = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
       dnsName: bucket.key,
       queryCount: bucket.doc_count,
       uniqueDomains: getOrNumber('unique_domains.value', bucket),
+    },
+    cursor: {
+      value: bucket.key,
+      tiebreaker: null,
+    },
+  }));
+
+const formatHttpEdges = (buckets: NetworkHttpBuckets[]): NetworkHttpEdges[] =>
+  buckets.map((bucket: NetworkHttpBuckets) => ({
+    node: {
+      _id: bucket.key,
+      domains: bucket.domains.buckets.map(({ key }) => key),
+      methods: bucket.methods.buckets.map(({ key }) => key),
+      statuses: bucket.status.buckets.map(({ key }) => `${key}`),
+      lastHost: get('source.hits.hits[0]._source.host.name', bucket),
+      lastSourceIp: get('source.hits.hits[0]._source.source.ip', bucket),
+      path: bucket.key,
+      requestCount: bucket.doc_count,
     },
     cursor: {
       value: bucket.key,

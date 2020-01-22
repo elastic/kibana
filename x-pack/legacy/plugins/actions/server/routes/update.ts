@@ -9,7 +9,7 @@ import Hapi from 'hapi';
 
 interface UpdateRequest extends Hapi.Request {
   payload: {
-    description: string;
+    name: string;
     config: Record<string, any>;
     secrets: Record<string, any>;
   };
@@ -31,7 +31,7 @@ export const updateActionRoute = {
         .required(),
       payload: Joi.object()
         .keys({
-          description: Joi.string().required(),
+          name: Joi.string().required(),
           config: Joi.object().default({}),
           secrets: Joi.object().default({}),
         })
@@ -40,8 +40,8 @@ export const updateActionRoute = {
   },
   async handler(request: UpdateRequest) {
     const { id } = request.params;
-    const { description, config, secrets } = request.payload;
+    const { name, config, secrets } = request.payload;
     const actionsClient = request.getActionsClient!();
-    return await actionsClient.update({ id, action: { description, config, secrets } });
+    return await actionsClient.update({ id, action: { name, config, secrets } });
   },
 };

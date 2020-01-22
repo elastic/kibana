@@ -12,13 +12,13 @@ import { docTitle } from 'ui/doc_title/doc_title';
 
 // @ts-ignore: allow traversal to fail on x-pack build
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
-import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 
 export type npCore = typeof npStart.core;
 
 // AppCore/AppPlugins is the set of core features/plugins
 // we pass on via context/hooks to the app and its components.
-export type AppCore = Pick<npCore, 'chrome' | 'http' | 'i18n'>;
+export type AppCore = Pick<npCore, 'chrome' | 'http' | 'i18n' | 'savedObjects' | 'uiSettings'>;
 
 export interface AppPlugins {
   management: {
@@ -47,6 +47,7 @@ export interface Core extends npCore {
     esDocBasePath: string;
     esPluginDocBasePath: string;
     esStackOverviewDocBasePath: string;
+    esMLDocBasePath: string;
   };
   docTitle: {
     change: typeof docTitle.change;
@@ -93,6 +94,7 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
         esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,
         esPluginDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`,
         esStackOverviewDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-overview/${DOC_LINK_VERSION}/`,
+        esMLDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`,
       },
       docTitle: {
         change: docTitle.change,

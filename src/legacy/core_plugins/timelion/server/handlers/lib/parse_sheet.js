@@ -21,12 +21,15 @@ import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
-const grammar = fs.readFileSync(path.resolve(__dirname, '../../../public/chain.peg'), 'utf8');
+const grammar = fs.readFileSync(
+  path.resolve(__dirname, '../../../../vis_type_timelion/public/chain.peg'),
+  'utf8'
+);
 import PEG from 'pegjs';
 const Parser = PEG.generate(grammar);
 
 export default function parseSheet(sheet) {
-  return _.map(sheet, function (plot) {
+  return _.map(sheet, function(plot) {
     try {
       return Parser.parse(plot).tree;
     } catch (e) {

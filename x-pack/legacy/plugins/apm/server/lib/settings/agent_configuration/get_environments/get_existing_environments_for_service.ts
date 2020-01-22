@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { Setup } from '../../../helpers/setup_request';
 import {
   SERVICE_NAME,
@@ -19,14 +18,14 @@ export async function getExistingEnvironmentsForService({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { client, indices } = setup;
+  const { internalClient, indices } = setup;
 
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
     : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
   const params = {
-    index: indices['apm_oss.apmAgentConfigurationIndex'],
+    index: indices.apmAgentConfigurationIndex,
     body: {
       size: 0,
       query: { bool },
@@ -42,7 +41,10 @@ export async function getExistingEnvironmentsForService({
     }
   };
 
-  const resp = await client.search(params);
-  const buckets = idx(resp.aggregations, _ => _.environments.buckets) || [];
-  return buckets.map(bucket => bucket.key as string);
+  const resp = await internalClient.search(params);
+  const existingEnvironments =
+    resp.aggregations?.environments.buckets.map(
+      bucket => bucket.key as string
+    ) || [];
+  return existingEnvironments;
 }

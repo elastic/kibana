@@ -10,7 +10,7 @@ export class ClusterMetric extends Metric {
   constructor(opts) {
     super({
       ...opts,
-      uuidField: 'cluster_uuid'
+      uuidField: 'cluster_uuid',
     });
   }
 }

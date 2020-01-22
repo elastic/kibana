@@ -35,4 +35,10 @@ export const CONTEXT_DEFAULTS = {
     cursorDirection: CursorDirection.AFTER,
     sortOrder: SortOrder.ASC,
   },
+
+  /**
+   * Defines the maximum number of monitors to iterate on
+   * in a single count session. The intention is to catch as many as possible.
+   */
+  MAX_MONITORS_FOR_SNAPSHOT_COUNT: 1000000,
 };

@@ -18,7 +18,10 @@ describe('seriesHasDownValues', () => {
 
   it('identifies that a series does not have down values', () => {
     expect(
-      seriesHasDownValues([{ timestamp: 123, down: 0, up: 0 }, { timestamp: 125, down: 0, up: 0 }])
+      seriesHasDownValues([
+        { timestamp: 123, down: 0, up: 0 },
+        { timestamp: 125, down: 0, up: 0 },
+      ])
     ).toBe(false);
   });
 });

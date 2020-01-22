@@ -18,9 +18,10 @@
  */
 
 import { createFilterRange } from './range';
-import { BytesFormat } from '../../../../../../plugins/data/common';
+import { BytesFormat } from '../../../../../../plugins/data/public';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 
 jest.mock('ui/new_platform');
 
@@ -60,7 +61,10 @@ describe('AggConfig Filters', () => {
 
     it('should return a range filter for range agg', () => {
       const aggConfigs = getAggConfigs();
-      const filter = createFilterRange(aggConfigs.aggs[0], { gte: 1024, lt: 2048.0 });
+      const filter = createFilterRange(aggConfigs.aggs[0] as IBucketAggConfig, {
+        gte: 1024,
+        lt: 2048.0,
+      });
 
       expect(filter).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');

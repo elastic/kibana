@@ -22,7 +22,7 @@ import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { RangeOption, SwitchOption } from '../../kbn_vislib_vis_types/public/components';
+import { RangeOption, SwitchOption } from '../../vis_type_vislib/public';
 import { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {

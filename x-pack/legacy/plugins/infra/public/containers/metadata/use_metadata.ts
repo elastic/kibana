@@ -8,24 +8,20 @@ import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { InfraNodeType } from '../../graphql/types';
 import { InfraMetadata, InfraMetadataRT } from '../../../common/http_api/metadata_api';
-import { getFilteredLayouts } from './lib/get_filtered_layouts';
 import { useHTTPRequest } from '../../hooks/use_http_request';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
-import { InventoryDetailLayout } from '../../../common/inventory_models/types';
+import { InventoryMetric, InventoryItemType } from '../../../common/inventory_models/types';
+import { getFilteredMetrics } from './lib/get_filtered_metrics';
 
 export function useMetadata(
   nodeId: string,
-  nodeType: InfraNodeType,
-  layouts: InventoryDetailLayout[],
+  nodeType: InventoryItemType,
+  requiredMetrics: InventoryMetric[],
   sourceId: string
 ) {
   const decodeResponse = (response: any) => {
-    return pipe(
-      InfraMetadataRT.decode(response),
-      fold(throwErrors(createPlainError), identity)
-    );
+    return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest<InfraMetadata>(
@@ -35,8 +31,8 @@ export function useMetadata(
       nodeId,
       nodeType,
       sourceId,
-      decodeResponse,
-    })
+    }),
+    decodeResponse
   );
 
   useEffect(() => {
@@ -47,7 +43,8 @@ export function useMetadata(
 
   return {
     name: (response && response.name) || '',
-    filteredLayouts: (response && getFilteredLayouts(layouts, response.features)) || [],
+    filteredRequiredMetrics:
+      (response && getFilteredMetrics(requiredMetrics, response.features)) || [],
     error: (error && error.message) || null,
     loading,
     metadata: response,

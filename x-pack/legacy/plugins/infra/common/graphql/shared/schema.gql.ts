@@ -30,5 +30,9 @@ export const sharedSchema = gql`
     pod
     container
     host
+    awsEC2
+    awsS3
+    awsRDS
+    awsSQS
   }
 `;

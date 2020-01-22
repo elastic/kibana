@@ -169,10 +169,14 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async getAttribute(selector: string, attribute: string): Promise<string> {
+    public async getAttribute(
+      selector: string,
+      attribute: string,
+      timeout?: number
+    ): Promise<string> {
       return await retry.try(async () => {
         log.debug(`TestSubjects.getAttribute(${selector}, ${attribute})`);
-        const element = await this.find(selector);
+        const element = await this.find(selector, timeout);
         return await element.getAttribute(attribute);
       });
     }
@@ -294,6 +298,25 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
 
     public getCssSelector(selector: string): string {
       return testSubjSelector(selector);
+    }
+
+    public async scrollIntoView(selector: string) {
+      const element = await this.find(selector);
+      await element.scrollIntoViewIfNecessary();
+    }
+
+    public async isChecked(selector: string) {
+      const checkbox = await this.find(selector);
+      return await checkbox.isSelected();
+    }
+
+    public async setCheckbox(selector: string, state: 'check' | 'uncheck') {
+      const isChecked = await this.isChecked(selector);
+      const states = { check: true, uncheck: false };
+      if (isChecked !== states[state]) {
+        log.debug(`updating checkbox ${selector}`);
+        await this.click(selector);
+      }
     }
   }
 

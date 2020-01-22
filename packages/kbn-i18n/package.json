@@ -21,14 +21,14 @@
     "del": "^5.1.0",
     "getopts": "^2.2.4",
     "supports-color": "^7.0.0",
-    "typescript": "3.5.3"
+    "typescript": "3.7.2"
   },
   "dependencies": {
     "intl-format-cache": "^2.1.0",
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
     "prop-types": "^15.6.2",
-    "react": "^16.6.0",
+    "react": "^16.12.0",
     "react-intl": "^2.8.0"
   }
 }

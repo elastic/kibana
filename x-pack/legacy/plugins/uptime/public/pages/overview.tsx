@@ -5,12 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
 import styled from 'styled-components';
-import { AutocompleteProviderRegister } from 'src/plugins/data/public';
-import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import {
   EmptyState,
   FilterGroup,
@@ -20,22 +16,18 @@ import {
   StatusPanel,
 } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeSettingsContext } from '../contexts';
-import { useUrlParams } from '../hooks';
+import { useIndexPattern, useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { getIndexPattern } from '../lib/adapters/index_pattern';
 import { combineFiltersAndUserSearch, stringifyKueries, toStaticIndexPattern } from '../lib/helper';
+import { store } from '../state';
+import { setEsKueryString } from '../state/actions';
+import { PageHeader } from './page_header';
+import { esKuery, DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { UptimeThemeContext } from '../contexts/uptime_theme_context';
 
 interface OverviewPageProps {
-  basePath: string;
-  autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
-  history: any;
-  location: {
-    pathname: string;
-    search: string;
-  };
-  logOverviewPageLoad: () => void;
+  autocomplete: DataPublicPluginStart['autocomplete'];
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -55,13 +47,8 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPage = ({
-  basePath,
-  autocomplete,
-  logOverviewPageLoad,
-  setBreadcrumbs,
-}: Props) => {
-  const { colors, setHeadingText } = useContext(UptimeSettingsContext);
+export const OverviewPage = ({ autocomplete, setBreadcrumbs }: Props) => {
+  const { colors } = useContext(UptimeThemeContext);
   const [getUrlParams, updateUrl] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const {
@@ -73,25 +60,12 @@ export const OverviewPage = ({
     filters: urlFilters,
   } = params;
   const [indexPattern, setIndexPattern] = useState<any>(undefined);
-
-  useEffect(() => {
-    getIndexPattern(basePath, setIndexPattern);
-    setBreadcrumbs(getOverviewPageBreadcrumbs());
-    logOverviewPageLoad();
-    if (setHeadingText) {
-      setHeadingText(
-        i18n.translate('xpack.uptime.overviewPage.headerText', {
-          defaultMessage: 'Overview',
-          description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-        })
-      );
-    }
-  }, []);
+  useUptimeTelemetry(UptimePage.Overview);
+  useIndexPattern(setIndexPattern);
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
-  const filterQueryString = search || '';
   let error: any;
   let kueryString: string = '';
   try {
@@ -103,15 +77,25 @@ export const OverviewPage = ({
     kueryString = '';
   }
 
+  const filterQueryString = search || '';
   let filters: any | undefined;
   try {
     if (filterQueryString || urlFilters) {
       if (indexPattern) {
         const staticIndexPattern = toStaticIndexPattern(indexPattern);
         const combinedFilterString = combineFiltersAndUserSearch(filterQueryString, kueryString);
-        const ast = fromKueryExpression(combinedFilterString);
-        const elasticsearchQuery = toElasticsearchQuery(ast, staticIndexPattern);
+        const ast = esKuery.fromKueryExpression(combinedFilterString);
+        const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, staticIndexPattern);
         filters = JSON.stringify(elasticsearchQuery);
+        const searchDSL: string = filterQueryString
+          ? JSON.stringify(
+              esKuery.toElasticsearchQuery(
+                esKuery.fromKueryExpression(filterQueryString),
+                staticIndexPattern
+              )
+            )
+          : '';
+        store.dispatch(setEsKueryString(searchDSL));
       }
     }
   } catch (e) {
@@ -129,20 +113,21 @@ export const OverviewPage = ({
 
   return (
     <Fragment>
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={{}}>
+      <PageHeader setBreadcrumbs={setBreadcrumbs} />
+      <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
             <KueryBar autocomplete={autocomplete} />
           </EuiFlexItem>
           <EuiFlexItemStyled grow={true}>
             <FilterGroup
+              {...sharedProps}
               currentFilter={urlFilters}
               onFilterUpdate={(filtersKuery: string) => {
                 if (urlFilters !== filtersKuery) {
                   updateUrl({ filters: filtersKuery, pagination: '' });
                 }
               }}
-              variables={sharedProps}
             />
           </EuiFlexItemStyled>
           {error && <OverviewPageParsingErrorCallout error={error} />}
@@ -151,7 +136,10 @@ export const OverviewPage = ({
         <StatusPanel
           absoluteDateRangeStart={absoluteDateRangeStart}
           absoluteDateRangeEnd={absoluteDateRangeEnd}
-          colors={colors}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          filters={filters}
+          statusFilter={statusFilter}
           sharedProps={sharedProps}
         />
         <EuiSpacer size="s" />

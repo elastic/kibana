@@ -1,19 +1,11 @@
 [[vis-inspector]]
-== Inspecting Visualizations
+== Inspect visualizations
 
-Many visualizations allow you to inspect the data behind the 
-visualization. 
+Many visualizations allow you to inspect the query and data behind the visualization.
 
-To inspect a visualization, click the *Inspect* button in the editor or 
-select *Inspect* from the Dashboard panel menu.
-
-The initial view shows the underlying data for the visualization. You can 
-download the data as a comma separated values (CSV) file in 
-*Formatted* or *Raw* format. Formatted downloads the data in table format.
-Raw downloads the data as provided -- dates are timestamps, numbers don’t have
-thousand separators, and so on.
-
-To view the requests that collected the data, select *Requests* from the *View* 
-menu in the upper right.
-
-Which views are available depends on the inspected visualization.
+. In the {kib} toolbar, click *Inspect*.
+. To download the data, click *Download CSV*, then choose one of the following options:
+* *Formatted CSV* - Downloads the data in table format.
+* *Raw CSV* - Downloads the data as provided.
+. To view the data collection requests, select *Requests* from the *View*
+dropdown.

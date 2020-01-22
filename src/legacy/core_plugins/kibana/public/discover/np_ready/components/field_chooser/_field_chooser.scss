@@ -1,0 +1,37 @@
+.dscFieldChooser {
+  padding-left: $euiSizeS !important;
+  padding-right: $euiSizeS !important;
+}
+
+.dscFieldChooser__toggle {
+  color: $euiColorMediumShade;
+  margin-left: $euiSizeS !important;
+}
+
+.dscFieldName {
+  color: $euiColorDarkShade;
+  padding-left: $euiSizeS;
+}
+
+
+/*
+  Fixes EUI known issue https://github.com/elastic/eui/issues/1749
+*/
+.dscProgressBarTooltip__anchor {
+  display: block;
+}
+
+.dscToggleFieldFilterButton {
+  width: calc(100% - #{$euiSizeS});
+  color: $euiColorPrimary;
+  padding-left: $euiSizeXS;
+  margin-left: $euiSizeXS;
+}
+
+.dscFieldSearch__filterWrapper {
+  flex-grow: 0;
+}
+
+.dscFieldSearch__formWrapper {
+  padding: $euiSizeM;
+}

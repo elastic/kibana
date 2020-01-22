@@ -11,7 +11,7 @@ interface Props {
   title: React.ReactNode;
 }
 
-export const AuthenticationStatePage: React.SFC<Props> = props => (
+export const AuthenticationStatePage: React.FC<Props> = props => (
   <div className="secAuthenticationStatePage">
     <header className="secAuthenticationStatePage__header">
       <div className="secAuthenticationStatePage__content eui-textCenter">

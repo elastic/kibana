@@ -17,14 +17,13 @@ import {
 import url from 'url';
 import { i18n } from '@kbn/i18n';
 import React, { useState, FunctionComponent } from 'react';
-import { idx } from '@kbn/elastic-idx';
 import { pick } from 'lodash';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { InfraLink } from '../Links/InfraLink';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { fromQuery } from '../Links/url_helpers';
-import { useKibanaCore } from '../../../../../observability/public';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -66,15 +65,15 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
 ) => {
   const { transaction } = props;
 
-  const core = useKibanaCore();
+  const { core } = useApmPluginContext();
 
   const [isOpen, setIsOpen] = useState(false);
 
   const { urlParams } = useUrlParams();
 
-  const hostName = idx(transaction, _ => _.host.hostname);
-  const podId = idx(transaction, _ => _.kubernetes.pod.uid);
-  const containerId = idx(transaction, _ => _.container.id);
+  const hostName = transaction.host?.hostname;
+  const podId = transaction.kubernetes?.pod.uid;
+  const containerId = transaction.container?.id;
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
@@ -175,7 +174,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         {
           dateRangeStart: urlParams.rangeFrom,
           dateRangeEnd: urlParams.rangeTo,
-          search: `url.domain:"${idx(transaction, t => t.url.domain)}"`
+          search: `url.domain:"${transaction.url?.domain}"`
         },
         (val: string) => !!val
       )
@@ -209,7 +208,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
           })}
         </EuiLink>
       ),
-      condition: idx(transaction, _ => _.url.domain)
+      condition: transaction.url?.domain
     }
   ]
     .filter(({ condition }) => condition)

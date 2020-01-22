@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Filter, isPhrasesFilter } from '@kbn/es-query';
+import { esFilters } from '../../../../../common';
 
-export const mapPhrases = (filter: Filter) => {
-  if (!isPhrasesFilter(filter)) {
+export const mapPhrases = (filter: esFilters.Filter) => {
+  if (!esFilters.isPhrasesFilter(filter)) {
     throw filter;
   }
 

@@ -156,8 +156,9 @@ describe('Geohash Agg', () => {
   describe('aggregation options', () => {
     it('should only create geohash_grid and geo_centroid aggregations when isFilteredByCollar is false', () => {
       const aggConfigs = getAggConfigs({ isFilteredByCollar: false });
-      const requestAggs = geoHashBucketAgg.getRequestAggs(aggConfigs
-        .aggs[0] as IBucketGeoHashGridAggConfig) as IBucketGeoHashGridAggConfig[];
+      const requestAggs = geoHashBucketAgg.getRequestAggs(
+        aggConfigs.aggs[0] as IBucketGeoHashGridAggConfig
+      ) as IBucketGeoHashGridAggConfig[];
 
       expect(requestAggs.length).toEqual(2);
       expect(requestAggs[0].type.name).toEqual('geohash_grid');
@@ -166,8 +167,9 @@ describe('Geohash Agg', () => {
 
     it('should only create filter and geohash_grid aggregations when useGeocentroid is false', () => {
       const aggConfigs = getAggConfigs({ useGeocentroid: false });
-      const requestAggs = geoHashBucketAgg.getRequestAggs(aggConfigs
-        .aggs[0] as IBucketGeoHashGridAggConfig) as IBucketGeoHashGridAggConfig[];
+      const requestAggs = geoHashBucketAgg.getRequestAggs(
+        aggConfigs.aggs[0] as IBucketGeoHashGridAggConfig
+      ) as IBucketGeoHashGridAggConfig[];
 
       expect(requestAggs.length).toEqual(2);
       expect(requestAggs[0].type.name).toEqual('filter');
@@ -179,36 +181,43 @@ describe('Geohash Agg', () => {
     let originalRequestAggs: IBucketGeoHashGridAggConfig[];
 
     beforeEach(() => {
-      originalRequestAggs = geoHashBucketAgg.getRequestAggs(getAggConfigs()
-        .aggs[0] as IBucketGeoHashGridAggConfig) as IBucketGeoHashGridAggConfig[];
+      originalRequestAggs = geoHashBucketAgg.getRequestAggs(
+        getAggConfigs().aggs[0] as IBucketGeoHashGridAggConfig
+      ) as IBucketGeoHashGridAggConfig[];
     });
 
     it('should change geo_bounding_box filter aggregation and vis session state when map movement is outside map collar', () => {
-      const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(getAggConfigs({
-        mapBounds: {
-          top_left: { lat: 10.0, lon: -10.0 },
-          bottom_right: { lat: 9.0, lon: -9.0 },
-        },
-      }).aggs[0] as IBucketGeoHashGridAggConfig) as IBucketGeoHashGridAggConfig[];
+      const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
+        getAggConfigs({
+          mapBounds: {
+            top_left: { lat: 10.0, lon: -10.0 },
+            bottom_right: { lat: 9.0, lon: -9.0 },
+          },
+        }).aggs[0] as IBucketGeoHashGridAggConfig
+      ) as IBucketGeoHashGridAggConfig[];
 
       expect(originalRequestAggs[1].params).not.toEqual(geoBoxingBox.params);
     });
 
     it('should not change geo_bounding_box filter aggregation and vis session state when map movement is within map collar', () => {
-      const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(getAggConfigs({
-        mapBounds: {
-          top_left: { lat: 1, lon: -1 },
-          bottom_right: { lat: -1, lon: 1 },
-        },
-      }).aggs[0] as IBucketGeoHashGridAggConfig) as IBucketGeoHashGridAggConfig[];
+      const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
+        getAggConfigs({
+          mapBounds: {
+            top_left: { lat: 1, lon: -1 },
+            bottom_right: { lat: -1, lon: 1 },
+          },
+        }).aggs[0] as IBucketGeoHashGridAggConfig
+      ) as IBucketGeoHashGridAggConfig[];
 
       expect(originalRequestAggs[1].params).toEqual(geoBoxingBox.params);
     });
 
     it('should change geo_bounding_box filter aggregation and vis session state when map zoom level changes', () => {
-      const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(getAggConfigs({
-        mapZoom: -1,
-      }).aggs[0] as IBucketGeoHashGridAggConfig) as IBucketGeoHashGridAggConfig[];
+      const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
+        getAggConfigs({
+          mapZoom: -1,
+        }).aggs[0] as IBucketGeoHashGridAggConfig
+      ) as IBucketGeoHashGridAggConfig[];
 
       expect(originalRequestAggs[1].lastMapCollar).not.toEqual(geoBoxingBox.lastMapCollar);
     });

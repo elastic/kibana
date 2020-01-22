@@ -21,7 +21,7 @@ import { dropRight, last } from 'lodash';
 import { topHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig } from './metric_agg_type';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -85,7 +85,7 @@ describe('Top hit metric', () => {
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
-    aggConfig = aggConfigs.aggs[0];
+    aggConfig = aggConfigs.aggs[0] as IMetricAggConfig;
     aggDsl = aggConfig.toDsl(aggConfigs);
   };
 

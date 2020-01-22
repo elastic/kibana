@@ -10,7 +10,7 @@ Constructs a new instance of the `ToastsApi` class
 
 ```typescript
 constructor(deps: {
-        uiSettings: UiSettingsClientContract;
+        uiSettings: IUiSettingsClient;
     });
 ```
 
@@ -18,5 +18,5 @@ constructor(deps: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  deps | <code>{</code><br/><code>        uiSettings: UiSettingsClientContract;</code><br/><code>    }</code> |  |
+|  deps | <code>{</code><br/><code>        uiSettings: IUiSettingsClient;</code><br/><code>    }</code> |  |
 

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import numeral from '@elastic/numeral';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../../models/calculate_model_memory_limit';
@@ -20,13 +18,17 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   // retrieve the max_model_memory_limit value from the server
   // this will be unset unless the user has set this on their cluster
   const mlInfo = await callWithRequest('ml.info');
-  const maxModelMemoryLimit = (typeof mlInfo.limits === 'undefined') ? undefined : mlInfo.limits.max_model_memory_limit;
+  const maxModelMemoryLimit =
+    typeof mlInfo.limits === 'undefined' ? undefined : mlInfo.limits.max_model_memory_limit;
 
   // retrieve the model memory limit specified by the user in the job config.
   // note, this will probably be the auto generated value, unless the user has
   // over written it.
-  const mml = (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') ?
-    job.analysis_limits.model_memory_limit.toUpperCase() : null;
+  const mml =
+    typeof job.analysis_limits !== 'undefined' &&
+    typeof job.analysis_limits.model_memory_limit !== 'undefined'
+      ? job.analysis_limits.model_memory_limit.toUpperCase()
+      : null;
 
   const splitFieldNames = {};
   let splitFieldName = '';
@@ -38,14 +40,14 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   // we only want to estimate the mml for multi-metric jobs.
   // a multi-metric job will have one partition field, one or more field names
   // and no over or by fields
-  job.analysis_config.detectors.forEach((d) => {
+  job.analysis_config.detectors.forEach(d => {
     if (typeof d.field_name !== 'undefined') {
       fieldNames.push(d.field_name);
     }
 
     // create a deduplicated list of partition field names.
     if (typeof d.partition_field_name !== 'undefined') {
-      splitFieldNames[d.partition_field_name ] = null;
+      splitFieldNames[d.partition_field_name] = null;
     }
 
     // if an over or by field is present, do not run the estimate test
@@ -62,7 +64,11 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   }
 
   // if there is no duration, do not run the estimate test
-  if (typeof duration === 'undefined' || typeof duration.start === 'undefined' || typeof duration.end === 'undefined') {
+  if (
+    typeof duration === 'undefined' ||
+    typeof duration.start === 'undefined' ||
+    typeof duration.end === 'undefined'
+  ) {
     runCalcModelMemoryTest = false;
   }
 
@@ -71,12 +77,12 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   // check that mml is a valid data format
   if (mml !== null) {
     const mmlSplit = mml.match(/\d+(\w+)/);
-    const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
+    const unit = mmlSplit && mmlSplit.length === 2 ? mmlSplit[1] : null;
 
     if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
       messages.push({
         id: 'mml_value_invalid',
-        mml
+        mml,
       });
       // mml is not a valid data format.
       // abort all other tests
@@ -85,7 +91,7 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   }
 
   if (validModelMemoryLimit) {
-    if(runCalcModelMemoryTest) {
+    if (runCalcModelMemoryTest) {
       const mmlEstimate = await calculateModelMemoryLimitProvider(callWithRequest)(
         job.datafeed_config.indices.join(','),
         splitFieldName,
@@ -95,7 +101,8 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
         job.data_description.time_field,
         duration.start,
         duration.end,
-        true);
+        true
+      );
       const mmlEstimateBytes = numeral(mmlEstimate.modelMemoryLimit).value();
 
       let runEstimateGreaterThenMml = true;
@@ -108,7 +115,7 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
           messages.push({
             id: 'estimated_mml_greater_than_max_mml',
             maxModelMemoryLimit,
-            mmlEstimate
+            mmlEstimate,
           });
         }
       }
@@ -122,19 +129,19 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
         if (mmlBytes < MODEL_MEMORY_LIMIT_MINIMUM_BYTES) {
           messages.push({
             id: 'mml_value_invalid',
-            mml
+            mml,
           });
-        } else if ((mmlEstimateBytes / 2) > mmlBytes) {
+        } else if (mmlEstimateBytes / 2 > mmlBytes) {
           messages.push({
             id: 'half_estimated_mml_greater_than_mml',
             maxModelMemoryLimit,
-            mml
+            mml,
           });
         } else if (mmlEstimateBytes > mmlBytes) {
           messages.push({
             id: 'estimated_mml_greater_than_mml',
             maxModelMemoryLimit,
-            mml
+            mml,
           });
         }
       }
@@ -149,7 +156,7 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
         messages.push({
           id: 'mml_greater_than_max_mml',
           maxModelMemoryLimit,
-          mml
+          mml,
         });
       }
     }

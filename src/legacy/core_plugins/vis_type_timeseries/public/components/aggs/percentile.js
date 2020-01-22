@@ -34,7 +34,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { Percentiles, newPercentile } from './percentile_ui';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
@@ -42,7 +42,7 @@ const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER];
 export class PercentileAgg extends Component {
   // eslint-disable-line react/no-multi-comp
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!this.props.model.percentiles) {
       this.props.onChange(
         _.assign({}, this.props.model, {

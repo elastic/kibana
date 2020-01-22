@@ -55,12 +55,8 @@ exports[`TimeField should render a loading state 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={true}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       name="timeField"
       options={
         Array [
@@ -137,11 +133,8 @@ exports[`TimeField should render a selected time field 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isLoading={false}
       name="timeField"
       onChange={[Function]}
@@ -221,11 +214,8 @@ exports[`TimeField should render normally 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isLoading={false}
       name="timeField"
       onChange={[Function]}

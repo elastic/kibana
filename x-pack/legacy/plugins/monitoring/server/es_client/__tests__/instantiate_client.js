@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { get, noop } from 'lodash';
+import { noop } from 'lodash';
 import { exposeClient, hasMonitoringCluster } from '../instantiate_client';
 
 function getMockServerFromConnectionUrl(monitoringClusterUrl) {
@@ -19,31 +19,29 @@ function getMockServerFromConnectionUrl(monitoringClusterUrl) {
           password: 'monitoring-p@ssw0rd!-internal-test',
           ssl: {},
           customHeaders: {
-            'x-custom-headers-test': 'connection-monitoring'
-          }
-        }
-      }
+            'x-custom-headers-test': 'connection-monitoring',
+          },
+        },
+      },
     },
   };
 
-  const config = {
-    get: (path) => { return get(server, path); },
-    set: noop
-  };
-
   return {
-    config,
+    elasticsearchConfig: server.xpack.monitoring.elasticsearch,
     elasticsearchPlugin: {
-      getCluster: sinon.stub().withArgs('admin').returns({
-        config: sinon.stub().returns(server.elasticsearch)
-      }),
+      getCluster: sinon
+        .stub()
+        .withArgs('admin')
+        .returns({
+          config: sinon.stub().returns(server.elasticsearch),
+        }),
       createCluster: sinon.stub(),
     },
     events: {
       on: noop,
     },
     expose: sinon.stub(),
-    log: sinon.stub()
+    log: sinon.stub(),
   };
 }
 
@@ -55,8 +53,8 @@ describe('Instantiate Client', () => {
       exposeClient(server);
 
       expect(server.log.getCall(0).args).to.eql([
-        [ 'monitoring', 'es-client' ],
-        'config sourced from: production cluster'
+        ['monitoring', 'es-client'],
+        'config sourced from: production cluster',
       ]);
     });
 
@@ -65,8 +63,8 @@ describe('Instantiate Client', () => {
       exposeClient(server);
 
       expect(server.log.getCall(0).args).to.eql([
-        [ 'monitoring', 'es-client' ],
-        'config sourced from: monitoring cluster'
+        ['monitoring', 'es-client'],
+        'config sourced from: monitoring cluster',
       ]);
     });
   });
@@ -95,9 +93,9 @@ describe('Instantiate Client', () => {
 
       sinon.assert.calledOnce(createCluster);
       expect(createClusterCall.args[0]).to.be('monitoring');
-      expect(createClusterCall.args[1].customHeaders).to.eql(
-        { 'x-custom-headers-test': 'connection-monitoring' }
-      );
+      expect(createClusterCall.args[1].customHeaders).to.eql({
+        'x-custom-headers-test': 'connection-monitoring',
+      });
     });
   });
 
@@ -136,12 +134,12 @@ describe('Instantiate Client', () => {
   describe('hasMonitoringCluster', () => {
     it('returns true if monitoring is configured', () => {
       const server = getMockServerFromConnectionUrl('http://monitoring-cluster.test:9200'); // pass null for URL to create the client using prod config
-      expect(hasMonitoringCluster(server.config)).to.be(true);
+      expect(hasMonitoringCluster(server.elasticsearchConfig)).to.be(true);
     });
 
     it('returns false if monitoring is not configured', () => {
       const server = getMockServerFromConnectionUrl(null);
-      expect(hasMonitoringCluster(server.config)).to.be(false);
+      expect(hasMonitoringCluster(server.elasticsearchConfig)).to.be(false);
     });
   });
 });

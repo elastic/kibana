@@ -5,16 +5,12 @@
  */
 
 import { ClusterMetric, Metric } from '../classes';
-import {
-  SMALL_FLOAT,
-  LARGE_FLOAT,
-  LARGE_BYTES
-} from '../../../../common/formatting';
+import { SMALL_FLOAT, LARGE_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.beats.perSecondUnitLabel', {
-  defaultMessage: '/s'
+  defaultMessage: '/s',
 });
 
 export class BeatsClusterMetric extends ClusterMetric {
@@ -22,14 +18,14 @@ export class BeatsClusterMetric extends ClusterMetric {
     super({
       ...opts,
       app: 'beats',
-      ...BeatsClusterMetric.getMetricFields()
+      ...BeatsClusterMetric.getMetricFields(),
     });
   }
 
   static getMetricFields() {
     return {
       uuidField: 'beats_stats.beat.uuid',
-      timestampField: 'beats_stats.timestamp'
+      timestampField: 'beats_stats.timestamp',
     };
   }
 }
@@ -41,36 +37,36 @@ export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: perSecondUnitLabel
+      units: perSecondUnitLabel,
     });
 
     this.aggs = {
       beats_uuids: {
         terms: {
           field: 'beats_stats.beat.uuid',
-          size: 10000
+          size: 10000,
         },
         aggs: {
           event_rate_per_beat: {
             max: {
-              field: this.field
-            }
-          }
-        }
+              field: this.field,
+            },
+          },
+        },
       },
       event_rate: {
         sum_bucket: {
           buckets_path: 'beats_uuids>event_rate_per_beat',
-          gap_policy: 'skip'
-        }
+          gap_policy: 'skip',
+        },
       },
       metric_deriv: {
         derivative: {
           buckets_path: 'event_rate',
           gap_policy: 'skip',
-          unit: NORMALIZED_DERIVATIVE_UNIT
-        }
-      }
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
+      },
     };
   }
 }
@@ -80,14 +76,14 @@ export class BeatsMetric extends Metric {
     super({
       ...opts,
       app: 'beats',
-      ...BeatsMetric.getMetricFields()
+      ...BeatsMetric.getMetricFields(),
     });
   }
 
   static getMetricFields() {
     return {
       uuidField: 'beats_stats.beat.uuid',
-      timestampField: 'beats_stats.timestamp'
+      timestampField: 'beats_stats.timestamp',
     };
   }
 }
@@ -96,7 +92,7 @@ export class BeatsByteRateClusterMetric extends BeatsEventsRateClusterMetric {
   constructor(opts) {
     super({
       ...opts,
-      format: LARGE_BYTES
+      format: LARGE_BYTES,
     });
   }
 }
@@ -108,7 +104,7 @@ export class BeatsEventsRateMetric extends BeatsMetric {
       format: LARGE_FLOAT,
       metricAgg: 'max',
       units: perSecondUnitLabel,
-      derivative: true
+      derivative: true,
     });
   }
 }
@@ -120,7 +116,7 @@ export class BeatsByteRateMetric extends BeatsMetric {
       format: LARGE_BYTES,
       metricAgg: 'max',
       units: perSecondUnitLabel,
-      derivative: true
+      derivative: true,
     });
   }
 }
@@ -132,27 +128,19 @@ export class BeatsCpuUtilizationMetric extends BeatsMetric {
       format: SMALL_FLOAT,
       metricAgg: 'max',
       units: '%',
-      derivative: true
+      derivative: true,
     });
 
     /*
      * Convert a counter of milliseconds of utilization time into a percentage of the bucket size
      */
-    this.calculation = (
-      { metric_deriv: metricDeriv } = {},
-      _key,
-      _metric,
-      bucketSizeInSeconds
-    ) => {
+    this.calculation = ({ metric_deriv: metricDeriv } = {}, _key, _metric, bucketSizeInSeconds) => {
       if (metricDeriv) {
         const { value } = metricDeriv;
         const bucketSizeInMillis = bucketSizeInSeconds * 1000;
 
-        if (
-          value >= 0 &&
-          value !== null
-        ) {
-          return value / bucketSizeInMillis * 100;
+        if (value >= 0 && value !== null) {
+          return (value / bucketSizeInMillis) * 100;
         }
       }
       return null;

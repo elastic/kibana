@@ -20,7 +20,7 @@ export class LoggingAction extends BaseAction {
   get downstreamJson() {
     const result = super.downstreamJson;
     Object.assign(result, {
-      text: this.text
+      text: this.text,
     });
 
     return result;
@@ -32,7 +32,7 @@ export class LoggingAction extends BaseAction {
     const { errors } = this.validateJson(json);
 
     Object.assign(props, {
-      text: json.text
+      text: json.text,
     });
 
     const action = new LoggingAction(props, errors);
@@ -45,8 +45,8 @@ export class LoggingAction extends BaseAction {
 
     result[this.id] = {
       logging: {
-        text: this.text
-      }
+        text: this.text,
+      },
     };
 
     return result;
@@ -58,7 +58,7 @@ export class LoggingAction extends BaseAction {
     const { errors } = this.validateJson(json.actionJson);
 
     Object.assign(props, {
-      text: json.actionJson.logging.text
+      text: json.actionJson.logging.text,
     });
 
     const action = new LoggingAction(props, errors);
@@ -71,24 +71,30 @@ export class LoggingAction extends BaseAction {
     if (!json.logging) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonLoggingPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonLogging} property',
-          values: {
-            actionJsonLogging: 'actionJson.logging'
+        message: i18n.translate(
+          'xpack.watcher.models.loggingAction.actionJsonLoggingPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonLogging} property',
+            values: {
+              actionJsonLogging: 'actionJson.logging',
+            },
           }
-        }),
+        ),
       });
     }
 
     if (json.logging && !json.logging.text) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonLoggingTextPropertyMissingBadRequestMessage', {
-          defaultMessage: 'JSON argument must contain an {actionJsonLoggingText} property',
-          values: {
-            actionJsonLoggingText: 'actionJson.logging.text'
+        message: i18n.translate(
+          'xpack.watcher.models.loggingAction.actionJsonLoggingTextPropertyMissingBadRequestMessage',
+          {
+            defaultMessage: 'JSON argument must contain an {actionJsonLoggingText} property',
+            values: {
+              actionJsonLoggingText: 'actionJson.logging.text',
+            },
           }
-        }),
+        ),
       });
     }
 

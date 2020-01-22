@@ -7,10 +7,7 @@
 jest.mock('../selectors/map_selectors', () => ({}));
 jest.mock('../kibana_services', () => ({}));
 
-import {
-  mapExtentChanged,
-  setMouseCoordinates
-} from './map_actions';
+import { mapExtentChanged, setMouseCoordinates } from './map_actions';
 
 const getStoreMock = jest.fn();
 const dispatchMock = jest.fn();
@@ -55,7 +52,7 @@ describe('map_actions', () => {
             maxLon: 100,
             minLat: 5,
             minLon: 95,
-          }
+          },
         });
         await action(dispatchMock, getStoreMock);
 
@@ -72,7 +69,7 @@ describe('map_actions', () => {
               maxLon: 102.5,
               minLat: 2.5,
               minLon: 92.5,
-            }
+            },
           },
           type: 'MAP_EXTENT_CHANGED',
         });
@@ -90,7 +87,7 @@ describe('map_actions', () => {
               maxLon: 102.5,
               minLat: 2.5,
               minLon: 92.5,
-            }
+            },
           };
         };
       });
@@ -103,7 +100,7 @@ describe('map_actions', () => {
             maxLon: 101,
             minLat: 6,
             minLon: 96,
-          }
+          },
         });
         await action(dispatchMock, getStoreMock);
 
@@ -121,7 +118,7 @@ describe('map_actions', () => {
               maxLon: 102.5,
               minLat: 2.5,
               minLon: 92.5,
-            }
+            },
           },
           type: 'MAP_EXTENT_CHANGED',
         });
@@ -135,7 +132,7 @@ describe('map_actions', () => {
             maxLon: 90,
             minLat: 0,
             minLon: 85,
-          }
+          },
         });
         await action(dispatchMock, getStoreMock);
 
@@ -153,7 +150,7 @@ describe('map_actions', () => {
               maxLon: 92.5,
               minLat: -2.5,
               minLon: 82.5,
-            }
+            },
           },
           type: 'MAP_EXTENT_CHANGED',
         });
@@ -167,7 +164,7 @@ describe('map_actions', () => {
             maxLon: 101,
             minLat: 6,
             minLon: 96,
-          }
+          },
         });
         await action(dispatchMock, getStoreMock);
 
@@ -185,14 +182,12 @@ describe('map_actions', () => {
               maxLon: 103.5,
               minLat: 3.5,
               minLon: 93.5,
-            }
+            },
           },
           type: 'MAP_EXTENT_CHANGED',
         });
       });
-
     });
-
   });
 
   describe('setMouseCoordinates', () => {

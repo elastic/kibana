@@ -12,13 +12,6 @@
 export interface ChromeNavControls 
 ```
 
-## Methods
-
-|  Method | Description |
-|  --- | --- |
-|  [registerLeft(navControl)](./kibana-plugin-public.chromenavcontrols.registerleft.md) | Register a nav control to be presented on the left side of the chrome header. |
-|  [registerRight(navControl)](./kibana-plugin-public.chromenavcontrols.registerright.md) | Register a nav control to be presented on the right side of the chrome header. |
-
 ## Example
 
 Register a left-side nav control rendered with React.
@@ -32,4 +25,11 @@ chrome.navControls.registerLeft({
 })
 
 ```
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [registerLeft(navControl)](./kibana-plugin-public.chromenavcontrols.registerleft.md) | Register a nav control to be presented on the left side of the chrome header. |
+|  [registerRight(navControl)](./kibana-plugin-public.chromenavcontrols.registerright.md) | Register a nav control to be presented on the right side of the chrome header. |
 

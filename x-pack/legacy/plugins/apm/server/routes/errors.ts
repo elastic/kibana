@@ -27,10 +27,11 @@ export const errorsRoute = createRoute(core => ({
       rangeRt
     ])
   },
-  handler: async (req, { query, path }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
-    const { sortField, sortDirection } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { params } = context;
+    const { serviceName } = params.path;
+    const { sortField, sortDirection } = params.query;
 
     return getErrorGroups({
       serviceName,
@@ -50,9 +51,9 @@ export const errorGroupsRoute = createRoute(() => ({
     }),
     query: t.intersection([uiFiltersRt, rangeRt])
   },
-  handler: async (req, { path }) => {
-    const setup = await setupRequest(req);
-    const { serviceName, groupId } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName, groupId } = context.params.path;
     return getErrorGroup({ serviceName, groupId, setup });
   }
 }));
@@ -71,10 +72,11 @@ export const errorDistributionRoute = createRoute(() => ({
       rangeRt
     ])
   },
-  handler: async (req, { path, query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = path;
-    const { groupId } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { params } = context;
+    const { serviceName } = params.path;
+    const { groupId } = params.query;
     return getErrorDistribution({ serviceName, groupId, setup });
   }
 }));

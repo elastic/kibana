@@ -12,12 +12,14 @@ interface Props {
   options: EuiComboBoxOptionProps[];
   placeholder?: string;
   changeHandler(d: EuiComboBoxOptionProps[]): void;
+  testSubj?: string;
 }
 
-export const DropDown: React.SFC<Props> = ({
+export const DropDown: React.FC<Props> = ({
   changeHandler,
   options,
   placeholder = 'Search ...',
+  testSubj,
 }) => {
   return (
     <EuiComboBox
@@ -27,6 +29,7 @@ export const DropDown: React.SFC<Props> = ({
       selectedOptions={[]}
       onChange={changeHandler}
       isClearable={false}
+      data-test-subj={testSubj}
     />
   );
 };

@@ -2,11 +2,11 @@
 
 exports[`UrlFormatEditor should render label template help 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={true}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
@@ -26,11 +26,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="urlEditorType"
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -79,10 +75,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="urlEditorUrlTemplate"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
@@ -116,15 +109,12 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="urlEditorLabelTemplate"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     sampleType="html"
     samples={Array []}
   />
@@ -133,11 +123,11 @@ exports[`UrlFormatEditor should render label template help 1`] = `
 
 exports[`UrlFormatEditor should render normally 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
@@ -157,11 +147,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="urlEditorType"
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -210,10 +196,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="urlEditorUrlTemplate"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
@@ -247,15 +230,12 @@ exports[`UrlFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="urlEditorLabelTemplate"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     sampleType="html"
     samples={Array []}
   />
@@ -264,11 +244,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
 
 exports[`UrlFormatEditor should render url template help 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={true}
     onClose={[Function]}
   />
@@ -288,11 +268,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="urlEditorType"
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -341,10 +317,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="urlEditorUrlTemplate"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
@@ -378,15 +351,12 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="urlEditorLabelTemplate"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     sampleType="html"
     samples={Array []}
   />
@@ -395,11 +365,11 @@ exports[`UrlFormatEditor should render url template help 1`] = `
 
 exports[`UrlFormatEditor should render width and height fields if image 1`] = `
 <Fragment>
-  <InjectIntl(LabelTemplateFlyout)
+  <LabelTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
-  <InjectIntl(UrlTemplateFlyout)
+  <UrlTemplateFlyout
     isVisible={false}
     onClose={[Function]}
   />
@@ -419,11 +389,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="urlEditorType"
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -473,10 +439,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="urlEditorUrlTemplate"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
@@ -510,10 +473,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="urlEditorLabelTemplate"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
@@ -534,10 +494,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="urlEditorWidth"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
@@ -558,15 +515,12 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
       data-test-subj="urlEditorHeight"
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       value=""
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
     sampleType="html"
     samples={
       Array [

@@ -20,19 +20,19 @@ export function validateRollupDelay(rollupDelay) {
 
   try {
     parseEsInterval(rollupDelay);
-  } catch(error) {
+  } catch (error) {
     if (error instanceof InvalidEsIntervalFormatError) {
-      return [(
+      return [
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.rollupDelayInvalidFormat"
           defaultMessage="Invalid delay format."
-        />
-      )];
+        />,
+      ];
     }
 
     if (error instanceof InvalidEsCalendarIntervalError) {
       const { unit } = error;
-      return [(
+      return [
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.rollupDelayInvalidCalendarInterval"
           defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
@@ -46,13 +46,13 @@ export function validateRollupDelay(rollupDelay) {
                   values={{ unit }}
                 />
               </strong>
-            )
+            ),
           }}
-        />
-      )];
+        />,
+      ];
     }
 
-    throw(error);
+    throw error;
   }
 
   return undefined;

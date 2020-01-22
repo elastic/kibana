@@ -37,49 +37,24 @@ const selectTimelineQuery = (state: State, id: string): GlobalQuery =>
     selectedInspectIndex: 0,
   };
 
-export const inputsSelector = () =>
-  createSelector(
-    selectInputs,
-    inputs => inputs
-  );
+export const inputsSelector = () => createSelector(selectInputs, inputs => inputs);
 
 export const timelineTimeRangeSelector = createSelector(
   selectTimeline,
   timeline => timeline.timerange
 );
 
-export const globalTimeRangeSelector = createSelector(
-  selectGlobal,
-  global => global.timerange
-);
+export const globalTimeRangeSelector = createSelector(selectGlobal, global => global.timerange);
 
-export const globalPolicySelector = createSelector(
-  selectGlobal,
-  global => global.policy
-);
+export const globalPolicySelector = createSelector(selectGlobal, global => global.policy);
 
-export const globalQuery = createSelector(
-  selectGlobal,
-  global => global.queries
-);
+export const globalQuery = createSelector(selectGlobal, global => global.queries);
 
-export const globalQueryByIdSelector = () =>
-  createSelector(
-    selectGlobalQuery,
-    query => query
-  );
+export const globalQueryByIdSelector = () => createSelector(selectGlobalQuery, query => query);
 
-export const timelineQueryByIdSelector = () =>
-  createSelector(
-    selectTimelineQuery,
-    query => query
-  );
+export const timelineQueryByIdSelector = () => createSelector(selectTimelineQuery, query => query);
 
-export const globalSelector = () =>
-  createSelector(
-    selectGlobal,
-    global => global
-  );
+export const globalSelector = () => createSelector(selectGlobal, global => global);
 
 export const globalQuerySelector = () =>
   createSelector(
@@ -92,19 +67,12 @@ export const globalQuerySelector = () =>
   );
 
 export const globalSavedQuerySelector = () =>
-  createSelector(
-    selectGlobal,
-    global => global.savedQuery || null
-  );
+  createSelector(selectGlobal, global => global.savedQuery || null);
 
 export const globalFiltersQuerySelector = () =>
-  createSelector(
-    selectGlobal,
-    global => global.filters || []
-  );
+  createSelector(selectGlobal, global => global.filters || []);
 
-export const getTimelineSelector = () =>
-  createSelector(
-    selectTimeline,
-    timeline => timeline
-  );
+export const getTimelineSelector = () => createSelector(selectTimeline, timeline => timeline);
+
+export const getTimelinePolicySelector = () =>
+  createSelector(selectTimeline, timeline => timeline.policy);

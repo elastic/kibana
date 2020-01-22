@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { HeaderPanel } from '../../header_panel';
+import { HeaderSection } from '../../header_section';
 
 import * as i18n from './translations';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
@@ -27,65 +27,71 @@ const sorting = {
     field: 'anomaly.severity',
     direction: 'desc',
   },
+} as const;
+
+const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
+  startDate,
+  endDate,
+  narrowDateRange,
+  hostName,
+  skip,
+  type,
+}) => {
+  const capabilities = useContext(MlCapabilitiesContext);
+  const [loading, tableData] = useAnomaliesTableData({
+    startDate,
+    endDate,
+    skip,
+    criteriaFields: getCriteriaFromHostType(type, hostName),
+  });
+
+  const hosts = convertAnomaliesToHosts(tableData, hostName);
+
+  const interval = getIntervalFromAnomalies(tableData);
+  const columns = getAnomaliesHostTableColumnsCurated(
+    type,
+    startDate,
+    endDate,
+    interval,
+    narrowDateRange
+  );
+  const pagination = {
+    initialPageIndex: 0,
+    initialPageSize: 10,
+    totalItemCount: hosts.length,
+    pageSizeOptions: [5, 10, 20, 50],
+    hidePerPageOptions: false,
+  };
+
+  if (!hasMlUserPermissions(capabilities)) {
+    return null;
+  } else {
+    return (
+      <Panel loading={loading}>
+        <HeaderSection
+          subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
+            pagination.totalItemCount
+          )}`}
+          title={i18n.ANOMALIES}
+          tooltip={i18n.TOOLTIP}
+        />
+
+        <BasicTable
+          // @ts-ignore the Columns<T, U> type is not as specific as EUI's...
+          columns={columns}
+          compressed
+          // @ts-ignore ...which leads to `networks` not "matching" the columns
+          items={hosts}
+          pagination={pagination}
+          sorting={sorting}
+        />
+
+        {loading && (
+          <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />
+        )}
+      </Panel>
+    );
+  }
 };
 
-export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
-  ({ startDate, endDate, narrowDateRange, hostName, skip, type }): JSX.Element | null => {
-    const capabilities = useContext(MlCapabilitiesContext);
-    const [loading, tableData] = useAnomaliesTableData({
-      startDate,
-      endDate,
-      skip,
-      criteriaFields: getCriteriaFromHostType(type, hostName),
-    });
-
-    const hosts = convertAnomaliesToHosts(tableData, hostName);
-
-    const interval = getIntervalFromAnomalies(tableData);
-    const columns = getAnomaliesHostTableColumnsCurated(
-      type,
-      startDate,
-      endDate,
-      interval,
-      narrowDateRange
-    );
-    const pagination = {
-      initialPageIndex: 0,
-      initialPageSize: 10,
-      totalItemCount: hosts.length,
-      pageSizeOptions: [5, 10, 20, 50],
-      hidePerPageOptions: false,
-    };
-
-    if (!hasMlUserPermissions(capabilities)) {
-      return null;
-    } else {
-      return (
-        <Panel loading={loading}>
-          <HeaderPanel
-            subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
-              pagination.totalItemCount
-            )}`}
-            title={i18n.ANOMALIES}
-            tooltip={i18n.TOOLTIP}
-          />
-
-          <BasicTable
-            columns={columns}
-            compressed
-            items={hosts}
-            pagination={pagination}
-            sorting={sorting}
-          />
-
-          {loading && (
-            <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />
-          )}
-        </Panel>
-      );
-    }
-  },
-  hostEquality
-);
-
-AnomaliesHostTable.displayName = 'AnomaliesHostTable';
+export const AnomaliesHostTable = React.memo(AnomaliesHostTableComponent, hostEquality);

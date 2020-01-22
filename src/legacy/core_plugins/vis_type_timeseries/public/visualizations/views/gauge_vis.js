@@ -37,7 +37,7 @@ export class GaugeVis extends Component {
     this.handleResize = this.handleResize.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const check = () => {
       this.timeout = setTimeout(() => {
         const newState = calculateCoordinates(this.inner, this.resize, this.state);

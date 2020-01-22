@@ -16,45 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { npSetup } from 'ui/new_platform';
 
-import { createReporter, Reporter, UiStatsMetricType } from '@kbn/analytics';
-
-let telemetryReporter: Reporter;
-
-export const setTelemetryReporter = (aTelemetryReporter: Reporter): void => {
-  telemetryReporter = aTelemetryReporter;
+export const createUiStatsReporter = (appName: string) => {
+  const { usageCollection } = npSetup.plugins;
+  return usageCollection.reportUiStats.bind(usageCollection, appName);
 };
-
-export const getTelemetryReporter = () => {
-  return telemetryReporter;
-};
-
-export const createUiStatsReporter = (appName: string) => (
-  type: UiStatsMetricType,
-  eventNames: string | string[],
-  count?: number
-): void => {
-  if (telemetryReporter) {
-    return telemetryReporter.reportUiStats(appName, type, eventNames, count);
-  }
-};
-
-interface AnalyicsReporterConfig {
-  localStorage: any;
-  basePath: string;
-  debug: boolean;
-  $http: ng.IHttpService;
-}
-
-export function createAnalyticsReporter(config: AnalyicsReporterConfig) {
-  const { localStorage, basePath, $http, debug } = config;
-
-  return createReporter({
-    debug,
-    storage: localStorage,
-    async http(report) {
-      const url = `${basePath}/api/telemetry/report`;
-      await $http.post(url, { report });
-    },
-  });
-}

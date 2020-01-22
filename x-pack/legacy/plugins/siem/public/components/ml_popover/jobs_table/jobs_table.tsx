@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import chrome from 'ui/chrome';
 import React, { useEffect, useState } from 'react';
 
@@ -81,7 +83,7 @@ const getJobsTableColumns = (
       ),
     align: CENTER_ALIGNMENT,
     width: '80px',
-  },
+  } as const,
 ];
 
 const getPaginatedItems = (items: SiemJob[], pageIndex: number, pageSize: number): SiemJob[] =>
@@ -93,7 +95,7 @@ export interface JobTableProps {
   onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
 }
 
-export const JobsTable = React.memo(({ isLoading, jobs, onJobStateChange }: JobTableProps) => {
+export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 5;
 
@@ -123,7 +125,11 @@ export const JobsTable = React.memo(({ isLoading, jobs, onJobStateChange }: JobT
       }}
     />
   );
-});
+};
+
+JobsTableComponent.displayName = 'JobsTableComponent';
+
+export const JobsTable = React.memo(JobsTableComponent);
 
 JobsTable.displayName = 'JobsTable';
 

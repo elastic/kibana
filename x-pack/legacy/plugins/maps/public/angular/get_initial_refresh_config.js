@@ -7,11 +7,7 @@ import chrome from 'ui/chrome';
 
 const uiSettings = chrome.getUiSettingsClient();
 
-export function getInitialRefreshConfig({
-  mapStateJSON,
-  globalState = {},
-}) {
-
+export function getInitialRefreshConfig({ mapStateJSON, globalState = {} }) {
   if (mapStateJSON) {
     const mapState = JSON.parse(mapStateJSON);
     if (mapState.refreshConfig) {

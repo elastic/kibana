@@ -24,8 +24,7 @@ export function notInNodeModules(checkPath) {
 }
 
 export function notInNodeModulesOrWebpackShims(checkPath) {
-  return notInNodeModules(checkPath)
-    && !checkPath.includes(`${path.sep}webpackShims${path.sep}`);
+  return notInNodeModules(checkPath) && !checkPath.includes(`${path.sep}webpackShims${path.sep}`);
 }
 
 export function inPluginNodeModules(checkPath) {

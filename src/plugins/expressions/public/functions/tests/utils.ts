@@ -18,7 +18,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { AnyExpressionFunction, FunctionHandlers } from '../../types';
+import { AnyExpressionFunction, FunctionHandlers } from '../../../common/types';
 
 // Takes a function spec and passes in default args,
 // overriding with any provided args.

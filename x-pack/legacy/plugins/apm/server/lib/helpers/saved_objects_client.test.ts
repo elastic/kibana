@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSavedObjectsClient } from './saved_objects_client';
+import { getInternalSavedObjectsClient } from './saved_objects_client';
 
 describe('saved_objects/client', () => {
   describe('getSavedObjectsClient', () => {
@@ -31,7 +31,7 @@ describe('saved_objects/client', () => {
     });
 
     it('should use internal user "admin"', () => {
-      getSavedObjectsClient(server);
+      getInternalSavedObjectsClient(server);
 
       expect(server.plugins.elasticsearch.getCluster).toHaveBeenCalledWith(
         'admin'
@@ -39,7 +39,7 @@ describe('saved_objects/client', () => {
     });
 
     it('should call getSavedObjectsRepository with a cluster using the internal user context', () => {
-      getSavedObjectsClient(server);
+      getInternalSavedObjectsClient(server);
 
       expect(
         server.savedObjects.getSavedObjectsRepository
@@ -47,9 +47,9 @@ describe('saved_objects/client', () => {
     });
 
     it('should return a SavedObjectsClient initialized with the saved objects internal repository', () => {
-      const result = getSavedObjectsClient(server);
+      const internalSavedObjectsClient = getInternalSavedObjectsClient(server);
 
-      expect(result).toBe(savedObjectsClientInstance);
+      expect(internalSavedObjectsClient).toBe(savedObjectsClientInstance);
       expect(server.savedObjects.SavedObjectsClient).toHaveBeenCalledWith(
         internalRepository
       );

@@ -19,11 +19,11 @@
 
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 
 export class BoolFormat extends FieldFormat {
-  static id = 'boolean';
+  static id = FIELD_FORMAT_IDS.BOOLEAN;
   static title = 'Boolean';
   static fieldType = [KBN_FIELD_TYPES.BOOLEAN, KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
 

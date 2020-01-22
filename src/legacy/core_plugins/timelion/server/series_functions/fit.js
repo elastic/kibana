@@ -22,13 +22,13 @@ import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 import loadFunctions from '../lib/load_functions.js';
-const fitFunctions  = loadFunctions('fit_functions');
+const fitFunctions = loadFunctions('fit_functions');
 
 export default new Chainable('fit', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'mode',
@@ -42,16 +42,15 @@ export default new Chainable('fit', {
       }),
       suggestions: _.keys(fitFunctions).map(key => {
         return { name: key };
-      })
-    }
+      }),
+    },
   ],
   help: i18n.translate('timelion.help.functions.fitHelpText', {
     defaultMessage: 'Fills null values using a defined fit function',
   }),
   fn: function absFn(args) {
-    return alter(args, function (eachSeries, mode) {
-
-      const noNulls = eachSeries.data.filter((item) => (item[1] === 0 || item[1]));
+    return alter(args, function(eachSeries, mode) {
+      const noNulls = eachSeries.data.filter(item => item[1] === 0 || item[1]);
 
       if (noNulls.length === 0) {
         return eachSeries;
@@ -60,5 +59,5 @@ export default new Chainable('fit', {
       eachSeries.data = fitFunctions[mode](noNulls, eachSeries.data);
       return eachSeries;
     });
-  }
+  },
 });

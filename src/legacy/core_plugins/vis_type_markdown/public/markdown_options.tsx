@@ -36,7 +36,7 @@ import { MarkdownVisParams } from './types';
 function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
   const onMarkdownUpdate = useCallback(
     (value: MarkdownVisParams['markdown']) => setValue('markdown', value),
-    []
+    [setValue]
   );
 
   return (

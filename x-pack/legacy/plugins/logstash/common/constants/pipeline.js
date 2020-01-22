@@ -7,6 +7,6 @@
 export const PIPELINE = {
   ORIGIN: {
     CCM: 'centralized_configuration_management',
-    OTHER: 'file_or_command_line_interface_or_pipelines_yml'
-  }
+    OTHER: 'file_or_command_line_interface_or_pipelines_yml',
+  },
 };

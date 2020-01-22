@@ -8,7 +8,7 @@ import { noop } from 'lodash';
 import expect from '@kbn/expect';
 import { MonitoringMainController } from '../';
 
-const getMockLicenseService = (options) => ({ mlIsSupported: () => options.mlIsSupported });
+const getMockLicenseService = options => ({ mlIsSupported: () => options.mlIsSupported });
 const getMockBreadcrumbsService = () => noop; // breadcrumb service has its own test
 
 describe('Monitoring Main Directive Controller', () => {
@@ -27,8 +27,8 @@ describe('Monitoring Main Directive Controller', () => {
       licenseService: getMockLicenseService(),
       breadcrumbsService: getMockBreadcrumbsService(),
       attributes: {
-        name: 'listing'
-      }
+        name: 'listing',
+      },
     });
 
     // derived properties
@@ -61,8 +61,8 @@ describe('Monitoring Main Directive Controller', () => {
       licenseService: getMockLicenseService(),
       breadcrumbsService: getMockBreadcrumbsService(),
       attributes: {
-        name: 'alerts'
-      }
+        name: 'alerts',
+      },
     });
 
     // derived properties
@@ -95,8 +95,8 @@ describe('Monitoring Main Directive Controller', () => {
       licenseService: getMockLicenseService(),
       breadcrumbsService: getMockBreadcrumbsService(),
       attributes: {
-        name: 'overview'
-      }
+        name: 'overview',
+      },
     });
 
     // derived properties
@@ -142,7 +142,7 @@ describe('Monitoring Main Directive Controller', () => {
         page: 'advanced',
         tabIconClass: 'fa star',
         tabIconLabel: 'Master Node',
-      }
+      },
     });
 
     // derived properties
@@ -171,8 +171,8 @@ describe('Monitoring Main Directive Controller', () => {
       breadcrumbsService: getMockBreadcrumbsService(),
       attributes: {
         product: 'kibana',
-        name: 'overview'
-      }
+        name: 'overview',
+      },
     });
 
     // derived properties
@@ -201,8 +201,8 @@ describe('Monitoring Main Directive Controller', () => {
       breadcrumbsService: getMockBreadcrumbsService(),
       attributes: {
         product: 'logstash',
-        name: 'listing'
-      }
+        name: 'listing',
+      },
     });
 
     // derived properties
@@ -231,8 +231,8 @@ describe('Monitoring Main Directive Controller', () => {
         licenseService: getMockLicenseService({ mlIsSupported: true }),
         breadcrumbsService: getMockBreadcrumbsService(),
         attributes: {
-          name: 'listing'
-        }
+          name: 'listing',
+        },
       });
 
       expect(controller.isMlSupported()).to.be(true);
@@ -245,8 +245,8 @@ describe('Monitoring Main Directive Controller', () => {
         licenseService: getMockLicenseService({ mlIsSupported: false }),
         breadcrumbsService: getMockBreadcrumbsService(),
         attributes: {
-          name: 'listing'
-        }
+          name: 'listing',
+        },
       });
 
       expect(controller.isMlSupported()).to.be(false);

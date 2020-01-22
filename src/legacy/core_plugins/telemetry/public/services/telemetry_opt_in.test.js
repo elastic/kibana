@@ -21,23 +21,32 @@ import { mockInjectedMetadata } from './telemetry_opt_in.test.mocks';
 import { TelemetryOptInProvider } from './telemetry_opt_in';
 
 describe('TelemetryOptInProvider', () => {
-  const setup = ({ optedIn, simulatePostError }) => {
+  const setup = ({ optedIn, simulatePostError, simulatePutError }) => {
     const mockHttp = {
       post: jest.fn(async () => {
         if (simulatePostError) {
           return Promise.reject('Something happened');
         }
-      })
+      }),
+      put: jest.fn(async () => {
+        if (simulatePutError) {
+          return Promise.reject('Something happened');
+        }
+      }),
     };
 
     const mockChrome = {
-      addBasePath: (url) => url
+      addBasePath: url => url,
     };
 
-    mockInjectedMetadata({ telemetryOptedIn: optedIn });
+    mockInjectedMetadata({
+      telemetryOptedIn: optedIn,
+      allowChangingOptInStatus: true,
+      telemetryNotifyUserAboutOptInDefault: true,
+    });
 
     const mockInjector = {
-      get: (key) => {
+      get: key => {
         switch (key) {
           case '$http': {
             return mockHttp;
@@ -45,16 +54,15 @@ describe('TelemetryOptInProvider', () => {
           default:
             throw new Error('unexpected injector request: ' + key);
         }
-      }
+      },
     };
 
-    const provider = new TelemetryOptInProvider(mockInjector, mockChrome);
+    const provider = new TelemetryOptInProvider(mockInjector, mockChrome, false);
     return {
       provider,
       mockHttp,
     };
   };
-
 
   it('should return the current opt-in status', () => {
     const { provider: optedInProvider } = setup({ optedIn: true });
@@ -97,5 +105,44 @@ describe('TelemetryOptInProvider', () => {
     const bannerId = 'bruce-banner';
     provider.setBannerId(bannerId);
     expect(provider.getBannerId()).toEqual(bannerId);
+  });
+
+  describe('Notice Banner', () => {
+    it('should return the current bannerId', () => {
+      const { provider } = setup({});
+      const bannerId = 'bruce-wayne';
+      provider.setOptInBannerNoticeId(bannerId);
+
+      expect(provider.getOptInBannerNoticeId()).toEqual(bannerId);
+      expect(provider.getBannerId()).not.toEqual(bannerId);
+    });
+
+    it('should persist that a user has seen the notice', async () => {
+      const { provider, mockHttp } = setup({});
+      await provider.setOptInNoticeSeen();
+
+      expect(mockHttp.put).toHaveBeenCalledWith(`/api/telemetry/v2/userHasSeenNotice`);
+
+      expect(provider.notifyUserAboutOptInDefault()).toEqual(false);
+    });
+
+    it('should only call the API once', async () => {
+      const { provider, mockHttp } = setup({});
+      await provider.setOptInNoticeSeen();
+      await provider.setOptInNoticeSeen();
+
+      expect(mockHttp.put).toHaveBeenCalledTimes(1);
+
+      expect(provider.notifyUserAboutOptInDefault()).toEqual(false);
+    });
+
+    it('should gracefully handle errors', async () => {
+      const { provider } = setup({ simulatePutError: true });
+
+      await provider.setOptInNoticeSeen();
+
+      // opt-in change should not be reflected
+      expect(provider.notifyUserAboutOptInDefault()).toEqual(true);
+    });
   });
 });

@@ -1,16 +1,54 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Markdown markdown links it renders the expected content containing a link 1`] = `
-<Component
-  raw="A link to an external site [External Site](https://google.com)"
+<ReactMarkdown
+  astPlugins={Array []}
+  data-test-subj="markdown"
+  escapeHtml={true}
+  linkTarget="_blank"
+  plugins={Array []}
+  rawSourcePos={false}
+  renderers={
+    Object {
+      "link": [Function],
+      "root": [Function],
+      "table": [Function],
+      "tableCell": [Function],
+      "tableHead": [Function],
+      "tableRow": [Function],
+    }
+  }
+  skipHtml={false}
+  source="A link to an external site [External Site](https://google.com)"
+  sourcePos={false}
+  transformLinkUri={[Function]}
 />
 `;
 
 exports[`Markdown markdown tables it renders the expected table content 1`] = `
-<Component
-  raw="| we | support | markdown | tables |
+<ReactMarkdown
+  astPlugins={Array []}
+  data-test-subj="markdown"
+  escapeHtml={true}
+  linkTarget="_blank"
+  plugins={Array []}
+  rawSourcePos={false}
+  renderers={
+    Object {
+      "link": [Function],
+      "root": [Function],
+      "table": [Function],
+      "tableCell": [Function],
+      "tableHead": [Function],
+      "tableRow": [Function],
+    }
+  }
+  skipHtml={false}
+  source="| we | support | markdown | tables |
 |---------|---------|------------|--------|
 | because | tables  | are        | pretty |
 | useful  | for     | formatting | data   |"
+  sourcePos={false}
+  transformLinkUri={[Function]}
 />
 `;

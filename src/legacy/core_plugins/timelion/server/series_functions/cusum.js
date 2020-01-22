@@ -26,29 +26,30 @@ export default new Chainable('cusum', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'base',
       types: ['number'],
       help: i18n.translate('timelion.help.functions.cusum.args.baseHelpText', {
-        defaultMessage: 'Number to start at. Basically just adds this to the beginning of the series',
+        defaultMessage:
+          'Number to start at. Basically just adds this to the beginning of the series',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.cusumHelpText', {
     defaultMessage: 'Return the cumulative sum of a series, starting at a base.',
   }),
   fn: function cusumFn(args) {
-    return alter(args, function (eachSeries, base) {
+    return alter(args, function(eachSeries, base) {
       const pairs = eachSeries.data;
       let total = base || 0;
-      eachSeries.data = _.map(pairs, function (point) {
+      eachSeries.data = _.map(pairs, function(point) {
         total += point[1];
         return [point[0], total];
       });
 
       return eachSeries;
     });
-  }
+  },
 });

@@ -24,7 +24,7 @@ describe('EmptyState component', () => {
 
   it('renders child components when count is truthy', () => {
     const component = shallowWithIntl(
-      <EmptyStateComponent basePath="" data={{ statesIndexStatus }} loading={false}>
+      <EmptyStateComponent data={{ statesIndexStatus }} loading={false}>
         <div>Foo</div>
         <div>Bar</div>
         <div>Baz</div>
@@ -35,7 +35,7 @@ describe('EmptyState component', () => {
 
   it(`doesn't render child components when count is falsey`, () => {
     const component = mountWithIntl(
-      <EmptyStateComponent basePath="" data={undefined} loading={false}>
+      <EmptyStateComponent data={undefined} loading={false}>
         <div>Shouldn&apos;t be rendered</div>
       </EmptyStateComponent>
     );
@@ -57,7 +57,7 @@ describe('EmptyState component', () => {
       },
     ];
     const component = mountWithIntl(
-      <EmptyStateComponent basePath="" data={undefined} errors={errors} loading={false}>
+      <EmptyStateComponent data={undefined} errors={errors} loading={false}>
         <div>Shouldn&apos;t appear...</div>
       </EmptyStateComponent>
     );
@@ -66,7 +66,7 @@ describe('EmptyState component', () => {
 
   it('renders loading state if no errors or doc count', () => {
     const component = mountWithIntl(
-      <EmptyStateComponent basePath="" loading={true}>
+      <EmptyStateComponent loading={true}>
         <div>Should appear even while loading...</div>
       </EmptyStateComponent>
     );
@@ -81,7 +81,7 @@ describe('EmptyState component', () => {
       indexExists: true,
     };
     const component = mountWithIntl(
-      <EmptyStateComponent basePath="foo" data={{ statesIndexStatus }} loading={false}>
+      <EmptyStateComponent data={{ statesIndexStatus }} loading={false}>
         <div>If this is in the snapshot the test should fail</div>
       </EmptyStateComponent>
     );
@@ -91,7 +91,7 @@ describe('EmptyState component', () => {
   it('notifies when index does not exist', () => {
     statesIndexStatus.indexExists = false;
     const component = mountWithIntl(
-      <EmptyStateComponent basePath="foo" data={{ statesIndexStatus }} loading={false}>
+      <EmptyStateComponent data={{ statesIndexStatus }} loading={false}>
         <div>This text should not render</div>
       </EmptyStateComponent>
     );

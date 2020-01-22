@@ -116,7 +116,11 @@ export function getDatasourceSuggestionsForField(
 }
 
 function getBucketOperation(field: IndexPatternField) {
-  return getOperationTypesForField(field).find(op => op === 'date_histogram' || op === 'terms');
+  // We allow numeric bucket types in some cases, but it's generally not the right suggestion,
+  // so we eliminate it here.
+  if (field.type !== 'number') {
+    return getOperationTypesForField(field).find(op => op === 'date_histogram' || op === 'terms');
+  }
 }
 
 function getExistingLayerSuggestionsForField(

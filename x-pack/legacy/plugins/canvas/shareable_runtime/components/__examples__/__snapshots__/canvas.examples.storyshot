@@ -88,9 +88,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -126,9 +126,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -165,9 +165,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -205,9 +205,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -249,9 +249,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -290,9 +290,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -332,9 +332,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -368,9 +368,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -418,9 +418,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -471,9 +471,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -509,9 +509,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -545,9 +545,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -582,9 +582,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -620,9 +620,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -658,9 +658,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -698,9 +698,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -735,9 +735,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -772,9 +772,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -811,9 +811,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -862,9 +862,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -905,9 +905,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -996,9 +996,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1065,9 +1065,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1105,9 +1105,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1146,9 +1146,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1188,9 +1188,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1228,9 +1228,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1268,9 +1268,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1312,6 +1312,11 @@ exports[`Storyshots shareables/Canvas component 1`] = `
             >
               <div
                 className="euiFlexItem euiFlexItem--flexGrowZero"
+                style={
+                  Object {
+                    "flexShrink": 0,
+                  }
+                }
               >
                 <a
                   className="euiLink euiLink--primary"
@@ -1320,9 +1325,11 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   title="Powered by Elastic.co"
                 >
                   <svg
+                    aria-hidden={true}
                     className="euiIcon euiIcon--large euiIcon-isLoading"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -1381,10 +1388,11 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     type="button"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -1434,10 +1442,11 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     type="button"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -1471,10 +1480,11 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                         type="button"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -1582,9 +1592,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1620,9 +1630,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1659,9 +1669,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1699,9 +1709,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1743,9 +1753,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1784,9 +1794,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1826,9 +1836,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1862,9 +1872,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1912,9 +1922,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -1965,9 +1975,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2003,9 +2013,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2039,9 +2049,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2076,9 +2086,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2114,9 +2124,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2152,9 +2162,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2192,9 +2202,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2229,9 +2239,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2266,9 +2276,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2305,9 +2315,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2356,9 +2366,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2399,9 +2409,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2490,9 +2500,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2559,9 +2569,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2599,9 +2609,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2640,9 +2650,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2682,9 +2692,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2722,9 +2732,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2762,9 +2772,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 177.77777777777777,
+                  "width": 1280,
                 }
               }
             >
@@ -2806,6 +2816,11 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
             >
               <div
                 className="euiFlexItem euiFlexItem--flexGrowZero"
+                style={
+                  Object {
+                    "flexShrink": 0,
+                  }
+                }
               >
                 <a
                   className="euiLink euiLink--primary"
@@ -2814,9 +2829,11 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   title="Powered by Elastic.co"
                 >
                   <svg
+                    aria-hidden={true}
                     className="euiIcon euiIcon--large euiIcon-isLoading"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -2875,10 +2892,11 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     type="button"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -2928,10 +2946,11 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     type="button"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -2965,10 +2984,11 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                         type="button"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -3074,9 +3094,9 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
               className="preview"
               style={
                 Object {
-                  "height": 100,
+                  "height": 720,
                   "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
-                  "width": 150,
+                  "width": 1080,
                 }
               }
             >
@@ -3116,6 +3136,11 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
             >
               <div
                 className="euiFlexItem euiFlexItem--flexGrowZero"
+                style={
+                  Object {
+                    "flexShrink": 0,
+                  }
+                }
               >
                 <a
                   className="euiLink euiLink--primary"
@@ -3124,9 +3149,11 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   title="Powered by Elastic.co"
                 >
                   <svg
+                    aria-hidden={true}
                     className="euiIcon euiIcon--large euiIcon-isLoading"
                     focusable="false"
                     height={16}
+                    role="img"
                     style={null}
                     viewBox="0 0 16 16"
                     width={16}
@@ -3185,10 +3212,11 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     type="button"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -3237,10 +3265,11 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     type="button"
                   >
                     <svg
-                      aria-hidden="true"
+                      aria-hidden={true}
                       className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                       focusable="false"
                       height={16}
+                      role="img"
                       style={null}
                       viewBox="0 0 16 16"
                       width={16}
@@ -3274,10 +3303,11 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                         type="button"
                       >
                         <svg
-                          aria-hidden="true"
+                          aria-hidden={true}
                           className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
