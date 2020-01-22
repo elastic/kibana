@@ -176,7 +176,6 @@ export function useCamera(): {
    */
   useLayoutEffect(() => {
     setProjectionMatrix(projectionMatrixAtTime(new Date()));
-    // TODO why does projectionMatrixAtTime change when the mouse moves???
   }, [projectionMatrixAtTime]);
 
   /**

@@ -36,32 +36,41 @@ interface ClippingPlanes {
 }
 
 /**
- * The 2D clipping planes used for the orthographic projection. See https://en.wikipedia.org/wiki/Orthographic_projection
- */
-export const clippingPlanes = (state: CameraState): ClippingPlanes => {
-  const renderWidth = state.rasterSize[0];
-  const renderHeight = state.rasterSize[1];
-  const clippingPlaneRight = renderWidth / 2 / scale(state)[0];
-  const clippingPlaneTop = renderHeight / 2 / scale(state)[1];
-
-  return {
-    renderWidth,
-    renderHeight,
-    clippingPlaneRight,
-    clippingPlaneTop,
-    clippingPlaneLeft: -clippingPlaneRight,
-    clippingPlaneBottom: -clippingPlaneTop,
-  };
-};
-
-/**
  * The scale by which world values are scaled when rendered.
  */
-export const scale = (state: CameraState): Vector2 => {
-  const delta = maximum - minimum;
-  const value = Math.pow(state.scalingFactor, zoomCurveRate) * delta + minimum;
-  return [value, value];
-};
+export const scale: (state: CameraState) => Vector2 = createSelector(
+  state => state.scalingFactor,
+  scalingFactor => {
+    const delta = maximum - minimum;
+    const value = Math.pow(scalingFactor, zoomCurveRate) * delta + minimum;
+    return [value, value];
+  }
+);
+
+// TODO test that projection matrix doesn't change when simply moving the mouse?
+
+/**
+ * The 2D clipping planes used for the orthographic projection. See https://en.wikipedia.org/wiki/Orthographic_projection
+ */
+export const clippingPlanes: (state: CameraState) => ClippingPlanes = createSelector(
+  state => state.rasterSize,
+  scale,
+  (rasterSize, [scaleX, scaleY]) => {
+    const renderWidth = rasterSize[0];
+    const renderHeight = rasterSize[1];
+    const clippingPlaneRight = renderWidth / 2 / scaleX;
+    const clippingPlaneTop = renderHeight / 2 / scaleY;
+
+    return {
+      renderWidth,
+      renderHeight,
+      clippingPlaneRight,
+      clippingPlaneTop,
+      clippingPlaneLeft: -clippingPlaneRight,
+      clippingPlaneBottom: -clippingPlaneTop,
+    };
+  }
+);
 
 /**
  * TODO update comment, possibly do this differently?
