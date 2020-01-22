@@ -90,23 +90,6 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
       [setAbsoluteRangeDatePicker]
     );
 
-    if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
-      return (
-        <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-          <DetectionEngineUserUnauthenticated />
-        </WrapperPage>
-      );
-    }
-    if (isSignalIndexExists != null && !isSignalIndexExists && !loading) {
-      return (
-        <WrapperPage>
-          <HeaderPage border title={i18n.PAGE_TITLE} />
-          <DetectionEngineNoIndex />
-        </WrapperPage>
-      );
-    }
-
     const tabs = useMemo(
       () => (
         <EuiTabs>
@@ -124,6 +107,23 @@ const DetectionEngineComponent = React.memo<DetectionEngineComponentProps>(
       ),
       [detectionsTabs, tabName]
     );
+
+    if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
+      return (
+        <WrapperPage>
+          <HeaderPage border title={i18n.PAGE_TITLE} />
+          <DetectionEngineUserUnauthenticated />
+        </WrapperPage>
+      );
+    }
+    if (isSignalIndexExists != null && !isSignalIndexExists && !loading) {
+      return (
+        <WrapperPage>
+          <HeaderPage border title={i18n.PAGE_TITLE} />
+          <DetectionEngineNoIndex />
+        </WrapperPage>
+      );
+    }
 
     return (
       <>
@@ -230,8 +230,13 @@ const makeMapStateToProps = () => {
   };
 };
 
-export const DetectionEngine = connect(makeMapStateToProps, {
+const mapDispatchToProps = {
   setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-})(DetectionEngineComponent);
+};
+
+export const DetectionEngine = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(DetectionEngineComponent);
 
 DetectionEngine.displayName = 'DetectionEngine';
