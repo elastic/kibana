@@ -12,6 +12,8 @@ import { timelineActions } from '../../store/actions';
 export const telemetryMiddleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
   if (timelineActions.endTimelineSaving.match(action)) {
     track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.TIMELINE_SAVED);
+  } else if (timelineActions.updateTitle.match(action)) {
+    track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.TIMELINE_NAMED);
   } else if (timelineActions.showTimeline.match(action)) {
     if (action.payload.show) {
       track(METRIC_TYPE.LOADED, TELEMETRY_EVENT.TIMELINE_OPENED);
