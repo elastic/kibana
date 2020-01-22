@@ -87,7 +87,7 @@ const TOP_OFFSET = 50;
  * keep around 5 rows rendering below it. All other DOM elements are replaced with their "blank"
  * rows.
  */
-const BOTTOM_OFFSET = -50;
+const BOTTOM_OFFSET = -500;
 
 interface AttributesProps {
   children: React.ReactNode;
