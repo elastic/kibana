@@ -10,5 +10,9 @@ import { track, METRIC_TYPE, TELEMETRY_EVENT } from './';
 import { timelineActions } from '../../store/actions';
 
 export const telemetryMiddleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
+  if (action.type === timelineActions.endTimelineSaving.type) {
+    track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.TIMELINE_SAVED);
+  }
+
   return next(action);
 };

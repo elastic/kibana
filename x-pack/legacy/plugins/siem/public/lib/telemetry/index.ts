@@ -27,6 +27,7 @@ export enum TELEMETRY_EVENT {
 
   // Timeline
   TIMELINE_OPENED = 'open_timeline',
+  TIMELINE_SAVED = 'timeline_saved',
 
   // UI Interactions
   TAB_CLICKED = 'tab_',
