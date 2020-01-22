@@ -39,11 +39,11 @@ export function useCamera(): {
     projectionMatrixAtTime(new Date())
   );
 
+  // TODO try removing, seems useless
   const rafRef = useRef<number>();
 
   const userIsPanning = useSelector(selectors.userIsPanning);
   const isAnimatingAtTime = useSelector(selectors.isAnimating);
-  const isAnimatingAtTimeRef = useRef<typeof isAnimatingAtTime>();
 
   const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();
 
@@ -162,13 +162,13 @@ export function useCamera(): {
     }
   }, [ref, handleWheel]);
 
+  /**
+   * Allow rAF loop to indirectly read projectionMatrixAtTime via a ref. Since it also
+   * sets projectionMatrixAtTime, relying directly on it causes considerable jank.
+   */
   useLayoutEffect(() => {
     projectionMatrixAtTimeRef.current = projectionMatrixAtTime;
   }, [projectionMatrixAtTime]);
-
-  useLayoutEffect(() => {
-    isAnimatingAtTimeRef.current = isAnimatingAtTime;
-  }, [isAnimatingAtTime]);
 
   /**
    * Keep the projection matrix state in sync with the selector.
@@ -178,23 +178,15 @@ export function useCamera(): {
     setProjectionMatrix(projectionMatrixAtTime(new Date()));
   }, [projectionMatrixAtTime]);
 
-  /**
-   * For some reason, referring to `projectionMatrixAtTime` in here didn't work. Several tutorials
-   * I've found mention something similar to this problem. They use a ref
-   * to refer to values that update during rerenders. Not sure: https://css-tricks.com/using-requestanimationframe-with-react-hooks/
-   */
   useLayoutEffect(() => {
     const startDate = new Date();
     if (isAnimatingAtTime(startDate)) {
       const handleFrame = () => {
         const date = new Date();
         if (projectionMatrixAtTimeRef.current !== undefined) {
-          // since we set projectionMatrix, we really should not update when projection matrix is changed. use a ref to avoid
-          // this terrible loop
-          // TODO better comment
           setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
         }
-        if (isAnimatingAtTimeRef.current !== undefined && isAnimatingAtTimeRef.current(date)) {
+        if (isAnimatingAtTime(date)) {
           rafRef.current = requestAnimationFrame(handleFrame);
         } else {
           rafRef.current = undefined;
