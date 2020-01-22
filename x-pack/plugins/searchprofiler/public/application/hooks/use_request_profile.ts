@@ -19,7 +19,7 @@ interface ReturnValue {
   error?: string;
 }
 
-const extractProfilerErrorMessage = async (e: any): Promise<string | undefined> => {
+const extractProfilerErrorMessage = (e: any): string | undefined => {
   if (e.body?.attributes?.error?.reason) {
     const { reason, line, col } = e.body.attributes.error;
     return `${reason} at line: ${line - 1} col: ${col}`;
@@ -73,7 +73,7 @@ export const useRequestProfile = () => {
 
       return { data: resp.resp.profile.shards };
     } catch (e) {
-      const profilerErrorMessage = await extractProfilerErrorMessage(e);
+      const profilerErrorMessage = extractProfilerErrorMessage(e);
       if (profilerErrorMessage) {
         notifications.addError(e, {
           title: e.message,

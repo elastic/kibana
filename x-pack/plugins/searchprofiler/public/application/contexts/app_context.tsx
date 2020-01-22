@@ -7,7 +7,7 @@
 import React, { useContext, createContext, useCallback } from 'react';
 
 import { HttpSetup, ToastsSetup } from 'kibana/public';
-import { LicenseStatus } from '../../../common/types';
+import { LicenseStatus } from '../../../common';
 
 export interface ContextArgs {
   http: HttpSetup;

@@ -9,10 +9,9 @@ import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/serv
 
 import { LICENSE_CHECK_STATE } from '../../licensing/common/types';
 
-import { LicenseStatus } from '../common/types';
+import { LicenseStatus, PLUGIN } from '../common';
 import { AppServerPluginDependencies } from './types';
 import * as profileRoute from './routes/profile';
-import { PLUGIN } from '../common/constants';
 
 export class SearchProfilerServerPlugin implements Plugin {
   licenseStatus: LicenseStatus;

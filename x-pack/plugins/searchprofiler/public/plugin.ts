@@ -11,7 +11,7 @@ import { first } from 'rxjs/operators';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { LICENSE_CHECK_STATE } from '../../licensing/public';
 
-import { PLUGIN } from '../common/constants';
+import { PLUGIN } from '../common';
 import { AppPublicPluginDependencies } from './types';
 
 export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {

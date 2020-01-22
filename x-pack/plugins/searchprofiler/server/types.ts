@@ -5,9 +5,9 @@
  */
 
 import { IRouter, Logger } from 'kibana/server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { ElasticsearchPlugin } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { LicenseStatus } from '../common/types';
+import { LicenseStatus } from '../common';
 
 export interface AppServerPluginDependencies {
   licensing: LicensingPluginSetup;

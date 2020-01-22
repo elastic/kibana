@@ -7,7 +7,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { HttpStart as Http, ToastsSetup } from 'kibana/public';
 import React from 'react';
 
-import { LicenseStatus } from '../../common/types';
+import { LicenseStatus } from '../../common';
 import { App } from '.';
 
 export interface Dependencies {
