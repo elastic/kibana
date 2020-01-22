@@ -17,7 +17,13 @@
  * under the License.
  */
 
-export { UiSettingsParams, UserProvidedValues, UiSettingsType } from '../../core/types';
+export {
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+  ImageValidation,
+  StringValidationRegex,
+} from '../../core/types';
 
 /**
  * A function that should mount DOM content inside the provided container element

@@ -23,7 +23,7 @@
  * @returns {string} the type to use for determining the display and editor
  */
 
-import { UiSettingsType } from 'src/core/server/types';
+import { UiSettingsType } from 'src/core/public';
 import { FieldSetting } from '../types';
 
 export function getValType(def: Partial<FieldSetting>, value?: any): UiSettingsType {

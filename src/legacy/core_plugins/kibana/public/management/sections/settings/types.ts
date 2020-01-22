@@ -21,7 +21,7 @@ import {
   UiSettingsType,
   StringValidation,
   ImageValidation,
-} from '../../../../../../../core/server/ui_settings';
+} from '../../../../../../../core/public';
 import { SavedObjectAttribute } from '../../../../../../../core/server';
 
 export interface FieldSetting {

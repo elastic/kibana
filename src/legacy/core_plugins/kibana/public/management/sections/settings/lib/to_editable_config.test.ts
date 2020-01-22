@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsParams, StringValidationRegex } from 'src/core/server/types';
+import { UiSettingsParams, StringValidationRegex } from 'src/core/public';
 import expect from '@kbn/expect';
 import { toEditableConfig } from './to_editable_config';
 

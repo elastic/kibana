@@ -59,7 +59,7 @@ import {
   UiSettingsType,
   ImageValidation,
   StringValidationRegex,
-} from '../../../../../../../../../core/server';
+} from '../../../../../../../../../core/public';
 
 interface FieldProps {
   setting: FieldSetting;

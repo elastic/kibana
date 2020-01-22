@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  UiSettingsParams,
-  UserProvidedValues,
-  StringValidationRegexString,
-} from 'src/core/server/types';
+import { UiSettingsParams, UserProvidedValues, StringValidationRegexString } from 'src/core/public';
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
 import { DEFAULT_CATEGORY } from './default_category';

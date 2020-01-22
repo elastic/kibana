@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { UiSettingsType } from '../../../../../../../../../core/server/types';
+import { UiSettingsType } from '../../../../../../../../../core/public';
 
 import { Form } from './form';
 
