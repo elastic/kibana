@@ -16,6 +16,7 @@ import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 import { HttpLink } from 'apollo-link-http';
 import { withClientState } from 'apollo-link-state';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { InfraFrontendLibs } from './lib/lib';
 import introspectionQueryResultData from './graphql/introspection.json';
 import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/kibana_observable_api';
@@ -51,6 +52,7 @@ export class Plugin
       euiIconType: 'logsApp',
       order: 8001,
       appRoute: '/app/infra/logs',
+      category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { startApp } = await import('./apps/start_app');
@@ -71,6 +73,7 @@ export class Plugin
       euiIconType: 'metricsApp',
       order: 8000,
       appRoute: '/app/infra/infrastructure',
+      category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { startApp } = await import('./apps/start_app');
