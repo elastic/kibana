@@ -10,6 +10,9 @@ import { Matrix3 } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 
+// TODO, consider this design:
+// receive camera state, don't use `useSelector`. make `camera` a top level module that exports hook, reducer, selectors, types, etc.
+// could be a good separation of concerns. could be premature tho.
 export function useCamera(): {
   ref: (node: HTMLDivElement | null) => void;
   onMouseDown: React.MouseEventHandler<HTMLElement>;
@@ -19,10 +22,31 @@ export function useCamera(): {
 
   const [ref, setRef] = useState<null | HTMLDivElement>(null);
 
+  /**
+   * The position of a thing, as a `Vector2`, is multiplied by the projection matrix
+   * to determine where it belongs on the screen.
+   * The projection matrix changes over time if the camera is currently animating.
+   */
+  const projectionMatrixAtTime = useSelector(selectors.projectionMatrix);
+
+  /**
+   * The projection matrix is stateful, depending on the current time.
+   * When the projection matrix changes, the component should be rerendered.
+   */
+  const [projectionMatrix, setProjectionMatrix] = useState<Matrix3>(
+    projectionMatrixAtTime(new Date())
+  );
+
+  const [time, setTime] = useState<Date>(new Date());
+
   const userIsPanning = useSelector(selectors.userIsPanning);
+  const rafRef = useRef<number>();
 
   const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();
 
+  /**
+   * For an event with clientX and clientY, return [clientX, clientY] - the top left corner of the `ref` element
+   */
   const relativeCoordinatesFromMouseEvent = useCallback(
     (event: { clientX: number; clientY: number }): null | [number, number] => {
       if (elementBoundingClientRect === null) {
@@ -35,15 +59,6 @@ export function useCamera(): {
     },
     [elementBoundingClientRect]
   );
-
-  useEffect(() => {
-    if (elementBoundingClientRect !== null) {
-      dispatch({
-        type: 'userSetRasterSize',
-        payload: [elementBoundingClientRect.width, elementBoundingClientRect.height],
-      });
-    }
-  }, [dispatch, elementBoundingClientRect]);
 
   const handleMouseDown = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -107,6 +122,14 @@ export function useCamera(): {
     [elementBoundingClientRect, dispatch]
   );
 
+  const refCallback = useCallback(
+    (node: null | HTMLDivElement) => {
+      setRef(node);
+      clientRectCallback(node);
+    },
+    [clientRectCallback]
+  );
+
   useEffect(() => {
     window.addEventListener('mouseup', handleMouseUp, { passive: true });
     return () => {
@@ -120,14 +143,6 @@ export function useCamera(): {
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [handleMouseMove]);
-
-  const refCallback = useCallback(
-    (node: null | HTMLDivElement) => {
-      setRef(node);
-      clientRectCallback(node);
-    },
-    [clientRectCallback]
-  );
 
   /**
    * Register an event handler directly on `elementRef` for the `wheel` event, with no options
@@ -144,13 +159,6 @@ export function useCamera(): {
     }
   }, [ref, handleWheel]);
 
-  const projectionMatrixAtTime = useSelector(selectors.projectionMatrix);
-
-  const [projectionMatrix, setProjectionMatrix] = useState<Matrix3>(
-    projectionMatrixAtTime(new Date())
-  );
-  const [time, setTime] = useState<Date>(new Date());
-  const rafRef = useRef<number>();
   useEffect(() => {
     const handleFrame = () => {
       setTime(new Date());
@@ -163,9 +171,19 @@ export function useCamera(): {
       }
     };
   }, []);
+
   useEffect(() => {
     setProjectionMatrix(projectionMatrixAtTime(time));
   }, [projectionMatrixAtTime, time]);
+
+  useEffect(() => {
+    if (elementBoundingClientRect !== null) {
+      dispatch({
+        type: 'userSetRasterSize',
+        payload: [elementBoundingClientRect.width, elementBoundingClientRect.height],
+      });
+    }
+  }, [dispatch, elementBoundingClientRect]);
 
   return {
     ref: refCallback,
