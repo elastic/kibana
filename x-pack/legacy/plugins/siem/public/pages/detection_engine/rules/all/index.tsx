@@ -231,7 +231,7 @@ export const AllRules = React.memo<AllRulesProps>(
         <Panel loading={isGlobalLoading}>
           <>
             {rulesInstalled != null && rulesInstalled > 0 && (
-              <HeaderSection split title={i18n.ALL_RULES}>
+              <HeaderSection split title={i18n.ALL_RULES} border={true}>
                 <EuiFieldSearch
                   aria-label={i18n.SEARCH_RULES}
                   fullWidth
