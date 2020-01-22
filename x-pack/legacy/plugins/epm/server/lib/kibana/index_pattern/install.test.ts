@@ -3,12 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import path from 'path';
 import { readFileSync } from 'fs';
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
-import { flattenFields, dedupeFields, transformField } from './install';
-import { Fields } from '../../fields/field';
+import {
+  flattenFields,
+  dedupeFields,
+  transformField,
+  findFieldByPath,
+  IndexPatternField,
+} from './install';
+import { Fields, Field } from '../../fields/field';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -28,7 +35,14 @@ for (const file of files) {
 }
 
 describe('creating index patterns from yaml fields', () => {
-  test('flattenFields function recursively flattens nested fields and renames name property with path', () => {
+  interface Test {
+    fields: Field[];
+    expect: string | number | boolean | undefined;
+  }
+
+  const name = 'testField';
+
+  test('flattenFields function flattens recursively and handles copying alias fields', () => {
     const flattened = flattenFields(fields);
     expect(flattened).toMatchSnapshot('flattenFields');
   });
@@ -38,113 +52,180 @@ describe('creating index patterns from yaml fields', () => {
     expect(deduped).toMatchSnapshot('dedupeFields');
   });
 
-  test('transformField maps field types to kibana index pattern data types', () => {
-    expect(transformField({ name: 'testField' }).type).toBe('string');
-    expect(transformField({ name: 'testField', type: 'half_float' }).type).toBe('number');
-    expect(transformField({ name: 'testField', type: 'scaled_float' }).type).toBe('number');
-    expect(transformField({ name: 'testField', type: 'float' }).type).toBe('number');
-    expect(transformField({ name: 'testField', type: 'integer' }).type).toBe('number');
-    expect(transformField({ name: 'testField', type: 'long' }).type).toBe('number');
-    expect(transformField({ name: 'testField', type: 'short' }).type).toBe('number');
-    expect(transformField({ name: 'testField', type: 'byte' }).type).toBe('number');
-    expect(transformField({ name: 'testField', type: 'keyword' }).type).toBe('string');
-    expect(transformField({ name: 'testField', type: 'invalidType' }).type).toBe(undefined);
-    expect(transformField({ name: 'testField', type: 'text' }).type).toBe('string');
-    expect(transformField({ name: 'testField', type: 'date' }).type).toBe('date');
-    expect(transformField({ name: 'testField', type: 'geo_point' }).type).toBe('geo_point');
-    expect(transformField({ name: 'testField', type: 'invalid' }).type).toBe(undefined);
+  describe('getFieldByPath searches recursively for field in fields given dot separated path', () => {
+    const searchFields: Fields = [
+      {
+        name: '1',
+        fields: [
+          {
+            name: '1-1',
+          },
+          {
+            name: '1-2',
+          },
+        ],
+      },
+      {
+        name: '2',
+        fields: [
+          {
+            name: '2-1',
+          },
+          {
+            name: '2-2',
+            fields: [
+              {
+                name: '2-2-1',
+              },
+              {
+                name: '2-2-2',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    test('returns undefined when the field does not exist', () => {
+      expect(findFieldByPath(searchFields, '0')).toBe(undefined);
+    });
+    test('returns undefined if the field is not a leaf node', () => {
+      expect(findFieldByPath(searchFields, '1')?.name).toBe(undefined);
+    });
+    test('returns undefined searching for a nested field that does not exist', () => {
+      expect(findFieldByPath(searchFields, '1.1-3')?.name).toBe(undefined);
+    });
+    test('returns nested field that is a leaf node', () => {
+      expect(findFieldByPath(searchFields, '2.2-2.2-2-1')?.name).toBe('2-2-1');
+    });
   });
 
-  describe('transformField changes values based on other values', () => {
-    test('count', () => {
-      expect(transformField({ name: 'testField' }).count).toBe(0);
-      expect(transformField({ name: 'testField', count: 4 }).count).toBe(4);
-    });
+  test('transformField maps field types to kibana index pattern data types', () => {
+    const tests: Test[] = [
+      { fields: [{ name: 'testField' }], expect: 'string' },
+      { fields: [{ name: 'testField', type: 'half_float' }], expect: 'number' },
+      { fields: [{ name: 'testField', type: 'scaled_float' }], expect: 'number' },
+      { fields: [{ name: 'testField', type: 'float' }], expect: 'number' },
+      { fields: [{ name: 'testField', type: 'integer' }], expect: 'number' },
+      { fields: [{ name: 'testField', type: 'long' }], expect: 'number' },
+      { fields: [{ name: 'testField', type: 'short' }], expect: 'number' },
+      { fields: [{ name: 'testField', type: 'byte' }], expect: 'number' },
+      { fields: [{ name: 'testField', type: 'keyword' }], expect: 'string' },
+      { fields: [{ name: 'testField', type: 'invalidType' }], expect: undefined },
+      { fields: [{ name: 'testField', type: 'text' }], expect: 'string' },
+      { fields: [{ name: 'testField', type: 'date' }], expect: 'date' },
+      { fields: [{ name: 'testField', type: 'geo_point' }], expect: 'geo_point' },
+    ];
 
-    test('searchable', () => {
-      expect(transformField({ name: 'testField' }).searchable).toBe(true);
-      expect(transformField({ name: 'testField', searchable: true }).searchable).toBe(true);
-      expect(transformField({ name: 'testField', searchable: false }).searchable).toBe(false);
-      expect(transformField({ name: 'testField', type: 'binary' }).searchable).toBe(false);
-      expect(
-        transformField({ name: 'testField', searchable: true, type: 'binary' }).searchable
-      ).toBe(false);
+    tests.forEach(test => {
+      const res = test.fields.map(transformField);
+      expect(res[0].type).toBe(test.expect);
     });
+  });
 
-    test('aggregatable', () => {
-      expect(transformField({ name: 'testField' }).aggregatable).toBe(true);
-      expect(transformField({ name: 'testField', aggregatable: true }).aggregatable).toBe(true);
-      expect(transformField({ name: 'testField', aggregatable: false }).aggregatable).toBe(false);
-      expect(transformField({ name: 'testField', type: 'binary' }).aggregatable).toBe(false);
-      expect(
-        transformField({ name: 'testField', aggregatable: true, type: 'binary' }).aggregatable
-      ).toBe(false);
-      expect(transformField({ name: 'testField', type: 'keyword' }).aggregatable).toBe(true);
-      expect(
-        transformField({ name: 'testField', aggregatable: true, type: 'text' }).aggregatable
-      ).toBe(false);
-      expect(transformField({ name: 'testField', type: 'text' }).aggregatable).toBe(false);
-    });
+  test('transformField changes values based on other values', () => {
+    interface TestWithAttr extends Test {
+      attr: keyof IndexPatternField;
+    }
 
-    test('analyzed', () => {
-      expect(transformField({ name: 'testField' }).analyzed).toBe(false);
-      expect(transformField({ name: 'testField', analyzed: true }).analyzed).toBe(true);
-      expect(transformField({ name: 'testField', analyzed: false }).analyzed).toBe(false);
-      expect(transformField({ name: 'testField', type: 'binary' }).analyzed).toBe(false);
-      expect(transformField({ name: 'testField', analyzed: true, type: 'binary' }).analyzed).toBe(
-        false
-      );
-    });
+    const tests: TestWithAttr[] = [
+      // count
+      { fields: [{ name }], expect: 0, attr: 'count' },
+      { fields: [{ name, count: 4 }], expect: 4, attr: 'count' },
 
-    test('doc_values always set to true except for meta fields', () => {
-      expect(transformField({ name: 'testField' }).doc_values).toBe(true);
-      expect(transformField({ name: 'testField', doc_values: true }).doc_values).toBe(true);
-      expect(transformField({ name: 'testField', doc_values: false }).doc_values).toBe(false);
-      expect(transformField({ name: 'testField', script: 'doc[]' }).doc_values).toBe(false);
-      expect(
-        transformField({ name: 'testField', doc_values: true, script: 'doc[]' }).doc_values
-      ).toBe(false);
-      expect(transformField({ name: 'testField', type: 'binary' }).doc_values).toBe(false);
-      expect(
-        transformField({ name: 'testField', doc_values: true, type: 'binary' }).doc_values
-      ).toBe(true);
-    });
+      // searchable
+      { fields: [{ name }], expect: true, attr: 'searchable' },
+      { fields: [{ name, searchable: true }], expect: true, attr: 'searchable' },
+      { fields: [{ name, searchable: false }], expect: false, attr: 'searchable' },
+      { fields: [{ name, type: 'binary' }], expect: false, attr: 'searchable' },
+      { fields: [{ name, searchable: true, type: 'binary' }], expect: false, attr: 'searchable' },
+      {
+        fields: [{ name, searchable: true, type: 'object', enabled: false }],
+        expect: false,
+        attr: 'searchable',
+      },
 
-    test('enabled - only applies to objects (and only if set)', () => {
-      expect(transformField({ name: 'testField', type: 'binary', enabled: false }).enabled).toBe(
-        undefined
-      );
-      expect(transformField({ name: 'testField', type: 'binary', enabled: true }).enabled).toBe(
-        undefined
-      );
-      expect(transformField({ name: 'testField', type: 'object', enabled: true }).enabled).toBe(
-        true
-      );
-      expect(transformField({ name: 'testField', type: 'object', enabled: false }).enabled).toBe(
-        false
-      );
-      expect(transformField({ name: 'testField', type: 'object', enabled: false }).doc_values).toBe(
-        false
-      );
-    });
+      // aggregatable
+      { fields: [{ name }], expect: true, attr: 'aggregatable' },
+      { fields: [{ name, aggregatable: true }], expect: true, attr: 'aggregatable' },
+      { fields: [{ name, aggregatable: false }], expect: false, attr: 'aggregatable' },
+      { fields: [{ name, type: 'binary' }], expect: false, attr: 'aggregatable' },
+      {
+        fields: [{ name, aggregatable: true, type: 'binary' }],
+        expect: false,
+        attr: 'aggregatable',
+      },
+      { fields: [{ name, type: 'keyword' }], expect: true, attr: 'aggregatable' },
+      { fields: [{ name, type: 'text', aggregatable: true }], expect: false, attr: 'aggregatable' },
+      { fields: [{ name, type: 'text' }], expect: false, attr: 'aggregatable' },
+      {
+        fields: [{ name, aggregatable: true, type: 'object', enabled: false }],
+        expect: false,
+        attr: 'aggregatable',
+      },
 
-    test('indexed', () => {
-      expect(transformField({ name: 'testField', type: 'binary' }).indexed).toBe(false);
-      expect(transformField({ name: 'testField', index: true, type: 'binary' }).indexed).toBe(
-        false
-      );
-    });
+      // analyzed
+      { fields: [{ name }], expect: false, attr: 'analyzed' },
+      { fields: [{ name, analyzed: true }], expect: true, attr: 'analyzed' },
+      { fields: [{ name, analyzed: false }], expect: false, attr: 'analyzed' },
+      { fields: [{ name, type: 'binary' }], expect: false, attr: 'analyzed' },
+      { fields: [{ name, analyzed: true, type: 'binary' }], expect: false, attr: 'analyzed' },
+      {
+        fields: [{ name, analyzed: true, type: 'object', enabled: false }],
+        expect: false,
+        attr: 'analyzed',
+      },
 
-    test('script, scripted', () => {
-      expect(transformField({ name: 'testField' }).scripted).toBe(false);
-      expect(transformField({ name: 'testField' }).script).toBe(undefined);
-      expect(transformField({ name: 'testField', script: 'doc[]' }).scripted).toBe(true);
-      expect(transformField({ name: 'testField', script: 'doc[]' }).script).toBe('doc[]');
-    });
+      // doc_values always set to true except for meta fields
+      { fields: [{ name }], expect: true, attr: 'doc_values' },
+      { fields: [{ name, doc_values: true }], expect: true, attr: 'doc_values' },
+      { fields: [{ name, doc_values: false }], expect: false, attr: 'doc_values' },
+      { fields: [{ name, script: 'doc[]' }], expect: false, attr: 'doc_values' },
+      { fields: [{ name, doc_values: true, script: 'doc[]' }], expect: false, attr: 'doc_values' },
+      { fields: [{ name, type: 'binary' }], expect: false, attr: 'doc_values' },
+      { fields: [{ name, doc_values: true, type: 'binary' }], expect: true, attr: 'doc_values' },
+      {
+        fields: [{ name, doc_values: true, type: 'object', enabled: false }],
+        expect: false,
+        attr: 'doc_values',
+      },
 
-    test('language', () => {
-      expect(transformField({ name: 'testField' }).lang).toBe(undefined);
-      expect(transformField({ name: 'testField', script: 'doc[]' }).lang).toBe('painless');
+      // enabled - only applies to objects (and only if set)
+      { fields: [{ name, type: 'binary', enabled: false }], expect: undefined, attr: 'enabled' },
+      { fields: [{ name, type: 'binary', enabled: true }], expect: undefined, attr: 'enabled' },
+      { fields: [{ name, type: 'object', enabled: true }], expect: true, attr: 'enabled' },
+      { fields: [{ name, type: 'object', enabled: false }], expect: false, attr: 'enabled' },
+      {
+        fields: [{ name, type: 'object', enabled: false }],
+        expect: false,
+        attr: 'doc_values',
+      },
+
+      // indexed
+      { fields: [{ name, type: 'binary' }], expect: false, attr: 'indexed' },
+      {
+        fields: [{ name, index: true, type: 'binary' }],
+        expect: false,
+        attr: 'indexed',
+      },
+      {
+        fields: [{ name, index: true, type: 'object', enabled: false }],
+        expect: false,
+        attr: 'indexed',
+      },
+
+      // script, scripted
+      { fields: [{ name }], expect: false, attr: 'scripted' },
+      { fields: [{ name }], expect: undefined, attr: 'script' },
+      { fields: [{ name, script: 'doc[]' }], expect: true, attr: 'scripted' },
+      { fields: [{ name, script: 'doc[]' }], expect: 'doc[]', attr: 'script' },
+
+      // lang
+      { fields: [{ name }], expect: undefined, attr: 'lang' },
+      { fields: [{ name, script: 'doc[]' }], expect: 'painless', attr: 'lang' },
+    ];
+    tests.forEach(test => {
+      const res = test.fields.map(transformField);
+      expect(res[0][test.attr]).toBe(test.expect);
     });
   });
 });

@@ -102,7 +102,39 @@ export const dedupeFields = (fields: Fields) => {
   return Object.values(uniqueObj);
 };
 
-export const transformField = (field: Field): IndexPatternField => {
+/**
+ * search through fields with field's path property
+ * returns undefined if field not found or field is not a leaf node
+ * @param  allFields fields to search
+ * @param  path dot separated path from field.path
+ */
+export const findFieldByPath = (allFields: Fields, path: string): Field | undefined => {
+  const pathParts = path.split('.');
+  const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
+    if (!pathNames.length) return undefined;
+    // get the first rest of path names
+    const [name, ...restPathNames] = pathNames;
+    for (const field of fields) {
+      if (field.name === name) {
+        // check field's fields, passing in the remaining path names
+        if (field.fields && field.fields.length > 0) {
+          return getField(field.fields, restPathNames);
+        }
+        // no nested fields to search, but still more names - not found
+        if (restPathNames.length) {
+          return undefined;
+        }
+        return field;
+      }
+    }
+    return undefined;
+  };
+
+  return getField(allFields, pathParts);
+};
+
+// check for alias type and copy contents of the aliased field
+export const transformField = (field: Field, i: number, fields: Fields): IndexPatternField => {
   const newField: IndexPatternField = {
     name: field.name,
     count: field.count ?? 0,
@@ -165,18 +197,34 @@ export const transformField = (field: Field): IndexPatternField => {
  *
  * flattens fields and renames them with a path of the parent names
  */
-export const flattenFields = (fields: Fields): Fields =>
-  fields.reduce<Field[]>((acc, field) => {
-    if (field.fields?.length) {
-      const flattenedFields = flattenFields(field.fields);
-      flattenedFields.forEach(nestedField => {
-        acc.push({ ...nestedField, name: `${field.name}.${nestedField.name}` });
-      });
-    } else {
-      acc.push(field);
-    }
-    return acc;
-  }, []);
+
+export const flattenFields = (allFields: Fields): Fields => {
+  const flatten = (fields: Fields): Fields =>
+    fields.reduce<Field[]>((acc, field) => {
+      if (field.fields?.length) {
+        const flattenedFields = flatten(field.fields);
+        flattenedFields.forEach(nestedField => {
+          acc.push({
+            ...nestedField,
+            name: `${field.name}.${nestedField.name}`,
+          });
+        });
+      } else {
+        // handle alias type fields - TODO: this should probably go somewhere else
+        if (field.type === 'alias' && field.path) {
+          const foundField = findFieldByPath(allFields, field.path);
+          // if aliased leaf field is found copy its props over except path and name
+          if (foundField) {
+            const { path, name } = field;
+            field = { ...foundField, path, name };
+          }
+        }
+        acc.push(field);
+      }
+      return acc;
+    }, []);
+  return flatten(allFields);
+};
 
 /* this should match https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/kibana/fields_transformer.go */
 interface TypeMap {
@@ -198,6 +246,4 @@ const typeMap: TypeMap = {
   date: 'date',
   ip: 'ip',
   boolean: 'boolean',
-  /* TODO: add alias support */
-  alias: 'string',
 };

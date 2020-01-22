@@ -247,11 +247,27 @@ exports[`creating index patterns from yaml fields dedupFields function remove du
         ]
       }
     ]
+  },
+  {
+    "name": "source",
+    "type": "group",
+    "fields": [
+      {
+        "name": "geo",
+        "type": "group",
+        "fields": [
+          {
+            "name": "continent_name",
+            "type": "text"
+          }
+        ]
+      }
+    ]
   }
 ]
 `;
 
-exports[`creating index patterns from yaml fields flattenFields function recursively flattens nested fields and renames name property with path: flattenFields 1`] = `
+exports[`creating index patterns from yaml fields flattenFields function flattens recursively and handles copying alias fields: flattenFields 1`] = `
 [
   {
     "name": "@timestamp",
@@ -516,9 +532,8 @@ exports[`creating index patterns from yaml fields flattenFields function recursi
   },
   {
     "name": "nginx.access.geoip.continent_name",
-    "type": "alias",
-    "path": "source.geo.continent_name",
-    "migration": true
+    "type": "text",
+    "path": "source.geo.continent_name"
   },
   {
     "name": "nginx.access.geoip.country_iso_code",
@@ -549,6 +564,10 @@ exports[`creating index patterns from yaml fields flattenFields function recursi
     "type": "alias",
     "path": "source.geo.region_iso_code",
     "migration": true
+  },
+  {
+    "name": "source.geo.continent_name",
+    "type": "text"
   }
 ]
 `;
