@@ -45,7 +45,7 @@ export interface TimelineQueryReduxProps {
 
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
-  eventType: EventType;
+  eventType?: EventType;
   id: string;
   indexPattern?: IIndexPattern;
   indexToAdd?: string[];
@@ -71,7 +71,7 @@ class TimelineQueryComponent extends QueryTemplate<
   public render() {
     const {
       children,
-      eventType,
+      eventType = 'raw',
       id,
       indexPattern,
       indexToAdd = [],
