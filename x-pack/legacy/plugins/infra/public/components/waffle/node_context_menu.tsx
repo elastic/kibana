@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopoverProps } from '@elastic/eui';
+import { EuiPopoverProps, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import React from 'react';
-import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
+import React, { useMemo } from 'react';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
@@ -23,6 +22,7 @@ import {
   SectionSubtitle,
   SectionLinks,
   SectionLink,
+  SectionLinkProps,
 } from './action_menu';
 
 interface Props {
@@ -63,7 +63,27 @@ export const NodeContextMenu = ({
   const showUptimeLink =
     inventoryModel.crosslinkSupport.uptime && (['pod', 'container'].includes(nodeType) || node.ip);
 
-  const nodeLogsMenuItem: EuiListGroupItemProps = {
+  const inventoryId = useMemo(() => {
+    switch (nodeType) {
+      case 'host':
+        if (node.ip) {
+          return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
+        } else {
+          return { label: '', value: '' };
+        }
+      case 'pod':
+        return { label: <EuiCode>pod.uid</EuiCode>, value: node.id };
+      case 'container':
+        return { label: <EuiCode>container.id</EuiCode>, value: node.id };
+      case 'awsEC2':
+      case 'awsRDS':
+      case 'awsSQS':
+      case 'awsS3':
+        return { label: <EuiCode>instance.id</EuiCode>, value: node.id };
+    }
+  }, [nodeType, node]);
+
+  const nodeLogsMenuItem: SectionLinkProps = {
     label: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
       defaultMessage: '{inventoryName} logs',
       values: { inventoryName: inventoryModel.singularDisplayName },
@@ -77,7 +97,7 @@ export const NodeContextMenu = ({
     isDisabled: !showLogsLink,
   };
 
-  const nodeDetailMenuItem: EuiListGroupItemProps = {
+  const nodeDetailMenuItem: SectionLinkProps = {
     label: i18n.translate('xpack.infra.nodeContextMenu.viewMetricsName', {
       defaultMessage: '{inventoryName} metrics',
       values: { inventoryName: inventoryModel.singularDisplayName },
@@ -91,7 +111,7 @@ export const NodeContextMenu = ({
     isDisabled: !showDetail,
   };
 
-  const apmTracesMenuItem: EuiListGroupItemProps = {
+  const apmTracesMenuItem: SectionLinkProps = {
     label: i18n.translate('xpack.infra.nodeContextMenu.viewAPMTraces', {
       defaultMessage: '{inventoryName} APM traces',
       values: { inventoryName: inventoryModel.singularDisplayName },
@@ -101,7 +121,7 @@ export const NodeContextMenu = ({
     isDisabled: !showAPMTraceLink,
   };
 
-  const uptimeMenuItem: EuiListGroupItemProps = {
+  const uptimeMenuItem: SectionLinkProps = {
     label: i18n.translate('xpack.infra.nodeContextMenu.viewUptimeLink', {
       defaultMessage: '{inventoryName} in Uptime',
       values: { inventoryName: inventoryModel.singularDisplayName },
@@ -126,15 +146,15 @@ export const NodeContextMenu = ({
             values={{ inventoryName: inventoryModel.singularDisplayName }}
           />
         </SectionTitle>
-        <SectionSubtitle>
-          <FormattedMessage
-            id={'xpack.infra.nodeContextMenu.description'}
-            defaultMessage={
-              'View logs, metrics and traces of this {inventoryName} to get further details'
-            }
-            values={{ inventoryName: inventoryModel.singularDisplayName }}
-          />
-        </SectionSubtitle>
+        {inventoryId.label && (
+          <SectionSubtitle>
+            <FormattedMessage
+              id={'xpack.infra.nodeContextMenu.description'}
+              defaultMessage={'View details for {label} {value}'}
+              values={inventoryId}
+            />
+          </SectionSubtitle>
+        )}
         <SectionLinks>
           <SectionLink
             label={nodeLogsMenuItem.label}

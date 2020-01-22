@@ -47,10 +47,11 @@ export const SectionSpacer: React.FC<{}> = () => <EuiSpacer size={'l'} />;
 
 export const Section: React.FC<{}> = props => <>{props.children}</>;
 
+export type SectionLinkProps = EuiListGroupItemProps;
 export const SectionLink: React.FC<EuiListGroupItemProps> = props => (
   <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />
 );
 
 export const ActionMenuDivider: React.FC<{}> = props => <EuiHorizontalRule margin={'s'} />;
 
-export const ActionMenu: React.FC<Props> = props => <EuiPopover {...props} />;
+export const ActionMenu: React.FC<Props> = props => <EuiPopover {...props} ownFocus={true} />;
