@@ -73,8 +73,9 @@ export function registerSaveRoute(deps: RouteDependencies) {
 
     try {
       // Create new watch
-      await saveWatch(callWithRequest, id, serializedWatch);
-      return response.noContent();
+      return response.ok({
+        body: await saveWatch(callWithRequest, id, serializedWatch),
+      });
     } catch (e) {
       // Case: Error from Elasticsearch JS client
       if (isEsError(e)) {
