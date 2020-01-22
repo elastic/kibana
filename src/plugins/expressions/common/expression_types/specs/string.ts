@@ -23,7 +23,7 @@ import { Render } from './render';
 
 const name = 'string';
 
-export const string = (): ExpressionTypeDefinition<typeof name, string> => ({
+export const string: ExpressionTypeDefinition<typeof name, string> = {
   name,
   from: {
     null: () => '',
@@ -44,4 +44,4 @@ export const string = (): ExpressionTypeDefinition<typeof name, string> => ({
       rows: [{ value }],
     }),
   },
-});
+};

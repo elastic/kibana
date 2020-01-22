@@ -29,7 +29,7 @@ export interface KibanaContext {
   timeRange?: TimeRange;
 }
 
-export const kibanaContext = () => ({
+export const kibanaContext = {
   name,
   from: {
     null: () => {
@@ -45,4 +45,4 @@ export const kibanaContext = () => ({
       };
     },
   },
-});
+};

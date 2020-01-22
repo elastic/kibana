@@ -70,11 +70,7 @@ interface RenderedDatatable {
   showHeader: boolean;
 }
 
-export const datatable = (): ExpressionTypeDefinition<
-  typeof name,
-  Datatable,
-  SerializedDatatable
-> => ({
+export const datatable: ExpressionTypeDefinition<typeof name, Datatable, SerializedDatatable> = {
   name,
   validate: table => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
@@ -147,4 +143,4 @@ export const datatable = (): ExpressionTypeDefinition<
       };
     },
   },
-});
+};

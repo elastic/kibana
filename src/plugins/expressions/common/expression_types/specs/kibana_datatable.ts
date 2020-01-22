@@ -46,7 +46,7 @@ export interface KibanaDatatable {
   rows: KibanaDatatableRow[];
 }
 
-export const kibanaDatatable = () => ({
+export const kibanaDatatable = {
   name,
   from: {
     datatable: (context: Datatable) => {
@@ -72,4 +72,4 @@ export const kibanaDatatable = () => ({
       };
     },
   },
-});
+};

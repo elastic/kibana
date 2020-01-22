@@ -22,7 +22,7 @@ import { Render } from './render';
 
 const name = 'shape';
 
-export const shape = (): ExpressionTypeDefinition<typeof name, Render<any>> => ({
+export const shape: ExpressionTypeDefinition<typeof name, Render<any>> = {
   name: 'shape',
   to: {
     render: input => {
@@ -33,4 +33,4 @@ export const shape = (): ExpressionTypeDefinition<typeof name, Render<any>> => (
       };
     },
   },
-});
+};

@@ -54,4 +54,4 @@ export interface ExpressionTypeDefinition<
   help?: string;
 }
 
-export type AnyExpressionTypeDefinition = ExpressionTypeDefinition<any, any>;
+export type AnyExpressionTypeDefinition = ExpressionTypeDefinition<any, any, any>;

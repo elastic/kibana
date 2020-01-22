@@ -41,7 +41,7 @@ export const isExpressionValueError = (value: any): value is ExpressionValueErro
  */
 export type InterpreterErrorType = ExpressionValueError;
 
-export const error = (): ExpressionTypeDefinition<'error', ExpressionValueError> => ({
+export const error: ExpressionTypeDefinition<'error', ExpressionValueError> = {
   name,
   to: {
     render: (input): Render<Pick<InterpreterErrorType, 'error' | 'info'>> => {
@@ -55,4 +55,4 @@ export const error = (): ExpressionTypeDefinition<'error', ExpressionValueError>
       };
     },
   },
-});
+};

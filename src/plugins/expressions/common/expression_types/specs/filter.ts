@@ -34,7 +34,7 @@ export interface Filter {
   query?: string | null;
 }
 
-export const filter = (): ExpressionTypeDefinition<typeof name, Filter> => ({
+export const filter: ExpressionTypeDefinition<typeof name, Filter> = {
   name,
   from: {
     null: () => {
@@ -47,4 +47,4 @@ export const filter = (): ExpressionTypeDefinition<typeof name, Filter> => ({
       };
     },
   },
-});
+};

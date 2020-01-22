@@ -55,7 +55,7 @@ export type PointSeries = ExpressionValueBoxed<
   }
 >;
 
-export const pointseries = (): ExpressionTypeDefinition<'pointseries', PointSeries> => ({
+export const pointseries: ExpressionTypeDefinition<'pointseries', PointSeries> = {
   name,
   from: {
     null: () => {
@@ -82,4 +82,4 @@ export const pointseries = (): ExpressionTypeDefinition<'pointseries', PointSeri
       };
     },
   },
-});
+};

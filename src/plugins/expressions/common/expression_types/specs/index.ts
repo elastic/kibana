@@ -32,8 +32,9 @@ import { render } from './render';
 import { shape } from './shape';
 import { string } from './string';
 import { style } from './style';
+import { AnyExpressionTypeDefinition } from '../types';
 
-export const typeSpecs = [
+export const typeSpecs: AnyExpressionTypeDefinition[] = [
   boolean,
   datatable,
   error,

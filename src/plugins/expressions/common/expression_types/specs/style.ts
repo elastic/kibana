@@ -22,7 +22,7 @@ import { ExpressionTypeStyle } from '../../types/style';
 
 const name = 'style';
 
-export const style = (): ExpressionTypeDefinition<typeof name, ExpressionTypeStyle> => ({
+export const style: ExpressionTypeDefinition<typeof name, ExpressionTypeStyle> = {
   name,
   from: {
     null: () => {
@@ -33,4 +33,4 @@ export const style = (): ExpressionTypeDefinition<typeof name, ExpressionTypeSty
       };
     },
   },
-});
+};

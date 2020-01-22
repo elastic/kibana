@@ -28,7 +28,7 @@ export interface Range {
   to: number;
 }
 
-export const range = (): ExpressionTypeDefinition<typeof name, Range> => ({
+export const range: ExpressionTypeDefinition<typeof name, Range> = {
   name,
   from: {
     null: (): Range => {
@@ -49,4 +49,4 @@ export const range = (): ExpressionTypeDefinition<typeof name, Range> => ({
       };
     },
   },
-});
+};

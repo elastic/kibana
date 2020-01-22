@@ -21,9 +21,9 @@ import { ExpressionTypeDefinition } from '../types';
 
 const name = 'null';
 
-export const nullType = (): ExpressionTypeDefinition<typeof name, null> => ({
+export const nullType: ExpressionTypeDefinition<typeof name, null> = {
   name,
   from: {
     '*': () => null,
   },
-});
+};

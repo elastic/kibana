@@ -28,7 +28,7 @@ export interface ExpressionImage {
   dataurl: string;
 }
 
-export const image = (): ExpressionTypeDefinition<typeof name, ExpressionImage> => ({
+export const image: ExpressionTypeDefinition<typeof name, ExpressionImage> = {
   name,
   to: {
     render: (input): Render<Pick<ExpressionImage, 'mode' | 'dataurl'>> => {
@@ -39,4 +39,4 @@ export const image = (): ExpressionTypeDefinition<typeof name, ExpressionImage> 
       };
     },
   },
-});
+};
