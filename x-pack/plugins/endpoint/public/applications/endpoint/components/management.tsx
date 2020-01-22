@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import {
   EuiPage,
   EuiPageBody,
@@ -17,24 +18,11 @@ import {
   EuiTitle,
   EuiBasicTable,
 } from '@elastic/eui';
-import { CoreStart } from 'kibana/public';
+import { endpointListData } from '../store/endpoint_list/selectors';
+import { useEndpointListSelector } from '../store/hooks';
 
-export const EndpointList = ({ coreStart }: { coreStart: CoreStart }) => {
-  const [results, setResults] = useState([]);
-  const [wasFetched, setWasFetched] = useState(false);
-
-  useEffect(() => {
-    async function fetchEndpointListData() {
-      const response = await coreStart.http.post('/api/endpoint/endpoints', {
-        query: {},
-      });
-      setResults(response.endpoints);
-    }
-    if (wasFetched === false) {
-      setWasFetched(true);
-      fetchEndpointListData();
-    }
-  }, [coreStart, results, wasFetched]);
+export const EndpointList = () => {
+  const endpointListResults = useEndpointListSelector(endpointListData);
 
   const columns = [
     {
@@ -105,7 +93,7 @@ export const EndpointList = ({ coreStart }: { coreStart: CoreStart }) => {
               </EuiTitle>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
-          <EuiBasicTable items={results} columns={columns} />
+          <EuiBasicTable items={endpointListResults} columns={columns} />
           <EuiPageContentBody />
         </EuiPageContent>
       </EuiPageBody>
