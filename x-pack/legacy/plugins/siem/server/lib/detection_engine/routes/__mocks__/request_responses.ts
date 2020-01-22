@@ -6,7 +6,7 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ActionResult } from '../../../../../../actions/server/types';
+import { ActionResult } from '../../../../../../../../plugins/actions/server';
 import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,

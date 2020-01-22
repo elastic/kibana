@@ -94,15 +94,21 @@ export const signalsHeaders: ColumnHeader[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
+    id: 'signal.rule.version',
+    label: i18n.SIGNALS_HEADERS_VERSION,
+    width: 100,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.type',
     label: i18n.SIGNALS_HEADERS_METHOD,
-    width: 80,
+    width: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.severity',
     label: i18n.SIGNALS_HEADERS_SEVERITY,
-    width: 80,
+    width: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -141,7 +147,7 @@ export const signalsHeaders: ColumnHeader[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
-    width: 120,
+    width: 140,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
