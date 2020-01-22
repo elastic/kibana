@@ -48,9 +48,11 @@ import {
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart as NpDataStart,
+  syncFilters,
+} from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
-import { initGlobalState } from './kbn_global_state';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
@@ -83,7 +85,7 @@ let angularModuleInstance: IModule | null = null;
 const hasInheritedGlobalStateRef: { value: boolean } = { value: false };
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
-  const { destroy: destroyGlobalState, hasInheritedGlobalState } = initGlobalState(
+  const { stop: stopSyncingGlobalFilters, hasInheritedFiltersFromUrl } = syncFilters(
     deps.kbnUrlStateStorage,
     deps.npDataStart.query.filterManager,
     deps.npDataStart.query.timefilter.timefilter
@@ -91,7 +93,7 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
 
   // hack: always keeping the latest 'hasInheritedGlobalState' value in the same object - hasInheritedGlobalStateRef
   // this is needed so angular Controller picks up the latest value, as it has reference to the hasInheritedGlobalStateRef
-  hasInheritedGlobalStateRef.value = hasInheritedGlobalState;
+  hasInheritedGlobalStateRef.value = hasInheritedFiltersFromUrl;
   deps.hasInheritedGlobalState = hasInheritedGlobalStateRef;
 
   if (!angularModuleInstance) {
@@ -106,7 +108,7 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
 
   return () => {
     $injector.get('$rootScope').$destroy();
-    destroyGlobalState();
+    stopSyncingGlobalFilters();
   };
 };
 

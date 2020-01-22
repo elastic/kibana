@@ -20,83 +20,78 @@
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import {
-  esFilters,
-  FilterManager,
-  RefreshInterval,
-  TimefilterContract,
-  TimeRange,
-} from '../../../../../../plugins/data/public';
-import {
   createStateContainer,
   IKbnUrlStateStorage,
   syncState,
-} from '../../../../../../plugins/kibana_utils/public';
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  // this whole file will soon be deprecated by new state management.
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/data/public/query/filter_manager/lib/compare_filters';
+} from '../../../../kibana_utils/public';
+import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
+import { RefreshInterval, TimeRange, esFilters } from '../../../common';
+import { FilterManager } from '../filter_manager';
+import { TimefilterContract } from '../timefilter';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
-export interface KbnGlobalState {
+export interface FiltersSyncState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: esFilters.Filter[];
 }
 
-// this should go away after: https://github.com/elastic/kibana/issues/55339
-// is resolved
-export const initGlobalState = (
+/**
+ * Helper function to set up syncing between Filter & Time Filter services with url's '_g' query param
+ * @param urlStateStorage - url state storage to use
+ * @param filterManager - filter manager instance
+ * @param timeFilter - time filter instance
+ */
+export const syncFilters = (
   urlStateStorage: IKbnUrlStateStorage,
   filterManager: FilterManager,
   timeFilter: TimefilterContract
 ) => {
-  const defaultState: KbnGlobalState = {
+  const defaultState: FiltersSyncState = {
     time: timeFilter.getTime(),
     refreshInterval: timeFilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
   };
 
-  const initialStateFromUrl = urlStateStorage.get<KbnGlobalState>(GLOBAL_STATE_STORAGE_KEY);
+  const initialStateFromUrl = urlStateStorage.get<FiltersSyncState>(GLOBAL_STATE_STORAGE_KEY);
 
   // remember whether there were info in the URL
-  const hasInheritedGlobalState = Boolean(
+  const hasInheritedFiltersFromUrl = Boolean(
     initialStateFromUrl && Object.keys(initialStateFromUrl).length
   );
 
-  const initialState: KbnGlobalState = {
+  const initialState: FiltersSyncState = {
     ...defaultState,
     ...initialStateFromUrl,
   };
 
-  const globalStateContainer = createStateContainer(
+  const filtersSyncStateContainer = createStateContainer(
     initialState,
     {
-      setTime: (state: KbnGlobalState) => (time: TimeRange) => ({ ...state, time }),
-      setRefreshInterval: (state: KbnGlobalState) => (refreshInterval: RefreshInterval) => ({
+      setTime: (state: FiltersSyncState) => (time: TimeRange) => ({ ...state, time }),
+      setRefreshInterval: (state: FiltersSyncState) => (refreshInterval: RefreshInterval) => ({
         ...state,
         refreshInterval,
       }),
-      setFilters: (state: KbnGlobalState) => (filters: esFilters.Filter[]) => ({
+      setFilters: (state: FiltersSyncState) => (filters: esFilters.Filter[]) => ({
         ...state,
         filters,
       }),
     },
     {
-      time: (state: KbnGlobalState) => () => state.time,
-      refreshInterval: (state: KbnGlobalState) => () => state.refreshInterval,
-      filters: (state: KbnGlobalState) => () => state.filters,
+      time: (state: FiltersSyncState) => () => state.time,
+      refreshInterval: (state: FiltersSyncState) => () => state.refreshInterval,
+      filters: (state: FiltersSyncState) => () => state.filters,
     }
   );
 
   const subs: Subscription[] = [
     timeFilter.getTimeUpdate$().subscribe(() => {
-      globalStateContainer.transitions.setTime(timeFilter.getTime());
+      filtersSyncStateContainer.transitions.setTime(timeFilter.getTime());
     }),
     timeFilter.getRefreshIntervalUpdate$().subscribe(() => {
-      globalStateContainer.transitions.setRefreshInterval(timeFilter.getRefreshInterval());
+      filtersSyncStateContainer.transitions.setRefreshInterval(timeFilter.getRefreshInterval());
     }),
     filterManager
       .getUpdates$()
@@ -105,7 +100,7 @@ export const initGlobalState = (
         filter(newGlobalFilters => {
           // continue only if global filters changed
           // and ignore app state filters
-          const oldGlobalFilters = globalStateContainer.get().filters;
+          const oldGlobalFilters = filtersSyncStateContainer.get().filters;
           return (
             !oldGlobalFilters ||
             !compareFilters(newGlobalFilters, oldGlobalFilters, COMPARE_ALL_OPTIONS)
@@ -113,44 +108,47 @@ export const initGlobalState = (
         })
       )
       .subscribe(newGlobalFilters => {
-        globalStateContainer.transitions.setFilters(newGlobalFilters);
+        filtersSyncStateContainer.transitions.setFilters(newGlobalFilters);
       }),
-    globalStateContainer.state$
-      .pipe(map(state => _.cloneDeep(state))) // state in state container is 'frozen', but services implementations are mutating it
-      .subscribe(({ time, filters: globalFilters, refreshInterval }) => {
+    filtersSyncStateContainer.state$.subscribe(
+      ({ time, filters: globalFilters, refreshInterval }) => {
         if (time && !_.isEqual(time, timeFilter.getTime())) {
-          timeFilter.setTime(time);
+          timeFilter.setTime(_.cloneDeep(time));
         }
 
         if (refreshInterval && !_.isEqual(refreshInterval, timeFilter.getRefreshInterval())) {
-          timeFilter.setRefreshInterval(refreshInterval);
+          timeFilter.setRefreshInterval(_.cloneDeep(refreshInterval));
         }
 
         if (
           globalFilters &&
           !compareFilters(globalFilters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)
         ) {
-          // have to make sure we don't accidentally remove application filters here
+          globalFilters = _.cloneDeep(globalFilters);
           FilterManager.setFiltersStore(globalFilters, esFilters.FilterStateStore.GLOBAL_STATE);
+          // have to make sure we don't accidentally remove application filters here
           filterManager.setFilters([...globalFilters, ...filterManager.getAppFilters()]);
         }
-      }),
+      }
+    ),
   ];
 
   if (!initialStateFromUrl) {
-    urlStateStorage.set<KbnGlobalState>(GLOBAL_STATE_STORAGE_KEY, initialState, { replace: true });
+    urlStateStorage.set<FiltersSyncState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
+      replace: true,
+    });
   }
 
   // trigger syncing from state container to services if needed
-  globalStateContainer.set(initialState);
+  filtersSyncStateContainer.set(initialState);
 
   const { start, stop } = syncState({
     stateStorage: urlStateStorage,
     stateContainer: {
-      ...globalStateContainer,
+      ...filtersSyncStateContainer,
       set: state => {
-        globalStateContainer.set({
-          ...globalStateContainer.get(),
+        filtersSyncStateContainer.set({
+          ...filtersSyncStateContainer.get(),
           ...state,
         });
       },
@@ -160,10 +158,10 @@ export const initGlobalState = (
 
   start();
   return {
-    destroy: () => {
+    stop: () => {
       subs.forEach(s => s.unsubscribe());
       stop();
     },
-    hasInheritedGlobalState,
+    hasInheritedFiltersFromUrl,
   };
 };
