@@ -263,6 +263,20 @@ exports[`creating index patterns from yaml fields dedupFields function remove du
         ]
       }
     ]
+  },
+  {
+    "name": "country",
+    "type": "",
+    "multi_fields": [
+      {
+        "name": "keyword",
+        "type": "keyword"
+      },
+      {
+        "name": "text",
+        "type": "text"
+      }
+    ]
   }
 ]
 `;
@@ -567,6 +581,28 @@ exports[`creating index patterns from yaml fields flattenFields function flatten
   },
   {
     "name": "source.geo.continent_name",
+    "type": "text"
+  },
+  {
+    "name": "country",
+    "type": "",
+    "multi_fields": [
+      {
+        "name": "keyword",
+        "type": "keyword"
+      },
+      {
+        "name": "text",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "name": "country.keyword",
+    "type": "keyword"
+  },
+  {
+    "name": "country.text",
     "type": "text"
   }
 ]
