@@ -8,40 +8,37 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { SyncBadge } from './SyncBadge';
 
-storiesOf('app/TransactionDetails/SyncBadge', module).add(
-  'sync=true',
-  () => {
-    return (
-      <SyncBadge sync={true}/>
-    );
-  },
-  {
-    info: {
-      source: false
+storiesOf('app/TransactionDetails/SyncBadge', module)
+  .add(
+    'sync=true',
+    () => {
+      return <SyncBadge sync={true} />;
+    },
+    {
+      info: {
+        source: false
+      }
     }
-  }
-).add(
+  )
+  .add(
     'sync=false',
-  () => {
-    return (
-      <SyncBadge sync={false}/>
-    );
-  },
-  {
-    info: {
-      source: false
+    () => {
+      return <SyncBadge sync={false} />;
+    },
+    {
+      info: {
+        source: false
+      }
     }
-  }
-).add(
+  )
+  .add(
     'sync=undefined',
-  () => {
-    return (
-      <SyncBadge/>
-    );
-  },
-  {
-    info: {
-      source: false
+    () => {
+      return <SyncBadge />;
+    },
+    {
+      info: {
+        source: false
+      }
     }
-  }
-)
+  );
