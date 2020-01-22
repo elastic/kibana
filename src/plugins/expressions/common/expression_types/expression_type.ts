@@ -17,10 +17,7 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
-
-import { get } from 'lodash';
-import { AnyExpressionTypeDefinition, ExpressionValue } from './types';
+import { AnyExpressionTypeDefinition, ExpressionValue, ExpressionValueConverter } from './types';
 import { getType } from './get_type';
 
 export class ExpressionType {
@@ -58,29 +55,39 @@ export class ExpressionType {
     this.deserialize = deserialize;
   }
 
-  getToFn = (value: any) =>
-    get(this.definition, ['to', value]) || get(this.definition, ['to', '*']);
-  getFromFn = (value: any) =>
-    get(this.definition, ['from', value]) || get(this.definition, ['from', '*']);
+  getToFn = (
+    typeName: string
+  ): undefined | ExpressionValueConverter<ExpressionValue, ExpressionValue> =>
+    !this.definition.to ? undefined : this.definition.to[typeName] || this.definition.to['*'];
 
-  castsTo = (value: any) => typeof this.getToFn(value) === 'function';
-  castsFrom = (value: any) => typeof this.getFromFn(value) === 'function';
+  getFromFn = (
+    typeName: string
+  ): undefined | ExpressionValueConverter<ExpressionValue, ExpressionValue> =>
+    !this.definition.from ? undefined : this.definition.from[typeName] || this.definition.from['*'];
 
-  to = (node: any, toTypeName: any, types: any) => {
-    const typeName = getType(node);
+  castsTo = (value: ExpressionValue) => typeof this.getToFn(value) === 'function';
+
+  castsFrom = (value: ExpressionValue) => typeof this.getFromFn(value) === 'function';
+
+  to = (value: ExpressionValue, toTypeName: string, types: Record<string, ExpressionType>) => {
+    const typeName = getType(value);
+
     if (typeName !== this.name) {
       throw new Error(`Can not cast object of type '${typeName}' using '${this.name}'`);
     } else if (!this.castsTo(toTypeName)) {
       throw new Error(`Can not cast '${typeName}' to '${toTypeName}'`);
     }
 
-    return (this.getToFn(toTypeName) as any)(node, types);
+    return this.getToFn(toTypeName)!(value, types);
   };
 
-  from = (node: any, types: any) => {
-    const typeName = getType(node);
-    if (!this.castsFrom(typeName)) throw new Error(`Can not cast '${this.name}' from ${typeName}`);
+  from = (value: ExpressionValue, types: Record<string, ExpressionType>) => {
+    const typeName = getType(value);
 
-    return (this.getFromFn(typeName) as any)(node, types);
+    if (!this.castsFrom(typeName)) {
+      throw new Error(`Can not cast '${this.name}' from ${typeName}`);
+    }
+
+    return this.getFromFn(typeName)!(value, types);
   };
 }
