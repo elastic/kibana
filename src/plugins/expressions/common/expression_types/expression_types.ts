@@ -20,16 +20,8 @@
 /* eslint-disable max-classes-per-file */
 
 import { get, identity } from 'lodash';
-import { AnyExpressionType, ExpressionValue } from '../types';
-
-export function getType(node: any) {
-  if (node == null) return 'null';
-  if (typeof node === 'object') {
-    if (!node.type) throw new Error('Objects must have a type property');
-    return node.type;
-  }
-  return typeof node;
-}
+import { AnyExpressionType, ExpressionValue } from './types';
+import { getType } from './get_type';
 
 export function serializeProvider(types: any) {
   function provider(key: any) {

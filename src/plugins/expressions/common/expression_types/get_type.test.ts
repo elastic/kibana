@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getType } from './expression_types';
+import { getType } from './get_type';
 
 describe('getType()', () => {
   test('returns "null" string for null or undefined', () => {

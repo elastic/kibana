@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { ExpressionType } from '../types';
+import { ExpressionType, ExpressionValueBoxed } from '../types';
 import { Render } from './render';
-import { ExpressionValueBoxed } from '../types/types';
-import { getType } from '../executor';
+import { getType } from '../get_type';
 
 const name = 'error';
 

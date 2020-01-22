@@ -17,36 +17,11 @@
  * under the License.
  */
 
-export {
-  TypeToString,
-  KnownTypeToString,
-  TypeString,
-  UnmappedTypeStrings,
-  UnwrapPromise,
-  SerializedFieldFormat,
-} from './common';
-
-export * from './style';
-
-export { ArgumentType } from './arguments';
-
-export {
-  ExpressionFunctionDefinition,
-  AnyExpressionFunctionDefinition,
-  ExecutionContext,
-} from './functions';
-
-export type ExpressionArgAST = string | boolean | number | ExpressionAST;
-
-export interface ExpressionFunctionAST {
-  type: 'function';
-  function: string;
-  arguments: {
-    [key: string]: ExpressionArgAST[];
-  };
-}
-
-export interface ExpressionAST {
-  type: 'expression';
-  chain: ExpressionFunctionAST[];
+export function getType(node: any) {
+  if (node == null) return 'null';
+  if (typeof node === 'object') {
+    if (!node.type) throw new Error('Objects must have a type property');
+    return node.type;
+  }
+  return typeof node;
 }

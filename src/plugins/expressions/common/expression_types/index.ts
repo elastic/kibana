@@ -17,5 +17,7 @@
  * under the License.
  */
 
+export * from './types';
+export * from './get_type';
 export * from './expression_types';
 export * from './specs';
