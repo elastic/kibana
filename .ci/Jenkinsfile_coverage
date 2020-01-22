@@ -86,10 +86,10 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   du -sh /tmp/extracted_coverage/target/kibana-coverage/
 
                   # echo replacing path in json files
-                  # for i in {1..9}; do
-                  #  sed -i "s|/dev/shm/workspace/kibana|\$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/${i}*.json &
-                  # done
-                  # wait
+                  for i in {1..9}; do
+                    sed -i "s|/dev/shm/workspace/kibana|\$pwd|g" /tmp/extracted_coverage/target/kibana-coverage/functional/${i}*.json &
+                  done
+                  wait
 
                   # merge oss & x-pack reports
                   echo merging coverage reports
