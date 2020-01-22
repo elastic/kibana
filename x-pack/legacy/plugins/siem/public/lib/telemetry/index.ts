@@ -4,17 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import {
-  createUiStatsReporter,
-  METRIC_TYPE,
-} from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
-import { APP_ID } from '../../../common/constants';
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+
+import { SetupPlugins } from '../../plugin';
 export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };
 
-export const track = createUiStatsReporter(APP_ID);
+export let track: (type: UiStatsMetricType, event: string | string[], count?: number) => void;
+
+export const initTelemetry = (usageCollection: SetupPlugins['usageCollection'], appId: string) => {
+  // @ts-ignore
+  if (track) {
+    throw new Error('Telemetry already initialized');
+  }
+  track = usageCollection.reportUiStats.bind(null, appId);
+};
 
 export enum TELEMETRY_EVENT {
   // ML
