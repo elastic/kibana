@@ -22,24 +22,26 @@ const Panel = styled(EuiPanel)`
   max-width: 50%;
 `;
 
-const HorizontalRule = memo(() => (
-  <EuiHorizontalRule
-    style={{
-      /**
-       * Cannot use `styled` to override this because the specificity of EuiHorizontalRule's
-       * CSS selectors is too high.
-       */
-      marginLeft: `-${euiVars.euiPanelPaddingModifiers.paddingMedium}`,
-      marginRight: `-${euiVars.euiPanelPaddingModifiers.paddingMedium}`,
-      /**
-       * The default width is 100%, but this should be greater.
-       */
-      width: 'auto',
-    }}
-  />
-));
+const HorizontalRule = memo(function HorizontalRule() {
+  return (
+    <EuiHorizontalRule
+      style={{
+        /**
+         * Cannot use `styled` to override this because the specificity of EuiHorizontalRule's
+         * CSS selectors is too high.
+         */
+        marginLeft: `-${euiVars.euiPanelPaddingModifiers.paddingMedium}`,
+        marginRight: `-${euiVars.euiPanelPaddingModifiers.paddingMedium}`,
+        /**
+         * The default width is 100%, but this should be greater.
+         */
+        width: 'auto',
+      }}
+    />
+  );
+});
 
-export const Event = memo(() => {
+export const Event = memo(function Event() {
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   interface ProcessTableView {
     name: string;

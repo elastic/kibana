@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useSelector } from 'react-redux';
 import ResizeObserver from 'resize-observer-polyfill';
 import { Matrix3 } from '../types';
@@ -29,6 +29,8 @@ export function useCamera(): {
    */
   const projectionMatrixAtTime = useSelector(selectors.projectionMatrix);
 
+  const projectionMatrixAtTimeRef = useRef<(time: Date) => Matrix3>();
+
   /**
    * The projection matrix is stateful, depending on the current time.
    * When the projection matrix changes, the component should be rerendered.
@@ -36,8 +38,6 @@ export function useCamera(): {
   const [projectionMatrix, setProjectionMatrix] = useState<Matrix3>(
     projectionMatrixAtTime(new Date())
   );
-
-  const [time, setTime] = useState<Date>(new Date());
 
   const userIsPanning = useSelector(selectors.userIsPanning);
   const rafRef = useRef<number>();
@@ -159,22 +159,25 @@ export function useCamera(): {
     }
   }, [ref, handleWheel]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    projectionMatrixAtTimeRef.current = projectionMatrixAtTime;
+  }, [projectionMatrixAtTime]);
+
+  useLayoutEffect(() => {
     const handleFrame = () => {
-      setTime(new Date());
+      if (projectionMatrixAtTimeRef.current !== undefined) {
+        const date = new Date();
+        setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
+      }
       rafRef.current = requestAnimationFrame(handleFrame);
     };
-    handleFrame();
+    rafRef.current = requestAnimationFrame(handleFrame);
     return () => {
       if (rafRef.current !== undefined) {
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, []);
-
-  useEffect(() => {
-    setProjectionMatrix(projectionMatrixAtTime(time));
-  }, [projectionMatrixAtTime, time]);
+  }, [projectionMatrixAtTime]);
 
   useEffect(() => {
     if (elementBoundingClientRect !== null) {

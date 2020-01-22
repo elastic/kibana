@@ -25,7 +25,7 @@ export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, Reso
 });
 
 const Resolver = styled(
-  React.memo(({ className }: { className?: string }) => {
+  React.memo(function Resolver({ className }: { className?: string }) {
     const { processNodePositions, edgeLineSegments } = useSelector(
       selectors.processNodePositionsAndEdgeLineSegments
     );
