@@ -19,6 +19,8 @@
 
 import { Url } from 'url';
 import { Request } from 'hapi';
+import { Observable, fromEvent, merge } from 'rxjs';
+import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
@@ -44,6 +46,17 @@ export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
   options: KibanaRequestRouteOptions<Method>;
+}
+
+/**
+ * Request events.
+ * @public
+ * */
+export interface KibanaRequestEvents {
+  /**
+   * Observable that emits once if and when the request has been aborted.
+   */
+  aborted$: Observable<void>;
 }
 
 /**
@@ -115,7 +128,10 @@ export class KibanaRequest<
    */
   public readonly headers: Headers;
 
+  /** {@link IKibanaSocket} */
   public readonly socket: IKibanaSocket;
+  /** Request events {@link KibanaRequestEvents} */
+  public readonly events: KibanaRequestEvents;
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
@@ -138,12 +154,22 @@ export class KibanaRequest<
       enumerable: false,
     });
 
-    this.route = deepFreeze(this.getRouteInfo());
+    this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = new KibanaSocket(request.raw.req.socket);
+    this.events = this.getEvents(request);
   }
 
-  private getRouteInfo(): KibanaRequestRoute<Method> {
-    const request = this[requestSymbol];
+  private getEvents(request: Request): KibanaRequestEvents {
+    const finish$ = merge(
+      fromEvent(request.raw.req, 'end'), // all data consumed
+      fromEvent(request.raw.req, 'close') // connection was closed
+    ).pipe(shareReplay(1), first());
+    return {
+      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$)),
+    } as const;
+  }
+
+  private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
     const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
 
