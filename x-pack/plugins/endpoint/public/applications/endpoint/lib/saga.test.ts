@@ -7,7 +7,8 @@
 import { createSagaMiddleware, SagaContext, SagaMiddleware } from './index';
 import { applyMiddleware, createStore, Reducer, Store } from 'redux';
 
-describe('saga', () => {
+// Failing: https://github.com/elastic/kibana/issues/55464 https://github.com/elastic/kibana/issues/55465
+describe.skip('saga', () => {
   const INCREMENT_COUNTER = 'INCREMENT';
   const DELAYED_INCREMENT_COUNTER = 'DELAYED INCREMENT COUNTER';
   const STOP_SAGA_PROCESSING = 'BREAK ASYNC ITERATOR';
