@@ -33,7 +33,17 @@ export interface ColorSchema {
   text: string;
 }
 
-export const vislibColorMaps = {
+export interface RawColorSchema {
+  id: ColorSchemas;
+  label: string;
+  value: Array<[number, number[]]>;
+}
+
+export interface ColorMap {
+  [key: string]: RawColorSchema;
+}
+
+export const vislibColorMaps: ColorMap = {
   // Sequential
   [ColorSchemas.Blues]: {
     id: ColorSchemas.Blues,
@@ -3158,7 +3168,7 @@ export const vislibColorMaps = {
   },
 };
 
-export const colorSchemas = Object.values(vislibColorMaps).map(({ id, label }) => ({
+export const colorSchemas: ColorSchema[] = Object.values(vislibColorMaps).map(({ id, label }) => ({
   value: id,
   text: label,
 }));

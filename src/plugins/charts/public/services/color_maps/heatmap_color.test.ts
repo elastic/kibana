@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { getHeatmapColors } from './heatmap_color';
 
 describe('Vislib Heatmap Color Module Test Suite', () => {
