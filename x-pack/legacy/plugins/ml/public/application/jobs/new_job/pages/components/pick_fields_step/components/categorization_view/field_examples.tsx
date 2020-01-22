@@ -7,10 +7,10 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
-import { CategoryExample } from '../../../../../common/results_loader';
+import { CategoryFieldExample } from '../../../../../../../../../common/types/categories';
 
 interface Props {
-  fieldExamples: CategoryExample[] | null;
+  fieldExamples: CategoryFieldExample[] | null;
 }
 
 const TOKEN_HIGHLIGHT_COLOR = '#b0ccf7';

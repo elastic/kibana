@@ -69,6 +69,52 @@ export const getStepsData = ({
 
 export const useQuery = () => new URLSearchParams(useLocation().search);
 
+export type PrePackagedRuleStatus =
+  | 'ruleInstalled'
+  | 'ruleNotInstalled'
+  | 'ruleNeedUpdate'
+  | 'someRuleUninstall'
+  | 'unknown';
+
+export const getPrePackagedRuleStatus = (
+  rulesInstalled: number | null,
+  rulesNotInstalled: number | null,
+  rulesNotUpdated: number | null
+): PrePackagedRuleStatus => {
+  if (
+    rulesNotInstalled != null &&
+    rulesInstalled === 0 &&
+    rulesNotInstalled > 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'ruleNotInstalled';
+  } else if (
+    rulesInstalled != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled === 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'ruleInstalled';
+  } else if (
+    rulesInstalled != null &&
+    rulesNotInstalled != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled > 0 &&
+    rulesNotUpdated === 0
+  ) {
+    return 'someRuleUninstall';
+  } else if (
+    rulesInstalled != null &&
+    rulesNotInstalled != null &&
+    rulesNotUpdated != null &&
+    rulesInstalled > 0 &&
+    rulesNotInstalled >= 0 &&
+    rulesNotUpdated > 0
+  ) {
+    return 'ruleNeedUpdate';
+  }
+  return 'unknown';
+};
 export const setFieldValue = (
   form: FormHook<FormData>,
   schema: FormSchema<FormData>,
