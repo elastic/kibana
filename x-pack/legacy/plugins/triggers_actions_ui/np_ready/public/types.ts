@@ -90,10 +90,10 @@ export interface Alert {
   actions: AlertAction[];
   params: Record<string, any>;
   scheduledTaskId?: string;
-  createdBy: string | null;
-  updatedBy: string | null;
+  createdBy?: string;
+  updatedBy?: string;
   apiKeyOwner?: string;
-  throttle: string | null;
+  throttle?: string;
   muteAll: boolean;
   mutedInstanceIds: string[];
 }

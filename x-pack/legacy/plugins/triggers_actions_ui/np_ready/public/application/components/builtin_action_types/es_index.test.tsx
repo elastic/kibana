@@ -119,7 +119,7 @@ describe('IndexParamsFields renders', () => {
       documents: ['test'],
     };
     const wrapper = mountWithIntl(
-      <ParamsFields action={actionParams} errors={{}} editAction={() => {}} index={0} />
+      <ParamsFields action={actionParams} errors={{ index: [] }} editAction={() => {}} index={0} />
     );
     expect(wrapper.find('[data-test-subj="indexInput"]').length > 0).toBeTruthy();
     expect(

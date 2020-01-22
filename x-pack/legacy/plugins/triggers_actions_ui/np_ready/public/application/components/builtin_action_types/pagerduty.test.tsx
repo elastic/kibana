@@ -152,7 +152,12 @@ describe('PagerDutyParamsFields renders', () => {
       class: 'test class',
     };
     const wrapper = mountWithIntl(
-      <ParamsFields action={actionParams} errors={{}} editAction={() => {}} index={0} />
+      <ParamsFields
+        action={actionParams}
+        errors={{ summary: [] }}
+        editAction={() => {}}
+        index={0}
+      />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
     expect(

@@ -95,6 +95,7 @@ describe('ServerLogParamsFields renders', () => {
     const ParamsFields = actionTypeModel.actionParamsFields;
     const actionParams = {
       message: 'test message',
+      level: 'info',
     };
     const wrapper = mountWithIntl(
       <ParamsFields

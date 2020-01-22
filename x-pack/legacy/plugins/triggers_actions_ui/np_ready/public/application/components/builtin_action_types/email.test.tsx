@@ -204,7 +204,12 @@ describe('EmailParamsFields renders', () => {
       message: 'test message',
     };
     const wrapper = mountWithIntl(
-      <ParamsFields action={actionParams} errors={{}} editAction={() => {}} index={0} />
+      <ParamsFields
+        action={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        editAction={() => {}}
+        index={0}
+      />
     );
     expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
     expect(

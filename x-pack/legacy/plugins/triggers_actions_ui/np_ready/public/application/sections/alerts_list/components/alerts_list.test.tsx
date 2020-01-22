@@ -39,7 +39,6 @@ actionTypeRegistry.list.mockReturnValue([]);
 
 describe('alerts_list component empty', () => {
   let wrapper: ReactWrapper<any>;
-
   beforeEach(async () => {
     const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
     const { loadActionTypes, loadAllActions } = jest.requireMock(
@@ -114,14 +113,13 @@ describe('alerts_list component empty', () => {
   });
 
   it('renders empty list', () => {
-    expect(wrapper.find('[data-test-subj="createAlertButton"]').find('EuiButton')).toHaveLength(1);
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRowCell')).toHaveLength(1);
   });
 
-  test('if click create button should render AlertAdd', () => {
-    wrapper
-      .find('[data-test-subj="createAlertButton"]')
-      .first()
-      .simulate('click');
+  it('renders Create alert button', () => {
+    expect(wrapper.find('[data-test-subj="createAlertButton"]').find('EuiButton')).toHaveLength(1);
     expect(wrapper.find('AlertAdd')).toHaveLength(1);
   });
 });

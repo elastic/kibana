@@ -234,88 +234,86 @@ export const AlertsList: React.FunctionComponent = () => {
 
   return (
     <section data-test-subj="alertsList">
-      <Fragment>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          {selectedIds.length > 0 && canDelete && (
-            <EuiFlexItem grow={false}>
-              <BulkActionPopover
-                selectedItems={pickFromData(data, selectedIds)}
-                onPerformingAction={() => setIsPerformingAction(true)}
-                onActionPerformed={() => {
-                  loadAlertsData();
-                  setIsPerformingAction(false);
-                }}
-              />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiFieldText
-              fullWidth
-              data-test-subj="alertSearchField"
-              prepend={<EuiIcon type="search" />}
-              onChange={e => setInputText(e.target.value)}
-              onKeyUp={e => {
-                if (e.keyCode === ENTER_KEY) {
-                  setSearchText(inputText);
-                }
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        {selectedIds.length > 0 && canDelete && (
+          <EuiFlexItem grow={false}>
+            <BulkActionPopover
+              selectedItems={pickFromData(data, selectedIds)}
+              onPerformingAction={() => setIsPerformingAction(true)}
+              onActionPerformed={() => {
+                loadAlertsData();
+                setIsPerformingAction(false);
               }}
-              placeholder={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertsList.searchPlaceholderTitle',
-                { defaultMessage: 'Search...' }
-              )}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              {toolsRight.map((tool, index: number) => (
-                <EuiFlexItem key={index} grow={false}>
-                  {tool}
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        )}
+        <EuiFlexItem>
+          <EuiFieldText
+            fullWidth
+            data-test-subj="alertSearchField"
+            prepend={<EuiIcon type="search" />}
+            onChange={e => setInputText(e.target.value)}
+            onKeyUp={e => {
+              if (e.keyCode === ENTER_KEY) {
+                setSearchText(inputText);
+              }
+            }}
+            placeholder={i18n.translate(
+              'xpack.triggersActionsUI.sections.alertsList.searchPlaceholderTitle',
+              { defaultMessage: 'Search...' }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            {toolsRight.map((tool, index: number) => (
+              <EuiFlexItem key={index} grow={false}>
+                {tool}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        {/* Large to remain consistent with ActionsList table spacing */}
-        <EuiSpacer size="l" />
+      {/* Large to remain consistent with ActionsList table spacing */}
+      <EuiSpacer size="l" />
 
-        <EuiBasicTable
-          loading={isLoadingAlerts || isLoadingAlertTypes || isPerformingAction}
-          items={data}
-          itemId="id"
-          columns={alertsTableColumns}
-          rowProps={() => ({
-            'data-test-subj': 'alert-row',
-          })}
-          cellProps={() => ({
-            'data-test-subj': 'cell',
-          })}
-          data-test-subj="alertsList"
-          pagination={{
-            pageIndex: page.index,
-            pageSize: page.size,
-            totalItemCount,
-          }}
-          selection={
-            canDelete
-              ? {
-                  onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                    setSelectedIds(updatedSelectedItemsList.map(item => item.id));
-                  },
-                }
-              : undefined
-          }
-          onChange={({ page: changedPage }: { page: Pagination }) => {
-            setPage(changedPage);
-          }}
-        />
-        <AlertsContextProvider
-          value={{ alertFlyoutVisible, setAlertFlyoutVisibility, reloadAlerts: loadAlertsData }}
-        >
-          <AlertAdd />
-        </AlertsContextProvider>
-      </Fragment>
+      <EuiBasicTable
+        loading={isLoadingAlerts || isLoadingAlertTypes || isPerformingAction}
+        items={data}
+        itemId="id"
+        columns={alertsTableColumns}
+        rowProps={() => ({
+          'data-test-subj': 'alert-row',
+        })}
+        cellProps={() => ({
+          'data-test-subj': 'cell',
+        })}
+        data-test-subj="alertsList"
+        pagination={{
+          pageIndex: page.index,
+          pageSize: page.size,
+          totalItemCount,
+        }}
+        selection={
+          canDelete
+            ? {
+                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+                },
+              }
+            : undefined
+        }
+        onChange={({ page: changedPage }: { page: Pagination }) => {
+          setPage(changedPage);
+        }}
+      />
+      <AlertsContextProvider
+        value={{ alertFlyoutVisible, setAlertFlyoutVisibility, reloadAlerts: loadAlertsData }}
+      >
+        <AlertAdd />
+      </AlertsContextProvider>
     </section>
   );
 };

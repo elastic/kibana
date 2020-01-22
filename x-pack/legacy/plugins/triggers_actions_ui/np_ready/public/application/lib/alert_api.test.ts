@@ -262,13 +262,10 @@ describe('createAlert', () => {
       schedule: { interval: '1m' },
       actions: [],
       params: {},
-      throttle: null,
     };
     const resolvedValue: Alert = {
       ...alertToCreate,
       id: '123',
-      createdBy: null,
-      updatedBy: null,
       muteAll: false,
       mutedInstanceIds: [],
     };
@@ -280,7 +277,7 @@ describe('createAlert', () => {
       Array [
         "/api/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"interval\\":\\"1m\\",\\"actions\\":[],\\"params\\":{},\\"throttle\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerting\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{}}",
         },
       ]
     `);
@@ -303,8 +300,6 @@ describe('updateAlert', () => {
       id: '123',
       enabled: true,
       alertTypeId: 'test',
-      createdBy: null,
-      updatedBy: null,
       muteAll: false,
       mutedInstanceIds: [],
     };
@@ -316,7 +311,7 @@ describe('updateAlert', () => {
       Array [
         "/api/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"interval\\":\\"1m\\",\\"params\\":{},\\"actions\\":[]}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"consumer\\":\\"alerting\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[]}",
         },
       ]
     `);
