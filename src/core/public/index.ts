@@ -78,7 +78,8 @@ import {
 
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly } from '../utils';
+export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export { AppCategory } from '../types';
 
 export {
   ApplicationSetup,

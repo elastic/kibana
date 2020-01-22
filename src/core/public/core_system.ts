@@ -246,6 +246,7 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
+        uiSettings,
       });
 
       application.registerMountContext(this.coreContext.coreId, 'core', () => ({
