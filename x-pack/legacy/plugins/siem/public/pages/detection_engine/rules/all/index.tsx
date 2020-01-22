@@ -230,8 +230,8 @@ export const AllRules = React.memo<AllRulesProps>(
 
         <Panel loading={isGlobalLoading}>
           <>
-            <HeaderSection split title={i18n.ALL_RULES}>
-              {rulesInstalled != null && rulesInstalled > 0 && (
+            {rulesInstalled != null && rulesInstalled > 0 && (
+              <HeaderSection split title={i18n.ALL_RULES}>
                 <EuiFieldSearch
                   aria-label={i18n.SEARCH_RULES}
                   fullWidth
@@ -251,8 +251,8 @@ export const AllRules = React.memo<AllRulesProps>(
                     });
                   }}
                 />
-              )}
-            </HeaderSection>
+              </HeaderSection>
+            )}
             {isInitialLoad && isEmpty(tableData) && (
               <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
             )}
