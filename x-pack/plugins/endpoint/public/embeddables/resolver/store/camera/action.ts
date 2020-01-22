@@ -24,11 +24,17 @@ interface UserClickedZoomIn {
 
 interface UserZoomed {
   readonly type: 'userZoomed';
-  /**
-   * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
-   * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
-   */
-  readonly payload: number;
+  payload: {
+    /**
+     * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
+     * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
+     */
+    zoomChange: number;
+    /**
+     * Time when this action was dispatched.
+     */
+    time: Date;
+  };
 }
 
 interface UserSetRasterSize {
@@ -52,12 +58,18 @@ interface UserSetPositionOfCamera {
 
 interface UserStartedPanning {
   readonly type: 'userStartedPanning';
-  /**
-   * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen)
-   * relative to the Resolver component.
-   * Represents a starting position during panning for a pointing device.
-   */
-  readonly payload: Vector2;
+  readonly payload: {
+    /**
+     * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen)
+     * relative to the Resolver component.
+     * Represents a starting position during panning for a pointing device.
+     */
+    screenCoordinates: Vector2;
+    /**
+     * Time when this action was dispatched.
+     */
+    time: Date;
+  };
 }
 
 interface UserStoppedPanning {
@@ -74,11 +86,17 @@ interface UserClickedPanControl {
 
 interface UserMovedPointer {
   readonly type: 'userMovedPointer';
-  /**
-   * A vector in screen coordinates relative to the Resolver component.
-   * The payload should be contain clientX and clientY minus the client position of the Resolver component.
-   */
-  readonly payload: Vector2;
+  readonly payload: {
+    /**
+     * A vector in screen coordinates relative to the Resolver component.
+     * The payload should be contain clientX and clientY minus the client position of the Resolver component.
+     */
+    screenCoordinates: Vector2;
+    /**
+     * Time when this action was dispatched.
+     */
+    time: Date;
+  };
 }
 
 export type CameraAction =

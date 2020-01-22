@@ -17,7 +17,7 @@ describe('panning interaction', () => {
   beforeEach(() => {
     store = createStore(cameraReducer, undefined);
     translationShouldBeCloseTo = expectedTranslation => {
-      const actualTranslation = translation(store.getState());
+      const actualTranslation = translation(store.getState())(new Date(0));
       expect(expectedTranslation[0]).toBeCloseTo(actualTranslation[0]);
       expect(expectedTranslation[1]).toBeCloseTo(actualTranslation[1]);
     };
@@ -32,7 +32,10 @@ describe('panning interaction', () => {
     });
     describe('when the user has started panning', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userStartedPanning', payload: [100, 100] };
+        const action: CameraAction = {
+          type: 'userStartedPanning',
+          payload: { screenCoordinates: [100, 100], time: new Date(0) },
+        };
         store.dispatch(action);
       });
       it('should have a translation of 0,0', () => {
@@ -40,7 +43,10 @@ describe('panning interaction', () => {
       });
       describe('when the user continues to pan 50px up and to the right', () => {
         beforeEach(() => {
-          const action: CameraAction = { type: 'userMovedPointer', payload: [150, 50] };
+          const action: CameraAction = {
+            type: 'userMovedPointer',
+            payload: { screenCoordinates: [150, 50], time: new Date(0) },
+          };
           store.dispatch(action);
         });
         it('should have a translation of 50,50', () => {

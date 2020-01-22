@@ -50,3 +50,10 @@ export function angle(a: Vector2, b: Vector2) {
   const deltaY = b[1] - a[1];
   return Math.atan2(deltaY, deltaX);
 }
+
+/**
+ * Scale vector by number
+ */
+export function scale(a: Vector2, n: number): Vector2 {
+  return [a[0] * n, a[1] * n];
+}

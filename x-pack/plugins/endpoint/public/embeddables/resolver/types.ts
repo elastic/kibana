@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ResolverAction } from './actions';
+export { ResolverAction } from './store/actions';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -21,27 +21,69 @@ export interface ResolverState {
   readonly data: DataState;
 }
 
-interface PanningState {
+export interface CameraAnimationState {
   /**
-   * Screen coordinate vector representing the starting point when panning.
+   * The time when the animation began.
    */
-  readonly origin: Vector2;
-
+  readonly startTime: Date;
   /**
-   * Screen coordinate vector representing the current point when panning.
+   * The final translation when the animation is complete.
    */
-  readonly currentOffset: Vector2;
+  readonly targetTranslation: Vector2;
+  /**
+   * The effective camera position (including an in-progress user panning) at the time
+   * when the animation began.
+   */
+  readonly initialTranslation: Vector2;
 }
 
 /**
  * Redux state for the virtual 'camera' used by Resolver.
+ * CameraState can be panning or animating or neither, but not both at the same time.
  */
-export interface CameraState {
+export type CameraState =
+  | CameraStateWhenAnimating
+  | CameraStateWhenPanning
+  | CameraStateWhenNotAnimatingOrPanning;
+
+type CameraStateWhenAnimating = {
+  /**
+   * Contains the animation start time and target translation.
+   */
+  readonly animation: CameraAnimationState;
+  /**
+   * If the camera is animating, it must not be panning.
+   */
+  readonly panning: undefined;
+} & BaseCameraState;
+
+export type CameraStateWhenPanning = {
+  /**
+   * If the camera is panning, it must not be animating.
+   */
+  readonly animation: undefined;
   /**
    * Contains the starting and current position of the pointer when the user is panning the map.
    */
-  readonly panning?: PanningState;
+  readonly panning: {
+    /**
+     * Screen coordinate vector representing the starting point when panning.
+     */
+    readonly origin: Vector2;
 
+    /**
+     * Screen coordinate vector representing the current point when panning.
+     */
+    readonly currentOffset: Vector2;
+  };
+} & BaseCameraState;
+
+export type CameraStateWhenNotAnimatingOrPanning = {
+  readonly animation: undefined;
+  readonly panning: undefined;
+} & BaseCameraState;
+
+interface BaseCameraState {
   /**
    * Scales the coordinate system, used for zooming. Should always be between 0 and 1
    */
@@ -54,7 +96,7 @@ export interface CameraState {
 
   /**
    * The camera world transform not counting any change from panning. When panning finishes, this value is updated to account for it.
-   * Use the `transform` selector to get the transform adjusted for panning.
+   * Use the `translation` selector to get the effective translation adjusted for panning.
    */
   readonly translationNotCountingCurrentPanning: Vector2;
 
@@ -121,6 +163,7 @@ export interface ProcessEvent {
   readonly event_type: number;
   readonly machine_id: string;
   readonly data_buffer: {
+    timestamp_utc: string;
     event_subtype_full: eventSubtypeFull;
     event_type_full: eventTypeFull;
     node_id: number;

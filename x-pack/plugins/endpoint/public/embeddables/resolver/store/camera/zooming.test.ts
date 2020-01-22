@@ -20,7 +20,7 @@ describe('zooming', () => {
     return [
       `the camera view should be bound by an AABB with a minimum point of ${expectedViewableBoundingBox.minimum} and a maximum point of ${expectedViewableBoundingBox.maximum}`,
       () => {
-        const actual = viewableBoundingBox(store.getState());
+        const actual = viewableBoundingBox(store.getState())(new Date(0));
         expect(actual.minimum[0]).toBeCloseTo(expectedViewableBoundingBox.minimum[0]);
         expect(actual.minimum[1]).toBeCloseTo(expectedViewableBoundingBox.minimum[1]);
         expect(actual.maximum[0]).toBeCloseTo(expectedViewableBoundingBox.maximum[0]);
@@ -58,12 +58,12 @@ describe('zooming', () => {
       beforeEach(() => {
         const action: CameraAction = {
           type: 'userZoomed',
-          payload: 1,
+          payload: { zoomChange: 1, time: new Date(0) },
         };
         store.dispatch(action);
       });
       it('should zoom to maximum scale factor', () => {
-        const actual = viewableBoundingBox(store.getState());
+        const actual = viewableBoundingBox(store.getState())(new Date(0));
         expect(actual).toMatchInlineSnapshot(`
           Object {
             "maximum": Array [
@@ -79,16 +79,16 @@ describe('zooming', () => {
       });
     });
     it('the raster position 200, 50 should map to the world position 50, 50', () => {
-      expectVectorsToBeClose(applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())), [
-        50,
-        50,
-      ]);
+      expectVectorsToBeClose(
+        applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())(new Date(0))),
+        [50, 50]
+      );
     });
     describe('when the user has moved their mouse to the raster position 200, 50', () => {
       beforeEach(() => {
         const action: CameraAction = {
           type: 'userMovedPointer',
-          payload: [200, 50],
+          payload: { screenCoordinates: [200, 50], time: new Date(0) },
         };
         store.dispatch(action);
       });
@@ -104,13 +104,13 @@ describe('zooming', () => {
         beforeEach(() => {
           const action: CameraAction = {
             type: 'userZoomed',
-            payload: 0.5,
+            payload: { zoomChange: 0.5, time: new Date(0) },
           };
           store.dispatch(action);
         });
         it('the raster position 200, 50 should map to the world position 50, 50', () => {
           expectVectorsToBeClose(
-            applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())),
+            applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())(new Date(0))),
             [50, 50]
           );
         });
@@ -130,7 +130,7 @@ describe('zooming', () => {
       it('should be centered on 100, 0', () => {
         const worldCenterPoint = applyMatrix3(
           [150, 100],
-          inverseProjectionMatrix(store.getState())
+          inverseProjectionMatrix(store.getState())(new Date(0))
         );
         expect(worldCenterPoint[0]).toBeCloseTo(100);
         expect(worldCenterPoint[1]).toBeCloseTo(0);
@@ -143,7 +143,7 @@ describe('zooming', () => {
         it('should be centered on 100, 0', () => {
           const worldCenterPoint = applyMatrix3(
             [150, 100],
-            inverseProjectionMatrix(store.getState())
+            inverseProjectionMatrix(store.getState())(new Date(0))
           );
           expect(worldCenterPoint[0]).toBeCloseTo(100);
           expect(worldCenterPoint[1]).toBeCloseTo(0);

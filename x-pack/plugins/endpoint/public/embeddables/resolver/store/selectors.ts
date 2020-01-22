@@ -41,6 +41,11 @@ export const scalingFactor = composeSelectors(cameraStateSelector, cameraSelecto
  */
 export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelectors.userIsPanning);
 
+/**
+ * Whether the camera is animating. If so, the view should be refreshed each frame.
+ */
+export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
+
 export const processNodePositionsAndEdgeLineSegments = composeSelectors(
   dataStateSelector,
   dataSelectors.processNodePositionsAndEdgeLineSegments

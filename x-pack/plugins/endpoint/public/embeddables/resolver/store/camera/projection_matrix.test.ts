@@ -18,7 +18,10 @@ describe('projectionMatrix', () => {
   beforeEach(() => {
     store = createStore(cameraReducer, undefined);
     compare = (worldPosition: [number, number], expectedRasterPosition: [number, number]) => {
-      const [rasterX, rasterY] = applyMatrix3(worldPosition, projectionMatrix(store.getState()));
+      const [rasterX, rasterY] = applyMatrix3(
+        worldPosition,
+        projectionMatrix(store.getState())(new Date(0))
+      );
       expect(rasterX).toBeCloseTo(expectedRasterPosition[0]);
       expect(rasterY).toBeCloseTo(expectedRasterPosition[1]);
     };

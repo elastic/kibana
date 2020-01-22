@@ -20,7 +20,7 @@ describe('inverseProjectionMatrix', () => {
     compare = (rasterPosition: [number, number], expectedWorldPosition: [number, number]) => {
       const [worldX, worldY] = applyMatrix3(
         rasterPosition,
-        inverseProjectionMatrix(store.getState())
+        inverseProjectionMatrix(store.getState())(new Date(0))
       );
       expect(worldX).toBeCloseTo(expectedWorldPosition[0]);
       expect(worldY).toBeCloseTo(expectedWorldPosition[1]);
