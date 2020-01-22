@@ -59,7 +59,6 @@ kibana_vars=(
     path.data
     pid.file
     regionmap
-    regionmap.includeElasticMapsService
     server.basePath
     server.customResponseHeaders
     server.defaultRoute
