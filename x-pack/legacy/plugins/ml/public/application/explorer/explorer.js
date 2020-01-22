@@ -21,11 +21,8 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
-  EuiPage,
-  EuiPageBody,
   EuiSelect,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -90,15 +87,8 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="explorer" />
-    <EuiTitle style={{ paddingLeft: '10px', paddingTop: '10px' }}>
-      <h1>
-        <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly explorer" />
-      </h1>
-    </EuiTitle>
     <JobSelector {...jobSelectorProps} />
-    <EuiPage>
-      <EuiPageBody>{children}</EuiPageBody>
-    </EuiPage>
+    {children}
   </div>
 );
 
