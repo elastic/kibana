@@ -20,3 +20,5 @@
 export { SearchService, SearchSetup, SearchStart } from './search_service';
 
 export { getRequestInspectorStats, getResponseInspectorStats } from './utils';
+
+export { SearchError, getSearchErrorType, addSearchStrategy } from './search_strategy';

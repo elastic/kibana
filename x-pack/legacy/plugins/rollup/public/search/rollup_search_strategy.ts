@@ -8,7 +8,7 @@ import { HttpSetup } from 'src/core/public';
 import {
   SearchError,
   getSearchErrorType,
-} from '../../../../../../src/legacy/core_plugins/data/public/search/search_strategy';
+} from '../../../../../../src/legacy/core_plugins/data/public';
 
 function serializeFetchParams(searchRequests: any) {
   return JSON.stringify(
