@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import PEG from 'pegjs';
-import grammar from 'raw-loader!../../../../vis_type_timelion/public/chain.peg';
-import { SUGGESTION_TYPE, suggest } from '../timelion_expression_input_helpers';
-import { getArgValueSuggestions } from '../../../../vis_type_timelion/public/helpers/arg_value_suggestions';
-import {
-  setIndexPatterns,
-  setSavedObjectsClient,
-} from '../../../../vis_type_timelion/public/helpers/plugin_services';
+import { SUGGESTION_TYPE, suggest } from './timelion_expression_input_helpers';
+import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
+import { setIndexPatterns, setSavedObjectsClient } from '../helpers/plugin_services';
+import { IndexPatterns } from 'src/plugins/data/public';
+import { SavedObjectsClient } from 'kibana/public';
+import { ITimelionFunction } from '../../common/types';
 
 describe('Timelion expression suggestions', () => {
-  setIndexPatterns({});
-  setSavedObjectsClient({});
+  setIndexPatterns({} as IndexPatterns);
+  setSavedObjectsClient({} as SavedObjectsClient);
 
   const argValueSuggestions = getArgValueSuggestions();
 
@@ -45,17 +42,13 @@ describe('Timelion expression suggestions', () => {
           suggestions: [{ name: 'value1' }],
         },
       ],
-    };
+    } as ITimelionFunction;
     const myFunc2 = {
       name: 'myFunc2',
       chainable: false,
       args: [{ name: 'argA' }, { name: 'argAB' }, { name: 'argABC' }],
-    };
+    } as ITimelionFunction;
     const functionList = [func1, myFunc2];
-    let Parser;
-    beforeEach(function() {
-      Parser = PEG.generate(grammar);
-    });
 
     describe('parse exception', () => {
       describe('incompleteFunction', () => {
@@ -65,17 +58,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: [func1, myFunc2],
-            location: {
-              min: 0,
-              max: 1,
-            },
-            type: 'functions',
+            type: SUGGESTION_TYPE.FUNCTIONS,
           });
         });
         it('should filter function suggestions by function name', async () => {
@@ -84,17 +72,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: [myFunc2],
-            location: {
-              min: 0,
-              max: 4,
-            },
-            type: 'functions',
+            type: SUGGESTION_TYPE.FUNCTIONS,
           });
         });
       });
@@ -106,17 +89,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: [],
-            location: {
-              min: 11,
-              max: 12,
-            },
-            type: 'arguments',
+            type: SUGGESTION_TYPE.ARGUMENTS,
           });
         });
 
@@ -126,17 +104,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: myFunc2.args,
-            location: {
-              min: 9,
-              max: 10,
-            },
-            type: 'arguments',
+            type: SUGGESTION_TYPE.ARGUMENTS,
           });
         });
 
@@ -146,17 +119,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: myFunc2.args,
-            location: {
-              min: 9,
-              max: 25,
-            },
-            type: 'arguments',
+            type: SUGGESTION_TYPE.ARGUMENTS,
           });
         });
 
@@ -166,17 +134,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: [{ name: 'argA' }, { name: 'argAB', suggestions: [{ name: 'value1' }] }],
-            location: {
-              min: 7,
-              max: 8,
-            },
-            type: 'arguments',
+            type: SUGGESTION_TYPE.ARGUMENTS,
           });
         });
 
@@ -186,17 +149,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: [{ name: 'argA' }, { name: 'argABC' }],
-            location: {
-              min: 24,
-              max: 25,
-            },
-            type: 'arguments',
+            type: SUGGESTION_TYPE.ARGUMENTS,
           });
         });
       });
@@ -208,17 +166,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: [],
-            location: {
-              min: 11,
-              max: 11,
-            },
-            type: 'argument_value',
+            type: SUGGESTION_TYPE.ARGUMENT_VALUE,
           });
         });
 
@@ -228,17 +181,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: [{ name: 'value1' }],
-            location: {
-              min: 11,
-              max: 11,
-            },
-            type: 'argument_value',
+            type: SUGGESTION_TYPE.ARGUMENT_VALUE,
           });
         });
       });
@@ -252,17 +200,12 @@ describe('Timelion expression suggestions', () => {
           const suggestions = await suggest(
             expression,
             functionList,
-            Parser,
             cursorPosition,
             argValueSuggestions
           );
-          expect(suggestions).to.eql({
+          expect(suggestions).toEqual({
             list: [func1],
-            location: {
-              min: 0,
-              max: 8,
-            },
-            type: 'functions',
+            type: SUGGESTION_TYPE.FUNCTIONS,
           });
         });
       });
@@ -275,17 +218,12 @@ describe('Timelion expression suggestions', () => {
             const suggestions = await suggest(
               expression,
               functionList,
-              Parser,
               cursorPosition,
               argValueSuggestions
             );
-            expect(suggestions).to.eql({
+            expect(suggestions).toEqual({
               list: myFunc2.args,
-              location: {
-                min: 9,
-                max: 9,
-              },
-              type: 'arguments',
+              type: SUGGESTION_TYPE.ARGUMENTS,
             });
           });
           it('should not provide argument suggestions for argument that is all ready set in function def', async () => {
@@ -294,18 +232,12 @@ describe('Timelion expression suggestions', () => {
             const suggestions = await suggest(
               expression,
               functionList,
-              Parser,
               cursorPosition,
               argValueSuggestions
             );
-            expect(suggestions.type).to.equal(SUGGESTION_TYPE.ARGUMENTS);
-            expect(suggestions).to.eql({
+            expect(suggestions).toEqual({
               list: [{ name: 'argA' }, { name: 'argABC' }],
-              location: {
-                min: 24,
-                max: 24,
-              },
-              type: 'arguments',
+              type: SUGGESTION_TYPE.ARGUMENTS,
             });
           });
           it('should filter argument suggestions by argument name', async () => {
@@ -314,17 +246,12 @@ describe('Timelion expression suggestions', () => {
             const suggestions = await suggest(
               expression,
               functionList,
-              Parser,
               cursorPosition,
               argValueSuggestions
             );
-            expect(suggestions).to.eql({
+            expect(suggestions).toEqual({
               list: [{ name: 'argAB' }, { name: 'argABC' }],
-              location: {
-                min: 9,
-                max: 14,
-              },
-              type: 'arguments',
+              type: SUGGESTION_TYPE.ARGUMENTS,
             });
           });
           it('should not show first argument for chainable functions', async () => {
@@ -333,17 +260,12 @@ describe('Timelion expression suggestions', () => {
             const suggestions = await suggest(
               expression,
               functionList,
-              Parser,
               cursorPosition,
               argValueSuggestions
             );
-            expect(suggestions).to.eql({
+            expect(suggestions).toEqual({
               list: [{ name: 'argA' }, { name: 'argAB', suggestions: [{ name: 'value1' }] }],
-              location: {
-                min: 7,
-                max: 7,
-              },
-              type: 'arguments',
+              type: SUGGESTION_TYPE.ARGUMENTS,
             });
           });
         });
@@ -354,17 +276,12 @@ describe('Timelion expression suggestions', () => {
             const suggestions = await suggest(
               expression,
               functionList,
-              Parser,
               cursorPosition,
               argValueSuggestions
             );
-            expect(suggestions).to.eql({
+            expect(suggestions).toEqual({
               list: [],
-              location: {
-                min: 14,
-                max: 16,
-              },
-              type: 'argument_value',
+              type: SUGGESTION_TYPE.ARGUMENT_VALUE,
             });
           });
 
@@ -374,17 +291,12 @@ describe('Timelion expression suggestions', () => {
             const suggestions = await suggest(
               expression,
               functionList,
-              Parser,
               cursorPosition,
               argValueSuggestions
             );
-            expect(suggestions).to.eql({
+            expect(suggestions).toEqual({
               list: [{ name: 'value1' }],
-              location: {
-                min: 13,
-                max: 16,
-              },
-              type: 'argument_value',
+              type: SUGGESTION_TYPE.ARGUMENT_VALUE,
             });
           });
         });
