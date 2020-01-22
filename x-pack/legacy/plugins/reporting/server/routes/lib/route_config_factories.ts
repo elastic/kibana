@@ -5,7 +5,6 @@
  */
 
 import Joi from 'joi';
-import { Legacy } from 'kibana';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { ServerFacade, Logger } from '../../../types';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
@@ -33,7 +32,7 @@ export function getRouteConfigFactoryReportingPre(
   const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server, logger);
   const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server, logger);
 
-  return (getFeatureId?: GetFeatureFunction): RouteConfigFactory => {
+  return (getFeatureId?: GetReportingFeatureIdFn): RouteConfigFactory => {
     const preRouting: any[] = [{ method: authorizedUserPreRouting, assign: 'user' }];
     if (getFeatureId) {
       preRouting.push(reportingFeaturePreRouting(getFeatureId));
