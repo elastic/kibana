@@ -100,14 +100,13 @@ describe('Fetch', () => {
 
     it('should not allow overwriting of kbn-version header', async () => {
       fetchMock.get('*', {});
-      await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
-      });
-
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        'kbn-version': 'VERSION',
-        myheader: 'foo',
-      });
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+      );
     });
 
     it('should not set kbn-system-request header by default', async () => {
@@ -144,56 +143,52 @@ describe('Fetch', () => {
 
     it('should not allow overwriting of kbn-system-request when asSystemRequest: true', async () => {
       fetchMock.get('*', {});
-      await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
-        asSystemRequest: true,
-      });
-
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        'kbn-system-request': 'true',
-        myheader: 'foo',
-      });
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
+          asSystemRequest: true,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-request]"`
+      );
     });
 
     it('should not allow overwriting of kbn-system-request when asSystemRequest: false', async () => {
       fetchMock.get('*', {});
-      await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
-        asSystemRequest: false,
-      });
-
-      expect(fetchMock.lastOptions()!.headers).not.toHaveProperty('kbn-system-request');
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        myheader: 'foo',
-      });
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-system-request': 'ANOTHER!' },
+          asSystemRequest: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-request]"`
+      );
     });
 
     // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
     it('should not allow overwriting of kbn-system-api when asSystemRequest: true', async () => {
       fetchMock.get('*', {});
-      await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-        asSystemRequest: true,
-      });
-
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        'kbn-system-request': 'true',
-        myheader: 'foo',
-      });
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
+          asSystemRequest: true,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
+      );
     });
 
     // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
     it('should not allow overwriting of kbn-system-api when asSystemRequest: false', async () => {
       fetchMock.get('*', {});
-      await fetchInstance.fetch('/my/path', {
-        headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
-        asSystemRequest: false,
-      });
-
-      expect(fetchMock.lastOptions()!.headers).not.toHaveProperty('kbn-system-api');
-      expect(fetchMock.lastOptions()!.headers).toMatchObject({
-        myheader: 'foo',
-      });
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: { myHeader: 'foo', 'kbn-system-api': 'ANOTHER!' },
+          asSystemRequest: false,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-system-api]"`
+      );
     });
 
     it('should return response', async () => {

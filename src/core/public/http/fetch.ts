@@ -133,15 +133,6 @@ export class Fetch {
     // Make sure the system request header is only present if `asSystemRequest` is true.
     if (asSystemRequest) {
       fetchOptions.headers['kbn-system-request'] = 'true';
-    } else {
-      if ('kbn-system-request' in fetchOptions.headers) {
-        Reflect.deleteProperty(fetchOptions.headers, 'kbn-system-request');
-      }
-    }
-
-    // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
-    if ('kbn-system-api' in fetchOptions.headers) {
-      Reflect.deleteProperty(fetchOptions.headers, 'kbn-system-api');
     }
 
     return new Request(url, fetchOptions);
@@ -204,13 +195,28 @@ const validateFetchArguments = (
   pathOrOptions: string | HttpFetchOptionsWithPath,
   options?: HttpFetchOptions
 ): HttpFetchOptionsWithPath => {
+  let fullOptions: HttpFetchOptionsWithPath;
+
   if (typeof pathOrOptions === 'string' && (typeof options === 'object' || options === undefined)) {
-    return { ...options, path: pathOrOptions };
+    fullOptions = { ...options, path: pathOrOptions };
   } else if (typeof pathOrOptions === 'object' && options === undefined) {
-    return pathOrOptions;
+    fullOptions = pathOrOptions;
   } else {
     throw new Error(
       `Invalid fetch arguments, must either be (string, object) or (object, undefined), received (${typeof pathOrOptions}, ${typeof options})`
     );
   }
+
+  const invalidHeaders = Object.keys(fullOptions.headers ?? {}).filter(headerName =>
+    headerName.startsWith('kbn-')
+  );
+  if (invalidHeaders.length) {
+    throw new Error(
+      `Invalid fetch headers, headers beginning with "kbn-" are not allowed: [${invalidHeaders.join(
+        ','
+      )}]`
+    );
+  }
+
+  return fullOptions;
 };
