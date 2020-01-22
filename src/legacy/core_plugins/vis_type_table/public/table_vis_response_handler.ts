@@ -22,13 +22,13 @@ import { Required } from '@kbn/utility-types';
 import { getFormat } from './legacy_imports';
 import { Context } from './table_vis_fn';
 
-export type ConvertedContext = Context & {
+export interface TableContext {
   tables: Array<TableGroup | Table>;
   direction?: 'row' | 'column';
-};
+}
 
 export interface TableGroup {
-  $parent: ConvertedContext;
+  $parent: TableContext;
   table: Context;
   tables: Table[];
   title: string;
@@ -44,12 +44,9 @@ export interface Table {
   rows: Context['rows'];
 }
 
-export function tableVisResponseHandler(table: Context, dimensions: any): ConvertedContext {
-  const converted: ConvertedContext = {
-    type: 'kibana_datatable',
+export function tableVisResponseHandler(table: Context, dimensions: any): TableContext {
+  const converted: TableContext = {
     tables: [],
-    rows: [],
-    columns: [],
   };
 
   const split = dimensions.splitColumn || dimensions.splitRow;

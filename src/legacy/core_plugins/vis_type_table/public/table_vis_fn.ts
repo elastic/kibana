@@ -18,8 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { tableVisResponseHandler } from './table_vis_response_handler';
+import { tableVisResponseHandler, TableContext } from './table_vis_response_handler';
 
 import {
   ExpressionFunction,
@@ -38,7 +37,7 @@ interface Arguments {
 type VisParams = Required<Arguments>;
 
 interface RenderValue {
-  visData: Context;
+  visData: TableContext;
   visType: 'table';
   visConfig: VisParams;
   params: {
