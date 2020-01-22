@@ -32,7 +32,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can change the log indices to a pattern that matches nothing', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/settings');
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '/logs/settings');
         await infraSourceConfigurationForm.getForm();
 
         const nameInput = await infraSourceConfigurationForm.getNameInput();
@@ -47,12 +47,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the no indices screen when no indices match the pattern', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/stream');
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '/logs/stream');
         await pageObjects.infraLogs.getNoLogsIndicesPrompt();
       });
 
       it('can change the log indices back to a pattern that matches something', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/settings');
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '/logs/settings');
         await infraSourceConfigurationForm.getForm();
 
         const logIndicesInput = await infraSourceConfigurationForm.getLogIndicesInput();
@@ -63,7 +63,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the default log columns with their headers', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/stream');
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '/logs/stream');
         const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
 
         expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
@@ -80,7 +80,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can change the log columns', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/settings');
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '/logs/settings');
         await infraSourceConfigurationForm.getForm();
 
         await infraSourceConfigurationForm.removeAllLogColumns();
@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the changed log columns with their headers', async () => {
-        await pageObjects.common.navigateToActualUrl('infraLogs', 'logs/stream');
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '/logs/stream');
         const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
 
         // TODO: make test more robust

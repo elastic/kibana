@@ -25,9 +25,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         "logFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1565707203194),streamLive:!f)&sourceId=default";
       const expectedRedirectPath = '/logs/stream?';
 
-      await pageObjects.common.navigateToActualUrl(
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraOps',
-        `${location.pathname}${location.search}`
+        `/${location.pathname}${location.search}`
       );
       await retry.tryForTime(5000, async () => {
         const currentUrl = await browser.getCurrentUrl();

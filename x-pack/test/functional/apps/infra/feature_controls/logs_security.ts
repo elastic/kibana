@@ -63,7 +63,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('logs landing page without data', () => {
         it(`shows 'Change source configuration' button`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'logs', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/logs', {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -126,7 +126,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('logs landing page without data', () => {
         it(`doesn't show 'Change source configuration' button`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'logs', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/logs', {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -188,7 +188,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('logs landing page renders not found page', async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'logs', {
+        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/logs', {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });

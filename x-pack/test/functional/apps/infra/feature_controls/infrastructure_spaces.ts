@@ -53,7 +53,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/home', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: true,
         });
@@ -104,7 +104,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`infrastructure root renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', '', {
+        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
@@ -113,7 +113,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`infrastructure home page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/home', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
@@ -122,7 +122,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`infrastructure landing page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure', {
+        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/infrastructure', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
@@ -131,16 +131,20 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`infrastructure snapshot page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/inventory', {
-          basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
+          'infraOps',
+          '/infrastructure/inventory',
+          {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('~infraNotFoundPage');
       });
 
       it(`metrics page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
           '/infrastructure/metrics/host/demo-stack-redis-01',
           {
@@ -170,7 +174,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/home', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: true,
         });
@@ -213,7 +217,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/home', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: true,
         });
