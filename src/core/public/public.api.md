@@ -26,6 +26,7 @@ export interface App extends AppBase {
 // @public (undocumented)
 export interface AppBase {
     capabilities?: Partial<Capabilities>;
+    category?: AppCategory;
     chromeless?: boolean;
     euiIconType?: string;
     icon?: string;
@@ -38,6 +39,14 @@ export interface AppBase {
     title: string;
     tooltip?: string;
     updater$?: Observable<AppUpdater>;
+}
+
+// @public
+export interface AppCategory {
+    ariaLabel?: string;
+    euiIconType?: string;
+    label: string;
+    order?: number;
 }
 
 // @public
@@ -251,6 +260,7 @@ export interface ChromeNavLink {
     // @deprecated
     readonly active?: boolean;
     readonly baseUrl: string;
+    readonly category?: AppCategory;
     // @deprecated
     readonly disabled?: boolean;
     readonly euiIconType?: string;
@@ -377,6 +387,8 @@ export interface CoreStart {
     // (undocumented)
     docLinks: DocLinksStart;
     // (undocumented)
+    fatalErrors: FatalErrorsStart;
+    // (undocumented)
     http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
@@ -407,6 +419,26 @@ export class CoreSystem {
     // (undocumented)
     stop(): void;
     }
+
+// @internal (undocumented)
+export const DEFAULT_APP_CATEGORIES: Readonly<{
+    analyze: {
+        label: string;
+        order: number;
+    };
+    observability: {
+        label: string;
+        order: number;
+    };
+    security: {
+        label: string;
+        order: number;
+    };
+    management: {
+        label: string;
+        euiIconType: string;
+    };
+}>;
 
 // @public (undocumented)
 export interface DocLinksStart {
@@ -532,6 +564,9 @@ export interface FatalErrorsSetup {
     add: (error: string | Error, source?: string) => never;
     get$: () => Rx.Observable<FatalErrorInfo>;
 }
+
+// @public
+export type FatalErrorsStart = FatalErrorsSetup;
 
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
@@ -742,6 +777,8 @@ export interface LegacyCoreStart extends CoreStart {
 
 // @public (undocumented)
 export interface LegacyNavLink {
+    // (undocumented)
+    category?: AppCategory;
     // (undocumented)
     euiIconType?: string;
     // (undocumented)

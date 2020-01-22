@@ -66,7 +66,7 @@ function ColorSchemaOptions({
         }}
       >
         <FormattedMessage
-          id="kbnVislibVisTypes.controls.colorSchema.resetColorsButtonLabel"
+          id="visTypeVislib.controls.colorSchema.resetColorsButtonLabel"
           defaultMessage="Reset colors"
         />
       </EuiLink>
@@ -79,11 +79,11 @@ function ColorSchemaOptions({
         disabled={disabled}
         helpText={
           showHelpText &&
-          i18n.translate('kbnVislibVisTypes.controls.colorSchema.howToChangeColorsDescription', {
+          i18n.translate('visTypeVislib.controls.colorSchema.howToChangeColorsDescription', {
             defaultMessage: 'Individual colors can be changed in the legend.',
           })
         }
-        label={i18n.translate('kbnVislibVisTypes.controls.colorSchema.colorSchemaLabel', {
+        label={i18n.translate('visTypeVislib.controls.colorSchema.colorSchemaLabel', {
           defaultMessage: 'Color schema',
         })}
         labelAppend={isCustomColors && resetColorsButton}
@@ -95,7 +95,7 @@ function ColorSchemaOptions({
 
       <SwitchOption
         disabled={disabled}
-        label={i18n.translate('kbnVislibVisTypes.controls.colorSchema.reverseColorSchemaLabel', {
+        label={i18n.translate('visTypeVislib.controls.colorSchema.reverseColorSchemaLabel', {
           defaultMessage: 'Reverse schema',
         })}
         paramName="invertColors"

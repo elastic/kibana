@@ -153,7 +153,7 @@ app.controller(
       delete $scope.savedQuery;
       delete $state.savedQuery;
       onQueryChange({
-        filters: [],
+        filters: filterManager.getGlobalFilters(),
         query: {
           query: '',
           language: localStorage.get('kibana.userQueryLanguage'),
@@ -162,6 +162,10 @@ app.controller(
     };
 
     function updateStateFromSavedQuery(savedQuery) {
+      const savedQueryFilters = savedQuery.attributes.filters || [];
+      const globalFilters = filterManager.getGlobalFilters();
+      const allFilters = [...savedQueryFilters, ...globalFilters];
+
       if (savedQuery.attributes.timefilter) {
         if (savedQuery.attributes.timefilter.refreshInterval) {
           $scope.onRefreshChange({
@@ -170,13 +174,13 @@ app.controller(
           });
         }
         onQueryChange({
-          filters: savedQuery.attributes.filters || [],
+          filters: allFilters,
           query: savedQuery.attributes.query,
           time: savedQuery.attributes.timefilter,
         });
       } else {
         onQueryChange({
-          filters: savedQuery.attributes.filters || [],
+          filters: allFilters,
           query: savedQuery.attributes.query,
         });
       }
@@ -367,7 +371,9 @@ app.controller(
       if (prevIndexPatternIds !== nextIndexPatternIds) {
         return;
       }
-      $scope.indexPatterns = indexPatterns;
+      $scope.$evalAsync(() => {
+        $scope.indexPatterns = indexPatterns;
+      });
     }
 
     $scope.isFullScreen = false;
