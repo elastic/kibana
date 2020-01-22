@@ -21,6 +21,7 @@ export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers
 export { Router, RequestHandler, IRouter, RouteRegistrar } from './router';
 export {
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   isRealRequest,
