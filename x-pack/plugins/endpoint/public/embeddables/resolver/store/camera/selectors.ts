@@ -23,6 +23,7 @@ import {
   Matrix3,
   CameraStateWhenPanning,
   CameraStateWhenNotAnimatingOrPanning,
+  CameraAnimationState,
 } from '../../types';
 
 interface ClippingPlanes {
@@ -88,6 +89,14 @@ export const isAnimating: (state: CameraState) => (time: Date) => boolean = crea
     return animation !== undefined && animationIsActive(animation, time);
   }
 );
+
+/**
+ * The `useCamera` hook uses changes to this referenece to optionally trigger a new rAF loop.
+ * TODO delete this
+ */
+export function animationReference(state: CameraState): CameraAnimationState | undefined {
+  return state.animation;
+}
 
 // TODO, use this
 /*

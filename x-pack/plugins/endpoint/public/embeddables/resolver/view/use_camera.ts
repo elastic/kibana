@@ -29,7 +29,7 @@ export function useCamera(): {
    */
   const projectionMatrixAtTime = useSelector(selectors.projectionMatrix);
 
-  const projectionMatrixAtTimeRef = useRef<(time: Date) => Matrix3>();
+  const projectionMatrixAtTimeRef = useRef<typeof projectionMatrixAtTime>();
 
   /**
    * The projection matrix is stateful, depending on the current time.
@@ -39,8 +39,11 @@ export function useCamera(): {
     projectionMatrixAtTime(new Date())
   );
 
-  const userIsPanning = useSelector(selectors.userIsPanning);
   const rafRef = useRef<number>();
+
+  const userIsPanning = useSelector(selectors.userIsPanning);
+  const isAnimatingAtTime = useSelector(selectors.isAnimating);
+  const isAnimatingAtTimeRef = useRef<typeof isAnimatingAtTime>();
 
   const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();
 
@@ -164,20 +167,43 @@ export function useCamera(): {
   }, [projectionMatrixAtTime]);
 
   useLayoutEffect(() => {
-    const handleFrame = () => {
-      if (projectionMatrixAtTimeRef.current !== undefined) {
-        const date = new Date();
-        setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
-      }
-      rafRef.current = requestAnimationFrame(handleFrame);
-    };
-    rafRef.current = requestAnimationFrame(handleFrame);
-    return () => {
-      if (rafRef.current !== undefined) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
+    isAnimatingAtTimeRef.current = isAnimatingAtTime;
+  }, [isAnimatingAtTime]);
+
+  useLayoutEffect(() => {
+    setProjectionMatrix(projectionMatrixAtTime(new Date()));
   }, [projectionMatrixAtTime]);
+
+  /**
+   * For some reason, referring to `projectionMatrixAtTime` in here didn't work. Several tutorials
+   * I've found mention something similar to this problem. They use a ref
+   * to refer to values that update during rerenders. Not sure: https://css-tricks.com/using-requestanimationframe-with-react-hooks/
+   */
+  useLayoutEffect(() => {
+    const startDate = new Date();
+    if (isAnimatingAtTime(startDate)) {
+      const handleFrame = () => {
+        const date = new Date();
+        if (projectionMatrixAtTimeRef.current !== undefined) {
+          // since we set projectionMatrix, we really should not update when projection matrix is changed. use a ref to avoid
+          // this terrible loop
+          // TODO better comment
+          setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
+        }
+        if (isAnimatingAtTimeRef.current !== undefined && isAnimatingAtTimeRef.current(date)) {
+          rafRef.current = requestAnimationFrame(handleFrame);
+        } else {
+          rafRef.current = undefined;
+        }
+      };
+      rafRef.current = requestAnimationFrame(handleFrame);
+      return () => {
+        if (rafRef.current !== undefined) {
+          cancelAnimationFrame(rafRef.current);
+        }
+      };
+    }
+  }, [isAnimatingAtTime]);
 
   useEffect(() => {
     if (elementBoundingClientRect !== null) {

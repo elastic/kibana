@@ -42,7 +42,15 @@ export const scalingFactor = composeSelectors(cameraStateSelector, cameraSelecto
 export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelectors.userIsPanning);
 
 /**
- * Whether the camera is animating. If so, the view should be refreshed each frame.
+ * A reference to the animation details, used to track changes in animation state.
+ */
+export const animationReference = composeSelectors(
+  cameraStateSelector,
+  cameraSelectors.animationReference
+);
+
+/**
+ * Whether or not the camera is animating, at a given time.
  */
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
