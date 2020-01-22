@@ -41,3 +41,24 @@ export function scaleValue(value, range) {
 
   return (value - range.min) / range.delta;
 }
+
+export function assignCategoriesToPalette({ categories, paletteValues }) {
+  const stops = [];
+  let fallback = null;
+
+  if (categories && categories.length && paletteValues && paletteValues.length) {
+    const maxLength = Math.min(paletteValues.length, categories.length + 1);
+    fallback = paletteValues[maxLength - 1];
+    for (let i = 0; i < maxLength - 1; i++) {
+      stops.push({
+        stop: categories[i].key,
+        style: paletteValues[i],
+      });
+    }
+  }
+
+  return {
+    stops,
+    fallback,
+  };
+}

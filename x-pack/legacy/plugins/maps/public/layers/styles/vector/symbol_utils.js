@@ -125,3 +125,8 @@ export function getIconPaletteOptions(isDarkMode) {
     };
   });
 }
+
+export function getIconPalette(paletteId) {
+  const palette = ICON_PALETTES.find(({ id }) => id === paletteId);
+  return palette ? [...palette.icons] : null;
+}
