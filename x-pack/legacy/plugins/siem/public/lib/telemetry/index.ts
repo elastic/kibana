@@ -10,6 +10,7 @@ import {
   METRIC_TYPE,
 } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { APP_ID } from '../../../common/constants';
+export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };
 
