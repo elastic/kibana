@@ -42,9 +42,9 @@ import { KbnVislibVisTypesDependencies } from './plugin';
 
 export const createLineVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
   name: 'line',
-  title: i18n.translate('kbnVislibVisTypes.line.lineTitle', { defaultMessage: 'Line' }),
+  title: i18n.translate('visTypeVislib.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
-  description: i18n.translate('kbnVislibVisTypes.line.lineDescription', {
+  description: i18n.translate('visTypeVislib.line.lineDescription', {
     defaultMessage: 'Emphasize trends',
   }),
   visualization: createVislibVisController(deps),
@@ -136,7 +136,7 @@ export const createLineVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.line.metricTitle', { defaultMessage: 'Y-axis' }),
+        title: i18n.translate('visTypeVislib.line.metricTitle', { defaultMessage: 'Y-axis' }),
         min: 1,
         aggFilter: ['!geo_centroid', '!geo_bounds'],
         defaults: [{ schema: 'metric', type: 'count' }],
@@ -144,7 +144,7 @@ export const createLineVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Metrics,
         name: 'radius',
-        title: i18n.translate('kbnVislibVisTypes.line.radiusTitle', { defaultMessage: 'Dot size' }),
+        title: i18n.translate('visTypeVislib.line.radiusTitle', { defaultMessage: 'Dot size' }),
         min: 0,
         max: 1,
         aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality', 'top_hits'],
@@ -152,7 +152,7 @@ export const createLineVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.line.segmentTitle', { defaultMessage: 'X-axis' }),
+        title: i18n.translate('visTypeVislib.line.segmentTitle', { defaultMessage: 'X-axis' }),
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
@@ -160,7 +160,7 @@ export const createLineVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.line.groupTitle', {
+        title: i18n.translate('visTypeVislib.line.groupTitle', {
           defaultMessage: 'Split series',
         }),
         min: 0,
@@ -170,7 +170,7 @@ export const createLineVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.line.splitTitle', {
+        title: i18n.translate('visTypeVislib.line.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,

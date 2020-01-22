@@ -37,7 +37,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
     describe('conflicts', () => {
       it('returns a field for each in response, no filtering', () => {
         const fields = readFieldCapsResponse(esResponse);
-        expect(fields).toHaveLength(25);
+        expect(fields).toHaveLength(24);
       });
 
       it(
@@ -68,8 +68,8 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         sandbox.spy(shouldReadFieldFromDocValuesNS, 'shouldReadFieldFromDocValues');
         const fields = readFieldCapsResponse(esResponse);
         const conflictCount = fields.filter(f => f.type === 'conflict').length;
-        // +1 is for the object field which is filtered out of the final return value from readFieldCapsResponse
-        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 1);
+        // +2 is for the object and nested fields which get filtered out of the final return value from readFieldCapsResponse
+        sinon.assert.callCount(shouldReadFieldFromDocValues, fields.length - conflictCount + 2);
       });
 
       it('converts es types to kibana types', () => {
@@ -143,13 +143,6 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(child).toHaveProperty('subType', { nested: { path: 'nested_object_parent' } });
       });
 
-      it('returns nested sub-fields as non-aggregatable', () => {
-        const fields = readFieldCapsResponse(esResponse);
-        // Normally a keyword field would be aggregatable, but the fact that it is nested overrides that
-        const child = fields.find(f => f.name === 'nested_object_parent.child.keyword');
-        expect(child).toHaveProperty('aggregatable', false);
-      });
-
       it('handles fields that are both nested and multi', () => {
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'nested_object_parent.child.keyword');
@@ -159,12 +152,10 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         });
       });
 
-      it('returns the nested parent as not searchable or aggregatable', () => {
+      it('does not include the field actually mapped as nested itself', () => {
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'nested_object_parent');
-        expect(child.type).toBe('nested');
-        expect(child.aggregatable).toBe(false);
-        expect(child.searchable).toBe(false);
+        expect(child).toBeUndefined();
       });
 
       it('should not confuse object children for multi or nested field children', () => {

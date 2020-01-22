@@ -36,8 +36,8 @@ interface FieldIconProps {
     | 'number'
     | '_source'
     | 'string'
-    | 'nested'
-    | string;
+    | string
+    | 'nested';
   label?: string;
   size?: IconSize;
   useColor?: boolean;

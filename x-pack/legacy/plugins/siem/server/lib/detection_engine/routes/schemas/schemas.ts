@@ -37,12 +37,15 @@ export const timeline_title = Joi.string().when('timeline_id', {
   otherwise: Joi.forbidden(),
 });
 export const meta = Joi.object();
-export const max_signals = Joi.number().greater(0);
+export const max_signals = Joi.number()
+  .integer()
+  .greater(0);
 export const name = Joi.string();
 export const risk_score = Joi.number()
+  .integer()
   .greater(-1)
   .less(101);
-export const severity = Joi.string();
+export const severity = Joi.string().valid('low', 'medium', 'high', 'critical');
 export const status = Joi.string().valid('open', 'closed');
 export const to = Joi.string();
 export const type = Joi.string().valid('query', 'saved_query');
@@ -51,9 +54,11 @@ export const references = Joi.array()
   .items(Joi.string())
   .single();
 export const per_page = Joi.number()
+  .integer()
   .min(0)
   .default(20);
 export const page = Joi.number()
+  .integer()
   .min(1)
   .default(1);
 export const signal_ids = Joi.array().items(Joi.string());
@@ -97,4 +102,6 @@ export const updated_at = Joi.string()
   .strict();
 export const created_by = Joi.string();
 export const updated_by = Joi.string();
-export const version = Joi.number().min(1);
+export const version = Joi.number()
+  .integer()
+  .min(1);

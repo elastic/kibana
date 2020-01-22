@@ -36,8 +36,10 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
       const actionsClient = isFunction(request.getActionsClient)
         ? request.getActionsClient()
         : null;
-
-      if (!alertsClient || !actionsClient) {
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !actionsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -59,7 +61,13 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
           }
         }
         await installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex);
-        await updatePrepackagedRules(alertsClient, actionsClient, rulesToUpdate, spaceIndex);
+        await updatePrepackagedRules(
+          alertsClient,
+          actionsClient,
+          savedObjectsClient,
+          rulesToUpdate,
+          spaceIndex
+        );
         return {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,
