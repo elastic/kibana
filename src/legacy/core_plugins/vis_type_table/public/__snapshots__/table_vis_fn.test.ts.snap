@@ -35,17 +35,8 @@ Object {
     "visData": Object {
       "tables": Array [
         Object {
-          "columns": Array [
-            Object {
-              "id": "col-0-1",
-              "name": "Count",
-            },
-          ],
-          "rows": Array [
-            Object {
-              "col-0-1": 0,
-            },
-          ],
+          "columns": Array [],
+          "rows": Array [],
         },
       ],
     },

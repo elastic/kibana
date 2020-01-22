@@ -78,6 +78,7 @@ export function tableVisResponseHandler(table: Context, dimensions: any): Conver
           table,
           tables: [],
         };
+
         tableGroup.tables.push({
           $parent: tableGroup,
           columns: table.columns,
