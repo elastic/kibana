@@ -30,7 +30,6 @@ import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs } from '../types';
 import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
-import { Case } from '../case/saved_object';
 import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
@@ -48,7 +47,6 @@ export function compose(
   const timeline = new Timeline();
   const note = new Note();
   const pinnedEvent = new PinnedEvent();
-  const caseWorkflow = new Case();
 
   const domainLibs: AppDomainLibs = {
     alerts: new Alerts(new ElasticsearchAlertsAdapter(framework)),
@@ -74,7 +72,6 @@ export function compose(
     timeline,
     note,
     pinnedEvent,
-    case: caseWorkflow,
   };
 
   return libs;

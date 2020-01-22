@@ -8,18 +8,6 @@
 
 export type Maybe<T> = T | null;
 
-export interface PageInfoCase {
-  pageIndex: number;
-
-  pageSize: number;
-}
-
-export interface SortCase {
-  field: SortFieldCase;
-
-  direction: Direction;
-}
-
 export interface PageInfoNote {
   pageIndex: number;
 
@@ -279,20 +267,14 @@ export interface FavoriteTimelineInput {
   favoriteDate?: Maybe<number>;
 }
 
-export enum SortFieldCase {
-  created_at = 'created_at',
-  state = 'state',
-  updated_at = 'updated_at',
+export enum SortFieldNote {
+  updatedBy = 'updatedBy',
+  updated = 'updated',
 }
 
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
-}
-
-export enum SortFieldNote {
-  updatedBy = 'updatedBy',
-  updated = 'updated',
 }
 
 export enum LastEventIndexKey {
@@ -400,10 +382,6 @@ export type EsValue = any;
 // ====================================================
 
 export interface Query {
-  getCase: CaseSavedObject;
-
-  getCases: CasesSavedObjects;
-
   getNote: NoteResult;
 
   getNotesByTimelineId: NoteResult[];
@@ -421,50 +399,6 @@ export interface Query {
   getOneTimeline: TimelineResult;
 
   getAllTimeline: ResponseTimelines;
-}
-
-export interface CaseSavedObject {
-  attributes: CaseResult;
-
-  id: string;
-
-  type: string;
-
-  updated_at: string;
-
-  version: string;
-}
-
-export interface CaseResult {
-  case_type: string;
-
-  created_at: number;
-
-  created_by: ElasticUser;
-
-  description: string;
-
-  state: string;
-
-  tags: (Maybe<string>)[];
-
-  title: string;
-}
-
-export interface ElasticUser {
-  username: string;
-
-  full_name?: Maybe<string>;
-}
-
-export interface CasesSavedObjects {
-  saved_objects: (Maybe<CaseSavedObject>)[];
-
-  page: number;
-
-  per_page: number;
-
-  total: number;
 }
 
 export interface NoteResult {
@@ -2166,7 +2100,6 @@ export interface ResponseTimelines {
 }
 
 export interface Mutation {
-  deleteCase?: Maybe<boolean>;
   /** Persists a note */
   persistNote: ResponseNote;
 
@@ -2265,16 +2198,6 @@ export interface HostFields {
 // Arguments
 // ====================================================
 
-export interface GetCaseQueryArgs {
-  caseId: string;
-}
-export interface GetCasesQueryArgs {
-  pageInfo?: Maybe<PageInfoCase>;
-
-  search?: Maybe<string>;
-
-  sort?: Maybe<SortCase>;
-}
 export interface GetNoteQueryArgs {
   id: string;
 }
@@ -2591,9 +2514,6 @@ export interface IndicesExistSourceStatusArgs {
 export interface IndexFieldsSourceStatusArgs {
   defaultIndex: string[];
 }
-export interface DeleteCaseMutationArgs {
-  id: string[];
-}
 export interface PersistNoteMutationArgs {
   noteId?: Maybe<string>;
 
@@ -2776,124 +2696,6 @@ export namespace GetAuthenticationsQuery {
     dsl: string[];
 
     response: string[];
-  };
-}
-
-export namespace GetCaseQuery {
-  export type Variables = {
-    caseId: string;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    getCase: GetCase;
-  };
-
-  export type GetCase = {
-    __typename?: 'CaseSavedObject';
-
-    id: string;
-
-    type: string;
-
-    updated_at: string;
-
-    version: string;
-
-    attributes: Attributes;
-  };
-
-  export type Attributes = {
-    __typename?: 'CaseResult';
-
-    case_type: string;
-
-    created_at: number;
-
-    created_by: CreatedBy;
-
-    description: string;
-
-    state: string;
-
-    tags: (Maybe<string>)[];
-
-    title: string;
-  };
-
-  export type CreatedBy = {
-    __typename?: 'ElasticUser';
-
-    username: string;
-
-    full_name: Maybe<string>;
-  };
-}
-
-export namespace GetCasesQuery {
-  export type Variables = {
-    pageInfo: PageInfoCase;
-    search?: Maybe<string>;
-    sort?: Maybe<SortCase>;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    getCases: GetCases;
-  };
-
-  export type GetCases = {
-    __typename?: 'CasesSavedObjects';
-
-    page: number;
-
-    per_page: number;
-
-    total: number;
-
-    saved_objects: (Maybe<SavedObjects>)[];
-  };
-
-  export type SavedObjects = {
-    __typename?: 'CaseSavedObject';
-
-    id: string;
-
-    type: string;
-
-    updated_at: string;
-
-    version: string;
-
-    attributes: Attributes;
-  };
-
-  export type Attributes = {
-    __typename?: 'CaseResult';
-
-    case_type: string;
-
-    created_at: number;
-
-    created_by: CreatedBy;
-
-    description: string;
-
-    state: string;
-
-    tags: (Maybe<string>)[];
-
-    title: string;
-  };
-
-  export type CreatedBy = {
-    __typename?: 'ElasticUser';
-
-    username: string;
-
-    full_name: Maybe<string>;
   };
 }
 

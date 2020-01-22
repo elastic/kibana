@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { CasesPaginatedTable } from './table_hook';
+import { CasesPaginatedTable } from './table';
 
 export const CasesTable = React.memo(() => {
   return (
     <EuiFlexItem>
-      <CasesPaginatedTable id={'getCases'} />
+      <CasesPaginatedTable />
     </EuiFlexItem>
   );
 });

@@ -5,7 +5,6 @@
  */
 
 export { appModel } from './app';
-export { caseModel } from './case';
 export { dragAndDropModel } from './drag_and_drop';
 export { hostsModel } from './hosts';
 export { inputsModel } from './inputs';

@@ -16,7 +16,6 @@ import { createKpiHostsResolvers } from './graphql/kpi_hosts';
 import { createKpiNetworkResolvers } from './graphql/kpi_network';
 import { createNetworkResolvers } from './graphql/network';
 import { createNoteResolvers } from './graphql/note';
-import { createCaseResolvers } from './graphql/case';
 import { createPinnedEventResolvers } from './graphql/pinned_event';
 import { createOverviewResolvers } from './graphql/overview';
 import { createScalarDateResolvers } from './graphql/scalar_date';
@@ -39,7 +38,6 @@ export const initServer = (libs: AppBackendLibs) => {
       createAlertsResolvers(libs) as IResolvers,
       createAnomaliesResolvers(libs) as IResolvers,
       createAuthenticationsResolvers(libs) as IResolvers,
-      createCaseResolvers(libs) as IResolvers,
       createEsValueResolvers() as IResolvers,
       createEventsResolvers(libs) as IResolvers,
       createHostsResolvers(libs) as IResolvers,

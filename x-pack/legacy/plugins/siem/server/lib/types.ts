@@ -7,7 +7,6 @@
 export { ConfigType as Configuration } from '../../../../../plugins/siem/server';
 import { Anomalies } from './anomalies';
 import { Authentications } from './authentications';
-import { Case } from './case/saved_object';
 import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
@@ -45,7 +44,6 @@ export interface AppDomainLibs {
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
-  case: Case;
   framework: FrameworkAdapter;
   sources: Sources;
   sourceStatus: SourceStatus;

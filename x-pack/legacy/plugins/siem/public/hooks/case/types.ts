@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticUser, Maybe } from '../../../graphql/types';
 import { SavedObjectsBaseOptions } from 'kibana/server';
-
+import { Direction, Maybe } from '../../graphql/types';
+export { Direction };
 export interface CasesSavedObjects {
   saved_objects: Array<Maybe<CaseSavedObject>>;
 
@@ -43,7 +43,15 @@ export interface CaseResult {
 
   title: string;
 }
-
+export interface SortCase {
+  field: SortFieldCase;
+  direction: Direction;
+}
+export enum SortFieldCase {
+  createdAt = 'created_at',
+  state = 'state',
+  updatedAt = 'updated_at',
+}
 export interface CaseFindOptions extends SavedObjectsBaseOptions {
   page?: number;
   perPage?: number;
@@ -62,4 +70,9 @@ export interface CaseFindOptions extends SavedObjectsBaseOptions {
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string;
+}
+
+export interface ElasticUser {
+  username: string;
+  full_name?: Maybe<string>;
 }

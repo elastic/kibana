@@ -11,13 +11,11 @@ import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from '.
 import { hostsReducer, HostsState, initialHostsState } from './hosts';
 import { initialInputsState, inputsReducer, InputsState } from './inputs';
 import { initialNetworkState, networkReducer, NetworkState } from './network';
-import { initialCaseState, caseReducer, CaseState } from './case';
 import { initialTimelineState, timelineReducer } from './timeline/reducer';
 import { TimelineState } from './timeline/types';
 
 export interface State {
   app: AppState;
-  case: CaseState;
   dragAndDrop: DragAndDropState;
   hosts: HostsState;
   inputs: InputsState;
@@ -27,7 +25,6 @@ export interface State {
 
 export const initialState: State = {
   app: initialAppState,
-  case: initialCaseState,
   dragAndDrop: initialDragAndDropState,
   hosts: initialHostsState,
   inputs: initialInputsState,
@@ -37,7 +34,6 @@ export const initialState: State = {
 
 export const reducer = combineReducers<State>({
   app: appReducer,
-  case: caseReducer,
   dragAndDrop: dragAndDropReducer,
   hosts: hostsReducer,
   inputs: inputsReducer,

@@ -7,10 +7,9 @@
 import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
 
 import chrome from 'ui/chrome';
-import { CasesSavedObjects } from '../../components/page/case/types';
 import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS, UPDATE_TABLE } from './constants';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
-import { Direction, SortFieldCase } from '../../graphql/types';
+import { CasesSavedObjects, Direction, SortFieldCase } from './types';
 
 interface TableArgs {
   page: number;
@@ -37,7 +36,7 @@ interface PayloadObj {
 }
 interface Action {
   type: string;
-  payload: CasesSavedObjects | QueryArgs | PayloadObj;
+  payload?: CasesSavedObjects | QueryArgs | PayloadObj;
 }
 
 const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
@@ -88,7 +87,7 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     table: {
       page: DEFAULT_TABLE_ACTIVE_PAGE + 1,
       perPage: DEFAULT_TABLE_LIMIT,
-      sortField: SortFieldCase.created_at,
+      sortField: SortFieldCase.createdAt,
       sortOrder: Direction.desc,
     },
   });
@@ -101,7 +100,7 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
   useEffect(() => {
     let didCancel = false;
     const fetchData = async () => {
-      dispatch({ type: FETCH_INIT, payload: {} });
+      dispatch({ type: FETCH_INIT });
       try {
         const queryParams = Object.entries(state.table).reduce((acc, [key, value]) => {
           return `${acc}${key}=${value}&`;
@@ -116,11 +115,15 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
           },
         });
         if (!didCancel) {
-          dispatch({ type: FETCH_SUCCESS, payload: await result.json() });
+          const resultJson = await result.json();
+          if (resultJson.statusCode >= 400) {
+            return dispatch({ type: FETCH_FAILURE });
+          }
+          dispatch({ type: FETCH_SUCCESS, payload: resultJson });
         }
       } catch (error) {
         if (!didCancel) {
-          dispatch({ type: FETCH_FAILURE, payload: {} });
+          dispatch({ type: FETCH_FAILURE });
         }
       }
     };

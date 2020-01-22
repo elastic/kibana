@@ -6,7 +6,7 @@
 import React from 'react';
 import { getEmptyTagValue } from '../../../empty_value';
 import { Columns } from '../../../paginated_table';
-import { CaseSavedObject } from '../../../../graphql/types';
+import { CaseSavedObject } from '../../../../hooks/case/types';
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
 import { CaseDetailsLink } from '../../../links';
 

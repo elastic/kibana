@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 import chrome from 'ui/chrome';
-import { CaseSavedObject } from '../../components/page/case/types';
+import { CaseSavedObject } from './types';
 import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
 
 interface CaseState {
@@ -88,9 +88,8 @@ export const useGetCase = (initialCaseId: string): [CaseState] => {
           }
         );
         if (!didCancel) {
-          const resultJson = await result.json()
-          console.log('resultJson', resultJson);
-          if (resultJson.statusCode === 404) {
+          const resultJson = await result.json();
+          if (resultJson.statusCode >= 400) {
             return dispatch({ type: FETCH_FAILURE });
           }
           dispatch({ type: FETCH_SUCCESS, payload: resultJson });
