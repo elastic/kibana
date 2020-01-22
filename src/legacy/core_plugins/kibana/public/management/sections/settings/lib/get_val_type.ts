@@ -43,7 +43,7 @@ export function getValType(def: Partial<FieldSetting>, value?: any): UiSettingsT
     typeofVal === 'object' ||
     typeofVal === 'function'
   ) {
-    throw new Error('incompatible UiSettingsType');
+    throw new Error(`incompatible UiSettingsType: ${typeofVal}`);
   }
 
   return typeofVal === 'bigint' ? 'number' : typeofVal;

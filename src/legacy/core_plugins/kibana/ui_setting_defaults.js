@@ -257,6 +257,7 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Default index',
       }),
       value: null,
+      type: 'string',
       description: i18n.translate('kbn.advancedSettings.defaultIndexText', {
         defaultMessage: 'The index to access if no index is set',
       }),
