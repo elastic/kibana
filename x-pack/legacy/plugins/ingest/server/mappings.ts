@@ -40,6 +40,13 @@ export const mappings = {
       hosts: { type: 'keyword' },
       ingest_pipeline: { type: 'keyword' },
       api_key: { type: 'keyword' },
+      // TODO encrypt
+      admin_username: {
+        type: 'keyword',
+      },
+      admin_password: {
+        type: 'keyword',
+      },
     },
   },
   datasources: {

@@ -22,8 +22,6 @@ import { OutputsLib } from '../outputs';
 import { PolicyLib } from '../policy';
 import { ServerLibs } from '../types';
 import { BackendFrameworkLib } from './../framework';
-import { ElasticsearchAdapter } from '../adapters/elasticsearch/default';
-import { OutputAdapter } from '../adapters/outputs/default';
 
 export function compose(servers?: {
   shutdown: () => Promise<void>;
@@ -58,7 +56,7 @@ export function compose(servers?: {
   ) as BackendFrameworkAdapter;
   const framework = new BackendFrameworkLib(memorizedFrameworkAdapter);
 
-  const outputs = new OutputsLib({ framework }, {} as ElasticsearchAdapter, {} as OutputAdapter);
+  const outputs = {} as OutputsLib;
 
   const memorizedDatasourceAdapter = new MemorizedDatasourceAdapter(
     realDatasourceAdapter!

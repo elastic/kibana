@@ -22,7 +22,6 @@ import { FileSystemArtifactRepository } from '../../repositories/artifacts/file_
 import { HttpAdapter } from '../../adapters/http_adapter/default';
 import { AgentEventsRepository } from '../../repositories/agent_events/default';
 import { InstallLib } from '../install';
-import { ElasticsearchAdapter } from '../../adapters/elasticsearch/default';
 import { AgentPolicyLib } from '../agent_policy';
 import { AgentEventLib } from '../agent_event';
 import { makePolicyUpdateHandler } from '../policy_update';
@@ -59,7 +58,6 @@ export function compose(server: any): FleetServerLib {
     server.savedObjects,
     server.plugins.elasticsearch
   );
-  const esAdapter = new ElasticsearchAdapter(server.plugins.elasticsearch);
   const encryptedObjectAdapter = new EncryptedSavedObjects(
     server.newPlatform.start.plugins.encryptedSavedObjects
   );
@@ -72,7 +70,7 @@ export function compose(server: any): FleetServerLib {
 
   const libs: FleetServerLib = ({} as any) as FleetServerLib;
   const policies = new PolicyLib(policyAdapter);
-  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, esAdapter, libs, pluginsStart);
+  const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, libs, pluginsStart);
   const agentsPolicy = new AgentPolicyLib(agentsRepository, policies);
   const agentEvents = new AgentEventLib(agentEventsRepository);
   const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);

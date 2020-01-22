@@ -5,6 +5,7 @@
  */
 
 import { camelCase } from 'lodash';
+import KbnServer from 'src/legacy/server/kbn_server';
 import { PLUGIN } from '../../../common/constants';
 import { CONFIG_PREFIX } from '../../../common/constants/plugin';
 import { DatabaseKbnESPlugin } from '../adapters/es_database/adapter_types';
@@ -20,20 +21,31 @@ import { PolicyLib } from '../policy';
 import { ServerLibs } from '../types';
 import { BackendFrameworkLib } from './../framework';
 import { OutputAdapter } from '../adapters/outputs/default';
-import { ElasticsearchAdapter } from '../adapters/elasticsearch/default';
+import { PluginSetupContract as SecurityPlugin } from '../../../../../../plugins/security/server';
+
+export interface IngestPluginsStart {
+  security: SecurityPluginStartContract;
+}
+
+export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
+export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
 
 export function compose(server: KibanaLegacyServer): ServerLibs {
+  const newPlatform = ((server as unknown) as KbnServer).newPlatform;
   const framework = new BackendFrameworkLib(
     new BackendFrameworkAdapter(camelCase(PLUGIN.ID), server, CONFIG_PREFIX)
   );
 
-  const elasticsearch = new ElasticsearchAdapter(server.plugins.elasticsearch);
+  const pluginsStart: IngestPluginsStart = {
+    security: newPlatform.setup.plugins.security as SecurityPluginStartContract,
+  };
 
   const database = new ESDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
   const soDatabase = new SODatabaseAdapter(server.savedObjects, server.plugins.elasticsearch);
 
   const outputsAdapter = new OutputAdapter(soDatabase);
-  const outputs = new OutputsLib({ framework }, elasticsearch, outputsAdapter);
+
+  const outputs = new OutputsLib({ framework }, outputsAdapter, pluginsStart);
 
   const datasourceAdapter = new DatasourceAdapter(soDatabase);
   const datasources = new DatasourcesLib(datasourceAdapter, { framework });

@@ -15,13 +15,3 @@ export const initServerWithKibana = (hapiServer: any) => {
 
   initRestApi(hapiServer, libs);
 };
-
-export async function postInit(server: any) {
-  await Promise.all([
-    server.plugins.ingest.policy.ensureDefaultPolicy(),
-    server.plugins.ingest.outputs.ensureDefaultOutput(),
-  ]).catch(err => {
-    // Log error but do not stop kbn from booting
-    server.log(['error'], err);
-  });
-}

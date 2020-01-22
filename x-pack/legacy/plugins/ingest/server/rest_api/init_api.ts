@@ -9,6 +9,7 @@ import { HapiFrameworkAdapter } from '../libs/adapters/framework/hapi_framework_
 import { ServerLibs } from '../libs/types';
 import { registerPolicyRoutes } from './policy';
 import { registerDatasourceRoutes } from './datasource';
+import { registerInternalsRoute } from './internals';
 
 export function initRestApi(server: Server, libs: ServerLibs) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
@@ -16,4 +17,5 @@ export function initRestApi(server: Server, libs: ServerLibs) {
   // Register routes
   registerPolicyRoutes(frameworkAdapter, libs);
   registerDatasourceRoutes(frameworkAdapter, libs);
+  registerInternalsRoute(frameworkAdapter, libs);
 }

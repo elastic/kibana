@@ -14,7 +14,6 @@ import {
   AccessApiKeyVerificationResponse,
 } from '../repositories/enrollment_api_keys/types';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
-import { ElasticsearchAdapter } from '../adapters/elasticsearch/adapter_types';
 import { DEFAULT_POLICY_ID } from '../../common/constants';
 import {
   EnrollmentApiKey,
@@ -27,7 +26,6 @@ import { FleetPluginsStart } from './compose/kibana';
 export class ApiKeyLib {
   constructor(
     private readonly enrollmentApiKeysRepository: EnrollmentApiKeysRepository,
-    private readonly esAdapter: ElasticsearchAdapter,
     private readonly libs: FleetServerLib,
     private readonly pluginsStart: FleetPluginsStart
   ) {}
@@ -176,9 +174,7 @@ export class ApiKeyLib {
       throw Boom.notFound('Enrollment API key not found');
     }
 
-    await this.esAdapter.deleteApiKey(this.libs.framework.getInternalUser(), {
-      id: enrollmentApiKey.api_key_id,
-    });
+    await this._invalidateAPIKey(id);
 
     await this.enrollmentApiKeysRepository.delete(user, id);
   }
@@ -303,10 +299,28 @@ export class ApiKeyLib {
     });
   }
 
-  private async _createAPIKey(name: string, roleDescriptors: any) {
+  private async _invalidateAPIKey(id: string) {
+    const adminUser = await this.pluginsStart.ingest.outputs.getAdminUser();
     const request: FakeRequest = {
       headers: {
-        authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
+        authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
+          'base64'
+        )}`,
+      },
+    };
+
+    return this.pluginsStart.security.authc.invalidateAPIKey(request as KibanaRequest, {
+      id,
+    });
+  }
+
+  private async _createAPIKey(name: string, roleDescriptors: any) {
+    const adminUser = await this.pluginsStart.ingest.outputs.getAdminUser();
+    const request: FakeRequest = {
+      headers: {
+        authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
+          'base64'
+        )}`,
       },
     };
 

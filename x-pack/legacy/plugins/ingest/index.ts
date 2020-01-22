@@ -7,7 +7,7 @@ import * as Joi from 'joi';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
-import { initServerWithKibana, postInit } from './server/kibana.index';
+import { initServerWithKibana } from './server/kibana.index';
 import { mappings } from './server/mappings';
 // TODO https://github.com/elastic/kibana/issues/46373
 // import { INDEX_NAMES } from './common/constants';
@@ -40,6 +40,5 @@ export function ingest(kibana: any) {
     init(server: any) {
       initServerWithKibana(server);
     },
-    postInit,
   });
 }
