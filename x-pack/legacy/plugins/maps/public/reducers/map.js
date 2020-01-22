@@ -453,10 +453,23 @@ function resetDataRequest(state, action, request) {
     return state;
   }
 
-  dataRequest.dataRequestToken = null;
-  dataRequest.dataId = action.dataId;
-  const layerList = [...state.layerList];
-  return { ...state, layerList };
+  const layer = findLayerById(state, action.layerId);
+  const dataRequestIndex = layer.__dataRequests.indexOf(dataRequest);
+
+  const newDataRequests = [...layer.__dataRequests];
+  newDataRequests[dataRequestIndex] = { ...dataRequest };
+
+  const newDataRequest = newDataRequests[dataRequestIndex];
+  newDataRequest.dataRequestToken = null;
+  newDataRequest.dataId = action.dataId;
+
+  const layerIndex = state.layerList.indexOf(layer);
+  const newLayerList = [...state.layerList];
+  newLayerList[layerIndex] = {
+    ...layer,
+    __dataRequests: newDataRequests,
+  };
+  return { ...state, layerList: newLayerList };
 }
 
 function getValidDataRequest(state, action, checkRequestToken = true) {
