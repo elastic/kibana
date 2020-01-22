@@ -6,6 +6,7 @@
 
 import React, { FC } from 'react';
 
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { NavigationMenu } from '../../components/navigation_menu';
 
 // @ts-ignore
@@ -15,7 +16,11 @@ export const JobsPage: FC<{ props?: any }> = props => {
   return (
     <div data-test-subj="mlPageJobManagement">
       <NavigationMenu tabId="jobs" />
-      <JobsListView {...props} />
+      <EuiPage>
+        <EuiPageBody>
+          <JobsListView {...props} />
+        </EuiPageBody>
+      </EuiPage>
     </div>
   );
 };

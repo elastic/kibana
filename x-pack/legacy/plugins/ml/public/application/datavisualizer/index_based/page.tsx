@@ -132,12 +132,11 @@ export const Page: FC = () => {
 
   const defaults = getDefaultPageState();
 
-  const [showActionsPanel] = useState(
+  const showActionsPanel =
     isFullLicense() &&
-      checkPermission('canCreateJob') &&
-      mlNodesAvailable() &&
-      currentIndexPattern.timeFieldName !== undefined
-  );
+    checkPermission('canCreateJob') &&
+    mlNodesAvailable() &&
+    currentIndexPattern.timeFieldName !== undefined;
 
   const [searchString, setSearchString] = useState(defaults.searchString);
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
