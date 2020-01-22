@@ -731,8 +731,6 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
     readonly response?: Readonly<Response>;
 }
 
-// Warning: (ae-missing-release-tag) "ImageValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface ImageValidation {
     // (undocumented)
@@ -1178,14 +1176,10 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
     _version?: SavedObject<T>['version'];
 }
 
-// Warning: (ae-missing-release-tag) "StringValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
 
-// Warning: (ae-missing-release-tag) "StringValidationRegex" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export interface StringValidationRegex {
     // (undocumented)
     message: string;
@@ -1193,9 +1187,7 @@ export interface StringValidationRegex {
     regex: RegExp;
 }
 
-// Warning: (ae-missing-release-tag) "StringValidationRegexString" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @public
 export interface StringValidationRegexString {
     // (undocumented)
     message: string;

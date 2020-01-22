@@ -4,6 +4,8 @@
 
 ## StringValidation type
 
+Allows regex objects or a regex string
+
 <b>Signature:</b>
 
 ```typescript

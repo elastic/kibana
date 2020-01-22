@@ -111,8 +111,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMigrationVersion](./kibana-plugin-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsStart](./kibana-plugin-public.savedobjectsstart.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-public.savedobjectsupdateoptions.md) |  |
-|  [StringValidationRegex](./kibana-plugin-public.stringvalidationregex.md) |  |
-|  [StringValidationRegexString](./kibana-plugin-public.stringvalidationregexstring.md) |  |
+|  [StringValidationRegex](./kibana-plugin-public.stringvalidationregex.md) | StringValidation with regex object |
+|  [StringValidationRegexString](./kibana-plugin-public.stringvalidationregexstring.md) | StringValidation as regex string |
 |  [UiSettingsParams](./kibana-plugin-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
 |  [UserProvidedValues](./kibana-plugin-public.userprovidedvalues.md) | Describes the values explicitly set by user. |
@@ -149,7 +149,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) |
-|  [StringValidation](./kibana-plugin-public.stringvalidation.md) |  |
+|  [StringValidation](./kibana-plugin-public.stringvalidation.md) | Allows regex objects or a regex string |
 |  [Toast](./kibana-plugin-public.toast.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) | Inputs for [IToasts](./kibana-plugin-public.itoasts.md) APIs. |
 |  [ToastInputFields](./kibana-plugin-public.toastinputfields.md) | Allowed fields for [ToastInput](./kibana-plugin-public.toastinput.md)<!-- -->. |

@@ -77,18 +77,33 @@ export interface UiSettingsParams {
   validation?: ImageValidation | StringValidation;
 }
 
+/**
+ * Allows regex objects or a regex string
+ * @public
+ * */
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
 
+/**
+ * StringValidation with regex object
+ * @public
+ * */
 export interface StringValidationRegex {
   regex: RegExp;
   message: string;
 }
 
+/**
+ * StringValidation as regex string
+ * @public
+ * */
 export interface StringValidationRegexString {
   regexString: string;
   message: string;
 }
 
+/**
+ * @public
+ * */
 export interface ImageValidation {
   maxSize: {
     length: number;

@@ -4,6 +4,8 @@
 
 ## StringValidationRegex interface
 
+StringValidation with regex object
+
 <b>Signature:</b>
 
 ```typescript
