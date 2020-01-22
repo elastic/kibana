@@ -579,9 +579,7 @@ export class VectorStyle extends AbstractStyle {
     //fieldDescriptor.label is ignored. This is essentially cruft duplicating label-info from the metric-selection
     //Ignore this custom label
     if (fieldDescriptor.origin === FIELD_ORIGIN.SOURCE) {
-      return this._source.createField({
-        fieldName: fieldDescriptor.name,
-      });
+      return this._source.getFieldByName(fieldDescriptor.name);
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
       const join = this._layer.getValidJoins().find(join => {
         return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);

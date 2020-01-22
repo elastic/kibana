@@ -20,14 +20,13 @@
 import { AggConfig, VisState } from '../../..';
 import { EditorConfig } from '../../config/types';
 import { AggParam } from '../../../../agg_types';
-import { SubAggParamsProp } from '..';
 
 export const aggParamCommonPropsMock = {
   agg: {} as AggConfig,
   aggParam: {} as AggParam,
   editorConfig: {} as EditorConfig,
+  formIsTouched: false,
   metricAggs: [] as AggConfig[],
-  subAggParams: {} as SubAggParamsProp,
   state: {} as VisState,
   showValidation: false,
 };

@@ -8,6 +8,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { KqlFilterBar } from './kql_filter_bar';
 
+jest.mock('ui/new_platform');
+
 const defaultProps = {
   indexPattern: {
     title: '.ml-anomalies-*',

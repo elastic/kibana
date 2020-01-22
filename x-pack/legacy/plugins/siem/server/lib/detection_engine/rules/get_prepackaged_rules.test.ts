@@ -5,7 +5,7 @@
  */
 
 import { getPrepackagedRules } from './get_prepackaged_rules';
-import { RuleAlertParamsRest } from '../types';
+import { PrepackagedRules } from '../types';
 import { isEmpty } from 'lodash/fp';
 
 describe('get_existing_prepackaged_rules', () => {
@@ -15,7 +15,7 @@ describe('get_existing_prepackaged_rules', () => {
 
   test('no rule should have the same rule_id as another rule_id', () => {
     const prePacakgedRules = getPrepackagedRules();
-    let existingRuleIds: RuleAlertParamsRest[] = [];
+    let existingRuleIds: PrepackagedRules[] = [];
     prePacakgedRules.forEach(rule => {
       const foundDuplicate = existingRuleIds.reduce((accum, existingRule) => {
         if (existingRule.rule_id === rule.rule_id) {

@@ -184,6 +184,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           explorerState,
           setSelectedCells,
           showCharts,
+          severity: tableSeverity.val,
         }}
       />
     </div>

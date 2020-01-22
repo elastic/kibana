@@ -55,10 +55,10 @@ export const Editor = ({ loading }: Props) => {
   if (!currentTextObject) return null;
 
   return (
-    <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
+    <PanelsContainer onPanelWidthChange={onPanelWidthChange} resizerClassName="conApp__resizer">
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-        initialWidth={firstPanelWidth + '%'}
+        initialWidth={firstPanelWidth}
       >
         {loading ? (
           <EditorContentSpinner />
@@ -68,7 +68,7 @@ export const Editor = ({ loading }: Props) => {
       </Panel>
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
-        initialWidth={secondPanelWidth + '%'}
+        initialWidth={secondPanelWidth}
       >
         {loading ? <EditorContentSpinner /> : <EditorOutput />}
       </Panel>

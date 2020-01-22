@@ -20,11 +20,11 @@ const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
 export const eventsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_ACTION,
+    text: 'event.action',
     value: 'event.action',
   },
   {
-    text: i18n.NAVIGATION_EVENTS_STACK_BY_EVENT_DATASET,
+    text: 'event.dataset',
     value: 'event.dataset',
   },
 ];
@@ -50,7 +50,6 @@ export const EventsQueryTabBody = ({
       <MatrixHistogramContainer
         dataKey="EventsHistogram"
         defaultStackByOption={eventsStackByOptions[0]}
-        deleteQuery={deleteQuery}
         endDate={endDate}
         isEventsHistogram={true}
         errorMessage={i18n.ERROR_FETCHING_EVENTS_DATA}
