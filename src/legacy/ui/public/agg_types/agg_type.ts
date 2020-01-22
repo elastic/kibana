@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { initParams } from './agg_params';
 
-import { AggConfig } from '../vis';
+import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { ISearchSource } from '../courier';
 import { Adapters } from '../inspector';

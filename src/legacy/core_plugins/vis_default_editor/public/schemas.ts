@@ -22,10 +22,10 @@ import _ from 'lodash';
 import { Optional } from '@kbn/utility-types';
 
 import { AggParam, IndexedArray } from './legacy_imports';
-import { RowsOrColumnsControl } from './controls/rows_or_columns';
-import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
+import { RowsOrColumnsControl } from './components/controls/rows_or_columns';
+import { RadiusRatioOptionControl } from './components/controls/radius_ratio_option';
 import { AggGroupNames } from './agg_groups';
-import { AggControlProps } from './controls/agg_control_props';
+import { AggControlProps } from './components/controls/agg_control_props';
 
 export interface ISchemas {
   [AggGroupNames.Buckets]: Schema[];

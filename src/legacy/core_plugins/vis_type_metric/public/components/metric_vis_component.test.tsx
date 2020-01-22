@@ -20,8 +20,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { MetricVisComponent } from './metric_vis_component';
-import { Vis } from '../legacy_imports';
 
 jest.mock('ui/new_platform');
 

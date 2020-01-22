@@ -22,13 +22,13 @@ import React, { Component } from 'react';
 
 import { isColorDark } from '@elastic/eui';
 
-import { getHeatmapColors, getFormat, Vis } from '../legacy_imports';
+import { getHeatmapColors, getFormat } from '../legacy_imports';
 import { MetricVisValue } from './metric_vis_value';
 import { FieldFormat, ContentType } from '../../../../../plugins/data/public';
 import { Context } from '../metric_vis_fn';
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { VisParams, MetricVisMetric } from '../types';
-import { SchemaConfig } from '../../../visualizations/public';
+import { SchemaConfig, Vis } from '../../../visualizations/public';
 
 interface MetricVisComponentProps {
   visParams: VisParams;

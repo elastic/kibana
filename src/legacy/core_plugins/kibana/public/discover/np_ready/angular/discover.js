@@ -53,12 +53,12 @@ import {
   subscribeWithScope,
   tabifyAggResponse,
   vislibSeriesResponseHandlerProvider,
-  Vis,
   SavedObjectSaveModal,
   getAngularModule,
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,
 } from '../../kibana_services';
+import { Vis } from '../../../../../visualizations/public';
 
 const {
   core,

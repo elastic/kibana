@@ -20,8 +20,6 @@
 import { SearchSource as SearchSourceClass, ISearchSource } from 'ui/courier';
 import { Class } from '@kbn/utility-types';
 
-export { Vis, VisParams } from 'ui/vis';
-export { VisOptionsProps } from 'ui/vis/editors/default';
 export { ValidatedDualRange } from 'ui/validated_range';
 export { SearchSourceFields } from '../../data/public';
 

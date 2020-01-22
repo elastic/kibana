@@ -19,9 +19,9 @@
 
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../vis';
+import { FieldParamEditor } from 'src/legacy/core_plugins/vis_default_editor/public/components/controls/field';
+import { AggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';

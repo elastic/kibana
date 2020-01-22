@@ -19,7 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas, AggGroupNames, ColorSchemas, RangeValues } from './legacy_imports';
+import { ColorSchemas } from './legacy_imports';
+import { Schemas, AggGroupNames, RangeValues } from '../../vis_default_editor/public';
 import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils/collections';
 import { HeatmapOptions } from './components/options';
 import { createVislibVisController } from './vis_controller';

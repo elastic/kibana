@@ -22,7 +22,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AggGroupNames } from '../../../legacy_imports';
+import { AggGroupNames } from '../../../../../vis_default_editor/public';
 import { SelectOption } from '../../common';
 import { GaugeOptionsInternalProps } from '.';
 

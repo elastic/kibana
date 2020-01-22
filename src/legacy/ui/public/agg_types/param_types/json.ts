@@ -18,8 +18,9 @@
  */
 
 import _ from 'lodash';
-import { AggConfig } from 'ui/vis';
-import { RawJsonParamEditor } from '../../vis/editors/default/controls/raw_json';
+
+import { RawJsonParamEditor } from 'src/legacy/core_plugins/vis_default_editor/public/components/controls/raw_json';
+import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class JsonParamType extends BaseParamType {

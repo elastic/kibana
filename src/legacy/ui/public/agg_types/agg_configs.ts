@@ -28,9 +28,8 @@
 
 import _ from 'lodash';
 import { TimeRange } from 'src/plugins/data/public';
-import { Schema } from '../vis/editors/default/schemas';
+import { AggGroupNames, Schema } from 'src/legacy/core_plugins/vis_default_editor/public';
 import { AggConfig, AggConfigOptions } from './agg_config';
-import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { IndexPattern } from '../../../../plugins/data/public';
 import { ISearchSource, FetchOptions } from '../courier/types';
 

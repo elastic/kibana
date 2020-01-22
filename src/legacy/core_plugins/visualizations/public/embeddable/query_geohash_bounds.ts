@@ -21,11 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
-import { AggConfig } from 'ui/vis';
+import { AggConfig } from 'ui/agg_types';
 import { timefilter } from 'ui/timefilter';
-import { Vis } from '../../../vis';
-import { SearchSource, ISearchSource } from '../../../courier';
-import { esFilters, Query } from '../../../../../../plugins/data/public';
+import { SearchSource, ISearchSource } from '../../../../ui/public/courier';
+import { esFilters, Query } from '../../../../../plugins/data/public';
+import { Vis } from '../np_ready/public';
 
 interface QueryGeohashBoundsParams {
   filters?: esFilters.Filter[];
