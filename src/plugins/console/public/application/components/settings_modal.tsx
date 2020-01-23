@@ -248,7 +248,10 @@ export function DevToolsSettingsModal(props: Props) {
             }
           >
             <EuiCheckboxGroup
-              options={autoCompleteCheckboxes}
+              options={autoCompleteCheckboxes.map(opts => {
+                const { stateSetter, ...rest } = opts;
+                return rest;
+              })}
               idToSelectedMap={checkboxIdToSelectedMap}
               onChange={(e: any) => {
                 onAutocompleteChange(e as AutocompleteOptions);
