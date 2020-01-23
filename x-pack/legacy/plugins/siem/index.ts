@@ -165,11 +165,11 @@ export const siem = (kibana: any) => {
       const { config, newPlatform, plugins, route } = server;
       const { coreContext, env, setup } = newPlatform;
       const initializerContext = { ...coreContext, env } as PluginInitializerContext;
-
       const serverFacade = {
         config,
         plugins: {
           alerting: plugins.alerting,
+          actions: newPlatform.start.plugins.actions,
           elasticsearch: plugins.elasticsearch,
           spaces: plugins.spaces,
           savedObjects: server.savedObjects.SavedObjectsClient,

@@ -13,12 +13,20 @@ import {
   timelineSavedObjectMappings,
 } from './lib/timeline/saved_object_mappings';
 import {
+  ruleStatusSavedObjectMappings,
+  ruleStatusSavedObjectType,
+} from './lib/detection_engine/rules/saved_object_mappings';
+import {
   caseSavedObjectMappings,
   caseCommentSavedObjectMappings,
 } from './lib/case/saved_object_mappings';
-import { ruleStatusSavedObjectMappings } from './lib/detection_engine/rules/saved_object_mappings';
 
-export { noteSavedObjectType, pinnedEventSavedObjectType, timelineSavedObjectType };
+export {
+  noteSavedObjectType,
+  pinnedEventSavedObjectType,
+  ruleStatusSavedObjectType,
+  timelineSavedObjectType,
+};
 export const savedObjectMappings = {
   ...timelineSavedObjectMappings,
   ...noteSavedObjectMappings,
