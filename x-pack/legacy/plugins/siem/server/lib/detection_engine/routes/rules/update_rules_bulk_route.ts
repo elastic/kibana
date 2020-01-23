@@ -17,6 +17,7 @@ import { transformBulkError } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { updateRules } from '../../rules/update_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -33,13 +34,13 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
     },
     async handler(request: BulkUpdateRulesRequest, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
+      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from((request as unknown) as Hapi.Request)
+      );
       const savedObjectsClient = isFunction(request.getSavedObjectsClient)
         ? request.getSavedObjectsClient()
         : null;
-      if (!alertsClient || !actionsClient || !savedObjectsClient) {
+      if (!alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 

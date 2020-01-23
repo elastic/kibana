@@ -173,12 +173,11 @@ export const updateRules = async ({
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
-
   return alertsClient.update({
     id: rule.id,
     data: {
       tags: addTags(
-        tags,
+        tags != null ? tags : rule.tags, // Add tags as an update if it exists, otherwise re-use the older tags
         rule.params.ruleId,
         immutable != null ? immutable : rule.params.immutable // Add new one if it exists, otherwise re-use old one
       ),

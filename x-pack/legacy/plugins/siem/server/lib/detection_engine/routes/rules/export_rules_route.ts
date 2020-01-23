@@ -31,11 +31,8 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
     },
     async handler(request: ExportRulesRequest, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
 
-      if (!alertsClient || !actionsClient) {
+      if (!alertsClient) {
         return headers.response().code(404);
       }
 
