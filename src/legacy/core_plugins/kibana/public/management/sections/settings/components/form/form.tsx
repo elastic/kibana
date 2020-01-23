@@ -74,11 +74,11 @@ export class Form extends PureComponent<FormProps> {
       .find(el => el.name === key);
   };
 
-  getCountOfUnsavedSettings = (): number => {
+  getCountOfUnsavedChanges = (): number => {
     return Object.keys(this.state.unsavedChanges).length;
   };
 
-  getCountOfHiddenUnsavedSettings = (): number => {
+  getCountOfHiddenUnsavedChanges = (): number => {
     const unsavedSettings = Object.keys(this.state.unsavedChanges).map(key => ({ name: key }));
     const displayedUnsavedCount = intersectionBy(
       unsavedSettings,
@@ -123,7 +123,7 @@ export class Form extends PureComponent<FormProps> {
     });
   };
 
-  clearUnsaved = () => {
+  clearAllUnsaved = () => {
     this.setState({ unsavedChanges: {} });
   };
 
@@ -165,7 +165,7 @@ export class Form extends PureComponent<FormProps> {
 
     try {
       await this.props.save(configToSave);
-      this.clearUnsaved();
+      this.clearAllUnsaved();
       if (requiresReload) {
         this.renderPageReloadToast();
       }
@@ -296,8 +296,8 @@ export class Form extends PureComponent<FormProps> {
   }
 
   renderBottomBar = () => {
-    const unsavedCount = this.getCountOfUnsavedSettings();
-    const hiddenUnsavedCount = this.getCountOfHiddenUnsavedSettings();
+    const unsavedCount = this.getCountOfUnsavedChanges();
+    const hiddenUnsavedCount = this.getCountOfHiddenUnsavedChanges();
     return (
       <EuiBottomBar>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -330,7 +330,7 @@ export class Form extends PureComponent<FormProps> {
                   color="ghost"
                   size="s"
                   iconType="cross"
-                  onClick={this.clearUnsaved}
+                  onClick={this.clearAllUnsaved}
                   aria-label={i18n.translate('kbn.management.settings.form.cancelButtonAriaLabel', {
                     defaultMessage: 'Cancel all changes',
                   })}
