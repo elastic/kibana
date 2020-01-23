@@ -163,7 +163,7 @@ describe('url state', () => {
 
     cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).click({ force: true });
 
-    cy.url().should(
+    cy.url({ timeout: DEFAULT_TIMEOUT }).should(
       'include',
       `timeline:(linkTo:!(),timerange:(from:${new Date(
         ABSOLUTE_DATE_RANGE.newStartTimeTyped
@@ -270,8 +270,8 @@ describe('url state', () => {
     toggleTimelineVisibility();
     executeKQL(hostExistsQuery);
     assertAtLeastOneEventMatchesSearch();
-    const timelineName = 'My Timeline';
-    cy.get(TIMELINE_TITLE).type(`${timelineName}{enter}`);
+    const timelineName = 'SIEM';
+    cy.get(TIMELINE_TITLE).type(`${timelineName}{enter}`, { delay: 30 });
     cy.url({ timeout: DEFAULT_TIMEOUT }).should('match', /\w*-\w*-\w*-\w*-\w*/);
     cy.url().then(url => {
       const matched = url.match(/\w*-\w*-\w*-\w*-\w*/);

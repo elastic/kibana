@@ -15,10 +15,9 @@ export const DEFAULT_TIMEOUT = 30 * 1000;
  */
 export const loginAndWaitForPage = (url: string) => {
   login();
-
-  cy.visit(`${Cypress.config().baseUrl}${url}`);
-
   cy.viewport('macbook-15');
-
+  cy.visit(
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
+  );
   cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
 };
