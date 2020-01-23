@@ -16,7 +16,9 @@ export const endpointListSaga = async (
 
   for await (const { action } of actionsAndState()) {
     if (action.type === 'userEnteredEndpointListPage') {
-      const response = await httpPost('/api/endpoint/endpoints');
+      const response = await httpPost('/api/endpoint/endpoints', {
+        body: JSON.stringify({ paging_properties: [{ page_index: 1 }, { page_size: 2 }] }),
+      });
       dispatch({
         type: 'serverReturnedEndpointList',
         payload: response,
