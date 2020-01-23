@@ -29,7 +29,7 @@ describe('field format map', function() {
     number: { id: 'number', params: {} },
   };
   configMock['format:number:defaultPattern'] = '0,0.[000]';
-  const getConfig = (key: string) => configMock[key] as fieldFormats.GetConfigFn;
+  const getConfig = ((key: string) => configMock[key]) as fieldFormats.GetConfigFn;
   const testValue = '4000';
 
   const fieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
