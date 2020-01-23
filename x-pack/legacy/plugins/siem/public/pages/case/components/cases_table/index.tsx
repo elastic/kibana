@@ -8,12 +8,12 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
-import { Criteria, ItemsPerRow, PaginatedTable } from '../../../paginated_table';
+import { Criteria, ItemsPerRow, PaginatedTable } from '../../../../components/paginated_table';
 
 import { getCasesColumns } from './columns';
-import { Direction, SortFieldCase } from '../../types';
-import { useGetCases } from '../../api/use_get_cases';
-import { CasesSearchBar } from '../search_bar';
+import { Direction, SortFieldCase } from '../../../../containers/case/types';
+import { useGetCases } from '../../../../containers/case/use_get_cases';
+import { CasesSearchBar } from '../../search_bar';
 
 const rowItems: ItemsPerRow[] = [
   {

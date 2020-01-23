@@ -15,7 +15,7 @@ import {
   FETCH_SUCCESS,
   UPDATE_TABLE,
 } from './constants';
-import { CasesSavedObjects, Direction, SortFieldCase } from '../types';
+import { CasesSavedObjects, Direction, SortFieldCase } from './types';
 
 interface TableArgs {
   page: number;

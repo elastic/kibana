@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { getEmptyTagValue } from '../../../empty_value';
-import { Columns } from '../../../paginated_table';
-import { CaseSavedObject } from '../../../../hooks/case/types';
-import { FormattedRelativePreferenceDate } from '../../../formatted_date';
-import { CaseDetailsLink } from '../../../links';
+import { getEmptyTagValue } from '../../../../components/empty_value';
+import { Columns } from '../../../../components/paginated_table';
+import { CaseSavedObject } from '../../../../containers/case/types';
+import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
+import { CaseDetailsLink } from '../../../../components/links';
 
 export type CasesColumns = [
   Columns<CaseSavedObject['attributes']['title']>,

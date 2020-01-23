@@ -13,7 +13,7 @@ import { EmptyPage } from '../../components/empty_page';
 import { HeaderPage } from '../../components/header_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
-import { CasesTable } from '../../components/case/views/cases_table';
+import { CasesTable } from './cases_table';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
 

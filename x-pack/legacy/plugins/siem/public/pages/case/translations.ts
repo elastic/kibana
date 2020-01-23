@@ -38,3 +38,4 @@ export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.case.emptyActionP
 export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.case.emptyActionSecondary', {
   defaultMessage: 'Go to documentation',
 });
+

@@ -7,7 +7,7 @@
 import { useEffect, useReducer, useState } from 'react';
 
 import chrome from 'ui/chrome';
-import { CaseSavedObject } from '../types';
+import { CaseSavedObject } from './types';
 import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
 
 interface CaseState {

@@ -8,10 +8,10 @@ import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { HeaderPage } from '../../../header_page';
-import * as i18n from '../../../../pages/case/translations';
-import { getCaseUrl } from '../../../link_to';
-import { useGetCase } from '../../api/use_get_case';
+import { HeaderPage } from '../../../../components/header_page';
+import * as i18n from '../../translations';
+import { getCaseUrl } from '../../../../components/link_to';
+import { useGetCase } from '../../../../containers/case/use_get_case';
 
 interface Props {
   caseId: string;
