@@ -460,7 +460,6 @@ export function resetDataRequest(state, action, request) {
   newDataRequests[dataRequestIndex] = {
     ...dataRequest,
     dataRequestToken: null,
-    dataId: action.dataId,
   };
 
   const layerIndex = state.layerList.indexOf(layer);
