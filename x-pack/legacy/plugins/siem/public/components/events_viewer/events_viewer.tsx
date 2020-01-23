@@ -42,6 +42,10 @@ const WrappedByAutoSizer = styled.div`
 `; // required by AutoSizer
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
+const StyledEuiPanel = styled(EuiPanel)`
+  max-width: 100%;
+`;
+
 interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeader[];
@@ -113,7 +117,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiPanel data-test-subj="events-viewer-panel">
+    <StyledEuiPanel data-test-subj="events-viewer-panel">
       <AutoSizer detectAnyWindowResize={true} content>
         {({ measureRef, content: { width = 0 } }) => (
           <>
@@ -150,20 +154,18 @@ const EventsViewerComponent: React.FC<Props> = ({
                   const totalCountMinusDeleted =
                     totalCount > 0 ? totalCount - deletedEventIds.length : 0;
 
+                  const subtitle = `${
+                    i18n.SHOWING
+                  }: ${totalCountMinusDeleted.toLocaleString()} ${timelineTypeContext.unit?.(
+                    totalCountMinusDeleted
+                  ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
+
                   // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
                   return (
                     <>
                       <HeaderSection
                         id={id}
-                        subtitle={
-                          utilityBar
-                            ? undefined
-                            : `${
-                                i18n.SHOWING
-                              }: ${totalCountMinusDeleted.toLocaleString()} ${i18n.UNIT(
-                                totalCountMinusDeleted
-                              )}`
-                        }
+                        subtitle={utilityBar ? undefined : subtitle}
                         title={timelineTypeContext?.title ?? i18n.EVENTS}
                       >
                         {headerFilterGroup}
@@ -225,7 +227,7 @@ const EventsViewerComponent: React.FC<Props> = ({
           </>
         )}
       </AutoSizer>
-    </EuiPanel>
+    </StyledEuiPanel>
   );
 };
 

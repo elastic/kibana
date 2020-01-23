@@ -5,6 +5,9 @@
         "properties": {
           "parent": {
             "properties": {
+              "rule": {
+                "type": "keyword"
+              },
               "index": {
                 "type": "keyword"
               },
@@ -18,6 +21,9 @@
                 "type": "long"
               }
             }
+          },
+          "ancestors": {
+            "type": "object"
           },
           "rule": {
             "properties": {

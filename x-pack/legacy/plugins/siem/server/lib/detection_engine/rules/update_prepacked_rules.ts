@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsClient } from '../../../../../actions';
+import { SavedObjectsClientContract } from 'kibana/server';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { AlertsClient } from '../../../../../alerting';
 import { updateRules } from './update_rules';
 import { PrepackagedRules } from '../types';
@@ -12,6 +13,7 @@ import { PrepackagedRules } from '../types';
 export const updatePrepackagedRules = async (
   alertsClient: AlertsClient,
   actionsClient: ActionsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   rules: PrepackagedRules[],
   outputIndex: string
 ): Promise<void> => {
@@ -55,6 +57,7 @@ export const updatePrepackagedRules = async (
       outputIndex,
       id: undefined, // We never have an id when updating from pre-packaged rules
       savedId,
+      savedObjectsClient,
       meta,
       filters,
       ruleId,

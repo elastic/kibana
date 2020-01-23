@@ -18,11 +18,11 @@
  */
 
 import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import {
   Environment,
   FeatureCatalogueEntry,
@@ -41,8 +41,6 @@ export interface HomePluginStartDependencies {
 
 export interface HomePluginSetupDependencies {
   __LEGACY: {
-    trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
-    METRIC_TYPE: any;
     metadata: {
       app: unknown;
       bundleId: string;
@@ -59,6 +57,7 @@ export interface HomePluginSetupDependencies {
     getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
   };
+  usageCollection: UsageCollectionSetup;
   kibana_legacy: KibanaLegacySetup;
 }
 
@@ -71,6 +70,7 @@ export class HomePlugin implements Plugin {
     core: CoreSetup,
     {
       kibana_legacy,
+      usageCollection,
       __LEGACY: { getAngularDependencies, ...legacyServices },
     }: HomePluginSetupDependencies
   ) {
@@ -78,9 +78,11 @@ export class HomePlugin implements Plugin {
       id: 'home',
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {
+        const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
         const angularDependencies = await getAngularDependencies();
         setServices({
           ...legacyServices,
+          trackUiMetric,
           http: contextCore.http,
           toastNotifications: core.notifications.toasts,
           banners: contextCore.overlays.banners,
