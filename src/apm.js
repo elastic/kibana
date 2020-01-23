@@ -44,7 +44,7 @@ function devConfig() {
   }
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line prefer-object-spread/prefer-object-spread
 const apmConfig = Object.assign(
   {
     active: false,
