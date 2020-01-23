@@ -46,7 +46,11 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
               });
 
           return (
-            <AnalyzerParameter path="analyzer" label={label} defaultValue={field.source.analyzer} />
+            <AnalyzerParameter
+              path="analyzer"
+              label={label}
+              defaultValue={field.source.analyzer as string}
+            />
           );
         }}
       </FormDataProvider>
@@ -74,7 +78,7 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
               <EuiSpacer size="m" />
               <AnalyzerParameter
                 path="search_analyzer"
-                defaultValue={field.source.search_analyzer}
+                defaultValue={field.source.search_analyzer as string}
                 config={getFieldConfig('search_analyzer')}
               />
               <EuiSpacer size="s" />
@@ -88,7 +92,7 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
           <EuiSpacer size="m" />
           <AnalyzerParameter
             path="search_quote_analyzer"
-            defaultValue={field.source.search_quote_analyzer}
+            defaultValue={field.source.search_quote_analyzer as string}
             config={getFieldConfig('search_quote_analyzer')}
           />
         </>

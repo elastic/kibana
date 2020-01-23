@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { head } from 'lodash/fp';
 import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
@@ -27,6 +28,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     timelineId,
     truncate,
     values,
+    linkValues,
   }: {
     columnName: string;
     eventId: string;
@@ -34,6 +36,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     timelineId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
+    linkValues?: string[] | null | undefined;
   }) =>
     values != null
       ? values.map(value => (
@@ -46,6 +49,7 @@ export const plainColumnRenderer: ColumnRenderer = {
             fieldType={field.type || ''}
             value={parseValue(value)}
             truncate={truncate}
+            linkValue={head(linkValues)}
           />
         ))
       : getEmptyTagValue(),
