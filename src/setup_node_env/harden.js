@@ -17,8 +17,13 @@
  * under the License.
  */
 
-require('./harden');
-require('symbol-observable');
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+var hook = require('require-in-the-middle');
+
+// Ensure `process.env` doesn't inherit from `Object.prototype`. This gives
+// partial protection against similar RCE vulnerabilities as described in
+// CVE-2019-7609
+process.env = Object.assign(Object.create(null), process.env);
+
+hook(['child_process'], function(exports, name) {
+  return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
+});
