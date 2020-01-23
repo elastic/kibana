@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import uuid from 'uuid';
-import { isPlainObject } from 'lodash';
 
 import {
   DataType,
@@ -18,7 +17,6 @@ import {
   ChildFieldName,
   ParameterName,
   ComboBoxOption,
-  GenericObject,
 } from '../types';
 
 import {
@@ -504,58 +502,3 @@ export const isStateValid = (state: State): boolean | undefined =>
 
       return isValid && value.isValid;
     }, true as undefined | boolean);
-
-/**
- * 5.x index templates can be created with multiple types.
- * e.g.
- ```
-  const mappings = {
-      type1: {
-        properties: {
-          name1: {
-            type: 'keyword',
-          },
-        },
-      },
-      type2: {
-        properties: {
-          name2: {
-            type: 'keyword',
-          },
-        },
-      },
-    };
- ```
- * A mappings can also be declared under an explicit "_doc" property.
- ```
- const mappings = {
-    _doc: {
-      _source: {
-        "enabled": false
-      },
-      properties: {
-        name1: {
-          type: 'keyword',
-        },
-      },
-    },
-  };
- ```
- * This helpers parse the mappings provided an removes any possible mapping "type" declared
- *
- * @param mappings The mappings object to validate
- */
-export const extractMappingsDefinition = (mappings = {}): GenericObject | null => {
-  const mappingsFound = Object.values(mappings).reduce((acc: GenericObject[], value) => {
-    if (isPlainObject(value) && {}.hasOwnProperty.call(value, 'properties')) {
-      acc.push(value as GenericObject);
-    }
-    return acc;
-  }, []);
-
-  return mappingsFound.length === 0
-    ? mappings
-    : mappingsFound.length === 1
-    ? mappingsFound[0]
-    : null; // If more than 1 mappings definition, return null
-};

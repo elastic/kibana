@@ -36,7 +36,7 @@ describe('<MappingsEditor />', () => {
       expect(exists('documentFields')).toBe(false);
     });
 
-    test('should show not show a warning when mappings a single-type', async () => {
+    test('should not show a warning when mappings a single-type', async () => {
       const defaultValue = {
         properties: {
           name1: {

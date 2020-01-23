@@ -214,7 +214,7 @@ export const mappingsConfigurationSchema = t.partial({
 
 const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.props);
 
-const validateMappingsConfiguration = (
+export const validateMappingsConfiguration = (
   mappingsConfiguration: any
 ): { value: any; errors: MappingsValidationError[] } => {
   // Set to keep track of invalid configuration parameters.
