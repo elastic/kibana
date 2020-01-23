@@ -26,12 +26,13 @@ import React, {
   MutableRefObject,
 } from 'react';
 
-import { AppUnmount, Mounter, AppLeaveHandler } from '../types';
+import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
 interface Props {
   appId: string;
   mounter?: Mounter;
+  appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
 }
 
@@ -39,10 +40,12 @@ export const AppContainer: FunctionComponent<Props> = ({
   mounter,
   appId,
   setAppLeaveHandler,
+  appStatus,
 }: Props) => {
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef: MutableRefObject<AppUnmount | null> = useRef<AppUnmount>(null);
+  // const appStatus = useObservable(appStatus$);
 
   useLayoutEffect(() => {
     const unmount = () => {
@@ -52,7 +55,7 @@ export const AppContainer: FunctionComponent<Props> = ({
       }
     };
     const mount = async () => {
-      if (!mounter) {
+      if (!mounter || appStatus !== AppStatus.accessible) {
         return setAppNotFound(true);
       }
 
@@ -71,7 +74,7 @@ export const AppContainer: FunctionComponent<Props> = ({
 
     mount();
     return unmount;
-  }, [appId, mounter, setAppLeaveHandler]);
+  }, [appId, appStatus, mounter, setAppLeaveHandler]);
 
   return (
     <Fragment>

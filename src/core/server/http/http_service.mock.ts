@@ -21,6 +21,7 @@ import { Server } from 'hapi';
 import { CspConfig } from '../csp';
 import { mockRouter } from './router/router.mock';
 import { configMock } from '../config/config.mock';
+import { createMockEnv } from '../config/env.mock';
 import { InternalHttpServiceSetup } from './types';
 import { HttpService } from './http_service';
 import { AuthStatus } from './auth_state_storage';
@@ -73,7 +74,7 @@ const createSetupContractMock = () => {
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
     basePath: createBasePathMock(),
-    csp: CspConfig.DEFAULT,
+    csp: new CspConfig(createMockEnv()),
     auth: createAuthMock(),
     getAuthHeaders: jest.fn(),
     isTlsEnabled: false,

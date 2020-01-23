@@ -1,16 +1,36 @@
 {
-  "description": "EQL - Delete Volume USN Journal with fsutil",
+  "description": "Identifies use of the fsutil command to delete the volume USNJRNL. This technique is used by attackers to eliminate evidence of files created during post-exploitation activities.",
   "enabled": false,
   "filters": [],
   "from": "now-6m",
   "immutable": true,
   "interval": "5m",
   "language": "kuery",
-  "name": "EQL - Delete Volume USN Journal with fsutil",
+  "name": "Delete Volume USN Journal with fsutil",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and   process.name:\"fsutil.exe\" and    process.args:(\"usn\" and \"deletejournal\")",
-  "risk_score": 50,
+  "risk_score": 25,
   "rule_id": "f675872f-6d85-40a3-b502-c0d2ef101e92",
   "severity": "low",
+  "tags": [
+    "EIA"
+  ],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "techniques": [
+        {
+          "id": "T1107",
+          "name": "File Deletion",
+          "reference": "https://attack.mitre.org/techniques/T1107/"
+        }
+      ]
+    }
+  ],
   "to": "now",
   "type": "query",
   "version": 1

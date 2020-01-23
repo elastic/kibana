@@ -11,8 +11,7 @@ import { render } from 'react-dom';
 import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 import { npSetup } from 'ui/new_platform';
-import { SecurityPluginSetup } from '../../../../../../plugins/security/public';
-import { AuthenticatedUser } from '../../../common/model';
+import { AuthenticatedUser, SecurityPluginSetup } from '../../../../../../plugins/security/public';
 import { AuthenticationStatePage } from '../../components/authentication_state_page';
 
 chrome

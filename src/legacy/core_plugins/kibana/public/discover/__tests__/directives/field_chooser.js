@@ -23,7 +23,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { SimpleSavedObject } from '../../../../../../../core/public';

@@ -22,7 +22,8 @@ import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 
-import { compareFilters } from './lib/compare_filters';
+import { compareFilters, COMPARE_ALL_OPTIONS } from './lib/compare_filters';
+import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
@@ -76,20 +77,9 @@ export class FilterManager {
   }
 
   private handleStateUpdate(newFilters: esFilters.Filter[]) {
-    // global filters should always be first
+    newFilters.sort(sortFilters);
 
-    newFilters.sort(({ $state: a }: esFilters.Filter, { $state: b }: esFilters.Filter): number => {
-      if (a!.store === b!.store) {
-        return 0;
-      } else {
-        return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
-          b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
-          ? -1
-          : 1;
-      }
-    });
-
-    const filtersUpdated = !_.isEqual(this.filters, newFilters);
+    const filtersUpdated = !compareFilters(this.filters, newFilters, COMPARE_ALL_OPTIONS);
     const updatedOnlyDisabledFilters = onlyDisabledFiltersChanged(newFilters, this.filters);
 
     this.filters = newFilters;

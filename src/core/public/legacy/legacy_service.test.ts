@@ -98,6 +98,7 @@ const notificationsStart = notificationServiceMock.createStartContract();
 const overlayStart = overlayServiceMock.createStartContract();
 const uiSettingsStart = uiSettingsServiceMock.createStartContract();
 const savedObjectsStart = savedObjectsMock.createStartContract();
+const fatalErrorsStart = fatalErrorsServiceMock.createStartContract();
 const mockStorage = { getItem: jest.fn() } as any;
 
 const defaultStartDeps = {
@@ -112,6 +113,7 @@ const defaultStartDeps = {
     overlays: overlayStart,
     uiSettings: uiSettingsStart,
     savedObjects: savedObjectsStart,
+    fatalErrors: fatalErrorsStart,
   },
   lastSubUrlStorage: mockStorage,
   targetDomElement: document.createElement('div'),

@@ -76,6 +76,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IRouter](./kibana-plugin-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-server.routeconfig.md) and [RequestHandler](./kibana-plugin-server.requesthandler.md) for more information about arguments to route registrations. |
 |  [IScopedRenderingClient](./kibana-plugin-server.iscopedrenderingclient.md) |  |
 |  [IUiSettingsClient](./kibana-plugin-server.iuisettingsclient.md) | Server-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. |
+|  [KibanaRequestEvents](./kibana-plugin-server.kibanarequestevents.md) | Request events. |
 |  [KibanaRequestRoute](./kibana-plugin-server.kibanarequestroute.md) | Request specific route information exposed to a handler. |
 |  [LegacyRequest](./kibana-plugin-server.legacyrequest.md) |  |
 |  [LegacyServiceSetupDeps](./kibana-plugin-server.legacyservicesetupdeps.md) |  |
