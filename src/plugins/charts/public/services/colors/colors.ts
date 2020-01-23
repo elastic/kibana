@@ -22,6 +22,7 @@ import _ from 'lodash';
 import { CoreSetup } from 'kibana/public';
 
 import { MappedColors } from './mapped_colors';
+import { seedColors } from './seed_colors';
 
 /**
  * Accepts an array of strings or numbers that are used to create a
@@ -31,6 +32,8 @@ import { MappedColors } from './mapped_colors';
  */
 export class ColorsService {
   private _mappedColors?: MappedColors;
+
+  public readonly seedColors = seedColors;
 
   public get mappedColors() {
     if (!this._mappedColors) {
@@ -45,8 +48,6 @@ export class ColorsService {
   }
 
   vislibColor(arrayOfStringsOrNumbers?: any, colorMapping = {}) {
-    colorMapping = colorMapping || {};
-
     if (!Array.isArray(arrayOfStringsOrNumbers)) {
       throw new Error(
         `vislibColor expects an array but recived: ${typeof arrayOfStringsOrNumbers}`

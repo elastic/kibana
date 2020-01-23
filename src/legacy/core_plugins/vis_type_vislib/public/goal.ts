@@ -75,7 +75,7 @@ export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies)
     },
   },
   editorConfig: {
-    collections: getGaugeCollections(deps.colorMaps),
+    collections: getGaugeCollections(deps.charts.colorMaps),
     optionsTemplate: GaugeOptions,
     schemas: new Schemas([
       {

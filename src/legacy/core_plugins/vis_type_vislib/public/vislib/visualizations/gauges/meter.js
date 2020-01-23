@@ -56,9 +56,9 @@ const defaultConfig = {
 };
 
 export class MeterGauge {
-  constructor(gaugeChart, { colorMaps }) {
+  constructor(gaugeChart, { charts }) {
     this.gaugeChart = gaugeChart;
-    this.colorMaps = colorMaps;
+    this.colorMaps = charts.colorMaps;
     this.gaugeConfig = gaugeChart.gaugeConfig;
     this.gaugeConfig = _.defaultsDeep(this.gaugeConfig, defaultConfig);
 

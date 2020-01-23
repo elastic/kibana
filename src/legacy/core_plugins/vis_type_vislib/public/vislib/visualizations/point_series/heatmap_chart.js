@@ -42,7 +42,7 @@ export class HeatmapChart extends PointSeries {
   constructor(handler, chartEl, chartData, seriesConfigArgs, deps) {
     super(handler, chartEl, chartData, seriesConfigArgs, deps);
 
-    this.colorMaps = deps.colorMaps;
+    this.colorMaps = deps.charts.colorMaps;
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
 
     this.handler.visConfig.set('legend', {

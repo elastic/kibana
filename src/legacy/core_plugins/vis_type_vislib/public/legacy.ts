@@ -26,8 +26,6 @@ import {
   vislibSlicesResponseHandlerProvider,
   // @ts-ignore
 } from 'ui/vis/response_handlers/vislib';
-// @ts-ignore
-import { vislibColor } from 'ui/vis/components/color/color';
 
 import { plugin } from '.';
 import {
@@ -46,7 +44,6 @@ const setupPlugins: Readonly<KbnVislibVisTypesPluginSetupDependencies> = {
   __LEGACY: {
     vislibSeriesResponseHandlerProvider,
     vislibSlicesResponseHandlerProvider,
-    vislibColor,
   },
 };
 

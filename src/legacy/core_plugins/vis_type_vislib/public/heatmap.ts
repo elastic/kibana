@@ -85,7 +85,7 @@ export const createHeatmapVisTypeDefinition = (deps: KbnVislibVisTypesDependenci
     brush: { disabled: false },
   },
   editorConfig: {
-    collections: getHeatmapCollections(deps.colorMaps),
+    collections: getHeatmapCollections(deps.charts.colorMaps),
     optionsTemplate: HeatmapOptions,
     schemas: new Schemas([
       {

@@ -49,12 +49,11 @@ type KbnVislibVisTypesCoreSetup = CoreSetup<KbnVislibVisTypesPluginStartDependen
 export interface LegacyDependencies {
   vislibSeriesResponseHandlerProvider: ResponseHandlerProvider;
   vislibSlicesResponseHandlerProvider: ResponseHandlerProvider;
-  vislibColor: (colors: Array<string | number>, mappings: any) => (value: any) => any;
 }
 
 export type KbnVislibVisTypesDependencies = LegacyDependencies & {
   uiSettings: IUiSettingsClient;
-  colorMaps: ChartsPluginSetup['colorMaps'];
+  charts: ChartsPluginSetup;
 };
 
 /** @internal */
@@ -81,7 +80,7 @@ export class KbnVislibVisTypesPlugin implements Plugin<Promise<void>, void> {
   ) {
     const visualizationDependencies: Readonly<KbnVislibVisTypesDependencies> = {
       uiSettings: core.uiSettings,
-      colorMaps: charts.colorMaps,
+      charts,
       ...__LEGACY,
     };
 

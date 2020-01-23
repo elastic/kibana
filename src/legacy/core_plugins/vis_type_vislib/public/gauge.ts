@@ -111,7 +111,7 @@ export const createGaugeVisTypeDefinition = (deps: KbnVislibVisTypesDependencies
   },
   visualization: createVislibVisController(deps),
   editorConfig: {
-    collections: getGaugeCollections(deps.colorMaps),
+    collections: getGaugeCollections(deps.charts.colorMaps),
     optionsTemplate: GaugeOptions,
     schemas: new Schemas([
       {
