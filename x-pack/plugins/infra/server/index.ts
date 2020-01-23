@@ -6,8 +6,9 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 import { config, InfraConfig, InfraServerPlugin } from './plugin';
+import { savedObjectMappings } from './saved_objects';
 
-export { config, InfraConfig };
+export { config, InfraConfig, savedObjectMappings };
 export const APP_ID = 'infra';
 
 export function plugin(context: PluginInitializerContext) {
