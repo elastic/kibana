@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { HttpBody, Ping, PingResults } from '../../../../common/graphql/types';
 import { UMPingsAdapter } from './types';
-import { getPingHistogram } from './es_get_ping_historgram';
+import { esGetPingHistogram } from './es_get_ping_historgram';
 
 export const elasticsearchPingsAdapter: UMPingsAdapter = {
   getAll: async ({

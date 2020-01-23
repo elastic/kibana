@@ -10,77 +10,54 @@ import { assertCloseTo } from '../../../../../legacy/plugins/uptime/server/lib/h
 
 export default function({ getService }: FtrProviderContext) {
   describe('pingHistogram', () => {
-    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
-    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
-
     const supertest = getService('supertest');
 
     it('will fetch histogram data for all monitors', async () => {
-      const getPingHistogramQuery = {
-        operationName: 'PingHistogram',
-        query: pingHistogramQueryString,
-        variables: {
-          dateRangeStart: '2019-09-11T03:31:04.380Z',
-          dateRangeEnd: '2019-09-11T03:40:34.410Z',
-        },
-      };
+      const dateStart = '2019-09-11T03:31:04.380Z';
+      const dateEnd = '2019-09-11T03:40:34.410Z';
 
-      const {
-        body: { data },
-      } = await supertest
-        .post('/api/uptime/graphql')
-        .set('kbn-xsrf', 'foo')
-        .send({ ...getPingHistogramQuery });
+      const apiResponse = await supertest.get(
+        `/api/uptime/ping/histogram?dateStart=${dateStart}&dateEnd=${dateEnd}`
+      );
+      const data = apiResponse.body;
+
       // manually testing this value and then removing it to avoid flakiness
-      const { interval } = data.queryResult;
+      const { interval } = data;
       assertCloseTo(interval, 22801, 100);
-      delete data.queryResult.interval;
+      delete data.interval;
       expectFixtureEql(data, 'ping_histogram');
     });
 
     it('will fetch histogram data for a given monitor id', async () => {
-      const getPingHistogramQuery = {
-        operationName: 'PingHistogram',
-        query: pingHistogramQueryString,
-        variables: {
-          dateRangeStart: '2019-09-11T03:31:04.380Z',
-          dateRangeEnd: '2019-09-11T03:40:34.410Z',
-        },
-      };
+      const dateStart = '2019-09-11T03:31:04.380Z';
+      const dateEnd = '2019-09-11T03:40:34.410Z';
+      const monitorId = '0002-up';
 
-      const {
-        body: { data },
-      } = await supertest
-        .post('/api/uptime/graphql')
-        .set('kbn-xsrf', 'foo')
-        .send({ ...getPingHistogramQuery });
-      const { interval } = data.queryResult;
+      const apiResponse = await supertest.get(
+        `/api/uptime/ping/histogram?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
+      );
+      const data = apiResponse.body;
+
+      const { interval } = data;
       assertCloseTo(interval, 22801, 100);
-      delete data.queryResult.interval;
+      delete data.interval;
       expectFixtureEql(data, 'ping_histogram_by_id');
     });
 
     it('will fetch histogram data for a given filter', async () => {
-      const getPingHistogramQuery = {
-        operationName: 'PingHistogram',
-        query: pingHistogramQueryString,
-        variables: {
-          dateRangeStart: '2019-09-11T03:31:04.380Z',
-          dateRangeEnd: '2019-09-11T03:40:34.410Z',
-          filters:
-            '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}',
-        },
-      };
+      const dateStart = '2019-09-11T03:31:04.380Z';
+      const dateEnd = '2019-09-11T03:40:34.410Z';
+      const filters =
+        '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}';
 
-      const {
-        body: { data },
-      } = await supertest
-        .post('/api/uptime/graphql')
-        .set('kbn-xsrf', 'foo')
-        .send({ ...getPingHistogramQuery });
-      const { interval } = data.queryResult;
+      const apiResponse = await supertest.get(
+        `/api/uptime/ping/histogram?dateStart=${dateStart}&dateEnd=${dateEnd}&filters=${filters}`
+      );
+      const data = apiResponse.body;
+
+      const { interval } = data;
       assertCloseTo(interval, 22801, 100);
-      delete data.queryResult.interval;
+      delete data.interval;
       expectFixtureEql(data, 'ping_histogram_by_filter');
     });
   });
