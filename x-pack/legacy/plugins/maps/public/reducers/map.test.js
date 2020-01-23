@@ -7,6 +7,7 @@
 jest.mock('../actions/map_actions', () => ({}));
 
 import { resetDataRequest } from './map';
+import _ from 'lodash';
 
 describe('reducers/map', () => {
   it('Should clear datarequest without mutation store state', async () => {
@@ -35,6 +36,8 @@ describe('reducers/map', () => {
       ],
     };
 
+    const preStateCopy = _.cloneDeep(preState);
+
     const action = {
       layerId,
       requestToken,
@@ -43,19 +46,10 @@ describe('reducers/map', () => {
 
     const postState = resetDataRequest(preState, action);
 
-    expect(postState === preState).toEqual(false);
-    expect(postState.layerList === preState.layerList).toEqual(false);
-    expect(postState.layerList.length).toEqual(2);
-    expect(postState.layerList[1].__dataRequests.length).toEqual(2);
-    expect(postState.layerList[1].__dataRequests === preState.layerList[1].__dataRequests).toEqual(
-      false
-    );
-    expect(postState.layerList[1].__dataRequests === preState.layerList[1].__dataRequests).toEqual(
-      false
-    );
-    expect(
-      postState.layerList[1].__dataRequests[1] === preState.layerList[1].__dataRequests[1]
-    ).toEqual(false);
+    //Ensure previous state is not mutated.
+    expect(_.isEqual(preState, preStateCopy)).toEqual(true);
+
+    //Ensure new state is set correctly.
     expect(postState.layerList[1].__dataRequests[1].dataId).toEqual(dataId);
     expect(postState.layerList[1].__dataRequests[1].dataRequestToken).toEqual(null);
   });
