@@ -29,11 +29,11 @@ export const painlessPlayground = (kibana: any) =>
       // Register feature flag
       server.newPlatform.setup.core.uiSettings.register({
         [ADVANCED_SETTINGS_FLAG_NAME]: {
-          name: i18n.translate('kbn.advancedSettings.devTools.painlessPlaygroundTitle', {
+          name: i18n.translate('xpack.painless_playground.devTools.painlessPlaygroundTitle', {
             defaultMessage: 'Painless Playground',
           }),
           description: i18n.translate(
-            'kbn.advancedSettings.devTools.painlessPlaygroundDescription',
+            'xpack.painless_playground.devTools.painlessPlaygroundDescription',
             {
               defaultMessage: 'Enable experimental Painless Playground.',
             }
