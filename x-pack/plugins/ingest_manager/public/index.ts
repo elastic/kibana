@@ -6,10 +6,6 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { IngestManagerPlugin } from './plugin';
 
-// Exports to use in `server/`
-export { PLUGIN_ID, EPM_ROUTES } from './constants';
-export { epmRouteService } from './services';
-
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);
 };
