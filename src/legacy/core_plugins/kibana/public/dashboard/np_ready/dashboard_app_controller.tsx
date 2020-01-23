@@ -308,8 +308,14 @@ export class DashboardAppController {
             // This has to be first because handleDashboardContainerChanges causes
             // appState.save which will cause refreshDashboardContainer to be called.
 
-            // Add filters modifies the object passed to it, hence the clone deep.
-            if (!_.isEqual(container.getInput().filters, queryFilter.getFilters())) {
+            if (
+              !compareFilters(
+                container.getInput().filters,
+                queryFilter.getFilters(),
+                COMPARE_ALL_OPTIONS
+              )
+            ) {
+              // Add filters modifies the object passed to it, hence the clone deep.
               queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
 
               dashboardStateManager.applyFilters($scope.model.query, container.getInput().filters);
@@ -417,13 +423,13 @@ export class DashboardAppController {
           key
         ];
         if (!_.isEqual(containerValue, appStateValue)) {
-          // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
-          // but values from appStateValue are deeply frozen, as they can't be mutated directly
-          (differences as { [key: string]: unknown })[key] = _.cloneDeep(appStateValue);
+          (differences as { [key: string]: unknown })[key] = appStateValue;
         }
       });
 
-      return Object.values(differences).length === 0 ? undefined : differences;
+      // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
+      // but values from appStateValue are deeply frozen, as they can't be mutated directly
+      return Object.values(differences).length === 0 ? undefined : _.cloneDeep(differences);
     };
 
     const refreshDashboardContainer = () => {
