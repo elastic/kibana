@@ -25,4 +25,30 @@ export async function init(server: Server) {
     start: startContract,
   };
   server.expose(exposedFunctions);
+
+  createAlwaysFiringAlertType(setupContract);
+}
+
+function createAlwaysFiringAlertType(setupContract: any) {
+  // Alert types
+  const alwaysFiringAlertType: any = {
+    id: '.always-firing',
+    name: 'Always Firing',
+    actionGroups: ['default', 'other'],
+    async executor(alertExecutorOptions: any) {
+      const { services, state } = alertExecutorOptions;
+
+      services
+        .alertInstanceFactory('1')
+        .replaceState({ instanceStateValue: true })
+        .scheduleActions('default', {
+          instanceContextValue: true,
+        });
+      return {
+        globalStateValue: true,
+        groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+      };
+    },
+  };
+  setupContract.registerType(alwaysFiringAlertType);
 }
