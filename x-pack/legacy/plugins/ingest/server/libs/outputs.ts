@@ -19,13 +19,16 @@ export class OutputsLib {
     private readonly pluginsStart: IngestPluginsStart
   ) {}
 
-  public async createDefaultOutput(adminUser: { username: string; password: string }) {
-    const defaultOutput = await this.adapter.get(this.libs.framework.internalUser, 'default');
+  public async createDefaultOutput(
+    user: FrameworkUser,
+    adminUser: { username: string; password: string }
+  ) {
+    const defaultOutput = await this.adapter.get(user, 'default');
     if (!defaultOutput) {
       const apiKey = await this._createDefaultApiKey(adminUser.username, adminUser.password);
       // Create default output with an API KEY
       await this.adapter.create(
-        this.libs.framework.internalUser,
+        user,
         {
           name: 'default',
           type: OutputType.Elasticsearch,
@@ -43,14 +46,14 @@ export class OutputsLib {
   }
 
   public async getAdminUser() {
-    const [defaultOutput] = await this.getByIDs(this.libs.framework.internalUser, ['default']);
-    if (!defaultOutput) {
-      throw new Error('No default output');
-    }
+    const so = await this.pluginsStart.encryptedSavedObjects.getDecryptedAsInternalUser(
+      'outputs',
+      'default'
+    );
 
     return {
-      username: defaultOutput.admin_username,
-      password: defaultOutput.admin_password,
+      username: so.attributes.admin_username,
+      password: so.attributes.admin_password,
     };
   }
 
@@ -71,7 +74,9 @@ export class OutputsLib {
   private async _createDefaultApiKey(username: string, password: string): Promise<string> {
     const key = await this.pluginsStart.security.authc.createAPIKey(
       {
-        headers: { authorization: Buffer.from(`${username}:${password}`).toString('base64') },
+        headers: {
+          authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+        },
       } as KibanaRequest,
       {
         name: 'fleet-default-output',
@@ -88,7 +93,6 @@ export class OutputsLib {
         },
       }
     );
-
     if (!key) {
       throw new Error('An error occured while creating default API Key');
     }

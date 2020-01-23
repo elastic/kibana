@@ -5,7 +5,6 @@
  */
 
 import os from 'os';
-import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
 import { ApiKeyLib } from '../api_keys';
 import { AgentLib } from '../agent';
 import { FrameworkLib } from '../framework';
@@ -25,28 +24,9 @@ import { InstallLib } from '../install';
 import { AgentPolicyLib } from '../agent_policy';
 import { AgentEventLib } from '../agent_event';
 import { makePolicyUpdateHandler } from '../policy_update';
-import { PluginSetupContract as SecurityPlugin } from '../../../../../../plugins/security/server';
-import { OutputsLib as IngestOutputLib } from '../../../../ingest/server/libs/outputs';
-import { PolicyLib as IngestPolicyLib } from '../../../../ingest/server/libs/policy';
+import { FleetPluginsStart } from '../../shim';
 
-export interface FleetPluginsStart {
-  security: SecurityPluginStartContract;
-  ingest: {
-    outputs: IngestOutputLib;
-    policies: IngestPolicyLib;
-  };
-}
-
-export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
-export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
-
-export function compose(server: any): FleetServerLib {
-  const newPlatform = ((server as unknown) as KbnServer).newPlatform;
-  const pluginsStart: FleetPluginsStart = {
-    security: newPlatform.setup.plugins.security as SecurityPluginStartContract,
-    ingest: server.plugins.ingest,
-  };
-
+export function compose(server: any, pluginsStart: FleetPluginsStart): FleetServerLib {
   const frameworkAdapter = new FrameworkAdapter(server);
   const policyAdapter = new PoliciesRepository(
     server.plugins.ingest.policy,

@@ -22,8 +22,10 @@ import { ServerLibs } from '../types';
 import { BackendFrameworkLib } from './../framework';
 import { OutputAdapter } from '../adapters/outputs/default';
 import { PluginSetupContract as SecurityPlugin } from '../../../../../../plugins/security/server';
+import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../../plugins/encrypted_saved_objects/server';
 
 export interface IngestPluginsStart {
+  encryptedSavedObjects: EncryptedSavedObjectsStartContract;
   security: SecurityPluginStartContract;
 }
 
@@ -38,6 +40,8 @@ export function compose(server: KibanaLegacyServer): ServerLibs {
 
   const pluginsStart: IngestPluginsStart = {
     security: newPlatform.setup.plugins.security as SecurityPluginStartContract,
+    encryptedSavedObjects: newPlatform.start.plugins
+      .encryptedSavedObjects as EncryptedSavedObjectsStartContract,
   };
 
   const database = new ESDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);

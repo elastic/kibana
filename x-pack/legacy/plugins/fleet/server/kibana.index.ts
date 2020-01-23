@@ -6,8 +6,19 @@
 
 import { compose } from './libs/compose/kibana';
 import { initRestApi } from './routes/init_api';
+import { shim } from './shim';
 
 export const initServerWithKibana = (hapiServer: any) => {
-  const libs = compose(hapiServer);
+  const {
+    pluginsStart,
+    // pluginsSetup
+  } = shim(hapiServer);
+  const libs = compose(hapiServer, pluginsStart);
+
+  // TODO enable when this is fixed https://github.com/elastic/kibana/pull/42762
+  // pluginsSetup.encryptedSavedObjects.registerType({
+  //   type: 'outputs',
+  //   attributesToEncrypt: new Set(['admin_username', 'admin_password']),
+  // });
   initRestApi(hapiServer, libs);
 };

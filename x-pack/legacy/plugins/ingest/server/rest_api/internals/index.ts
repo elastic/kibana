@@ -62,7 +62,7 @@ const createPOSTInternalsSetupRoute = (libs: ServerLibs) => ({
       };
     }>
   ): Promise<SetupResponse> => {
-    await libs.outputs.createDefaultOutput({
+    await libs.outputs.createDefaultOutput(request.user, {
       username: request.payload.admin_username,
       password: request.payload.admin_password,
     });

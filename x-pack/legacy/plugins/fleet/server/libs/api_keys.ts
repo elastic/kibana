@@ -21,7 +21,7 @@ import {
   EnrollmentRule,
 } from '../../common/types/domain_data';
 import { FleetServerLib } from './types';
-import { FleetPluginsStart } from './compose/kibana';
+import { FleetPluginsStart } from '../shim';
 
 export class ApiKeyLib {
   constructor(
