@@ -17,21 +17,16 @@
  * under the License.
  */
 
-import { createMetricVisFn } from './metric_vis_fn';
-
 import { npSetup } from 'ui/new_platform';
 
-// eslint-disable-next-line
+import { createMetricVisFn } from './metric_vis_fn';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
 jest.mock('ui/new_platform');
 
 describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(() =>
-    createMetricVisFn({
-      colorMaps: npSetup.plugins.charts.colorMaps,
-    })
-  );
+  const fn = functionWrapper(() => createMetricVisFn(npSetup.plugins.charts));
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],

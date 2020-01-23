@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 
-import { npStart, npSetup } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 // @ts-ignore
 import getStubIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -37,9 +37,8 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
   let vis: Vis;
 
   beforeAll(() => {
-    const { colorMaps } = npSetup.plugins.charts;
-    visualizationsSetup.types.createReactVisualization(() =>
-      createMetricVisTypeDefinition({ colorMaps })
+    visualizationsSetup.types.createReactVisualization(
+      createMetricVisTypeDefinition(npSetup.plugins.charts)
     );
     (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
       return UrlFormat;

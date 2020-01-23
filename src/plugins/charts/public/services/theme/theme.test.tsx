@@ -26,28 +26,32 @@ import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist
 import { ThemeService } from './theme';
 import { coreMock } from '../../../../../core/public/mocks';
 
-const { uiSettings: startMockUiSettings } = coreMock.createStart();
+const { uiSettings: setupMockUiSettings } = coreMock.createSetup();
 
 describe('ThemeService', () => {
   describe('chartsTheme$', () => {
-    it('returns the light theme when not in dark mode', () => {
-      startMockUiSettings.get$.mockReturnValue(new BehaviorSubject(false));
+    it('should throw error if service has not been initialized', () => {
       const themeService = new ThemeService();
-      themeService.init(startMockUiSettings);
+      expect(() => themeService.chartsTheme$).toThrowError();
+    });
+    it('returns the light theme when not in dark mode', async () => {
+      setupMockUiSettings.get$.mockReturnValue(new BehaviorSubject(false));
+      const themeService = new ThemeService();
+      themeService.init(setupMockUiSettings);
 
-      expect(themeService.chartsTheme$.pipe(take(1)).toPromise()).toEqual(
+      expect(await themeService.chartsTheme$.pipe(take(1)).toPromise()).toEqual(
         EUI_CHARTS_THEME_LIGHT.theme
       );
     });
 
     describe('in dark mode', () => {
-      it(`returns the dark theme`, () => {
+      it(`returns the dark theme`, async () => {
         // Fake dark theme turned returning true
-        startMockUiSettings.get$.mockReturnValue(new BehaviorSubject(true));
+        setupMockUiSettings.get$.mockReturnValue(new BehaviorSubject(true));
         const themeService = new ThemeService();
-        themeService.init(startMockUiSettings);
+        themeService.init(setupMockUiSettings);
 
-        expect(themeService.chartsTheme$.pipe(take(1)).toPromise()).toEqual(
+        expect(await themeService.chartsTheme$.pipe(take(1)).toPromise()).toEqual(
           EUI_CHARTS_THEME_DARK.theme
         );
       });
@@ -57,9 +61,9 @@ describe('ThemeService', () => {
   describe('useChartsTheme', () => {
     it('updates when the uiSettings change', () => {
       const darkMode$ = new BehaviorSubject(false);
-      startMockUiSettings.get$.mockReturnValue(darkMode$);
+      setupMockUiSettings.get$.mockReturnValue(darkMode$);
       const themeService = new ThemeService();
-      themeService.init(startMockUiSettings);
+      themeService.init(setupMockUiSettings);
       const { useChartsTheme } = themeService;
 
       const { result } = renderHook(() => useChartsTheme());

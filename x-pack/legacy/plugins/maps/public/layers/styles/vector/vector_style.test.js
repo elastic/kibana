@@ -9,6 +9,8 @@ import { DataRequest } from '../../util/data_request';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 
+jest.mock('ui/new_platform');
+
 class MockField {
   constructor({ fieldName }) {
     this._fieldName = fieldName;
