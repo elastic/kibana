@@ -1503,9 +1503,12 @@ export class SavedObjectsClient {
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 // @public
-export type SavedObjectsClientFactory<Request = unknown> = ({ request, }: {
-    request: Request;
+export type SavedObjectsClientFactory = ({ request, }: {
+    request: KibanaRequest;
 }) => SavedObjectsClientContract;
+
+// @public
+export type SavedObjectsClientFactoryProvider = (repositoryFactory: SavedObjectsRepositoryFactory) => SavedObjectsClientFactory;
 
 // @public
 export interface SavedObjectsClientProviderOptions {
@@ -1514,14 +1517,14 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 // @public
-export type SavedObjectsClientWrapperFactory<Request = unknown> = (options: SavedObjectsClientWrapperOptions<Request>) => SavedObjectsClientContract;
+export type SavedObjectsClientWrapperFactory = (options: SavedObjectsClientWrapperOptions) => SavedObjectsClientContract;
 
 // @public
-export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+export interface SavedObjectsClientWrapperOptions {
     // (undocumented)
     client: SavedObjectsClientContract;
     // (undocumented)
-    request: Request;
+    request: KibanaRequest;
 }
 
 // @public (undocumented)
@@ -1757,15 +1760,15 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
 }
 
 // @internal @deprecated (undocumented)
-export interface SavedObjectsLegacyService<Request = any> {
+export interface SavedObjectsLegacyService {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider['addClientWrapperFactory'];
     // (undocumented)
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
-    getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
+    getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
     // (undocumented)
     importExport: {
         objectLimit: number;
@@ -1778,7 +1781,7 @@ export interface SavedObjectsLegacyService<Request = any> {
     // (undocumented)
     schema: SavedObjectsSchema;
     // (undocumented)
-    setScopedSavedObjectsClientFactory: SavedObjectsClientProvider<Request>['setClientFactory'];
+    setScopedSavedObjectsClientFactory: SavedObjectsClientProvider['setClientFactory'];
     // (undocumented)
     types: string[];
 }
@@ -1842,6 +1845,12 @@ export class SavedObjectsRepository {
     }
 
 // @public
+export interface SavedObjectsRepositoryFactory {
+    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+}
+
+// @public
 export interface SavedObjectsResolveImportErrorsOptions {
     // (undocumented)
     namespace?: string;
@@ -1883,14 +1892,14 @@ export class SavedObjectsSerializer {
 
 // @public
 export interface SavedObjectsServiceSetup {
-    addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory<KibanaRequest>) => void;
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
-    setClientFactory: (customClientFactory: SavedObjectsClientFactory<KibanaRequest>) => void;
+    addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
 // @public
 export interface SavedObjectsServiceStart {
+    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
 }
 
