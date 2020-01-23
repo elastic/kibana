@@ -78,6 +78,10 @@ const coreSystem = new CoreSystem({
     buildNumber: 1234,
     legacyMode: true,
     legacyMetadata: {
+      app: {
+        id: 'karma',
+        title: 'Karma',
+      },
       nav: [],
       version: '1.2.3',
       buildNum: 1234,
