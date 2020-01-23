@@ -99,6 +99,53 @@ export class FunctionalTestRunner {
     });
   }
 
+  async getTestSuites() {
+    // TODO re-factor this so that it's not duplicated
+    return await this._run(async (config, coreProviders) => {
+      // replace the function of custom service providers so that they return
+      // promise-like objects which never resolve, essentially disabling them
+      // allowing us to load the test files and populate the mocha suites
+      const readStubbedProviderSpec = (type: string, providers: any) =>
+        readProviderSpec(type, providers).map(p => ({
+          ...p,
+          fn: () => ({
+            then: () => {},
+          }),
+        }));
+
+      const providers = new ProviderCollection(this.log, [
+        ...coreProviders,
+        ...readStubbedProviderSpec('Service', config.get('services')),
+        ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),
+      ]);
+
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
+
+      const suitesByIndex = {};
+
+      const findLeafSuites = (suite: any, parentFile = null) => {
+        parentFile =
+          suite.parent && suite.parent.file !== suite.file ? suite.parent.file : parentFile;
+        parentFile = parentFile || suite.file;
+
+        if (suite.suites && suite.suites.length) {
+          suite.suites.forEach(s => findLeafSuites(s, parentFile));
+        } else {
+          suitesByIndex[parentFile] = suitesByIndex[parentFile] || new Set();
+          suitesByIndex[parentFile].add(suite.suiteTag);
+        }
+      };
+
+      findLeafSuites(mocha.suite);
+
+      Object.keys(suitesByIndex).forEach(key => {
+        suitesByIndex[key] = [...suitesByIndex[key]];
+      });
+
+      return suitesByIndex;
+    });
+  }
+
   async _run<T = any>(
     handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>
   ): Promise<T> {

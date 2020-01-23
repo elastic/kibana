@@ -65,6 +65,16 @@ export function decorateMochaUi(lifecycle, context) {
             this._tags = [].concat(this._tags || [], tags);
           };
 
+          const tag = this.file
+            .match(/\/test\/(.*?)$/)[1]
+            .replace('/index.js', '')
+            .replace(/\.(j|t)s$/, '')
+            .replace('/test_suites/', '/')
+            .replace(/\//g, '.');
+
+          this.tags(tag);
+          this.suiteTag = tag;
+
           provider.call(this);
 
           after(async () => {

@@ -22,7 +22,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
   return async ({ readConfigFile }: TestInvoker) => {
     const config = {
       kibana: {
-        api: await readConfigFile(resolveKibanaPath('test/api_integration/config.js')),
+        api: await readConfigFile(require.resolve('../../../test/api_integration/config.js')),
         functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
       },
       xpack: {

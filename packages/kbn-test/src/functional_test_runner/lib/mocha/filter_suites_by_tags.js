@@ -38,7 +38,14 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
   if (include.length) {
     log.info('Only running suites (and their sub-suites) if they include the tag(s):', include);
 
-    const isIncluded = suite => (!suite._tags ? false : suite._tags.some(t => include.includes(t)));
+    const isIncluded = suite => {
+      return !suite._tags
+        ? false
+        : suite._tags.some(
+            t => include.includes(t) || include.find(i => i === t.substr(0, i.length))
+          );
+    };
+
     const isChildIncluded = suite => suite.suites.some(s => isIncluded(s) || isChildIncluded(s));
 
     (function recurse(parentSuite) {
