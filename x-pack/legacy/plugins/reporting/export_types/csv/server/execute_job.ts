@@ -5,13 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../types';
+import {
+  ExecuteJobFactory,
+  ESQueueWorkerExecuteFn,
+  FieldFormats,
+  ServerFacade,
+} from '../../../types';
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { JobDocPayloadDiscoverCsv } from '../types';
-// @ts-ignore untyped module TODO
 import { createGenerateCsv } from './lib/generate_csv';
-// @ts-ignore untyped module TODO
 import { fieldFormatMapFactory } from './lib/field_format_map';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
@@ -86,7 +89,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
-        const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
+        const fieldFormats = (await server.fieldFormatServiceFactory(uiConfig)) as FieldFormats;
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),
       (async () => {
