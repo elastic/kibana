@@ -127,9 +127,6 @@ export const spaces = (kibana: Record<string, any>) =>
           kibanaIndex: config.get('kibana.index'),
         },
         savedObjects: server.savedObjects,
-        tutorial: {
-          addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
-        },
         auditLogger: {
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
