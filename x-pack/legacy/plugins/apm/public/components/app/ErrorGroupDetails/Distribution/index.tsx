@@ -6,11 +6,13 @@
 
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { scaleUtc } from 'd3-scale';
 import React from 'react';
+import { asRelativeDateTimeRange } from '../../../../utils/formatters';
+import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 
 interface IBucket {
   key: number;
@@ -61,7 +63,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
     distribution.bucketSize
   );
 
-  if (distribution.noHits) {
+  if (!buckets || distribution.noHits) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
@@ -79,7 +81,16 @@ export function ErrorDistribution({ distribution, title }: Props) {
       <Histogram
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
-        xType="time"
+        xType="time-utc"
+        formatX={(value: any) => {
+          if (value && 'getTime' in value) {
+            const time = value.getTime();
+            return scaleUtc().tickFormat()(
+              new Date(time - getTimezoneOffsetInMs(time))
+            );
+          }
+          return value;
+        }}
         buckets={buckets}
         bucketSize={distribution.bucketSize}
         formatYShort={(value: number) =>
