@@ -33,6 +33,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send a message to a Slack channel or user.',
       }
     ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to Slack',
+      }
+    ),
     validateConnector: (action: ActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {

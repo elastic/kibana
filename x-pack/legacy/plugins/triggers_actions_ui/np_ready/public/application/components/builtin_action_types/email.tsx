@@ -35,6 +35,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send email from your server.',
       }
     ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to email',
+      }
+    ),
     validateConnector: (action: ActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {

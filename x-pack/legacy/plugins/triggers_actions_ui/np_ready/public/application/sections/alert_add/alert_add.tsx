@@ -25,13 +25,13 @@ export const AlertAdd = () => {
     mutedInstanceIds: [],
   } as unknown) as Alert;
 
-  const { alertFlyoutVisible, setAlertFlyoutVisibility } = useAlertsContext();
+  const { addFlyoutVisible, setAddFlyoutVisibility } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
-    setAlertFlyoutVisibility(false);
-  }, [setAlertFlyoutVisibility]);
+    setAddFlyoutVisibility(false);
+  }, [setAddFlyoutVisibility]);
 
-  if (!alertFlyoutVisible) {
+  if (!addFlyoutVisible) {
     return null;
   }
 
@@ -54,7 +54,7 @@ export const AlertAdd = () => {
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <AlertForm initialAlert={initialAlert} setFlyoutVisibility={setAlertFlyoutVisibility} />
+        <AlertForm initialAlert={initialAlert} setFlyoutVisibility={setAddFlyoutVisibility} />
       </EuiFlyout>
     </EuiPortal>
   );

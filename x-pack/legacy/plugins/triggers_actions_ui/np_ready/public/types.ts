@@ -36,6 +36,7 @@ export interface ActionTypeModel {
   id: string;
   iconClass: string;
   selectMessage: string;
+  actionTypeTitle?: string;
   validateConnector: (action: ActionConnector) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
   actionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> | null;

@@ -18,6 +18,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Add a message to a Kibana log.',
       }
     ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to Server log',
+      }
+    ),
     validateConnector: (): ValidationResult => {
       return { errors: {} };
     },

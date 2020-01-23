@@ -32,6 +32,12 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send an event in PagerDuty.',
       }
     ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to PagerDuty',
+      }
+    ),
     validateConnector: (action: ActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {

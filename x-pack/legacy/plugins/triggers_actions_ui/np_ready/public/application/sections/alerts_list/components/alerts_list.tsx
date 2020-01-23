@@ -310,7 +310,11 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       />
       <AlertsContextProvider
-        value={{ alertFlyoutVisible, setAlertFlyoutVisibility, reloadAlerts: loadAlertsData }}
+        value={{
+          addFlyoutVisible: alertFlyoutVisible,
+          setAddFlyoutVisibility: setAlertFlyoutVisibility,
+          reloadAlerts: loadAlertsData,
+        }}
       >
         <AlertAdd />
       </AlertsContextProvider>
