@@ -6,8 +6,9 @@
 
 import {
   EuiBasicTable,
+  EuiButton,
   EuiContextMenuPanel,
-  EuiFieldSearch,
+  EuiEmptyPrompt,
   EuiLoadingContent,
   EuiSpacer,
 } from '@elastic/eui';
@@ -16,7 +17,11 @@ import React, { useCallback, useEffect, useMemo, useReducer, useState } from 're
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
 
-import { useRules, CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
+import {
+  useRules,
+  CreatePreBuiltRules,
+  FilterOptions,
+} from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
   UtilityBar,
@@ -36,6 +41,8 @@ import { EuiBasicTableOnChange, TableData } from '../types';
 import { getBatchItems } from './batch_actions';
 import { getColumns } from './columns';
 import { allRulesReducer, State } from './reducer';
+import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
+import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 
 const initialState: State = {
   isLoading: true,
@@ -209,6 +216,20 @@ export const AllRules = React.memo<AllRulesProps>(
       []
     );
 
+    const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
+      dispatch({
+        type: 'updateFilterOptions',
+        filterOptions: {
+          ...filterOptions,
+          ...newFilterOptions,
+        },
+      });
+      dispatch({
+        type: 'updatePagination',
+        pagination: { ...pagination, page: 1 },
+      });
+    }, []);
+
     return (
       <>
         <RuleDownloader
@@ -231,26 +252,8 @@ export const AllRules = React.memo<AllRulesProps>(
         <Panel loading={isGlobalLoading}>
           <>
             {rulesInstalled != null && rulesInstalled > 0 && (
-              <HeaderSection split title={i18n.ALL_RULES} border={true}>
-                <EuiFieldSearch
-                  aria-label={i18n.SEARCH_RULES}
-                  fullWidth
-                  incremental={false}
-                  placeholder={i18n.SEARCH_PLACEHOLDER}
-                  onSearch={filterString => {
-                    dispatch({
-                      type: 'updateFilterOptions',
-                      filterOptions: {
-                        ...filterOptions,
-                        filter: filterString,
-                      },
-                    });
-                    dispatch({
-                      type: 'updatePagination',
-                      pagination: { ...pagination, page: 1 },
-                    });
-                  }}
-                />
+              <HeaderSection split title={i18n.ALL_RULES}>
+                <RulesTableFilters onFilterChanged={onFilterChangedCallback} />
               </HeaderSection>
             )}
             {isInitialLoad && isEmpty(tableData) && (
@@ -301,6 +304,24 @@ export const AllRules = React.memo<AllRulesProps>(
                   isSelectable={!hasNoPermissions ?? false}
                   itemId="id"
                   items={tableData}
+                  noItemsMessage={
+                    <EuiEmptyPrompt
+                      title={<h3>{i18n.NO_RULES}</h3>}
+                      titleSize="xs"
+                      body={i18n.NO_RULES_BODY}
+                      actions={
+                        <EuiButton
+                          fill
+                          size="s"
+                          href={`#${DETECTION_ENGINE_PAGE_NAME}/rules/create`}
+                          iconType="plusInCircle"
+                          isDisabled={hasNoPermissions}
+                        >
+                          {i18n.ADD_NEW_RULE}
+                        </EuiButton>
+                      }
+                    />
+                  }
                   onChange={tableOnChangeCallback}
                   pagination={{
                     pageIndex: pagination.page - 1,
