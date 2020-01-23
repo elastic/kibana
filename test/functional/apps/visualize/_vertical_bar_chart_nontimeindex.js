@@ -136,7 +136,6 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickMetricsAndAxes();
         await PageObjects.visEditor.clickYAxisOptions(axisId);
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
-        await PageObjects.visEditor.clickYAxisAdvancedOptions(axisId);
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
