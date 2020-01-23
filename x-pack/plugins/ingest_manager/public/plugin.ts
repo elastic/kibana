@@ -48,7 +48,7 @@ export class IngestManagerPlugin implements Plugin {
       id: 'ingest_manager',
       title: 'Ingest Manager',
       appRoute: BASE_PATH,
-      euiIconType: 'pipelineApp',
+      euiIconType: 'savedObjectsApp',
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./applications/ingest_manager');

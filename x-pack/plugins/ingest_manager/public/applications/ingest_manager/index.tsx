@@ -5,14 +5,15 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { useObservable } from 'react-use';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
-
+import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
 import { IngestManagerSetupDeps, IngestManagerConfigType } from '../../plugin';
 import { EPM_PATH, FLEET_PATH } from './constants';
 import { DefaultLayout } from './layouts';
 import { IngestManagerOverview, EPMApp, FleetApp } from './sections';
-import { CoreContext, DepsContext, ConfigContext } from './hooks';
+import { CoreContext, DepsContext, ConfigContext, setHttpClient } from './hooks';
 
 const IngestManagerRoutes = ({ ...rest }) => (
   <Router {...rest}>
@@ -36,24 +37,39 @@ const IngestManagerRoutes = ({ ...rest }) => (
   </Router>
 );
 
+const IngestManagerApp = ({
+  coreStart,
+  deps,
+  config,
+}: {
+  coreStart: CoreStart;
+  deps: IngestManagerSetupDeps;
+  config: IngestManagerConfigType;
+}) => {
+  const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
+  return (
+    <coreStart.i18n.Context>
+      <CoreContext.Provider value={coreStart}>
+        <DepsContext.Provider value={deps}>
+          <ConfigContext.Provider value={config}>
+            <EuiThemeProvider darkMode={isDarkMode}>
+              <IngestManagerRoutes />
+            </EuiThemeProvider>
+          </ConfigContext.Provider>
+        </DepsContext.Provider>
+      </CoreContext.Provider>
+    </coreStart.i18n.Context>
+  );
+};
+
 export function renderApp(
   coreStart: CoreStart,
   { element }: AppMountParameters,
   deps: IngestManagerSetupDeps,
   config: IngestManagerConfigType
 ) {
-  ReactDOM.render(
-    <coreStart.i18n.Context>
-      <CoreContext.Provider value={coreStart}>
-        <DepsContext.Provider value={deps}>
-          <ConfigContext.Provider value={config}>
-            <IngestManagerRoutes />
-          </ConfigContext.Provider>
-        </DepsContext.Provider>
-      </CoreContext.Provider>
-    </coreStart.i18n.Context>,
-    element
-  );
+  setHttpClient(coreStart.http);
+  ReactDOM.render(<IngestManagerApp coreStart={coreStart} deps={deps} config={config} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);

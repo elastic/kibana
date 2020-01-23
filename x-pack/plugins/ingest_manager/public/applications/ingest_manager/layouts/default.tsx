@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiPage, EuiPageBody, EuiTabs, EuiTab } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+} from '@elastic/eui';
+import euiStyled from '../../../../../../legacy/common/eui_styled_components';
 import { Section } from '../sections';
 import { useLink, useConfig } from '../hooks';
 import { EPM_PATH, FLEET_PATH } from '../constants';
@@ -14,26 +23,49 @@ interface Props {
   children?: React.ReactNode;
 }
 
+const Nav = euiStyled.nav`
+  background: ${props => props.theme.eui.euiColorEmptyShade};
+  border-bottom: ${props => props.theme.eui.euiBorderThin};
+  padding: ${props =>
+    `${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL} ${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL}`};
+  .euiTabs {
+    padding-left: 3px;
+    margin-left: -3px;
+  };
+`;
+
 export const DefaultLayout: React.FC<Props> = ({ section, children }) => {
   const { epm, fleet } = useConfig();
-
   return (
     <div>
-      <EuiTabs display="condensed">
-        <EuiTab isSelected={!section || section === 'overview'} href={useLink()}>
-          Overview
-        </EuiTab>
-        <EuiTab isSelected={section === 'epm'} href={useLink(EPM_PATH)} disabled={!epm?.enabled}>
-          Packages
-        </EuiTab>
-        <EuiTab
-          isSelected={section === 'fleet'}
-          href={useLink(FLEET_PATH)}
-          disabled={!fleet?.enabled}
-        >
-          Fleet
-        </EuiTab>
-      </EuiTabs>
+      <Nav>
+        <EuiFlexGroup gutterSize="l" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="savedObjectsApp" size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTabs display="condensed">
+              <EuiTab isSelected={!section || section === 'overview'} href={useLink()}>
+                Overview
+              </EuiTab>
+              <EuiTab
+                isSelected={section === 'epm'}
+                href={useLink(EPM_PATH)}
+                disabled={!epm?.enabled}
+              >
+                Packages
+              </EuiTab>
+              <EuiTab
+                isSelected={section === 'fleet'}
+                href={useLink(FLEET_PATH)}
+                disabled={!fleet?.enabled}
+              >
+                Fleet
+              </EuiTab>
+            </EuiTabs>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Nav>
       <EuiPage>
         <EuiPageBody>{children}</EuiPageBody>
       </EuiPage>
