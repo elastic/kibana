@@ -11343,7 +11343,6 @@
     "xpack.siem.overview.startedText.docsLinkText": "ドキュメンテーション",
     "xpack.siem.overview.startedText.siemSolutionLinkText": "SIEM ソリューション",
     "xpack.siem.overview.startedTitle": "はじめて使う",
-    "xpack.siem.overview.winlogbeatTitle": "Winlogbeat",
     "xpack.siem.pages.fourohfour.noContentFoundDescription": "コンテンツがありません",
     "xpack.siem.paginatedTable.rowsButtonLabel": "ページごとの行数",
     "xpack.siem.paginatedTable.showingSubtitle": "表示中",
