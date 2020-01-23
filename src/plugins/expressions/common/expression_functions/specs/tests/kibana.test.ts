@@ -19,18 +19,18 @@
 
 import { functionWrapper } from './utils';
 import { kibana } from '../kibana';
-import { ExecutionContext } from '../../../common/types';
-import { KibanaContext } from '../../../common/expression_types/kibana_context';
+import { ExecutionContext } from '../../../types';
+import { KibanaContext } from '../../../expression_types';
 
 describe('interpreter/functions#kibana', () => {
   const fn = functionWrapper(kibana);
-  let context: Partial<KibanaContext>;
-  let initialContext: KibanaContext;
-  let handlers: ExecutionContext;
+  let input: Partial<KibanaContext>;
+  let initialInput: KibanaContext;
+  let context: ExecutionContext;
 
   beforeEach(() => {
-    context = { timeRange: { from: '0', to: '1' } };
-    initialContext = {
+    input = { timeRange: { from: '0', to: '1' } };
+    initialInput = {
       type: 'kibana_context',
       query: { language: 'lucene', query: 'geo.src:US' },
       filters: [
@@ -45,31 +45,27 @@ describe('interpreter/functions#kibana', () => {
       ],
       timeRange: { from: '2', to: '3' },
     };
-    handlers = {
-      getInitialContext: () => initialContext,
+    context = {
+      getInitialInput: () => initialInput,
+      getInitialContext: () => initialInput,
+      types: {},
+      variables: {},
     };
   });
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, {}, handlers);
+    const actual = fn(input, {}, context);
     expect(actual).toMatchSnapshot();
   });
 
   it('uses timeRange from context if not provided in initialContext', () => {
-    initialContext.timeRange = undefined;
-    const actual = fn(context, {}, handlers);
+    initialInput.timeRange = undefined;
+    const actual = fn(input, {}, context);
     expect(actual.timeRange).toEqual({ from: '0', to: '1' });
   });
 
-  it.skip('combines query from context with initialContext', () => {
-    context.query = { language: 'kuery', query: 'geo.dest:CN' };
-    // TODO: currently this fails & likely requires a fix in run_pipeline
-    const actual = fn(context, {}, handlers);
-    expect(actual.query).toEqual('TBD');
-  });
-
   it('combines filters from context with initialContext', () => {
-    context.filters = [
+    input.filters = [
       {
         meta: {
           disabled: true,
@@ -79,7 +75,7 @@ describe('interpreter/functions#kibana', () => {
         query: { match: {} },
       },
     ];
-    const actual = fn(context, {}, handlers);
+    const actual = fn(input, {}, context);
     expect(actual.filters).toEqual([
       {
         meta: {

@@ -49,7 +49,14 @@ export interface ExpressionFunctionDefinition<
    */
   args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
 
+  /**
+   * @todo What is this?
+   */
   aliases?: string[];
+
+  /**
+   * List of input types this function supports.
+   */
   context?: {
     types: Array<TypeToString<Input>>;
   };

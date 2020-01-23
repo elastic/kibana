@@ -18,16 +18,18 @@
  */
 
 import { mapValues } from 'lodash';
-import { ExpressionFunctionDefinition, ExecutionContext } from '../../../common/types';
+import { AnyExpressionFunctionDefinition } from '../../types';
+import { ExecutionContext } from '../../../types';
 
-// Takes a function spec and passes in default args,
-// overriding with any provided args.
-export const functionWrapper = <T extends ExpressionFunctionDefinition>(fnSpec: () => T) => {
-  const spec = fnSpec();
+/**
+ * Takes a function spec and passes in default args,
+ * overriding with any provided args.
+ */
+export const functionWrapper = (spec: AnyExpressionFunctionDefinition) => {
   const defaultArgs = mapValues(spec.args, argSpec => argSpec.default);
   return (
     context: object | null,
     args: Record<string, any> = {},
-    handlers: ExecutionContext = {}
+    handlers: ExecutionContext = {} as ExecutionContext
   ) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
 };

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TimeRange, Query, esFilters } from 'src/plugins/data/public';
+import { TimeRange, Query, esFilters } from 'src/plugins/data/common';
 
 const name = 'kibana_context';
 export type KIBANA_CONTEXT_NAME = 'kibana_context';

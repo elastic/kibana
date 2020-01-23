@@ -19,56 +19,60 @@
 
 import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
-import { FunctionHandlers } from '../../../common/types';
-import { KibanaContext } from '../../../common/expression_types/kibana_context';
+import { ExecutionContext } from '../../../types';
+import { KibanaContext } from '../../../expression_types';
 
-describe('interpreter/functions#varset', () => {
-  const fn = functionWrapper(variableSet);
-  let context: Partial<KibanaContext>;
-  let initialContext: KibanaContext;
-  let handlers: FunctionHandlers;
-  let variables: Record<string, any>;
+describe('expression_functions', () => {
+  describe('var_set', () => {
+    const fn = functionWrapper(variableSet);
+    let input: Partial<KibanaContext>;
+    let initialInput: KibanaContext;
+    let context: ExecutionContext;
+    let variables: Record<string, any>;
 
-  beforeEach(() => {
-    context = { timeRange: { from: '0', to: '1' } };
-    initialContext = {
-      type: 'kibana_context',
-      query: { language: 'lucene', query: 'geo.src:US' },
-      filters: [
-        {
-          meta: {
-            disabled: false,
-            negate: false,
-            alias: null,
+    beforeEach(() => {
+      input = { timeRange: { from: '0', to: '1' } };
+      initialInput = {
+        type: 'kibana_context',
+        query: { language: 'lucene', query: 'geo.src:US' },
+        filters: [
+          {
+            meta: {
+              disabled: false,
+              negate: false,
+              alias: null,
+            },
+            query: { match: {} },
           },
-          query: { match: {} },
-        },
-      ],
-      timeRange: { from: '2', to: '3' },
-    };
-    handlers = {
-      getInitialContext: () => initialContext,
-      variables: { test: 1 } as any,
-    };
+        ],
+        timeRange: { from: '2', to: '3' },
+      };
+      context = {
+        getInitialInput: () => initialInput,
+        getInitialContext: () => initialInput,
+        types: {},
+        variables: { test: 1 },
+      };
 
-    variables = handlers.variables;
-  });
+      variables = context.variables;
+    });
 
-  it('updates a variable', () => {
-    const actual = fn(context, { name: 'test', value: 2 }, handlers);
-    expect(variables.test).toEqual(2);
-    expect(actual).toEqual(context);
-  });
+    it('updates a variable', () => {
+      const actual = fn(input, { name: 'test', value: 2 }, context);
+      expect(variables.test).toEqual(2);
+      expect(actual).toEqual(input);
+    });
 
-  it('sets a new variable', () => {
-    const actual = fn(context, { name: 'new', value: 3 }, handlers);
-    expect(variables.new).toEqual(3);
-    expect(actual).toEqual(context);
-  });
+    it('sets a new variable', () => {
+      const actual = fn(input, { name: 'new', value: 3 }, context);
+      expect(variables.new).toEqual(3);
+      expect(actual).toEqual(input);
+    });
 
-  it('stores context if value is not set', () => {
-    const actual = fn(context, { name: 'test' }, handlers);
-    expect(variables.test).toEqual(context);
-    expect(actual).toEqual(context);
+    it('stores context if value is not set', () => {
+      const actual = fn(input, { name: 'test' }, context);
+      expect(variables.test).toEqual(input);
+      expect(actual).toEqual(input);
+    });
   });
 });

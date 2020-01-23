@@ -19,45 +19,49 @@
 
 import { functionWrapper } from './utils';
 import { variable } from '../var';
-import { FunctionHandlers } from '../../../common/types';
-import { KibanaContext } from '../../../common/expression_types/kibana_context';
+import { ExecutionContext } from '../../../types';
+import { KibanaContext } from '../../../expression_types';
 
-describe('interpreter/functions#var', () => {
-  const fn = functionWrapper(variable);
-  let context: Partial<KibanaContext>;
-  let initialContext: KibanaContext;
-  let handlers: FunctionHandlers;
+describe('expression_functions', () => {
+  describe('var', () => {
+    const fn = functionWrapper(variable);
+    let input: Partial<KibanaContext>;
+    let initialInput: KibanaContext;
+    let context: ExecutionContext;
 
-  beforeEach(() => {
-    context = { timeRange: { from: '0', to: '1' } };
-    initialContext = {
-      type: 'kibana_context',
-      query: { language: 'lucene', query: 'geo.src:US' },
-      filters: [
-        {
-          meta: {
-            disabled: false,
-            negate: false,
-            alias: null,
+    beforeEach(() => {
+      input = { timeRange: { from: '0', to: '1' } };
+      initialInput = {
+        type: 'kibana_context',
+        query: { language: 'lucene', query: 'geo.src:US' },
+        filters: [
+          {
+            meta: {
+              disabled: false,
+              negate: false,
+              alias: null,
+            },
+            query: { match: {} },
           },
-          query: { match: {} },
-        },
-      ],
-      timeRange: { from: '2', to: '3' },
-    };
-    handlers = {
-      getInitialContext: () => initialContext,
-      variables: { test: 1 } as any,
-    };
-  });
+        ],
+        timeRange: { from: '2', to: '3' },
+      };
+      context = {
+        getInitialInput: () => initialInput,
+        getInitialContext: () => initialInput,
+        types: {},
+        variables: { test: 1 },
+      };
+    });
 
-  it('returns the selected variable', () => {
-    const actual = fn(context, { name: 'test' }, handlers);
-    expect(actual).toEqual(1);
-  });
+    it('returns the selected variable', () => {
+      const actual = fn(input, { name: 'test' }, context);
+      expect(actual).toEqual(1);
+    });
 
-  it('returns undefined if variable does not exist', () => {
-    const actual = fn(context, { name: 'unknown' }, handlers);
-    expect(actual).toEqual(undefined);
+    it('returns undefined if variable does not exist', () => {
+      const actual = fn(input, { name: 'unknown' }, context);
+      expect(actual).toEqual(undefined);
+    });
   });
 });
