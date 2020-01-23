@@ -4,5 +4,6 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": ["features", "apm", "usageCollection", "spaces", "home", "data", "metrics"],
   "server": true,
-  "ui": true
+  "ui": true,
+  "configPath": ["xpack", "infra"]
 }
