@@ -60,7 +60,8 @@ export const DETECTION_ENGINE_PREPACKAGED_URL = `${DETECTION_ENGINE_RULES_URL}/p
 export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges`;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
-export const DETECTION_ENGINE_RULES_STATUS = `${DETECTION_ENGINE_URL}/rules/_find_statuses`;
+export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
+export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
 
 /**
  * Default signals index key for kibana.dev.yml

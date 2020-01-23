@@ -31,7 +31,6 @@ import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   GlobalStateProvider,
   StateManagementConfigProvider,
-  AppStateProvider,
   PrivateProvider,
   EventsProvider,
   PersistedState,
@@ -155,12 +154,6 @@ function createLocalStateModule() {
       'app/dashboard/Promise',
       'app/dashboard/PersistedState',
     ])
-    .factory('AppState', function(Private: any) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: any) {
-      return Private(AppStateProvider).getAppState;
-    })
     .service('globalState', function(Private: any) {
       return Private(GlobalStateProvider);
     });

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
+
 import { labels } from '../../components/labels/labels';
 import { dataArray } from '../../components/labels/data_array';
 import { uniqLabels } from '../../components/labels/uniq_labels';
@@ -161,21 +161,18 @@ const columnsData = {
 describe('Vislib Labels Module Test Suite', function() {
   let uniqSeriesLabels;
   describe('Labels (main)', function() {
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function() {
-        seriesLabels = labels(seriesData);
-        rowsLabels = labels(rowsData);
-        seriesArr = Array.isArray(seriesLabels);
-        rowsArr = Array.isArray(rowsLabels);
-        uniqSeriesLabels = _.chain(rowsData.rows)
-          .pluck('series')
-          .flattenDeep()
-          .pluck('label')
-          .uniq()
-          .value();
-      })
-    );
+    beforeEach(() => {
+      seriesLabels = labels(seriesData);
+      rowsLabels = labels(rowsData);
+      seriesArr = Array.isArray(seriesLabels);
+      rowsArr = Array.isArray(rowsLabels);
+      uniqSeriesLabels = _.chain(rowsData.rows)
+        .pluck('series')
+        .flattenDeep()
+        .pluck('label')
+        .uniq()
+        .value();
+    });
 
     it('should be a function', function() {
       expect(typeof labels).to.be('function');
@@ -224,15 +221,12 @@ describe('Vislib Labels Module Test Suite', function() {
     let testSeries;
     let testRows;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function() {
-        seriesLabels = dataArray(seriesData);
-        rowsLabels = dataArray(rowsData);
-        testSeries = Array.isArray(seriesLabels);
-        testRows = Array.isArray(rowsLabels);
-      })
-    );
+    beforeEach(() => {
+      seriesLabels = dataArray(seriesData);
+      rowsLabels = dataArray(rowsData);
+      testSeries = Array.isArray(seriesLabels);
+      testRows = Array.isArray(rowsLabels);
+    });
 
     it('should throw an error if the input is not an object', function() {
       expect(function() {
@@ -333,15 +327,12 @@ describe('Vislib Labels Module Test Suite', function() {
     let uniq;
     let testArr;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function() {
-        uniq = uniqLabels(arrObj, function(d) {
-          return d;
-        });
-        testArr = Array.isArray(uniq);
-      })
-    );
+    beforeEach(() => {
+      uniq = uniqLabels(arrObj, function(d) {
+        return d;
+      });
+      testArr = Array.isArray(uniq);
+    });
 
     it('should throw an error if input is not an array', function() {
       expect(function() {
@@ -407,15 +398,12 @@ describe('Vislib Labels Module Test Suite', function() {
     let columnsArr;
     let rowsArr;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function() {
-        columnsLabels = getSeries(columnsData);
-        rowsLabels = getSeries(rowsData);
-        columnsArr = Array.isArray(columnsLabels);
-        rowsArr = Array.isArray(rowsLabels);
-      })
-    );
+    beforeEach(() => {
+      columnsLabels = getSeries(columnsData);
+      rowsLabels = getSeries(rowsData);
+      columnsArr = Array.isArray(columnsLabels);
+      rowsArr = Array.isArray(rowsLabels);
+    });
 
     it('should throw an error if input is not an object', function() {
       expect(function() {

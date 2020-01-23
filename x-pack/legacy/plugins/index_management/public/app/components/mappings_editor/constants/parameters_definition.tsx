@@ -17,7 +17,13 @@ import {
   fieldFormatters,
   FieldConfig,
 } from '../shared_imports';
-import { AliasOption, DataType, ComboBoxOption } from '../types';
+import {
+  AliasOption,
+  DataType,
+  ComboBoxOption,
+  ParameterName,
+  ParameterDefinition,
+} from '../types';
 import { documentationService } from '../../../services/documentation';
 import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
@@ -124,7 +130,7 @@ const analyzerValidations = [
  *
  * As a consequence, if a parameter is *not* declared here, we won't be able to declare it in the Json editor.
  */
-export const PARAMETERS_DEFINITION = {
+export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinition } = {
   name: {
     fieldConfig: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.nameFieldLabel', {
@@ -537,20 +543,32 @@ export const PARAMETERS_DEFINITION = {
   },
   dynamic: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicFieldLabel', {
-        defaultMessage: 'Dynamic',
-      }),
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: t.boolean,
+    schema: t.union([t.boolean, t.literal('strict')]),
+  },
+  dynamic_toggle: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
+  dynamic_strict: {
+    fieldConfig: {
+      defaultValue: false,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicStrictParameter.fieldTitle', {
+        defaultMessage: 'Throw an exception when the object contains an unmapped property',
+      }),
+      helpText: i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.dynamicStrictParameter.fieldHelpText',
+        {
+          defaultMessage:
+            'By default, unmapped properties will be silently ignored when dynamic mapping is disabled. Optionally, you can choose to throw an exception when an object contains an unmapped property.',
+        }
+      ),
+    },
   },
   enabled: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.enabledFieldLabel', {
-        defaultMessage: 'Enabled',
-      }),
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
     schema: t.boolean,
@@ -662,6 +680,11 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: false,
     },
     schema: t.boolean,
+  },
+  eager_global_ordinals_join: {
+    fieldConfig: {
+      defaultValue: true,
+    },
   },
   index_phrases: {
     fieldConfig: {
@@ -893,5 +916,22 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
     schema: t.string,
+  },
+  relations: {
+    fieldConfig: {
+      defaultValue: [] as any, // Needed for FieldParams typing
+    },
+    schema: t.record(t.string, t.union([t.string, t.array(t.string)])),
+  },
+  max_shingle_size: {
+    fieldConfig: {
+      type: FIELD_TYPES.SELECT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.largestShingleSizeFieldLabel', {
+        defaultMessage: 'Max shingle size',
+      }),
+      defaultValue: 3,
+      formatters: [toInt],
+    },
+    schema: t.union([t.literal(2), t.literal(3), t.literal(4)]),
   },
 };
