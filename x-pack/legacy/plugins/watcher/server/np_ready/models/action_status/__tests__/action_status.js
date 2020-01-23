@@ -106,11 +106,39 @@ describe('action_status', () => {
         };
       });
 
-      it(`correctly calculates ACTION_STATES.ERROR`, () => {
-        upstreamJson.actionStatusJson.last_execution.successful = false;
-        const actionStatus = ActionStatus.fromUpstreamJson(upstreamJson);
+      describe(`correctly calculates ACTION_STATES.ERROR`, () => {
+        it('lastExecutionSuccessful is equal to false', () => {
+          upstreamJson.actionStatusJson.last_execution.successful = false;
+          const actionStatus = ActionStatus.fromUpstreamJson(upstreamJson);
+          expect(actionStatus.state).to.be(ACTION_STATES.ERROR);
+        });
 
-        expect(actionStatus.state).to.be(ACTION_STATES.ERROR);
+        it('action is acked and lastAcknowledged is less than lastExecution', () => {
+          const actionStatus = ActionStatus.fromUpstreamJson({
+            ...upstreamJson,
+            actionStatusJson: {
+              ack: {
+                state: 'acked',
+                timestamp: '2017-03-01T00:00:00.000Z',
+              },
+              last_execution: {
+                timestamp: '2017-03-02T00:00:00.000Z',
+              },
+            },
+          });
+          expect(actionStatus.state).to.be(ACTION_STATES.ERROR);
+        });
+
+        it('action is ackable and lastSuccessfulExecution is less than lastExecution', () => {
+          delete upstreamJson.actionStatusJson.last_throttle;
+          upstreamJson.actionStatusJson.ack.state = 'ackable';
+          upstreamJson.actionStatusJson.last_successful_execution.timestamp =
+            '2017-03-01T00:00:00.000Z';
+          upstreamJson.actionStatusJson.last_execution.timestamp = '2017-03-02T00:00:00.000Z';
+          const actionStatus = ActionStatus.fromUpstreamJson(upstreamJson);
+
+          expect(actionStatus.state).to.be(ACTION_STATES.ERROR);
+        });
       });
 
       it('correctly calculates ACTION_STATES.CONFIG_ERROR', () => {
@@ -192,18 +220,7 @@ describe('action_status', () => {
         });
       });
 
-      it(`correctly calculates ACTION_STATES.ERROR`, () => {
-        delete upstreamJson.actionStatusJson.last_throttle;
-        upstreamJson.actionStatusJson.ack.state = 'ackable';
-        upstreamJson.actionStatusJson.last_successful_execution.timestamp =
-          '2017-03-01T00:00:00.000Z';
-        upstreamJson.actionStatusJson.last_execution.timestamp = '2017-03-02T00:00:00.000Z';
-        const actionStatus = ActionStatus.fromUpstreamJson(upstreamJson);
-
-        expect(actionStatus.state).to.be(ACTION_STATES.ERROR);
-      });
-
-      it(`throws an error if it can not determine ACTION_STATE`, () => {
+      it(`correctly calculates ACTION_STATES.UNKNOWN if it can not determine state`, () => {
         upstreamJson = {
           id: 'my-action',
           actionStatusJson: {
@@ -213,9 +230,7 @@ describe('action_status', () => {
         };
         const actionStatus = ActionStatus.fromUpstreamJson(upstreamJson);
 
-        expect(() => {
-          actionStatus.state;
-        }).to.throwError(/could not determine action status/i);
+        expect(actionStatus.state).to.be(ACTION_STATES.UNKNOWN);
       });
     });
 
