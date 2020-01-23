@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ArgumentType } from '../types';
+import { ArgumentType } from './arguments';
 
 export class ExpressionFunctionParameter {
   name: string;

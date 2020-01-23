@@ -18,9 +18,9 @@
  */
 
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
-import { ArgumentType } from '../types/arguments';
+import { ArgumentType } from './arguments';
 import { TypeToString } from '../types/common';
-import { ExecutionContext } from '../types';
+import { ExecutionContext } from '../execution/types';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to

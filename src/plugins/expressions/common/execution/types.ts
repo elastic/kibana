@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionType } from '../expression_types/expression_type';
+import { ExpressionType } from '../expression_types';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;

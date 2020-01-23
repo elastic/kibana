@@ -20,7 +20,7 @@
 import { ExpressionAstExpression } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { parse: parseRaw } = require('@kbn/interpreter/common');
+const { parse } = require('@kbn/interpreter/common');
 
 /**
  * Given expression pipeline string, returns parsed AST.
@@ -29,7 +29,7 @@ const { parse: parseRaw } = require('@kbn/interpreter/common');
  */
 export function parseExpression(expression: string): ExpressionAstExpression {
   try {
-    return parseRaw(String(expression), { startRule: 'expression' });
+    return parse(String(expression), { startRule: 'expression' });
   } catch (e) {
     throw new Error(`Unable to parse expression: ${e.message}`);
   }

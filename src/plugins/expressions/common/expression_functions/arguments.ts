@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KnownTypeToString, TypeString, UnmappedTypeStrings } from './common';
+import { KnownTypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
 
 /**
  * This type represents all of the possible combinations of properties of an

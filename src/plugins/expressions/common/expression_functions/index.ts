@@ -18,6 +18,7 @@
  */
 
 export * from './types';
+export * from './arguments';
 export * from './expression_function_parameter';
 export * from './expression_function';
 export * from './specs';

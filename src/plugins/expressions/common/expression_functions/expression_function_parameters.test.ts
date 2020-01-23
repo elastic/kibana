@@ -17,6 +17,14 @@
  * under the License.
  */
 
-export * from './types';
-export * from './container';
-export * from './execution';
+import { ExpressionFunctionParameter } from './expression_function_parameter';
+
+describe('ExpressionFunctionParameter', () => {
+  test('can instantiate', () => {
+    const param = new ExpressionFunctionParameter('foo', {
+      help: 'bar',
+    });
+
+    // console.log(param);
+  });
+});
