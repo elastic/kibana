@@ -22,6 +22,12 @@ export const initTelemetry = (usageCollection: SetupPlugins['usageCollection'], 
 };
 
 export enum TELEMETRY_EVENT {
+  // Detections
+  SIEM_RULE_ENABLED = 'siem_rule_enabled',
+  SIEM_RULE_DISABLED = 'siem_rule_disabled',
+  CUSTOM_RULE_ENABLED = 'custom_rule_enabled',
+  CUSTOM_RULE_DISABLED = 'custom_rule_disabled',
+
   // ML
   SIEM_JOB_ENABLED = 'siem_job_enabled',
   SIEM_JOB_DISABLED = 'siem_job_disabled',
