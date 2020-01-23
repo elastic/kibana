@@ -3,15 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { pick } from 'lodash';
+import { pick, isPlainObject } from 'lodash';
 import * as t from 'io-ts';
 import { ordString } from 'fp-ts/lib/Ord';
 import { toArray } from 'fp-ts/lib/Set';
 import { isLeft, isRight } from 'fp-ts/lib/Either';
+
 import { errorReporter } from './error_reporter';
 import { ALL_DATA_TYPES, PARAMETERS_DEFINITION } from '../constants';
 import { FieldMeta } from '../types';
-import { getFieldMeta, isObject } from './utils';
+import { getFieldMeta } from './utils';
 
 const ALLOWED_FIELD_PROPERTIES = [
   ...Object.keys(PARAMETERS_DEFINITION),
@@ -70,7 +71,7 @@ const validateParameter = (parameter: string, value: any): boolean => {
   }
 
   if (parameter === 'properties' || parameter === 'fields') {
-    return isObject(value);
+    return isPlainObject(value);
   }
 
   const parameterSchema = (PARAMETERS_DEFINITION as any)[parameter]!.schema;
@@ -98,7 +99,7 @@ const stripUnknownOrInvalidParameter = (field: GenericObject): FieldValidatorRes
 
 const parseField = (field: any): FieldValidatorResponse & { meta?: FieldMeta } => {
   // Sanitize the input to make sure we are working with an object
-  if (!isObject(field)) {
+  if (!isPlainObject(field)) {
     return { parametersRemoved: [] };
   }
   // Make sure the field "type" is valid
@@ -184,7 +185,7 @@ const parseFields = (
  */
 export const validateProperties = (properties = {}): PropertiesValidatorResponse => {
   // Sanitize the input to make sure we are working with an object
-  if (!isObject(properties)) {
+  if (!isPlainObject(properties)) {
     return { value: {}, errors: [] };
   }
 
@@ -247,7 +248,7 @@ const validateMappingsConfiguration = (
 };
 
 export const validateMappings = (mappings: any = {}): MappingsValidatorResponse => {
-  if (!isObject(mappings)) {
+  if (!isPlainObject(mappings)) {
     return { value: {} };
   }
 

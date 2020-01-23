@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import uuid from 'uuid';
+import { isPlainObject } from 'lodash';
 
 import {
   DataType,
@@ -31,8 +32,6 @@ import {
 import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
-
-export const isObject = (obj: any) => obj != null && obj.constructor.name === 'Object';
 
 export const getUniqueId = () => {
   return uuid.v4();
@@ -548,7 +547,7 @@ export const isStateValid = (state: State): boolean | undefined =>
  */
 export const extractMappingsDefinition = (mappings = {}): GenericObject | null => {
   const mappingsFound = Object.values(mappings).reduce((acc: GenericObject[], value) => {
-    if (isObject(value) && {}.hasOwnProperty.call(value, 'properties')) {
+    if (isPlainObject(value) && {}.hasOwnProperty.call(value, 'properties')) {
       acc.push(value as GenericObject);
     }
     return acc;

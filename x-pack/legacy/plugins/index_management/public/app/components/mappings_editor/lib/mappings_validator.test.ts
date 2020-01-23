@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { isPlainObject } from 'lodash';
 
 import { validateMappings, validateProperties } from './mappings_validator';
-import { isObject } from './utils';
 
 describe('Mappings configuration validator', () => {
   it('should convert non object to empty object', () => {
@@ -13,7 +13,7 @@ describe('Mappings configuration validator', () => {
 
     tests.forEach(testValue => {
       const { value, errors } = validateMappings(testValue as any);
-      expect(isObject(value)).toBe(true);
+      expect(isPlainObject(value)).toBe(true);
       expect(errors).toBe(undefined);
     });
   });
@@ -77,7 +77,7 @@ describe('Properties validator', () => {
 
     tests.forEach(testValue => {
       const { value, errors } = validateProperties(testValue as any);
-      expect(isObject(value)).toBe(true);
+      expect(isPlainObject(value)).toBe(true);
       expect(errors).toEqual([]);
     });
   });
