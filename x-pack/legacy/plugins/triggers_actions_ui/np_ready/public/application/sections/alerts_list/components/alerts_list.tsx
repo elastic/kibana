@@ -17,8 +17,8 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
+import { useLocation, useHistory } from 'react-router-dom';
 
-import { Link } from 'react-router-dom';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
@@ -40,6 +40,8 @@ export const AlertsList: React.FunctionComponent = () => {
     toastNotifications,
     legacy: { capabilities },
   } = useAppDependencies();
+  const history = useHistory();
+  const location = useLocation();
   const canDelete = hasDeleteAlertsCapability(capabilities.get());
   const canSave = hasSaveAlertsCapability(capabilities.get());
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
@@ -159,10 +161,12 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-name',
       render: (name: string, alert: AlertTableItem) => {
         return (
-          <EuiLink>
-            <Link title={name} to={location => `${location.pathname}/${alert.id}`}>
-              {name}
-            </Link>
+          <EuiLink
+            onClick={() => {
+              history.push(`${location.pathname}/${alert.id}`);
+            }}
+          >
+            {name}
           </EuiLink>
         );
       },
