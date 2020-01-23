@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopoverProps, EuiCode } from '@elastic/eui';
+import { EuiPopoverProps, EuiCode, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -70,8 +70,9 @@ export const NodeContextMenu = ({
       }
     } else {
       if (options.fields) {
+        const { id } = findInventoryFields(nodeType, options.fields);
         return {
-          label: <EuiCode>{findInventoryFields(nodeType, options.fields).id}</EuiCode>,
+          label: <EuiCode>{id}</EuiCode>,
           value: node.id,
         };
       }
@@ -145,11 +146,13 @@ export const NodeContextMenu = ({
           </SectionTitle>
           {inventoryId.label && (
             <SectionSubtitle>
-              <FormattedMessage
-                id={'xpack.infra.nodeContextMenu.description'}
-                defaultMessage={'View details for {label} {value}'}
-                values={inventoryId}
-              />
+              <div style={{ wordBreak: 'break-all' }}>
+                <FormattedMessage
+                  id={'xpack.infra.nodeContextMenu.description'}
+                  defaultMessage={'View details for {label} {value}'}
+                  values={inventoryId}
+                />
+              </div>
             </SectionSubtitle>
           )}
           <SectionLinks>
