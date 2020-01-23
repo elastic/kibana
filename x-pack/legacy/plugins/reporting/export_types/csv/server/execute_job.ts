@@ -5,6 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest } from '../../../../../../../src/core/server';
 import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../types';
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
@@ -77,7 +79,9 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       return callWithRequest(fakeRequest, endpoint, clientParams, options);
     };
     const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
+    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+      (fakeRequest as unknown) as KibanaRequest
+    );
     const uiConfig = server.uiSettingsServiceFactory({
       savedObjectsClient,
     });

@@ -18,8 +18,7 @@
  */
 import { FieldFormatRegistry } from './field_formats_registry';
 import { BoolFormat, PercentFormat, StringFormat } from './converters';
-import { IFieldFormatType } from './field_format';
-import { GetConfigFn } from './types';
+import { GetConfigFn, IFieldFormatType } from './types';
 import { KBN_FIELD_TYPES } from '../../common';
 
 const getValueOfPrivateField = (instance: any, field: string) => instance[field];
