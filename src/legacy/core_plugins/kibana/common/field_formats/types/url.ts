@@ -52,7 +52,7 @@ const URL_TYPES = [
 ];
 const DEFAULT_URL_TYPE = 'a';
 
-export function createUrlFormat(context: any) {
+export function createUrlFormat() {
   class UrlFormat extends FieldFormat {
     static basePath = undefined;
     static id = 'url';
