@@ -11,6 +11,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { MapListing } from './components/map_listing';
 // @ts-ignore
 import { setLicenseId } from './kibana_services';
+// @ts-ignore
 import { MapView } from './inspector/views/map_view';
 
 /**
@@ -26,7 +27,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: any, plugins: any) {
     const {
       __LEGACY: { uiModules },
-      np: { licensing },
+      np: { licensing, inspector },
     } = plugins;
 
     uiModules
@@ -39,7 +40,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
       licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
     }
 
-    plugins.inspector.registerView(MapView);
+    inspector.registerView(MapView);
   }
 
   public start(core: CoreStart, plugins: any) {}
