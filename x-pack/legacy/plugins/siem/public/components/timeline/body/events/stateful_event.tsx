@@ -35,6 +35,7 @@ import { StatefulEventChild } from './stateful_event_child';
 
 interface Props {
   actionsColumnWidth: number;
+  containerElementRef: HTMLDivElement;
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
@@ -115,6 +116,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
   addNoteToEvent,
   browserFields,
+  containerElementRef,
   columnHeaders,
   columnRenderers,
   event,
@@ -201,6 +203,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     <VisibilitySensor
       partialVisibility={true}
       scrollCheck={true}
+      containment={containerElementRef}
       offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
     >
       {({ isVisible }) => {
@@ -279,7 +282,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         } else {
           // Height place holder for visibility detection as well as re-rendering sections.
           const height =
-            divElement.current != null
+            divElement.current != null && divElement.current.clientHeight
               ? `${divElement.current.clientHeight}px`
               : DEFAULT_ROW_HEIGHT;
 
