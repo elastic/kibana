@@ -3,9 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { min, max, sum } from 'lodash';
+import { min, max, sum, isNumber } from 'lodash';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptionsMetric } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
+
+const getMin = (values: Array<number | null>) => {
+  const minValue = min(values);
+  return minValue === Infinity || minValue === -Infinity ? undefined : minValue;
+};
+
+const getMax = (values: Array<number | null>) => {
+  const maxValue = max(values);
+  return maxValue === Infinity || maxValue === -Infinity ? undefined : maxValue;
+};
 
 export const calculateDomain = (
   series: MetricsExplorerSeries,
@@ -18,13 +28,13 @@ export const calculateDomain = (
         .map((m, index) => {
           return (row[`metric_${index}`] as number) || null;
         })
-        .filter(v => v);
-      const minValue = min(rowValues);
+        .filter(v => isNumber(v));
+      const minValue = getMin(rowValues);
       // For stacked domains we want to add 10% head room so the charts have
       // enough room to draw the 2 pixel line as well.
-      const maxValue = stacked ? sum(rowValues) * 1.1 : max(rowValues);
+      const maxValue = stacked ? sum(rowValues) * 1.1 : getMax(rowValues);
       return acc.concat([minValue || null, maxValue || null]);
     }, [] as Array<number | null>)
-    .filter(v => v);
-  return { min: min(values) || 0, max: max(values) || 0 };
+    .filter(v => isNumber(v));
+  return { min: getMin(values) || 0, max: getMax(values) || 0 };
 };
