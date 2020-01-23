@@ -17,7 +17,7 @@ import { EditFieldFormRow } from '../fields/edit_field';
  * Export custom serializer to be used when we need to serialize the form data to be sent to ES
  * @param field The field to be serialized
  */
-export const dynamicSerializer = (field: Field): Partial<Field> => {
+export const dynamicSerializer = (field: Field): Field => {
   if (field.dynamic_toggle === undefined) {
     return field;
   }

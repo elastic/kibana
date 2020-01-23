@@ -5,8 +5,8 @@
  */
 
 import { DocLinksStart } from '../../../../../../../src/core/public';
-import { DataType, ParameterName } from '../components/mappings_editor/types';
-import { TYPE_DEFINITION, PARAMETERS_DEFINITION } from '../components/mappings_editor/constants';
+import { DataType } from '../components/mappings_editor/types';
+import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
 
 class DocumentationService {
   private esDocsBase: string = '';

@@ -159,10 +159,10 @@ interface FieldBasic {
 }
 
 type FieldParams = {
-  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'];
+  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'] | unknown;
 };
 
-export type Field = FieldBasic & FieldParams;
+export type Field = FieldBasic & Partial<FieldParams>;
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;
