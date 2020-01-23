@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import React, { FC, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -24,7 +23,7 @@ import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
-import { getDateFormatTz, TimeRangeBounds } from '../../explorer/explorer_utils';
+import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useSwimlaneLimit } from '../../explorer/select_limit';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useShowCharts } from '../../components/controls/checkbox_showcharts';
