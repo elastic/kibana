@@ -67,11 +67,11 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   // State for using selectable indices list or custom patterns
   // Users with more than 100 indices will probably want to use an index pattern to select
   // them instead, so we'll default to showing them the index pattern input.
-  const [selectIndicesMode, setSelectIndicesMode] = useState<'list' | 'custom'>(
+  const [selectIndicesMode, setSelectIndicesMode] = useState<'custom' | 'list'>(
     typeof config.indices === 'string' ||
       (Array.isArray(config.indices) && config.indices.length > 100)
-      ? 'custom'
-      : 'list'
+      ? 'list'
+      : 'custom'
   );
 
   // State for custom patterns
@@ -171,7 +171,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                           >
                             <FormattedMessage
                               id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleCustomLink"
-                              defaultMessage="Use index patterns"
+                              defaultMessage="Use custom patterns"
                             />
                           </EuiLink>
                         </EuiFlexItem>
@@ -181,7 +181,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                         <EuiFlexItem grow={false}>
                           <FormattedMessage
                             id="xpack.snapshotRestore.policyForm.stepSettings.indicesPatternLabel"
-                            defaultMessage="Index patterns"
+                            defaultMessage="Custom patterns"
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
