@@ -17,11 +17,13 @@
  * under the License.
  */
 
-export * from './split_panel';
-export { SomethingWentWrongCallout } from './something_went_wrong_callout';
-export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
-export { ConsoleMenu } from './console_menu';
-export { WelcomePanel } from './welcome_panel';
-export { AutocompleteOptions, DevToolsSettingsModal } from './settings_modal';
-export { HelpPanel } from './help_panel';
-export { EditorContentSpinner } from './editor_content_spinner';
+import { Storage } from '../../services';
+import { ObjectStorageClient } from '../../../../common/types';
+import { TextObject, textObjectTypeName } from '../../../../common/text_object';
+import { LocalObjectStorage } from './local_storage_object_client';
+
+export const create = (storage: Storage): ObjectStorageClient => {
+  return {
+    text: new LocalObjectStorage<TextObject>(storage, textObjectTypeName),
+  };
+};

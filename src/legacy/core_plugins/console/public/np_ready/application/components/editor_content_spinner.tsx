@@ -17,11 +17,13 @@
  * under the License.
  */
 
-export * from './split_panel';
-export { SomethingWentWrongCallout } from './something_went_wrong_callout';
-export { TopNavMenuItem, TopNavMenu } from './top_nav_menu';
-export { ConsoleMenu } from './console_menu';
-export { WelcomePanel } from './welcome_panel';
-export { AutocompleteOptions, DevToolsSettingsModal } from './settings_modal';
-export { HelpPanel } from './help_panel';
-export { EditorContentSpinner } from './editor_content_spinner';
+import React, { FunctionComponent } from 'react';
+import { EuiLoadingContent, EuiPageContent } from '@elastic/eui';
+
+export const EditorContentSpinner: FunctionComponent = () => {
+  return (
+    <EuiPageContent className="conApp__editor__spinner">
+      <EuiLoadingContent lines={10} />
+    </EuiPageContent>
+  );
+};

@@ -17,38 +17,33 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { useRef, useCallback } from 'react';
+import { throttle } from 'lodash';
+import { useEditorReadContext, useServicesContext } from '../contexts';
 
-export interface TopNavMenuItem {
-  id: string;
-  label: string;
-  description: string;
-  onClick: () => void;
-  testId: string;
-}
+const WAIT_MS = 500;
 
-interface Props {
-  disabled?: boolean;
-  items: TopNavMenuItem[];
-}
+export const useSaveCurrentTextObject = () => {
+  const promiseChainRef = useRef(Promise.resolve());
 
-export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
-  return (
-    <EuiTabs size="s">
-      {items.map((item, idx) => {
-        return (
-          <EuiTab
-            key={idx}
-            disabled={disabled}
-            onClick={item.onClick}
-            title={item.label}
-            data-test-subj={item.testId}
-          >
-            {item.label}
-          </EuiTab>
+  const {
+    services: { objectStorageClient },
+  } = useServicesContext();
+
+  const { currentTextObject } = useEditorReadContext();
+
+  return useCallback(
+    throttle(
+      (text: string) => {
+        const { current: promise } = promiseChainRef;
+        if (!currentTextObject) return;
+        promise.finally(() =>
+          objectStorageClient.text.update({ ...currentTextObject, text, updatedAt: Date.now() })
         );
-      })}
-    </EuiTabs>
+      },
+      WAIT_MS,
+      { trailing: true }
+    ),
+    [objectStorageClient, currentTextObject]
   );
 };
