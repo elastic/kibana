@@ -17,20 +17,17 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 import _ from 'lodash';
+import expect from '@kbn/expect';
+
 import { visTypes } from '../../visualizations/vis_types';
 
 describe('Vislib Vis Types Test Suite', function() {
   let visFunc;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function() {
-      visFunc = visTypes.point_series;
-    })
-  );
+  beforeEach(function() {
+    visFunc = visTypes.point_series;
+  });
 
   it('should be an object', function() {
     expect(_.isObject(visTypes)).to.be(true);

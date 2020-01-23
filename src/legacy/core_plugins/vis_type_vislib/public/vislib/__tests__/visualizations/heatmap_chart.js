@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
 import _ from 'lodash';
+import $ from 'jquery';
 import d3 from 'd3';
-
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 // Data
 import series from '../lib/fixtures/mock_data/date_histogram/_series';
@@ -30,8 +28,8 @@ import seriesPosNeg from '../lib/fixtures/mock_data/date_histogram/_series_pos_n
 import seriesNeg from '../lib/fixtures/mock_data/date_histogram/_series_neg';
 import termsColumns from '../lib/fixtures/mock_data/terms/_columns';
 import stackedSeries from '../lib/fixtures/mock_data/date_histogram/_stacked_series';
-import $ from 'jquery';
-import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
+
+import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [
@@ -48,10 +46,8 @@ describe('Vislib Heatmap Chart Test Suite', function() {
     const data = dataType[1];
 
     describe('for ' + name + ' Data', function() {
-      let PersistedState;
-      let vislibVis;
       let vis;
-      let persistedState;
+      let mockUiState;
       const visLibParams = {
         type: 'heatmap',
         addLegend: true,
@@ -66,20 +62,15 @@ describe('Vislib Heatmap Chart Test Suite', function() {
 
       function generateVis(opts = {}) {
         const config = _.defaultsDeep({}, opts, visLibParams);
-        vis = vislibVis(config);
-        persistedState = new PersistedState();
+        vis = getVis(config);
+        mockUiState = getMockUiState();
         vis.on('brush', _.noop);
-        vis.render(data, persistedState);
+        vis.render(data, mockUiState);
       }
 
-      beforeEach(ngMock.module('kibana'));
-      beforeEach(
-        ngMock.inject(function(Private, $injector) {
-          vislibVis = getFixturesVislibVisFixtureProvider(Private);
-          PersistedState = $injector.get('PersistedState');
-          generateVis();
-        })
-      );
+      beforeEach(() => {
+        generateVis();
+      });
 
       afterEach(function() {
         vis.destroy();
@@ -174,7 +165,7 @@ describe('Vislib Heatmap Chart Test Suite', function() {
       });
 
       it('should define default colors', function() {
-        expect(persistedState.get('vis.defaultColors')).to.not.be(undefined);
+        expect(mockUiState.get('vis.defaultColors')).to.not.be(undefined);
       });
 
       it('should set custom range', function() {
