@@ -17,13 +17,27 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import fn from './range';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import _ from 'lodash';
+const expect = require('chai').expect;
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('range.js', () => {
+  let seriesList;
+  beforeEach(() => {
+    seriesList = require('./fixtures/series_list.js')();
+    seriesList.list[0].data = [
+      [1000, 20],
+      [2000, 10],
+      [3000, 30],
+      [4000, 40],
+    ];
+  });
+
+  it('keeps the min of a series vs a number', () => {
+    return invoke(fn, [seriesList, 1, 4]).then(r => {
+      expect(_.map(r.output.list[0].data, 1)).to.eql([2, 1, 3, 4]);
+    });
+  });
+});

@@ -17,13 +17,29 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { PluginInitializerContext } from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
+import { ConfigSchema } from '../config';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export class ConfigManager {
+  private esShardTimeout: number = 0;
+  private graphiteUrls: string[] = [];
+
+  constructor(config: PluginInitializerContext['config']) {
+    config.create<TypeOf<typeof ConfigSchema>>().subscribe(configUpdate => {
+      this.graphiteUrls = configUpdate.graphiteUrls || [];
+    });
+
+    config.legacy.globalConfig$.subscribe(configUpdate => {
+      this.esShardTimeout = configUpdate.elasticsearch.shardTimeout.asMilliseconds();
+    });
+  }
+
+  getEsShardTimeout() {
+    return this.esShardTimeout;
+  }
+
+  getGraphiteUrls() {
+    return this.graphiteUrls;
+  }
+}
