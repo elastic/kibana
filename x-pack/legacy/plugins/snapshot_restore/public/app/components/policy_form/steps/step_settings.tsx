@@ -171,7 +171,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
                           >
                             <FormattedMessage
                               id="xpack.snapshotRestore.policyForm.stepSettings.indicesToggleCustomLink"
-                              defaultMessage="Use Index patterns"
+                              defaultMessage="Use index patterns"
                             />
                           </EuiLink>
                         </EuiFlexItem>
