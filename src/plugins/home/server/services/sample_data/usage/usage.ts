@@ -37,23 +37,21 @@ export function usage(
     logger.warn(`saved objects repository incrementCounter encountered an error: ${err}`);
   };
 
-  const internalRepository = savedObjects.then(so => so.createInternalRepository());
+  const internalRepositoryPromise = savedObjects.then(so => so.createInternalRepository());
 
   return {
     addInstall: async (dataSet: string) => {
       try {
-        await (await internalRepository).incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
+        const internalRepository = await internalRepositoryPromise;
+        await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
       } catch (err) {
         handleIncrementError(err);
       }
     },
     addUninstall: async (dataSet: string) => {
       try {
-        await (await internalRepository).incrementCounter(
-          SAVED_OBJECT_ID,
-          dataSet,
-          `unInstallCount`
-        );
+        const internalRepository = await internalRepositoryPromise;
+        await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
       } catch (err) {
         handleIncrementError(err);
       }

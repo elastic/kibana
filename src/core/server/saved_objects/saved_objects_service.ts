@@ -84,13 +84,13 @@ import { PropertyValidators } from './validation';
  */
 export interface SavedObjectsServiceSetup {
   /**
-   * Set a default factory for creating Saved Objects clients. Only one client
-   * factory can be set, subsequent calls to this method will fail.
+   * Set the default {@link SavedObjectsClientFactoryProvider | factory provider} for creating Saved Objects clients.
+   * Only one provider can be set, subsequent calls to this method will fail.
    */
   setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 
   /**
-   * Add a client wrapper with the given priority.
+   * Add a {@link SavedObjectsClientWrapperFactory | client wrapper factory} with the given priority.
    */
   addClientWrapper: (
     priority: number,
@@ -160,7 +160,7 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
 }
 
 /**
- * Factory provided when invoking a {@link SavedObjectsClientFactoryProvider}
+ * Factory provided when invoking a {@link SavedObjectsClientFactoryProvider | client factory provider}
  * See {@link SavedObjectsServiceSetup.setClientFactoryProvider}
  *
  * @public
@@ -170,11 +170,15 @@ export interface SavedObjectsRepositoryFactory {
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the credentials from the passed in request to authenticate with
    * Elasticsearch.
+   *
+   * @param extraTypes - A list of additional hidden types the repository should have access to.
    */
   createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
+   *
+   * @param extraTypes - A list of additional hidden types the repository should have access to.
    */
   createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
 }

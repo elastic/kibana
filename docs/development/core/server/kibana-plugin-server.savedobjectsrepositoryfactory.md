@@ -4,7 +4,7 @@
 
 ## SavedObjectsRepositoryFactory interface
 
-Factory provided when invoking a [SavedObjectsClientFactoryProvider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) See [SavedObjectsServiceSetup.setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md)
+Factory provided when invoking a [client factory provider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) See [SavedObjectsServiceSetup.setClientFactoryProvider](./kibana-plugin-server.savedobjectsservicesetup.setclientfactoryprovider.md)
 
 <b>Signature:</b>
 

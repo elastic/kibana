@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceSetup.setClientFactoryProvider property
 
-Set a default factory for creating Saved Objects clients. Only one client factory can be set, subsequent calls to this method will fail.
+Set the default [factory provider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail.
 
 <b>Signature:</b>
 

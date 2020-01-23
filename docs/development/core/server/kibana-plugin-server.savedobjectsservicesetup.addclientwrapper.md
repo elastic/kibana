@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceSetup.addClientWrapper property
 
-Add a client wrapper with the given priority.
+Add a [client wrapper factory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) with the given priority.
 
 <b>Signature:</b>
 
