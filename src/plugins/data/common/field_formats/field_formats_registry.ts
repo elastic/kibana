@@ -155,7 +155,7 @@ export class FieldFormatRegistry {
 
       return new ConcreteFieldFormat(params, this.getConfig);
     },
-    (formatId, params) =>
+    (formatId: IFieldFormatId, params: Record<string, any>) =>
       JSON.stringify({
         formatId,
         ...params,
