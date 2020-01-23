@@ -48,7 +48,7 @@ export const DateType = ({ field }: Props) => {
         <IndexParameter hasIndexOptions={false} />
 
         <FormatParameter
-          defaultValue={field.source.format}
+          defaultValue={field.source.format as string}
           defaultToggleValue={getDefaultToggleValue('format', field.source)}
         />
 
