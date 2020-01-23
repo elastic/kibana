@@ -38,11 +38,29 @@ Table of Contents
   - [Example](#example-1)
 - [Built-in Action Types](#built-in-action-types)
   - [Server log](#server-log)
+    - [`config`](#config)
+    - [`secrets`](#secrets)
+    - [`params`](#params)
   - [Email](#email)
+    - [`config`](#config-1)
+    - [`secrets`](#secrets-1)
+    - [`params`](#params-1)
   - [Slack](#slack)
+    - [`config`](#config-2)
+    - [`secrets`](#secrets-2)
+    - [`params`](#params-2)
   - [Index](#index)
+    - [`config`](#config-3)
+    - [`secrets`](#secrets-3)
+    - [`params`](#params-3)
   - [Webhook](#webhook)
+    - [`config`](#config-4)
+    - [`secrets`](#secrets-4)
+    - [`params`](#params-4)
   - [PagerDuty](#pagerduty)
+    - [`config`](#config-5)
+    - [`secrets`](#secrets-5)
+    - [`params`](#params-5)
 - [Command Line Utility](#command-line-utility)
 
 
@@ -254,15 +272,15 @@ ID: `.log`
 
 The params properties are modelled after the arguments to the [Hapi.server.log()](https://hapijs.com/api#-serverlogtags-data-timestamp) function.
 
-`config` 
+### `config` 
 
 This action has no `config` properties.
 
-`secrets`
+### `secrets`
 
 This action type has no `secrets` properties.
 
-`params`
+### `params`
 
 |Property|Description|Type|
 |---|---|---|
@@ -276,7 +294,7 @@ ID: `.email`
 
 This action type uses [nodemailer](https://nodemailer.com/about/) to send emails.
 
-`config`
+### `config`
 
 Either the property `service` must be provided, or the `host` and `port` properties must be provided.  If `service` is provided, `host`, `port` and `secure` are ignored.  For more information on the `gmail` service value specifically, see the [nodemailer gmail documentation](https://nodemailer.com/usage/using-gmail/).
 
@@ -292,14 +310,14 @@ The `from` field can be specified as in typical `"user@host-name"` format, or as
 |secure|whether to use TLS with the service provider|boolean _(optional)_|
 |from|the from address for all emails sent with this action type|string|
 
-`secrets`
+### `secrets`
 
 |Property|Description|Type|
 |---|---|---|
 |user|userid to use with the service provider|string|
 |password|password to use with the service provider|string|
 
-`params`
+### `params`
 
 There must be at least one entry in the `to`, `cc` and `bcc` arrays.
 
@@ -323,17 +341,17 @@ ID: `.slack`
 
 This action type interfaces with the [Slack Incoming Webhooks feature](https://api.slack.com/incoming-webhooks).  Currently the params property `message` will be used as the `text` property of the Slack incoming message.  Additional function may be provided later.
 
-`config`
+### `config`
 
 This action type has no `config` properties.
 
-`secrets`
+### `secrets`
 
 |Property|Description|Type|
 |---|---|---|
 |webhookUrl|the url of the Slack incoming webhook|string|
 
-`params`
+### `params`
 
 |Property|Description|Type|
 |---|---|---|
@@ -347,17 +365,17 @@ ID: `.index`
 
 The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elasticsearch/reference/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
 
-`config`
+### `config`
 
 |Property|Description|Type|
 |---|---|---|
 |index|The Elasticsearch index to index into.|string _(optional)_|
 
-`secrets`
+### `secrets`
 
 This action type has no `secrets` properties.
 
-`params`
+### `params`
 
 |Property|Description|Type|
 |---|---|---|
@@ -374,7 +392,7 @@ ID: `.webhook`
 
 The webhook action uses [axios](https://github.com/axios/axios) to send a POST or PUT request to a web service.
 
-`config` 
+### `config` 
 
 |Property|Description|Type|
 |---|---|---|
@@ -382,14 +400,14 @@ The webhook action uses [axios](https://github.com/axios/axios) to send a POST o
 |method|HTTP request method, either `post`_(default)_ or `put`|string _(optional)_|
 |headers|Key-value pairs of the headers to send with the request|object, keys and values are strings _(optional)_|
 
-`secrets` 
+### `secrets` 
 
 |Property|Description|Type|
 |---|---|---|
 |user|Username for HTTP Basic authentication|string|
 |password|Password for HTTP Basic authentication|string|
 
-`params` 
+### `params` 
 
 |Property|Description|Type|
 |---|---|---|
@@ -403,19 +421,19 @@ ID: `.pagerduty`
 
 The PagerDuty action uses the [V2 Events API](https://v2.developer.pagerduty.com/docs/events-api-v2) to trigger, acknowlege, and resolve PagerDuty alerts. 
 
-`config` 
+### `config` 
 
 |Property|Description|Type|
 |---|---|---|
 |apiUrl|PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`|string _(optional)_|
 
-`secrets`
+### `secrets`
 
 |Property|Description|Type|
 |---|---|---|
 |routingKey|This is the 32 character PagerDuty Integration Key for an integration on a service or on a global ruleset.|string|
 
-`params` 
+### `params` 
 
 |Property|Description|Type|
 |---|---|---|
