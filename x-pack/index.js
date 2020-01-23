@@ -26,6 +26,7 @@ import { consoleExtensions } from './legacy/plugins/console_extensions';
 import { spaces } from './legacy/plugins/spaces';
 import { kueryAutocompleteInitializer } from './legacy/plugins/kuery_autocomplete';
 import { canvas } from './legacy/plugins/canvas';
+import { infra } from './legacy/plugins/infra';
 import { taskManager } from './legacy/plugins/task_manager';
 import { rollup } from './legacy/plugins/rollup';
 import { siem } from './legacy/plugins/siem';
@@ -67,6 +68,7 @@ module.exports = function(kibana) {
     consoleExtensions(kibana),
     indexLifecycleManagement(kibana),
     kueryAutocompleteInitializer(kibana),
+    infra(kibana),
     taskManager(kibana),
     rollup(kibana),
     transform(kibana),
