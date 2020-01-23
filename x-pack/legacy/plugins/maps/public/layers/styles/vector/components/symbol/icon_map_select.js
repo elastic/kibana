@@ -9,12 +9,14 @@ import React from 'react';
 import { StyleMapSelect } from '../style_map_select';
 import { i18n } from '@kbn/i18n';
 import { getIconPaletteOptions } from '../../symbol_utils';
+import { IconStops } from './icon_stops';
 
 export function IconMapSelect({
   customIconStops,
   iconPaletteId,
   isDarkMode,
   onChange,
+  symbolOptions,
   useCustomIconMap,
 }) {
   function onMapSelectChange({ customMapStops, selectedMapId, useCustomMap }) {
@@ -25,8 +27,15 @@ export function IconMapSelect({
     });
   }
 
-  function renderCustomIconStopsInput() {
-    return <div>Custom stops UI goes here</div>;
+  function renderCustomIconStopsInput(onCustomMapChange) {
+    return (
+      <IconStops
+        iconStops={customIconStops}
+        isDarkMode={isDarkMode}
+        onChange={onCustomMapChange}
+        symbolOptions={symbolOptions}
+      />
+    );
   }
 
   return (

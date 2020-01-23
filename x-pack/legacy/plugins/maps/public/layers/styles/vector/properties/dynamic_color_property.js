@@ -6,7 +6,7 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import _ from 'lodash';
-import { getComputedFieldName } from '../style_util';
+import { getComputedFieldName, getOtherCategoryLabel } from '../style_util';
 import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
@@ -21,10 +21,7 @@ import {
 import { VectorIcon } from '../components/legend/vector_icon';
 import { VECTOR_STYLES } from '../vector_style_defaults';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
-import {
-  isCategoricalStopsInvalid,
-  getOtherCategoryLabel,
-} from '../components/color/color_stops_utils';
+import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 

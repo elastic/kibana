@@ -31,11 +31,32 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     }
   }
 
-  _getMbIconExpression(iconPixelSize) {
-    const { stops, fallback } = assignCategoriesToPalette({
+  _getPaletteStops() {
+    if (this._options.useCustomIconMap && this._options.customIconStops) {
+      const stops = [];
+      for (let i = 1; i < this._options.customIconStops.length; i++) {
+        const { stop, icon } = this._options.customIconStops[i];
+        stops.push({
+          stop,
+          style: icon,
+        });
+      }
+
+      return {
+        fallback:
+          this._options.customIconStops.length > 0 ? this._options.customIconStops[0].icon : null,
+        stops,
+      };
+    }
+
+    return assignCategoriesToPalette({
       categories: _.get(this.getFieldMeta(), 'categories', []),
       paletteValues: getIconPalette(this._options.iconPaletteId),
     });
+  }
+
+  _getMbIconExpression(iconPixelSize) {
+    const { stops, fallback } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallback) {
       //occurs when no data
@@ -52,6 +73,6 @@ export class DynamicIconProperty extends DynamicStyleProperty {
   }
 
   _isIconDynamicConfigComplete() {
-    return this._field && this._field.isValid() && this._options.iconPaletteId;
+    return this._field && this._field.isValid();
   }
 }

@@ -50,14 +50,10 @@ export class StyleMapSelect extends Component {
       return null;
     }
 
-    const customStopsInput = React.cloneElement(this.props.renderCustomStopsInput(), {
-      onCustomMapChange: this._onCustomMapChange,
-    });
-
     return (
       <Fragment>
         <EuiSpacer size="s" />
-        {customStopsInput}
+        {this.props.renderCustomStopsInput(this._onCustomMapChange)}
       </Fragment>
     );
   }
