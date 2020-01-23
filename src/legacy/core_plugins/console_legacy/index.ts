@@ -20,6 +20,7 @@
 import { first } from 'rxjs/operators';
 import { resolve } from 'path';
 
+// TODO: Remove this hack once we can get the ES config we need for Console proxy a better way.
 let _legacyEsConfig: any;
 export const readLegacyEsConfig = () => {
   return _legacyEsConfig;
@@ -30,7 +31,7 @@ export default function(kibana: any) {
   return new kibana.Plugin({
     id: 'console_legacy',
 
-    async init(server: any, options: any) {
+    async init(server: any) {
       _legacyEsConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
         .pipe(first())
         .toPromise();

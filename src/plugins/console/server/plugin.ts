@@ -18,16 +18,16 @@
  */
 import { first } from 'rxjs/operators';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { ProxyConfigCollection } from './lib';
-import { ConfigType } from '.';
 
 import { readLegacyEsConfig } from '../../../legacy/core_plugins/console_legacy';
 
+import { ProxyConfigCollection, addExtensionSpecFilePath, addProcessorDefinition } from './lib';
+import { ConfigType } from './config';
 import { registerProxyRoute } from './routes/api/console/proxy';
 import { registerSpecDefinitionsRoute } from './routes/api/console/spec_definitions';
-import { ESConfigForProxy } from './types';
+import { ESConfigForProxy, ConsoleSetup } from './types';
 
-export class ConsoleServerPlugin implements Plugin {
+export class ConsoleServerPlugin implements Plugin<ConsoleSetup> {
   log: Logger;
 
   constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
@@ -63,6 +63,11 @@ export class ConsoleServerPlugin implements Plugin {
     });
 
     registerSpecDefinitionsRoute({ router });
+
+    return {
+      addExtensionSpecFilePath,
+      addProcessorDefinition,
+    };
   }
   async start() {}
   stop() {}

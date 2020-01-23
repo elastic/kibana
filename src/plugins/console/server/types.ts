@@ -18,7 +18,14 @@
  */
 
 import { Duration } from 'moment';
+import { ConsoleServerPlugin } from './plugin';
 
+/** @public */
+export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
+  ? U
+  : ReturnType<ConsoleServerPlugin['setup']>;
+
+/** @internal */
 export interface ESConfigForProxy {
   hosts: string[];
   requestHeadersWhitelist: string[];

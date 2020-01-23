@@ -17,45 +17,13 @@
  * under the License.
  */
 import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+
+import { ConfigType, config as configSchema } from './config';
 import { ConsoleServerPlugin } from './plugin';
 
+export { ConsoleSetup } from './types';
+
 export const plugin = (ctx: PluginInitializerContext) => new ConsoleServerPlugin(ctx);
-
-export type ConfigType = TypeOf<typeof configSchema>;
-
-const configSchema = schema.object(
-  {
-    enabled: schema.boolean({ defaultValue: true }),
-    proxyFilter: schema.arrayOf(schema.string(), { defaultValue: ['.*'] }),
-    ssl: schema.object({ verify: schema.boolean({ defaultValue: false }) }, {}),
-
-    // This does not actually work, track this issue: https://github.com/elastic/kibana/issues/55576
-    proxyConfig: schema.arrayOf(
-      schema.object({
-        match: schema.object({
-          protocol: schema.string({ defaultValue: '*' }),
-          host: schema.string({ defaultValue: '*' }),
-          port: schema.string({ defaultValue: '*' }),
-          path: schema.string({ defaultValue: '*' }),
-        }),
-
-        timeout: schema.number(),
-        ssl: schema.object(
-          {
-            verify: schema.boolean(),
-            ca: schema.arrayOf(schema.string()),
-            cert: schema.string(),
-            key: schema.string(),
-          },
-          { defaultValue: undefined }
-        ),
-      }),
-      { defaultValue: [] }
-    ),
-  },
-  { defaultValue: undefined }
-);
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   deprecations: ({ unused }) => [unused('ssl')],
