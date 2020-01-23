@@ -127,6 +127,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteConnectorsConfirmation');
 
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql('Deleted 1 connector');
+
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
@@ -164,6 +167,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('deleteConnectorsConfirmation');
       await testSubjects.click('deleteConnectorsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteConnectorsConfirmation');
+
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
