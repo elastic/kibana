@@ -86,6 +86,8 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
                   . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
 
+                  . src/dev/code_coverage/shell_scripts/merge_reports.sh
+
                   echo '### List target'
                   ls -R ./target
 

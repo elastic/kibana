@@ -2,11 +2,16 @@
 
 set -e
 
-# merge oss & x-pack reports
-echo "### merging coverage reports"
-yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/jest --report-dir target/kibana-coverage/jest-combined --reporter=html --reporter=json-summary
-yarn nyc report --temp-dir /tmp/extracted_coverage/target/kibana-coverage/functional --report-dir target/kibana-coverage/functional-combined --reporter=html --reporter=json-summary
+EXTRACT_START_DIR=tmp/extracted_coverage
+EXTRACT_END_DIR=target/kibana-coverage
+COMBINED_EXRACT_DIR=/${EXTRACT_START_DIR}/${EXTRACT_END_DIR}
+
+echo "### Merge coverage reports"
+for x in jest functional; do
+  yarn nyc report --temp-dir $COMBINED_EXRACT_DIR/${x} --report-dir $EXTRACT_END_DIR/${x}-combined --reporter=html --reporter=json-summary
+done
+
 
 echo "### Copy mocha reports"
-mkdir -p target/kibana-coverage/mocha-combined
-cp -r /tmp/extracted_coverage/target/kibana-coverage/mocha target/kibana-coverage/mocha-combined
+mkdir -p $EXTRACT_END_DIR/mocha-combined
+cp -r $COMBINED_EXRACT_DIR/mocha $EXTRACT_END_DIR/mocha-combined
