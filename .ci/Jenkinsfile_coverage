@@ -73,15 +73,12 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
 
                   set -e
 
-                  echo '### List /tmp'
-                  ls -R /tmp
+                  echo '### List /tmp/downloaded_coverage'
+                  ls -R /tmp/downloaded_coverage
 
                   echo '### List target'
                   # Debugging Ingest and Static Site
                   ls -R ./target
-
-                  echo List 'Here'
-                  ls -R ./
 
                 """,
                 "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
