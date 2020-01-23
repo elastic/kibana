@@ -33,7 +33,7 @@ describe('searchAfterAndBulkCreate', () => {
   test('if successful with empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
     const result = await searchAfterAndBulkCreate({
-      someResult: sampleEmptyDocSearchResults,
+      someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -51,6 +51,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockService.callCluster).toHaveBeenCalledTimes(0);
     expect(result).toEqual(true);
   });
+
   test('if successful iteration of while loop with maxDocs', async () => {
     const sampleParams = sampleRuleAlertParams(30);
     const someGuids = Array.from({ length: 13 }).map(x => uuid.v4());
@@ -103,6 +104,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockService.callCluster).toHaveBeenCalledTimes(5);
     expect(result).toEqual(true);
   });
+
   test('if unsuccessful first bulk create', async () => {
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
     const sampleParams = sampleRuleAlertParams(10);
@@ -126,6 +128,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result).toEqual(false);
   });
+
   test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValueOnce({
@@ -156,6 +159,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result).toEqual(false);
   });
+
   test('if unsuccessful iteration of searchAfterAndBulkCreate due to empty sort ids and 0 total hits', async () => {
     const sampleParams = sampleRuleAlertParams();
     mockService.callCluster.mockReturnValueOnce({
@@ -185,6 +189,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(result).toEqual(true);
   });
+
   test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
     const sampleParams = sampleRuleAlertParams(10);
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
@@ -217,6 +222,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(result).toEqual(true);
   });
+
   test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
     const sampleParams = sampleRuleAlertParams(10);
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
@@ -230,7 +236,7 @@ describe('searchAfterAndBulkCreate', () => {
           },
         ],
       })
-      .mockReturnValueOnce(sampleEmptyDocSearchResults);
+      .mockReturnValueOnce(sampleEmptyDocSearchResults());
     const result = await searchAfterAndBulkCreate({
       someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
       ruleParams: sampleParams,
@@ -249,6 +255,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(result).toEqual(true);
   });
+
   test('if returns false when singleSearchAfter throws an exception', async () => {
     const sampleParams = sampleRuleAlertParams(10);
     const someGuids = Array.from({ length: 4 }).map(x => uuid.v4());
