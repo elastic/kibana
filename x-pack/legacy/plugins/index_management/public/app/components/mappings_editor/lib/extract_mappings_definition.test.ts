@@ -31,7 +31,7 @@ describe('extractMappingsDefinition', () => {
   test('should detect that the mappings has multiple types even when one of the type has not defined any "properties"', () => {
     const mappings = {
       type1: {
-        source: {
+        _source: {
           excludes: [],
           includes: [],
           enabled: true,
@@ -52,9 +52,9 @@ describe('extractMappingsDefinition', () => {
     expect(extractMappingsDefinition(mappings)).toBe(null);
   });
 
-  test('should detect that the mappings has one type under the "_doc" type', () => {
+  test('should detect that the mappings has one type and return its mapping definition', () => {
     const mappings = {
-      _doc: {
+      myType: {
         _source: {
           excludes: [],
           includes: [],
@@ -73,7 +73,7 @@ describe('extractMappingsDefinition', () => {
       },
     };
 
-    expect(extractMappingsDefinition(mappings)).toBe(mappings._doc);
+    expect(extractMappingsDefinition(mappings)).toBe(mappings.myType);
   });
 
   test('should detect that the mappings has one type at root level', () => {

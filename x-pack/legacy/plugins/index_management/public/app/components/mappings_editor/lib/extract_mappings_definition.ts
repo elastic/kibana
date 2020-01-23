@@ -81,18 +81,16 @@ export const extractMappingsDefinition = (mappings: GenericObject = {}): Generic
     }
   }
 
-  // Detect if multi-types mapping
-  const mappingsFound = Object.entries(mappings).reduce(
+  // At this point there MUST be one or more type mappings
+  const typedMappings = Object.entries(mappings).reduce(
     (acc: GenericObject[], [definitionKey, value]) => {
-      const isDefinitionKeyAllowed = allowedParameters.includes(definitionKey);
-
       // If all of the keys of the object are valid mappings definition parameters
       // it is probably a mappings definition :)
       const areAllParametersValid =
         isPlainObject(value) &&
         Object.keys(value as GenericObject).every(key => allowedParameters.includes(key));
 
-      if (!isDefinitionKeyAllowed || areAllParametersValid) {
+      if (areAllParametersValid) {
         acc.push(value as GenericObject);
       }
       return acc;
@@ -100,9 +98,18 @@ export const extractMappingsDefinition = (mappings: GenericObject = {}): Generic
     []
   );
 
-  return mappingsFound.length === 0
-    ? mappings
-    : mappingsFound.length === 1
-    ? mappingsFound[0]
-    : null; // If more than 1 mappings definition, return null
+  // If there are no typed mappings found this means that one of the type must have an invalid
+  // parameter that has set "areAllParametersValid" to false.
+  // In theory this should never happen but let's make sure the UI does not try to load an invalid mapping
+  if (typedMappings.length === 0) {
+    return null;
+  }
+
+  // If there's only one mapping type then we can consume it as if the type doesn't exist.
+  if (typedMappings.length === 1) {
+    return typedMappings[0];
+  }
+
+  // If there's more than one mapping type, then the mappings object isn't usable.
+  return null;
 };
