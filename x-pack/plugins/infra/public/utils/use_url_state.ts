@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
 import qs from 'querystring';
 import { useHistory } from './history_context';
+import { encodeQueryParams } from './url_state';
 
 export const useUrlState = <State>({
   defaultState,
@@ -110,16 +111,10 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   const previousQueryValues = qs.parse(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return qs
-    .stringify({
-      ...previousQueryValues,
-      [stateKey]: encodedUrlState,
-    })
-    .replace(/%40/gi, '@')
-    .replace(/%3A/gi, ':')
-    .replace(/%24/g, '$')
-    .replace(/%2C/gi, ',')
-    .replace(/%20/g, '%20');
+  return encodeQueryParams({
+    ...previousQueryValues,
+    [stateKey]: encodedUrlState,
+  });
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {

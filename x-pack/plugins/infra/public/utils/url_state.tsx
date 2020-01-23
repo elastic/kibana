@@ -155,16 +155,11 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   const previousQueryValues = qs.parse(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return qs
-    .stringify({
-      ...previousQueryValues,
-      [stateKey]: encodedUrlState,
-    })
-    .replace(/%40/gi, '@')
-    .replace(/%3A/gi, ':')
-    .replace(/%24/g, '$')
-    .replace(/%2C/gi, ',')
-    .replace(/%20/g, '%20');
+
+  return encodeQueryParams({
+    ...previousQueryValues,
+    [stateKey]: encodedUrlState,
+  });
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
@@ -176,4 +171,17 @@ const replaceQueryStringInLocation = (location: Location, queryString: string): 
       search: `?${queryString}`,
     };
   }
+};
+
+/* We need a custom method because encodeURIComponent (used by qs.stringify) is too aggressive and
+encodes stuff that doesn't have to be encoded per http://tools.ietf.org/html/rfc3986. This mimics the
+legacy encodeQueryComponent() Kibana function */
+export const encodeQueryParams = (params: Record<string, any>) => {
+  return qs
+    .stringify(params)
+    .replace(/%40/gi, '@')
+    .replace(/%3A/gi, ':')
+    .replace(/%24/g, '$')
+    .replace(/%2C/gi, ',')
+    .replace(/%20/g, '%20');
 };
