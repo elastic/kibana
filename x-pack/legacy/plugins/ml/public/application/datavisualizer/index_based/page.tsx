@@ -33,6 +33,8 @@ import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isFullLicense } from '../../license/check_license';
+import { checkPermission } from '../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
@@ -130,9 +132,11 @@ export const Page: FC = () => {
 
   const defaults = getDefaultPageState();
 
-  const [showActionsPanel] = useState(
-    isFullLicense() && currentIndexPattern.timeFieldName !== undefined
-  );
+  const showActionsPanel =
+    isFullLicense() &&
+    checkPermission('canCreateJob') &&
+    mlNodesAvailable() &&
+    currentIndexPattern.timeFieldName !== undefined;
 
   const [searchString, setSearchString] = useState(defaults.searchString);
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
@@ -613,7 +617,9 @@ export const Page: FC = () => {
                 )}
               </EuiPageContentHeader>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }} />
+            {showActionsPanel === true && (
+              <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }} />
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiPageContentBody>

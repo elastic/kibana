@@ -180,6 +180,10 @@ class DocumentationService {
   public getRemovalMappingTypeLink() {
     return `${this.esDocsBase}/removal-of-types.html`;
   }
+  
+  public getJoinMultiLevelsPerformanceLink() {
+    return `${this.esDocsBase}/parent-join.html#_parent_join_and_performance`;
+  }
 
   public getWellKnownTextLink() {
     return 'http://docs.opengeospatial.org/is/12-063r5/12-063r5.html';

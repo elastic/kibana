@@ -5,8 +5,6 @@
   "risk_score": 15,
   "severity": "high",
   "type": "query",
-  "from": "now-24h",
-  "to": "now",
   "query": "user.name: root or user.name: admin",
   "filters": [
     {

@@ -18,7 +18,6 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 
 import { getHeatmapColors } from '../../../legacy_imports';
 
@@ -26,8 +25,6 @@ describe('Vislib Heatmap Color Module Test Suite', function() {
   const emptyObject = {};
   const nullValue = null;
   let notAValue;
-
-  beforeEach(ngMock.module('kibana'));
 
   it('should throw an error if schema is invalid', function() {
     expect(function() {
