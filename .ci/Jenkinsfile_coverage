@@ -76,8 +76,11 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   echo '### List /tmp/downloaded_coverage'
                   ls -R /tmp/downloaded_coverage
 
+                  . src/dev/code_coverage/shell_scripts/extract_archives.sh
+                  echo '### List extracted dir'
+                  ls -R /tmp/extracted_coverage
+
                   echo '### List target'
-                  # Debugging Ingest and Static Site
                   ls -R ./target
 
                 """,

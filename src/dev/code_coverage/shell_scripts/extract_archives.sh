@@ -2,11 +2,14 @@
 
 set -e
 
-mkdir -p /tmp/extracted_coverage
+DOWNLOAD_DIR=/tmp/downloaded_coverage
+EXTRACT_DIR=/tmp/extracted_coverage
 
-echo "### Extracting intakes"
-tar -xzf /tmp/downloaded_coverage/coverage/kibana-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-tar -xzf /tmp/downloaded_coverage/coverage/x-pack-intake/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+mkdir -p $EXTRACT_DIR
 
-echo "### Extracting kibana-oss-tests"
-tar -xzf /tmp/downloaded_coverage/coverage/kibana-oss-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
+echo "### Extracting downloaded artifacts"
+# TODO-TRE: Prolly need to update the numbered kibana-xpack-tests-NUMBER later.
+for x in kibana-intake kibana-oss-tests kibana-xpack-tests-1 x-pack-intake; do
+  tar -xzf $DOWNLOAD_DIR/kibana-coverage/${x}/kibana-coverage.tar.gz -C $EXTRACT_DIR
+done
+
