@@ -33,17 +33,17 @@ import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plu
 import { VisualizationsStart } from '../../../visualizations/public';
 import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
+import { Chrome } from './legacy_imports';
 
 export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
   chrome: ChromeStart;
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
-  editorTypes: any;
   embeddables: IEmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
-  legacyChrome: any;
+  legacyChrome: Chrome;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
