@@ -475,13 +475,11 @@ export function resetDataRequest(state, action, request) {
 function getValidDataRequest(state, action, checkRequestToken = true) {
   const layer = findLayerById(state, action.layerId);
   if (!layer) {
-    console.log('no layer');
     return;
   }
 
   const dataRequest = findDataRequest(layer, action);
   if (!dataRequest) {
-    console.log('no datarequest');
     return;
   }
 
@@ -491,7 +489,6 @@ function getValidDataRequest(state, action, checkRequestToken = true) {
     dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
-    console.log('ignore outdated');
     return;
   }
   return dataRequest;
