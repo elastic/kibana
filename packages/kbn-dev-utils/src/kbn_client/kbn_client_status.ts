@@ -32,6 +32,7 @@ interface Status {
 interface ApiResponseStatus {
   name: string;
   uuid: string;
+  running_from_source?: true;
   version: {
     number: string;
     build_hash: string;
@@ -56,6 +57,11 @@ export class KbnClientStatus {
       method: 'GET',
       path: 'api/status',
     });
+  }
+
+  public async isDistributable() {
+    const status = await this.get();
+    return !status.running_from_source;
   }
 
   /**
