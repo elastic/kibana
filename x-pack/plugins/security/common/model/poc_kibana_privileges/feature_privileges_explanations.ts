@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PrivilegeExplanation } from './privilege_explanation';
+import { SubFeaturePrivilege } from '../sub_feature_privilege';
 
 export class FeaturePrivilegesExplanations {
   constructor(
@@ -55,6 +56,24 @@ export class FeaturePrivilegesExplanations {
     const explanation = this.explanations[featureId][privilegeId];
     const { global } = explanation.getGrantSources();
     return global.filter(gp => !gp.equals(explanation.privilege)).length > 0;
+  }
+
+  public hasNonSupersededCustomizations() {
+    return this.exists(
+      (featureId, privilegeId, explanation) =>
+        explanation.privilege.privilege.type === 'feature' &&
+        explanation.isDirectlyAssigned() &&
+        !explanation.isInherited()
+    );
+  }
+
+  public hasNonSupersededSubFeatureCustomizations() {
+    return this.exists(
+      (featureId, privilegeId, explanation) =>
+        explanation.privilege.privilege instanceof SubFeaturePrivilege &&
+        explanation.isDirectlyAssigned() &&
+        !explanation.isInherited()
+    );
   }
 
   public *explanationsIterator(): IterableIterator<{

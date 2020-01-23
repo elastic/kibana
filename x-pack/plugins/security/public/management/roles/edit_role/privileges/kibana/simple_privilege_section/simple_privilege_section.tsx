@@ -66,7 +66,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
     // TODO: bad logic here.
     const hasReservedPrivileges = effectivePrivileges.exists(
       (featureId, privilegeId, explanation) =>
-        explanation.isGranted() && !explanation.privilege.actions
+        explanation.isGranted() && !explanation.privilege.privilege.actions
     );
 
     const description = (

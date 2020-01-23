@@ -192,14 +192,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
           // TODO: Custom assignment value
 
-          const hasNonSupersededCustomizations = explanations.exists(
-            (featureId, privilegeId, explanation) =>
-              explanation.privilege.privilege.type === 'feature' &&
-              explanation.isDirectlyAssigned() &&
-              !explanation.isInherited()
-          );
-
-          const showCustom = hasNonSupersededCustomizations;
+          const showCustom = explanations.hasNonSupersededCustomizations();
 
           return (
             <PrivilegeDisplay

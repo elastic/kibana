@@ -6,7 +6,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent, EuiText } from '@elastic/eui';
-import { Role, SecuredFeature, PrimaryFeaturePrivilege } from '../../../../../../../common/model';
+import {
+  Role,
+  SecuredFeature,
+  PrimaryFeaturePrivilege,
+  SubFeaturePrivilege,
+} from '../../../../../../../common/model';
 import { SubFeatureForm } from './sub_feature_form';
 import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 
@@ -48,34 +53,59 @@ export const FeatureTableExpandedRow = ({
   );
 
   useEffect(() => {
+    const hasEffectivePrimaryFeaturePrivilege = privilegeExplanations.exists(
+      (featureId, privilegeId, explanation) =>
+        explanation.isGranted() &&
+        explanation.privilege.privilege instanceof PrimaryFeaturePrivilege
+    );
+
+    const hasEffectiveBasePrivilege = !!privilegeCalculator.getEffectiveBasePrivilege(
+      role,
+      spacesIndex
+    );
+
+    const hasEffectiveNonMinimalPrimaryFeaturePrivilege = privilegeExplanations.exists(
+      (featureId, privilegeId, explanation) =>
+        explanation.isGranted() &&
+        explanation.privilege.privilege instanceof PrimaryFeaturePrivilege &&
+        !explanation.privilege.privilege.isMinimalFeaturePrivilege()
+    );
+    const hasEffectiveMinimalPrimaryFeaturePrivilege = privilegeExplanations.exists(
+      (featureId, privilegeId, explanation) =>
+        explanation.isGranted() &&
+        explanation.privilege.privilege instanceof PrimaryFeaturePrivilege &&
+        explanation.privilege.privilege.isMinimalFeaturePrivilege()
+    );
+
+    console.log({ disabled, hasEffectiveBasePrivilege, hasEffectivePrimaryFeaturePrivilege });
+
     setCanCustomize(
-      !Boolean(disabled) &&
-        privilegeExplanations.exists((featureId, privilegeId, explanation) => {
-          return (
-            !explanation.isGranted() ||
-            !explanation
-              .getGrantSources()
-              .global.some(source => source.privilege.type === 'base') ||
-            !explanation.getGrantSources().space.some(source => source.privilege.type === 'base')
-          );
-        })
+      !Boolean(disabled) && !hasEffectiveBasePrivilege && hasEffectivePrimaryFeaturePrivilege
     );
 
     setHasInheritedCustomizations(
       privilegeExplanations.exists((featureId, privilegeId, explanation) => {
-        return explanation
-          .getGrantSources()
-          .global.some(source => source.isParentScopeOf(explanation.privilege));
+        return (
+          explanation.privilege.privilege instanceof SubFeaturePrivilege &&
+          explanation
+            .getGrantSources()
+            .global.some(source => source.isParentScopeOf(explanation.privilege))
+        );
       })
     );
 
     setIsCustomizing(
-      selectedMinimalPrimaryFeaturePrivileges.length > 0 || hasInheritedCustomizations
+      (hasEffectiveMinimalPrimaryFeaturePrivilege &&
+        !hasEffectiveNonMinimalPrimaryFeaturePrivilege) ||
+        privilegeExplanations.hasNonSupersededSubFeatureCustomizations()
     );
   }, [
     disabled,
     hasInheritedCustomizations,
+    isCustomizing,
+    privilegeCalculator,
     privilegeExplanations,
+    role,
     role.kibana,
     selectedMinimalPrimaryFeaturePrivileges.length,
     spacesIndex,
@@ -137,7 +167,7 @@ export const FeatureTableExpandedRow = ({
           label="Customize sub-feature privileges"
           checked={isCustomizing}
           onChange={onCustomizeSubFeatureChange}
-          disabled={!canCustomize || hasInheritedCustomizations}
+          disabled={!canCustomize}
         />
       </EuiFlexItem>
       {feature.subFeatures.map(subFeature => {

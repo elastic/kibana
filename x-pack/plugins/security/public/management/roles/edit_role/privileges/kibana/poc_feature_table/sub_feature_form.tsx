@@ -88,9 +88,6 @@ export const SubFeatureForm = (props: Props) => {
     const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
       props.privilegeExplanations.isGranted(props.featureId, p.id)
     );
-    const isInherited =
-      firstSelectedPrivilege &&
-      props.privilegeExplanations.isInherited(props.featureId, firstSelectedPrivilege.id);
 
     const areAnyInherited = props.privilegeExplanations.exists(
       (featureId, privilegeId, explanation) =>

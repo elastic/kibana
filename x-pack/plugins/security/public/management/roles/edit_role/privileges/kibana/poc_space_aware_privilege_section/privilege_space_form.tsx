@@ -194,7 +194,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                   this.props.privilegeCalculator.explainEffectiveBasePrivilege(
                     this.props.role,
                     this.props.editingIndex
-                  )?.privilege.id === 'all',
+                  )?.privilege.privilege.id === 'all',
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -477,7 +477,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     // else assigned
 
     if (baseExplanation?.isDirectlyAssigned() && !this.state.isCustomizingFeaturePrivileges) {
-      return `basePrivilege_${baseExplanation.privilege.id}`;
+      return `basePrivilege_${baseExplanation.privilege.privilege.id}`;
     }
 
     return `basePrivilege_${CUSTOM_PRIVILEGE_VALUE}`;
