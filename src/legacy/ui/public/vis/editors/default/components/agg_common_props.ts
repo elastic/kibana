@@ -18,29 +18,32 @@
  */
 
 import { AggType } from 'ui/agg_types';
-import { AggConfig, VisState, VisParams } from '../../..';
-import { AggParams } from '../agg_params';
+import { AggConfig, VisState, VisParams } from 'ui/vis';
 import { AggGroupNames } from '../agg_groups';
+import { Schema } from '../schemas';
 
-export type OnAggParamsChange = <
-  Params extends AggParams | VisParams,
-  ParamName extends keyof Params
->(
-  params: Params,
-  paramName: ParamName,
-  value: Params[ParamName]
-) => void;
+type AggId = AggConfig['id'];
+type AggParams = AggConfig['params'];
 
-export interface DefaultEditorAggCommonProps {
+export type AddSchema = (schemas: Schema) => void;
+export type ReorderAggs = (sourceAgg: AggConfig, destinationAgg: AggConfig) => void;
+
+export interface DefaultEditorCommonProps {
   formIsTouched: boolean;
   groupName: AggGroupNames;
-  lastParentPipelineAggTitle?: string;
   metricAggs: AggConfig[];
   state: VisState;
-  onAggParamsChange: OnAggParamsChange;
-  onAggTypeChange: (agg: AggConfig, aggType: AggType) => void;
-  onToggleEnableAgg: (agg: AggConfig, isEnable: boolean) => void;
-  removeAgg: (agg: AggConfig) => void;
-  setTouched: (isTouched: boolean) => void;
-  setValidity: (isValid: boolean) => void;
+  setAggParamValue: <T extends keyof AggParams>(
+    aggId: AggId,
+    paramName: T,
+    value: AggParams[T]
+  ) => void;
+  onAggTypeChange: (aggId: AggId, aggType: AggType) => void;
+}
+
+export interface DefaultEditorAggCommonProps extends DefaultEditorCommonProps {
+  lastParentPipelineAggTitle?: string;
+  setStateParamValue: <T extends keyof VisParams>(paramName: T, value: VisParams[T]) => void;
+  onToggleEnableAgg: (aggId: AggId, isEnable: boolean) => void;
+  removeAgg: (aggId: AggId) => void;
 }

@@ -9,8 +9,13 @@ import {
   NetworkHttpData,
   NetworkTopCountriesData,
   NetworkTopNFlowData,
+  NetworkDsOverTimeData,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
+import {
+  FrameworkRequest,
+  RequestOptionsPaginated,
+  MatrixHistogramRequestOptions,
+} from '../framework';
 import { TotalValue } from '../types';
 import { NetworkDnsRequestOptions } from '.';
 
@@ -24,6 +29,10 @@ export interface NetworkAdapter {
     options: RequestOptionsPaginated
   ): Promise<NetworkTopNFlowData>;
   getNetworkDns(req: FrameworkRequest, options: NetworkDnsRequestOptions): Promise<NetworkDnsData>;
+  getNetworkDnsHistogramData(
+    request: FrameworkRequest,
+    options: MatrixHistogramRequestOptions
+  ): Promise<NetworkDsOverTimeData>;
   getNetworkHttp(req: FrameworkRequest, options: RequestOptionsPaginated): Promise<NetworkHttpData>;
 }
 
@@ -142,4 +151,24 @@ export interface NetworkHttpBuckets {
   status: {
     buckets: GenericBuckets[];
   };
+}
+
+interface DnsHistogramSubBucket {
+  key: string;
+  doc_count: number;
+  orderAgg: {
+    value: number;
+  };
+}
+interface DnsHistogramBucket {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: DnsHistogramSubBucket[];
+}
+
+export interface DnsHistogramGroupData {
+  key: number;
+  doc_count: number;
+  key_as_string: string;
+  histogram: DnsHistogramBucket;
 }

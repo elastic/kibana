@@ -23,7 +23,7 @@ import Chainable from '../../lib/classes/chainable';
 import ses from './lib/ses';
 import des from './lib/des';
 import tes from './lib/tes';
-import toMilliseconds from '../../lib/to_milliseconds';
+import { toMS } from '../../../../vis_type_timelion/common/lib';
 
 export default new Chainable('holt', {
   args: [
@@ -125,9 +125,7 @@ export default new Chainable('holt', {
             })
           );
         }
-        const season = Math.round(
-          toMilliseconds(args.byName.season) / toMilliseconds(tlConfig.time.interval)
-        );
+        const season = Math.round(toMS(args.byName.season) / toMS(tlConfig.time.interval));
         points = tes(points, alpha, beta, gamma, season, sample);
       }
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { vislibColorMaps } from 'ui/color_maps';
 import { getLegendColors, getColor } from 'ui/vis/map/color_util';
 import { ColorGradient } from './components/color_gradient';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
@@ -113,7 +113,11 @@ export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {
       height: '100%',
       display: 'inline-block',
     };
-    return <div style={style}>&nbsp;</div>;
+    return (
+      <div style={style} key={color}>
+        &nbsp;
+      </div>
+    );
   });
   return {
     value: palette.id,

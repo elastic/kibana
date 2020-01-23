@@ -18,10 +18,18 @@
  */
 
 import _ from 'lodash';
+import { Subscription } from 'rxjs';
 import { State } from 'ui/state_management/state';
 import { FilterManager, esFilters } from '../../../../../../plugins/data/public';
 
-type GetAppStateFunc = () => State | undefined | null;
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  // this whole file will soon be deprecated by new state management.
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/data/public/query/filter_manager/lib/compare_filters';
+
+type GetAppStateFunc = () => { filters?: esFilters.Filter[]; save?: () => void } | undefined | null;
 
 /**
  * FilterStateManager is responsible for watching for filter changes
@@ -29,10 +37,12 @@ type GetAppStateFunc = () => State | undefined | null;
  * back to the URL.
  **/
 export class FilterStateManager {
+  private filterManagerUpdatesSubscription: Subscription;
+
   filterManager: FilterManager;
   globalState: State;
   getAppState: GetAppStateFunc;
-  interval: NodeJS.Timeout | undefined;
+  interval: number | undefined;
 
   constructor(globalState: State, getAppState: GetAppStateFunc, filterManager: FilterManager) {
     this.getAppState = getAppState;
@@ -41,7 +51,7 @@ export class FilterStateManager {
 
     this.watchFilterState();
 
-    this.filterManager.getUpdates$().subscribe(() => {
+    this.filterManagerUpdatesSubscription = this.filterManager.getUpdates$().subscribe(() => {
       this.updateAppState();
     });
   }
@@ -50,12 +60,13 @@ export class FilterStateManager {
     if (this.interval) {
       clearInterval(this.interval);
     }
+    this.filterManagerUpdatesSubscription.unsubscribe();
   }
 
   private watchFilterState() {
     // This is a temporary solution to remove rootscope.
     // Moving forward, state should provide observable subscriptions.
-    this.interval = setInterval(() => {
+    this.interval = window.setInterval(() => {
       const appState = this.getAppState();
       const stateUndefined = !appState || !this.globalState;
       if (stateUndefined) return;
@@ -63,8 +74,16 @@ export class FilterStateManager {
       const globalFilters = this.globalState.filters || [];
       const appFilters = (appState && appState.filters) || [];
 
-      const globalFilterChanged = !_.isEqual(this.filterManager.getGlobalFilters(), globalFilters);
-      const appFilterChanged = !_.isEqual(this.filterManager.getAppFilters(), appFilters);
+      const globalFilterChanged = !compareFilters(
+        this.filterManager.getGlobalFilters(),
+        globalFilters,
+        COMPARE_ALL_OPTIONS
+      );
+      const appFilterChanged = !compareFilters(
+        this.filterManager.getAppFilters(),
+        appFilters,
+        COMPARE_ALL_OPTIONS
+      );
       const filterStateChanged = globalFilterChanged || appFilterChanged;
 
       if (!filterStateChanged) return;
@@ -80,7 +99,7 @@ export class FilterStateManager {
 
   private saveState() {
     const appState = this.getAppState();
-    if (appState) appState.save();
+    if (appState && appState.save) appState.save();
     this.globalState.save();
   }
 

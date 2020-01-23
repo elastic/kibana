@@ -125,7 +125,7 @@ export const buildThreatsDescription = ({
         description: (
           <ThreatsEuiFlexGroup direction="column">
             {threats.map((threat, index) => {
-              const tactic = tacticsOptions.find(t => t.name === threat.tactic.name);
+              const tactic = tacticsOptions.find(t => t.id === threat.tactic.id);
               return (
                 <EuiFlexItem key={`${threat.tactic.name}-${index}`}>
                   <EuiLink href={threat.tactic.reference} target="_blank">
@@ -133,7 +133,7 @@ export const buildThreatsDescription = ({
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
                     {threat.techniques.map(technique => {
-                      const myTechnique = techniquesOptions.find(t => t.name === technique.name);
+                      const myTechnique = techniquesOptions.find(t => t.id === technique.id);
                       return (
                         <EuiFlexItem>
                           <TechniqueLinkItem

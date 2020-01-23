@@ -62,6 +62,22 @@ export class ManagementTestPlugin
         };
       },
     });
+
+    testSection!
+      .registerApp({
+        id: 'test-management-disabled',
+        title: 'Management Test Disabled',
+        mount(params) {
+          params.setBreadcrumbs([{ text: 'Management Test Disabled' }]);
+          ReactDOM.render(<div>This is a secret that should never be seen!</div>, params.element);
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(params.element);
+          };
+        },
+      })
+      .disable();
+
     return {};
   }
 

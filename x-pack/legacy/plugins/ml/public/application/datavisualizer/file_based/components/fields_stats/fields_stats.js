@@ -32,7 +32,7 @@ export class FieldsStats extends Component {
       <div className="fields-stats">
         <EuiFlexGrid gutterSize="m">
           {this.state.fields.map(f => (
-            <EuiFlexItem key={f.name} style={{ minWidth: '360px' }}>
+            <EuiFlexItem key={f.name} style={{ width: '360px' }}>
               <FieldStatsCard field={f} />
             </EuiFlexItem>
           ))}

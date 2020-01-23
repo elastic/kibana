@@ -16,8 +16,8 @@ import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
 import { getJobIdUrl } from '../utils';
 
-import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 const PAGE_SIZE = 10;
@@ -124,7 +124,16 @@ class JobsListUI extends Component {
     // be updated if we move to always using props for width.
     const columns = [
       {
-        name: '',
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.showDetailsColumn.screenReaderDescription"
+                defaultMessage="This column contains clickable controls for showing more details on each job"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
         render: item => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
@@ -163,11 +172,21 @@ class JobsListUI extends Component {
         sortable: true,
         truncateText: false,
         width: '20%',
+        scope: 'row',
         render: isManagementTable ? id => this.getJobIdLink(id) : undefined,
       },
       {
         field: 'auditMessage',
-        name: '',
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.auditMessageColumn.screenReaderDescription"
+                defaultMessage="This column display icons when there are errors or warnings for the job in the past 24 hours"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
         render: item => <JobIcon message={item} showTooltip={true} />,
       },
       {
@@ -272,7 +291,16 @@ class JobsListUI extends Component {
         width: '15%',
       });
       columns.push({
-        name: '',
+        name: (
+          <EuiScreenReaderOnly>
+            <p>
+              <FormattedMessage
+                id="xpack.ml.jobsList.jobActionsColumn.screenReaderDescription"
+                defaultMessage="This column contains extra actions in a menu that can be performed on each job"
+              />
+            </p>
+          </EuiScreenReaderOnly>
+        ),
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,

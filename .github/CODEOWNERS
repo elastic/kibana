@@ -15,6 +15,7 @@
 /src/legacy/core_plugins/kibana/public/home/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/legacy/core_plugins/metrics/ @elastic/kibana-app
+/src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/home/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
@@ -117,21 +118,22 @@
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
 # Kibana Localization
-/src/dev/i18n @elastic/kibana-localization
+/src/dev/i18n/ @elastic/kibana-localization
 
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
 /src/legacy/core_plugins/ui_metric/ @elastic/pulse
 /src/plugins/usage_collection/ @elastic/pulse
-/x-pack/legacy/plugins/telemetry @elastic/pulse
+/x-pack/legacy/plugins/telemetry/ @elastic/pulse
 
 # Kibana Alerting Services
-/x-pack/legacy/plugins/alerting @elastic/kibana-alerting-services
-/x-pack/legacy/plugins/actions @elastic/kibana-alerting-services
-/x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
-/x-pack/test/alerting_api_integration @elastic/kibana-alerting-services
-/x-pack/test/plugin_api_integration/plugins/task_manager @elastic/kibana-alerting-services
-/x-pack/test/plugin_api_integration/test_suites/task_manager @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/actions/ @elastic/kibana-alerting-services
+/x-pack/plugins/event_log/ @elastic/kibana-alerting-services
+/x-pack/plugins/task_manager/ @elastic/kibana-alerting-services
+/x-pack/test/alerting_api_integration/ @elastic/kibana-alerting-services
+/x-pack/test/plugin_api_integration/plugins/task_manager/ @elastic/kibana-alerting-services
+/x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services

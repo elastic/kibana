@@ -8,10 +8,10 @@ import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { AutocompleteSuggestion } from '../../../../../../../../src/plugins/data/public';
+import { autocomplete } from '../../../../../../../../src/plugins/data/public';
 import { SuggestionItem } from '../suggestion_item';
 
-const suggestion: AutocompleteSuggestion = {
+const suggestion: autocomplete.QuerySuggestion = {
   description: 'Description...',
   end: 3,
   start: 1,

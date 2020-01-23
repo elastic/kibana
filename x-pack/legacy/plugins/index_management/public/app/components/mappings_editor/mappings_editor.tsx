@@ -68,7 +68,7 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
         return;
       }
     } else if (selectedTab === 'templates') {
-      const { isValid: isTemplatesFormValid } = await state.templates.form!.submit();
+      const { isValid: isTemplatesFormValid } = await state.templates.submitForm!();
 
       if (!isTemplatesFormValid) {
         return;
