@@ -303,7 +303,9 @@ export class LegacyCoreEditor implements CoreEditor {
       const maxLineLength = this.getWrapLimit() - 5;
       const isWrapping = firstLine.length > maxLineLength;
       const getScreenCoords = (line: number) =>
-        this.editor.renderer.textToScreenCoordinates(line - 1, startColumn).pageY - offsetFromPage;
+        this.editor.renderer.textToScreenCoordinates(line - 1, startColumn).pageY -
+        offsetFromPage +
+        (window.pageYOffset || 0);
       const topOfReq = getScreenCoords(startLine);
 
       if (topOfReq >= 0) {

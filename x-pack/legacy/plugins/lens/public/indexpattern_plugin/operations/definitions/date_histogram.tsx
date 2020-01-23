@@ -322,7 +322,7 @@ function parseInterval(currentInterval: string) {
   };
 }
 
-function restrictedInterval(aggregationRestrictions?: AggregationRestrictions) {
+function restrictedInterval(aggregationRestrictions?: Partial<AggregationRestrictions>) {
   if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
     return;
   }

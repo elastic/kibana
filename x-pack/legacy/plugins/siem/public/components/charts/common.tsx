@@ -14,6 +14,7 @@ import {
   ScaleType,
   SettingsSpecProps,
   TickFormatter,
+  Position,
 } from '@elastic/charts';
 import styled from 'styled-components';
 import { useUiSetting } from '../../lib/kibana';
@@ -35,6 +36,7 @@ export interface ChartData {
 
 export interface ChartSeriesConfigs {
   customHeight?: number;
+  customSeriesColors?: string[];
   series?: {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
@@ -105,6 +107,7 @@ export const chartDefaultSettings = {
   showLegend: false,
   showLegendDisplayValue: false,
   debug: false,
+  legendPosition: Position.Bottom,
 };
 
 export const getChartHeight = (customHeight?: number, autoSizerHeight?: number): string => {

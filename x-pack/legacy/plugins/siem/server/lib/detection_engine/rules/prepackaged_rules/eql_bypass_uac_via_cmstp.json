@@ -1,17 +1,37 @@
 {
-  "rule_id": "2f7403da-1a4c-46bb-8ecc-c1a596e10cd0",
-  "risk_score": 50,
-  "description": "EQL - Bypass UAC via CMSTP",
+  "description": "Identifies User Account Control (UAC) bypass via cmstp.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
   "immutable": true,
   "interval": "5m",
-  "name": "EQL - Bypass UAC via CMSTP",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:\"cmstp.exe\" and process.parent.args:(\"/s\" and \"/au\")",
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "Bypass UAC via CMSTP",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:\"cmstp.exe\" and process.parent.args:(\"/s\" and \"/au\")",
+  "risk_score": 25,
+  "rule_id": "2f7403da-1a4c-46bb-8ecc-c1a596e10cd0",
+  "severity": "low",
+  "tags": [
+    "EIA"
+  ],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "techniques": [
+        {
+          "id": "T1088",
+          "name": "Bypass User Account Control",
+          "reference": "https://attack.mitre.org/techniques/T1088/"
+        }
+      ]
+    }
+  ],
+  "to": "now",
+  "type": "query",
   "version": 1
 }

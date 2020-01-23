@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
+export { withProcRunner, ProcRunner } from './proc_runner';
 export {
   ToolingLog,
   ToolingLogTextWriter,

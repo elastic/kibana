@@ -5,7 +5,8 @@
  */
 
 import { VectorStyle } from '../../vector_style';
-import { getColorRampCenterColor } from '../../../color_utils';
+import { getColorRampCenterColor, getColorPalette } from '../../../color_utils';
+import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 
 export function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
   if (!colorStyleProperty) {
@@ -21,19 +22,37 @@ export function extractColorFromStyleProperty(colorStyleProperty, defaultColor) 
     return defaultColor;
   }
 
-  // return middle of gradient for dynamic style property
-
-  if (colorStyleProperty.options.useCustomColorRamp) {
-    if (
-      !colorStyleProperty.options.customColorRamp ||
-      !colorStyleProperty.options.customColorRamp.length
-    ) {
-      return defaultColor;
+  if (colorStyleProperty.options.type === COLOR_MAP_TYPE.CATEGORICAL) {
+    if (colorStyleProperty.options.useCustomColorPalette) {
+      return colorStyleProperty.options.customColorPalette &&
+        colorStyleProperty.options.customColorPalette.length
+        ? colorStyleProperty.options.customColorPalette[0].colorCategory
+        : defaultColor;
     }
-    // favor the lowest color in even arrays
-    const middleIndex = Math.floor((colorStyleProperty.options.customColorRamp.length - 1) / 2);
-    return colorStyleProperty.options.customColorRamp[middleIndex].color;
-  }
 
-  return getColorRampCenterColor(colorStyleProperty.options.color);
+    if (!colorStyleProperty.options.colorCategory) {
+      return null;
+    }
+
+    const palette = getColorPalette(colorStyleProperty.options.colorCategory);
+    return palette[0];
+  } else {
+    // return middle of gradient for dynamic style property
+    if (colorStyleProperty.options.useCustomColorRamp) {
+      if (
+        !colorStyleProperty.options.customColorRamp ||
+        !colorStyleProperty.options.customColorRamp.length
+      ) {
+        return defaultColor;
+      }
+      // favor the lowest color in even arrays
+      const middleIndex = Math.floor((colorStyleProperty.options.customColorRamp.length - 1) / 2);
+      return colorStyleProperty.options.customColorRamp[middleIndex].color;
+    }
+
+    if (!colorStyleProperty.options.color) {
+      return null;
+    }
+    return getColorRampCenterColor(colorStyleProperty.options.color);
+  }
 }

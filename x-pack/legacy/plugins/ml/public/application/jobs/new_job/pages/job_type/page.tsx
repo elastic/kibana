@@ -24,6 +24,7 @@ import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { CategorizationIcon } from './categorization_job_icon';
 
 export const Page: FC = () => {
   const kibanaContext = useKibanaContext();
@@ -154,7 +155,7 @@ export const Page: FC = () => {
     {
       href: getUrl('#jobs/new_job/categorization'),
       icon: {
-        type: 'createAdvancedJob',
+        type: CategorizationIcon,
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
           defaultMessage: 'Categorization job',
         }),

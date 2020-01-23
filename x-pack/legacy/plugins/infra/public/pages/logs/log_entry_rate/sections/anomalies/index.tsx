@@ -93,7 +93,7 @@ export const AnomaliesResults: React.FunctionComponent<{
 
   return (
     <>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="s" aria-label={title}>
             <h2>{title}</h2>

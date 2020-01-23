@@ -39,7 +39,9 @@ export function taskManager(kibana: any) {
           .description('The name of the index used to store task information.')
           .default('.kibana_task_manager')
           .invalid(['.tasks']),
-      }).default();
+      })
+        .unknown(true)
+        .default();
     },
     init(server: Legacy.Server) {
       /*

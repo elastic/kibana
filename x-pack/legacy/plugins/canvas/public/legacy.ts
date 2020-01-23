@@ -15,6 +15,8 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url'; // eslint-d
 import { Storage } from '../../../../../src/plugins/kibana_utils/public'; // eslint-disable-line import/order
 // @ts-ignore Untyped Kibana Lib
 import { formatMsg } from 'ui/notify/lib/format_msg'; // eslint-disable-line import/order
+// @ts-ignore Untyped Kibana Lib
+import { QueryString } from 'ui/utils/query_string'; // eslint-disable-line import/order
 
 const shimCoreSetup = {
   ...npSetup.core,
@@ -30,6 +32,7 @@ const shimStartPlugins: CanvasStartDeps = {
     absoluteToParsedUrl,
     // ToDo: Copy directly into canvas
     formatMsg,
+    QueryString,
     // ToDo: Remove in favor of core.application.register
     setRootController: chrome.setRootController,
     storage: Storage,

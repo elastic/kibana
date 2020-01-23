@@ -6,13 +6,12 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { updateRulesRoute } from './update_rules_route';
 import { ServerInjectOptions } from 'hapi';
+
 import {
   getFindResult,
   getResult,
@@ -69,26 +68,10 @@ describe('update_rules_bulk', () => {
       expect(parsed).toEqual(expected);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      updateRulesRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getUpdateBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       updateRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getUpdateBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      updateRulesRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getUpdateBulkRequest());
       expect(statusCode).toBe(404);
     });
   });

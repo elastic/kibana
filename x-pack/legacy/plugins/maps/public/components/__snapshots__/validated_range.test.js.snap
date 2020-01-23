@@ -5,6 +5,7 @@ exports[`Should display error message when value is outside of range 1`] = `
   <EuiRange
     compressed={false}
     fullWidth={false}
+    isLoading={false}
     levels={Array []}
     max={10}
     min={0}
@@ -36,6 +37,7 @@ exports[`Should pass slider props to slider 1`] = `
 <EuiRange
   compressed={false}
   fullWidth={false}
+  isLoading={false}
   levels={Array []}
   max={10}
   min={0}
@@ -54,6 +56,7 @@ exports[`Should render slider 1`] = `
 <EuiRange
   compressed={false}
   fullWidth={false}
+  isLoading={false}
   levels={Array []}
   max={10}
   min={0}

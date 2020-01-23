@@ -57,7 +57,8 @@ describe('StatefulEventsViewer', () => {
     ).toBe(true);
   });
 
-  test('it renders a transparent inspect button when it does NOT have mouse focus', async () => {
+  // InspectButtonContainer controls displaying InspectButton components
+  test('it renders InspectButtonContainer', async () => {
     const wrapper = mount(
       <TestProviders>
         <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
@@ -74,39 +75,6 @@ describe('StatefulEventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="transparent-inspect-container"]`)
-        .first()
-        .exists()
-    ).toBe(true);
-  });
-
-  test('it renders an opaque inspect button when it has mouse focus', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
-      </TestProviders>
-    );
-
-    await wait();
-    wrapper.update();
-
-    wrapper.simulate('mouseenter');
-    wrapper.update();
-
-    expect(
-      wrapper
-        .find(`[data-test-subj="opaque-inspect-container"]`)
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
   });
 });

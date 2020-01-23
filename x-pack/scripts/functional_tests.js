@@ -9,6 +9,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/reporting/configs/chromium_api.js'),
   require.resolve('../test/reporting/configs/chromium_functional.js'),
   require.resolve('../test/reporting/configs/generate_api.js'),
+  require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.js'),
   require.resolve('../test/api_integration/config_security_basic.js'),
   require.resolve('../test/api_integration/config.js'),

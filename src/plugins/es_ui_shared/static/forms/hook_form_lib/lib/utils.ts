@@ -33,7 +33,7 @@ export const flattenObject = (
 ): Record<string, any> =>
   Object.entries(object).reduce((acc, [key, value]) => {
     const updatedPaths = [...paths, key];
-    if (value !== null && typeof value === 'object') {
+    if (value !== null && !Array.isArray(value) && typeof value === 'object') {
       return flattenObject(value, to, updatedPaths);
     }
     acc[updatedPaths.join('.')] = value;

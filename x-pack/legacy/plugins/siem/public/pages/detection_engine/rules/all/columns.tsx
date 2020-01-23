@@ -8,31 +8,36 @@
 
 import {
   EuiBadge,
-  EuiIconTip,
   EuiLink,
-  EuiTextColor,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
+  EuiHealth,
 } from '@elastic/eui';
 import * as H from 'history';
-import React from 'react';
+import React, { Dispatch } from 'react';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import {
   deleteRulesAction,
-  duplicateRuleAction,
+  duplicateRulesAction,
   editRuleAction,
   exportRulesAction,
-  runRuleAction,
 } from './actions';
 
 import { Action } from './reducer';
 import { TableData } from '../types';
 import * as i18n from '../translations';
-import { PreferenceFormattedDate } from '../../../../components/formatted_date';
+import { FormattedDate } from '../../../../components/formatted_date';
 import { RuleSwitch } from '../components/rule_switch';
 import { SeverityBadge } from '../components/severity_badge';
+import { ActionToaster } from '../../../../components/toasters';
+import { getStatusColor } from '../components/rule_status/helpers';
+import { TruncatableText } from '../../../../components/truncatable_text';
 
-const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
+const getActions = (
+  dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>,
+  history: H.History
+) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
     icon: 'visControls',
@@ -41,29 +46,24 @@ const getActions = (dispatch: React.Dispatch<Action>, history: H.History) => [
     enabled: (rowItem: TableData) => !rowItem.sourceRule.immutable,
   },
   {
-    description: i18n.RUN_RULE_MANUALLY,
-    icon: 'play',
-    name: i18n.RUN_RULE_MANUALLY,
-    onClick: runRuleAction,
-    enabled: () => false,
-  },
-  {
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: i18n.DUPLICATE_RULE,
-    onClick: (rowItem: TableData) => duplicateRuleAction(rowItem.sourceRule, dispatch),
+    onClick: (rowItem: TableData) =>
+      duplicateRulesAction([rowItem.sourceRule], dispatch, dispatchToaster),
   },
   {
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
     onClick: (rowItem: TableData) => exportRulesAction([rowItem.sourceRule], dispatch),
+    enabled: (rowItem: TableData) => !rowItem.immutable,
   },
   {
     description: i18n.DELETE_RULE,
     icon: 'trash',
     name: i18n.DELETE_RULE,
-    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch),
+    onClick: (rowItem: TableData) => deleteRulesAction([rowItem.id], dispatch, dispatchToaster),
   },
 ];
 
@@ -72,6 +72,7 @@ type RulesColumns = EuiBasicTableColumn<TableData> | EuiTableActionsColumnType<T
 // Michael: Are we able to do custom, in-table-header filters, as shown in my wireframes?
 export const getColumns = (
   dispatch: React.Dispatch<Action>,
+  dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
   hasNoPermissions: boolean
 ): RulesColumns[] => {
@@ -84,63 +85,58 @@ export const getColumns = (
       width: '24%',
     },
     {
-      field: 'method',
-      name: i18n.COLUMN_METHOD,
+      field: 'risk_score',
+      name: i18n.COLUMN_RISK_SCORE,
       truncateText: true,
+      width: '14%',
     },
     {
       field: 'severity',
       name: i18n.COLUMN_SEVERITY,
       render: (value: TableData['severity']) => <SeverityBadge value={value} />,
       truncateText: true,
+      width: '16%',
     },
     {
-      field: 'lastCompletedRun',
+      field: 'statusDate',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
-      render: (value: TableData['lastCompletedRun']) => {
+      render: (value: TableData['statusDate']) => {
         return value == null ? (
           getEmptyTagValue()
         ) : (
-          <PreferenceFormattedDate value={new Date(value)} />
+          <FormattedDate value={value} fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} />
         );
       },
       sortable: true,
       truncateText: true,
-      width: '16%',
+      width: '20%',
     },
     {
-      field: 'lastResponse',
+      field: 'status',
       name: i18n.COLUMN_LAST_RESPONSE,
-      render: (value: TableData['lastResponse']) => {
-        return value == null ? (
-          getEmptyTagValue()
-        ) : (
+      render: (value: TableData['status']) => {
+        return (
           <>
-            {value.type === 'Fail' ? (
-              <EuiTextColor color="danger">
-                {value.type} <EuiIconTip content={value.message} type="iInCircle" />
-              </EuiTextColor>
-            ) : (
-              <EuiTextColor color="secondary">{value.type}</EuiTextColor>
-            )}
+            <EuiHealth color={getStatusColor(value ?? null)}>
+              {value ?? getEmptyTagValue()}
+            </EuiHealth>
           </>
         );
       },
+      width: '16%',
       truncateText: true,
     },
     {
       field: 'tags',
       name: i18n.COLUMN_TAGS,
       render: (value: TableData['tags']) => (
-        <div>
-          <>
-            {value.map((tag, i) => (
-              <EuiBadge color="hollow" key={i}>
-                {tag}
-              </EuiBadge>
-            ))}
-          </>
-        </div>
+        <TruncatableText>
+          {value.map((tag, i) => (
+            <EuiBadge color="hollow" key={`${tag}-${i}`}>
+              {tag}
+            </EuiBadge>
+          ))}
+        </TruncatableText>
       ),
       truncateText: true,
       width: '20%',
@@ -159,12 +155,12 @@ export const getColumns = (
         />
       ),
       sortable: true,
-      width: '85px',
+      width: '95px',
     },
   ];
   const actions: RulesColumns[] = [
     {
-      actions: getActions(dispatch, history),
+      actions: getActions(dispatch, dispatchToaster, history),
       width: '40px',
     } as EuiTableActionsColumnType<TableData>,
   ];

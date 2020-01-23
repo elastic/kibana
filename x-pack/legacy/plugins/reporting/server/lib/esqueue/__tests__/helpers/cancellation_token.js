@@ -8,8 +8,7 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { CancellationToken } from '../../../../../common/cancellation_token';
 
-// FAILING: https://github.com/elastic/kibana/issues/51373
-describe.skip('CancellationToken', function() {
+describe('CancellationToken', function() {
   let cancellationToken;
   beforeEach(function() {
     cancellationToken = new CancellationToken();
@@ -65,12 +64,12 @@ describe.skip('CancellationToken', function() {
 
   describe('isCancelled', function() {
     it('should default to false', function() {
-      expect(cancellationToken.isCancelled).to.be(false);
+      expect(cancellationToken.isCancelled()).to.be(false);
     });
 
     it('should switch to true after call to cancel', function() {
       cancellationToken.cancel();
-      expect(cancellationToken.isCancelled).to.be(true);
+      expect(cancellationToken.isCancelled()).to.be(true);
     });
   });
 });

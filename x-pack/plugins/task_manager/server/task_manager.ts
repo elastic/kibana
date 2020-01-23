@@ -48,11 +48,11 @@ import { createTaskPoller, PollingError, PollingErrorType } from './task_poller'
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_runner';
 import {
-  FetchOpts,
   FetchResult,
   TaskStore,
   OwnershipClaimingOpts,
   ClaimOwnershipResult,
+  SearchOpts,
 } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
@@ -323,12 +323,12 @@ export class TaskManager {
   }
 
   /**
-   * Fetches a paginatable list of scheduled tasks.
+   * Fetches a list of scheduled tasks.
    *
    * @param opts - The query options used to filter tasks
    * @returns {Promise<FetchResult>}
    */
-  public async fetch(opts: FetchOpts): Promise<FetchResult> {
+  public async fetch(opts: SearchOpts): Promise<FetchResult> {
     await this.waitUntilStarted();
     return this.store.fetch(opts);
   }
@@ -401,7 +401,7 @@ export async function claimAvailableTasks(
   } else {
     performance.mark('claimAvailableTasks.noAvailableWorkers');
     logger.info(
-      `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers. If this happens often, consider adjusting the "xpack.task_manager.max_workers" configuration.`
+      `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
     );
   }
   return [];

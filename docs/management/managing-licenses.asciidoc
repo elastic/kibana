@@ -25,9 +25,9 @@ At the end of the trial period, the platinum features operate in a
 <<license-expiration,degraded mode>>. You can revert to a basic license, 
 extend the trial, or purchase a subscription. 
 
-TIP: If {security-features} are enabled, before you revert to a basic license or
-install a gold or platinum license, you must configure Transport Layer Security
-(TLS) in {es}. See {ref}/encrypting-communications.html[Encrypting communications].
+TIP: If {security-features} are enabled, unless you have a trial license, 
+you must configure Transport Layer Security (TLS) in {es}. 
+See {ref}/encrypting-communications.html[Encrypting communications].
 {kib} and the {ref}/start-basic.html[start basic API] provide a list of all of
 the features that will no longer be supported if you revert to a basic license.
 
