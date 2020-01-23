@@ -63,7 +63,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpFetchOptionsWithPath](./kibana-plugin-public.httpfetchoptionswithpath.md) | Similar to [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) but with the URL path included. |
 |  [HttpFetchQuery](./kibana-plugin-public.httpfetchquery.md) |  |
 |  [HttpHandler](./kibana-plugin-public.httphandler.md) | A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) for options and [HttpResponse](./kibana-plugin-public.httpresponse.md) for the response. |
-|  [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) |  |
+|  [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) | Headers to append to the request. Any headers that begin with <code>kbn-</code> are considered private to Core and will cause [HttpHandler](./kibana-plugin-public.httphandler.md) to throw an error. |
 |  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) | An object that may define global interceptor functions for different parts of the request and response lifecycle. See [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md)<!-- -->. |
 |  [HttpInterceptorRequestError](./kibana-plugin-public.httpinterceptorrequesterror.md) |  |
 |  [HttpInterceptorResponseError](./kibana-plugin-public.httpinterceptorresponseerror.md) |  |

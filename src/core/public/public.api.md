@@ -614,7 +614,7 @@ export interface HttpHandler {
     <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
-// @public (undocumented)
+// @public
 export interface HttpHeadersInit {
     // (undocumented)
     [name: string]: any;
