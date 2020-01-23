@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Privilege } from './privilege_instance';
+import { ScopedPrivilege } from '../scoped_privilege';
 
 export class PrivilegeExplanation {
   constructor(
-    public readonly privilege: Privilege,
+    public readonly privilege: ScopedPrivilege,
     private readonly calculation: {
-      global: Privilege[];
-      space: Privilege[];
+      global: ScopedPrivilege[];
+      space: ScopedPrivilege[];
     }
   ) {}
 

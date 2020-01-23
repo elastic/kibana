@@ -62,6 +62,7 @@ export const SubFeatureForm = (props: Props) => {
               key={privilege.id}
               id={privilege.id}
               label={privilege.name}
+              data-test-subj="independentSubFeaturePrivilegeControl"
               onChange={e => {
                 const { checked } = e.target;
                 if (checked) {
@@ -94,7 +95,7 @@ export const SubFeatureForm = (props: Props) => {
     const areAnyInherited = props.privilegeExplanations.exists(
       (featureId, privilegeId, explanation) =>
         privilegeGroup.privileges.some(
-          pgp => explanation.isInherited() && pgp.equals(explanation.privilege)
+          pgp => explanation.isInherited() && pgp.equals(explanation.privilege.privilege)
         )
     );
 
@@ -106,22 +107,24 @@ export const SubFeatureForm = (props: Props) => {
         return {
           id: privilege.id,
           label: privilege.name,
-          isDisabled: props.privilegeExplanations.exists((featureId, privilegeId, explanation) => {
-            const morePermissiveGroupPrivileges = privilegeGroup.privileges.slice(
-              0,
-              privilegeIndex
-            );
+          isDisabled:
+            props.disabled ||
+            props.privilegeExplanations.exists((featureId, privilegeId, explanation) => {
+              const morePermissiveGroupPrivileges = privilegeGroup.privileges.slice(
+                0,
+                privilegeIndex
+              );
 
-            return morePermissiveGroupPrivileges.some(
-              pgp => pgp.equals(explanation.privilege) && explanation.isInherited()
-            );
-          }),
+              return morePermissiveGroupPrivileges.some(
+                pgp => pgp.equals(explanation.privilege.privilege) && explanation.isInherited()
+              );
+            }),
         };
       }),
       {
         id: NO_PRIVILEGE_VALUE,
         label: 'None',
-        isDisabled: areAnyInherited,
+        isDisabled: props.disabled || areAnyInherited,
       },
     ].flat();
 
@@ -129,6 +132,7 @@ export const SubFeatureForm = (props: Props) => {
       <EuiButtonGroup
         key={index}
         buttonSize="compressed"
+        data-test-subj="mutexSubFeaturePrivilegeControl"
         options={options}
         idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
         isDisabled={props.disabled}

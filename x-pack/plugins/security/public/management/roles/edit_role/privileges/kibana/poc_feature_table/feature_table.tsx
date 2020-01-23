@@ -32,7 +32,6 @@ import { NO_PRIVILEGE_VALUE } from '../constants';
 import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 // TODO: move htis up to a common spot if it's to be used here...
 import { PrivilegeDisplay } from '../poc_space_aware_privilege_section/privilege_display';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
 interface Props {
   role: Role;
@@ -233,9 +232,22 @@ export class FeatureTable extends Component<Props, State> {
 
           // TODO: better min priv check
           const selectedPrivilege = effectiveFeaturePrivileges.find(afp => {
-            return record.feature.primaryFeaturePrivileges.find(
-              featurePriv => afp.id === featurePriv.id || afp.id === `minimal_${featurePriv.id}`
+            const primary = record.feature.primaryFeaturePrivileges.findIndex(featurePriv =>
+              afp.equals(featurePriv)
             );
+            const minimalPrimary = record.feature.minimalPrimaryFeaturePrivileges.findIndex(
+              featurePriv => afp.equals(featurePriv)
+            );
+
+            if (primary < 0 && minimalPrimary < 0) {
+              return undefined;
+            }
+
+            if (primary < 0 || minimalPrimary < primary) {
+              return record.feature.minimalPrimaryFeaturePrivileges[minimalPrimary];
+            }
+
+            return record.feature.primaryFeaturePrivileges[primary];
           });
 
           const selectedPrivilegeId = selectedPrivilege?.id.startsWith('minimal_')
@@ -247,22 +259,14 @@ export class FeatureTable extends Component<Props, State> {
             !selectedPrivilegeId ||
             !featurePrivilegeExplanations.exists((fid, privilegeId, explanation) => {
               const isPrimaryFeaturePrivilege =
-                explanation.privilege instanceof PrimaryFeaturePrivilege;
+                explanation.privilege.privilege instanceof PrimaryFeaturePrivilege;
 
-              const isMinimalPrimaryFeaturePrivilege =
-                isPrimaryFeaturePrivilege &&
-                (explanation.privilege as PrimaryFeaturePrivilege).isMinimalFeaturePrivilege();
+              const isInheritedByGlobal = explanation
+                .getGrantSources()
+                .global.some(gp => gp.isParentScopeOf(explanation.privilege));
 
-              const isInheritedByGlobal =
-                !isGlobalPrivilegeDefinition(this.props.role.kibana[this.props.spacesIndex]) &&
-                explanation.getGrantSources().global.length > 0;
-
-              // Cannot deselect a primary (non-minimal) feature privilege if it is inherited
-              return (
-                isPrimaryFeaturePrivilege &&
-                !isMinimalPrimaryFeaturePrivilege &&
-                isInheritedByGlobal
-              );
+              // Cannot deselect a primary feature privilege if it is inherited
+              return isPrimaryFeaturePrivilege && isInheritedByGlobal;
             });
 
           const canChangePrivilege =
@@ -309,6 +313,7 @@ export class FeatureTable extends Component<Props, State> {
           return (
             <EuiButtonGroup
               name={`featurePrivilege_${feature.id}`}
+              data-test-subj={`primaryFeaturePrivilegeControl`}
               buttonSize="s"
               isFullWidth={true}
               options={options}
@@ -327,6 +332,7 @@ export class FeatureTable extends Component<Props, State> {
         render: (featureId: string) => (
           <EuiButtonIcon
             onClick={() => this.toggleExpandedFeature(featureId)}
+            data-test-subj={`expandFeaturePrivilegeRow expandFeaturePrivilegeRow-${featureId}`}
             aria-label={this.state.expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
             iconType={this.state.expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
           />

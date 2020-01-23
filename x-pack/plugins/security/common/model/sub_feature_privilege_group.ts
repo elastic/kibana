@@ -10,10 +10,6 @@ import { SubFeaturePrivilege } from './sub_feature_privilege';
 export class SubFeaturePrivilegeGroup {
   constructor(private readonly config: SubFeaturePrivilegeGroupConfig) {}
 
-  public get name() {
-    return this.config.name;
-  }
-
   public get groupType() {
     return this.config.groupType;
   }

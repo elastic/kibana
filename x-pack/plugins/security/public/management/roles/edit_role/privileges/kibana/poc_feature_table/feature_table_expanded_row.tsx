@@ -5,15 +5,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import {
-  Role,
-  SecuredFeature,
-  PrimaryFeaturePrivilege,
-  SubFeaturePrivilege,
-} from '../../../../../../../common/model';
+import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent, EuiText } from '@elastic/eui';
+import { Role, SecuredFeature, PrimaryFeaturePrivilege } from '../../../../../../../common/model';
 import { SubFeatureForm } from './sub_feature_form';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 
 interface Props {
@@ -55,23 +49,24 @@ export const FeatureTableExpandedRow = ({
 
   useEffect(() => {
     setCanCustomize(
-      Boolean(disabled) &&
+      !Boolean(disabled) &&
         privilegeExplanations.exists((featureId, privilegeId, explanation) => {
           return (
             !explanation.isGranted() ||
-            !explanation.getGrantSources().global.some(source => source.type === 'base') ||
-            !explanation.getGrantSources().space.some(source => source.type === 'base')
+            !explanation
+              .getGrantSources()
+              .global.some(source => source.privilege.type === 'base') ||
+            !explanation.getGrantSources().space.some(source => source.privilege.type === 'base')
           );
         })
     );
 
     setHasInheritedCustomizations(
-      !isGlobalPrivilegeDefinition(role.kibana[spacesIndex]) &&
-        privilegeExplanations.exists((featureId, privilegeId, explanation) => {
-          return explanation
-            .getGrantSources()
-            .global.some(source => source instanceof SubFeaturePrivilege);
-        })
+      privilegeExplanations.exists((featureId, privilegeId, explanation) => {
+        return explanation
+          .getGrantSources()
+          .global.some(source => source.isParentScopeOf(explanation.privilege));
+      })
     );
 
     setIsCustomizing(
@@ -127,6 +122,14 @@ export const FeatureTableExpandedRow = ({
     }
   };
 
+  if (!feature.subFeatures || feature.subFeatures.length === 0) {
+    return (
+      <EuiText size="s" data-test-subj="noSubFeatures">
+        Customizations are not available for this feature.
+      </EuiText>
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -146,7 +149,7 @@ export const FeatureTableExpandedRow = ({
               onChange={updatedPrivileges => onChange(feature.id, updatedPrivileges)}
               selectedPrivileges={selectedPrivileges}
               privilegeExplanations={privilegeExplanations}
-              disabled={disabled}
+              disabled={disabled || !isCustomizing}
             />
           </EuiFlexItem>
         );

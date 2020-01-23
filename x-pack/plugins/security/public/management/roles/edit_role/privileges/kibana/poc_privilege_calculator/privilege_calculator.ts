@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
+import { ScopedPrivilege } from '../../../../../../../common/model/scoped_privilege';
 import {
   KibanaPrivileges,
   Role,
@@ -82,10 +83,15 @@ export class POCPrivilegeCalculator {
       ? []
       : spacePrivileges.getPrivilegesGranting(basePrivilege);
 
-    return new PrivilegeExplanation(basePrivilege, {
-      global: globalGrantingPrivileges,
-      space: isGlobalPrivilege ? [] : grantingPrivileges,
-    });
+    return new PrivilegeExplanation(
+      new ScopedPrivilege(isGlobalPrivilege ? 'global' : 'space', basePrivilege),
+      {
+        global: globalGrantingPrivileges.map(ggp => new ScopedPrivilege('global', ggp)),
+        space: isGlobalPrivilege
+          ? []
+          : grantingPrivileges.map(gp => new ScopedPrivilege('space', gp)),
+      }
+    );
   }
 
   public getEffectiveFeaturePrivileges(role: Role, privilegeIndex: number, featureId: string) {
@@ -182,10 +188,15 @@ export class POCPrivilegeCalculator {
       ? []
       : spacePrivileges.getPrivilegesGranting(featurePrivilege);
 
-    return new PrivilegeExplanation(featurePrivilege, {
-      global: globalGrantingPrivileges,
-      space: isGlobalPrivilege ? [] : grantingPrivileges,
-    });
+    return new PrivilegeExplanation(
+      new ScopedPrivilege(isGlobalPrivilege ? 'global' : 'space', featurePrivilege),
+      {
+        global: globalGrantingPrivileges.map(ggp => new ScopedPrivilege('global', ggp)),
+        space: isGlobalPrivilege
+          ? []
+          : grantingPrivileges.map(gp => new ScopedPrivilege('space', gp)),
+      }
+    );
   }
 
   public getAssignedFeaturePrivileges(role: Role, privilegeIndex: number, featureId: string) {

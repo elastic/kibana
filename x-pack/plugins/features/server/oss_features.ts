@@ -133,6 +133,73 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show'],
         },
       },
+      subFeatures: [
+        {
+          name: 'Short URLs',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'url_create',
+                  name: 'Create Short URLs',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['url'],
+                    read: [],
+                  },
+                  ui: ['createShortUrl'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Alerting',
+          privilegeGroups: [
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'alerting_readwrite',
+                  name: 'Read/Write',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['alerts'],
+                    read: [],
+                  },
+                  ui: ['createAlerts', 'readAlerts'],
+                },
+                {
+                  id: 'alerting_read',
+                  name: 'Read',
+                  includeIn: 'read',
+                  savedObject: {
+                    all: [],
+                    read: ['read'],
+                  },
+                  ui: ['readAlerts'],
+                },
+              ],
+            },
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'alerting_mute',
+                  name: 'Mute Alerts',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['alerts'],
+                    read: [],
+                  },
+                  ui: ['muteAlerts'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       id: 'dashboard',
