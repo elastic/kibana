@@ -25,7 +25,7 @@ interface TagsFilterPopoverProps {
 }
 
 const ScrollableDiv = styled.div`
-  height: 250px;
+  max-height: 250px;
   overflow: auto;
 `;
 
