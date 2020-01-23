@@ -60,7 +60,9 @@ export const createAddPrepackedRulesRoute = (server: ServerFacade): Hapi.ServerR
             );
           }
         }
-        await installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex);
+        await Promise.all(
+          installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, spaceIndex)
+        );
         await updatePrepackagedRules(
           alertsClient,
           actionsClient,
