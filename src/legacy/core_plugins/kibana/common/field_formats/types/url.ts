@@ -52,8 +52,9 @@ const URL_TYPES = [
 ];
 const DEFAULT_URL_TYPE = 'a';
 
-export function createUrlFormat() {
+export function createUrlFormat(context: any) {
   class UrlFormat extends FieldFormat {
+    static basePath = undefined;
     static id = 'url';
     static title = 'Url';
     static fieldType = [
@@ -140,6 +141,10 @@ export function createUrlFormat() {
       const url = escape(this.formatUrl(rawValue));
       const label = escape(this.formatLabel(rawValue, url));
 
+      if (!parsedUrl) {
+        parsedUrl = UrlFormat.defaultParsedUrl;
+      }
+
       switch (this.param('type')) {
         case 'audio':
           return `<audio controls preload="none" src="${url}">`;
@@ -200,6 +205,25 @@ export function createUrlFormat() {
       }
     };
   }
+
+  async function initializeDefaultParsedUrl() {
+    if (UrlFormat.defaultParsedUrl !== undefined) {
+      return;
+    }
+
+    try {
+      const platform = await import('ui/new_platform');
+      UrlFormat.defaultParsedUrl = {
+        origin: global.window.location.origin,
+        pathname: global.window.location.pathname,
+        basePath: platform.npSetup.core.http.basePath.get(),
+      };
+    } catch (err) {
+      UrlFormat.defaultParsedUrl = null;
+    }
+  }
+
+  initializeDefaultParsedUrl();
 
   return UrlFormat;
 }
