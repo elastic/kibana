@@ -19,7 +19,7 @@
 import { CoreSetup } from 'kibana/public';
 import { fieldFormats } from '../../plugins/data/public';
 
-export const getFieldFormatsRegistry = (core: CoreSetup) => {
+export const getFieldFormatRegistry = (core: CoreSetup) => {
   const fieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
 
   fieldFormatRegistry.init(core.uiSettings.get, {});

@@ -21,16 +21,16 @@ import { CoreSetup } from 'src/core/public';
 import { fieldFormats } from '../../common/field_formats';
 
 export class FieldFormatsService {
-  private readonly fieldFormatsRegistry: fieldFormats.FieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
+  private readonly fieldFormatRegistry: fieldFormats.FieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
 
   public setup(core: CoreSetup) {
     core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
       if (key === 'format:defaultTypeMap') {
-        this.fieldFormatsRegistry.parseDefaultTypeMap(newValue);
+        this.fieldFormatRegistry.parseDefaultTypeMap(newValue);
       }
     });
 
-    this.fieldFormatsRegistry.init(core.uiSettings.get, {
+    this.fieldFormatRegistry.init(core.uiSettings.get, {
       parsedUrl: {
         origin: window.location.origin,
         pathname: window.location.pathname,
@@ -38,11 +38,11 @@ export class FieldFormatsService {
       },
     });
 
-    return this.fieldFormatsRegistry as FieldFormatsSetup;
+    return this.fieldFormatRegistry as FieldFormatsSetup;
   }
 
   public start() {
-    return this.fieldFormatsRegistry as FieldFormatsStart;
+    return this.fieldFormatRegistry as FieldFormatsStart;
   }
 }
 
