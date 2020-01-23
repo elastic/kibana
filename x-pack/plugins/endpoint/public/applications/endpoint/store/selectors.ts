@@ -19,7 +19,6 @@ function alertListStateSelector(state: GlobalState) {
   return state.alertList;
 }
 
-// TODO abstract this its in two places
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.

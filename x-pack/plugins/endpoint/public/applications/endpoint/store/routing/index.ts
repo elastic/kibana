@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertData } from '../../../../../endpoint_app_types';
-
-interface ServerReturnedAlertsData {
-  readonly type: 'serverReturnedAlertsData';
-
-  readonly payload: AlertData[];
-}
-
-export type AlertAction = ServerReturnedAlertsData;
+export { RoutingAction } from './action';

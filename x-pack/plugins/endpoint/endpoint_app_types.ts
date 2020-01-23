@@ -32,3 +32,5 @@ export interface AlertData {
     };
   };
 }
+
+export type PageId = 'alertsPage' | 'endpointListPage';

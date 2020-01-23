@@ -15,7 +15,7 @@ export const alertMiddlewareFactory: (
 ) => Middleware<{}, GlobalState, Dispatch<AppAction>> = coreStart => {
   return store => next => async action => {
     next(action);
-    if (action.type === 'appRequestedAlertsData') {
+    if (action.type === 'userNavigatedToPage' && action.payload === 'alertsPage') {
       const response: AlertData[] = await coreStart.http.get('/api/endpoint/alerts');
       store.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }

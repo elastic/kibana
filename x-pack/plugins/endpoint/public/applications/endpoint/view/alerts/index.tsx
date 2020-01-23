@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo, useEffect } from 'react';
+import { memo, useState, useMemo } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { AlertAction } from '../../store/alerts/action';
 import * as selectors from '../../store/selectors';
+import { usePageId } from '../use_page_id';
 
 export const AlertIndex = memo(() => {
+  usePageId('alertsPage');
+
   const columns: Array<{ id: string }> = [
     { id: 'alert_type' },
     { id: 'event_type' },
@@ -24,12 +27,6 @@ export const AlertIndex = memo(() => {
   ];
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
-
-  const dispatch: (action: AlertAction) => unknown = useDispatch();
-
-  useEffect(() => {
-    dispatch({ type: 'appRequestedAlertsData' });
-  }, [dispatch]);
 
   const json = useSelector(selectors.alertListData);
 
