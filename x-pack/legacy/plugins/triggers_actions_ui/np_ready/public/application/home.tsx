@@ -18,7 +18,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
+import {
+  BASE_PATH,
+  Section,
+  routeToConnectors,
+  routeToAlerts,
+  routeToAlertDetails,
+} from './constants';
 import { getCurrentBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { useAppDependencies } from './app_context';
@@ -26,6 +32,7 @@ import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabil
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
+import { AlertDetailsRoute } from './sections/alert_details/components/alert_details';
 
 interface MatchParams {
   section: Section;
@@ -119,6 +126,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             <Route exact path={routeToConnectors} component={ActionsConnectorsList} />
           )}
           {canShowAlerts && <Route exact path={routeToAlerts} component={AlertsList} />}
+          {canShowAlerts && <Route path={routeToAlertDetails} component={AlertDetailsRoute} />}
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

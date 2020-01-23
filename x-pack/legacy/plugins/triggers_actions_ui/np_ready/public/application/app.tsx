@@ -53,11 +53,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: any) => {
   const DEFAULT_SECTION: Section = canShowAlerts ? 'alerts' : 'connectors';
   return (
     <Switch>
-      <Route
-        exact
-        path={`${BASE_PATH}/:section(${sectionsRegex})`}
-        component={TriggersActionsUIHome}
-      />
+      <Route path={`${BASE_PATH}/:section(${sectionsRegex})`} component={TriggersActionsUIHome} />
       <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
     </Switch>
   );
