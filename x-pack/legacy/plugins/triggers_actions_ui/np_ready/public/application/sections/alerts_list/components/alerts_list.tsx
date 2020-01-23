@@ -31,6 +31,16 @@ import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib
 
 const ENTER_KEY = 13;
 
+interface IAlertTypeState {
+  isLoading: boolean;
+  data: AlertTypeIndex | null;
+}
+interface IAlertState {
+  isLoading: boolean;
+  data: Alert[];
+  totalItemCount: number;
+}
+
 export const AlertsList: React.FunctionComponent = () => {
   const {
     http,
@@ -43,20 +53,24 @@ export const AlertsList: React.FunctionComponent = () => {
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
-  const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
   const [data, setData] = useState<AlertTableItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [isLoadingAlertTypes, setIsLoadingAlertTypes] = useState<boolean>(false);
-  const [isLoadingAlerts, setIsLoadingAlerts] = useState<boolean>(false);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
-  const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+  const [alertTypesState, setAlertTypesState] = useState<IAlertTypeState>({
+    isLoading: false,
+    data: null,
+  });
+  const [alertsState, setAlertsState] = useState<IAlertState>({
+    isLoading: false,
+    data: [],
+    totalItemCount: 0,
+  });
 
   useEffect(() => {
     loadAlertsData();
@@ -66,13 +80,13 @@ export const AlertsList: React.FunctionComponent = () => {
   useEffect(() => {
     (async () => {
       try {
-        setIsLoadingAlertTypes(true);
+        setAlertTypesState({ isLoading: true, data: alertTypesState.data });
         const alertTypes = await loadAlertTypes({ http });
         const index: AlertTypeIndex = {};
         for (const alertType of alertTypes) {
           index[alertType.id] = alertType;
         }
-        setAlertTypesIndex(index);
+        setAlertTypesState({ isLoading: false, data: index });
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -80,8 +94,7 @@ export const AlertsList: React.FunctionComponent = () => {
             { defaultMessage: 'Unable to load alert types' }
           ),
         });
-      } finally {
-        setIsLoadingAlertTypes(false);
+        setAlertTypesState({ isLoading: false, data: alertTypesState.data });
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,21 +119,21 @@ export const AlertsList: React.FunctionComponent = () => {
 
   useEffect(() => {
     // Avoid flickering before alert types load
-    if (typeof alertTypesIndex === 'undefined') {
+    if (typeof alertTypesState.data === 'undefined') {
       return;
     }
-    const updatedData = alerts.map(alert => ({
+    const updatedData = (alertsState.data || []).map(alert => ({
       ...alert,
       tagsText: alert.tags.join(', '),
-      alertType: alertTypesIndex[alert.alertTypeId]
-        ? alertTypesIndex[alert.alertTypeId].name
+      alertType: (alertTypesState.data || {})[alert.alertTypeId]
+        ? (alertTypesState.data || {})[alert.alertTypeId].name
         : alert.alertTypeId,
     }));
     setData(updatedData);
-  }, [alerts, alertTypesIndex]);
+  }, [alertsState, alertTypesState]);
 
   async function loadAlertsData() {
-    setIsLoadingAlerts(true);
+    setAlertsState({ ...alertsState, isLoading: true });
     try {
       const alertsResponse = await loadAlerts({
         http,
@@ -129,8 +142,11 @@ export const AlertsList: React.FunctionComponent = () => {
         typesFilter,
         actionTypesFilter,
       });
-      setAlerts(alertsResponse.data);
-      setTotalItemCount(alertsResponse.total);
+      setAlertsState({
+        isLoading: false,
+        data: alertsResponse.data,
+        totalItemCount: alertsResponse.total,
+      });
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -140,8 +156,7 @@ export const AlertsList: React.FunctionComponent = () => {
           }
         ),
       });
-    } finally {
-      setIsLoadingAlerts(false);
+      setAlertsState({ ...alertsState, isLoading: false });
     }
   }
 
@@ -200,7 +215,7 @@ export const AlertsList: React.FunctionComponent = () => {
     <TypeFilter
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
-      options={Object.values(alertTypesIndex || {})
+      options={Object.values(alertTypesState.data || {})
         .map(alertType => ({
           value: alertType.id,
           name: alertType.name,
@@ -282,7 +297,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiSpacer size="l" />
 
           <EuiBasicTable
-            loading={isLoadingAlerts || isLoadingAlertTypes || isPerformingAction}
+            loading={alertsState.isLoading || alertTypesState.isLoading || isPerformingAction}
             items={data}
             itemId="id"
             columns={alertsTableColumns}
@@ -296,7 +311,7 @@ export const AlertsList: React.FunctionComponent = () => {
             pagination={{
               pageIndex: page.index,
               pageSize: page.size,
-              totalItemCount,
+              totalItemCount: alertsState.totalItemCount,
             }}
             selection={
               canDelete
