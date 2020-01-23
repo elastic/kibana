@@ -38,6 +38,7 @@ export default async function({ readConfigFile }) {
       require.resolve('./test_suites/embeddable_explorer'),
       require.resolve('./test_suites/core_plugins'),
       require.resolve('./test_suites/management'),
+      require.resolve('./test_suites/bfetch_explorer'),
     ],
     services: {
       ...functionalConfig.get('services'),

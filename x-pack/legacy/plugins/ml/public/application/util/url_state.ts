@@ -18,13 +18,18 @@ import { getNestedProperty } from './object_utils';
 export type SetUrlState = (attribute: string | Dictionary<any>, value?: any) => void;
 export type UrlState = [Dictionary<any>, SetUrlState];
 
-function getUrlState(search: string) {
+const decodedParams = new Set(['_a', '_g']);
+export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
   const parsedQueryString = queryString.parse(search);
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
-      urlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
+      if (decodedParams.has(a)) {
+        urlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
+      } else {
+        urlState[a] = parsedQueryString[a];
+      }
     });
   } catch (error) {
     // eslint-disable-next-line no-console

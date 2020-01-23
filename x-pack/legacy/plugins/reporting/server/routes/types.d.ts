@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { RequestFacade, ReportingResponseToolkit, JobDocPayload } from '../../types';
 
 export type HandlerFunction = (
   exportType: string,
   jobParams: object,
-  request: RequestFacade,
+  request: Legacy.Request,
   h: ReportingResponseToolkit
 ) => any;
 

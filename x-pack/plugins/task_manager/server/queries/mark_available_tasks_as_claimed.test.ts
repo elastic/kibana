@@ -9,9 +9,9 @@ import {
   asUpdateByQuery,
   shouldBeOneOf,
   mustBeAllOf,
-  ExistsBoolClause,
-  TermBoolClause,
-  RangeBoolClause,
+  ExistsFilter,
+  TermFilter,
+  RangeFilter,
 } from './query_clauses';
 
 import {
@@ -51,7 +51,7 @@ describe('mark_available_tasks_as_claimed', () => {
           // status running or claiming with a retryAt <= now.
           shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
           // Either task has an schedule or the attempts < the maximum configured
-          shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
+          shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
             TaskWithSchedule,
             ...Object.entries(definitions).map(([type, { maxAttempts }]) =>
               taskWithLessThanMaxAttempts(type, maxAttempts || defaultMaxAttempts)

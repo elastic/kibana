@@ -23,7 +23,6 @@ import { SavedDashboardPanel } from '../types';
 import { migrateAppState } from './migrate_app_state';
 
 test('migrate app state from 6.0', async () => {
-  const mockSave = jest.fn();
   const appState = {
     uiState: {
       'P-1': { vis: { defaultColors: { '0+-+100': 'rgb(0,104,55)' } } },
@@ -39,11 +38,8 @@ test('migrate app state from 6.0', async () => {
         type: 'visualization',
       },
     ],
-    translateHashToRison: () => 'a',
-    getQueryParamName: () => 'a',
-    save: mockSave,
   };
-  migrateAppState(appState, '8.0');
+  migrateAppState(appState as any, '8.0');
   expect(appState.uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -54,12 +50,10 @@ test('migrate app state from 6.0', async () => {
   expect(newPanel.gridData.y).toBe(0);
 
   expect((newPanel.embeddableConfig as any).vis.defaultColors['0+-+100']).toBe('rgb(0,104,55)');
-  expect(mockSave).toBeCalledTimes(1);
 });
 
 test('migrate sort from 6.1', async () => {
   const TARGET_VERSION = '8.0';
-  const mockSave = jest.fn();
   const appState = {
     uiState: {
       'P-1': { vis: { defaultColors: { '0+-+100': 'rgb(0,104,55)' } } },
@@ -76,12 +70,9 @@ test('migrate sort from 6.1', async () => {
         sort: 'sort',
       },
     ],
-    translateHashToRison: () => 'a',
-    getQueryParamName: () => 'a',
-    save: mockSave,
     useMargins: false,
   };
-  migrateAppState(appState, TARGET_VERSION);
+  migrateAppState(appState as any, TARGET_VERSION);
   expect(appState.uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -91,11 +82,9 @@ test('migrate sort from 6.1', async () => {
 
   expect((newPanel.embeddableConfig as any).sort).toBe('sort');
   expect((newPanel.embeddableConfig as any).vis.defaultColors['0+-+100']).toBe('rgb(0,104,55)');
-  expect(mockSave).toBeCalledTimes(1);
 });
 
 test('migrates 6.0 even when uiState does not exist', async () => {
-  const mockSave = jest.fn();
   const appState = {
     panels: [
       {
@@ -109,11 +98,8 @@ test('migrates 6.0 even when uiState does not exist', async () => {
         sort: 'sort',
       },
     ],
-    translateHashToRison: () => 'a',
-    getQueryParamName: () => 'a',
-    save: mockSave,
   };
-  migrateAppState(appState, '8.0');
+  migrateAppState(appState as any, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -122,11 +108,9 @@ test('migrates 6.0 even when uiState does not exist', async () => {
   expect((newPanel as any).sort).toBeUndefined();
 
   expect((newPanel.embeddableConfig as any).sort).toBe('sort');
-  expect(mockSave).toBeCalledTimes(1);
 });
 
 test('6.2 migration adjusts w & h without margins', async () => {
-  const mockSave = jest.fn();
   const appState = {
     panels: [
       {
@@ -143,12 +127,9 @@ test('6.2 migration adjusts w & h without margins', async () => {
         version: '6.2.0',
       },
     ],
-    translateHashToRison: () => 'a',
-    getQueryParamName: () => 'a',
-    save: mockSave,
     useMargins: false,
   };
-  migrateAppState(appState, '8.0');
+  migrateAppState(appState as any, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -159,11 +140,9 @@ test('6.2 migration adjusts w & h without margins', async () => {
   expect((newPanel as any).sort).toBeUndefined();
 
   expect((newPanel.embeddableConfig as any).sort).toBe('sort');
-  expect(mockSave).toBeCalledTimes(1);
 });
 
 test('6.2 migration adjusts w & h with margins', async () => {
-  const mockSave = jest.fn();
   const appState = {
     panels: [
       {
@@ -180,12 +159,9 @@ test('6.2 migration adjusts w & h with margins', async () => {
         version: '6.2.0',
       },
     ],
-    translateHashToRison: () => 'a',
-    getQueryParamName: () => 'a',
-    save: mockSave,
     useMargins: true,
   };
-  migrateAppState(appState, '8.0');
+  migrateAppState(appState as any, '8.0');
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = (appState.panels[0] as unknown) as SavedDashboardPanel;
@@ -196,5 +172,4 @@ test('6.2 migration adjusts w & h with margins', async () => {
   expect((newPanel as any).sort).toBeUndefined();
 
   expect((newPanel.embeddableConfig as any).sort).toBe('sort');
-  expect(mockSave).toBeCalledTimes(1);
 });

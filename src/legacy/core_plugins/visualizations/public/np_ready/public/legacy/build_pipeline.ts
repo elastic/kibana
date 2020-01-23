@@ -305,8 +305,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     }
 
     let expr = `metricvis `;
-    expr += prepareValue('percentage', percentageMode);
-    expr += prepareValue('colorScheme', colorSchema);
+    expr += prepareValue('percentageMode', percentageMode);
+    expr += prepareValue('colorSchema', colorSchema);
     expr += prepareValue('colorMode', metricColorMode);
     expr += prepareValue('useRanges', useRanges);
     expr += prepareValue('invertColors', invertColors);

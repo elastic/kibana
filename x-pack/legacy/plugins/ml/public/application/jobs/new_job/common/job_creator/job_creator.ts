@@ -19,7 +19,7 @@ import {
   CREATED_BY_LABEL,
   SHARED_RESULTS_INDEX_NAME,
 } from '../../../../../../common/constants/new_job';
-import { isSparseDataJob } from './util/general';
+import { isSparseDataJob, collectAggs } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
@@ -43,6 +43,7 @@ export class JobCreator {
   protected _aggs: Aggregation[] = [];
   protected _fields: Field[] = [];
   protected _scriptFields: Field[] = [];
+  protected _aggregationFields: Field[] = [];
   protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
     stop: boolean;
@@ -450,6 +451,14 @@ export class JobCreator {
     return this._scriptFields;
   }
 
+  public get aggregationFields(): Field[] {
+    return this._aggregationFields;
+  }
+
+  public get additionalFields(): Field[] {
+    return [...this._scriptFields, ...this._aggregationFields];
+  }
+
   public get subscribers(): ProgressSubscriber[] {
     return this._subscribers;
   }
@@ -603,6 +612,7 @@ export class JobCreator {
     }
     this._sparseData = isSparseDataJob(job, datafeed);
 
+    this._scriptFields = [];
     if (this._datafeed_config.script_fields !== undefined) {
       this._scriptFields = Object.keys(this._datafeed_config.script_fields).map(f => ({
         id: f,
@@ -610,8 +620,11 @@ export class JobCreator {
         type: ES_FIELD_TYPES.KEYWORD,
         aggregatable: true,
       }));
-    } else {
-      this._scriptFields = [];
+    }
+
+    this._aggregationFields = [];
+    if (this._datafeed_config.aggregations?.buckets !== undefined) {
+      collectAggs(this._datafeed_config.aggregations.buckets, this._aggregationFields);
     }
   }
 }
