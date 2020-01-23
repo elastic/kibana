@@ -1,4 +1,4 @@
-# Kibana actions
+# Kibana Actions
 
 The Kibana actions plugin provides a framework to create executable actions. You can:
 
@@ -9,6 +9,60 @@ The Kibana actions plugin provides a framework to create executable actions. You
 - Get a list of actions that have been created.
 - Execute an action, passing it a parameter object.
 - Perform CRUD operations on actions.
+
+-----
+
+
+Table of Contents
+
+- [Kibana Actions](#kibana-actions)
+  - [Terminology](#terminology)
+  - [Usage](#usage)
+  - [Kibana Actions Configuration](#kibana-actions-configuration)
+    - [Configuration Options](#configuration-options)
+      - [Whitelisting Built-in Action Types](#whitelisting-built-in-action-types)
+    - [Configuration Utilities](#configuration-utilities)
+  - [Action types](#action-types)
+    - [Methods](#methods)
+    - [Executor](#executor)
+    - [Example](#example)
+  - [RESTful API](#restful-api)
+      - [`POST /api/action`: Create action](#post-apiaction-create-action)
+      - [`DELETE /api/action/{id}`: Delete action](#delete-apiactionid-delete-action)
+      - [`GET /api/action/_find`: Find actions](#get-apiactionfind-find-actions)
+      - [`GET /api/action/{id}`: Get action](#get-apiactionid-get-action)
+      - [`GET /api/action/types`: List action types](#get-apiactiontypes-list-action-types)
+      - [`PUT /api/action/{id}`: Update action](#put-apiactionid-update-action)
+      - [`POST /api/action/{id}/_execute`: Execute action](#post-apiactionidexecute-execute-action)
+  - [Firing actions](#firing-actions)
+    - [Example](#example-1)
+- [Built-in Action Types](#built-in-action-types)
+  - [Server log](#server-log)
+      - [`config`](#config)
+      - [`secrets`](#secrets)
+      - [`params`](#params)
+  - [Email](#email)
+      - [`config`](#config-1)
+      - [`secrets`](#secrets-1)
+      - [`params`](#params-1)
+  - [Slack](#slack)
+      - [`config`](#config-2)
+      - [`secrets`](#secrets-2)
+      - [`params`](#params-2)
+  - [Index](#index)
+      - [`config`](#config-3)
+      - [`secrets`](#secrets-3)
+      - [`params`](#params-3)
+  - [Webhook](#webhook)
+      - [`config`](#config-4)
+      - [`secrets`](#secrets-4)
+      - [`params`](#params-4)
+  - [PagerDuty](#pagerduty)
+      - [`config`](#config-5)
+      - [`secrets`](#secrets-5)
+      - [`params`](#params-5)
+- [Command Line Utility](#command-line-utility)
+
 
 ## Terminology
 
@@ -204,35 +258,43 @@ Kibana ships with a set of built-in action types:
 
 |Type|Id|Description|
 |---|---|---|
-|Server log|`.log`|Logs messages to the Kibana log using `server.log()`|
-|Email|`.email`|Sends an email using SMTP|
-|Slack|`.slack`|Posts a message to a slack channel|
-|Index|`.index`|Indexes document(s) into Elasticsearch|
-|Webhook|`.webhook`|Send a payload to a web service using HTTP POST or PUT|
-|PagerDuty|`.pagerduty`|Trigger, resolve, or acknowlege an incident to a PagerDuty service|
+|[Server log](#server-log)|`.log`|Logs messages to the Kibana log using `server.log()`|
+|[Email](#email)|`.email`|Sends an email using SMTP|
+|[Slack](#slack)|`.slack`|Posts a message to a slack channel|
+|[Index](#index)|`.index`|Indexes document(s) into Elasticsearch|
+|[Webhook](#webhook)|`.webhook`|Send a payload to a web service using HTTP POST or PUT|
+|[PagerDuty](#pagerduty)|`.pagerduty`|Trigger, resolve, or acknowlege an incident to a PagerDuty service|
 
-## Server log, action id: `.log`
+----
+## Server log
+
+ID: `.log`
 
 The params properties are modelled after the arguments to the [Hapi.server.log()](https://hapijs.com/api#-serverlogtags-data-timestamp) function.
 
-#### config properties
+#### `config` 
 
-|Property|Description|Type|
-|---|---|---|
-|-|This action has no config properties.|-|
+This action has no `config` properties.
 
-#### params properties
+#### `secrets`
+
+This action type has no `secrets` properties.
+
+#### `params`
 
 |Property|Description|Type|
 |---|---|---|
 |message|The message to log.|string|
 |tags|Tags associated with the message to log.|string[] _(optional)_|
 
-## Email, action id: `.email`
+----
+## Email
+
+ID: `.email`
 
 This action type uses [nodemailer](https://nodemailer.com/about/) to send emails.
 
-#### config properties
+#### `config`
 
 Either the property `service` must be provided, or the `host` and `port` properties must be provided.  If `service` is provided, `host`, `port` and `secure` are ignored.  For more information on the `gmail` service value specifically, see the [nodemailer gmail documentation](https://nodemailer.com/usage/using-gmail/).
 
@@ -246,11 +308,16 @@ The `from` field can be specified as in typical `"user@host-name"` format, or as
 |host|host name of the service provider|string _(optional)_|
 |port|port number of the service provider|number _(optional)_|
 |secure|whether to use TLS with the service provider|boolean _(optional)_|
-|user|userid to use with the service provider|string|
-|password|password to use with the service provider|string|
 |from|the from address for all emails sent with this action type|string|
 
-#### params properties
+#### `secrets`
+
+|Property|Description|Type|
+|---|---|---|
+|user|userid to use with the service provider|string|
+|password|password to use with the service provider|string|
+
+#### `params`
 
 There must be at least one entry in the `to`, `cc` and `bcc` arrays.
 
@@ -266,34 +333,49 @@ The `to`, `cc`, and `bcc` array entries can be in the same format as the `from` 
 |subject|the subject line of the email|string|
 |message|the message text|string|
 
-## Slack, action id: `.slack`
+----
+
+## Slack
+
+ID: `.slack`
 
 This action type interfaces with the [Slack Incoming Webhooks feature](https://api.slack.com/incoming-webhooks).  Currently the params property `message` will be used as the `text` property of the Slack incoming message.  Additional function may be provided later.
 
-#### config properties
+#### `config`
+
+This action type has no `config` properties.
+
+#### `secrets`
 
 |Property|Description|Type|
 |---|---|---|
 |webhookUrl|the url of the Slack incoming webhook|string|
 
-#### params properties
+#### `params`
 
 |Property|Description|Type|
 |---|---|---|
 |message|the message text|string|
 
+----
 
-## Index, action id: `.index`
+## Index
+
+ID: `.index`
 
 The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elasticsearch/reference/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
 
-#### config properties
+#### `config`
 
 |Property|Description|Type|
 |---|---|---|
 |index|The Elasticsearch index to index into.|string _(optional)_|
 
-#### params properties
+#### `secrets`
+
+This action type has no `secrets` properties.
+
+#### `params`
 
 |Property|Description|Type|
 |---|---|---|
@@ -303,38 +385,55 @@ The config and params properties are modelled after the [Watcher Index Action](h
 |refresh|Setting of the refresh policy for the write request|boolean _(optional)_|
 |body|The documument body/bodies to index.|object or object[]|
 
-## Webhook, action id: `.webhook`
+----
+## Webhook
+
+ID: `.webhook`
 
 The webhook action uses [axios](https://github.com/axios/axios) to send a POST or PUT request to a web service.
 
-#### config properties
+#### `config` 
 
 |Property|Description|Type|
 |---|---|---|
 |url|Request URL|string|
-|user|Username for HTTP Basic authentication|string|
-|password|Password for HTTP Basic authentication|string|
 |method|HTTP request method, either `post`_(default)_ or `put`|string _(optional)_|
 |headers|Key-value pairs of the headers to send with the request|object, keys and values are strings _(optional)_|
 
-#### params properties
+#### `secrets` 
+
+|Property|Description|Type|
+|---|---|---|
+|user|Username for HTTP Basic authentication|string|
+|password|Password for HTTP Basic authentication|string|
+
+#### `params` 
 
 |Property|Description|Type|
 |---|---|---|
 |body|The HTTP request body|string _(optional)_|
 
-## PagerDuty, action id: `.pagerduty`
+----
+
+## PagerDuty
+
+ID: `.pagerduty` 
 
 The PagerDuty action uses the [V2 Events API](https://v2.developer.pagerduty.com/docs/events-api-v2) to trigger, acknowlege, and resolve PagerDuty alerts. 
 
-#### config properties
+#### `config` 
+
+|Property|Description|Type|
+|---|---|---|
+|apiUrl|PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`|string _(optional)_|
+
+#### `secrets`
 
 |Property|Description|Type|
 |---|---|---|
 |routingKey|This is the 32 character PagerDuty Integration Key for an integration on a service or on a global ruleset.|string|
-|apiUrl|PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`|string _(optional)_|
 
-#### params properties
+#### `params` 
 
 |Property|Description|Type|
 |---|---|---|
