@@ -8,7 +8,7 @@
     "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js & node ../../../../scripts/eslint ./public/pages/detection_engine/mitre/mitre_tactics_techniques.ts --fix",
     "build-graphql-types": "node scripts/generate_types_from_graphql.js",
     "cypress:open": "../../../node_modules/.bin/cypress open",
-    "cypress:run": "../../../node_modules/.bin/cypress run --spec ./cypress/integration/**/*.spec.ts"
+    "cypress:run": "../../../node_modules/.bin/cypress run --spec ./cypress/integration/smoke_tests/navigation/navigation.spec.ts"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.110",
