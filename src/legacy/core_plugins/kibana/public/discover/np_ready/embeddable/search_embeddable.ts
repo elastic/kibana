@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { RequestAdapter, Adapters } from 'src/plugins/inspector/public';
+import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
   TimeRange,
