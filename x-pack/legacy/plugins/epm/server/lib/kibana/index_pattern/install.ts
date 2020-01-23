@@ -200,9 +200,12 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
 export const flattenFields = (allFields: Fields): Fields => {
   const flatten = (fields: Fields): Fields =>
     fields.reduce<Field[]>((acc, field) => {
+      // recurse through nested fields
       if (field.type === 'group' && field.fields?.length) {
-        // look for nested fields
-        acc = renameAndFlatten(field, field.fields, [...acc]);
+        // skip if field.enabled is not explicitly set to false
+        if (!field.hasOwnProperty('enabled') || field.enabled === true) {
+          acc = renameAndFlatten(field, field.fields, [...acc]);
+        }
       } else {
         // handle alias type fields
         if (field.type === 'alias' && field.path) {
