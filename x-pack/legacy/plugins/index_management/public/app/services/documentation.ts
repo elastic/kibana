@@ -177,8 +177,8 @@ class DocumentationService {
     return `${this.esDocsBase}/index-options.html`;
   }
 
-  public getRemovalMappingTypeLink() {
-    return `${this.esDocsBase}/removal-of-types.html`;
+  public getAlternativeToMappingTypesLink() {
+    return `${this.esDocsBase}/removal-of-types.html#_alternatives_to_mapping_types`;
   }
 
   public getWellKnownTextLink() {
