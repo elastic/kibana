@@ -311,9 +311,21 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Moves forwards in the browser history.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#forward
+     *
+     * @return {Promise<void>}
      */
     public async goForward() {
       await driver.navigate().forward();
+    }
+
+    /**
+     * Navigates to a URL via the browser history.
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#to
+     *
+     * @return {Promise<void>}
+     */
+    public async navigateTo(url: string) {
+      await driver.navigate().to(url);
     }
 
     /**
