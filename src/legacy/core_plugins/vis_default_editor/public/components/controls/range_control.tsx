@@ -18,9 +18,10 @@
  */
 
 import React from 'react';
-import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { RangesParamEditor } from '../../vis/editors/default/controls/ranges';
 
-export const RangesEditor = (props: AggParamEditorProps<any>) => (
+import { AggParamEditorProps } from '../agg_param_props';
+import { RangesParamEditor } from './ranges';
+
+export const RangesControl = (props: AggParamEditorProps<any>) => (
   <RangesParamEditor value={props.value} setValue={props.setValue} />
 );

@@ -21,11 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { geohashColumns } from 'ui/vis/map/decode_geo_hash';
 import chrome from '../../chrome';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
-import { AutoPrecisionParamEditor } from '../../vis/editors/default/controls/auto_precision';
-import { UseGeocentroidParamEditor } from '../../vis/editors/default/controls/use_geocentroid';
-import { IsFilteredByCollarParamEditor } from '../../vis/editors/default/controls/is_filtered_by_collar';
-import { PrecisionParamEditor } from '../../vis/editors/default/controls/precision';
-import { AggGroupNames } from '../../vis/editors/default/agg_groups';
+import { AggGroupNames } from '../../../../core_plugins/vis_default_editor/public';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 import { geoContains, scaleBounds, GeoBoundingBox } from './lib/geo_utils';
@@ -95,13 +91,11 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
     },
     {
       name: 'autoPrecision',
-      editorComponent: AutoPrecisionParamEditor,
       default: true,
       write: () => {},
     },
     {
       name: 'precision',
-      editorComponent: PrecisionParamEditor,
       default: defaultPrecision,
       deserialize: getPrecision,
       write(aggConfig, output) {
@@ -114,13 +108,11 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
     },
     {
       name: 'useGeocentroid',
-      editorComponent: UseGeocentroidParamEditor,
       default: true,
       write: () => {},
     },
     {
       name: 'isFilteredByCollar',
-      editorComponent: IsFilteredByCollarParamEditor,
       default: true,
       write: () => {},
     },

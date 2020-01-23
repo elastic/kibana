@@ -24,21 +24,13 @@ import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
-import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-import { OrderAggParamEditor } from '../../vis/editors/default/controls/order_agg';
-import { OrderParamEditor } from '../../vis/editors/default/controls/order';
-import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/controls/order_by';
-import { SizeParamEditor } from '../../vis/editors/default/controls/size';
-import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
-import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
 import { AggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../plugins/inspector/public';
 import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
-
-// @ts-ignore
-import { Schemas } from '../../vis/editors/default/schemas';
+import { aggFilter } from '../../../../core_plugins/vis_default_editor/public/components/controls/order_by';
+import { Schemas } from '../../../../core_plugins/vis_default_editor/public';
 
 import {
   buildOtherBucketAgg,
@@ -142,14 +134,12 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'orderBy',
-      editorComponent: OrderByParamEditor,
       write: noop, // prevent default write, it's handled by orderAgg
     },
     {
       name: 'orderAgg',
       type: 'agg',
       default: null,
-      editorComponent: OrderAggParamEditor,
       makeAgg(termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
@@ -202,7 +192,6 @@ export const termsBucketAgg = new BucketAggType({
       name: 'order',
       type: 'optioned',
       default: 'desc',
-      editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [
         {
           text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
@@ -221,13 +210,11 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'size',
-      editorComponent: wrapWithInlineComp(SizeParamEditor),
       default: 5,
     },
     {
       name: 'otherBucket',
       default: false,
-      editorComponent: OtherBucketParamEditor,
       write: noop,
     },
     {
@@ -245,7 +232,6 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'missingBucket',
       default: false,
-      editorComponent: MissingBucketParamEditor,
       write: noop,
     },
     {

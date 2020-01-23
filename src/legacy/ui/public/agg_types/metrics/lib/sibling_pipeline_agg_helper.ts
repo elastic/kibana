@@ -19,13 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
-import { SubMetricParamEditor } from '../../../vis/editors/default/controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
-
-// @ts-ignore
-import { Schemas } from '../../../vis/editors/default/schemas';
+import { Schemas } from '../../../../../core_plugins/vis_default_editor/public';
 
 const metricAggFilter: string[] = [
   '!top_hits',
@@ -86,7 +83,6 @@ const siblingPipelineAggHelper = {
 
           return orderAgg;
         },
-        editorComponent: SubMetricParamEditor,
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
           'customBucket'
         ),
@@ -104,7 +100,6 @@ const siblingPipelineAggHelper = {
 
           return orderAgg;
         },
-        editorComponent: SubMetricParamEditor,
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
           'customMetric'
         ),

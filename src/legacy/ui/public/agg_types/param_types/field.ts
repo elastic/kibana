@@ -19,7 +19,6 @@
 
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { FieldParamEditor } from 'src/legacy/core_plugins/vis_default_editor/public/components/controls/field';
 import { AggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
@@ -30,7 +29,6 @@ import { Field, IFieldList } from '../../../../../plugins/data/public';
 const filterByType = propFilter('type');
 
 export class FieldParamType extends BaseParamType {
-  editorComponent = FieldParamEditor;
   required = true;
   scriptable = true;
   filterFieldTypes: string;

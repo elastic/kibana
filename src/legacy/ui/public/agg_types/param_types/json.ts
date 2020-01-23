@@ -19,13 +19,10 @@
 
 import _ from 'lodash';
 
-import { RawJsonParamEditor } from 'src/legacy/core_plugins/vis_default_editor/public/components/controls/raw_json';
 import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class JsonParamType extends BaseParamType {
-  editorComponent = RawJsonParamEditor;
-
   constructor(config: Record<string, any>) {
     super(config);
 

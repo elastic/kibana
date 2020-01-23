@@ -16,3 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import React, { ComponentType } from 'react';
+import { AggParamEditorProps } from '../../agg_param_props';
+
+export const wrapWithInlineComp = <T extends unknown>(
+  WrapComponent: ComponentType<AggParamEditorProps<T>>
+) => (props: AggParamEditorProps<T>) => (
+  <div className={`visEditorAggParam--half visEditorAggParam--half-${props.aggParam.name}`}>
+    <WrapComponent {...props} />
+  </div>
+);

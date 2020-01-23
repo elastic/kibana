@@ -19,14 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { MetricAggParamEditor } from '../../../vis/editors/default/controls/metric_agg';
-import { SubAggParamEditor } from '../../../vis/editors/default/controls/sub_agg';
+
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
-// @ts-ignore
-import { Schemas } from '../../../vis/editors/default/schemas';
+import { Schemas } from '../../../../../core_plugins/vis_default_editor/public';
 
 const metricAggFilter = [
   '!top_hits',
@@ -66,13 +64,11 @@ export const parentPipelineAggHelper = {
     return [
       {
         name: 'metricAgg',
-        editorComponent: MetricAggParamEditor,
         default: 'custom',
         write: parentPipelineAggWriter,
       },
       {
         name: 'customMetric',
-        editorComponent: SubAggParamEditor,
         type: 'agg',
         makeAgg(termsAgg, state: any) {
           state = state || { type: 'count' };

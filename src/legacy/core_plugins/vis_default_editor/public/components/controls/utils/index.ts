@@ -18,5 +18,6 @@
  */
 
 export { useSubAggParamsHandlers } from './use_handlers';
+export { wrapWithInlineComp } from './inline_comp_wrapper';
 export * from './strings';
 export * from './agg_utils';

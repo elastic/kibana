@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { StringParamEditor } from 'src/legacy/core_plugins/vis_default_editor/public/components/controls/string';
 import { AggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class StringParamType extends BaseParamType {
-  editorComponent = StringParamEditor;
-
   constructor(config: Record<string, any>) {
     super(config);
 

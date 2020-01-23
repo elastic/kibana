@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { AggGroupNames } from '../../vis/editors/default/agg_groups';
+import { AggGroupNames } from '../../../../core_plugins/vis_default_editor/public';
 import { esFilters, esQuery } from '../../../../../plugins/data/public';
 
 /**

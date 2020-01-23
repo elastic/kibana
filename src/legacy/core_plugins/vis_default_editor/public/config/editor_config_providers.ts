@@ -18,7 +18,7 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { parseEsInterval } from 'src/legacy/core_plugins/data/public';
+import { parseEsInterval } from '../../../data/public';
 import { AggConfig, leastCommonMultiple, leastCommonInterval } from '../legacy_imports';
 import {
   TimeIntervalParam,

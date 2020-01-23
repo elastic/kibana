@@ -23,7 +23,6 @@ import { npStart } from 'ui/new_platform';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
-import { DateRangesParamEditor } from '../../vis/editors/default/controls/date_ranges';
 
 import {
   KBN_FIELD_TYPES,
@@ -79,7 +78,6 @@ export const dateRangeBucketAgg = new BucketAggType({
           to: 'now',
         },
       ],
-      editorComponent: DateRangesParamEditor,
     },
     {
       name: 'time_zone',

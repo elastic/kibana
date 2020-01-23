@@ -24,8 +24,8 @@ import { npStart } from 'ui/new_platform';
 import { AggConfig } from 'ui/agg_types';
 
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-import { IFieldFormatId, FieldFormat, ContentType } from 'src/plugins/data/public';
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { IFieldFormatId, FieldFormat, ContentType } from '../../../../../../plugins/data/public';
+import { Vis } from '../../../../../core_plugins/visualizations/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
 import { DateRangeKey, convertDateRangeToString } from '../../../agg_types/buckets/date_range';

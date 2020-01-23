@@ -10,7 +10,6 @@ import uuid from 'uuid/v4';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
-import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
@@ -30,6 +29,7 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
+import { Schemas } from '../../../../../../../../src/legacy/core_plugins/vis_default_editor/public';
 
 const MAX_GEOTILE_LEVEL = 29;
 

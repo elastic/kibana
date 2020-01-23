@@ -6,7 +6,6 @@
 
 import _ from 'lodash';
 
-import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,6 +16,7 @@ import {
 } from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
 import { AbstractESAggSource, AGG_DELIMITER } from './es_agg_source';
+import { Schemas } from '../../../../../../../src/legacy/core_plugins/vis_default_editor/public';
 
 const TERMS_AGG_NAME = 'join';
 

@@ -30,7 +30,7 @@ import { AggParamEditorProps } from '../agg_param_props';
 const generateId = htmlIdGenerator();
 const config = chrome.getUiSettingsClient();
 
-export interface FilterValue {
+interface FilterValue {
   input: Query;
   label: string;
   id: string;

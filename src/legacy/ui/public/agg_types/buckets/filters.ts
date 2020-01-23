@@ -23,11 +23,10 @@ import angular from 'angular';
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
-import { FiltersParamEditor, FilterValue } from '../../vis/editors/default/controls/filters';
 import { createFilterFilters } from './create_filter/filters';
 import { BucketAggType } from './_bucket_agg_type';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { getQueryLog, esQuery } from '../../../../../plugins/data/public';
+import { getQueryLog, esQuery, Query } from '../../../../../plugins/data/public';
 
 const config = chrome.getUiSettingsClient();
 const storage = new Storage(window.localStorage);
@@ -38,6 +37,12 @@ const filtersTitle = i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
     'The name of an aggregation, that allows to specify multiple individual filters to group data by.',
 });
 
+interface FilterValue {
+  input: Query;
+  label: string;
+  id: string;
+}
+
 export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
   title: filtersTitle,
@@ -46,7 +51,6 @@ export const filtersBucketAgg = new BucketAggType({
   params: [
     {
       name: 'filters',
-      editorComponent: FiltersParamEditor,
       default: [{ input: { query: '', language: config.get('search:queryLanguage') }, label: '' }],
       write(aggConfig, output) {
         const inFilters: FilterValue[] = aggConfig.params.filters;

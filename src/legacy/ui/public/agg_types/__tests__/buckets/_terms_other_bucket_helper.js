@@ -24,7 +24,7 @@ import {
   mergeOtherBucketAggResponse,
   updateMissingBucket,
 } from '../../buckets/_terms_other_bucket_helper';
-import { Vis } from '../../../../../visualizations/public';
+import { Vis } from '../../../../../core_plugins/visualizations/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 const visConfigSingleTerm = {
