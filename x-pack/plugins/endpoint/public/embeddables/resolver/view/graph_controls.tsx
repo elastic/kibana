@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiRange, EuiPanel, EuiIcon } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
-import { ResolverAction, PanDirection } from '../types';
+import { ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 
 /**
@@ -61,36 +61,45 @@ export const GraphControls = styled(
         });
       }, [dispatch]);
 
-      const handlePanClick = (panDirection: PanDirection) => {
-        return () => {
-          dispatch({
-            type: 'userClickedPanControl',
-            payload: panDirection,
-          });
-        };
-      };
+      const [handleNorth, handleEast, handleSouth, handleWest] = useMemo(() => {
+        const directionVectors: readonly Vector2[] = [
+          [0, 1],
+          [1, 0],
+          [0, -1],
+          [-1, 0],
+        ];
+        return directionVectors.map(direction => {
+          return () => {
+            const action: ResolverAction = {
+              type: 'userNudgedCamera',
+              payload: { direction, time: new Date() },
+            };
+            dispatch(action);
+          };
+        });
+      }, [dispatch]);
 
       return (
         <div className={className}>
           <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
             <div className="panning-controls-top">
-              <button className="north-button" title="North" onClick={handlePanClick('north')}>
+              <button className="north-button" title="North" onClick={handleNorth}>
                 <EuiIcon type="arrowUp" />
               </button>
             </div>
             <div className="panning-controls-middle">
-              <button className="west-button" title="West" onClick={handlePanClick('west')}>
+              <button className="west-button" title="West" onClick={handleWest}>
                 <EuiIcon type="arrowLeft" />
               </button>
               <button className="center-button" title="Center" onClick={handleCenterClick}>
                 <EuiIcon type="bullseye" />
               </button>
-              <button className="east-button" title="East" onClick={handlePanClick('east')}>
+              <button className="east-button" title="East" onClick={handleEast}>
                 <EuiIcon type="arrowRight" />
               </button>
             </div>
             <div className="panning-controls-bottom">
-              <button className="south-button" title="South" onClick={handlePanClick('south')}>
+              <button className="south-button" title="South" onClick={handleSouth}>
                 <EuiIcon type="arrowDown" />
               </button>
             </div>

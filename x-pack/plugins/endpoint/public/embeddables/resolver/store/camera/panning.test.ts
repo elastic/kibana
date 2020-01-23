@@ -64,66 +64,22 @@ describe('panning interaction', () => {
       });
     });
   });
-  describe('panning controls', () => {
-    describe('when user clicks on pan north button', () => {
-      beforeEach(() => {
-        const action: CameraAction = { type: 'userClickedPanControl', payload: 'north' };
-        store.dispatch(action);
-      });
-      it('moves the camera south so that objects appear closer to the bottom of the screen', () => {
-        const actual: Vector2 = translation(store.getState())(new Date(0));
-        expect(actual).toMatchInlineSnapshot(`
-          Array [
-            0,
-            -32.49906769231164,
-          ]
-        `);
-      });
+  describe('when the user nudges the camera up', () => {
+    beforeEach(() => {
+      const action: CameraAction = {
+        type: 'userNudgedCamera',
+        payload: { direction: [0, 1], time: new Date(0) },
+      };
+      store.dispatch(action);
     });
-    describe('when user clicks on pan south button', () => {
-      beforeEach(() => {
-        const action: CameraAction = { type: 'userClickedPanControl', payload: 'south' };
-        store.dispatch(action);
-      });
-      it('moves the camera north so that objects appear closer to the top of the screen', () => {
-        const actual: Vector2 = translation(store.getState())(new Date(0));
-        expect(actual).toMatchInlineSnapshot(`
-          Array [
-            0,
-            32.49906769231164,
-          ]
-        `);
-      });
-    });
-    describe('when user clicks on pan east button', () => {
-      beforeEach(() => {
-        const action: CameraAction = { type: 'userClickedPanControl', payload: 'east' };
-        store.dispatch(action);
-      });
-      it('moves the camera west so that objects appear closer to the left of the screen', () => {
-        const actual: Vector2 = translation(store.getState())(new Date(0));
-        expect(actual).toMatchInlineSnapshot(`
-          Array [
-            -32.49906769231164,
-            0,
-          ]
-        `);
-      });
-    });
-    describe('when user clicks on pan west button', () => {
-      beforeEach(() => {
-        const action: CameraAction = { type: 'userClickedPanControl', payload: 'west' };
-        store.dispatch(action);
-      });
-      it('moves the camera east so that objects appear closer to the right of the screen', () => {
-        const actual: Vector2 = translation(store.getState())(new Date(0));
-        expect(actual).toMatchInlineSnapshot(`
-          Array [
-            32.49906769231164,
-            0,
-          ]
-        `);
-      });
+    it('the camera eventually moves up so that objects appear closer to the bottom of the screen', () => {
+      const actual: Vector2 = translation(store.getState())(new Date(100));
+      expect(actual).toMatchInlineSnapshot(`
+        Array [
+          0,
+          32.49906769231164,
+        ]
+      `);
     });
   });
 });

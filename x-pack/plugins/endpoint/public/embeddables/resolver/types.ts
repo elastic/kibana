@@ -234,4 +234,4 @@ export type ProcessWithWidthMetadata = {
 /**
  * String that represents the direction in which Resolver can be panned
  */
-export type PanDirection = 'north' | 'south' | 'east' | 'west';
+export type CardinalDirection = 'north' | 'south' | 'east' | 'west';

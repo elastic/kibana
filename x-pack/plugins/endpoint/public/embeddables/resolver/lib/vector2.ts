@@ -27,6 +27,13 @@ export function divide(a: Vector2, b: Vector2): Vector2 {
 }
 
 /**
+ * Multiply `a` against `b`, treating `b` like a 1x2 instead of a 2x1
+ */
+export function multiply(a: Vector2, b: Vector2): Vector2 {
+  return [a[0] * b[0], a[1] * b[1]];
+}
+
+/**
  * Returns a vector which is the result of applying a 2D transformation matrix to the provided vector.
  */
 export function applyMatrix3([x, y]: Vector2, [m11, m12, m13, m21, m22, m23]: Matrix3): Vector2 {

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { easing } from 'ts-easing';
 import { clamp } from '../../../lib/math';
 import { CameraAnimationState, Vector2 } from '../../../types';
 import * as vector2 from '../../../lib/vector2';
@@ -18,5 +19,9 @@ export function translation(animation: CameraAnimationState, time: Date): Vector
     0,
     1
   );
-  return vector2.add(animation.initialTranslation, vector2.scale(delta, progress));
+
+  return vector2.add(
+    animation.initialTranslation,
+    vector2.scale(delta, easing.inOutCubic(progress))
+  );
 }

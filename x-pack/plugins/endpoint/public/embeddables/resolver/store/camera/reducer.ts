@@ -5,17 +5,14 @@
  */
 
 import { Reducer } from 'redux';
+import { animatePanning } from './methods';
 import * as vector2 from '../../lib/vector2';
-import {
-  projectionMatrix,
-  inverseProjectionMatrix,
-  isAnimating,
-  translationWhenNotAnimating,
-} from './selectors';
+import * as selectors from './selectors';
 import { clamp } from '../../lib/math';
 
 import { CameraState, ResolverAction, Vector2 } from '../../types';
 import { scaleToZoom } from './scale_to_zoom';
+import { viewableBoundingBox } from './selectors';
 
 function initialState(): CameraState {
   const state: CameraState = {
@@ -68,14 +65,17 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
      * using CTRL and the mousewheel, or by pinching the trackpad on a Mac. The node will stay under your mouse cursor and other things in the map will get
      * nearer or further from the mouse cursor. This lets you keep your context when changing zoom levels.
      */
-    if (state.latestFocusedWorldCoordinates !== null && !isAnimating(state)(action.payload.time)) {
+    if (
+      state.latestFocusedWorldCoordinates !== null &&
+      !selectors.isAnimating(state)(action.payload.time)
+    ) {
       const rasterOfLastFocusedWorldCoordinates = vector2.applyMatrix3(
         state.latestFocusedWorldCoordinates,
-        projectionMatrix(state)(action.payload.time)
+        selectors.projectionMatrix(state)(action.payload.time)
       );
       const newWorldCoordinatesAtLastFocusedPosition = vector2.applyMatrix3(
         rasterOfLastFocusedWorldCoordinates,
-        inverseProjectionMatrix(stateWithNewScaling)(action.payload.time)
+        selectors.inverseProjectionMatrix(stateWithNewScaling)(action.payload.time)
       );
 
       /**
@@ -114,7 +114,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     };
     return nextState;
   } else if (action.type === 'userStartedPanning') {
-    if (isAnimating(state)(action.payload.time)) {
+    if (selectors.isAnimating(state)(action.payload.time)) {
       return state;
     }
     /**
@@ -140,39 +140,36 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
          * User is panning, therefore animation is not happening and is not needed to calculate
          * translation.
          */
-        translationNotCountingCurrentPanning: translationWhenNotAnimating(state),
+        translationNotCountingCurrentPanning: selectors.translationWhenNotAnimating(state),
         panning: undefined,
       };
       return nextState;
     } else {
       return state;
     }
-  } else if (action.type === 'userClickedPanControl') {
-    const panDirection = action.payload;
+  } else if (action.type === 'userNudgedCamera') {
+    const { direction, time } = action.payload;
+    const unitsPerNudge = 50;
     /**
-     * Delta amount will be in the range of 20 -> 40 depending on the scalingFactor
+     * Nudge less when zoomed in.
      */
-    const deltaAmount = (1 + state.scalingFactor) * 20;
-    let delta: Vector2;
-    if (panDirection === 'north') {
-      delta = [0, -deltaAmount];
-    } else if (panDirection === 'south') {
-      delta = [0, deltaAmount];
-    } else if (panDirection === 'east') {
-      delta = [-deltaAmount, 0];
-    } else if (panDirection === 'west') {
-      delta = [deltaAmount, 0];
-    } else {
-      delta = [0, 0];
-    }
+    const nudge = vector2.multiply(
+      vector2.divide([unitsPerNudge, unitsPerNudge], selectors.scale(state)),
+      direction
+    );
 
-    return {
-      ...state,
-      translationNotCountingCurrentPanning: [
-        state.translationNotCountingCurrentPanning[0] + delta[0],
-        state.translationNotCountingCurrentPanning[1] + delta[1],
-      ],
-    };
+    const animationDuration = 300;
+
+    return animatePanning(
+      state,
+      time,
+      vector2.add(
+        // TODO, this assumes the camera isn't panning. assert that instead, and test it
+        state.translationNotCountingCurrentPanning,
+        nudge
+      ),
+      animationDuration
+    );
   } else if (action.type === 'userSetRasterSize') {
     /**
      * Handle resizes of the Resolver component. We need to know the size in order to convert between screen
@@ -205,7 +202,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
        */
       latestFocusedWorldCoordinates: vector2.applyMatrix3(
         action.payload.screenCoordinates,
-        inverseProjectionMatrix(stateWithUpdatedPanning)(action.payload.time)
+        selectors.inverseProjectionMatrix(stateWithUpdatedPanning)(action.payload.time)
       ),
     };
     return nextState;

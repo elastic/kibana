@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2, PanDirection } from '../../types';
+import { Vector2, CardinalDirection } from '../../types';
 
 interface UserSetZoomLevel {
   readonly type: 'userSetZoomLevel';
@@ -24,16 +24,16 @@ interface UserClickedZoomIn {
 
 interface UserZoomed {
   readonly type: 'userZoomed';
-  payload: {
+  readonly payload: {
     /**
      * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
      * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
      */
-    zoomChange: number;
+    readonly zoomChange: number;
     /**
      * Time when this action was dispatched.
      */
-    time: Date;
+    readonly time: Date;
   };
 }
 
@@ -58,17 +58,19 @@ interface UserSetPositionOfCamera {
 
 interface UserStartedPanning {
   readonly type: 'userStartedPanning';
+
   readonly payload: {
     /**
      * A vector in screen coordinates (each unit is a pixel and the Y axis increases towards the bottom of the screen)
      * relative to the Resolver component.
      * Represents a starting position during panning for a pointing device.
      */
-    screenCoordinates: Vector2;
+    readonly screenCoordinates: Vector2;
+
     /**
      * Time when this action was dispatched.
      */
-    time: Date;
+    readonly time: Date;
   };
 }
 
@@ -76,12 +78,22 @@ interface UserStoppedPanning {
   readonly type: 'userStoppedPanning';
 }
 
-interface UserClickedPanControl {
-  readonly type: 'userClickedPanControl';
+interface UserNudgedCamera {
+  readonly type: 'userNudgedCamera';
   /**
    * String that represents the direction in which Resolver can be panned
    */
-  readonly payload: PanDirection;
+  readonly payload: {
+    /**
+     * A cardinal direction to move the users perspective in.
+     */
+    readonly direction: Vector2;
+
+    /**
+     * Time when this action was dispatched.
+     */
+    readonly time: Date;
+  };
 }
 
 interface UserMovedPointer {
@@ -109,4 +121,4 @@ export type CameraAction =
   | UserMovedPointer
   | UserClickedZoomOut
   | UserClickedZoomIn
-  | UserClickedPanControl;
+  | UserNudgedCamera;
