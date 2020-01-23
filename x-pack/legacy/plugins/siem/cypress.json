@@ -1,10 +1,5 @@
 {
   "baseUrl": "http://localhost:5601",
-  "reporter": "junit",
-  "reporterOptions": {
-    "mochaFile": "../../../../target/kibana-siem/cypress/results/[hash].xml",
-    "toConsole": false
-  },
   "screenshotsFolder": "../../../../target/kibana-siem/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
   "video": false,
