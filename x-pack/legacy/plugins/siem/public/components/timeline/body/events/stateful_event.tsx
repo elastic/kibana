@@ -282,7 +282,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         } else {
           // Height place holder for visibility detection as well as re-rendering sections.
           const height =
-            divElement.current != null
+            divElement.current != null && divElement.current.clientHeight
               ? `${divElement.current.clientHeight}px`
               : DEFAULT_ROW_HEIGHT;
 
