@@ -54,7 +54,9 @@ export const useLogAnalysisCapabilities = () => {
   };
 };
 
-export const LogAnalysisCapabilities = createContainer(useLogAnalysisCapabilities);
+export const [LogAnalysisCapabilitiesProvider, useLogAnalysisCapabilitiesContext] = createContainer(
+  useLogAnalysisCapabilities
+);
 
 const initialMlCapabilities = {
   capabilities: {
