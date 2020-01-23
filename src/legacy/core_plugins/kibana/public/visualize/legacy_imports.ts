@@ -27,6 +27,7 @@
 import chrome from 'ui/chrome';
 
 export const legacyChrome = chrome;
+export { Chrome } from 'ui/chrome';
 
 // @ts-ignore
 export { AppState, AppStateProvider } from 'ui/state_management/app_state';
@@ -58,8 +59,6 @@ export { PromiseServiceCreator } from 'ui/promises/promises';
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { configureAppAngularModule, ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-// @ts-ignore
-export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';

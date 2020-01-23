@@ -13,9 +13,10 @@ import { usePrePackagedRules } from '../../../containers/detection_engine/rules'
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../components/link_to/redirect_to_detection_engine';
 import { FormattedRelativePreferenceDate } from '../../../components/formatted_date';
 import { getEmptyTagValue } from '../../../components/empty_value';
-import { HeaderPage } from '../../../components/header_page';
+import { DetectionEngineHeaderPage } from '../components/detection_engine_header_page';
 import { WrapperPage } from '../../../components/wrapper_page';
 import { SpyRoute } from '../../../utils/route/spy_routes';
+
 import { useUserInfo } from '../components/user_info';
 import { AllRules } from './all';
 import { ImportRuleModal } from './components/import_rule_modal';
@@ -26,7 +27,7 @@ import * as i18n from './translations';
 
 type Func = () => void;
 
-export const RulesComponent = React.memo(() => {
+const RulesPageComponent: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [importCompleteToggle, setImportCompleteToggle] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
@@ -35,7 +36,7 @@ export const RulesComponent = React.memo(() => {
     isSignalIndexExists,
     isAuthenticated,
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
   } = useUserInfo();
   const {
@@ -48,7 +49,7 @@ export const RulesComponent = React.memo(() => {
     rulesNotUpdated,
   } = usePrePackagedRules({
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,
@@ -99,7 +100,7 @@ export const RulesComponent = React.memo(() => {
         importComplete={() => setImportCompleteToggle(!importCompleteToggle)}
       />
       <WrapperPage>
-        <HeaderPage
+        <DetectionEngineHeaderPage
           backOptions={{
             href: `#${DETECTION_ENGINE_PAGE_NAME}`,
             text: i18n.BACK_TO_DETECTION_ENGINE,
@@ -166,7 +167,7 @@ export const RulesComponent = React.memo(() => {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </HeaderPage>
+        </DetectionEngineHeaderPage>
         {prePackagedRuleStatus === 'ruleNeedUpdate' && (
           <UpdatePrePackagedRulesCallOut
             loading={loadingCreatePrePackagedRules}
@@ -191,6 +192,6 @@ export const RulesComponent = React.memo(() => {
       <SpyRoute />
     </>
   );
-});
+};
 
-RulesComponent.displayName = 'RulesComponent';
+export const RulesPage = React.memo(RulesPageComponent);

@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService }) {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('csp smoke test', () => {
     it('app response sends content security policy headers', async () => {
@@ -36,11 +37,12 @@ export default function({ getService }) {
         })
       );
 
+      const isDist = await kibanaServer.status.isDistributable();
       const entries = Array.from(parsed.entries());
       expect(entries).to.eql([
         ['script-src', ["'unsafe-eval'", "'self'"]],
         ['worker-src', ['blob:', "'self'"]],
-        ['style-src', ["'unsafe-inline'", "'self'"]],
+        ['style-src', [...(isDist ? [] : ['blob:']), "'unsafe-inline'", "'self'"]],
       ]);
     });
   });

@@ -213,10 +213,10 @@ export const COLUMN_RULE = i18n.translate(
   }
 );
 
-export const COLUMN_METHOD = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.columns.methodTitle',
+export const COLUMN_RISK_SCORE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.columns.riskScoreTitle',
   {
-    defaultMessage: 'Method',
+    defaultMessage: 'Risk score',
   }
 );
 
@@ -255,16 +255,42 @@ export const COLUMN_ACTIVATE = i18n.translate(
   }
 );
 
-export const COLUMN_STATUS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.columns.currentStatusTitle',
+export const CUSTOM_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.customRulesTitle',
   {
-    defaultMessage: 'Current status',
+    defaultMessage: 'Custom rules',
   }
 );
-export const NO_STATUS = i18n.translate(
-  'xpack.siem.detectionEngine.rules.allRules.columns.unknownStatusDescription',
+
+export const ELASTIC_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.elasticRulesTitle',
   {
-    defaultMessage: 'Unknown',
+    defaultMessage: 'Elastic rules',
+  }
+);
+
+export const TAGS = i18n.translate('xpack.siem.detectionEngine.rules.allRules.filters.tagsLabel', {
+  defaultMessage: 'Tags',
+});
+
+export const NO_TAGS_AVAILABLE = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.noTagsAvailableDescription',
+  {
+    defaultMessage: 'No tags available',
+  }
+);
+
+export const NO_RULES = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.noRulesTitle',
+  {
+    defaultMessage: 'No rules found',
+  }
+);
+
+export const NO_RULES_BODY = i18n.translate(
+  'xpack.siem.detectionEngine.rules.allRules.filters.noRulesBodyTitle',
+  {
+    defaultMessage: "We weren't able to find any rules with the above filters.",
   }
 );
 

@@ -70,6 +70,9 @@ export const useRules = (pagination: PaginationOptions, filterOptions: FilterOpt
     filterOptions.filter,
     filterOptions.sortField,
     filterOptions.sortOrder,
+    filterOptions.tags?.sort().join(),
+    filterOptions.showCustomRules,
+    filterOptions.showElasticRules,
   ]);
 
   return [loading, rules, reFetchRules.current];
