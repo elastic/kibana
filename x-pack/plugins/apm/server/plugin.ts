@@ -18,6 +18,9 @@ import { createApmAgentConfigurationIndex } from '../../../legacy/plugins/apm/se
 import { createApmApi } from '../../../legacy/plugins/apm/server/routes/create_apm_api';
 import { getApmIndices } from '../../../legacy/plugins/apm/server/lib/settings/apm_indices/get_apm_indices';
 import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
+import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
+import { tutorialProvider } from './tutorial';
+import { CloudSetup } from '../../cloud/server';
 
 export interface LegacySetup {
   server: Server;
@@ -44,6 +47,8 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     core: CoreSetup,
     plugins: {
       apm_oss: APMOSSPlugin extends Plugin<infer TSetup> ? TSetup : never;
+      home: HomeServerPluginSetup;
+      cloud?: CloudSetup;
     }
   ) {
     const config$ = this.initContext.config.create<APMXPackConfig>();
@@ -67,6 +72,21 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         resolve();
       });
     });
+
+    plugins.home.tutorials.registerTutorial(
+      tutorialProvider({
+        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
+        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
+        cloud: plugins.cloud,
+        indices: {
+          errorIndices: this.currentConfig['apm_oss.errorIndices'],
+          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
+          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
+          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
+          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
+        },
+      })
+    );
 
     return {
       config$: mergedConfig$,
