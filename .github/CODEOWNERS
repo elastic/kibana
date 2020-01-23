@@ -52,6 +52,7 @@
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
+/src/apm.js @watson
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
