@@ -11,7 +11,6 @@ import {
   inverseProjectionMatrix,
   isAnimating,
   translationWhenNotAnimating,
-  scale,
 } from './selectors';
 import { clamp } from '../../lib/math';
 
