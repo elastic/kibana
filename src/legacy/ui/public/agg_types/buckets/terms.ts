@@ -35,7 +35,7 @@ import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other
 import { AggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../plugins/inspector/public';
-import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { fieldFormats, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { Schemas } from '../../vis/editors/default/schemas';
@@ -69,9 +69,9 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket): FieldFormat {
+  getFormat(bucket): fieldFormats.FieldFormat {
     return {
-      getConverterFor: (type: ContentType) => {
+      getConverterFor: (type: fieldFormats.ContentType) => {
         return (val: any) => {
           if (val === '__other__') {
             return bucket.params.otherBucketLabel;
@@ -83,7 +83,7 @@ export const termsBucketAgg = new BucketAggType({
           return bucket.params.field.format.convert(val, type);
         };
       },
-    } as FieldFormat;
+    } as fieldFormats.FieldFormat;
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (

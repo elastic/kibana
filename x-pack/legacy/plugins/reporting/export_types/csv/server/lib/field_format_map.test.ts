@@ -6,11 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import {
-  BytesFormat,
-  NumberFormat,
-  FieldFormatRegisty,
-} from '../../../../../../../../src/plugins/data/server';
+import { fieldFormats } from '../../../../../../../../src/plugins/data/server';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;
@@ -36,9 +32,10 @@ describe('field format map', function() {
   const getConfig = (key: string) => configMock[key];
   const testValue = '4000';
 
-  const fieldFormats = new FieldFormatRegisty();
-  fieldFormats.init(getConfig, {}, [BytesFormat, NumberFormat]);
-  const formatMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
+  const fieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
+  fieldFormatRegistry.init(getConfig, {}, [fieldFormats.BytesFormat, fieldFormats.NumberFormat]);
+
+  const formatMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormatRegistry);
 
   it('should build field format map with entry per index pattern field', function() {
     expect(formatMap.has('field1')).to.be(true);

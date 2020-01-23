@@ -17,15 +17,6 @@
  * under the License.
  */
 
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
-export {
-  FieldFormat,
-  IFieldFormatType,
-  IFieldFormatId,
-  IFieldFormatMetaParams,
-} from './field_format';
-export { FieldFormatRegisty, IFieldFormatConfig } from './field_formats_registry';
-export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
-export { baseConverters } from './base_converters';
-export * from './converters';
-export * from './constants';
+import * as fieldFormats from './static';
+
+export { fieldFormats };

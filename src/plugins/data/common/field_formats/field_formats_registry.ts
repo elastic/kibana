@@ -20,34 +20,28 @@
 // eslint-disable-next-line max-classes-per-file
 import { forOwn, isFunction, memoize } from 'lodash';
 
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../common';
+
 import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
+  GetConfigFn,
+  IFieldFormatConfig,
   FIELD_FORMAT_IDS,
   IFieldFormatType,
   IFieldFormatId,
-  FieldFormat,
-  IFieldFormatMetaParams,
-} from '../../common';
+} from './types';
+import { baseFormatters } from './base_formatters';
+import { FieldFormat, IFieldFormatMetaParams } from './field_format';
 
-import { baseConverters } from './base_converters';
-
-export interface IFieldFormatConfig {
-  id: IFieldFormatId;
-  params: Record<string, any>;
-  es?: boolean;
-}
-
-export class FieldFormatRegisty {
+export class FieldFormatRegistry {
   protected fieldFormats: Map<IFieldFormatId, IFieldFormatType> = new Map();
   protected defaultMap: Record<string, IFieldFormatConfig> = {};
   protected metaParamsOptions: Record<string, any> = {};
-  protected getConfig?: Function;
+  protected getConfig?: GetConfigFn;
 
   init(
-    getConfig: Function,
+    getConfig: GetConfigFn,
     metaParamsOptions: Record<string, any> = {},
-    defaultFieldConverters: IFieldFormatType[] = baseConverters
+    defaultFieldConverters: IFieldFormatType[] = baseFormatters
   ) {
     const defaultTypeMap = getConfig('format:defaultTypeMap');
 
@@ -251,7 +245,7 @@ export class FieldFormatRegisty {
         static id = fieldFormat.id;
         static fieldType = fieldFormat.fieldType;
 
-        constructor(params: Record<string, any> = {}, getConfig?: Function) {
+        constructor(params: Record<string, any> = {}, getConfig?: GetConfigFn) {
           super(getMetaParams(params), getConfig);
         }
       };

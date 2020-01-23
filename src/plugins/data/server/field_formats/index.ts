@@ -18,4 +18,3 @@
  */
 
 export { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats_service';
-export { FieldFormatRegisty } from '../../common/field_formats';

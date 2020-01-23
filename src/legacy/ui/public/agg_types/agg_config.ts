@@ -33,7 +33,7 @@ import { AggGroupNames } from '../vis/editors/default/agg_groups';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { Schema } from '../vis/editors/default/schemas';
-import { ContentType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
+import { fieldFormats, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
 
 export interface AggConfigOptions {
   enabled: boolean;
@@ -371,7 +371,7 @@ export class AggConfig {
     return this.aggConfigs.timeRange;
   }
 
-  fieldFormatter(contentType?: ContentType, defaultFormat?: any) {
+  fieldFormatter(contentType?: fieldFormats.ContentType, defaultFormat?: any) {
     const format = this.type && this.type.getFormat(this);
 
     if (format) {
@@ -381,12 +381,12 @@ export class AggConfig {
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
-  fieldOwnFormatter(contentType?: ContentType, defaultFormat?: any) {
-    const fieldFormats = npStart.plugins.data.fieldFormats;
+  fieldOwnFormatter(contentType?: fieldFormats.ContentType, defaultFormat?: any) {
+    const fieldFormatsService = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
-    if (!format) format = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+    if (!format) format = fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
     return format.getConverterFor(contentType);
   }
 

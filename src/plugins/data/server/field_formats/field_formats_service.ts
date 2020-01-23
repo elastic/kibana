@@ -17,15 +17,16 @@
  * under the License.
  */
 import { has } from 'lodash';
-import { FieldFormatRegisty, IFieldFormatType, baseConverters } from '../../common/field_formats';
+import { fieldFormats } from '../../common/field_formats';
 import { IUiSettingsClient } from '../../../../core/server';
 
 export class FieldFormatsService {
-  private readonly fieldFormatClasses: IFieldFormatType[] = baseConverters;
+  private readonly fieldFormatClasses: fieldFormats.IFieldFormatType[] =
+    fieldFormats.baseFormatters;
 
   public setup() {
     return {
-      register: (customFieldFormat: IFieldFormatType) =>
+      register: (customFieldFormat: fieldFormats.IFieldFormatType) =>
         this.fieldFormatClasses.push(customFieldFormat),
     };
   }
@@ -33,7 +34,7 @@ export class FieldFormatsService {
   public start() {
     return {
       fieldFormatServiceFactory: async (uiSettings: IUiSettingsClient) => {
-        const fieldFormats = new FieldFormatRegisty();
+        const fieldFormatsRegistry = new fieldFormats.FieldFormatRegistry();
         const uiConfigs = await uiSettings.getAll();
         const registeredUiSettings = uiSettings.getRegistered();
 
@@ -43,9 +44,9 @@ export class FieldFormatsService {
           }
         });
 
-        fieldFormats.init((key: string) => uiConfigs[key], {}, this.fieldFormatClasses);
+        fieldFormatsRegistry.init((key: string) => uiConfigs[key], {}, this.fieldFormatClasses);
 
-        return fieldFormats;
+        return fieldFormatsRegistry;
       },
     };
   }

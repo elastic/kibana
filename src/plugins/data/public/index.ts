@@ -31,13 +31,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './types';
 export {
-  // field formats
-  ContentType, // only used in agg_type
-  FIELD_FORMAT_IDS,
-  IFieldFormat,
-  IFieldFormatId,
-  IFieldFormatType,
-  FieldFormatRegisty,
   // index patterns
   IIndexPattern,
   IFieldType,
@@ -62,26 +55,8 @@ export {
   esFilters,
   esKuery,
   esQuery,
+  fieldFormats,
   // field formats
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DEFAULT_CONVERTER_COLOR,
-  DurationFormat,
-  FieldFormat,
-  getHighlightRequest, // only used in search source
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TEXT_CONTEXT_TYPE, // only used in agg_types
-  TruncateFormat,
-  UrlFormat,
   // index patterns
   isFilterable,
   // kbn field types

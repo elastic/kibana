@@ -18,19 +18,19 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { FieldFormatRegisty } from '../../common/field_formats';
+import { fieldFormats } from '../../common/field_formats';
 
 export class FieldFormatsService {
-  private readonly fieldFormats: FieldFormatRegisty = new FieldFormatRegisty();
+  private readonly fieldFormatsRegistry: fieldFormats.FieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
 
   public setup(core: CoreSetup) {
     core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
       if (key === 'format:defaultTypeMap') {
-        this.fieldFormats.parseDefaultTypeMap(newValue);
+        this.fieldFormatsRegistry.parseDefaultTypeMap(newValue);
       }
     });
 
-    this.fieldFormats.init(core.uiSettings.get, {
+    this.fieldFormatsRegistry.init(core.uiSettings.get, {
       parsedUrl: {
         origin: window.location.origin,
         pathname: window.location.pathname,
@@ -38,16 +38,16 @@ export class FieldFormatsService {
       },
     });
 
-    return this.fieldFormats as FieldFormatsSetup;
+    return this.fieldFormatsRegistry as FieldFormatsSetup;
   }
 
   public start() {
-    return this.fieldFormats as FieldFormatsStart;
+    return this.fieldFormatsRegistry as FieldFormatsStart;
   }
 }
 
 /** @public */
-export type FieldFormatsSetup = Omit<FieldFormatRegisty, 'init'>;
+export type FieldFormatsSetup = Pick<fieldFormats.FieldFormatRegistry, 'register'>;
 
 /** @public */
-export type FieldFormatsStart = Omit<FieldFormatRegisty, 'init' & 'register'>;
+export type FieldFormatsStart = Omit<fieldFormats.FieldFormatRegistry, 'init' & 'register'>;
