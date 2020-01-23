@@ -7,10 +7,13 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
+import { Alert } from '../../../../types';
 
 describe('alert_details', () => {
   it('renders the alert ID', () => {
-    const alertId = uuid.v4();
-    expect(shallow(<AlertDetails alertId={alertId} />).contains(<div>{alertId}</div>)).toBeTruthy();
+    const alert = {
+      id: uuid.v4(),
+    } as Alert;
+    expect(shallow(<AlertDetails alert={alert} />).contains(<div>{alert.id}</div>)).toBeTruthy();
   });
 });
