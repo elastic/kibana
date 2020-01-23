@@ -18,11 +18,13 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
   EuiButton,
+  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -55,7 +57,9 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
     http.get('/api/<%= snakeCase(name) %>/example').then(res => {
       setTimestamp(res.time);
       // Use the core notifications service to display a success message.
-      notifications.toasts.addSuccess(PLUGIN_NAME);
+      notifications.toasts.addSuccess(i18n.translate('banana.dataUpdated', {
+        defaultMessage: 'Data updated',
+      }));
     });
 <%_ } else { -%>
     setTimestamp(new Date().toISOString());
@@ -70,14 +74,14 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
       <I18nProvider>
         <>
           <navigation.ui.TopNavMenu appName={ PLUGIN_ID } showSearchBar={true} />
-          <EuiPage>
+          <EuiPage restrictWidth="1000px">
             <EuiPageBody>
               <EuiPageHeader>
                 <EuiTitle size="l">
                   <h1>
                     <FormattedMessage
                       id="<%= camelCase(name) %>.helloWorldText"
-                      defaultMessage="Hello {name}!"
+                      defaultMessage="{name}!"
                       values={{ name: PLUGIN_NAME }}
                     />
                   </h1>
@@ -89,19 +93,20 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
                     <h2>
                       <FormattedMessage
                         id="<%= camelCase(name) %>.congratulationsTitle"
-                        defaultMessage="Congratulations"
+                        defaultMessage="Congratulations, you have successfully created your first Kibana Plugin!"
                       />
                     </h2>
                   </EuiTitle>
                 </EuiPageContentHeader>
                 <EuiPageContentBody>
                   <EuiText>
-                    <h3>
+                    <p>
                       <FormattedMessage
-                        id="<%= camelCase(name) %>.congratulationsText"
-                        defaultMessage="You have successfully created your first Kibana Plugin!"
+                        id="<%= camelCase(name) %>.content"
+                        defaultMessage="Look through the generated code and checkout the plugin developmment documentation."
                       />
-                    </h3>
+                    </p>
+                    <EuiHorizontalRule/>
                     <p>
                       <FormattedMessage
                         id="banana.timestampText"
