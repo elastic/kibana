@@ -17,6 +17,6 @@
  * under the License.
  */
 
-require('../apm')();
 require('../setup_node_env');
+require('../apm')();
 require('./cli');
