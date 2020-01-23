@@ -21,22 +21,16 @@
 import { fromExpression, getByAlias } from '@kbn/interpreter/common';
 
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
-import {
-  ExpressionAST,
-  AnyExpressionFunctionDefinition,
-  ExpressionFunctionAST,
-  ArgumentType,
-  ExecutionContext,
-} from '../types';
 import { Executor, getType } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer } from '../../../kibana_utils/common';
 import { isExpressionValueError } from '../expression_types/error';
+import { ExpressionAstExpression } from '../parser';
 
 export interface ExecutionParams {
   executor: Executor;
-  ast: ExpressionAST;
+  ast: ExpressionAstExpression;
 }
 
 export class Execution {
@@ -212,7 +206,7 @@ export class Execution {
     // Create the functions to resolve the argument ASTs into values
     // These are what are passed to the actual functions if you opt out of resolving
     const resolveArgFns = mapValues(argAstsWithDefaults, (asts, argName) => {
-      return asts.map((item: ExpressionAST) => {
+      return asts.map((item: ExpressionAstExpression) => {
         return async (subInput = input) => {
           const output = await this.params.executor.interpret(item, subInput);
           // This is why when any sub-expression errors, the entire thing errors
@@ -246,7 +240,7 @@ export class Execution {
     return { resolvedArgs };
   }
 
-  async invokeChain(chainArr: ExpressionFunctionAST[], context: any): Promise<any> {
+  async invokeChain(chainArr: ExpressionAstFunction[], context: any): Promise<any> {
     if (!chainArr.length) return context;
     // if execution was aborted return error
     if (this.context.abortSignal && this.context.abortSignal.aborted) {

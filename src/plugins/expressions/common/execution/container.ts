@@ -19,10 +19,10 @@
 
 import { StateContainer, createStateContainer } from '../../../kibana_utils/public';
 import { ExecutorState, defaultState as executorDefaultState } from '../executor';
-import { ExpressionAST } from '../types';
+import { ExpressionAstExpression } from '../parser';
 
 export interface ExecutionState extends ExecutorState {
-  ast: ExpressionAST;
+  ast: ExpressionAstExpression;
 }
 
 const defaultState: ExecutionState = {

@@ -23,7 +23,7 @@ import { Adapters, InspectorSession } from '../../inspector/public';
 import { ExpressionDataHandler } from './execute';
 import { ExpressionRenderHandler } from './render';
 import { Data, IExpressionLoaderParams } from './types';
-import { ExpressionAST } from '../common/types';
+import { ExpressionAstExpression } from '../common';
 import { getInspector } from './services';
 
 export class ExpressionLoader {
@@ -42,7 +42,7 @@ export class ExpressionLoader {
 
   constructor(
     element: HTMLElement,
-    expression?: string | ExpressionAST,
+    expression?: string | ExpressionAstExpression,
     params?: IExpressionLoaderParams
   ) {
     this.dataSubject = new Subject();
@@ -105,7 +105,7 @@ export class ExpressionLoader {
     }
   }
 
-  getAst(): ExpressionAST | undefined {
+  getAst(): ExpressionAstExpression | undefined {
     if (this.dataHandler) {
       return this.dataHandler.getAst();
     }
@@ -130,7 +130,7 @@ export class ExpressionLoader {
     }
   }
 
-  update(expression?: string | ExpressionAST, params?: IExpressionLoaderParams): void {
+  update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void {
     this.setParams(params);
 
     this.loadingSubject.next(true);
@@ -142,7 +142,7 @@ export class ExpressionLoader {
   }
 
   private loadData = async (
-    expression: string | ExpressionAST,
+    expression: string | ExpressionAstExpression,
     params: IExpressionLoaderParams
   ): Promise<void> => {
     if (this.dataHandler && this.dataHandler.isPending) {
@@ -186,7 +186,7 @@ export class ExpressionLoader {
 
 export type IExpressionLoader = (
   element: HTMLElement,
-  expression: string | ExpressionAST,
+  expression: string | ExpressionAstExpression,
   params: IExpressionLoaderParams
 ) => ExpressionLoader;
 

@@ -21,7 +21,7 @@ import { fromExpression, toExpression } from '@kbn/interpreter/target/common';
 import { DataAdapter, RequestAdapter, Adapters } from '../../inspector/public';
 import { getInterpreter } from './services';
 import { IExpressionLoaderParams, IInterpreterResult } from './types';
-import { ExpressionAST } from '../common/types';
+import { ExpressionAstExpression } from '../common';
 
 /**
  * The search context describes a specific context (filters, time range and query)
@@ -34,16 +34,16 @@ import { ExpressionAST } from '../common/types';
 export class ExpressionDataHandler {
   private abortController: AbortController;
   private expression: string;
-  private ast: ExpressionAST;
+  private ast: ExpressionAstExpression;
 
   private inspectorAdapters: Adapters;
   private promise: Promise<IInterpreterResult>;
 
   public isPending: boolean = true;
-  constructor(expression: string | ExpressionAST, params: IExpressionLoaderParams) {
+  constructor(expression: string | ExpressionAstExpression, params: IExpressionLoaderParams) {
     if (typeof expression === 'string') {
       this.expression = expression;
-      this.ast = fromExpression(expression) as ExpressionAST;
+      this.ast = fromExpression(expression) as ExpressionAstExpression;
     } else {
       this.ast = expression;
       this.expression = toExpression(this.ast);
@@ -133,7 +133,7 @@ export class ExpressionDataHandler {
 }
 
 export function execute(
-  expression: string | ExpressionAST,
+  expression: string | ExpressionAstExpression,
   params: IExpressionLoaderParams = {}
 ): ExpressionDataHandler {
   return new ExpressionDataHandler(expression, params);

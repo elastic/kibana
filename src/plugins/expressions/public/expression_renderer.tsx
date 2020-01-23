@@ -26,7 +26,7 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { IExpressionLoaderParams, IInterpreterRenderHandlers, RenderError } from './types';
-import { ExpressionAST } from '../common/types';
+import { ExpressionAstExpression } from '../common';
 import { ExpressionLoader } from './loader';
 
 // Accept all options of the runner as props except for the
@@ -34,7 +34,7 @@ import { ExpressionLoader } from './loader';
 export interface ExpressionRendererProps extends IExpressionLoaderParams {
   className?: string;
   dataAttrs?: string[];
-  expression: string | ExpressionAST;
+  expression: string | ExpressionAstExpression;
   renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
 }

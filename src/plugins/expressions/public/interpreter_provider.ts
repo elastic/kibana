@@ -23,13 +23,13 @@ import { fromExpression, getByAlias } from '@kbn/interpreter/common';
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { createError } from './create_error';
 import {
-  ExpressionAST,
-  ExpressionFunctionAST,
+  getType,
+  ExpressionAstExpression,
+  ExpressionAstFunction,
   AnyExpressionFunctionDefinition,
   ArgumentType,
-} from '../common/types';
-import { getType } from '../common/type';
-import { FunctionsRegistry } from '../common/registries';
+  FunctionsRegistry,
+} from '../common';
 
 export { createError };
 
@@ -39,7 +39,7 @@ export interface InterpreterConfig {
   handlers: any;
 }
 
-export type ExpressionInterpret = (ast: ExpressionAST, context?: any) => any;
+export type ExpressionInterpret = (ast: ExpressionAstExpression, context?: any) => any;
 
 export function interpreterProvider(config: InterpreterConfig): ExpressionInterpret {
   const { functions, types } = config;
@@ -69,7 +69,7 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
     throw new Error(`Can not cast '${fromTypeName}' to any of '${toTypeNames.join(', ')}'`);
   }
 
-  async function invokeChain(chainArr: ExpressionFunctionAST[], context: any): Promise<any> {
+  async function invokeChain(chainArr: ExpressionAstFunction[], context: any): Promise<any> {
     if (!chainArr.length) return context;
     // if execution was aborted return error
     if (handlers.abortSignal && handlers.abortSignal.aborted) {

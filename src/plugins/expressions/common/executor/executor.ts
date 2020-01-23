@@ -24,7 +24,7 @@ import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { FunctionsRegistry, ExpressionFunction } from './expression_functions';
 import { Type, getType } from './expression_types';
-import { AnyExpressionFunctionDefinition, AnyExpressionType, ExpressionAST } from '../types';
+import { AnyExpressionFunctionDefinition, AnyExpressionType } from '../expression_functions';
 import {
   ExpressionRenderFunction,
   ExpressionRenderDefinition,
@@ -134,7 +134,7 @@ export class Executor {
   public async interpret<T>(ast: ExpressionArgAST, input: T): Promise<unknown> {
     switch (getType(ast)) {
       case 'expression':
-        return await this.interpretExpression(ast as ExpressionAST, input);
+        return await this.interpretExpression(ast as ExpressionAstExpression, input);
       case 'string':
       case 'number':
       case 'null':
@@ -145,7 +145,7 @@ export class Executor {
     }
   }
 
-  public async interpretExpression<T>(ast: ExpressionAST, input: T): Promise<unknown> {
+  public async interpretExpression<T>(ast: ExpressionAstExpression, input: T): Promise<unknown> {
     const execution = new Execution({
       ast,
       executor: this,
