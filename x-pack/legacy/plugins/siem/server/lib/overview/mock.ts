@@ -160,5 +160,6 @@ export const mockResultHost = {
   endgameRegistry: 896,
   endgameSecurity: 897,
   filebeatSystemModule: 225,
-  winlogbeat: 737,
+  winlogbeatSecurity: 523,
+  winlogbeatMWSysmonOperational: 214,
 };

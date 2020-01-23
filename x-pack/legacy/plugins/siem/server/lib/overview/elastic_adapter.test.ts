@@ -181,7 +181,8 @@ describe('Siem Overview elasticsearch_adapter', () => {
           endgameRegistry: 0,
           endgameSecurity: 0,
           filebeatSystemModule: 0,
-          winlogbeat: 0,
+          winlogbeatSecurity: 0,
+          winlogbeatMWSysmonOperational: 0,
         });
       });
     });
