@@ -10,6 +10,7 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
 import { initRoutes } from './routes';
+import { emsBoundariesSpecProvider } from './tutorials/ems';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
@@ -115,6 +116,13 @@ export class MapPlugin {
           isLayerTOCOpen: false,
         },
       });
+
+      home.tutorials.registerTutorial(
+        emsBoundariesSpecProvider({
+          prependBasePath: core.http.basePath.prepend,
+          emsLandingPageUrl: __LEGACY.mapConfig().emsLandingPageUrl,
+        })
+      );
     }
 
     __LEGACY.injectUiAppVars(APP_ID, async () => {

@@ -10,7 +10,6 @@ import {
   RuleResponseBuckets,
 } from '../../../../containers/detection_engine/rules';
 import { TableData } from '../types';
-import { getEmptyValue } from '../../../../components/empty_value';
 
 /**
  * Formats rules into the correct format for the AllRulesTable
@@ -26,14 +25,9 @@ export const formatRules = (rules: Rule[], selectedIds?: string[]): TableData[] 
     rule: {
       href: `#/detections/rules/id/${encodeURIComponent(rule.id)}`,
       name: rule.name,
-      status: 'Status Placeholder',
     },
-    method: rule.type, // TODO: Map to i18n?
+    risk_score: rule.risk_score,
     severity: rule.severity,
-    lastCompletedRun: undefined, // TODO: Not available yet
-    lastResponse: {
-      type: getEmptyValue(), // TODO: Not available yet
-    },
     tags: rule.tags ?? [],
     activate: rule.enabled,
     status: rule.status ?? null,
