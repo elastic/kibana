@@ -5,12 +5,13 @@
  */
 
 import { Reducer } from 'redux';
-import { applyMatrix3, subtract } from '../../lib/vector2';
+import * as vector2 from '../../lib/vector2';
 import {
   projectionMatrix,
   inverseProjectionMatrix,
   isAnimating,
   translationWhenNotAnimating,
+  scale,
 } from './selectors';
 import { clamp } from '../../lib/math';
 
@@ -69,21 +70,36 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
      * nearer or further from the mouse cursor. This lets you keep your context when changing zoom levels.
      */
     if (state.latestFocusedWorldCoordinates !== null && !isAnimating(state)(action.payload.time)) {
-      const rasterOfLastFocusedWorldCoordinates = applyMatrix3(
+      const rasterOfLastFocusedWorldCoordinates = vector2.applyMatrix3(
         state.latestFocusedWorldCoordinates,
         projectionMatrix(state)(action.payload.time)
       );
-      const matrix = inverseProjectionMatrix(stateWithNewScaling)(action.payload.time);
-      const worldCoordinateThereNow = applyMatrix3(rasterOfLastFocusedWorldCoordinates, matrix);
-      const delta = subtract(worldCoordinateThereNow, state.latestFocusedWorldCoordinates);
+      const newWorldCoordinatesAtLastFocusedPosition = vector2.applyMatrix3(
+        rasterOfLastFocusedWorldCoordinates,
+        inverseProjectionMatrix(stateWithNewScaling)(action.payload.time)
+      );
+
+      /**
+       * The change in world position incurred by changing scale.
+       */
+      const delta = vector2.subtract(
+        newWorldCoordinatesAtLastFocusedPosition,
+        state.latestFocusedWorldCoordinates
+      );
+
+      /**
+       * Adjust for the change in position due to scale.
+       */
+      const translationNotCountingCurrentPanning: Vector2 = vector2.subtract(
+        stateWithNewScaling.translationNotCountingCurrentPanning,
+        delta
+      );
 
       const nextState: CameraState = {
         ...stateWithNewScaling,
-        translationNotCountingCurrentPanning: [
-          stateWithNewScaling.translationNotCountingCurrentPanning[0] + delta[0],
-          stateWithNewScaling.translationNotCountingCurrentPanning[1] + delta[1],
-        ],
+        translationNotCountingCurrentPanning,
       };
+
       return nextState;
     } else {
       return stateWithNewScaling;
@@ -188,7 +204,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
        * to keep the same point under the pointer.
        * In order to do this, we need to know the position of the mouse when changing the scale.
        */
-      latestFocusedWorldCoordinates: applyMatrix3(
+      latestFocusedWorldCoordinates: vector2.applyMatrix3(
         action.payload.screenCoordinates,
         inverseProjectionMatrix(stateWithUpdatedPanning)(action.payload.time)
       ),

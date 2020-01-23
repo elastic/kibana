@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { translation } from './camera/selectors';
-import { scale, distance, applyMatrix3 } from '../lib/vector2';
 import { animatePanning } from './camera/methods';
-import {
-  processNodePositionsAndEdgeLineSegments,
-  projectionMatrix as projectionMatrixAtTime,
-} from './selectors';
+import { processNodePositionsAndEdgeLineSegments } from './selectors';
 import { ResolverState, ProcessEvent } from '../types';
 
 /**
@@ -24,20 +19,9 @@ export function animateProcessIntoView(
   const { processNodePositions } = processNodePositionsAndEdgeLineSegments(state);
   const position = processNodePositions.get(process);
   if (position) {
-    const currentPosition = translation(state.camera)(startTime);
-    /**
-     * Move the camera 4 pixels per millisecond
-     */
-    const projectionMatrix = projectionMatrixAtTime(state)(startTime);
-    const duration =
-      distance(
-        applyMatrix3(currentPosition, projectionMatrix),
-        applyMatrix3(position, projectionMatrix)
-      ) / 4;
-
     return {
       ...state,
-      camera: animatePanning(state.camera, startTime, scale(position, -1), duration),
+      camera: animatePanning(state.camera, startTime, position, 1000),
     };
   }
   return state;

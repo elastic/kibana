@@ -69,7 +69,7 @@ describe('inverseProjectionMatrix', () => {
     });
     describe('when the user has panned to the right and up by 50', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [-50, -50] };
+        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [50, 50] };
         store.dispatch(action);
       });
       it('should convert 100,150 in raster space to 0,0 (center) in world space', () => {
@@ -84,7 +84,7 @@ describe('inverseProjectionMatrix', () => {
     });
     describe('when the user has panned to the right by 350 and up by 250', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [-350, -250] };
+        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [350, 250] };
         store.dispatch(action);
       });
       describe('when the user has scaled to 2', () => {

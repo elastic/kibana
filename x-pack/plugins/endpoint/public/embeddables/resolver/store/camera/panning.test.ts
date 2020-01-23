@@ -30,7 +30,7 @@ describe('panning interaction', () => {
     it('should have a translation of 0,0', () => {
       translationShouldBeCloseTo([0, 0]);
     });
-    describe('when the user has started panning', () => {
+    describe('when the user has started panning at (100, 100)', () => {
       beforeEach(() => {
         const action: CameraAction = {
           type: 'userStartedPanning',
@@ -41,7 +41,7 @@ describe('panning interaction', () => {
       it('should have a translation of 0,0', () => {
         translationShouldBeCloseTo([0, 0]);
       });
-      describe('when the user continues to pan 50px up and to the right', () => {
+      describe('when the user moves their pointer 50px up and right (towards the top right of the screen)', () => {
         beforeEach(() => {
           const action: CameraAction = {
             type: 'userMovedPointer',
@@ -49,16 +49,16 @@ describe('panning interaction', () => {
           };
           store.dispatch(action);
         });
-        it('should have a translation of 50,50', () => {
-          translationShouldBeCloseTo([50, 50]);
+        it('should have a translation of [-50, -50] as the camera is now focused on things lower and to the left.', () => {
+          translationShouldBeCloseTo([-50, -50]);
         });
         describe('when the user then stops panning', () => {
           beforeEach(() => {
             const action: CameraAction = { type: 'userStoppedPanning' };
             store.dispatch(action);
           });
-          it('should have a translation of 50,50', () => {
-            translationShouldBeCloseTo([50, 50]);
+          it('should still have a translation of [-50, -50]', () => {
+            translationShouldBeCloseTo([-50, -50]);
           });
         });
       });

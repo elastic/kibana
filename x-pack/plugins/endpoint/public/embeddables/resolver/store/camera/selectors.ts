@@ -5,7 +5,7 @@
  */
 
 import { createSelector, defaultMemoize } from 'reselect';
-import { subtract, divide, add, applyMatrix3 } from '../../lib/vector2';
+import * as vector2 from '../../lib/vector2';
 import { multiply, add as addMatrix } from '../../lib/matrix3';
 import {
   inverseOrthographicProjection,
@@ -122,14 +122,14 @@ export const translation: (state: CameraState) => (time: Date) => Vector2 = crea
       if (animation !== undefined && animationIsActive(animation, time)) {
         return cameraAnimationTranslation(animation, time);
       } else if (panning) {
-        return add(
-          translationNotCountingCurrentPanning,
-          divide(subtract(panning.currentOffset, panning.origin), [
-            scaleX,
-            // Invert `y` since the `.panning` vectors are in screen coordinates and therefore have backwards `y`
-            -scaleY,
-          ])
-        );
+        const changeInPanningOffset = vector2.subtract(panning.currentOffset, panning.origin);
+        /**
+         * invert the vector since panning moves the perception of the screen, which is inverse of the
+         * translation of the camera. Inverse the `y` axis again, since `y` is inverted between
+         * world and screen coordinates.
+         */
+        const changeInTranslation = vector2.divide(changeInPanningOffset, [-scaleX, scaleY]);
+        return vector2.add(translationNotCountingCurrentPanning, changeInTranslation);
       } else {
         return translationNotCountingCurrentPanning;
       }
@@ -159,6 +159,11 @@ export const inverseProjectionMatrix: (
   ) => {
     return (time: Date) => {
       // prettier-ignore
+      /**
+       * Scale by 1/renderSize to put it in range of 0->1
+       * Then multiply it by 2 and then subtract 1, putting it
+       * in the range of -1 -> 1
+       */
       const screenToNDC = [
         2 / renderWidth, 0, -1,
         0, 2 / renderHeight, -1,
@@ -171,12 +176,16 @@ export const inverseProjectionMatrix: (
         // 4. Translate for the 'camera'
         // prettier-ignore
         [
-          0, 0, -translationX,
-          0, 0, -translationY,
+          0, 0, translationX,
+          0, 0, translationY,
           0, 0, 0
         ] as const,
         multiply(
-          // 3. make values in range of clipping planes
+          /**
+           * 3. make values in range of clipping planes,
+           * so take it from range -1 -> 1 and put it in range of
+           * -length/2 -> length/2
+           */
           inverseOrthographicProjection(
             clippingPlaneTop,
             clippingPlaneRight,
@@ -208,8 +217,8 @@ export const viewableBoundingBox: (state: CameraState) => (time: Date) => AABB =
       const bottomLeftCorner: Vector2 = [0, renderHeight];
       const topRightCorner: Vector2 = [renderWidth, 0];
       return {
-        minimum: applyMatrix3(bottomLeftCorner, matrix),
-        maximum: applyMatrix3(topRightCorner, matrix),
+        minimum: vector2.applyMatrix3(bottomLeftCorner, matrix),
+        maximum: vector2.applyMatrix3(topRightCorner, matrix),
       };
     };
   }
@@ -251,8 +260,9 @@ export const projectionMatrix: (state: CameraState) => (time: Date) => Matrix3 =
                 clippingPlaneBottom,
                 clippingPlaneLeft
               ),
-              // 1. adjust for camera
-              translationTransformation(translationAtTime(time))
+              // 1. adjust for camera by subtracting its translation. The closer the camera is to a point, the closer that point
+              // should be to the center of the screen.
+              translationTransformation(vector2.scale(translationAtTime(time), -1))
             )
           )
         )
