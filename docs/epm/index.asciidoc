@@ -31,3 +31,17 @@ Delete a package:
 curl --user elastic:changeme localhost:5601/api/epm/delete/iptables-1.0.4
 curl --user elastic:changeme localhost:5601/api/epm/delete/coredns-1.0.1
 ```
+
+=== Definitions
+
+This section is to define terms used across ingest management.
+
+==== Elastic Agent
+A single, unified agent that users can deploy to hosts or containers. It controls which data is collected from the host or containers and where the data is sent. It will run Beats, Endpoint or other monitoring programs as needed. It can operate standalone or pull a configuration policy from Fleet.
+
+==== Namespace
+A user-specified string that will be used to part of the index name in Elasticsearch. It helps users identify logs coming from a specific environment (like prod or test), an application, or other identifiers.
+
+==== Package
+
+A package contains all the assets for the Elastic Stack. A more detailed definition of a package can be found under https://github.com/elastic/package-registry .
