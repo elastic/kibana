@@ -137,7 +137,14 @@ export const mockResponseHost = {
       user_count: { doc_count: 1979 },
       filebeat_count: { doc_count: 225 },
     },
-    winlog_count: { doc_count: 737 },
+    winlog_module: {
+      security_event_count: {
+        doc_count: 523,
+      },
+      mwsysmon_operational_event_count: {
+        doc_count: 214,
+      },
+    },
   },
 };
 
