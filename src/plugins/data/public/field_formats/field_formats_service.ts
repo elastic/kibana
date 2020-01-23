@@ -30,7 +30,9 @@ export class FieldFormatsService {
       }
     });
 
-    this.fieldFormatRegistry.init(core.uiSettings.get, {
+    const getConfig = core.uiSettings.get.bind(core.uiSettings);
+
+    this.fieldFormatRegistry.init(getConfig, {
       parsedUrl: {
         origin: window.location.origin,
         pathname: window.location.pathname,

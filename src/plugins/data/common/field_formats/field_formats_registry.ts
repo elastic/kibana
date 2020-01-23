@@ -44,7 +44,6 @@ export class FieldFormatRegistry {
     defaultFieldConverters: IFieldFormatType[] = baseFormatters
   ) {
     const defaultTypeMap = getConfig('format:defaultTypeMap');
-
     this.register(defaultFieldConverters);
     this.parseDefaultTypeMap(defaultTypeMap);
     this.getConfig = getConfig;

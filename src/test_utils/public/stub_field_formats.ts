@@ -21,8 +21,9 @@ import { fieldFormats } from '../../plugins/data/public';
 
 export const getFieldFormatRegistry = (core: CoreSetup) => {
   const fieldFormatRegistry = new fieldFormats.FieldFormatRegistry();
+  const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
-  fieldFormatRegistry.init(core.uiSettings.get, {});
+  fieldFormatRegistry.init(getConfig, {});
 
   return fieldFormatRegistry;
 };
