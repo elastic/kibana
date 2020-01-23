@@ -583,13 +583,13 @@ export interface CoreStart {
 // @public
 export class CspConfig implements ICspConfig {
     // @internal
-    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
-    // (undocumented)
-    static readonly DEFAULT: CspConfig;
+    constructor(env: Env, rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
     // (undocumented)
     readonly header: string;
     // (undocumented)
     readonly rules: string[];
+    // (undocumented)
+    readonly rulesChangedFromDefault: boolean;
     // (undocumented)
     readonly strict: boolean;
     // (undocumented)
@@ -774,6 +774,7 @@ export type IContextProvider<THandler extends HandlerFunction<any>, TContextName
 export interface ICspConfig {
     readonly header: string;
     readonly rules: string[];
+    readonly rulesChangedFromDefault: boolean;
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
 }
@@ -879,6 +880,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
+    readonly events: KibanaRequestEvents;
     // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -893,6 +895,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     readonly socket: IKibanaSocket;
     readonly url: Url;
     }
+
+// @public
+export interface KibanaRequestEvents {
+    aborted$: Observable<void>;
+}
 
 // @public
 export interface KibanaRequestRoute<Method extends RouteMethod> {
