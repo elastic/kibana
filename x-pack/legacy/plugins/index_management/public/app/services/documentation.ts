@@ -53,19 +53,6 @@ class DocumentationService {
     return `${this.esDocsBase}${typeDefinition.documentation[docType]}`;
   };
 
-  public getParameterDocLink = (parameter: ParameterName, docType = 'main'): string | undefined => {
-    const typeDefinition = PARAMETERS_DEFINITION[parameter];
-
-    if (
-      !typeDefinition ||
-      !typeDefinition.documentation ||
-      !typeDefinition.documentation[docType]
-    ) {
-      return undefined;
-    }
-    return `${this.esDocsBase}${typeDefinition.documentation[docType]}`;
-  };
-
   public getMappingTypesLink() {
     return `${this.esDocsBase}/mapping-types.html`;
   }
@@ -196,6 +183,14 @@ class DocumentationService {
 
   public getJoinMultiLevelsPerformanceLink() {
     return `${this.esDocsBase}/parent-join.html#_parent_join_and_performance`;
+  }
+
+  public getDynamicLink() {
+    return `${this.esDocsBase}/dynamic.html`;
+  }
+
+  public getEnabledLink() {
+    return `${this.esDocsBase}/enabled.html`;
   }
 
   public getWellKnownTextLink() {

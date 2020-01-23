@@ -546,9 +546,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       defaultValue: true,
     },
     schema: t.union([t.boolean, t.literal('strict')]),
-    documentation: {
-      main: '/dynamic.html',
-    },
   },
   dynamic_toggle: {
     fieldConfig: {
@@ -575,9 +572,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       defaultValue: true,
     },
     schema: t.boolean,
-    documentation: {
-      main: '/enabled.html',
-    },
   },
   format: {
     fieldConfig: {

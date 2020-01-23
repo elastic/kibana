@@ -74,7 +74,7 @@ export const DynamicParameter = ({ defaultToggleValue }: Props) => {
         text: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicDocLinkText', {
           defaultMessage: 'Dynamic documentation',
         }),
-        href: documentationService.getParameterDocLink('dynamic')!,
+        href: documentationService.getDynamicLink(),
       }}
       formFieldPath="dynamic_toggle"
       defaultToggleValue={defaultToggleValue}

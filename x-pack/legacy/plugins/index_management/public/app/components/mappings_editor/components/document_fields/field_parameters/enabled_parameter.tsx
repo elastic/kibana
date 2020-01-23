@@ -31,7 +31,7 @@ export const EnabledParameter = () => {
         text: i18n.translate('xpack.idxMgmt.mappingsEditor.enabledDocLinkText', {
           defaultMessage: 'Enabled documentation',
         }),
-        href: documentationService.getParameterDocLink('enabled')!,
+        href: documentationService.getEnabledLink(),
       }}
       formFieldPath="enabled"
     />
