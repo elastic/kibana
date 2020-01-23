@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
 import { History } from 'history';
 
@@ -73,6 +73,10 @@ export class DashboardStateManager {
 
   public get appState(): DashboardAppState {
     return this.stateContainer.get();
+  }
+
+  public get appState$(): Observable<DashboardAppState> {
+    return this.stateContainer.state$;
   }
 
   private readonly stateContainer: ReduxLikeStateContainer<

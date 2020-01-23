@@ -206,8 +206,9 @@ export function initDashboardApp(app, deps) {
                 // See https://github.com/elastic/kibana/issues/10951 for more context.
                 if (error instanceof SavedObjectNotFound && id === 'create') {
                   // Note preserve querystring part is necessary so the state is preserved through the redirect.
-                  deps.history.replace({
-                    ...deps.history.location, // preserve query,
+                  const history = deps.angularGlobalStateHacks.history;
+                  history.replace({
+                    ...history.location, // preserve query,
                     pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
                   });
 

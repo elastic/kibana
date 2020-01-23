@@ -34,10 +34,13 @@ import {
   subscribeWithScope,
 } from '../legacy_imports';
 import {
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
   IndexPattern,
   IndexPatternsContract,
   Query,
   SavedQuery,
+  syncAppFilters,
 } from '../../../../../../plugins/data/public';
 
 import {
@@ -68,13 +71,9 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../plugins/kibana_react/public';
+import { SavedObjectFinderProps, SavedObjectFinderUi } from '../../../../../../plugins/kibana_react/public';
 import { removeQueryParam, unhashUrl } from '../../../../../../plugins/kibana_utils/public';
-import { COMPARE_ALL_OPTIONS, compareFilters } from '../../../../../../plugins/data/public';
-import { startSyncingAppFilters } from './lib/sync_app_filters';
+import { map } from 'rxjs/operators';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -112,10 +111,12 @@ export class DashboardAppController {
       },
     },
     core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
-    history,
-    kbnUrlStateStorage,
-    hasInheritedGlobalState,
+    angularGlobalStateHacks,
   }: DashboardAppControllerDependencies) {
+    const history = angularGlobalStateHacks!.history!;
+    const kbnUrlStateStorage = angularGlobalStateHacks!.kbnUrlStateStorage!;
+    const hasInheritedGlobalState = angularGlobalStateHacks!.hasInheritedGlobalState!;
+
     const queryFilter = filterManager;
 
     let lastReloadRequestTime = 0;
@@ -133,11 +134,15 @@ export class DashboardAppController {
       history,
     });
 
-    const stopSyncingAppFilters = startSyncingAppFilters(filterManager, dashboardStateManager);
+    const stopSyncingAppFilters = syncAppFilters(filterManager, {
+      set: filters => dashboardStateManager.setFilters(filters),
+      get: () => dashboardStateManager.appState.filters,
+      state$: dashboardStateManager.appState$.pipe(map(state => state.filters)),
+    });
 
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
-    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalState?.value) {
+    if (dashboardStateManager.getIsTimeSavedWithDashboard() && !hasInheritedGlobalState) {
       dashboardStateManager.syncTimefilterWithDashboard(timefilter);
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;

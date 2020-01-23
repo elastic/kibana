@@ -25,78 +25,76 @@ import {
   syncState,
 } from '../../../../kibana_utils/public';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
-import { RefreshInterval, TimeRange, esFilters } from '../../../common';
-import { FilterManager } from '../filter_manager';
-import { TimefilterContract } from '../timefilter';
+import { esFilters, RefreshInterval, TimeRange } from '../../../common';
+import { QueryStart } from '../query_service';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
-export interface FiltersSyncState {
+interface QuerySyncState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: esFilters.Filter[];
 }
 
 /**
- * Helper function to set up syncing between Filter & Time Filter services with url's '_g' query param
- * @param urlStateStorage - url state storage to use
- * @param filterManager - filter manager instance
- * @param timeFilter - time filter instance
+ * Helper utility to set up syncing between query services and url's '_g' query param
  */
-export const syncFilters = (
-  urlStateStorage: IKbnUrlStateStorage,
-  filterManager: FilterManager,
-  timeFilter: TimefilterContract
+export const syncQuery = (
+  { timefilter: { timefilter }, filterManager }: QueryStart,
+  urlStateStorage: IKbnUrlStateStorage
 ) => {
-  const defaultState: FiltersSyncState = {
-    time: timeFilter.getTime(),
-    refreshInterval: timeFilter.getRefreshInterval(),
+  const defaultState: QuerySyncState = {
+    time: timefilter.getTime(),
+    refreshInterval: timefilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
   };
 
-  const initialStateFromUrl = urlStateStorage.get<FiltersSyncState>(GLOBAL_STATE_STORAGE_KEY);
+  // retrieve current state from `_g` url
+  const initialStateFromUrl = urlStateStorage.get<QuerySyncState>(GLOBAL_STATE_STORAGE_KEY);
 
   // remember whether there were info in the URL
-  const hasInheritedFiltersFromUrl = Boolean(
+  const hasInheritedQueryFromUrl = Boolean(
     initialStateFromUrl && Object.keys(initialStateFromUrl).length
   );
 
-  const initialState: FiltersSyncState = {
+  // prepare initial state, whatever was in URL takes precedences over current state in services
+  const initialState: QuerySyncState = {
     ...defaultState,
     ...initialStateFromUrl,
   };
 
+  // create state container, which will be used for syncing with syncState() util
   const filtersSyncStateContainer = createStateContainer(
     initialState,
     {
-      setTime: (state: FiltersSyncState) => (time: TimeRange) => ({ ...state, time }),
-      setRefreshInterval: (state: FiltersSyncState) => (refreshInterval: RefreshInterval) => ({
+      setTime: (state: QuerySyncState) => (time: TimeRange) => ({ ...state, time }),
+      setRefreshInterval: (state: QuerySyncState) => (refreshInterval: RefreshInterval) => ({
         ...state,
         refreshInterval,
       }),
-      setFilters: (state: FiltersSyncState) => (filters: esFilters.Filter[]) => ({
+      setFilters: (state: QuerySyncState) => (filters: esFilters.Filter[]) => ({
         ...state,
         filters,
       }),
     },
     {
-      time: (state: FiltersSyncState) => () => state.time,
-      refreshInterval: (state: FiltersSyncState) => () => state.refreshInterval,
-      filters: (state: FiltersSyncState) => () => state.filters,
+      time: (state: QuerySyncState) => () => state.time,
+      refreshInterval: (state: QuerySyncState) => () => state.refreshInterval,
+      filters: (state: QuerySyncState) => () => state.filters,
     }
   );
 
   const subs: Subscription[] = [
-    timeFilter.getTimeUpdate$().subscribe(() => {
-      filtersSyncStateContainer.transitions.setTime(timeFilter.getTime());
+    timefilter.getTimeUpdate$().subscribe(() => {
+      filtersSyncStateContainer.transitions.setTime(timefilter.getTime());
     }),
-    timeFilter.getRefreshIntervalUpdate$().subscribe(() => {
-      filtersSyncStateContainer.transitions.setRefreshInterval(timeFilter.getRefreshInterval());
+    timefilter.getRefreshIntervalUpdate$().subscribe(() => {
+      filtersSyncStateContainer.transitions.setRefreshInterval(timefilter.getRefreshInterval());
     }),
     filterManager
       .getUpdates$()
       .pipe(
-        map(() => filterManager.getGlobalFilters()),
+        map(() => filterManager.getGlobalFilters()), // we need to track only global filters here
         filter(newGlobalFilters => {
           // continue only if global filters changed
           // and ignore app state filters
@@ -112,34 +110,36 @@ export const syncFilters = (
       }),
     filtersSyncStateContainer.state$.subscribe(
       ({ time, filters: globalFilters, refreshInterval }) => {
-        if (time && !_.isEqual(time, timeFilter.getTime())) {
-          timeFilter.setTime(_.cloneDeep(time));
+        // cloneDeep is required because services are mutating passed objects
+        // and state in state container is frozen
+
+        if (time && !_.isEqual(time, timefilter.getTime())) {
+          timefilter.setTime(_.cloneDeep(time));
         }
 
-        if (refreshInterval && !_.isEqual(refreshInterval, timeFilter.getRefreshInterval())) {
-          timeFilter.setRefreshInterval(_.cloneDeep(refreshInterval));
+        if (refreshInterval && !_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
+          timefilter.setRefreshInterval(_.cloneDeep(refreshInterval));
         }
 
         if (
           globalFilters &&
           !compareFilters(globalFilters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)
         ) {
-          globalFilters = _.cloneDeep(globalFilters);
-          FilterManager.setFiltersStore(globalFilters, esFilters.FilterStateStore.GLOBAL_STATE);
-          // have to make sure we don't accidentally remove application filters here
-          filterManager.setFilters([...globalFilters, ...filterManager.getAppFilters()]);
+          filterManager.setGlobalFilters(_.cloneDeep(globalFilters));
         }
       }
     ),
   ];
 
+  // if there weren't any initial state in url,
+  // then put _g key into url
   if (!initialStateFromUrl) {
-    urlStateStorage.set<FiltersSyncState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
+    urlStateStorage.set<QuerySyncState>(GLOBAL_STATE_STORAGE_KEY, initialState, {
       replace: true,
     });
   }
 
-  // trigger syncing from state container to services if needed
+  // trigger initial syncing from state container to services if needed
   filtersSyncStateContainer.set(initialState);
 
   const { start, stop } = syncState({
@@ -147,10 +147,10 @@ export const syncFilters = (
     stateContainer: {
       ...filtersSyncStateContainer,
       set: state => {
-        filtersSyncStateContainer.set({
-          ...filtersSyncStateContainer.get(),
-          ...state,
-        });
+        if (state) {
+          // syncState utils requires to handle incoming "null" value
+          filtersSyncStateContainer.set(state);
+        }
       },
     },
     storageKey: GLOBAL_STATE_STORAGE_KEY,
@@ -162,6 +162,6 @@ export const syncFilters = (
       subs.forEach(s => s.unsubscribe());
       stop();
     },
-    hasInheritedFiltersFromUrl,
+    hasInheritedQueryFromUrl,
   };
 };

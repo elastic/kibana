@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { syncFilters } from './sync_filters';
+export { syncQuery } from './sync_query';
+export { syncAppFilters } from './sync_app_filters';
