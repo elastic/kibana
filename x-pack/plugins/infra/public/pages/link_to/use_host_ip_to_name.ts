@@ -31,7 +31,7 @@ export const useHostIpToName = (ipAddress: string | null, indexPattern: string |
             }),
           });
           setLoadingState(false);
-          setData(response.data);
+          setData(response);
         }
       } catch (err) {
         setLoadingState(false);

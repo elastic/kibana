@@ -72,22 +72,22 @@ export function useMetricsExplorerData(
           }),
         });
 
-        if (response.data) {
+        if (response) {
           if (
             data &&
             lastOptions &&
-            data.pageInfo.afterKey !== response.data.pageInfo.afterKey &&
+            data.pageInfo.afterKey !== response.pageInfo.afterKey &&
             isSameOptions(lastOptions, options) &&
             isEqual(timerange, lastTimerange) &&
             afterKey
           ) {
             const { series } = data;
             setData({
-              ...response.data,
-              series: [...series, ...response.data.series],
+              ...response,
+              series: [...series, ...response.series],
             });
           } else {
-            setData(response.data);
+            setData(response);
           }
           setLastOptions(options);
           setLastTimerange(timerange);
