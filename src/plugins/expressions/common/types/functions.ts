@@ -23,18 +23,18 @@ import { ExpressionType } from '../expression_types/expression_type';
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext {
+export interface ExecutionContext<Input = unknown> {
   /**
    * Get initial input with which execution started.
    */
-  getInitialInput: () => unknown;
+  getInitialInput: () => Input;
 
   /**
    * Same as `getInitialInput`, use `getInitialInput` instead, `getInitialContext` is deprecated.
    *
    * @deprecated
    */
-  getInitialContext: () => unknown;
+  getInitialContext: () => Input;
 
   /**
    * Context variables that can be consumed using `var` and `var_set` functions.

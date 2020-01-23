@@ -22,31 +22,7 @@ export {
   KnownTypeToString,
   TypeString,
   UnmappedTypeStrings,
-  UnwrapPromise,
   SerializedFieldFormat,
 } from './common';
 
 export * from './style';
-
-export { ArgumentType } from './arguments';
-
-export {
-  ExpressionFunctionDefinition,
-  AnyExpressionFunctionDefinition,
-  ExecutionContext,
-} from './functions';
-
-export type ExpressionArgAST = string | boolean | number | ExpressionAST;
-
-export interface ExpressionFunctionAST {
-  type: 'function';
-  function: string;
-  arguments: {
-    [key: string]: ExpressionArgAST[];
-  };
-}
-
-export interface ExpressionAST {
-  type: 'expression';
-  chain: ExpressionFunctionAST[];
-}

@@ -25,7 +25,7 @@ export interface ExecutionState extends ExecutorState {
   ast: ExpressionAstExpression;
 }
 
-const defaultState: ExecutionState = {
+const executionDefaultState: ExecutionState = {
   ...executorDefaultState,
   ast: {
     type: 'expression',
@@ -36,16 +36,16 @@ const defaultState: ExecutionState = {
 // eslint-disable-next-line
 export interface ExecutionPureTransitions {}
 
-export const pureTransitions: ExecutionPureTransitions = {};
+export const executionPureTransitions: ExecutionPureTransitions = {};
 
 export type ExecutionContainer = StateContainer<ExecutionState, ExecutionPureTransitions>;
 
 export const createExecutionContainer = (
-  state: ExecutionState = defaultState
+  state: ExecutionState = executionDefaultState
 ): ExecutionContainer => {
   const container = createStateContainer<ExecutionState, ExecutionPureTransitions>(
     state,
-    pureTransitions
+    executionPureTransitions
   );
   return container;
 };

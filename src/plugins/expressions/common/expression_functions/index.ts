@@ -18,9 +18,6 @@
  */
 
 export * from './types';
-export * from './parser';
-export * from './expression_types';
-export * from './expression_functions';
-export * from './executor';
-export * from './execution';
-export * from './util';
+export * from './expression_function_parameter';
+export * from './expression_function';
+export * from './specs';
