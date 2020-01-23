@@ -25,6 +25,27 @@ describe('ExpressionFunctionParameter', () => {
       help: 'bar',
     });
 
-    // console.log(param);
+    expect(param.name).toBe('foo');
+  });
+
+  test('checks supported types', () => {
+    const param = new ExpressionFunctionParameter('foo', {
+      help: 'bar',
+      types: ['baz', 'quux'],
+    });
+
+    expect(param.accepts('baz')).toBe(true);
+    expect(param.accepts('quux')).toBe(true);
+    expect(param.accepts('quix')).toBe(false);
+  });
+
+  test('if no types are provided, then accepts any type', () => {
+    const param = new ExpressionFunctionParameter('foo', {
+      help: 'bar',
+    });
+
+    expect(param.accepts('baz')).toBe(true);
+    expect(param.accepts('quux')).toBe(true);
+    expect(param.accepts('quix')).toBe(true);
   });
 });
