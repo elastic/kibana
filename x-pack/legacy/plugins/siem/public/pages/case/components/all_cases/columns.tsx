@@ -4,32 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { EuiBadge, EuiTableFieldDataColumnType } from '@elastic/eui';
 import { getEmptyTagValue } from '../../../../components/empty_value';
-import { Columns } from '../../../../components/paginated_table';
 import { CaseSavedObject } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { CaseDetailsLink } from '../../../../components/links';
+import { TruncatableText } from '../../../../components/truncatable_text';
+import * as i18n from './translations';
 
-export type CasesColumns = [
-  Columns<CaseSavedObject['attributes']['title']>,
-  Columns<CaseSavedObject['id']>,
-  Columns<CaseSavedObject['attributes']['created_at']>,
-  Columns<CaseSavedObject['attributes']['created_by']['username']>,
-  Columns<CaseSavedObject['updated_at']>,
-  Columns<CaseSavedObject['attributes']['state']>
-];
+export type CasesColumns = EuiTableFieldDataColumnType<CaseSavedObject>;
 
 const renderStringField = (field: string) => (field != null ? field : getEmptyTagValue());
 
-export const getCasesColumns = (): CasesColumns => [
+export const getCasesColumns = (): CasesColumns[] => [
   {
     field: 'attributes.title',
-    name: 'Case Title',
+    name: i18n.CASE_TITLE,
     render: title => renderStringField(title),
   },
   {
     field: 'id',
-    name: 'Case Id',
+    name: i18n.CASE_ID,
     render: id => {
       if (id != null) {
         return <CaseDetailsLink detailName={id} />;
@@ -38,8 +33,27 @@ export const getCasesColumns = (): CasesColumns => [
     },
   },
   {
+    field: 'attributes.tags',
+    name: i18n.TAGS,
+    render: tags => {
+      if (tags != null && tags.length > 0) {
+        return (
+          <TruncatableText>
+            {tags.map((tag, i) => (
+              <EuiBadge color="hollow" key={`${tag}-${i}`}>
+                {tag}
+              </EuiBadge>
+            ))}
+          </TruncatableText>
+        );
+      }
+      return getEmptyTagValue();
+    },
+    truncateText: true,
+  },
+  {
     field: 'attributes.created_at',
-    name: 'Created at',
+    name: i18n.CREATED_AT,
     sortable: true,
     render: createdAt => {
       if (createdAt != null) {
@@ -50,12 +64,12 @@ export const getCasesColumns = (): CasesColumns => [
   },
   {
     field: 'attributes.created_by.username',
-    name: 'Created by',
+    name: i18n.CREATED_BY,
     render: createdBy => renderStringField(createdBy),
   },
   {
     field: 'updated_at',
-    name: 'Last updated',
+    name: i18n.LAST_UPDATED,
     sortable: true,
     render: updatedAt => {
       if (updatedAt != null) {
@@ -66,7 +80,7 @@ export const getCasesColumns = (): CasesColumns => [
   },
   {
     field: 'attributes.state',
-    name: 'State',
+    name: i18n.STATE,
     sortable: true,
     render: state => renderStringField(state),
   },

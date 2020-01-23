@@ -8,8 +8,8 @@ import React from 'react';
 
 import { Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { SiemPageName } from '../home/types';
-import { CasePage } from './case';
-import { CaseDetails } from './case_details';
+import { CasesPage } from './case';
+import { CaseDetailsPage } from './case_details';
 
 type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
@@ -19,7 +19,7 @@ const caseDetailsPagePath = `${casesPagePath}/:detailName`;
 const CaseContainerComponent: React.FC<Props> = () => {
   return (
     <Switch>
-      <Route strict exact path={casesPagePath} render={() => <CasePage />} />
+      <Route strict exact path={casesPagePath} render={() => <CasesPage />} />
       <Route
         strict
         path={caseDetailsPagePath}
@@ -27,11 +27,10 @@ const CaseContainerComponent: React.FC<Props> = () => {
           match: {
             params: { detailName },
           },
-        }) => <CaseDetails caseId={detailName} />}
+        }) => <CaseDetailsPage caseId={detailName} />}
       />
     </Switch>
   );
 };
 
 export const Case = React.memo(CaseContainerComponent);
-Case.displayName = 'Case';

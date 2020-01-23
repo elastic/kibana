@@ -17,7 +17,7 @@ import {
 } from './constants';
 import { CasesSavedObjects, Direction, SortFieldCase } from './types';
 
-interface TableArgs {
+interface PaginationArgs {
   page: number;
   perPage: number;
   sortField: SortFieldCase;
@@ -35,7 +35,7 @@ interface CasesState {
   data: CasesSavedObjects;
   isLoading: boolean;
   isError: boolean;
-  table: TableArgs;
+  pagination: PaginationArgs;
 }
 interface PayloadObj {
   [key: string]: unknown;
@@ -70,8 +70,8 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
     case UPDATE_TABLE:
       return {
         ...state,
-        table: {
-          ...state.table,
+        pagination: {
+          ...state.pagination,
           ...action.payload,
         },
       };
@@ -90,14 +90,14 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     isLoading: false,
     isError: false,
     data: initialData,
-    table: {
-      page: DEFAULT_TABLE_ACTIVE_PAGE + 1,
+    pagination: {
+      page: DEFAULT_TABLE_ACTIVE_PAGE,
       perPage: DEFAULT_TABLE_LIMIT,
       sortField: SortFieldCase.createdAt,
       sortOrder: Direction.desc,
     },
   });
-  const [query, setQuery] = useState(state.table as QueryArgs);
+  const [query, setQuery] = useState(state.pagination as QueryArgs);
 
   useEffect(() => {
     dispatch({ type: UPDATE_TABLE, payload: query });
@@ -108,7 +108,7 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const queryParams = Object.entries(state.table).reduce(
+        const queryParams = Object.entries(state.pagination).reduce(
           (acc, [key, value]) => `${acc}${key}=${value}&`,
           '?'
         );
@@ -139,6 +139,6 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     return () => {
       didCancel = true;
     };
-  }, [state.table]);
+  }, [state.pagination]);
   return [state, setQuery];
 };

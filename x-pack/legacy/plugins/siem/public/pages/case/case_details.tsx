@@ -6,52 +6,24 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import chrome from 'ui/chrome';
 
-import { useKibana } from '../../lib/kibana';
-import { EmptyPage } from '../../components/empty_page';
 import { WrapperPage } from '../../components/wrapper_page';
-import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
-import { CaseView } from './case_view';
-import * as i18n from './translations';
+import { CaseView } from './components/case_view';
 import { SpyRoute } from '../../utils/route/spy_routes';
-
-const basePath = chrome.getBasePath();
 
 interface Props {
   caseId: string;
 }
 
-export const CaseDetails = React.memo(({ caseId }: Props) => {
-  const docLinks = useKibana().services.docLinks;
-  return (
-    <>
-      <WithSource sourceId="default">
-        {({ indicesExist }) =>
-          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-            <WrapperPage>
-              <EuiFlexGroup>
-                <CaseView caseId={caseId} />
-              </EuiFlexGroup>
-            </WrapperPage>
-          ) : (
-            <EmptyPage
-              actionPrimaryIcon="gear"
-              actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-              actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
-              actionSecondaryIcon="popout"
-              actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
-              actionSecondaryTarget="_blank"
-              actionSecondaryUrl={docLinks.links.siem.gettingStarted}
-              data-test-subj="empty-page"
-              title={i18n.EMPTY_TITLE}
-            />
-          )
-        }
-      </WithSource>
-      <SpyRoute />
-    </>
-  );
-});
+export const CaseDetailsPage = React.memo(({ caseId }: Props) => (
+  <>
+    <WrapperPage>
+      <EuiFlexGroup>
+        <CaseView caseId={caseId} />
+      </EuiFlexGroup>
+    </WrapperPage>
+    <SpyRoute />
+  </>
+));
 
-CaseDetails.displayName = 'CaseDetails';
+CaseDetailsPage.displayName = 'CaseDetailsPage';
