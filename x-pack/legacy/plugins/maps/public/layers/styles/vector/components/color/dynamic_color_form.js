@@ -95,7 +95,7 @@ export function DynamicColorForm({
         <EuiFlexItem>
           <FieldSelect
             fields={fields}
-            selectedFieldName={styleProperty.getField() ? styleProperty.getField().getName() : ''}
+            selectedFieldName={styleProperty.getFieldName()}
             onChange={onFieldChange}
             compressed
           />
