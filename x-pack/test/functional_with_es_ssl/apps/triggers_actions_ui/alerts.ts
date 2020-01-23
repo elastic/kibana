@@ -168,7 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('deleteAlert');
 
-      retry.try(async () => {
+      await retry.try(async () => {
         await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
         const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
@@ -283,7 +283,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('deleteAll');
 
-      retry.try(async () => {
+      await retry.try(async () => {
         await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
         const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
