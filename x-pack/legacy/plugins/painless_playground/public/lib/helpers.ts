@@ -72,8 +72,8 @@ export function formatJson(json: unknown): string {
 }
 
 export function formatResponse(response: Response): string {
-  if (response.result) {
-    return response.result;
+  if (typeof response.result === 'string') {
+    return response.result.replace(/\\n/g, '\n');
   } else if (response.error) {
     return formatExecutionError(response.error);
   }
