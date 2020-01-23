@@ -10,7 +10,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
-import { setLicenseId } from './kibana_services';
+import { setLicenseId, setInspector } from './kibana_services';
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 
@@ -43,5 +43,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     inspector.registerView(MapView);
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    setInspector(plugins.np.inspector);
+  }
 }
