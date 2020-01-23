@@ -224,7 +224,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     mbStops.push(defaultColor); //last color is default color
-    console.log(mbStops);
     return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
   }
 

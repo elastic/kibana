@@ -130,3 +130,7 @@ export function getIconPalette(paletteId) {
   const palette = ICON_PALETTES.find(({ id }) => id === paletteId);
   return palette ? [...palette.icons] : null;
 }
+
+export function getSymbolId(icon, iconPixelSize) {
+  return `${icon}-${iconPixelSize}`;
+}

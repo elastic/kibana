@@ -5,9 +5,14 @@
  */
 
 import { StaticStyleProperty } from './static_style_property';
+import { getSymbolId } from '../symbol_utils';
 
 export class StaticIconProperty extends StaticStyleProperty {
   syncIconWithMb(symbolLayerId, mbMap, iconPixelSize) {
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${this._options.value}-${iconPixelSize}`);
+    mbMap.setLayoutProperty(
+      symbolLayerId,
+      'icon-image',
+      getSymbolId(this._options.value, iconPixelSize)
+    );
   }
 }

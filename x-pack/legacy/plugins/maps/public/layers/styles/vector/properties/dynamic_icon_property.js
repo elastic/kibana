@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { getIconPalette } from '../symbol_utils';
+import { getIconPalette, getSymbolId } from '../symbol_utils';
 import { assignCategoriesToPalette } from '../style_util';
 
 export class DynamicIconProperty extends DynamicStyleProperty {
@@ -20,7 +20,6 @@ export class DynamicIconProperty extends DynamicStyleProperty {
 
   syncIconWithMb(symbolLayerId, mbMap, iconPixelSize) {
     if (this._isIconDynamicConfigComplete()) {
-      console.log(this._getMbIconExpression(iconPixelSize));
       mbMap.setLayoutProperty(
         symbolLayerId,
         'icon-image',
@@ -66,9 +65,9 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(`${style}-${iconPixelSize}`);
+      mbStops.push(getSymbolId(style, iconPixelSize));
     });
-    mbStops.push(fallback); //last item is fallback style for anything that does not match provided stops
+    mbStops.push(getSymbolId(fallback, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
     return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
   }
 
