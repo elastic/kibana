@@ -89,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         // Verify url
-        expect(await browser.getCurrentUrl()).to.contain(`/alerts/${alert.id}`);
+        expect(await browser.getCurrentUrl()).to.contain(`/alert/${alert.id}`);
 
         await alerting.alerts.deleteAlert(alert.id);
       });
