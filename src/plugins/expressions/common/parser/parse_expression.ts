@@ -17,33 +17,20 @@
  * under the License.
  */
 
-import { ExpressionAstExpression, ExpressionAst } from './types';
+import { ExpressionAstExpression } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { parse: parseRaw } = require('@kbn/interpreter/common');
 
 /**
- * Parses a string to a specific expression AST node.
+ * Given expression pipeline string, returns parsed AST.
  *
- * @param str String to parse.
- * @param startRule Name of expression AST node to use to start parsing.
+ * @param expression Expression pipeline string.
  */
-export function parse(
-  str: string,
-  startRule: 'expression' | 'function' | 'argument' = 'expression'
-): ExpressionAst {
+export function parseExpression(expression: string): ExpressionAstExpression {
   try {
-    return parseRaw(String(str), { startRule });
+    return parseRaw(String(expression), { startRule: 'expression' });
   } catch (e) {
     throw new Error(`Unable to parse expression: ${e.message}`);
   }
-}
-
-/**
- * Given expression pipeline string, returns parsed AST.
- *
- * @param str Expression pipeline string.
- */
-export function parseExpression(str: string): ExpressionAstExpression {
-  return parse(str, 'expression') as ExpressionAstExpression;
 }

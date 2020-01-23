@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export type ExpressionAst = ExpressionAstExpression | ExpressionAstFunction | ExpressionAstArgument;
+export type ExpressionAstNode =
+  | ExpressionAstExpression
+  | ExpressionAstFunction
+  | ExpressionAstArgument;
 
 export interface ExpressionAstExpression {
   type: 'expression';
