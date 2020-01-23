@@ -11,6 +11,6 @@ import { AlertDetails } from './alert_details';
 describe('alert_details', () => {
   it('renders the alert ID', () => {
     const alertId = uuid.v4();
-    expect(shallow(<AlertDetails alertId={} />).contains(<div>{alertId}</div>)).to.equal(true);
+    expect(shallow(<AlertDetails alertId={alertId} />).contains(<div>{alertId}</div>)).toBeTruthy();
   });
 });
