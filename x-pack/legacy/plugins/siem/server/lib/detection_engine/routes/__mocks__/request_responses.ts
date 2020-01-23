@@ -6,7 +6,7 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ActionResult } from '../../../../../../actions/server/types';
+import { ActionResult } from '../../../../../../../../plugins/actions/server';
 import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -15,11 +15,12 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   INTERNAL_RULE_ID_KEY,
   INTERNAL_IMMUTABLE_KEY,
+  DETECTION_ENGINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
-import { RuleAlertParamsRest } from '../../types';
+import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
 
-export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
+export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -50,8 +51,6 @@ export const fullRuleAlertParamsRest = (): RuleAlertParamsRest => ({
   false_positives: [],
   saved_id: 'some-id',
   max_signals: 100,
-  created_at: '2019-12-13T16:40:33.400Z',
-  updated_at: '2019-12-13T16:40:33.400Z',
   timeline_id: 'timeline-id',
   timeline_title: 'timeline-title',
 });
@@ -157,7 +156,17 @@ export const getDeleteAsPostBulkRequest = (): ServerInjectOptions => ({
 
 export const getPrivilegeRequest = (): ServerInjectOptions => ({
   method: 'GET',
-  url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
+  url: DETECTION_ENGINE_PRIVILEGES_URL,
+});
+
+export const addPrepackagedRulesRequest = (): ServerInjectOptions => ({
+  method: 'PUT',
+  url: DETECTION_ENGINE_PREPACKAGED_URL,
+});
+
+export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
+  method: 'GET',
+  url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
 });
 
 export interface FindHit {
@@ -362,7 +371,7 @@ export const getMockPrivileges = () => ({
     create_snapshot: true,
   },
   index: {
-    '.siem-signals-frank-hassanabad-test-space': {
+    '.siem-signals-test-space': {
       all: false,
       manage_ilm: true,
       read: false,
@@ -382,7 +391,7 @@ export const getMockPrivileges = () => ({
     },
   },
   application: {},
-  isAuthenticated: false,
+  is_authenticated: false,
 });
 
 export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({

@@ -9,25 +9,31 @@ import {
   FIELDS_BROWSER_CONTAINER,
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_TITLE,
-} from '../../lib/fields_browser/selectors';
+  FIELDS_BROWSER_CHECKBOX,
+} from '../../../screens/hosts/fields_browser';
 import { HOSTS_PAGE } from '../../lib/urls';
-import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../lib/util/helpers';
+import { loginAndWaitForPage } from '../../../tasks/login';
+import { openEventsViewerFieldsBrowser, filterSearchBar } from '../../lib/events_viewer/helpers';
+import { closeFieldsBrowser } from '../../../tasks/hosts/fields_browsers';
+import { openEvents } from '../../../tasks/hosts/main';
 import {
-  clickOutsideFieldsBrowser,
-  openEventsViewerFieldsBrowser,
-  filterSearchBar,
-} from '../../lib/events_viewer/helpers';
+  closeModal,
+  opensInspectQueryModal,
+  waitsForEventsToBeLoaded,
+  addsHostGeoCityNameToHeader,
+  addsHostGeoCountryNameToHeader,
+  resetFields,
+} from '../../../tasks/hosts/events';
+
 import {
-  CLOSE_MODAL,
-  EVENTS_VIEWER_PANEL,
   HEADER_SUBTITLE,
   INSPECT_MODAL,
-  INSPECT_QUERY,
   LOAD_MORE,
   LOCAL_EVENTS_COUNT,
-} from '../../lib/events_viewer/selectors';
-import { SERVER_SIDE_EVENT_COUNT } from '../../lib/timeline/selectors';
-import { clickEventsTab } from '../../lib/hosts/helpers';
+  HOST_GEO_CITY_NAME_HEADER,
+  HOST_GEO_COUNTRY_NAME_HEADER,
+} from '../../../screens/hosts/events';
+import { DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -43,7 +49,7 @@ describe('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
-      clickEventsTab();
+      openEvents();
     });
 
     beforeEach(() => {
@@ -51,7 +57,7 @@ describe('Events Viewer', () => {
     });
 
     afterEach(() => {
-      clickOutsideFieldsBrowser();
+      closeFieldsBrowser();
       cy.get(FIELDS_BROWSER_CONTAINER).should('not.exist');
     });
 
@@ -69,7 +75,7 @@ describe('Events Viewer', () => {
 
     it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
       defaultHeadersInDefaultEcsCategory.forEach(header =>
-        cy.get(`[data-test-subj="field-${header.id}-checkbox"]`).should('be.checked')
+        cy.get(FIELDS_BROWSER_CHECKBOX(header.id)).should('be.checked')
       );
     });
   });
@@ -77,26 +83,17 @@ describe('Events Viewer', () => {
   context('Events viewer query modal', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
-      clickEventsTab();
+      openEvents();
     });
 
     after(() => {
-      cy.get(CLOSE_MODAL).click();
+      closeModal();
       cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('not.exist');
     });
 
     it('launches the inspect query modal when the inspect button is clicked', () => {
-      // wait for data to load
-      cy.get(SERVER_SIDE_EVENT_COUNT, { timeout: DEFAULT_TIMEOUT })
-        .should('exist')
-        .invoke('text', { timeout: DEFAULT_TIMEOUT })
-        .should('not.equal', '0');
-
-      cy.get(INSPECT_QUERY, { timeout: DEFAULT_TIMEOUT })
-        .should('exist')
-        .trigger('mousemove', { force: true })
-        .click({ force: true });
-
+      waitsForEventsToBeLoaded();
+      opensInspectQueryModal();
       cy.get(INSPECT_MODAL, { timeout: DEFAULT_TIMEOUT }).should('exist');
     });
   });
@@ -104,7 +101,7 @@ describe('Events Viewer', () => {
   context('Events viewer fields behaviour', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
-      clickEventsTab();
+      openEvents();
     });
 
     beforeEach(() => {
@@ -113,89 +110,55 @@ describe('Events Viewer', () => {
 
     it('adds a field to the events viewer when the user clicks the checkbox', () => {
       const filterInput = 'host.geo.c';
-      const toggleField = 'host.geo.city_name';
 
       filterFieldsBrowser(filterInput);
-
-      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="header-text-${toggleField}"]`).should(
-        'not.exist'
-      );
-
-      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="field-${toggleField}-checkbox"]`).check({
-        force: true,
-      });
-
-      clickOutsideFieldsBrowser();
-
-      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="header-text-${toggleField}"]`).should(
-        'exist'
-      );
+      cy.get(HOST_GEO_CITY_NAME_HEADER).should('not.exist');
+      addsHostGeoCityNameToHeader();
+      closeFieldsBrowser();
+      cy.get(HOST_GEO_CITY_NAME_HEADER).should('exist');
     });
 
     it('resets all fields in the events viewer when `Reset Fields` is clicked', () => {
       const filterInput = 'host.geo.c';
-      const toggleField = 'host.geo.country_name';
 
       filterFieldsBrowser(filterInput);
-
-      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="header-text-${toggleField}"]`).should(
-        'not.exist'
-      );
-
-      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="field-${toggleField}-checkbox"]`).check({
-        force: true,
-      });
-
-      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="reset-fields"]`).click({ force: true });
-
-      cy.get(`${EVENTS_VIEWER_PANEL} [data-test-subj="header-text-${toggleField}"]`).should(
-        'not.exist'
-      );
+      cy.get(HOST_GEO_COUNTRY_NAME_HEADER).should('not.exist');
+      addsHostGeoCountryNameToHeader();
+      resetFields();
+      cy.get(HOST_GEO_COUNTRY_NAME_HEADER).should('not.exist');
     });
   });
 
   context('Events behaviour', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
-      clickEventsTab();
+      openEvents();
     });
 
     it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
       const filterInput = '4bf34c1c-eaa9-46de-8921-67a4ccc49829'; // this will never match real data
-
+      waitsForEventsToBeLoaded();
       cy.get(HEADER_SUBTITLE)
         .invoke('text')
-        .then(text1 => {
-          cy.get(HEADER_SUBTITLE)
-            .invoke('text', { timeout: DEFAULT_TIMEOUT })
-            .should('not.equal', 'Showing: 0 events');
-
+        .then(initialNumberOfEvents => {
           filterSearchBar(filterInput);
-
           cy.get(HEADER_SUBTITLE)
             .invoke('text')
-            .should(text2 => {
-              expect(text1).not.to.eq(text2);
-            });
+            .should('not.equal', initialNumberOfEvents);
         });
     });
 
     it('loads more events when the load more button is clicked', () => {
-      cy.get(LOCAL_EVENTS_COUNT, { timeout: DEFAULT_TIMEOUT })
+      const defaultNumberOfLoadedEvents = '25';
+      cy.get(LOCAL_EVENTS_COUNT)
         .invoke('text')
-        .then(text1 => {
-          cy.get(LOCAL_EVENTS_COUNT)
-            .invoke('text')
-            .should('equal', '25');
+        .should('equal', defaultNumberOfLoadedEvents);
 
-          cy.get(LOAD_MORE).click({ force: true });
+      cy.get(LOAD_MORE).click({ force: true });
 
-          cy.get(LOCAL_EVENTS_COUNT)
-            .invoke('text')
-            .should(text2 => {
-              expect(text1).not.to.eq(text2);
-            });
-        });
+      cy.get(LOCAL_EVENTS_COUNT)
+        .invoke('text')
+        .should('not.equal', defaultNumberOfLoadedEvents);
     });
   });
 });

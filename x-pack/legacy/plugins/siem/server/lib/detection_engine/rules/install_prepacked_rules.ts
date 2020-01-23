@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionsClient } from '../../../../../actions';
+import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { AlertsClient } from '../../../../../alerting';
 import { createRules } from './create_rules';
-import { RuleAlertParamsRest } from '../types';
+import { PrepackagedRules } from '../types';
 
 export const installPrepackagedRules = async (
   alertsClient: AlertsClient,
   actionsClient: ActionsClient,
-  rules: RuleAlertParamsRest[],
+  rules: PrepackagedRules[],
   outputIndex: string
 ): Promise<void> => {
   await rules.forEach(async rule => {

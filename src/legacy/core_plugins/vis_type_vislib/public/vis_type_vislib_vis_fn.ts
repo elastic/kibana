@@ -56,7 +56,7 @@ export const createKbnVislibVisTypesFn = () => (): ExpressionFunction<
   context: {
     types: ['kibana_datatable'],
   },
-  help: i18n.translate('kbnVislibVisTypes.functions.vislib.help', {
+  help: i18n.translate('visTypeVislib.functions.vislib.help', {
     defaultMessage: 'Vislib visualization',
   }),
   args: {

@@ -68,6 +68,21 @@ const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 
+const showingDocs = i18n.translate(
+  'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
+  {
+    defaultMessage: 'Showing documents for which predictions exist',
+  }
+);
+
+const showingFirstDocs = i18n.translate(
+  'xpack.ml.dataframe.analytics.regressionExploration.firstDocumentsShownHelpText',
+  {
+    defaultMessage: 'Showing first {searchSize} documents for which predictions exist',
+    values: { searchSize: SEARCH_SIZE },
+  }
+);
+
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
@@ -468,19 +483,12 @@ export const ResultsTable: FC<Props> = React.memo(
         )}
         {(columns.length > 0 || searchQuery !== defaultSearchQuery) && (
           <Fragment>
-            {tableItems.length === SEARCH_SIZE && (
-              <EuiFormRow
-                helpText={i18n.translate(
-                  'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
-                  {
-                    defaultMessage: 'Showing first {searchSize} documents',
-                    values: { searchSize: SEARCH_SIZE },
-                  }
-                )}
-              >
-                <Fragment />
-              </EuiFormRow>
-            )}
+            <EuiFormRow
+              helpText={tableItems.length === SEARCH_SIZE ? showingFirstDocs : showingDocs}
+            >
+              <Fragment />
+            </EuiFormRow>
+
             <EuiSpacer />
             <MlInMemoryTableBasic
               allowNeutralSort={false}

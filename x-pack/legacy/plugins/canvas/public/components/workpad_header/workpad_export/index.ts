@@ -62,12 +62,8 @@ export const WorkpadExport = compose<ComponentProps, {}>(
       enabled,
       getExportUrl: type => {
         if (type === 'pdf') {
-          const { createPdfUri } = getPdfUrl(
-            workpad,
-            { pageCount },
-            kibana.services.http.basePath.prepend
-          );
-          return getAbsoluteUrl(createPdfUri);
+          const pdfUrl = getPdfUrl(workpad, { pageCount }, kibana.services.http.basePath.prepend);
+          return getAbsoluteUrl(pdfUrl);
         }
 
         throw new Error(strings.getUnknownExportErrorMessage(type));

@@ -54,7 +54,7 @@ export const createPieVisFn = () => (): ExpressionFunction<
   context: {
     types: ['kibana_datatable'],
   },
-  help: i18n.translate('kbnVislibVisTypes.functions.pie.help', {
+  help: i18n.translate('visTypeVislib.functions.pie.help', {
     defaultMessage: 'Pie visualization',
   }),
   args: {

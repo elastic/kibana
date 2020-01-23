@@ -57,9 +57,9 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     groupName="metrics"
     indexPattern={Object {}}
     metricAggs={Array []}
-    onAggParamsChange={[MockFunction]}
     onAggTypeChange={[Function]}
-    setTouched={[MockFunction]}
+    setAggParamValue={[MockFunction]}
+    setTouched={[Function]}
     setValidity={[Function]}
     state={Object {}}
   />

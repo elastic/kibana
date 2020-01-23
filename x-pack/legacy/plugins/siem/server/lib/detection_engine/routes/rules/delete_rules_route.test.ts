@@ -13,7 +13,6 @@ import {
 
 import { deleteRulesRoute } from './delete_rules_route';
 import { ServerInjectOptions } from 'hapi';
-import { ServerFacade } from '../../../../types';
 
 import {
   getFindResult,
@@ -30,7 +29,7 @@ describe('delete_rules', () => {
 
   beforeEach(() => {
     ({ server, alertsClient, savedObjectsClient } = createMockServer());
-    deleteRulesRoute((server as unknown) as ServerFacade);
+    deleteRulesRoute(server);
   });
 
   afterEach(() => {
@@ -70,14 +69,14 @@ describe('delete_rules', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteRulesRoute((serverWithoutActionClient as unknown) as ServerFacade);
+      deleteRulesRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      deleteRulesRoute((serverWithoutAlertClient as unknown) as ServerFacade);
+      deleteRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
@@ -86,7 +85,7 @@ describe('delete_rules', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteRulesRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
+      deleteRulesRoute(serverWithoutActionOrAlertClient);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });

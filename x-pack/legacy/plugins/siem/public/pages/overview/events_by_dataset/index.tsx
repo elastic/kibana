@@ -6,7 +6,7 @@
 
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { esFilters, IIndexPattern, Query } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
@@ -66,8 +66,17 @@ export const EventsByDataset = React.memo<Props>(
     setQuery,
     to,
   }) => {
+    useEffect(() => {
+      return () => {
+        if (deleteQuery) {
+          deleteQuery({ id: ID });
+        }
+      };
+    }, []);
+
     const kibana = useKibana();
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+
     const updateDateRangeCallback = useCallback(
       (min: number, max: number) => {
         setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
@@ -96,7 +105,6 @@ export const EventsByDataset = React.memo<Props>(
     return (
       <MatrixHistogramContainer
         dataKey="EventsHistogram"
-        deleteQuery={deleteQuery}
         defaultStackByOption={eventsStackByOptions[1]}
         endDate={to}
         errorMessage={ERROR_FETCHING_EVENTS_DATA}
