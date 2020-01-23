@@ -60,7 +60,7 @@ export const TokenCountType = ({ field }: Props) => {
           <AnalyzerParameter
             path="analyzer"
             config={{ ...getFieldConfig('analyzer'), defaultValue: STANDARD }} // If "field.source.analyzer" is undefined, defaults to "standard" analyzer
-            defaultValue={field.source.analyzer}
+            defaultValue={field.source.analyzer as string}
             allowsIndexDefaultOption={false}
           />
         </EditFieldFormRow>
