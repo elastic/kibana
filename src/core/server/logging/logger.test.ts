@@ -410,3 +410,21 @@ test('passes log record to appenders only if log level is supported.', () => {
     });
   }
 });
+
+test('passes log record to appender with receiveAllLevels: true, regardless if log level is supported', () => {
+  const receiveAllAppender = { append: jest.fn(), receiveAllLevels: true };
+  const warnLogger = new BaseLogger(context, LogLevel.Warn, [receiveAllAppender], factory);
+
+  warnLogger.trace('trace-message');
+  expect(receiveAllAppender.append).toHaveBeenCalledTimes(1);
+  warnLogger.debug('debug-message');
+  expect(receiveAllAppender.append).toHaveBeenCalledTimes(2);
+  warnLogger.info('info-message');
+  expect(receiveAllAppender.append).toHaveBeenCalledTimes(3);
+  warnLogger.warn('warn-message');
+  expect(receiveAllAppender.append).toHaveBeenCalledTimes(4);
+  warnLogger.error('error-message');
+  expect(receiveAllAppender.append).toHaveBeenCalledTimes(5);
+  warnLogger.fatal('fatal-message');
+  expect(receiveAllAppender.append).toHaveBeenCalledTimes(6);
+});
