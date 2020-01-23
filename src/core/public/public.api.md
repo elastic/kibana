@@ -531,6 +531,7 @@ export interface DocLinksStart {
         readonly date: {
             readonly dateMath: string;
         };
+        readonly management: Record<string, string>;
     };
 }
 
@@ -728,6 +729,15 @@ export interface IHttpResponse<TResponseBody = any> {
 export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
     readonly body?: TResponseBody;
     readonly response?: Readonly<Response>;
+}
+
+// @public (undocumented)
+export interface ImageValidation {
+    // (undocumented)
+    maxSize: {
+        length: number;
+        description: string;
+    };
 }
 
 // @public
@@ -1166,6 +1176,25 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
     _version?: SavedObject<T>['version'];
 }
 
+// @public
+export type StringValidation = StringValidationRegex | StringValidationRegexString;
+
+// @public
+export interface StringValidationRegex {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    regex: RegExp;
+}
+
+// @public
+export interface StringValidationRegexString {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    regexString: string;
+}
+
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1207,6 +1236,23 @@ export type ToastsSetup = IToasts;
 // @public (undocumented)
 export type ToastsStart = IToasts;
 
+// @public
+export interface UiSettingsParams {
+    category?: string[];
+    // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
+    deprecation?: DeprecationSettings;
+    description?: string;
+    name?: string;
+    optionLabels?: Record<string, string>;
+    options?: string[];
+    readonly?: boolean;
+    requiresPageReload?: boolean;
+    type?: UiSettingsType;
+    // (undocumented)
+    validation?: ImageValidation | StringValidation;
+    value?: SavedObjectAttribute;
+}
+
 // @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)
@@ -1214,7 +1260,18 @@ export interface UiSettingsState {
 }
 
 // @public
+export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
+
+// @public
 export type UnmountCallback = () => void;
+
+// @public
+export interface UserProvidedValues<T = any> {
+    // (undocumented)
+    isOverridden?: boolean;
+    // (undocumented)
+    userValue?: T;
+}
 
 
 ```
