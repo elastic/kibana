@@ -953,7 +953,9 @@ export class TimeSeriesExplorer extends React.Component {
         this.setState({ showForecast: true });
         // Not best practice but we need the previous value for another comparison
         // once all the data was loaded.
-        this.previousSelectedForecastId = previousProps.selectedForecastId;
+        if (previousProps !== undefined) {
+          this.previousSelectedForecastId = previousProps.selectedForecastId;
+        }
       }
     }
 
