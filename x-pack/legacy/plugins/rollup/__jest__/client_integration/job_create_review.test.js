@@ -125,8 +125,8 @@ describe('Create Rollup Job, step 6: Review', () => {
   });
 
   describe('save()', () => {
-    const jobCreateApiPath = '/create';
-    const jobStartApiPath = '/start';
+    const jobCreateApiPath = '/api/rollup/create';
+    const jobStartApiPath = '/api/rollup/start';
 
     describe('without starting job after creation', () => {
       it('should call the "create" Api server endpoint', async () => {

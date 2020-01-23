@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  createJob,
-  deleteJobs,
-  loadJobs,
-  startJobs,
-  stopJobs,
-  validateIndexPattern,
-  setApiPrefix,
-} from './api';
+export { createJob, deleteJobs, loadJobs, startJobs, stopJobs, validateIndexPattern } from './api';
 
 export { showApiError, showApiWarning } from './api_errors';
 

@@ -16,24 +16,16 @@ import {
 import { getHttp } from './http_provider';
 import { trackUserRequest } from './track_ui_metric';
 
-let apiPrefix = '';
-
-export async function setApiPrefix(url) {
-  apiPrefix = url;
-}
-
-export function getApiPrefix() {
-  return apiPrefix;
-}
+const apiPrefix = '/api/rollup';
 
 export async function loadJobs() {
-  const { jobs } = await getHttp().get(`${getApiPrefix()}/jobs`);
+  const { jobs } = await getHttp().get(`${apiPrefix}/jobs`);
   return jobs;
 }
 
 export async function startJobs(jobIds) {
   const body = { jobIds };
-  const request = getHttp().post(`${getApiPrefix()}/start`, {
+  const request = getHttp().post(`${apiPrefix}/start`, {
     body: JSON.stringify(body),
   });
   const actionType = jobIds.length > 1 ? UIM_JOB_START_MANY : UIM_JOB_START;
@@ -42,7 +34,7 @@ export async function startJobs(jobIds) {
 
 export async function stopJobs(jobIds) {
   const body = { jobIds };
-  const request = getHttp().post(`${getApiPrefix()}/stop`, {
+  const request = getHttp().post(`${apiPrefix}/stop`, {
     body: JSON.stringify(body),
   });
   const actionType = jobIds.length > 1 ? UIM_JOB_STOP_MANY : UIM_JOB_STOP;
@@ -51,7 +43,7 @@ export async function stopJobs(jobIds) {
 
 export async function deleteJobs(jobIds) {
   const body = { jobIds };
-  const request = getHttp().post(`${getApiPrefix()}/delete`, {
+  const request = getHttp().post(`${apiPrefix}/delete`, {
     body: JSON.stringify(body),
   });
   const actionType = jobIds.length > 1 ? UIM_JOB_DELETE_MANY : UIM_JOB_DELETE;
@@ -60,12 +52,12 @@ export async function deleteJobs(jobIds) {
 
 export async function createJob(job) {
   const body = { job };
-  const request = getHttp().put(`${getApiPrefix()}/create`, {
+  const request = getHttp().put(`${apiPrefix}/create`, {
     body: JSON.stringify(body),
   });
   return await trackUserRequest(request, UIM_JOB_CREATE);
 }
 
 export async function validateIndexPattern(indexPattern) {
-  return await getHttp().get(`${getApiPrefix()}/index_pattern_validity/${indexPattern}`);
+  return await getHttp().get(`${apiPrefix}/index_pattern_validity/${indexPattern}`);
 }

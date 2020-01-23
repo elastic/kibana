@@ -19,11 +19,11 @@ const mockHttpRequest = (
   }: RequestMocks | { [key: string]: any } = {}
 ) => {
   http.get.mockImplementation(async (url: string) => {
-    if (url === '/jobs') {
+    if (url === '/api/rollup/jobs') {
       return jobs;
     }
 
-    if (url.startsWith('/index_pattern_validity')) {
+    if (url.startsWith('/api/rollup/index_pattern_validity')) {
       return {
         doesMatchIndices: true,
         doesMatchRollupIndices: false,
