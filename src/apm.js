@@ -20,6 +20,7 @@
 const { join } = require('path');
 const { readFileSync } = require('fs');
 const { execSync } = require('child_process');
+const merge = require('lodash.merge');
 const { name, version, build } = require('../package.json');
 
 const ROOT_DIR = join(__dirname, '..');
@@ -44,8 +45,7 @@ function devConfig() {
   }
 }
 
-// eslint-disable-next-line prefer-object-spread/prefer-object-spread
-const apmConfig = Object.assign(
+const apmConfig = merge(
   {
     active: false,
     serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
