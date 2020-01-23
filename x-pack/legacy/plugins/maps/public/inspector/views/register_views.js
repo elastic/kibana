@@ -6,6 +6,6 @@
 
 import { MapView } from './map_view';
 
-import { viewRegistry } from 'ui/inspector';
+import { viewRegistry } from '../../../../../../../src/plugins/inspector/public';
 
 viewRegistry.register(MapView);

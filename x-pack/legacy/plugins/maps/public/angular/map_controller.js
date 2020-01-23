@@ -43,7 +43,7 @@ import {
   getLayerListRaw,
 } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { Inspector } from 'ui/inspector';
+import { Inspector } from '../../../../../../src/plugins/inspector/public';
 import { docTitle } from 'ui/doc_title';
 import { indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
