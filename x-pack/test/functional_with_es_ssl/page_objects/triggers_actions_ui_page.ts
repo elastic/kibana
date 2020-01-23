@@ -90,6 +90,9 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
           };
         });
     },
+    async clickOnAlertInAlertsList(name: string) {
+      await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
+    },
     async changeTabs(tab: 'alertsTab' | 'connectorsTab') {
       return await testSubjects.click(tab);
     },

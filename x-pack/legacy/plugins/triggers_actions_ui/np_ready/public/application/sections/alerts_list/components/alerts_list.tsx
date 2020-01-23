@@ -15,8 +15,10 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 
+import { Link } from 'react-router-dom';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
@@ -155,6 +157,15 @@ export const AlertsList: React.FunctionComponent = () => {
       sortable: false,
       truncateText: true,
       'data-test-subj': 'alertsTableCell-name',
+      render: (name: string, alert: AlertTableItem) => {
+        return (
+          <EuiLink>
+            <Link title={name} to={location => `${location.pathname}/${alert.id}`}>
+              {name}
+            </Link>
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'tagsText',
