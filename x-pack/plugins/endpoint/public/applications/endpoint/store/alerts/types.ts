@@ -6,8 +6,6 @@
 
 import { AlertData } from '../../../../../endpoint_app_types';
 
-export interface AlertListData {
+export interface AlertListState {
   alerts: AlertData[];
 }
-
-export type AlertListState = AlertListData;

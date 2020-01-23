@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Reducer } from 'react';
+import { Reducer } from 'redux';
 import { AlertListState } from './types';
 import { AppAction } from '../action';
 

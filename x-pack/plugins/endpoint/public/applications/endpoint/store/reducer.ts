@@ -9,12 +9,11 @@ import { AppAction } from './action';
 import { AlertListState, alertListReducer } from './alerts';
 
 export interface GlobalState {
-  endpointList: EndpointListState;
-  alertList: AlertListState;
+  readonly endpointList: EndpointListState;
+  readonly alertList: AlertListState;
 }
 
 export const appReducer: Reducer<GlobalState, AppAction> = combineReducers({
-  // TODO FIX THIS
   endpointList: endpointListReducer,
   alertList: alertListReducer,
 });
