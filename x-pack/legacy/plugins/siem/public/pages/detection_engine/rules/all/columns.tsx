@@ -31,6 +31,7 @@ import { RuleSwitch } from '../components/rule_switch';
 import { SeverityBadge } from '../components/severity_badge';
 import { ActionToaster } from '../../../../components/toasters';
 import { getStatusColor } from '../components/rule_status/helpers';
+import { TruncatableText } from '../../../../components/truncatable_text';
 
 const getActions = (
   dispatch: React.Dispatch<Action>,
@@ -88,8 +89,8 @@ export const getColumns = (
       width: '24%',
     },
     {
-      field: 'method',
-      name: i18n.COLUMN_METHOD,
+      field: 'risk_score',
+      name: i18n.COLUMN_RISK_SCORE,
       truncateText: true,
       width: '14%',
     },
@@ -133,13 +134,13 @@ export const getColumns = (
       field: 'tags',
       name: i18n.COLUMN_TAGS,
       render: (value: TableData['tags']) => (
-        <>
+        <TruncatableText>
           {value.map((tag, i) => (
             <EuiBadge color="hollow" key={`${tag}-${i}`}>
               {tag}
             </EuiBadge>
           ))}
-        </>
+        </TruncatableText>
       ),
       truncateText: true,
       width: '20%',
