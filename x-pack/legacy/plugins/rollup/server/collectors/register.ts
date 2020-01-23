@@ -5,25 +5,31 @@
  */
 
 import { get } from 'lodash';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
+interface IdToFlagMap {
+  [key: string]: boolean;
+}
 
 const ROLLUP_USAGE_TYPE = 'rollups';
 
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;
 
-function getIdFromSavedObjectId(savedObjectId) {
+function getIdFromSavedObjectId(savedObjectId: string) {
   // The saved object ID is formatted `{TYPE}:{ID}`.
   return savedObjectId.split(':')[1];
 }
 
-function createIdToFlagMap(ids) {
+function createIdToFlagMap(ids: string[]) {
   return ids.reduce((map, id) => {
     map[id] = true;
     return map;
-  }, {});
+  }, {} as any);
 }
 
-async function fetchRollupIndexPatterns(kibanaIndex, callCluster) {
+async function fetchRollupIndexPatterns(kibanaIndex: string, callCluster: CallCluster) {
   const searchParams = {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
@@ -50,7 +56,11 @@ async function fetchRollupIndexPatterns(kibanaIndex, callCluster) {
   });
 }
 
-async function fetchRollupSavedSearches(kibanaIndex, callCluster, rollupIndexPatternToFlagMap) {
+async function fetchRollupSavedSearches(
+  kibanaIndex: string,
+  callCluster: CallCluster,
+  rollupIndexPatternToFlagMap: IdToFlagMap
+) {
   const searchParams = {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
@@ -86,19 +96,19 @@ async function fetchRollupSavedSearches(kibanaIndex, callCluster, rollupIndexPat
     const searchSource = JSON.parse(searchSourceJSON);
 
     if (rollupIndexPatternToFlagMap[searchSource.index]) {
-      const id = getIdFromSavedObjectId(savedObjectId);
+      const id = getIdFromSavedObjectId(savedObjectId) as string;
       rollupSavedSearches.push(id);
     }
 
     return rollupSavedSearches;
-  }, []);
+  }, [] as string[]);
 }
 
 async function fetchRollupVisualizations(
-  kibanaIndex,
-  callCluster,
-  rollupIndexPatternToFlagMap,
-  rollupSavedSearchesToFlagMap
+  kibanaIndex: string,
+  callCluster: CallCluster,
+  rollupIndexPatternToFlagMap: IdToFlagMap,
+  rollupSavedSearchesToFlagMap: IdToFlagMap
 ) {
   const searchParams = {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
@@ -135,7 +145,7 @@ async function fetchRollupVisualizations(
           savedSearchRefName,
           kibanaSavedObjectMeta: { searchSourceJSON },
         },
-        references = [],
+        references = [] as any[],
       },
     } = visualization;
 
@@ -164,13 +174,14 @@ async function fetchRollupVisualizations(
   };
 }
 
-export function registerRollupUsageCollector(usageCollection, server) {
-  const kibanaIndex = server.config().get('kibana.index');
-
+export function registerRollupUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  kibanaIndex: string
+): void {
   const collector = usageCollection.makeUsageCollector({
     type: ROLLUP_USAGE_TYPE,
     isReady: () => true,
-    fetch: async callCluster => {
+    fetch: async (callCluster: CallCluster) => {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
 

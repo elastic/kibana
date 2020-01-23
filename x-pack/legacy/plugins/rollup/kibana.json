@@ -4,6 +4,9 @@
   "requiredPlugins": [
     "home"
   ],
+  "optionalPlugins": [
+    "usageCollection"
+  ],
   "server": true,
   "ui": false
 }

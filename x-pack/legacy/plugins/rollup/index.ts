@@ -7,19 +7,13 @@
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
+import { RollupSetup } from '../../../plugins/rollup/server';
 import { PLUGIN, CONFIG_ROLLUPS } from './common';
 import { plugin } from './server';
+import { PluginInitializerContext } from '../siem/public/plugin';
 
-// import { registerLicenseChecker } from './server/lib/register_license_checker';
 // import { rollupDataEnricher } from './rollup_data_enricher';
 // import { registerRollupSearchStrategy } from './server/lib/search_strategies';
-// import {
-//   registerIndicesRoute,
-//   registerFieldsForWildcardRoute,
-//   registerSearchRoute,
-//   registerJobsRoute,
-// } from './server/routes/api';
-// import { registerRollupUsageCollector } from './server/usage';
 
 export type ServerFacade = Legacy.Server;
 
@@ -55,7 +49,17 @@ export function rollup(kibana: any) {
       search: ['plugins/rollup/search'],
     },
     init(server: ServerFacade) {
-      plugin({} as any).setup(server.newPlatform.setup.core, {
+      const { core, plugins } = server.newPlatform.setup;
+      const { usageCollection } = plugins;
+
+      const rollupSetup = (plugins.rollup as unknown) as RollupSetup;
+
+      const initContext = ({
+        config: rollupSetup.__legacy.config,
+      } as unknown) as PluginInitializerContext;
+
+      plugin(initContext).setup(core, {
+        usageCollection,
         __LEGACY: {
           route: server.route.bind(server),
           plugins: {
@@ -65,20 +69,13 @@ export function rollup(kibana: any) {
         },
       });
 
-      // const { usageCollection } = server.newPlatform.setup.plugins;
-      // registerLicenseChecker(server);
-      // registerIndicesRoute(server);
       // registerFieldsForWildcardRoute(server);
-      // registerSearchRoute(server);
-      // registerJobsRoute(server);
-      // registerRollupUsageCollector(usageCollection, server);
       // if (
       //   server.plugins.index_management &&
       //   server.plugins.index_management.addIndexManagementDataEnricher
       // ) {
       //   server.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
       // }
-      // registerRollupSearchStrategy(this.kbnServer, server);
     },
   });
 }

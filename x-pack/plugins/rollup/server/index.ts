@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerRollupUsageCollector } from './collector';
+import { PluginInitializerContext } from 'src/core/server';
+import { RollupPlugin } from './plugin';
+
+export const plugin = (initContext: PluginInitializerContext) => new RollupPlugin(initContext);
+
+export { RollupSetup } from './plugin';
