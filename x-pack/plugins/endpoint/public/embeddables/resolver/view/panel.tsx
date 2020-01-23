@@ -32,7 +32,7 @@ const HorizontalRule = memo(function HorizontalRule() {
   );
 });
 
-export const Event = memo(function Event({ className }: { className?: string }) {
+export const Panel = memo(function Event({ className }: { className?: string }) {
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   interface ProcessTableView {
     name: string;

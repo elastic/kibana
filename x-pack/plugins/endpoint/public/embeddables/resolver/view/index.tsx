@@ -5,16 +5,16 @@
  */
 
 import React from 'react';
-import { Store } from 'redux';
 import { Provider, useSelector } from 'react-redux';
+import { Store } from 'redux';
 import styled from 'styled-components';
-import { useCamera } from './use_camera';
-import { ResolverState, ResolverAction } from '../types';
 import * as selectors from '../store/selectors';
-import { ProcessEventDot } from './process_event_dot';
+import { ResolverAction, ResolverState } from '../types';
 import { EdgeLine } from './edge_line';
+import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
-import { Event } from './event';
+import { ProcessEventDot } from './process_event_dot';
+import { useCamera } from './use_camera';
 
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
   return (
@@ -24,7 +24,7 @@ export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, Reso
   );
 });
 
-const StyledEvent = styled(Event)`
+const StyledEvent = styled(Panel)`
   position: absolute;
   left: 1em;
   top: 1em;
