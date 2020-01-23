@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2, CardinalDirection } from '../../types';
+import { Vector2 } from '../../types';
 
 interface UserSetZoomLevel {
   readonly type: 'userSetZoomLevel';

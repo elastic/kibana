@@ -12,7 +12,6 @@ import { clamp } from '../../lib/math';
 
 import { CameraState, ResolverAction, Vector2 } from '../../types';
 import { scaleToZoom } from './scale_to_zoom';
-import { viewableBoundingBox } from './selectors';
 
 function initialState(): CameraState {
   const state: CameraState = {
