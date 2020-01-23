@@ -14,8 +14,10 @@ export ES_HOST
 TIME_STAMP=$(date -u +%Y%m%d_%H%M%SZ)
 export TIME_STAMP
 
-for x in jest functional mocha
-do
+for x in jest functional mocha; do
   echo "### Ingesting coverage for ${x}"
-  node scripts/ingest_coverage.js --verbose --path target/kibana-coverage/${x}-combined/coverage-summary.json || echo "### target/kibana-coverage/${x}-combined/coverage-summary.json not found?"
+
+  COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
+
+  node scripts/ingest_coverage.js --verbose --path $COVERAGE_SUMMARY_FILE || echo "### ${COVERAGE_SUMMARY_FILE} not found?"
 done
