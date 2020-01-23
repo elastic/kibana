@@ -72,6 +72,11 @@ const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   );
 };
 
+interface AppStateZoom {
+  from: string;
+  to: string;
+}
+
 interface TimeSeriesExplorerUrlStateManager {
   config: any;
   jobsWithTimeRange: MlJobWithTimeRange[];
@@ -159,12 +164,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     : +appState?.mlTimeSeriesExplorer?.detectorIndex || 0;
   const selectedEntities = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.forecastId;
-  const zoom:
-    | {
-        from: string;
-        to: string;
-      }
-    | undefined = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
+  const zoom: AppStateZoom | undefined = isJobChange
+    ? undefined
+    : appState?.mlTimeSeriesExplorer?.zoom;
 
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
   const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
@@ -280,7 +282,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     return null;
   }
 
-  const zoomProp =
+  const zoomProp: AppStateZoom | undefined =
     typeof selectedForecastId === 'string' && selectedForecastIdProp === undefined
       ? undefined
       : zoom;
