@@ -19,7 +19,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import { start as embeddables } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+// import { start as embeddables } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
 import { VisualizeEmbeddable } from 'src/legacy/core_plugins/visualizations/public/embeddable';
 import { VisualizeEmbeddableFactory } from 'src/legacy/core_plugins/visualizations/public/embeddable/visualize_embeddable_factory';
