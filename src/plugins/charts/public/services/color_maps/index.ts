@@ -17,8 +17,13 @@
  * under the License.
  */
 
-export * from './color_maps';
-// @ts-ignore
+export {
+  ColorSchemas,
+  ColorSchema,
+  RawColorSchema,
+  ColorMap,
+  vislibColorMaps,
+  colorSchemas,
+} from './color_maps';
 export { getHeatmapColors } from './heatmap_color';
-// @ts-ignore
-export * from './truncated_color_maps';
+export { truncatedColorMaps, truncatedColorSchemas } from './truncated_color_maps';

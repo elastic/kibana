@@ -19,5 +19,6 @@
 
 import * as colorMapsService from './color_maps';
 
+export { ColorsService } from './colors';
 export { ThemeService } from './theme';
 export { colorMapsService };

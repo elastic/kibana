@@ -17,27 +17,10 @@
  * under the License.
  */
 
-import { ChartsPlugin } from './plugin';
-import { themeServiceMock } from './services/theme/mock';
-import { colorMapsServiceMock } from './services/color_maps/mock';
-import { colorsServiceMock } from './services/colors/mock';
+import { seedColors } from './seed_colors';
 
-export type Setup = jest.Mocked<ReturnType<ChartsPlugin['setup']>>;
-export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
-
-const createSetupContract = (): Setup => ({
-  colorMaps: colorMapsServiceMock,
-  colors: colorsServiceMock,
-  theme: themeServiceMock,
+describe('Seed Colors', function() {
+  it('should return an array', function() {
+    expect(seedColors).toBeInstanceOf(Array);
+  });
 });
-
-const createStartContract = (): Start => ({
-  colorMaps: colorMapsServiceMock,
-  colors: colorsServiceMock,
-  theme: themeServiceMock,
-});
-
-export const chartPluginMock = {
-  createSetupContract,
-  createStartContract,
-};
