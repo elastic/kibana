@@ -21,7 +21,14 @@ jest.mock('../../../lib/alert_api', () => ({
   loadAlerts: jest.fn(),
   loadAlertTypes: jest.fn(),
 }));
-
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    push: jest.fn(),
+  }),
+  useLocation: () => ({
+    pathname: '/triggersActions/alerts/',
+  }),
+}));
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
