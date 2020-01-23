@@ -188,6 +188,24 @@ export class TimeSeriesExplorer extends React.Component {
    */
   contextChart$ = new Subject();
 
+  /**
+   * Returns field names that don't have a selection yet.
+   */
+  getFieldNamesWithEmptyValues = () => {
+    const latestEntityControls = this.getControlsForDetector();
+    return latestEntityControls
+      .filter(({ fieldValue }) => !fieldValue)
+      .map(({ fieldName }) => fieldName);
+  };
+
+  /**
+   * Checks if all entity control dropdowns have a selection.
+   */
+  arePartitioningFieldsProvided = () => {
+    const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
+    return fieldNamesWithEmptyValues.length === 0;
+  };
+
   detectorIndexChangeHandler = e => {
     const { appStateHandler } = this.props;
     const id = e.target.value;
@@ -296,7 +314,17 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   contextChartSelected = selection => {
+    const zoomState = {
+      from: selection.from.toISOString(),
+      to: selection.to.toISOString(),
+    };
+
+    if (isEqual(this.props.zoom, zoomState) && this.state.focusChartData !== undefined) {
+      return;
+    }
+
     this.contextChart$.next(selection);
+    this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
   };
 
   entityFieldValueChanged = (entity, fieldValue) => {
@@ -509,27 +537,38 @@ export class TimeSeriesExplorer extends React.Component {
               (Array.isArray(stateUpdate.contextForecastData) &&
                 stateUpdate.contextForecastData.length > 0);
             stateUpdate.loading = false;
+
             // Set zoomFrom/zoomTo attributes in scope which will result in the metric chart automatically
             // selecting the specified range in the context chart, and so loading that date range in the focus chart.
-            if (stateUpdate.contextChartData.length) {
+            // Only touch the zoom range if data for the context chart has been loaded and all necessary
+            // partition fields have a selection.
+            if (
+              stateUpdate.contextChartData.length &&
+              this.arePartitioningFieldsProvided() === true
+            ) {
               // Check for a zoom parameter in the appState (URL).
               let focusRange = calculateInitialFocusRange(
                 zoom,
                 stateUpdate.contextAggregationInterval,
                 bounds
               );
-
-              if (focusRange === undefined) {
+              if (
+                focusRange === undefined ||
+                this.previousSelectedForecastId !== this.props.selectedForecastId
+              ) {
                 focusRange = calculateDefaultFocusRange(
                   autoZoomDuration,
                   stateUpdate.contextAggregationInterval,
                   stateUpdate.contextChartData,
                   stateUpdate.contextForecastData
                 );
+                this.previousSelectedForecastId = this.props.selectedForecastId;
               }
 
-              stateUpdate.zoomFrom = focusRange[0];
-              stateUpdate.zoomTo = focusRange[1];
+              this.contextChartSelected({
+                from: focusRange[0],
+                to: focusRange[1],
+              });
             }
 
             this.setState(stateUpdate);
@@ -881,11 +920,6 @@ export class TimeSeriesExplorer extends React.Component {
             ...refreshFocusData,
             ...tableData,
           });
-          const zoomState = {
-            from: selection.from.toISOString(),
-            to: selection.to.toISOString(),
-          };
-          this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
         })
     );
 
@@ -917,6 +951,9 @@ export class TimeSeriesExplorer extends React.Component {
       if (this.props.selectedForecastId !== undefined) {
         // Ensure the forecast data will be shown if hidden previously.
         this.setState({ showForecast: true });
+        // Not best practice but we need the previous value for another comparison
+        // once all the data was loaded.
+        this.previousSelectedForecastId = previousProps.selectedForecastId;
       }
     }
 
@@ -927,8 +964,7 @@ export class TimeSeriesExplorer extends React.Component {
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
       !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
-      previousProps.selectedJobId !== this.props.selectedJobId ||
-      !isEqual(previousProps.zoom, this.props.zoom)
+      previousProps.selectedJobId !== this.props.selectedJobId
     ) {
       const fullRefresh =
         previousProps === undefined ||
@@ -960,41 +996,6 @@ export class TimeSeriesExplorer extends React.Component {
       previousProps.tableSeverity !== this.props.tableSeverity
     ) {
       tableControlsListener();
-    }
-
-    if (
-      this.props.autoZoomDuration === undefined ||
-      this.props.selectedForecastId !== undefined ||
-      this.state.contextAggregationInterval === undefined ||
-      this.state.contextChartData === undefined ||
-      this.state.contextChartData.length === 0
-    ) {
-      return;
-    }
-
-    const defaultRange = calculateDefaultFocusRange(
-      this.props.autoZoomDuration,
-      this.state.contextAggregationInterval,
-      this.state.contextChartData,
-      this.state.contextForecastData
-    );
-
-    const selection = {
-      from: this.state.zoomFrom,
-      to: this.state.zoomTo,
-    };
-
-    if (
-      (selection.from.getTime() !== defaultRange[0].getTime() ||
-        selection.to.getTime() !== defaultRange[1].getTime()) &&
-      isNaN(Date.parse(selection.from)) === false &&
-      isNaN(Date.parse(selection.to)) === false
-    ) {
-      const zoomState = {
-        from: selection.from.toISOString(),
-        to: selection.to.toISOString(),
-      };
-      this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
     }
   }
 
@@ -1070,12 +1071,8 @@ export class TimeSeriesExplorer extends React.Component {
 
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
-
-    const fieldNamesWithEmptyValues = entityControls
-      .filter(({ fieldValue }) => !fieldValue)
-      .map(({ fieldName }) => fieldName);
-
-    const arePartitioningFieldsProvided = fieldNamesWithEmptyValues.length === 0;
+    const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
+    const arePartitioningFieldsProvided = this.arePartitioningFieldsProvided();
 
     const detectorSelectOptions = getViewableDetectors(selectedJob).map(d => ({
       value: d.index,
