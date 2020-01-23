@@ -19,7 +19,7 @@
 
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { bufferCount, skip, take, takeUntil } from 'rxjs/operators';
+import { bufferCount, take, takeUntil } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
@@ -667,7 +667,7 @@ describe('#start()', () => {
 
       const { currentAppId$, navigateToApp } = await service.start(startDeps);
       const stop$ = new Subject();
-      const promise = currentAppId$.pipe(skip(1), bufferCount(4), takeUntil(stop$)).toPromise();
+      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
       await navigateToApp('alpha');
       await navigateToApp('beta');

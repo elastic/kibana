@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil, distinctUntilChanged } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
@@ -266,7 +266,11 @@ export class ApplicationService {
     return {
       applications$,
       capabilities,
-      currentAppId$: this.currentAppId$.pipe(distinctUntilChanged(), takeUntil(this.stop$)),
+      currentAppId$: this.currentAppId$.pipe(
+        filter(appId => appId !== undefined),
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
