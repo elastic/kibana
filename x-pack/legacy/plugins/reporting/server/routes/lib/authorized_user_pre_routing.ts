@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { getUserFactory } from '../../lib/get_user';
-import { ServerFacade } from '../../../types';
+import { ServerFacade, Logger } from '../../../types';
 
 const superuserRole = 'superuser';
 
@@ -17,19 +17,19 @@ export type PreRoutingFunction = (
 ) => Promise<Boom<null> | AuthenticatedUser | null>;
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
-  server: ServerFacade
+  server: ServerFacade,
+  logger: Logger
 ) {
-  const getUser = getUserFactory(server);
+  const getUser = getUserFactory(server, logger);
   const config = server.config();
 
   return async function authorizedUserPreRouting(request: Legacy.Request) {
     const xpackInfo = server.plugins.xpack_main.info;
 
     if (!xpackInfo || !xpackInfo.isAvailable()) {
-      server.log(
-        ['reporting', 'authorizedUserPreRouting', 'debug'],
-        'Unable to authorize user before xpack info is available.'
-      );
+      logger.warn('Unable to authorize user before xpack info is available.', [
+        'authorizedUserPreRouting',
+      ]);
       return Boom.notFound();
     }
 
