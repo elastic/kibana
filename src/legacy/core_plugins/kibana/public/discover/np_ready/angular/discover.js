@@ -524,11 +524,7 @@ function discoverController(
           language:
             localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
         },
-      sort: getSort.array(
-        savedSearch.sort,
-        $scope.indexPattern,
-        config.get('discover:sort:defaultOrder')
-      ),
+      sort: getSort.array(savedSearch.sort, $scope.indexPattern),
       columns:
         savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
