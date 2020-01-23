@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { setupIngest } from '../agents/services';
 
 const ENROLLMENT_KEY_ID = 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0';
 
@@ -18,6 +19,7 @@ export default function({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
     });
+    setupIngest({ getService } as FtrProviderContext);
     after(async () => {
       await esArchiver.unload('fleet/agents');
     });
@@ -27,7 +29,7 @@ export default function({ getService }: FtrProviderContext) {
           .get(`/api/fleet/enrollment-api-keys`)
           .expect(200);
 
-        expect(apiResponse.total).to.be(1);
+        expect(apiResponse.total).to.be(2);
         expect(apiResponse.list[0]).to.have.keys('id', 'api_key_id', 'name');
       });
     });

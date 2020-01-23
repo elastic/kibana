@@ -20,7 +20,10 @@ export interface IngestPluginStartContract {
 
 export interface FleetPluginsStart {
   security: SecurityPluginStartContract;
-  ingest: {};
+  ingest: {
+    outputs: IngestOutputLib;
+    policies: IngestPolicyLib;
+  };
   encryptedSavedObjects: EncryptedSavedObjectsStartContract;
 }
 
