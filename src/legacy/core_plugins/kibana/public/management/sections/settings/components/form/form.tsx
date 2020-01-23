@@ -334,6 +334,7 @@ export class Form extends PureComponent<FormProps> {
                   aria-label={i18n.translate('kbn.management.settings.form.cancelButtonAriaLabel', {
                     defaultMessage: 'Cancel all changes',
                   })}
+                  data-test-subj="advancedSetting-cancelButton"
                 >
                   {i18n.translate('kbn.management.settings.form.cancelButtonLabel', {
                     defaultMessage: 'Cancel all changes',

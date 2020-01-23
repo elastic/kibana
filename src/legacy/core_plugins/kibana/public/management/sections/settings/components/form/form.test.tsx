@@ -176,7 +176,33 @@ describe('Form', () => {
     expect(component).toMatchSnapshot();
   });
 
-  // it('should reset this.state.unsavedChanges to empty object when clicking on the cancel changes button')
+  // it('should reset this.state.unsavedChanges to empty object when clicking on the cancel changes button', async () => {
+  //   const wrapper = mountWithI18nProvider(
+  //     <Form
+  //       settings={settings}
+  //       categories={categories}
+  //       categoryCounts={categoryCounts}
+  //       save={save}
+  //       clearQuery={clearQuery}
+  //       showNoResultsMessage={true}
+  //       enableSaving={false}
+  //     />
+  //   );
+  //   (wrapper.instance() as Form).setState({
+  //     unsavedChanges: {
+  //       'dashboard:test:setting': {
+  //         value: 'changedValue',
+  //       },
+  //     },
+  //   });
+  //   const updated = wrapper.update();
+  //   await findTestSubject(updated, `advancedSetting-cancelButton`).simulate('click');
+
+  //   const updated1 = wrapper.update();
+  //   console.log(updated1.state(), 'hello')
+  //   expect(updated1.state()).toMatchObject({})
+
+  // });
 
   it('should show a reload toast when saving setting requiring a page reload', async () => {
     const wrapper = mountWithI18nProvider(

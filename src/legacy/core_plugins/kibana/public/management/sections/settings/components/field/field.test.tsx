@@ -286,6 +286,7 @@ describe('Field', () => {
             handleChange={handleChange}
             enableSaving={true}
             unsavedChanges={{
+              // @ts-ignore
               value: exampleValues[setting.type],
             }}
           />
