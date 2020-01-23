@@ -55,7 +55,6 @@ export interface HomeKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];
-  METRIC_TYPE: any;
   trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
   getBasePath: () => string;
   shouldShowTelemetryOptIn: boolean;
