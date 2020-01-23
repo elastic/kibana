@@ -6,8 +6,9 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { identity } from 'fp-ts/lib/function';
 import React, { useContext } from 'react';
+
 import { SnapshotPageContent } from './page_content';
 import { SnapshotToolbar } from './toolbar';
 
@@ -38,9 +39,10 @@ export const SnapshotPage = () => {
     loadSource,
     metricIndicesExist,
   } = useContext(Source.Context);
-  const basePath = useKibana().services.http?.basePath || '';
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
+
+  const prependBasePath = useKibana().services.http?.basePath.prepend ?? identity;
 
   return (
     <ColumnarPage>
@@ -78,7 +80,7 @@ export const SnapshotPage = () => {
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiButton
-                  href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                  href={prependBasePath('/app/kibana#/home/tutorial_directory/metrics')}
                   color="primary"
                   fill
                   data-test-subj="infrastructureViewSetupInstructionsButton"

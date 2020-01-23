@@ -6,6 +6,7 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
 import { euiStyled } from '../../../utils/eui_styled_components';
@@ -20,7 +21,8 @@ interface InvalidNodeErrorProps {
 }
 
 export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = ({ nodeName }) => {
-  const basePath = useKibana().services.http?.basePath || '';
+  const prependBasePath = useKibana().services.http?.basePath.prepend ?? identity;
+
   return (
     <CenteredEmptyPrompt
       title={
@@ -46,7 +48,7 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButton
-              href={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+              href={prependBasePath('/app/kibana#/home/tutorial_directory/metrics')}
               color="primary"
               fill
             >

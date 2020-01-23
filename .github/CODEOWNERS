@@ -45,8 +45,10 @@
 
 # APM
 /x-pack/legacy/plugins/apm/  @elastic/apm-ui
+/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
+/src/plugins/apm_oss/  @elastic/apm-ui
 
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
@@ -151,6 +153,6 @@
 /x-pack/legacy/plugins/license_management/  @elastic/es-ui
 /x-pack/legacy/plugins/remote_clusters/  @elastic/es-ui
 /x-pack/legacy/plugins/rollup/  @elastic/es-ui
-/x-pack/legacy/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/plugins/searchprofiler/  @elastic/es-ui
 /x-pack/legacy/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/legacy/plugins/watcher/  @elastic/es-ui
