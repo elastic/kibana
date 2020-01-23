@@ -12,8 +12,13 @@ export const getHistogramInterval = (
   dateRangeEnd: string,
   bucketCount?: number
 ): number => {
+  let endDate = dateRangeEnd;
+  if (dateRangeStart === dateRangeEnd && endDate.includes('now')) {
+    endDate = 'now';
+  }
+
   const from = DateMath.parse(dateRangeStart);
-  const to = DateMath.parse(dateRangeEnd);
+  const to = DateMath.parse(endDate);
   if (from === undefined) {
     throw Error('Invalid dateRangeStart value');
   }

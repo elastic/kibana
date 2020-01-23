@@ -9,6 +9,18 @@ import { APICaller } from 'kibana/server';
 import { CursorPagination } from '../adapter_types';
 import { INDEX_NAMES } from '../../../../../common/constants';
 
+const parseRelativeDates = (startDate: string, _endDate: string): { tsStart: any; tsEnd: any } => {
+  let endDate: string = _endDate;
+  if (startDate === endDate && endDate.includes('now')) {
+    endDate = 'now';
+  }
+
+  const tsStart = DateMath.parse(endDate).subtract(10, 'seconds');
+  const tsEnd = DateMath.parse(endDate);
+
+  return { tsStart, tsEnd };
+};
+
 export class QueryContext {
   callES: APICaller;
   dateRangeStart: string;
@@ -65,8 +77,7 @@ export class QueryContext {
     }
 
     // @ts-ignore
-    const tsStart = DateMath.parse(this.dateRangeEnd).subtract(10, 'seconds');
-    const tsEnd = DateMath.parse(this.dateRangeEnd)!;
+    const { tsStart, tsEnd } = parseRelativeDates(this.dateRangeStart, this.dateRangeEnd);
 
     return {
       bool: {
