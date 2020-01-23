@@ -30,7 +30,12 @@ export const SectionTitle: React.FC<{}> = props => (
 
 export const SectionSubtitle: React.FC<{}> = props => (
   <>
-    <EuiText size={'xs'} color={'subdued'} grow={false}>
+    <EuiText
+      size={'xs'}
+      color={'subdued'}
+      grow={false}
+      style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+    >
       <small>{props.children}</small>
     </EuiText>
     <EuiSpacer size={'s'} />

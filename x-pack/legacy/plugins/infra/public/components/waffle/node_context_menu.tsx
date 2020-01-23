@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
-import { findInventoryModel } from '../../../common/inventory_models';
+import { findInventoryModel, findInventoryFields } from '../../../common/inventory_models';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import {
@@ -64,24 +64,20 @@ export const NodeContextMenu = ({
     inventoryModel.crosslinkSupport.uptime && (['pod', 'container'].includes(nodeType) || node.ip);
 
   const inventoryId = useMemo(() => {
-    switch (nodeType) {
-      case 'host':
-        if (node.ip) {
-          return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
-        } else {
-          return { label: '', value: '' };
-        }
-      case 'pod':
-        return { label: <EuiCode>pod.uid</EuiCode>, value: node.id };
-      case 'container':
-        return { label: <EuiCode>container.id</EuiCode>, value: node.id };
-      case 'awsEC2':
-      case 'awsRDS':
-      case 'awsSQS':
-      case 'awsS3':
-        return { label: <EuiCode>instance.id</EuiCode>, value: node.id };
+    if (nodeType === 'host') {
+      if (node.ip) {
+        return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
+      }
+    } else {
+      if (options.fields) {
+        return {
+          label: <EuiCode>{findInventoryFields(nodeType, options.fields).id}</EuiCode>,
+          value: node.id,
+        };
+      }
     }
-  }, [nodeType, node]);
+    return { label: '', value: '' };
+  }, [nodeType, node.ip, node.id, options.fields]);
 
   const nodeLogsMenuItem: SectionLinkProps = {
     label: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
@@ -138,46 +134,48 @@ export const NodeContextMenu = ({
       button={children}
       anchorPosition={popoverPosition}
     >
-      <Section>
-        <SectionTitle>
-          <FormattedMessage
-            id={'xpack.infra.nodeContextMenu.title'}
-            defaultMessage={'{inventoryName} details'}
-            values={{ inventoryName: inventoryModel.singularDisplayName }}
-          />
-        </SectionTitle>
-        {inventoryId.label && (
-          <SectionSubtitle>
+      <div style={{ maxWidth: 300 }}>
+        <Section>
+          <SectionTitle>
             <FormattedMessage
-              id={'xpack.infra.nodeContextMenu.description'}
-              defaultMessage={'View details for {label} {value}'}
-              values={inventoryId}
+              id={'xpack.infra.nodeContextMenu.title'}
+              defaultMessage={'{inventoryName} details'}
+              values={{ inventoryName: inventoryModel.singularDisplayName }}
             />
-          </SectionSubtitle>
-        )}
-        <SectionLinks>
-          <SectionLink
-            label={nodeLogsMenuItem.label}
-            href={nodeLogsMenuItem.href}
-            isDisabled={nodeLogsMenuItem.isDisabled}
-          />
-          <SectionLink
-            label={nodeDetailMenuItem.label}
-            href={nodeDetailMenuItem.href}
-            isDisabled={nodeDetailMenuItem.isDisabled}
-          />
-          <SectionLink
-            label={apmTracesMenuItem.label}
-            href={apmTracesMenuItem.href}
-            isDisabled={apmTracesMenuItem.isDisabled}
-          />
-          <SectionLink
-            label={uptimeMenuItem.label}
-            href={uptimeMenuItem.href}
-            isDisabled={uptimeMenuItem.isDisabled}
-          />
-        </SectionLinks>
-      </Section>
+          </SectionTitle>
+          {inventoryId.label && (
+            <SectionSubtitle>
+              <FormattedMessage
+                id={'xpack.infra.nodeContextMenu.description'}
+                defaultMessage={'View details for {label} {value}'}
+                values={inventoryId}
+              />
+            </SectionSubtitle>
+          )}
+          <SectionLinks>
+            <SectionLink
+              label={nodeLogsMenuItem.label}
+              href={nodeLogsMenuItem.href}
+              isDisabled={nodeLogsMenuItem.isDisabled}
+            />
+            <SectionLink
+              label={nodeDetailMenuItem.label}
+              href={nodeDetailMenuItem.href}
+              isDisabled={nodeDetailMenuItem.isDisabled}
+            />
+            <SectionLink
+              label={apmTracesMenuItem.label}
+              href={apmTracesMenuItem.href}
+              isDisabled={apmTracesMenuItem.isDisabled}
+            />
+            <SectionLink
+              label={uptimeMenuItem.label}
+              href={uptimeMenuItem.href}
+              isDisabled={uptimeMenuItem.isDisabled}
+            />
+          </SectionLinks>
+        </Section>
+      </div>
     </ActionMenu>
   );
 };
