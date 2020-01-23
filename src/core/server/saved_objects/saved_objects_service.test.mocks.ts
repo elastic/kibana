@@ -17,16 +17,16 @@
  * under the License.
  */
 
-export { ISavedObjectsRepository, SavedObjectsRepository } from './repository';
+import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
+import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
 
-export {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  ISavedObjectsClientProvider,
-  SavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-  SavedObjectsClientFactory,
-  SavedObjectsClientFactoryProvider,
-} from './scoped_client_provider';
+export const migratorInstanceMock = mockKibanaMigrator.create();
+export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
+jest.doMock('./migrations/kibana/kibana_migrator', () => ({
+  KibanaMigrator: KibanaMigratorMock,
+}));
 
-export { SavedObjectsErrorHelpers } from './errors';
+export const clientProviderInstanceMock = savedObjectsClientProviderMock.create();
+jest.doMock('./service/lib/scoped_client_provider', () => ({
+  SavedObjectsClientProvider: jest.fn().mockImplementation(() => clientProviderInstanceMock),
+}));
