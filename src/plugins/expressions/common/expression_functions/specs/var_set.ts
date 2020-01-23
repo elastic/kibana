@@ -18,18 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../../common/types';
+import { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
   name: string;
+  value?: any;
 }
 
-type Context = any;
-type ExpressionFunctionVar = ExpressionFunctionDefinition<'var', Context, Arguments, any>;
-
-export const variable = (): ExpressionFunctionVar => ({
-  name: 'var',
-  help: i18n.translate('expressions.functions.var.help', {
+export const variableSet: ExpressionFunctionDefinition<'var_set', unknown, Arguments, unknown> = {
+  name: 'var_set',
+  help: i18n.translate('expressions.functions.varset.help', {
     defaultMessage: 'Updates kibana global context',
   }),
   args: {
@@ -37,13 +35,21 @@ export const variable = (): ExpressionFunctionVar => ({
       types: ['string'],
       aliases: ['_'],
       required: true,
-      help: i18n.translate('expressions.functions.var.name.help', {
+      help: i18n.translate('expressions.functions.varset.name.help', {
         defaultMessage: 'Specify name of the variable',
       }),
     },
+    value: {
+      aliases: ['val'],
+      help: i18n.translate('expressions.functions.varset.val.help', {
+        defaultMessage:
+          'Specify value for the variable. If not provided input context will be used',
+      }),
+    },
   },
-  fn(context, args, handlers) {
-    const variables: Record<string, any> = handlers.variables;
-    return variables[args.name];
+  fn(input, args, context) {
+    const variables: Record<string, any> = context.variables;
+    variables[args.name] = args.value === undefined ? input : args.value;
+    return input;
   },
-});
+};

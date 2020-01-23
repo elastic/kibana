@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { ArgumentType } from './arguments';
-import { TypeToString, UnwrapPromise } from './common';
-import { Type } from '../executor/expression_types';
+import { ExpressionType } from '../expression_types/expression_type';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
@@ -46,7 +44,7 @@ export interface ExecutionContext {
   /**
    * A map of available expression types.
    */
-  types: Record<string, Type>;
+  types: Record<string, ExpressionType>;
 
   /**
    * Adds ability to abort current execution.
@@ -58,49 +56,3 @@ export interface ExecutionContext {
    */
   inspectorAdapters?: unknown;
 }
-
-/**
- * `ExpressionFunctionDefinition` is the interface plugins have to implement to
- * register a function in `expressions` plugin.
- */
-export interface ExpressionFunctionDefinition<Name extends string, Input, Arguments, Return> {
-  /**
-   * The name of the function, as will be used in expression.
-   */
-  name: Name;
-
-  /**
-   * A string identifier that identifies the type of value this function returns.
-   */
-  type?: TypeToString<UnwrapPromise<Return>>;
-
-  /**
-   * Specification of arguments that function supports. This list will also be
-   * used for autocomplete functionality when your function is being edited.
-   */
-  args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
-
-  aliases?: string[];
-  context?: {
-    types: Array<TypeToString<Input>>;
-  };
-
-  /**
-   * Help text displayed in the Expression editor. This text should be
-   * internationalized.
-   */
-  help: string;
-
-  /**
-   * The actual implementation of the function.
-   *
-   * @param input Output of the previous function, or initial input.
-   * @param args Parameters set for this function in expression.
-   * @param context Object with functions to perform side effects. This object
-   *     is created for the duration of the execution of expression an is the
-   *     same for all functions.
-   */
-  fn(input: Input, args: Arguments, context: ExecutionContext): Return;
-}
-
-export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<string, any, any, any>;

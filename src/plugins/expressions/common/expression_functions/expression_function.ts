@@ -17,49 +17,9 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
-
-import {
-  ArgumentType,
-  ExpressionValue,
-  ExpressionFunctionDefinition,
-  ExecutionContext,
-} from '../types';
-
-export class ExpressionFunctionParameter {
-  name: string;
-  required: boolean;
-  help: string;
-  types: string[];
-  default: any;
-  aliases: string[];
-  multi: boolean;
-  resolve: boolean;
-  options: any[];
-
-  constructor(name: string, arg: ArgumentType<any>) {
-    const { required, help, types, aliases, multi, resolve, options } = arg;
-
-    if (name === '_') {
-      throw Error('Arg names must not be _. Use it in aliases instead.');
-    }
-
-    this.name = name;
-    this.required = !!required;
-    this.help = help || '';
-    this.types = types || [];
-    this.default = arg.default;
-    this.aliases = aliases || [];
-    this.multi = !!multi;
-    this.resolve = resolve == null ? true : resolve;
-    this.options = options || [];
-  }
-
-  accepts(type: string) {
-    if (!this.types.length) return true;
-    return this.types.indexOf(type) > -1;
-  }
-}
+import { AnyExpressionFunctionDefinition } from './types';
+import { ExpressionFunctionParameter } from './expression_function_parameter';
+import { ExpressionValue } from '../expression_types';
 
 export class ExpressionFunction {
   /**
@@ -82,22 +42,24 @@ export class ExpressionFunction {
   /**
    * Function to run function (context, args)
    */
-  fn: (
-    input: ExpressionValue,
-    params: Record<string, any>,
-    handlers: ExecutionContext
-  ) => ExpressionValue;
+  fn: (input: ExpressionValue, params: Record<string, any>, handlers: object) => ExpressionValue;
 
   /**
    * A short help text.
    */
   help: string;
 
+  /**
+   * Specification of expression function parameters.
+   */
   args: Record<string, ExpressionFunctionParameter> = {};
 
+  /**
+   * Type of inputs that this function supports.
+   */
   context: { types?: string[] };
 
-  constructor(functionDefinition: ExpressionFunctionDefinition) {
+  constructor(functionDefinition: AnyExpressionFunctionDefinition) {
     const { name, type, aliases, fn, help, args, context } = functionDefinition;
 
     this.name = name;

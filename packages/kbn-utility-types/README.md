@@ -24,3 +24,4 @@ type B = UnwrapPromise<A>; // string
 - `ShallowPromise<T>` &mdash; Same as `Promise` type, but it flat maps the wrapped type.
 - `UnwrapObservable<T>` &mdash; Returns wrapped type of an observable.
 - `UnwrapPromise<T>` &mdash; Returns wrapped type of a promise.
+- `UnwrapPromiseOrReturn<T>` &mdash; Returns wrapped type of a promise or the type itself, if it isn't a promise.

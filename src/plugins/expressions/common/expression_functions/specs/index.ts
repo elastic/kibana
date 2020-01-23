@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import { ExpressionFunctionDefinition } from '../../common/types';
+import { clog } from './clog';
+import { font } from './font';
+import { kibana } from './kibana';
+import { variableSet } from './var_set';
+import { variable } from './var';
+import { AnyExpressionFunctionDefinition } from '../types';
 
-const name = 'clog';
-
-type Context = any;
-type ClogExpressionFunction = ExpressionFunctionDefinition<typeof name, Context, {}, Context>;
-
-export const clog = (): ClogExpressionFunction => ({
-  name,
-  args: {},
-  help: 'Outputs the context to the console',
-  fn: context => {
-    console.log(context); // eslint-disable-line no-console
-    return context;
-  },
-});
+export const functionSpecs: AnyExpressionFunctionDefinition[] = [
+  clog,
+  font,
+  kibana,
+  variableSet,
+  variable,
+];

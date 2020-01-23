@@ -18,17 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../../common/types';
-import { KibanaContext } from '../../common/expression_types';
+import { ExpressionFunctionDefinition } from '../types';
+import { ExpressionValue } from '../../expression_types';
 
 export type ExpressionFunctionKibana = ExpressionFunctionDefinition<
   'kibana',
-  KibanaContext | null,
+  ExpressionValue,
   object,
-  KibanaContext
+  ExpressionValue
 >;
 
-export const kibana = (): ExpressionFunctionKibana => ({
+export const kibana: ExpressionFunctionKibana = {
   name: 'kibana',
   type: 'kibana_context',
 
@@ -40,25 +40,25 @@ export const kibana = (): ExpressionFunctionKibana => ({
     defaultMessage: 'Gets kibana global context',
   }),
   args: {},
-  fn(context, args, handlers) {
-    const initialContext = handlers.getInitialContext ? handlers.getInitialContext() : {};
+  fn(input, _, context) {
+    const initialInput: ExpressionValue = context.getInitialInput ? context.getInitialInput() : {};
 
-    if (context && context.query) {
-      initialContext.query = initialContext.query.concat(context.query);
+    if (input && input.query) {
+      initialInput.query = initialInput.query.concat(input.query);
     }
 
-    if (context && context.filters) {
-      initialContext.filters = initialContext.filters.concat(context.filters);
+    if (input && input.filters) {
+      initialInput.filters = initialInput.filters.concat(input.filters);
     }
 
-    const timeRange = initialContext.timeRange || (context ? context.timeRange : undefined);
+    const timeRange = initialInput.timeRange || (input ? input.timeRange : undefined);
 
     return {
-      ...context,
+      ...input,
       type: 'kibana_context',
-      query: initialContext.query,
-      filters: initialContext.filters,
+      query: initialInput.query,
+      filters: initialInput.filters,
       timeRange,
     };
   },
-});
+};
