@@ -447,7 +447,7 @@ function updateWithDataResponse(state, action) {
   return resetDataRequest(state, action, dataRequest);
 }
 
-function resetDataRequest(state, action, request) {
+export function resetDataRequest(state, action, request) {
   const dataRequest = request || getValidDataRequest(state, action);
   if (!dataRequest) {
     return state;
@@ -457,11 +457,11 @@ function resetDataRequest(state, action, request) {
   const dataRequestIndex = layer.__dataRequests.indexOf(dataRequest);
 
   const newDataRequests = [...layer.__dataRequests];
-  newDataRequests[dataRequestIndex] = { ...dataRequest };
-
-  const newDataRequest = newDataRequests[dataRequestIndex];
-  newDataRequest.dataRequestToken = null;
-  newDataRequest.dataId = action.dataId;
+  newDataRequests[dataRequestIndex] = {
+    ...dataRequest,
+    dataRequestToken: null,
+    dataId: action.dataId,
+  };
 
   const layerIndex = state.layerList.indexOf(layer);
   const newLayerList = [...state.layerList];
@@ -475,11 +475,13 @@ function resetDataRequest(state, action, request) {
 function getValidDataRequest(state, action, checkRequestToken = true) {
   const layer = findLayerById(state, action.layerId);
   if (!layer) {
+    console.log('no layer');
     return;
   }
 
   const dataRequest = findDataRequest(layer, action);
   if (!dataRequest) {
+    console.log('no datarequest');
     return;
   }
 
@@ -489,6 +491,7 @@ function getValidDataRequest(state, action, checkRequestToken = true) {
     dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
+    console.log('ignore outdated');
     return;
   }
   return dataRequest;
