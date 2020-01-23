@@ -38,12 +38,7 @@ export const duplicateRulesAction = async (
     const ruleIds = rules.map(r => r.id);
     dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: true });
     const duplicatedRules = await duplicateRules({ rules });
-    dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: false });
-    dispatch({
-      type: 'updateRules',
-      rules: duplicatedRules,
-      appendRuleId: rules[rules.length - 1].id,
-    });
+    dispatch({ type: 'refresh' });
     displaySuccessToast(
       i18n.SUCCESSFULLY_DUPLICATED_RULES(duplicatedRules.length),
       dispatchToaster

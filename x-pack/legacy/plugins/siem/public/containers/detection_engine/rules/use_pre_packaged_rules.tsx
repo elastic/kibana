@@ -18,6 +18,7 @@ interface Return {
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   refetchPrePackagedRulesStatus: Func | null;
+  rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
@@ -48,6 +49,7 @@ export const usePrePackagedRules = ({
   isSignalIndexExists,
 }: UsePrePackagedRuleProps): Return => {
   const [rulesInstalled, setRulesInstalled] = useState<number | null>(null);
+  const [rulesCustomInstalled, setRulesCustomInstalled] = useState<number | null>(null);
   const [rulesNotInstalled, setRulesNotInstalled] = useState<number | null>(null);
   const [rulesNotUpdated, setRulesNotUpdated] = useState<number | null>(null);
   const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
@@ -68,6 +70,7 @@ export const usePrePackagedRules = ({
         });
 
         if (isSubscribed) {
+          setRulesCustomInstalled(prePackagedRuleStatusResponse.rules_custom_installed);
           setRulesInstalled(prePackagedRuleStatusResponse.rules_installed);
           setRulesNotInstalled(prePackagedRuleStatusResponse.rules_not_installed);
           setRulesNotUpdated(prePackagedRuleStatusResponse.rules_not_updated);
@@ -158,6 +161,7 @@ export const usePrePackagedRules = ({
     loading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus: refetchPrePackagedRules.current,
+    rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,

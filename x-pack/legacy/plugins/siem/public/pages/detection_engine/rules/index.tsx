@@ -44,6 +44,7 @@ const RulesPageComponent: React.FC = () => {
     loading: prePackagedRuleLoading,
     loadingCreatePrePackagedRules,
     refetchPrePackagedRulesStatus,
+    rulesCustomInstalled,
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
@@ -105,19 +106,6 @@ const RulesPageComponent: React.FC = () => {
             href: `#${DETECTION_ENGINE_PAGE_NAME}`,
             text: i18n.BACK_TO_DETECTION_ENGINE,
           }}
-          subtitle={
-            lastCompletedRun ? (
-              <FormattedMessage
-                id="xpack.siem.headerPage.rules.pageSubtitle"
-                defaultMessage="Last completed run: {lastCompletedRun}"
-                values={{
-                  lastCompletedRun: <FormattedRelativePreferenceDate value={lastCompletedRun} />,
-                }}
-              />
-            ) : (
-              getEmptyTagValue()
-            )
-          }
           title={i18n.PAGE_TITLE}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
@@ -182,6 +170,7 @@ const RulesPageComponent: React.FC = () => {
           hasNoPermissions={userHasNoPermissions}
           importCompleteToggle={importCompleteToggle}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
+          rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}
