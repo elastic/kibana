@@ -97,10 +97,10 @@ export const reporting = (kibana: any) => {
         savedObjects: server.savedObjects,
         fieldFormatServiceFactory,
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
-        log: server.log.bind(server),
       };
 
-      const plugin: ReportingPlugin = reportingPluginFactory(__LEGACY, this);
+      const initializerContext = server.newPlatform.coreContext;
+      const plugin: ReportingPlugin = reportingPluginFactory(initializerContext, __LEGACY, this);
       await plugin.setup(coreSetup, pluginsSetup);
     },
 

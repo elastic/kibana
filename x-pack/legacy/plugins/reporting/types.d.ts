@@ -71,7 +71,6 @@ export type ServerFacade = LegacySetup;
 export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
 
 export type EnqueueJobFn = <JobParamsType>(
-  parentLogger: LevelLogger,
   exportTypeId: string,
   jobParams: JobParamsType,
   user: string,
@@ -197,18 +196,6 @@ export interface JobDocPayload<JobParamsType> {
   type: string | null;
 }
 
-export interface JobDocOutput {
-  content: string; // encoded content
-  contentType: string;
-}
-
-export interface JobDocExecuted<JobParamsType> {
-  jobtype: string;
-  output: JobDocOutputExecuted;
-  payload: JobDocPayload<JobParamsType>;
-  status: string; // completed, failed, etc
-}
-
 export interface JobSource<JobParamsType> {
   _id: string;
   _source: {
@@ -219,21 +206,9 @@ export interface JobSource<JobParamsType> {
   };
 }
 
-/*
- * A snake_cased field is the only significant difference in structure of
- * JobDocOutputExecuted vs JobDocOutput.
- *
- * JobDocOutput is the structure of the object returned by getDocumentPayload
- *
- * data in the _source fields of the
- * Reporting index.
- *
- * The ESQueueWorker internals have executed job objects returned with this
- * structure. See `_formatOutput` in reporting/server/lib/esqueue/worker.js
- */
-export interface JobDocOutputExecuted {
-  content_type: string; // vs `contentType` above
-  content: string | null; // defaultOutput is null
+export interface JobDocOutput {
+  content_type: string;
+  content: string | null;
   max_size_reached: boolean;
   size: number;
 }
@@ -276,7 +251,7 @@ export type ImmediateExecuteFn<JobParamsType> = (
   jobId: null,
   job: JobDocPayload<JobParamsType>,
   request: RequestFacade
-) => Promise<JobDocOutputExecuted>;
+) => Promise<JobDocOutput>;
 
 export interface ESQueueWorkerOptions {
   kibanaName: string;
@@ -289,7 +264,7 @@ export interface ESQueueWorkerOptions {
 type GenericWorkerFn<JobParamsType> = (
   jobSource: JobSource<JobParamsType>,
   ...workerRestArgs: any[]
-) => void | Promise<JobDocOutputExecuted>;
+) => void | Promise<JobDocOutput>;
 
 export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   registerWorker: (
@@ -299,9 +274,13 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
+export type CreateJobFactory<CreateJobFnType> = (
+  server: ServerFacade,
+  logger: LevelLogger
+) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   server: ServerFacade,
+  logger: LevelLogger,
   opts: {
     browserDriverFactory: HeadlessChromiumDriverFactory;
   }
