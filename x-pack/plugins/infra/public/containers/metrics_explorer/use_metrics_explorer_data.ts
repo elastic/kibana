@@ -10,9 +10,9 @@ import { useEffect, useState } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../common/graphql/types';
 import { MetricsExplorerResponse } from '../../../common/http_api/metrics_explorer';
-import { fetch } from '../../utils/fetch';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOptions) {
   return isEqual(current, next);
@@ -26,6 +26,7 @@ export function useMetricsExplorerData(
   afterKey: string | null,
   signal: any
 ) {
+  const fetch = useKibana().services.http?.fetch;
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<MetricsExplorerResponse | null>(null);
@@ -41,9 +42,12 @@ export function useMetricsExplorerData(
         if (!from || !to) {
           throw new Error('Unalble to parse timerange');
         }
-        const response = await fetch.post<MetricsExplorerResponse>(
-          '../api/infra/metrics_explorer',
-          {
+        if (!fetch) {
+          throw new Error('HTTP service is unavailable');
+        }
+        const response = await fetch('/api/infra/metrics_explorer', {
+          method: 'POST',
+          body: JSON.stringify({
             metrics:
               options.aggregation === 'count'
                 ? [{ aggregation: 'count' }]
@@ -65,8 +69,9 @@ export function useMetricsExplorerData(
               from: from.valueOf(),
               to: to.valueOf(),
             },
-          }
-        );
+          }),
+        });
+
         if (response.data) {
           if (
             data &&

@@ -6,9 +6,10 @@
 
 import { useState, useEffect } from 'react';
 import { IpToHostResponse } from '../../../common/http_api/ip_to_hostname';
-import { fetch } from '../../utils/fetch';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const useHostIpToName = (ipAddress: string | null, indexPattern: string | null) => {
+  const fetch = useKibana().services.http?.fetch;
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoadingState] = useState<boolean>(true);
   const [data, setData] = useState<IpToHostResponse | null>(null);
@@ -18,10 +19,16 @@ export const useHostIpToName = (ipAddress: string | null, indexPattern: string |
       setLoadingState(true);
       setError(null);
       try {
+        if (!fetch) {
+          throw new Error('HTTP service is unavailable');
+        }
         if (ipAddress && indexPattern) {
-          const response = await fetch.post<IpToHostResponse>('../api/infra/ip_to_host', {
-            ip: ipAddress,
-            index_pattern: indexPattern,
+          const response = await fetch('/api/infra/ip_to_host', {
+            method: 'POST',
+            body: JSON.stringify({
+              ip: ipAddress,
+              index_pattern: indexPattern,
+            }),
           });
           setLoadingState(false);
           setData(response.data);
@@ -31,6 +38,6 @@ export const useHostIpToName = (ipAddress: string | null, indexPattern: string |
         setError(err);
       }
     })();
-  }, [ipAddress, indexPattern]);
+  }, [ipAddress, indexPattern, fetch]);
   return { name: (data && data.host) || null, loading, error };
 };
