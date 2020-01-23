@@ -16,6 +16,7 @@ import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_cl
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
   savedObjects: CoreSetup['savedObjects'];
+  getStartServices: CoreSetup['getStartServices'];
 }
 
 export interface SavedObjectsSetup {
@@ -29,6 +30,7 @@ export interface SavedObjectsSetup {
 export function setupSavedObjects({
   service,
   savedObjects,
+  getStartServices,
 }: SetupSavedObjectsParams): SavedObjectsSetup {
   // Register custom saved object client that will encrypt, decrypt and strip saved object
   // attributes where appropriate for any saved object repository request. We choose max possible
@@ -41,13 +43,16 @@ export function setupSavedObjects({
     ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
   );
 
-  const internalRepository = savedObjects.createInternalRepository();
+  const internalRepositoryPromise = getStartServices().then(([core]) =>
+    core.savedObjects.createInternalRepository()
+  );
   return {
     getDecryptedAsInternalUser: async <T extends SavedObjectAttributes = any>(
       type: string,
       id: string,
       options?: SavedObjectsBaseOptions
     ): Promise<SavedObject<T>> => {
+      const internalRepository = await internalRepositoryPromise;
       const savedObject = await internalRepository.get(type, id, options);
       return {
         ...savedObject,

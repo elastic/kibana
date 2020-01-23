@@ -18,7 +18,6 @@
  */
 
 import { Server } from 'hapi';
-import { CspConfig } from '../../../../../../core/server';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
 export function createCspCollector(server: Server) {
@@ -26,7 +25,11 @@ export function createCspCollector(server: Server) {
     type: 'csp',
     isReady: () => true,
     async fetch() {
-      const { strict, warnLegacyBrowsers, header } = server.newPlatform.setup.core.http.csp;
+      const {
+        strict,
+        warnLegacyBrowsers,
+        rulesChangedFromDefault,
+      } = server.newPlatform.setup.core.http.csp;
 
       return {
         strict,
@@ -34,7 +37,7 @@ export function createCspCollector(server: Server) {
         // It's important that we do not send the value of csp.header here as it
         // can be customized with values that can be identifiable to given
         // installs, such as URLs
-        rulesChangedFromDefault: header !== CspConfig.DEFAULT.header,
+        rulesChangedFromDefault,
       };
     },
   };

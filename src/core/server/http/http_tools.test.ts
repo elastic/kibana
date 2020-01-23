@@ -29,6 +29,7 @@ import { defaultValidationErrorHandler, HapiValidationError, getServerOptions } 
 import { HttpServer } from './http_server';
 import { HttpConfig, config } from './http_config';
 import { Router } from './router';
+import { createMockEnv } from '../config/env.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { ByteSizeValue } from '@kbn/config-schema';
 
@@ -120,7 +121,8 @@ describe('getServerOptions', () => {
           certificate: 'some-certificate-path',
         },
       }),
-      {} as any
+      {} as any,
+      createMockEnv()
     );
 
     expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`
@@ -149,7 +151,8 @@ describe('getServerOptions', () => {
           clientAuthentication: 'required',
         },
       }),
-      {} as any
+      {} as any,
+      createMockEnv()
     );
 
     expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`
