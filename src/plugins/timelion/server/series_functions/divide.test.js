@@ -17,13 +17,21 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import fn from './divide';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import _ from 'lodash';
+const expect = require('chai').expect;
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('divide.js', () => {
+  let seriesList;
+  beforeEach(() => {
+    seriesList = require('./fixtures/series_list.js')();
+  });
+
+  it('divides by a single number', () => {
+    return invoke(fn, [seriesList, 2]).then(r => {
+      expect(_.map(r.output.list[1].data, 1)).to.eql([50, 25, 25, 10]);
+    });
+  });
+});

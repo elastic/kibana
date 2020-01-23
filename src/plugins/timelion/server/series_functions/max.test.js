@@ -17,13 +17,21 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import fn from './max';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import _ from 'lodash';
+const expect = require('chai').expect;
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('max.js', () => {
+  let seriesList;
+  beforeEach(() => {
+    seriesList = require('./fixtures/series_list.js')();
+  });
+
+  it('keeps the max of a series vs a number', () => {
+    return invoke(fn, [seriesList, 20]).then(r => {
+      expect(_.map(r.output.list[0].data, 1)).to.eql([20, 20, 82, 20]);
+    });
+  });
+});

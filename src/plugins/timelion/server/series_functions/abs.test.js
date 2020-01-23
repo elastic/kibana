@@ -17,13 +17,27 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import fn from './abs';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import _ from 'lodash';
+const expect = require('chai').expect;
+const seriesList = require('./fixtures/series_list.js')();
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('abs.js', function() {
+  it('should return the positive value of every value', function() {
+    return invoke(fn, [seriesList]).then(function(result) {
+      const before = _.filter(result.input[0].list[0].data, function(point) {
+        return point[1] < 0;
+      });
+
+      const after = _.filter(result.output.list[0].data, function(point) {
+        return point[1] < 0;
+      });
+
+      expect(before.length > 0).to.eql(true);
+      expect(result.output.list[0].data.length > 0).to.eql(true);
+      expect(after.length).to.eql(0);
+    });
+  });
+});
