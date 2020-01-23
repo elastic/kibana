@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { disableAlertRoute } from './disable';
 
 const { server, alertsClient } = createMockServer();
-disableAlertRoute(server);
+server.route(disableAlertRoute);
 
 test('disables an alert', async () => {
   const request = {

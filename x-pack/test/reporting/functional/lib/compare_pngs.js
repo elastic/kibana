@@ -7,10 +7,9 @@
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'bluebird';
-import mkdirp from 'mkdirp';
 import { comparePngs } from '../../../../../test/functional/services/lib/compare_pngs';
 
-const mkdirAsync = promisify(mkdirp);
+const mkdirAsync = promisify(fs.mkdir);
 
 export async function checkIfPngsMatch(actualpngPath, baselinepngPath, screenshotsDirectory, log) {
   log.debug(`checkIfpngsMatch: ${actualpngPath} vs ${baselinepngPath}`);
@@ -19,13 +18,16 @@ export async function checkIfPngsMatch(actualpngPath, baselinepngPath, screensho
   const sessionDirectoryPath = path.resolve(screenshotsDirectory, 'session');
   const failureDirectoryPath = path.resolve(screenshotsDirectory, 'failure');
 
-  await mkdirAsync(sessionDirectoryPath);
-  await mkdirAsync(failureDirectoryPath);
+  await mkdirAsync(sessionDirectoryPath, { recursive: true });
+  await mkdirAsync(failureDirectoryPath, { recursive: true });
 
   const actualpngFileName = path.basename(actualpngPath, '.png');
   const baselinepngFileName = path.basename(baselinepngPath, '.png');
 
-  const baselineCopyPath = path.resolve(sessionDirectoryPath, `${baselinepngFileName}_baseline.png`);
+  const baselineCopyPath = path.resolve(
+    sessionDirectoryPath,
+    `${baselinepngFileName}_baseline.png`
+  );
   const actualCopyPath = path.resolve(sessionDirectoryPath, `${actualpngFileName}_actual.png`);
 
   // Don't cause a test failure if the baseline snapshot doesn't exist - we don't have all OS's covered and we
@@ -44,8 +46,13 @@ export async function checkIfPngsMatch(actualpngPath, baselinepngPath, screensho
   let diffTotal = 0;
 
   const diffPngPath = path.resolve(failureDirectoryPath, `${baselinepngFileName}-${1}.png`);
-  diffTotal += await comparePngs(actualCopyPath, baselineCopyPath, diffPngPath, sessionDirectoryPath, log);
-
+  diffTotal += await comparePngs(
+    actualCopyPath,
+    baselineCopyPath,
+    diffPngPath,
+    sessionDirectoryPath,
+    log
+  );
 
   return diffTotal;
 }

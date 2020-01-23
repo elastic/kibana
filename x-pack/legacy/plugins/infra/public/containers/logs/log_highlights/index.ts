@@ -5,4 +5,3 @@
  */
 
 export * from './log_highlights';
-export * from './redux_bridges';

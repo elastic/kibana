@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -41,7 +41,7 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import { setup as visualizationsSetup } from '../../../visualizations/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 
 const THRESHOLD = 0.1;
@@ -50,11 +50,11 @@ const PIXEL_DIFF = 30;
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let imageComparator;
   let vegaVisualizationDependencies;
+  let visRegComplete = false;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
@@ -62,14 +62,26 @@ describe('VegaVisualizations', () => {
       vegaVisualizationDependencies = {
         es: $injector.get('es'),
         serviceSettings: $injector.get('serviceSettings'),
-        uiSettings: $injector.get('config'),
+        core: {
+          uiSettings: $injector.get('config'),
+        },
+        plugins: {
+          data: {
+            query: {
+              timefilter: {
+                timefilter: {},
+              },
+            },
+          },
+        },
       };
 
-      visualizationsSetup.types.registerVisualization(() =>
-        createVegaTypeDefinition(vegaVisualizationDependencies)
-      );
-
-      Vis = Private(visModule.VisProvider);
+      if (!visRegComplete) {
+        visRegComplete = true;
+        visualizationsSetup.types.createBaseVisualization(
+          createVegaTypeDefinition(vegaVisualizationDependencies)
+        );
+      }
 
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
@@ -77,19 +89,19 @@ describe('VegaVisualizations', () => {
   );
 
   describe('VegaVisualization - basics', () => {
-    beforeEach(async function () {
+    beforeEach(async function() {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
       vis = new Vis(indexPattern, { type: 'vega' });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize', async function () {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function() {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -112,7 +124,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph', async function () {
+    it('should show vega graph (may fail in dev env)', async function() {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -128,7 +140,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vegatooltip on mouseover over a vega graph', async () => {
+    it('should show vegatooltip on mouseover over a vega graph (may fail in dev env)', async () => {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -149,7 +161,7 @@ describe('VegaVisualizations', () => {
 
         $el.find('canvas')[0].dispatchEvent(event);
 
-        await Promise.delay(10);
+        await Bluebird.delay(10);
 
         let tooltip = document.getElementById('vega-kibana-tooltip');
         expect(tooltip).to.be.ok();

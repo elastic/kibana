@@ -62,9 +62,9 @@ The list of common parameters:
 - *visualization*: A constructor function for a Visualization.
 - *requestHandler*: <string> one of the available request handlers or a <function> for a custom request handler
 - *responseHandler*: <string> one of the available response handlers or a <function> for a custom response handler
-- *editor*: <string> one of the available editors or Editor class for custom one
+- *editor*: Editor class for custom one
 - *editorConfig*: object holding editor parameters
-- *options.showTimePicker*: <bool> show or hide time picker (defaults to true)
+- *options.showTimePicker*: <bool> show or hide time filter (defaults to true)
 - *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
 - *options.showFilterBar*: <bool> show or hide filter bar (defaults to true)
 - *options.showIndexSelection*: <bool> show or hide index selection (defaults to true)
@@ -208,8 +208,8 @@ This is the sidebar editor you see in many of the Kibana visualizations. You can
 
 [[development-default-editor]]
 ==== `default` editor controller
-The default editor controller receives an `optionsTemplate` or `optionsTabs` parameter. 
-These can be either an AngularJS template or React component.
+The default editor controller receives an `optionsTemplate` or `optionTabs` parameter. 
+These tabs should be React components.
 
 ["source","js"]
 -----------
@@ -218,14 +218,10 @@ These can be either an AngularJS template or React component.
     title: 'My New Vis',
     icon: 'my_icon',
     description: 'Cool new chart',
-    editor: 'default',
     editorConfig: {
-       optionsTemplate: '<my-custom-options-directive></my-custom-options-directive>' // or
        optionsTemplate: MyReactComponent // or if multiple tabs are required:
-       optionsTabs: [
-           { title: 'tab 1', template: '<div>....</div> },
-           { title: 'tab 2', template: '<my-custom-options-directive></my-custom-options-directive>' },
-           { title: 'tab 3', template: MyReactComponent }
+       optionTabs: [
+           { title: 'tab 3', editor: MyReactComponent }
        ]
     }
   }
@@ -275,7 +271,7 @@ VisTypesRegistryProvider.register(MyNewVisType);
 [[development-visualization-request-handlers]]
 === Visualization Request Handlers
 Request handler gets called when one of the following keys on AppState change:
-`vis`, `query`, `filters` or `uiState` and when timepicker is updated. On top
+`vis`, `query`, `filters` or `uiState` and when the time filter is updated. On top
 of that it will also get called on force refresh.
 
 By default visualizations will use the `courier` request handler. They can also choose to use any of the other provided 
@@ -417,7 +413,7 @@ The `vis` object holds the visualization state and is the window into kibana:
 - *vis.getUiState()*: gets UI state of visualization
 - *vis.uiStateVal(name, val)*: updates a property in UI state
 - *vis.isEditorMode()*: returns true if in editor mode
-- *vis.API.timeFilter*: allows you to access time picker
+- *vis.API.timeFilter*: allows you to access time filter
 - *vis.API.queryFilter*: gives you access to queryFilter
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
@@ -430,12 +426,12 @@ visualization's render method.
 For the parameters that should not be saved with the visualization you should use the UI state. 
 These hold viewer-specific state, such as popup open/closed, custom colors applied to the series etc.
 
-You can access filter bar and time picker through the objects defined on `vis.API`
+You can access the filter bar and time filter through the objects defined on `vis.API`
 
 [[development-vis-timefilter]]
 ==== timeFilter
 
-Update the timefilter time values and call update() method on it to update time picker
+Update the timefilter time values and call update() method on it to update the time filter
 
 ["source","js"]
 -----------

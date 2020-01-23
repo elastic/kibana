@@ -5,21 +5,12 @@
  */
 
 import { Location } from 'history';
-import { get, isEqual, difference, isEmpty } from 'lodash/fp';
+import { isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
+import { Query, esFilters } from 'src/plugins/data/public';
 
-import { convertKueryToElasticSearchQuery } from '../../lib/keury';
-import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
-import {
-  AbsoluteTimeRange,
-  LinkTo,
-  RelativeTimeRange,
-  UrlInputsModel,
-} from '../../store/inputs/model';
+import { UrlInputsModel } from '../../store/inputs/model';
 import { useApolloClient } from '../../utils/apollo_context';
-import { queryTimelineById } from '../open_timeline/helpers';
-import { HostsType } from '../../store/hosts/model';
-import { NetworkType } from '../../store/network/model';
 
 import { CONSTANTS, UrlStateType } from './constants';
 import {
@@ -28,23 +19,21 @@ import {
   replaceStateKeyInQueryString,
   getParamFromQueryString,
   decodeRisonUrlState,
-  isKqlForRoute,
-  getCurrentLocation,
   getUrlType,
   getTitle,
 } from './helpers';
-import { normalizeTimeRange } from './normalize_time_range';
 import {
   UrlStateContainerPropTypes,
   PreviousLocationUrlState,
   URL_STATE_KEYS,
   KeyUrlState,
-  KqlQuery,
   ALL_URL_STATE_KEYS,
+  UrlStateToRedux,
+  Timeline,
 } from './types';
 
 function usePrevious(value: PreviousLocationUrlState) {
-  const ref = useRef(value);
+  const ref = useRef<PreviousLocationUrlState>(value);
   useEffect(() => {
     ref.current = value;
   });
@@ -52,22 +41,14 @@ function usePrevious(value: PreviousLocationUrlState) {
 }
 
 export const useUrlStateHooks = ({
-  addGlobalLinkTo,
-  addTimelineLinkTo,
   detailName,
-  dispatch,
   indexPattern,
   history,
   navTabs,
   pageName,
   pathName,
-  removeGlobalLinkTo,
-  removeTimelineLinkTo,
   search,
-  setAbsoluteTimerange,
-  setHostsKql,
-  setNetworkKql,
-  setRelativeTimerange,
+  setInitialStateFromUrl,
   tabName,
   updateTimeline,
   updateTimelineIsLoading,
@@ -78,7 +59,7 @@ export const useUrlStateHooks = ({
   const prevProps = usePrevious({ pathName, urlState });
 
   const replaceStateInLocation = (
-    urlStateToReplace: UrlInputsModel | KqlQuery | string,
+    urlStateToReplace: UrlInputsModel | Query | esFilters.Filter[] | Timeline | string,
     urlStateKey: string,
     latestLocation: Location = {
       hash: '',
@@ -94,12 +75,12 @@ export const useUrlStateHooks = ({
         search,
         state: '',
       },
-      replaceStateKeyInQueryString(urlStateKey, urlStateToReplace)(
-        getQueryStringFromLocation(latestLocation)
-      )
+      replaceStateKeyInQueryString(
+        urlStateKey,
+        urlStateToReplace
+      )(getQueryStringFromLocation(latestLocation))
     );
-
-    if (history && !isEqual(newLocation.search, latestLocation.search)) {
+    if (history) {
       history.replace(newLocation);
     }
     return newLocation;
@@ -107,154 +88,66 @@ export const useUrlStateHooks = ({
 
   const handleInitialize = (initLocation: Location, type: UrlStateType) => {
     let myLocation: Location = initLocation;
+    let urlStateToUpdate: UrlStateToRedux[] = [];
     URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
       const newUrlStateString = getParamFromQueryString(
         getQueryStringFromLocation(initLocation),
         urlKey
       );
       if (newUrlStateString) {
-        const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
+        const queryState: Query | Timeline | esFilters.Filter[] = decodeRisonUrlState(
+          newUrlStateString
+        );
+
         if (
-          urlKey === CONSTANTS.kqlQuery &&
-          !isKqlForRoute(pageName, detailName, kqlQueryStateData.queryLocation) &&
-          urlState[urlKey].queryLocation === kqlQueryStateData.queryLocation
+          urlKey === CONSTANTS.appQuery &&
+          queryState != null &&
+          (queryState as Query).query === ''
         ) {
-          myLocation = replaceStateInLocation(
-            {
-              filterQuery: null,
-              queryLocation: null,
-            },
-            urlKey,
-            myLocation
-          );
+          myLocation = replaceStateInLocation('', urlKey, myLocation);
+        } else if (urlKey === CONSTANTS.filters && isEmpty(queryState)) {
+          myLocation = replaceStateInLocation('', urlKey, myLocation);
+        } else if (
+          urlKey === CONSTANTS.timeline &&
+          queryState != null &&
+          (queryState as Timeline).id === ''
+        ) {
+          myLocation = replaceStateInLocation('', urlKey, myLocation);
         }
         if (isInitializing) {
-          setInitialStateFromUrl(urlKey, newUrlStateString);
+          urlStateToUpdate = [...urlStateToUpdate, { urlKey, newUrlStateString }];
         }
+      } else if (
+        urlKey === CONSTANTS.appQuery &&
+        urlState[urlKey] != null &&
+        (urlState[urlKey] as Query).query === ''
+      ) {
+        myLocation = replaceStateInLocation('', urlKey, myLocation);
+      } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
+        myLocation = replaceStateInLocation('', urlKey, myLocation);
+      } else if (
+        urlKey === CONSTANTS.timeline &&
+        urlState[urlKey] != null &&
+        (urlState[urlKey] as Timeline).id === ''
+      ) {
+        myLocation = replaceStateInLocation('', urlKey, myLocation);
       } else {
-        myLocation = replaceStateInLocation(urlState[urlKey], urlKey, myLocation);
+        myLocation = replaceStateInLocation(urlState[urlKey] || '', urlKey, myLocation);
       }
     });
     difference(ALL_URL_STATE_KEYS, URL_STATE_KEYS[type]).forEach((urlKey: KeyUrlState) => {
       myLocation = replaceStateInLocation('', urlKey, myLocation);
     });
-  };
 
-  const setInitialStateFromUrl = (urlKey: KeyUrlState, newUrlStateString: string) => {
-    if (urlKey === CONSTANTS.timerange) {
-      const timerangeStateData: UrlInputsModel = decodeRisonUrlState(newUrlStateString);
-
-      const globalId: InputsModelId = 'global';
-      const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', timerangeStateData) };
-      const globalType: TimeRangeKinds = get('global.timerange.kind', timerangeStateData);
-
-      const timelineId: InputsModelId = 'timeline';
-      const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', timerangeStateData) };
-      const timelineType: TimeRangeKinds = get('timeline.timerange.kind', timerangeStateData);
-
-      if (isEmpty(globalLinkTo.linkTo)) {
-        dispatch(removeGlobalLinkTo());
-      } else {
-        dispatch(addGlobalLinkTo({ linkToId: 'timeline' }));
-      }
-
-      if (isEmpty(timelineLinkTo.linkTo)) {
-        dispatch(removeTimelineLinkTo());
-      } else {
-        dispatch(addTimelineLinkTo({ linkToId: 'global' }));
-      }
-
-      if (timelineType) {
-        if (timelineType === 'absolute') {
-          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-            get('timeline.timerange', timerangeStateData)
-          );
-          dispatch(
-            setAbsoluteTimerange({
-              ...absoluteRange,
-              id: timelineId,
-            })
-          );
-        }
-        if (timelineType === 'relative') {
-          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-            get('timeline.timerange', timerangeStateData)
-          );
-          dispatch(
-            setRelativeTimerange({
-              ...relativeRange,
-              id: timelineId,
-            })
-          );
-        }
-      }
-
-      if (globalType) {
-        if (globalType === 'absolute') {
-          const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
-            get('global.timerange', timerangeStateData)
-          );
-          dispatch(
-            setAbsoluteTimerange({
-              ...absoluteRange,
-              id: globalId,
-            })
-          );
-        }
-        if (globalType === 'relative') {
-          const relativeRange = normalizeTimeRange<RelativeTimeRange>(
-            get('global.timerange', timerangeStateData)
-          );
-          dispatch(
-            setRelativeTimerange({
-              ...relativeRange,
-              id: globalId,
-            })
-          );
-        }
-      }
-    }
-    if (urlKey === CONSTANTS.kqlQuery && indexPattern != null) {
-      const kqlQueryStateData: KqlQuery = decodeRisonUrlState(newUrlStateString);
-      if (isKqlForRoute(pageName, detailName, kqlQueryStateData.queryLocation)) {
-        const filterQuery = {
-          kuery: kqlQueryStateData.filterQuery,
-          serializedQuery: convertKueryToElasticSearchQuery(
-            kqlQueryStateData.filterQuery ? kqlQueryStateData.filterQuery.expression : '',
-            indexPattern
-          ),
-        };
-        const page = getCurrentLocation(pageName, detailName);
-        if ([CONSTANTS.hostsPage, CONSTANTS.hostsDetails].includes(page)) {
-          dispatch(
-            setHostsKql({
-              filterQuery,
-              hostsType: page === CONSTANTS.hostsPage ? HostsType.page : HostsType.details,
-            })
-          );
-        } else if ([CONSTANTS.networkPage, CONSTANTS.networkDetails].includes(page)) {
-          dispatch(
-            setNetworkKql({
-              filterQuery,
-              networkType: page === CONSTANTS.networkPage ? NetworkType.page : NetworkType.details,
-            })
-          );
-        }
-      }
-    }
-
-    if (urlKey === CONSTANTS.timelineId) {
-      const timelineId = decodeRisonUrlState(newUrlStateString);
-      if (timelineId != null) {
-        queryTimelineById({
-          apolloClient,
-          duplicate: false,
-          timelineId,
-          updateIsLoading: updateTimelineIsLoading,
-          updateTimeline,
-        });
-      }
-    }
+    setInitialStateFromUrl({
+      apolloClient,
+      detailName,
+      indexPattern,
+      pageName,
+      updateTimeline,
+      updateTimelineIsLoading,
+      urlStateToUpdate,
+    })();
   };
 
   useEffect(() => {
@@ -269,10 +162,26 @@ export const useUrlStateHooks = ({
     if (isInitializing && pageName != null && pageName !== '') {
       handleInitialize(location, type);
       setIsInitializing(false);
-    } else if (!isEqual(urlState, prevProps.urlState)) {
+    } else if (!isEqual(urlState, prevProps.urlState) && !isInitializing) {
       let newLocation: Location = location;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
-        newLocation = replaceStateInLocation(urlState[urlKey], urlKey, newLocation);
+        if (
+          urlKey === CONSTANTS.appQuery &&
+          urlState[urlKey] != null &&
+          (urlState[urlKey] as Query).query === ''
+        ) {
+          newLocation = replaceStateInLocation('', urlKey, newLocation);
+        } else if (urlKey === CONSTANTS.filters && isEmpty(urlState[urlKey])) {
+          newLocation = replaceStateInLocation('', urlKey, newLocation);
+        } else if (
+          urlKey === CONSTANTS.timeline &&
+          urlState[urlKey] != null &&
+          (urlState[urlKey] as Timeline).id === ''
+        ) {
+          newLocation = replaceStateInLocation('', urlKey, newLocation);
+        } else {
+          newLocation = replaceStateInLocation(urlState[urlKey] || '', urlKey, newLocation);
+        }
       });
     } else if (pathName !== prevProps.pathName) {
       handleInitialize(location, type);

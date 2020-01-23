@@ -19,29 +19,38 @@
 
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
-import { PluginInitializerContext } from 'src/core/server';
-import { CoreSetup } from 'src/core/server';
-
-import { plugin } from './server/';
-import { CustomCoreSetup } from './server/plugin';
 
 import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy/types';
+import { VisTypeTimeseriesSetup } from '../../../plugins/vis_type_timeseries/server';
 
 const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'metrics',
-    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'expressions'],
+    require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({}),
+      mappings: {
+        'tsvb-validation-telemetry': {
+          properties: {
+            failedRequests: {
+              type: 'long',
+            },
+          },
+        },
+      },
+      savedObjectSchemas: {
+        'tsvb-validation-telemetry': {
+          isNamespaceAgnostic: true,
+        },
+      },
     },
     init: (server: Legacy.Server) => {
-      const initializerContext = {} as PluginInitializerContext;
-      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
-
-      plugin(initializerContext).setup(core);
+      const visTypeTimeSeriesPlugin = server.newPlatform.setup.plugins
+        .metrics as VisTypeTimeseriesSetup;
+      visTypeTimeSeriesPlugin.__legacy.registerLegacyAPI({ server });
     },
     config(Joi: any) {
       return Joi.object({

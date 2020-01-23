@@ -91,7 +91,7 @@ and whether it's _tokenized_, or broken up into separate words.
 
 NOTE: If security is enabled, you must have the `all` Kibana privilege to run this tutorial.
 You must also have the `create`, `manage` `read`, `write,` and `delete` 
-index privileges. See {xpack-ref}/security-privileges.html[Security Privileges] 
+index privileges. See {ref}/security-privileges.html[Security privileges] 
 for more information.
 
 In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set:
@@ -183,7 +183,7 @@ At this point, you're ready to use the Elasticsearch {ref}/docs-bulk.html[bulk]
 API to load the data sets:
 
 [source,shell]
-curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/bank/account/_bulk?pretty' --data-binary @accounts.json
+curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/bank/_bulk?pretty' --data-binary @accounts.json
 curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
 curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/_bulk?pretty' --data-binary @logs.jsonl
 

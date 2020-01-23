@@ -29,12 +29,15 @@ describe('mergeProjection', () => {
   });
 
   it('merges plain objects', () => {
+    const termsAgg = { terms: { field: 'bar' } };
     expect(
       mergeProjection(
-        { body: { query: {}, aggs: { foo: { terms: { field: 'bar' } } } } },
+        { body: { query: {}, aggs: { foo: termsAgg } } },
         {
           body: {
-            aggs: { foo: { aggs: { bar: { terms: { field: 'baz' } } } } }
+            aggs: {
+              foo: { ...termsAgg, aggs: { bar: { terms: { field: 'baz' } } } }
+            }
           }
         }
       )

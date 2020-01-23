@@ -10,7 +10,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
-import { Editor } from '../editor';
+import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { CanvasFunction } from '../../../types';
 import {
@@ -268,7 +268,7 @@ export class ExpressionInput extends React.Component<Props> {
           error={error}
         >
           <div className="canvasExpressionInput__editor">
-            <Editor
+            <CodeEditor
               languageId={LANGUAGE_ID}
               value={value}
               onChange={this.onChange}

@@ -13,6 +13,7 @@
 
   .help-block {
     font-size: $euiFontSizeXS;
+    color: $euiTextColor;
   }
 }
 
@@ -27,7 +28,7 @@
 
 .gphSidebar__panel{
   max-height: $euiSizeL * 10;
-  overflow-y: auto;
+  overflow-y: hidden auto;
 }
 
 /**
@@ -49,6 +50,10 @@
   margin-bottom: 0;
 }
 
+.gphSelectionList__icon {
+  font-size: $euiFontSizeXS;
+}
+
 .gphSelectionList__field {
   line-height: $euiLineHeight;
   margin: $euiSizeXS 0;
@@ -64,19 +69,8 @@
 }
 
 /**
- * Link summary / Venn Diagram
+ * Link summary
  */
-
-.gphLinkSummary__venn {
-  .venn1 {
-    fill: $euiColorDanger;
-    fill-opacity:0.5;
-  }
-  .venn2 {
-    fill: $euiColorPrimary;
-    fill-opacity:0.5;
-  }
-}
 
 .gphLinkSummary__term--1 {
   color:$euiColorDanger;

@@ -21,7 +21,7 @@ import { first } from 'rxjs/operators';
 
 import { MockClusterClient } from './elasticsearch_service.test.mocks';
 
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
@@ -30,6 +30,7 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
+import { elasticsearchServiceMock } from './elasticsearch_service.mock';
 
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
@@ -69,42 +70,25 @@ describe('#setup', () => {
     );
   });
 
-  it('returns data and admin client observables as a part of the contract', async () => {
-    const mockAdminClusterClientInstance = { close: jest.fn() };
-    const mockDataClusterClientInstance = { close: jest.fn() };
+  it('returns data and admin client as a part of the contract', async () => {
+    const mockAdminClusterClientInstance = elasticsearchServiceMock.createClusterClient();
+    const mockDataClusterClientInstance = elasticsearchServiceMock.createClusterClient();
     MockClusterClient.mockImplementationOnce(
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
 
     const setupContract = await elasticsearchService.setup(deps);
 
-    const [esConfig, adminClient, dataClient] = await combineLatest(
-      setupContract.legacy.config$,
-      setupContract.adminClient$,
-      setupContract.dataClient$
-    )
-      .pipe(first())
-      .toPromise();
+    const adminClient = setupContract.adminClient;
+    const dataClient = setupContract.dataClient;
 
-    expect(adminClient).toBe(mockAdminClusterClientInstance);
-    expect(dataClient).toBe(mockDataClusterClientInstance);
+    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    await adminClient.callAsInternalUser('any');
+    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
 
-    expect(MockClusterClient).toHaveBeenCalledTimes(2);
-    expect(MockClusterClient).toHaveBeenNthCalledWith(
-      1,
-      esConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'admin'] }),
-      undefined
-    );
-    expect(MockClusterClient).toHaveBeenNthCalledWith(
-      2,
-      esConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'data'] }),
-      expect.any(Function)
-    );
-
-    expect(mockAdminClusterClientInstance.close).not.toHaveBeenCalled();
-    expect(mockDataClusterClientInstance.close).not.toHaveBeenCalled();
+    expect(mockDataClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    await dataClient.callAsInternalUser('any');
+    expect(mockDataClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
   });
 
   describe('#createClient', () => {
@@ -174,10 +158,58 @@ Object {
     undefined,
   ],
   "ssl": Object {
+    "alwaysPresentCertificate": undefined,
+    "certificate": undefined,
+    "certificateAuthorities": undefined,
+    "key": undefined,
+    "keyPassphrase": undefined,
     "verificationMode": "none",
   },
 }
 `);
+    });
+
+    it('does not merge elasticsearch hosts if custom config overrides', async () => {
+      configService.atPath.mockReturnValueOnce(
+        new BehaviorSubject({
+          hosts: ['http://1.2.3.4', 'http://9.8.7.6'],
+          healthCheck: {
+            delay: 2000,
+          },
+          ssl: {
+            verificationMode: 'none',
+          },
+        } as any)
+      );
+      elasticsearchService = new ElasticsearchService(coreContext);
+      const setupContract = await elasticsearchService.setup(deps);
+      // reset all mocks called during setup phase
+      MockClusterClient.mockClear();
+
+      const customConfig = {
+        hosts: ['http://8.8.8.8'],
+        logQueries: true,
+        ssl: { certificate: 'certificate-value' },
+      };
+      setupContract.createClient('some-custom-type', customConfig);
+
+      const config = MockClusterClient.mock.calls[0][0];
+      expect(config).toMatchInlineSnapshot(`
+        Object {
+          "healthCheckDelay": 2000,
+          "hosts": Array [
+            "http://8.8.8.8",
+          ],
+          "logQueries": true,
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
+        }
+      `);
     });
   });
 });

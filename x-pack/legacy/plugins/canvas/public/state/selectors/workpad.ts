@@ -421,3 +421,56 @@ export function getRefreshInterval(state: State): number {
 export function getAutoplay(state: State): State['transient']['autoplay'] {
   return get(state, 'transient.autoplay');
 }
+
+export function getRenderedWorkpad(state: State) {
+  const currentPages = getPages(state);
+  const args = state.transient.resolvedArgs;
+  const renderedPages = currentPages.map(page => {
+    const { elements, ...rest } = page;
+    return {
+      ...rest,
+      elements: elements.map(element => {
+        const { id, position } = element;
+        const arg = args[id];
+        if (!arg) {
+          return null;
+        }
+        const { expressionRenderable } = arg;
+
+        return { id, position, expressionRenderable };
+      }),
+    };
+  });
+
+  const workpad = getWorkpad(state);
+
+  // eslint-disable-next-line no-unused-vars
+  const { pages, ...rest } = workpad;
+
+  return {
+    pages: renderedPages,
+    ...rest,
+  };
+}
+
+export function getRenderedWorkpadExpressions(state: State) {
+  const workpad = getRenderedWorkpad(state);
+  const { pages } = workpad;
+  const expressions: string[] = [];
+
+  pages.forEach(page =>
+    page.elements.forEach(element => {
+      if (element && element.expressionRenderable) {
+        const { value } = element.expressionRenderable;
+        if (value) {
+          const { as } = value;
+          if (!expressions.includes(as)) {
+            expressions.push(as);
+          }
+        }
+      }
+    })
+  );
+
+  return expressions;
+}

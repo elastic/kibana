@@ -1,0 +1,35 @@
+{
+  "description": "Null user agent",
+  "enabled": false,
+  "filters": [
+    {
+      "meta": {
+        "alias": null,
+        "negate": true,
+        "disabled": false,
+        "type": "exists",
+        "key": "user_agent.original",
+        "value": "exists",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "exists": {
+        "field": "user_agent.original"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Null user agent",
+  "query": "url.path: *",
+  "risk_score": 50,
+  "rule_id": "43303fd4-4839-4e48-b2b2-803ab060758d",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

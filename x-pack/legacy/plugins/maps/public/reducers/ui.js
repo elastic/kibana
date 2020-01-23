@@ -14,13 +14,13 @@ import {
   SET_OPEN_TOC_DETAILS,
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
-  UPDATE_INDEXING_STAGE
+  UPDATE_INDEXING_STAGE,
 } from '../actions/ui_actions';
 
 export const FLYOUT_STATE = {
   NONE: 'NONE',
   LAYER_PANEL: 'LAYER_PANEL',
-  ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD'
+  ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD',
 };
 
 export const INDEXING_STAGE = {
@@ -41,7 +41,7 @@ const INITIAL_STATE = {
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
-  importIndexingStage: null
+  importIndexingStage: null,
 };
 
 // Reducer
@@ -64,17 +64,14 @@ export function ui(state = INITIAL_STATE, action) {
     case SHOW_TOC_DETAILS:
       return {
         ...state,
-        openTOCDetails: [
-          ...state.openTOCDetails,
-          action.layerId
-        ]
+        openTOCDetails: [...state.openTOCDetails, action.layerId],
       };
     case HIDE_TOC_DETAILS:
       return {
         ...state,
         openTOCDetails: state.openTOCDetails.filter(layerId => {
           return layerId !== action.layerId;
-        })
+        }),
       };
     case UPDATE_INDEXING_STAGE:
       return { ...state, importIndexingStage: action.stage };

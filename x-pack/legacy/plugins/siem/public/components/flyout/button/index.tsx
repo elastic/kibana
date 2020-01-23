@@ -5,15 +5,14 @@
  */
 
 import { EuiNotificationBadge, EuiIcon, EuiButton } from '@elastic/eui';
-import * as React from 'react';
+import { rgba } from 'polished';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import {
   droppableTimelineFlyoutButtonPrefix,
   IS_DRAGGING_CLASS_NAME,
-  TEN_PERCENT_ALPHA_HEX_SUFFIX,
-  TWENTY_PERCENT_ALPHA_HEX_SUFFIX,
 } from '../../drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 
@@ -28,13 +27,12 @@ const Container = styled.div`
   padding-top: 8px;
   position: fixed;
   top: 40%;
-  right: -49px;
-  z-index: 9;
+  right: -51px;
+  z-index: ${({ theme }) => theme.eui.euiZLevel9};
   transform: rotate(-90deg);
   user-select: none;
 
   button {
-    border-bottom: none;
     border-radius: 4px 4px 0 0;
     box-shadow: none;
     height: 46px;
@@ -47,20 +45,20 @@ const Container = styled.div`
   }
 
   .euiButton--primary:enabled {
+    background: ${({ theme }) => theme.eui.euiColorEmptyShade};
     box-shadow: none;
   }
 
   .euiButton--primary:enabled:hover,
   .euiButton--primary:enabled:focus {
     animation: none;
-    background-color: inherit;
+    background: ${({ theme }) => theme.eui.euiColorEmptyShade};
     box-shadow: none;
   }
 
   .${IS_DRAGGING_CLASS_NAME} & .${NOT_READY_TO_DROP_CLASS_NAME} {
     color: ${({ theme }) => theme.eui.euiColorSuccess};
-    background: ${({ theme }) =>
-      `${theme.eui.euiColorSuccess}${TEN_PERCENT_ALPHA_HEX_SUFFIX} !important`};
+    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)} !important;
     border: 1px solid ${({ theme }) => theme.eui.euiColorSuccess};
     border-bottom: none;
     text-decoration: none;
@@ -68,8 +66,7 @@ const Container = styled.div`
 
   .${READY_TO_DROP_CLASS_NAME} {
     color: ${({ theme }) => theme.eui.euiColorSuccess};
-    background: ${({ theme }) =>
-      `${theme.eui.euiColorSuccess}${TWENTY_PERCENT_ALPHA_HEX_SUFFIX} !important`};
+    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
     border: 1px solid ${({ theme }) => theme.eui.euiColorSuccess};
     border-bottom: none;
     text-decoration: none;

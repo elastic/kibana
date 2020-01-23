@@ -8,6 +8,7 @@ import { reducer, initialState } from './api';
 import { API_STATUS } from '../../constants';
 import { apiRequestStart, apiRequestEnd, setApiError } from '../actions';
 
+jest.mock('ui/new_platform');
 jest.mock('../../constants', () => ({
   API_STATUS: {
     IDLE: 'idle',
@@ -16,7 +17,7 @@ jest.mock('../../constants', () => ({
   SECTIONS: {
     AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
     FOLLOWER_INDEX: 'followerIndex',
-  }
+  },
 }));
 
 describe('CCR Api reducers', () => {

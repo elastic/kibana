@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#scheme returns error when shorter string 1`] = `"expected URI with scheme [http|https] but but got [ftp://elastic.co]."`;
+exports[`#scheme returns error when shorter string 1`] = `"expected URI with scheme [http|https] but got [ftp://elastic.co]."`;
 
-exports[`#scheme returns error when shorter string 2`] = `"expected URI with scheme [http|https] but but got [file:///kibana.log]."`;
+exports[`#scheme returns error when shorter string 2`] = `"expected URI with scheme [http|https] but got [file:///kibana.log]."`;
 
 exports[`#validate throws when returns string 1`] = `"validator failure"`;
 

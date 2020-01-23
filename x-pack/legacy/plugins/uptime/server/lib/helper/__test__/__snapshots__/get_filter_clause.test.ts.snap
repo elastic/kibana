@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getFilterClause returns a filter object with additional fields 1`] = `
+Array [
+  Object {
+    "range": Object {
+      "@timestamp": Object {
+        "gte": "now-15m",
+        "lte": "now",
+      },
+    },
+  },
+  Object {
+    "exists": Object {
+      "field": "summary.up",
+    },
+  },
+  Object {
+    "bool": Object {
+      "must": Array [
+        Object {
+          "term": Object {
+            "monitor.id": "foo",
+          },
+        },
+      ],
+    },
+  },
+]
+`;
+
+exports[`getFilterClause returns a filter object with range when only dates are supplied 1`] = `
+Array [
+  Object {
+    "range": Object {
+      "@timestamp": Object {
+        "gte": "now-15m",
+        "lte": "now",
+      },
+    },
+  },
+]
+`;

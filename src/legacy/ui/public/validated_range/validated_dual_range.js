@@ -21,10 +21,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { isRangeValid } from './is_range_valid';
 
-import {
-  EuiFormRow,
-  EuiDualRange,
-} from '@elastic/eui';
+import { EuiFormRow, EuiDualRange } from '@elastic/eui';
 
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value
 // is valid and within min/max
@@ -43,15 +40,20 @@ export class ValidatedDualRange extends Component {
         value: nextProps.value,
         prevValue: nextProps.value,
         isValid,
-        errorMessage
+        errorMessage,
       };
     }
 
     return null;
   }
 
-  _onChange = (value) => {
-    const { isValid, errorMessage } = isRangeValid(value, this.props.min, this.props.max, this.props.allowEmptyRange);
+  _onChange = value => {
+    const { isValid, errorMessage } = isRangeValid(
+      value,
+      this.props.min,
+      this.props.max,
+      this.props.allowEmptyRange
+    );
 
     this.setState({
       value,
@@ -69,12 +71,12 @@ export class ValidatedDualRange extends Component {
       compressed,
       fullWidth,
       label,
+      formRowDisplay,
       value, // eslint-disable-line no-unused-vars
       onChange, // eslint-disable-line no-unused-vars
       allowEmptyRange, // eslint-disable-line no-unused-vars
       ...rest
     } = this.props;
-
 
     return (
       <EuiFormRow
@@ -83,6 +85,7 @@ export class ValidatedDualRange extends Component {
         isInvalid={!this.state.isValid}
         error={this.state.errorMessage ? [this.state.errorMessage] : []}
         label={label}
+        display={formRowDisplay}
       >
         <EuiDualRange
           compressed={compressed}
@@ -101,6 +104,7 @@ ValidatedDualRange.propTypes = {
   fullWidth: PropTypes.bool,
   compressed: PropTypes.bool,
   label: PropTypes.node,
+  formRowDisplay: PropTypes.string,
 };
 
 ValidatedDualRange.defaultProps = {

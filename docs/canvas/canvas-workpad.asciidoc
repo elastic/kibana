@@ -18,17 +18,17 @@ To create a workpad, you can:
 [[blank-canvas-workpad]]
 === Start with a blank page
 
-To use the background colors, images, and data of your choice, start with a blank workpad. 
+To use the background colors, images, and data of your choice, start with a blank workpad.
 
 . Open *Canvas*.
 
-. On the *Canvas workpads* page, click *Create workpad*.
+. On the *Canvas workpads* view, click *Create workpad*.
 
 . Add a *Name* to your workpad.
 
-. In the *Width* and *Height* fields, specify the size. 
+. In the *Width* and *Height* fields, specify the size.
 
-. Select the layout. 
+. Select the layout.
 +
 For example, click *720p* for a traditional presentation layout.
 
@@ -45,7 +45,7 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 
 . Open *Canvas*.
 
-. On the *Canvas workpads* page, select *Templates*.
+. On the *Canvas workpads* view, select *Templates*.
 
 . Click the preconfigured template that you want to use.
 
@@ -59,7 +59,7 @@ When you want to use a workpad that someone else has already started, import the
 
 . Open *Canvas*.
 
-. On the *Canvas workpads* page, click and drag the file to the *Import workpad JSON file* field.
+. On the *Canvas workpads* view, click and drag the file to the *Import workpad JSON file* field.
 
 [float]
 [[sample-data-workpad]]
@@ -67,11 +67,11 @@ When you want to use a workpad that someone else has already started, import the
 
 Each of the sample data sets comes with a Canvas workpad that you can use for your own workpad inspiration.
 
-. Add a {kibana-ref}/add-sample-data.html[sample data set]. 
+. Add a {kibana-ref}/add-sample-data.html[sample data set].
 
 . On the *Add Data to Kibana* page, click the *View data* dropdown list, then select *Canvas*.
 +
-Need some more workpad inspiration? Check out the link:https://www.elastic.co/blog/[Elastic Blog]. 
+Need some more workpad inspiration? Check out the link:https://www.elastic.co/blog/[Elastic Blog].
 
 [float]
 [[apply-workpad-styles]]

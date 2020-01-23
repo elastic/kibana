@@ -24,11 +24,14 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { InternalChromeStart } from '../chrome';
 import { InternalApplicationStart } from '../application';
 import { InjectedMetadataStart } from '../injected_metadata';
+import { OverlayStart } from '../overlays';
+import { AppWrapper, AppContainer } from './app_containers';
 
 interface StartDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   injectedMetadata: InjectedMetadataStart;
+  overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
 }
 
@@ -43,9 +46,16 @@ interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, injectedMetadata, targetDomElement }: StartDeps): RenderingStart {
+  start({
+    application,
+    chrome,
+    injectedMetadata,
+    overlays,
+    targetDomElement,
+  }: StartDeps): RenderingStart {
     const chromeUi = chrome.getHeaderComponent();
     const appUi = application.getComponent();
+    const bannerUi = overlays.banners.getComponent();
 
     const legacyMode = injectedMetadata.getLegacyMode();
     const legacyRef = legacyMode ? React.createRef<HTMLDivElement>() : null;
@@ -56,11 +66,12 @@ export class RenderingService {
           {chromeUi}
 
           {!legacyMode && (
-            <div className="app-wrapper">
+            <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
               <div className="app-wrapper-panel">
-                <div className="application">{appUi}</div>
+                <div id="globalBannerList">{bannerUi}</div>
+                <AppContainer classes$={chrome.getApplicationClasses$()}>{appUi}</AppContainer>
               </div>
-            </div>
+            </AppWrapper>
           )}
 
           {legacyMode && <div ref={legacyRef} />}

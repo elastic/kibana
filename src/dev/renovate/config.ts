@@ -21,7 +21,7 @@ import { RENOVATE_PACKAGE_GROUPS } from './package_groups';
 import { PACKAGE_GLOBS } from './package_globs';
 import { wordRegExp, maybeFlatMap, maybeMap, getTypePackageName } from './utils';
 
-const DEFAULT_LABELS = ['release_note:skip', 'renovate', 'v8.0.0', 'v7.5.0'];
+const DEFAULT_LABELS = ['release_note:skip', 'Team:Operations', 'renovate', 'v8.0.0', 'v7.6.0'];
 
 export const RENOVATE_CONFIG = {
   extends: ['config:base'],
@@ -44,6 +44,13 @@ export const RENOVATE_CONFIG = {
   major: {
     labels: [...DEFAULT_LABELS, 'renovate:major'],
   },
+
+  // TODO: remove this once we've caught up on upgrades
+  /**
+   * When there is a major and minor update available, only offer the major update,
+   * the list of all upgrades is too overwhelming for now.
+   */
+  separateMajorMinor: false,
 
   /**
    * Enable creation of a "Master Issue" within the repository. This
@@ -86,7 +93,9 @@ export const RENOVATE_CONFIG = {
         labels: group.extraLabels && [...DEFAULT_LABELS, ...group.extraLabels],
         enabled: group.enabled === false ? false : undefined,
         allowedVersions: group.allowedVersions || undefined,
-      })),
+        reviewers: group.reviewers || undefined,
+        masterIssueApproval: group.autoOpenPr ? false : undefined,
+      })).sort((a, b) => a.groupName.localeCompare(b.groupName)),
 
       // internal/local packages
       {
@@ -113,6 +122,11 @@ export const RENOVATE_CONFIG = {
    * Disable automatic rebase on each change to base branch
    */
   rebaseStalePrs: false,
+
+  /**
+   * Disable automatic rebase on conflicts with the base branch
+   */
+  rebaseConflictedPrs: false,
 
   /**
    * Disable semantic commit formating

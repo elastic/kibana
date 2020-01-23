@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`YExtents component should init with the default set of props 1`] = `
+<EuiFormRow
+  compressed={true}
+  describedByIds={Array []}
+  display="row"
+  error={Array []}
+  fullWidth={true}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  isInvalid={false}
+  labelType="label"
+>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
+    <EuiFlexItem>
+      <NumberInputOption
+        data-test-subj="yAxisYExtentsMin"
+        isInvalid={false}
+        label="Min"
+        paramName="min"
+        setValue={[Function]}
+        step={0.1}
+        value=""
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <NumberInputOption
+        data-test-subj="yAxisYExtentsMax"
+        label="Max"
+        paramName="max"
+        setValue={[Function]}
+        step={0.1}
+        value=""
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiFormRow>
+`;

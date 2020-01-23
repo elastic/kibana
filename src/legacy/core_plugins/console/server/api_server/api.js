@@ -25,16 +25,18 @@ class Api {
     this.endpoints = {};
     this.name = name;
   }
-  addGlobalAutocompleteRules = function (parentNode, rules) {
+
+  addGlobalAutocompleteRules = (parentNode, rules) => {
     this.globalRules[parentNode] = rules;
-  }
-  addEndpointDescription(endpoint, description = {}) {
+  };
+
+  addEndpointDescription = (endpoint, description = {}) => {
     let copiedDescription = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
     }
     let urlParamsDef;
-    _.each(description.patterns || [], function (p) {
+    _.each(description.patterns || [], function(p) {
       if (p.indexOf('{indices}') >= 0) {
         urlParamsDef = urlParamsDef || {};
         urlParamsDef.ignore_unavailable = '__flag__';
@@ -52,19 +54,19 @@ class Api {
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],
-      methods: ['GET']
+      methods: ['GET'],
     });
+
     this.endpoints[endpoint] = copiedDescription;
-  }
+  };
 
   asJson() {
     return {
-      'name': this.name,
-      'globals': this.globalRules,
-      'endpoints': this.endpoints
+      name: this.name,
+      globals: this.globalRules,
+      endpoints: this.endpoints,
     };
   }
-
 }
 
 export default Api;

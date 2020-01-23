@@ -73,7 +73,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
     <EuiPanel className="canvasAssetManager__emptyPanel">
       <EuiEmptyPrompt
         iconType="importAction"
-        title={<h2>{strings.getEmptyAssetsMessageText()}</h2>}
+        title={<h2>{strings.getEmptyAssetsDescription()}</h2>}
         titleSize="xs"
       />
     </EuiPanel>
@@ -88,7 +88,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
       >
         <EuiModalHeader className="canvasAssetManager__modalHeader">
           <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
-            {strings.getModalTitleText()}
+            {strings.getModalTitle()}
           </EuiModalHeaderTitle>
           <EuiFlexGroup className="canvasAssetManager__fileUploadWrapper">
             <EuiFlexItem grow={false}>
@@ -108,7 +108,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText size="s" color="subdued">
-            <p>{strings.getDescriptionText()}</p>
+            <p>{strings.getDescription()}</p>
           </EuiText>
           <EuiSpacer />
           {assetValues.length ? (
@@ -145,7 +145,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiButton size="s" onClick={onClose}>
-            {strings.getModalCloseBtnText()}
+            {strings.getModalCloseButtonLabel()}
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>

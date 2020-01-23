@@ -39,55 +39,80 @@
  * @packageDocumentation
  */
 
-import { Observable } from 'rxjs';
-import {
-  ClusterClient,
-  ElasticsearchClientConfig,
-  ElasticsearchServiceSetup,
-  ScopedClusterClient,
-} from './elasticsearch';
-import {
-  HttpServiceSetup,
-  HttpServiceStart,
-  IRouter,
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
-} from './http';
+import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import { HttpServiceSetup } from './http';
+import { IScopedRenderingClient } from './rendering';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
+import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
+import { SavedObjectsClientContract } from './saved_objects/types';
+import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { UuidServiceSetup } from './uuid';
 
 export { bootstrap } from './bootstrap';
-export { ConfigPath, ConfigService } from './config';
-export { IContextContainer, IContextProvider, IContextHandler } from './context';
-export { CoreId } from './core_context';
+export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
 export {
-  CallAPIOptions,
+  ConfigPath,
+  ConfigService,
+  ConfigDeprecation,
+  ConfigDeprecationProvider,
+  ConfigDeprecationLogger,
+  ConfigDeprecationFactory,
+  EnvironmentMode,
+  PackageInfo,
+} from './config';
+export {
+  IContextContainer,
+  IContextProvider,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+} from './context';
+export { CoreId } from './core_context';
+export { CspConfig, ICspConfig } from './csp';
+export {
   ClusterClient,
+  IClusterClient,
+  ICustomClusterClient,
   Headers,
   ScopedClusterClient,
+  IScopedClusterClient,
   ElasticsearchClientConfig,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
+  ElasticsearchServiceSetup,
   APICaller,
   FakeRequest,
+  ScopeableRequest,
 } from './elasticsearch';
+export * from './elasticsearch/api_types';
 export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthResult,
+  AuthResultType,
+  Authenticated,
+  BasePath,
+  IBasePath,
   CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
   HttpResponseOptions,
   HttpResponsePayload,
-  HttpServerSetup,
+  HttpServiceSetup,
+  HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
   IsAuthenticated,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
+  KibanaRequestRouteOptions,
+  IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
   LegacyRequest,
@@ -95,12 +120,14 @@ export {
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
   RedirectResponseOptions,
   RequestHandler,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
-  RequestHandlerParams,
-  RequestHandlerReturn,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
@@ -108,34 +135,56 @@ export {
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
+  RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
+  RouteConfigOptionsBody,
+  RouteContentType,
+  validBodyOutput,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
+export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
   DiscoveredPlugin,
   Plugin,
+  PluginConfigDescriptor,
+  PluginConfigSchema,
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
   PluginName,
+  SharedGlobalConfig,
 } from './plugins';
 
 export {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsClient,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportError,
@@ -147,13 +196,35 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
   SavedObjectsSerializer,
-  SavedObjectsService,
+  SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
+  SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
 } from './saved_objects';
+
+export {
+  IUiSettingsClient,
+  UiSettingsParams,
+  UiSettingsType,
+  UiSettingsServiceSetup,
+  UiSettingsServiceStart,
+  UserProvidedValues,
+  ImageValidation,
+  DeprecationSettings,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
+} from './ui_settings';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -161,24 +232,53 @@ export {
   SavedObject,
   SavedObjectAttribute,
   SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectReference,
   SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
 } from './types';
 
-export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';
+export {
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyServiceDiscoverPlugins,
+  LegacyConfig,
+  LegacyUiExports,
+  LegacyInternals,
+} from './legacy';
 
 /**
  * Plugin specific context passed to a route handler.
+ *
+ * Provides the following clients:
+ *    - {@link IScopedRenderingClient | rendering} - Rendering client
+ *      which uses the data of the incoming request
+ *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
+ *      which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
+ *      admin client which uses the credentials of the incoming request
+ *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
+ *      which uses the credentials of the incoming request
+ *
  * @public
  */
 export interface RequestHandlerContext {
   core: {
+    rendering: IScopedRenderingClient;
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
     elasticsearch: {
-      dataClient: ScopedClusterClient;
-      adminClient: ScopedClusterClient;
+      dataClient: IScopedClusterClient;
+      adminClient: IScopedClusterClient;
+    };
+    uiSettings: {
+      client: IUiSettingsClient;
     };
   };
 }
@@ -188,31 +288,28 @@ export interface RequestHandlerContext {
  *
  * @public
  */
-export interface CoreSetup {
-  context: {
-    createContextContainer: ContextSetup['createContextContainer'];
-  };
-  elasticsearch: {
-    adminClient$: Observable<ClusterClient>;
-    dataClient$: Observable<ClusterClient>;
-    createClient: (
-      type: string,
-      clientConfig?: Partial<ElasticsearchClientConfig>
-    ) => ClusterClient;
-  };
-  http: {
-    createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
-    registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-    registerAuth: HttpServiceSetup['registerAuth'];
-    registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-    basePath: HttpServiceSetup['basePath'];
-    isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-    registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-      name: T,
-      provider: RequestHandlerContextProvider<RequestHandlerContext>
-    ) => RequestHandlerContextContainer<RequestHandlerContext>;
-    createRouter: () => IRouter;
-  };
+export interface CoreSetup<TPluginsStart extends object = object> {
+  /** {@link CapabilitiesSetup} */
+  capabilities: CapabilitiesSetup;
+  /** {@link ContextSetup} */
+  context: ContextSetup;
+  /** {@link ElasticsearchServiceSetup} */
+  elasticsearch: ElasticsearchServiceSetup;
+  /** {@link HttpServiceSetup} */
+  http: HttpServiceSetup;
+  /** {@link SavedObjectsServiceSetup} */
+  savedObjects: SavedObjectsServiceSetup;
+  /** {@link UiSettingsServiceSetup} */
+  uiSettings: UiSettingsServiceSetup;
+  /** {@link UuidServiceSetup} */
+  uuid: UuidServiceSetup;
+  /**
+   * Allows plugins to get access to APIs available in start inside async handlers.
+   * Promise will not resolve until Core and plugin dependencies have completed `start`.
+   * This should only be used inside handlers registered during `setup` that will only be executed
+   * after `start` lifecycle.
+   */
+  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
 }
 
 /**
@@ -220,26 +317,22 @@ export interface CoreSetup {
  *
  * @public
  */
-export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
-/** @internal */
-export interface InternalCoreSetup {
-  context: ContextSetup;
-  http: HttpServiceSetup;
-  elasticsearch: ElasticsearchServiceSetup;
+export interface CoreStart {
+  /** {@link CapabilitiesStart} */
+  capabilities: CapabilitiesStart;
+  /** {@link SavedObjectsServiceStart} */
+  savedObjects: SavedObjectsServiceStart;
+  /** {@link UiSettingsServiceStart} */
+  uiSettings: UiSettingsServiceStart;
 }
 
-/**
- * @public
- */
-export interface InternalCoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
 export {
+  CapabilitiesSetup,
+  CapabilitiesStart,
   ContextSetup,
-  HttpServiceSetup,
-  HttpServiceStart,
-  ElasticsearchServiceSetup,
+  IScopedRenderingClient,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,
+  UuidServiceSetup,
 };

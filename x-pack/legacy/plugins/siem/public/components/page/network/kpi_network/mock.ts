@@ -49,7 +49,7 @@ const mockMappingItems: StatItems = {
       value: null,
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -57,7 +57,7 @@ const mockMappingItems: StatItems = {
       value: null,
       name: 'Dest.',
       description: 'destination',
-      color: '#490092',
+      color: '#9170B8',
       icon: 'visMapCoordinate',
     },
   ],
@@ -82,7 +82,7 @@ export const mockDisableChartsInitialData = {
       value: undefined,
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -90,7 +90,7 @@ export const mockDisableChartsInitialData = {
       value: undefined,
       name: 'Dest.',
       description: 'destination',
-      color: '#490092',
+      color: '#9170B8',
       icon: 'visMapCoordinate',
     },
   ],
@@ -109,7 +109,7 @@ export const mockEnableChartsInitialData = {
       value: undefined,
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -117,7 +117,7 @@ export const mockEnableChartsInitialData = {
       value: undefined,
       name: 'Dest.',
       description: 'destination',
-      color: '#490092',
+      color: '#9170B8',
       icon: 'visMapCoordinate',
     },
   ],
@@ -128,7 +128,7 @@ export const mockEnableChartsInitialData = {
   areaChart: [],
   barChart: [
     {
-      color: '#DB1374',
+      color: '#D36086',
       key: 'uniqueSourcePrivateIps',
       value: [
         {
@@ -139,7 +139,7 @@ export const mockEnableChartsInitialData = {
       ],
     },
     {
-      color: '#490092',
+      color: '#9170B8',
       key: 'uniqueDestinationPrivateIps',
       value: [
         {
@@ -165,7 +165,7 @@ export const mockEnableChartsData = {
       ],
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -176,20 +176,27 @@ export const mockEnableChartsData = {
       ],
       name: 'Dest.',
       description: 'destination',
-      color: '#490092',
+      color: '#9170B8',
       icon: 'visMapCoordinate',
     },
   ],
   barChart: [
     {
       key: 'uniqueSourcePrivateIps',
-      color: '#DB1374',
-      value: [{ x: 'Src.', y: 383, g: 'uniqueSourcePrivateIps' }],
+      color: '#D36086',
+      value: [
+        {
+          x: 'Src.',
+          y: 383,
+          g: 'uniqueSourcePrivateIps',
+          y0: 0,
+        },
+      ],
     },
     {
       key: 'uniqueDestinationPrivateIps',
-      color: '#490092',
-      value: [{ x: 'Dest.', y: 18, g: 'uniqueDestinationPrivateIps' }],
+      color: '#9170B8',
+      value: [{ x: 'Dest.', y: 18, g: 'uniqueDestinationPrivateIps', y0: 0 }],
     },
   ],
   description: 'Unique private IPs',
@@ -201,7 +208,7 @@ export const mockEnableChartsData = {
       value: 383,
       name: 'Src.',
       description: 'source',
-      color: '#DB1374',
+      color: '#D36086',
       icon: 'visMapCoordinate',
     },
     {
@@ -209,14 +216,15 @@ export const mockEnableChartsData = {
       value: 18,
       name: 'Dest.',
       description: 'destination',
-      color: '#490092',
+      color: '#9170B8',
       icon: 'visMapCoordinate',
     },
   ],
   from: 1560578400000,
   grow: 2,
   id: 'statItem',
-  index: 4,
+  index: 2,
+  statKey: 'UniqueIps',
   to: 1560837600000,
   narrowDateRange: mockNarrowDateRange,
 };

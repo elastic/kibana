@@ -18,22 +18,16 @@
  */
 
 import { resolve } from 'path';
-import { createWriteStream } from 'fs';
+import { createWriteStream, mkdirSync } from 'fs';
 
-import { fromNode } from 'bluebird';
-import mkdirp from 'mkdirp';
-
-import {
-  createListStream,
-  createPromiseFromStreams,
-} from '../../legacy/utils';
+import { createListStream, createPromiseFromStreams } from '../../legacy/utils';
 
 import {
   createStats,
   createGenerateIndexRecordsStream,
   createFormatArchiveStreams,
   createGenerateDocRecordsStream,
-  Progress
+  Progress,
 } from '../lib';
 
 export async function saveAction({ name, indices, client, dataDir, log, raw }) {
@@ -42,7 +36,7 @@ export async function saveAction({ name, indices, client, dataDir, log, raw }) {
 
   log.info('[%s] Creating archive of %j', name, indices);
 
-  await fromNode(cb => mkdirp(outputDir, cb));
+  mkdirSync(outputDir, { recursive: true });
 
   const progress = new Progress();
   progress.activate(log);
@@ -61,8 +55,8 @@ export async function saveAction({ name, indices, client, dataDir, log, raw }) {
       createListStream(indices),
       createGenerateDocRecordsStream(client, stats, progress),
       ...createFormatArchiveStreams({ gzip: !raw }),
-      createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`))
-    ])
+      createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`)),
+    ]),
   ]);
 
   progress.deactivate();

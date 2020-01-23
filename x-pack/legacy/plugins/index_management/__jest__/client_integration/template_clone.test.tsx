@@ -5,37 +5,19 @@
  */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import axios from 'axios';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
-import * as fixtures from '../../test/fixtures';
-import { TEMPLATE_NAME, INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS } from './helpers/constants';
+import { getTemplate } from '../../test/fixtures';
+import {
+  TEMPLATE_NAME,
+  INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
+  MAPPINGS,
+} from './helpers/constants';
 
 const { setup } = pageHelpers.templateClone;
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: 'ILLEGAL_CHARACTERS',
-  CONTAINS_SPACES: 'CONTAINS_SPACES',
-  validateIndexPattern: () => {
-    return {
-      errors: {},
-    };
-  },
-}));
-
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/index_management',
-}));
-
-jest.mock('../../public/services/api', () => ({
-  ...jest.requireActual('../../public/services/api'),
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -60,9 +42,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<TemplateClone />', () => {
+describe('<TemplateClone />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -71,17 +51,21 @@ describe.skip('<TemplateClone />', () => {
     server.restore();
   });
 
-  const templateToClone = fixtures.getTemplate({
+  const templateToClone = getTemplate({
     name: TEMPLATE_NAME,
     indexPatterns: ['indexPattern1'],
+    mappings: {
+      ...MAPPINGS,
+      _meta: {},
+      _source: {},
+    },
   });
 
   beforeEach(async () => {
-    testBed = await setup();
-
     httpRequestsMockHelpers.setLoadTemplateResponse(templateToClone);
 
-    // @ts-ignore (remove when react 16.9.0 is released)
+    testBed = await setup();
+
     await act(async () => {
       await nextTick();
       testBed.component.update();
@@ -99,26 +83,27 @@ describe.skip('<TemplateClone />', () => {
     beforeEach(async () => {
       const { actions } = testBed;
 
-      // Complete step 1 (logistics)
-      // Specify index patterns, but do not change name (keep default)
-      actions.completeStepOne({
-        indexPatterns: DEFAULT_INDEX_PATTERNS,
+      await act(async () => {
+        // Complete step 1 (logistics)
+        // Specify index patterns, but do not change name (keep default)
+        await actions.completeStepOne({
+          indexPatterns: DEFAULT_INDEX_PATTERNS,
+        });
+
+        // Bypass step 2 (index settings)
+        await actions.completeStepTwo();
+
+        // Bypass step 3 (mappings)
+        await actions.completeStepThree();
+
+        // Bypass step 4 (aliases)
+        await actions.completeStepFour();
       });
-
-      // Bypass step 2 (index settings)
-      actions.clickNextButton();
-
-      // Bypass step 3 (mappings)
-      actions.clickNextButton();
-
-      // Bypass step 4 (aliases)
-      actions.clickNextButton();
     });
 
     it('should send the correct payload', async () => {
       const { actions } = testBed;
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         actions.clickSubmitButton();
         await nextTick();
@@ -126,13 +111,13 @@ describe.skip('<TemplateClone />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
 
-      expect(latestRequest.requestBody).toEqual(
-        JSON.stringify({
-          ...templateToClone,
-          name: `${templateToClone.name}-copy`,
-          indexPatterns: DEFAULT_INDEX_PATTERNS,
-        })
-      );
+      const expected = {
+        ...templateToClone,
+        name: `${templateToClone.name}-copy`,
+        indexPatterns: DEFAULT_INDEX_PATTERNS,
+      };
+
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
     });
   });
 });

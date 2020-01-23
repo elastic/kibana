@@ -4,8 +4,10 @@
 
 ## HttpRequestInit.window property
 
+Can only be null. Used to disassociate request from any Window.
+
 <b>Signature:</b>
 
 ```typescript
-window?: any;
+window?: null;
 ```

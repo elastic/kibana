@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
-
-import chrome from 'ui/chrome';
+import { compose } from 'redux';
 import { connect } from 'react-redux';
+
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
@@ -19,10 +20,11 @@ import {
   TimelineEdges,
   TimelineItem,
 } from '../../graphql/types';
-import { inputsModel, State, inputsSelectors } from '../../store';
+import { inputsModel, inputsSelectors, State } from '../../store';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
-
+import { EventType } from '../../store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 
 export interface TimelineArgs {
@@ -43,12 +45,15 @@ export interface TimelineQueryReduxProps {
 
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
+  eventType?: EventType;
   id: string;
+  indexPattern?: IIndexPattern;
+  indexToAdd?: string[];
   limit: number;
   sortField: SortField;
   fields: string[];
 }
-type TimelineQueryProps = OwnProps & TimelineQueryReduxProps;
+type TimelineQueryProps = OwnProps & TimelineQueryReduxProps & WithKibanaProps;
 
 class TimelineQueryComponent extends QueryTemplate<
   TimelineQueryProps,
@@ -66,21 +71,32 @@ class TimelineQueryComponent extends QueryTemplate<
   public render() {
     const {
       children,
+      eventType = 'raw',
       id,
+      indexPattern,
+      indexToAdd = [],
       isInspected,
+      kibana,
       limit,
       fields,
       filterQuery,
       sourceId,
       sortField,
     } = this.props;
+    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+    const defaultIndex = isEmpty(indexPattern)
+      ? [
+          ...(['all', 'raw'].includes(eventType) ? defaultKibanaIndex : []),
+          ...(['all', 'signal'].includes(eventType) ? indexToAdd : []),
+        ]
+      : indexPattern?.title.split(',') ?? [];
     const variables: GetTimelineQuery.Variables = {
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex,
       inspect: isInspected,
     };
     return (
@@ -154,4 +170,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const TimelineQuery = connect(makeMapStateToProps)(TimelineQueryComponent);
+export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(TimelineQueryComponent);

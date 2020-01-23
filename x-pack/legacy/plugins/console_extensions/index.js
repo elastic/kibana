@@ -5,6 +5,8 @@
  */
 
 import { join } from 'path';
+import { processors } from './spec/ingest';
+
 export function consoleExtensions(kibana) {
   return new kibana.Plugin({
     id: 'console_extensions',
@@ -26,17 +28,20 @@ export function consoleExtensions(kibana) {
     init: server => {
       if (
         server.plugins.console &&
-        server.plugins.console.addExtensionSpecFilePath
+        server.plugins.console.addExtensionSpecFilePath &&
+        server.plugins.console.addProcessorDefinition
       ) {
-        server.plugins.console.addExtensionSpecFilePath(
-          join(__dirname, 'spec/')
-        );
+        const { addExtensionSpecFilePath, addProcessorDefinition } = server.plugins.console;
+
+        addExtensionSpecFilePath(join(__dirname, 'spec/'));
+
+        processors.forEach(processor => addProcessorDefinition(processor));
       } else {
         console.warn(
           'Missing server.plugins.console.addExtensionSpecFilePath extension point.',
           'Cannot add xpack APIs to autocomplete.'
         );
       }
-    }
+    },
   });
 }

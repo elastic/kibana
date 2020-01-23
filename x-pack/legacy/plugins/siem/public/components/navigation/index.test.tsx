@@ -4,72 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
-import * as React from 'react';
+import { mount } from 'enzyme';
+import React from 'react';
 
 import { CONSTANTS } from '../url_state/constants';
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../pages/home/home_navigations';
-import { TabNavigationProps } from './tab_navigation/types';
 import { HostsTableType } from '../../store/hosts/model';
 import { RouteSpyState } from '../../utils/route/types';
+import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
+jest.mock('ui/new_platform');
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 
 describe('SIEM Navigation', () => {
-  const mockProps: TabNavigationProps & RouteSpyState = {
+  const mockProps: SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState = {
     pageName: 'hosts',
     pathName: '/hosts',
     detailName: undefined,
     search: '',
     tabName: HostsTableType.authentications,
     navTabs,
-    [CONSTANTS.timerange]: {
-      global: {
-        [CONSTANTS.timerange]: {
-          from: 1558048243696,
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: 1558134643697,
-          toStr: 'now',
+    urlState: {
+      [CONSTANTS.timerange]: {
+        global: {
+          [CONSTANTS.timerange]: {
+            from: 1558048243696,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1558134643697,
+            toStr: 'now',
+          },
+          linkTo: ['timeline'],
         },
-        linkTo: ['timeline'],
-      },
-      timeline: {
-        [CONSTANTS.timerange]: {
-          from: 1558048243696,
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: 1558134643697,
-          toStr: 'now',
+        timeline: {
+          [CONSTANTS.timerange]: {
+            from: 1558048243696,
+            fromStr: 'now-24h',
+            kind: 'relative',
+            to: 1558134643697,
+            toStr: 'now',
+          },
+          linkTo: ['global'],
         },
-        linkTo: ['global'],
+      },
+      [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
+      [CONSTANTS.filters]: [],
+      [CONSTANTS.timeline]: {
+        id: '',
+        isOpen: false,
       },
     },
-    hosts: {
-      filterQuery: null,
-      queryLocation: null,
-    },
-    hostDetails: {
-      filterQuery: null,
-      queryLocation: null,
-    },
-    network: {
-      filterQuery: null,
-      queryLocation: null,
-    },
-    [CONSTANTS.timelineId]: '',
   };
-  const wrapper = shallow(<SiemNavigationComponent {...mockProps} />);
+  const wrapper = mount(<SiemNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
     expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,
-      hostDetails: { filterQuery: null, queryLocation: null },
-      hosts: { filterQuery: null, queryLocation: null },
       navTabs: {
+        detections: {
+          disabled: false,
+          href: '#/link-to/detections',
+          id: 'detections',
+          name: 'Detections',
+          urlKey: 'detections',
+        },
         hosts: {
           disabled: false,
           href: '#/link-to/hosts',
@@ -99,12 +100,17 @@ describe('SIEM Navigation', () => {
           urlKey: 'timeline',
         },
       },
-      network: { filterQuery: null, queryLocation: null },
       pageName: 'hosts',
       pathName: '/hosts',
       search: '',
       tabName: 'authentications',
-      timelineId: '',
+      query: { query: '', language: 'kuery' },
+      filters: [],
+      savedQuery: undefined,
+      timeline: {
+        id: '',
+        isOpen: false,
+      },
       timerange: {
         global: {
           linkTo: ['timeline'],
@@ -136,11 +142,17 @@ describe('SIEM Navigation', () => {
       tabName: undefined,
     });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, {
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
       detailName: undefined,
-      hostDetails: { filterQuery: null, queryLocation: null },
-      hosts: { filterQuery: null, queryLocation: null },
+      filters: [],
       navTabs: {
+        detections: {
+          disabled: false,
+          href: '#/link-to/detections',
+          id: 'detections',
+          name: 'Detections',
+          urlKey: 'detections',
+        },
         hosts: {
           disabled: false,
           href: '#/link-to/hosts',
@@ -170,12 +182,14 @@ describe('SIEM Navigation', () => {
           urlKey: 'timeline',
         },
       },
-      network: { filterQuery: null, queryLocation: null },
-      pageName: 'network',
-      pathName: '/network',
+      pageName: 'hosts',
+      pathName: '/hosts',
+      query: { language: 'kuery', query: '' },
+      savedQuery: undefined,
       search: '',
-      tabName: undefined,
-      timelineId: '',
+      state: undefined,
+      tabName: 'authentications',
+      timeline: { id: '', isOpen: false },
       timerange: {
         global: {
           linkTo: ['timeline'],

@@ -1,0 +1,256 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddItemPopover calls addItems with multiple items on clicking Add button 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButton
+        color="primary"
+        iconSide="right"
+        iconType="arrowDown"
+        isDisabled={false}
+        onClick={[Function]}
+        size="s"
+      >
+        <FormattedMessage
+          defaultMessage="Add item"
+          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="add_item_popover"
+    isOpen={false}
+    ownFocus={true}
+    panelClassName="ml-add-filter-item-popover"
+    panelPaddingSize="m"
+  >
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Items"
+            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiTextArea
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+    </EuiForm>
+    <EuiText
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Enter one item per line"
+        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
+        values={Object {}}
+      />
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Add"
+            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPopover>
+</div>
+`;
+
+exports[`AddItemPopover opens the popover onButtonClick 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButton
+        color="primary"
+        iconSide="right"
+        iconType="arrowDown"
+        isDisabled={false}
+        onClick={[Function]}
+        size="s"
+      >
+        <FormattedMessage
+          defaultMessage="Add item"
+          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="add_item_popover"
+    isOpen={true}
+    ownFocus={true}
+    panelClassName="ml-add-filter-item-popover"
+    panelPaddingSize="m"
+  >
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Items"
+            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiTextArea
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+    </EuiForm>
+    <EuiText
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Enter one item per line"
+        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
+        values={Object {}}
+      />
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Add"
+            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPopover>
+</div>
+`;
+
+exports[`AddItemPopover renders the popover 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButton
+        color="primary"
+        iconSide="right"
+        iconType="arrowDown"
+        isDisabled={false}
+        onClick={[Function]}
+        size="s"
+      >
+        <FormattedMessage
+          defaultMessage="Add item"
+          id="xpack.ml.settings.filterLists.addItemPopover.addItemButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="add_item_popover"
+    isOpen={false}
+    ownFocus={true}
+    panelClassName="ml-add-filter-item-popover"
+    panelPaddingSize="m"
+  >
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Items"
+            id="xpack.ml.settings.filterLists.addItemPopover.itemsLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiTextArea
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+    </EuiForm>
+    <EuiText
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Enter one item per line"
+        id="xpack.ml.settings.filterLists.addItemPopover.enterItemPerLineDescription"
+        values={Object {}}
+      />
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          disabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Add"
+            id="xpack.ml.settings.filterLists.addItemPopover.addButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPopover>
+</div>
+`;

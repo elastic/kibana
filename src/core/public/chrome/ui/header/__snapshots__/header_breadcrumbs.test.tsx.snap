@@ -5,7 +5,6 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = 
   aria-current="page"
   className="euiBreadcrumb euiBreadcrumb--last"
   data-test-subj="breadcrumb first last"
-  title="First"
 >
   First
 </span>
@@ -18,7 +17,6 @@ Array [
     color="subdued"
     data-test-subj="breadcrumb first"
     title="First"
-    type="button"
   >
     <button
       className="euiLink euiLink--subdued euiBreadcrumb"
@@ -41,7 +39,6 @@ Array [
     aria-current="page"
     className="euiBreadcrumb euiBreadcrumb--last"
     data-test-subj="breadcrumb last"
-    title="Second"
   >
     Second
   </span>,

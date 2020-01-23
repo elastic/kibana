@@ -1,0 +1,13 @@
+{
+  "enrich.execute_policy": {
+    "url_params": {
+      "wait_for_completion": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_enrich/policy/{name}/_execute"
+    ]
+  }
+}

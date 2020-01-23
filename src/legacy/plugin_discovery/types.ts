@@ -18,12 +18,13 @@
  */
 
 import { Server } from '../server/kbn_server';
-import { Capabilities } from '../../core/public';
+import { Capabilities } from '../../core/server';
 // Disable lint errors for imports from src/core/* until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsSchemaDefinition } from '../../core/server/saved_objects/schema';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagementDefinition } from '../../core/server/saved_objects/management';
+import { AppCategory } from '../../core/types';
 
 /**
  * Usage
@@ -53,25 +54,31 @@ export interface LegacyPluginOptions {
   uiExports: Partial<{
     app: Partial<{
       title: string;
+      category?: AppCategory;
       description: string;
       main: string;
       icon: string;
       euiIconType: string;
       order: number;
+      listed: boolean;
     }>;
     apps: any;
     hacks: string[];
+    visualize: string[];
     devTools: string[];
     styleSheetPaths: string;
     injectDefaultVars: (server: Server) => Record<string, any>;
     noParse: string[];
     home: string[];
     mappings: any;
+    migrations: any;
     savedObjectSchemas: SavedObjectsSchemaDefinition;
     savedObjectsManagement: SavedObjectsManagementDefinition;
     visTypes: string[];
     embeddableActions?: string[];
     embeddableFactories?: string[];
+    uiSettingDefaults?: Record<string, any>;
+    interpreter: string | string[];
   }>;
   uiCapabilities?: Capabilities;
   publicDir: any;

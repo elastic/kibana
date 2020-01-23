@@ -21,7 +21,7 @@ import { uiModules } from '../modules';
 import { wrapInI18nContext } from 'ui/i18n';
 const module = uiModules.get('kibana');
 
-module.directive('fieldName', function (config, reactDirective) {
+export function FieldNameDirectiveProvider(config, reactDirective) {
   return reactDirective(
     wrapInI18nContext(FieldName),
     [
@@ -34,4 +34,6 @@ module.directive('fieldName', function (config, reactDirective) {
       useShortDots: config.get('shortDots:enable'),
     }
   );
-});
+}
+
+module.directive('fieldName', FieldNameDirectiveProvider);

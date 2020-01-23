@@ -4,7 +4,7 @@
 
 ## SavedObjectsUpdateOptions.version property
 
-Ensures version matches that of persisted object
+An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control.
 
 <b>Signature:</b>
 

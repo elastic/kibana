@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type ServerLog = (tags: string[], msg: string) => void;
+import { ServerFacade } from '../../types';
 
 const trimStr = (toTrim: string) => {
   return typeof toTrim === 'string' ? toTrim.trim() : toTrim;
@@ -13,19 +13,17 @@ const trimStr = (toTrim: string) => {
 export class LevelLogger {
   private _logger: any;
   private _tags: string[];
-  private _isVerbose: boolean;
 
   public warn: (msg: string, tags?: string[]) => void;
 
-  static createForServer(server: any, tags: string[], isVerbose = false) {
-    const serverLog: ServerLog = (tgs: string[], msg: string) => server.log(tgs, msg);
-    return new LevelLogger(serverLog, tags, isVerbose);
+  static createForServer(server: ServerFacade, tags: string[]) {
+    const serverLog: ServerFacade['log'] = (tgs: string[], msg: string) => server.log(tgs, msg);
+    return new LevelLogger(serverLog, tags);
   }
 
-  constructor(logger: ServerLog, tags: string[], isVerbose: boolean) {
+  constructor(logger: ServerFacade['log'], tags: string[]) {
     this._logger = logger;
     this._tags = tags;
-    this._isVerbose = isVerbose;
 
     /*
      * This shortcut provides maintenance convenience: Reporting code has been
@@ -50,11 +48,7 @@ export class LevelLogger {
     this._logger([...this._tags, ...tags, 'info'], trimStr(msg));
   }
 
-  public get isVerbose() {
-    return this._isVerbose;
-  }
-
   public clone(tags: string[]) {
-    return new LevelLogger(this._logger, [...this._tags, ...tags], this._isVerbose);
+    return new LevelLogger(this._logger, [...this._tags, ...tags]);
   }
 }

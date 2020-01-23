@@ -12,8 +12,7 @@ describe('SnapshotHistogram component', () => {
   const props: SnapshotHistogramProps = {
     absoluteStartDate: 1548697920000,
     absoluteEndDate: 1548700920000,
-    successColor: '#FEFEFE',
-    dangerColor: '#FF00FF',
+    isResponsive: false,
   };
 
   it('renders the component without errors', () => {

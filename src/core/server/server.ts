@@ -16,50 +16,79 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+
 import { Type } from '@kbn/config-schema';
 
-import { ConfigService, Env, Config, ConfigPath } from './config';
+import {
+  ConfigService,
+  Env,
+  ConfigPath,
+  RawConfigurationProvider,
+  coreDeprecationProvider,
+} from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, HttpServiceSetup } from './http';
-import { LegacyService } from './legacy';
+import { HttpService, InternalHttpServiceSetup } from './http';
+import { RenderingService, RenderingServiceSetup } from './rendering';
+import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
+import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
+import { SavedObjectsService } from '../server/saved_objects';
 
+import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
-import { mapToObject } from '../utils/';
+import { config as pathConfig } from './path';
+import { config as kibanaConfig } from './kibana_config';
+import { config as savedObjectsConfig } from './saved_objects';
+import { config as uiSettingsConfig } from './ui_settings';
+import { mapToObject } from '../utils';
 import { ContextService } from './context';
-import { InternalCoreSetup } from './index';
+import { RequestHandlerContext } from '.';
+import { InternalCoreSetup, InternalCoreStart } from './internal_types';
+import { CapabilitiesService } from './capabilities';
+import { UuidService } from './uuid';
 
 const coreId = Symbol('core');
+const rootConfigPath = '';
 
 export class Server {
   public readonly configService: ConfigService;
+  private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
   private readonly http: HttpService;
-  private readonly plugins: PluginsService;
+  private readonly rendering: RenderingService;
   private readonly legacy: LegacyService;
   private readonly log: Logger;
+  private readonly plugins: PluginsService;
+  private readonly savedObjects: SavedObjectsService;
+  private readonly uiSettings: UiSettingsService;
+  private readonly uuid: UuidService;
+
+  private coreStart?: InternalCoreStart;
 
   constructor(
-    readonly config$: Observable<Config>,
-    readonly env: Env,
+    rawConfigProvider: RawConfigurationProvider,
+    public readonly env: Env,
     private readonly logger: LoggerFactory
   ) {
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(config$, env, logger);
+    this.configService = new ConfigService(rawConfigProvider, env, logger);
 
     const core = { coreId, configService: this.configService, env, logger };
     this.context = new ContextService(core);
     this.http = new HttpService(core);
+    this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
+    this.savedObjects = new SavedObjectsService(core);
+    this.uiSettings = new UiSettingsService(core);
+    this.capabilities = new CapabilitiesService(core);
+    this.uuid = new UuidService(core);
   }
 
   public async setup() {
@@ -67,7 +96,24 @@ export class Server {
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     const pluginDependencies = await this.plugins.discover();
-    const contextServiceSetup = this.context.setup({ pluginDependencies });
+    const legacyPlugins = await this.legacy.discoverPlugins();
+
+    // Immediately terminate in case of invalid configuration
+    await this.configService.validate();
+    await ensureValidConfiguration(this.configService, legacyPlugins);
+
+    const contextServiceSetup = this.context.setup({
+      // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
+      // 1) Can access context from any NP plugin
+      // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
+      //    New Platform plugins.
+      pluginDependencies: new Map([
+        ...pluginDependencies,
+        [this.legacy.legacyId, [...pluginDependencies.keys()]],
+      ]),
+    });
+
+    const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -75,41 +121,79 @@ export class Server {
 
     this.registerDefaultRoute(httpSetup);
 
+    const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
+
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
     });
 
-    const coreSetup = {
+    const uiSettingsSetup = await this.uiSettings.setup({
+      http: httpSetup,
+    });
+
+    const savedObjectsSetup = await this.savedObjects.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      legacyPlugins,
+    });
+
+    const coreSetup: InternalCoreSetup = {
+      capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
+      uiSettings: uiSettingsSetup,
+      savedObjects: savedObjectsSetup,
+      uuid: uuidSetup,
     };
 
-    this.registerCoreContext(coreSetup);
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
+    const renderingSetup = await this.rendering.setup({
+      http: httpSetup,
+      legacyPlugins,
+      plugins: pluginsSetup,
+    });
+
     await this.legacy.setup({
-      core: { ...coreSetup, plugins: pluginsSetup },
+      core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
       plugins: mapToObject(pluginsSetup.contracts),
     });
+
+    this.registerCoreContext(coreSetup, renderingSetup);
 
     return coreSetup;
   }
 
   public async start() {
-    const pluginsStart = await this.plugins.start({});
+    this.log.debug('starting server');
+    const savedObjectsStart = await this.savedObjects.start({});
+    const capabilitiesStart = this.capabilities.start();
+    const uiSettingsStart = await this.uiSettings.start();
 
-    const coreStart = {
-      plugins: pluginsStart,
+    const pluginsStart = await this.plugins.start({
+      capabilities: capabilitiesStart,
+      savedObjects: savedObjectsStart,
+      uiSettings: uiSettingsStart,
+    });
+
+    this.coreStart = {
+      capabilities: capabilitiesStart,
+      savedObjects: savedObjectsStart,
+      uiSettings: uiSettingsStart,
     };
 
     await this.legacy.start({
-      core: coreStart,
+      core: {
+        ...this.coreStart,
+        plugins: pluginsStart,
+      },
       plugins: mapToObject(pluginsStart.contracts),
     });
 
     await this.http.start();
-    return coreStart;
+    await this.rendering.start();
+
+    return this.coreStart;
   }
 
   public async stop() {
@@ -117,38 +201,74 @@ export class Server {
 
     await this.legacy.stop();
     await this.plugins.stop();
+    await this.savedObjects.stop();
     await this.elasticsearch.stop();
     await this.http.stop();
+    await this.uiSettings.stop();
+    await this.rendering.stop();
   }
 
-  private registerDefaultRoute(httpSetup: HttpServiceSetup) {
+  private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
     const router = httpSetup.createRouter('/core');
     router.get({ path: '/', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
   }
 
-  private registerCoreContext(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req) => {
-      const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-      const dataClient = await coreSetup.elasticsearch.dataClient$.pipe(take(1)).toPromise();
-      return {
-        elasticsearch: {
-          adminClient: adminClient.asScoped(req),
-          dataClient: dataClient.asScoped(req),
-        },
-      };
-    });
+  private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
+    coreSetup.http.registerRouteHandlerContext(
+      coreId,
+      'core',
+      async (context, req, res): Promise<RequestHandlerContext['core']> => {
+        const savedObjectsClient = this.coreStart!.savedObjects.getScopedClient(req);
+        const uiSettingsClient = coreSetup.uiSettings.asScopedToClient(savedObjectsClient);
+
+        return {
+          rendering: {
+            render: async (options = {}) =>
+              rendering.render(req, uiSettingsClient, {
+                ...options,
+                vars: await this.legacy.legacyInternals!.getVars('core', req),
+              }),
+          },
+          savedObjects: {
+            client: savedObjectsClient,
+          },
+          elasticsearch: {
+            adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),
+            dataClient: coreSetup.elasticsearch.dataClient.asScoped(req),
+          },
+          uiSettings: {
+            client: uiSettingsClient,
+          },
+        };
+      }
+    );
   }
 
-  public async setupConfigSchemas() {
+  public async setupCoreConfig() {
     const schemas: Array<[ConfigPath, Type<unknown>]> = [
+      [pathConfig.path, pathConfig.schema],
+      [cspConfig.path, cspConfig.schema],
       [elasticsearchConfig.path, elasticsearchConfig.schema],
       [loggingConfig.path, loggingConfig.schema],
       [httpConfig.path, httpConfig.schema],
       [pluginsConfig.path, pluginsConfig.schema],
       [devConfig.path, devConfig.schema],
+      [kibanaConfig.path, kibanaConfig.schema],
+      [savedObjectsConfig.path, savedObjectsConfig.schema],
+      [uiSettingsConfig.path, uiSettingsConfig.schema],
     ];
+
+    this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
+    this.configService.addDeprecationProvider(
+      elasticsearchConfig.path,
+      elasticsearchConfig.deprecations!
+    );
+    this.configService.addDeprecationProvider(
+      uiSettingsConfig.path,
+      uiSettingsConfig.deprecations!
+    );
 
     for (const [path, schema] of schemas) {
       await this.configService.setSchema(path, schema);

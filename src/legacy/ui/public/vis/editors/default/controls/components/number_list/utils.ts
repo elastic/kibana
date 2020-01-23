@@ -21,19 +21,20 @@ import { last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 
-import { parseRange, Range } from '../../../../../../utils/range';
+import { parseRange, NumberListRange } from './range';
 import { NumberRowModel } from './number_row';
 
 const EMPTY_STRING = '';
 const defaultRange = parseRange('[0,Infinity)');
 const generateId = htmlIdGenerator();
+const defaultModel = { value: 0, id: generateId(), isInvalid: false };
 
 function parse(value: string) {
   const parsedValue = parseFloat(value);
   return isNaN(parsedValue) ? EMPTY_STRING : parsedValue;
 }
 
-function getRange(range?: string): Range {
+function getRange(range?: string): NumberListRange {
   try {
     return range ? parseRange(range) : defaultRange;
   } catch (e) {
@@ -41,48 +42,41 @@ function getRange(range?: string): Range {
   }
 }
 
-function validateValue(value: number | '', numberRange: Range) {
-  const result = {
-    isValid: true,
-    errors: [] as string[],
+function validateValue(value: number | '', numberRange: NumberListRange) {
+  const result: { isInvalid: boolean; error?: string } = {
+    isInvalid: false,
   };
 
   if (value === EMPTY_STRING) {
-    result.isValid = false;
+    result.isInvalid = true;
   } else if (!numberRange.within(value)) {
-    result.isValid = false;
-    result.errors.push(
-      i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
-        defaultMessage: 'The value should be in the range of {min} to {max}.',
-        values: { min: numberRange.min, max: numberRange.max },
-      })
-    );
+    result.isInvalid = true;
+    result.error = i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
+      defaultMessage: 'The value should be in the range of {min} to {max}.',
+      values: { min: numberRange.min, max: numberRange.max },
+    });
   }
 
   return result;
 }
 
-function validateOrder(list: NumberRowModel[]) {
-  let isInvalidOrder = false;
-  list.forEach((model, index, array) => {
+function validateOrder(list: Array<number | undefined>) {
+  const result: { isValidOrder: boolean; modelIndex?: number } = {
+    isValidOrder: true,
+  };
+
+  list.forEach((inputValue, index, array) => {
     const previousModel = array[index - 1];
-    if (previousModel && model.value !== EMPTY_STRING) {
-      const isInvalidOrderOfItem = model.value <= previousModel.value;
-
-      if (!model.isInvalid && isInvalidOrderOfItem) {
-        model.isInvalid = true;
-      }
-
-      if (isInvalidOrderOfItem) {
-        isInvalidOrder = true;
-      }
+    if (previousModel !== undefined && inputValue !== undefined && inputValue <= previousModel) {
+      result.isValidOrder = false;
+      result.modelIndex = index;
     }
   });
 
-  return isInvalidOrder;
+  return result;
 }
 
-function getNextModel(list: NumberRowModel[], range: Range): NumberRowModel {
+function getNextModel(list: NumberRowModel[], range: NumberListRange): NumberRowModel {
   const lastValue = last(list).value;
   let next = Number(lastValue) ? Number(lastValue) + 1 : 1;
 
@@ -104,26 +98,27 @@ function getInitModelList(list: Array<number | undefined>): NumberRowModel[] {
         id: generateId(),
         isInvalid: false,
       }))
-    : [{ value: 0, id: generateId(), isInvalid: false }];
+    : [defaultModel];
 }
 
 function getUpdatedModels(
   numberList: Array<number | undefined>,
   modelList: NumberRowModel[],
-  numberRange: Range
+  numberRange: NumberListRange,
+  invalidOrderModelIndex?: number
 ): NumberRowModel[] {
   if (!numberList.length) {
-    return modelList;
+    return [defaultModel];
   }
   return numberList.map((number, index) => {
     const model = modelList[index] || { id: generateId() };
     const newValue: NumberRowModel['value'] = number === undefined ? EMPTY_STRING : number;
-    const { isValid, errors } = validateValue(newValue, numberRange);
+    const { isInvalid, error } = validateValue(newValue, numberRange);
     return {
       ...model,
       value: newValue,
-      isInvalid: !isValid,
-      errors,
+      isInvalid: invalidOrderModelIndex === index ? true : isInvalid,
+      error,
     };
   });
 }

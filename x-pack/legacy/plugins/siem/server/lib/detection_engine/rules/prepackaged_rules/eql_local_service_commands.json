@@ -1,0 +1,37 @@
+{
+  "description": "Identifies use of sc.exe to create, modify, or start services on remote hosts. This could be indicative of adversary lateral movement but will be noisy if commonly done by admins.",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Local Service Commands",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and  process.name:sc.exe and process.args:(\"create\" or \"config\" or \"failure\" or \"start\")",
+  "risk_score": 25,
+  "rule_id": "e8571d5f-bea1-46c2-9f56-998de2d3ed95",
+  "severity": "low",
+  "tags": [
+    "EIA"
+  ],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "techniques": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        }
+      ]
+    }
+  ],
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

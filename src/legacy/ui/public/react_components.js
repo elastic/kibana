@@ -19,11 +19,7 @@
 
 import 'ngreact';
 
-import {
-  EuiConfirmModal,
-  EuiIcon,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiIcon, EuiIconTip } from '@elastic/eui';
 
 import { uiModules } from './modules';
 
@@ -33,5 +29,6 @@ app.directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal))
 
 app.directive('icon', reactDirective => reactDirective(EuiIcon));
 
-app.directive('iconTip', reactDirective => reactDirective(EuiIconTip, ['content', 'type', 'position', 'title', 'color']));
-
+app.directive('iconTip', reactDirective =>
+  reactDirective(EuiIconTip, ['content', 'type', 'position', 'title', 'color'])
+);

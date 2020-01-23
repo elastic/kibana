@@ -9,6 +9,11 @@ import PropTypes from 'prop-types';
 import {
   EuiFormRow,
   EuiSwitch,
+  EuiSelect,
+  EuiTitle,
+  EuiPanel,
+  EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
@@ -17,33 +22,51 @@ import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
+import { DEFAULT_MAX_INNER_RESULT_WINDOW, SORT_ORDER } from '../../../../common/constants';
+import { ESDocField } from '../../fields/es_doc_field';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { loadIndexSettings } from './load_index_settings';
 
 export class UpdateSourceEditor extends Component {
-
   static propTypes = {
     indexPatternId: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
-    filterByMapBounds: PropTypes.bool.isRequired,
-    tooltipProperties: PropTypes.arrayOf(PropTypes.string).isRequired,
+    tooltipFields: PropTypes.arrayOf(PropTypes.object).isRequired,
+    sortField: PropTypes.string,
+    sortOrder: PropTypes.string.isRequired,
     useTopHits: PropTypes.bool.isRequired,
     topHitsSplitField: PropTypes.string,
-    topHitsTimeField: PropTypes.string,
     topHitsSize: PropTypes.number.isRequired,
-  }
+    source: PropTypes.object,
+  };
 
   state = {
-    tooltipFields: null,
+    sourceFields: null,
     termFields: null,
-    dateFields: null,
-  }
+    sortFields: null,
+    maxInnerResultWindow: DEFAULT_MAX_INNER_RESULT_WINDOW,
+  };
 
   componentDidMount() {
     this._isMounted = true;
     this.loadFields();
+    this.loadIndexSettings();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  async loadIndexSettings() {
+    try {
+      const indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      const { maxInnerResultWindow } = await loadIndexSettings(indexPattern.title);
+      if (this._isMounted) {
+        this.setState({ maxInnerResultWindow });
+      }
+    } catch (err) {
+      return;
+    }
   }
 
   async loadFields() {
@@ -56,9 +79,9 @@ export class UpdateSourceEditor extends Component {
           loadError: i18n.translate('xpack.maps.source.esSearch.loadErrorMessage', {
             defaultMessage: `Unable to find Index pattern {id}`,
             values: {
-              id: this.props.indexPatternId
-            }
-          })
+              id: this.props.indexPatternId,
+            },
+          }),
         });
       }
       return;
@@ -68,34 +91,23 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
-    const dateFields = indexPattern.fields.filter(field => {
-      return field.type === 'date';
+    //todo move this all to the source
+    const rawTooltipFields = getSourceFields(indexPattern.fields);
+    const sourceFields = rawTooltipFields.map(field => {
+      return new ESDocField({
+        fieldName: field.name,
+        source: this.props.source,
+      });
     });
 
     this.setState({
-      dateFields,
-      tooltipFields: getSourceFields(indexPattern.fields),
-      termFields: getTermsFields(indexPattern.fields),
+      sourceFields: sourceFields,
+      termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
+      sortFields: indexPattern.fields.filter(field => field.sortable), //todo change sort fields to use fields
     });
-
-    if (!this.props.topHitsTimeField) {
-      // prefer default time field
-      if (indexPattern.timeFieldName) {
-        this.onTopHitsTimeFieldChange(indexPattern.timeFieldName);
-      } else {
-        // fall back to first date field in index
-        if (dateFields.length > 0) {
-          this.onTopHitsTimeFieldChange(dateFields[0].name);
-        }
-      }
-    }
   }
-  _onTooltipPropertiesChange = (propertyNames) => {
+  _onTooltipPropertiesChange = propertyNames => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
-  };
-
-  _onFilterByMapBoundsChange = event => {
-    this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
   onUseTopHitsChange = event => {
@@ -106,8 +118,12 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'topHitsSplitField', value: topHitsSplitField });
   };
 
-  onTopHitsTimeFieldChange = topHitsTimeField => {
-    this.props.onChange({ propName: 'topHitsTimeField', value: topHitsTimeField });
+  onSortFieldChange = sortField => {
+    this.props.onChange({ propName: 'sortField', value: sortField });
+  };
+
+  onSortOrderChange = e => {
+    this.props.onChange({ propName: 'sortOrder', value: e.target.value });
   };
 
   onTopHitsSizeChange = size => {
@@ -115,41 +131,40 @@ export class UpdateSourceEditor extends Component {
   };
 
   renderTopHitsForm() {
+    const topHitsSwitch = (
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.source.esSearch.topHitsLabel', {
+          defaultMessage: `Top hits`,
+        })}
+        display="columnCompressed"
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
+            defaultMessage: `Show top hits per entity`,
+          })}
+          checked={this.props.useTopHits}
+          onChange={this.onUseTopHitsChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
+
     if (!this.props.useTopHits) {
-      return null;
+      return topHitsSwitch;
     }
 
-    let timeFieldSelect;
     let sizeSlider;
     if (this.props.topHitsSplitField) {
-      timeFieldSelect = (
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.source.esSearch.topHitsTimeFieldLabel', {
-            defaultMessage: 'Time'
-          })}
-        >
-          <SingleFieldSelect
-            placeholder={i18n.translate('xpack.maps.source.esSearch.topHitsTimeFieldSelectPlaceholder', {
-              defaultMessage: 'Select time field'
-            })}
-            value={this.props.topHitsTimeField}
-            onChange={this.onTopHitsTimeFieldChange}
-            fields={this.state.dateFields}
-          />
-        </EuiFormRow>
-      );
-
       sizeSlider = (
         <EuiFormRow
-          label={
-            i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
-              defaultMessage: 'Documents per entity'
-            })
-          }
+          label={i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
+            defaultMessage: 'Documents per entity',
+          })}
+          display="columnCompressed"
         >
           <ValidatedRange
             min={1}
-            max={100}
+            max={this.state.maxInnerResultWindow}
             step={1}
             value={this.props.topHitsSize}
             onChange={this.onTopHitsSizeChange}
@@ -157,6 +172,7 @@ export class UpdateSourceEditor extends Component {
             showInput
             showRange
             data-test-subj="layerPanelTopHitsSize"
+            compressed
           />
         </EuiFormRow>
       );
@@ -164,70 +180,125 @@ export class UpdateSourceEditor extends Component {
 
     return (
       <Fragment>
+        {topHitsSwitch}
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
-            defaultMessage: 'Entity'
+            defaultMessage: 'Entity',
           })}
+          display="columnCompressed"
         >
           <SingleFieldSelect
-            placeholder={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder', {
-              defaultMessage: 'Select entity field'
-            })}
+            placeholder={i18n.translate(
+              'xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder',
+              {
+                defaultMessage: 'Select entity field',
+              }
+            )}
             value={this.props.topHitsSplitField}
             onChange={this.onTopHitsSplitFieldChange}
             fields={this.state.termFields}
+            compressed
           />
         </EuiFormRow>
-
-        {timeFieldSelect}
 
         {sizeSlider}
       </Fragment>
     );
   }
 
-  render() {
-    let topHitsCheckbox;
-    if (this.state.dateFields && this.state.dateFields.length) {
-      topHitsCheckbox = (
-        <EuiFormRow>
-          <EuiSwitch
-            label={
-              i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-                defaultMessage: `Show most recent documents by entity`
-              })
-            }
-            checked={this.props.useTopHits}
-            onChange={this.onUseTopHitsChange}
+  _renderTooltipsPanel() {
+    return (
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.maps.esSearch.tooltipsTitle"
+              defaultMessage="Tooltip fields"
+            />
+          </h5>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <TooltipSelector
+          tooltipFields={this.props.tooltipFields}
+          onChange={this._onTooltipPropertiesChange}
+          fields={this.state.sourceFields}
+        />
+      </EuiPanel>
+    );
+  }
+
+  _renderSortPanel() {
+    return (
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage id="xpack.maps.esSearch.sortTitle" defaultMessage="Sorting" />
+          </h5>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.esSearch.sortFieldLabel', {
+            defaultMessage: 'Field',
+          })}
+          display="columnCompressed"
+        >
+          <SingleFieldSelect
+            placeholder={i18n.translate('xpack.maps.source.esSearch.sortFieldSelectPlaceholder', {
+              defaultMessage: 'Select sort field',
+            })}
+            value={this.props.sortField}
+            onChange={this.onSortFieldChange}
+            fields={this.state.sortFields}
+            compressed
           />
         </EuiFormRow>
-      );
-    }
 
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.esSearch.sortOrderLabel', {
+            defaultMessage: 'Order',
+          })}
+          display="columnCompressed"
+        >
+          <EuiSelect
+            disabled={!this.props.sortField}
+            options={[
+              {
+                text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
+                  defaultMessage: 'ascending',
+                }),
+                value: SORT_ORDER.ASC,
+              },
+              {
+                text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
+                  defaultMessage: 'descending',
+                }),
+                value: SORT_ORDER.DESC,
+              },
+            ]}
+            value={this.props.sortOrder}
+            onChange={this.onSortOrderChange}
+            compressed
+          />
+        </EuiFormRow>
+
+        <EuiHorizontalRule margin="xs" />
+        {this.renderTopHitsForm()}
+      </EuiPanel>
+    );
+  }
+
+  render() {
     return (
       <Fragment>
-        <TooltipSelector
-          value={this.props.tooltipProperties}
-          onChange={this._onTooltipPropertiesChange}
-          fields={this.state.tooltipFields}
-        />
+        {this._renderTooltipsPanel()}
+        <EuiSpacer size="s" />
 
-        <EuiFormRow>
-          <EuiSwitch
-            label={
-              i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
-                defaultMessage: `Dynamically filter for data in the visible map area`
-              })
-
-            }
-            checked={this.props.filterByMapBounds}
-            onChange={this._onFilterByMapBoundsChange}
-          />
-        </EuiFormRow>
-
-        {topHitsCheckbox}
-
-        {this.renderTopHitsForm()}
+        {this._renderSortPanel()}
+        <EuiSpacer size="s" />
       </Fragment>
     );
   }

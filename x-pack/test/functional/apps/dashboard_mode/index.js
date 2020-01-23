@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('dashboard mode', function () {
-    this.tags('ciGroup2');
+export default function({ loadTestFile }) {
+  describe('dashboard mode', function() {
+    this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./dashboard_view_mode'));
+    loadTestFile(require.resolve('./dashboard_empty_screen'));
   });
 }

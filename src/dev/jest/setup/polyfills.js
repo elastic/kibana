@@ -20,7 +20,9 @@
 // bluebird < v3.3.5 does not work with MutationObserver polyfill
 // when MutationObserver exists, bluebird avoids using node's builtin async schedulers
 const bluebird = require('bluebird');
-bluebird.Promise.setScheduler(function (fn) { global.setImmediate.call(global, fn); });
+bluebird.Promise.setScheduler(function(fn) {
+  global.setImmediate.call(global, fn);
+});
 
 const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });

@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import Joi from 'joi';
-import { KbnServer } from '../../../types';
-// @ts-ignore
-import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
-// @ts-ignore
-import { reportingFeaturePreRoutingFactory } from './reporting_feature_pre_routing';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
+import { ServerFacade } from '../../../types';
+import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
+import { reportingFeaturePreRoutingFactory } from './reporting_feature_pre_routing';
+import { GetReportingFeatureIdFn } from './reporting_feature_pre_routing';
 
 const API_TAG = 'api';
 
-interface RouteConfigFactory {
+export interface RouteConfigFactory {
   tags?: string[];
   pre: any[];
   response?: {
@@ -23,15 +21,16 @@ interface RouteConfigFactory {
   };
 }
 
-type GetFeatureFunction = (request: Request) => any;
-type PreRoutingFunction = (getFeatureId?: GetFeatureFunction) => any;
+export type GetRouteConfigFactoryFn = (
+  getFeatureId?: GetReportingFeatureIdFn
+) => RouteConfigFactory;
 
-export function getRouteConfigFactoryReportingPre(server: KbnServer) {
-  const authorizedUserPreRouting: PreRoutingFunction = authorizedUserPreRoutingFactory(server);
-  const reportingFeaturePreRouting: PreRoutingFunction = reportingFeaturePreRoutingFactory(server);
+export function getRouteConfigFactoryReportingPre(server: ServerFacade): GetRouteConfigFactoryFn {
+  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
+  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
 
-  return (getFeatureId?: GetFeatureFunction): RouteConfigFactory => {
-    const preRouting = [{ method: authorizedUserPreRouting, assign: 'user' }];
+  return (getFeatureId?: GetReportingFeatureIdFn): RouteConfigFactory => {
+    const preRouting: any[] = [{ method: authorizedUserPreRouting, assign: 'user' }];
     if (getFeatureId) {
       preRouting.push(reportingFeaturePreRouting(getFeatureId));
     }
@@ -43,7 +42,7 @@ export function getRouteConfigFactoryReportingPre(server: KbnServer) {
   };
 }
 
-export function getRouteOptions(server: KbnServer) {
+export function getRouteOptionsCsv(server: ServerFacade) {
   const getRouteConfig = getRouteConfigFactoryReportingPre(server);
   return {
     ...getRouteConfig(() => CSV_FROM_SAVEDOBJECT_JOB_TYPE),
@@ -64,7 +63,7 @@ export function getRouteOptions(server: KbnServer) {
   };
 }
 
-export function getRouteConfigFactoryManagementPre(server: KbnServer) {
+export function getRouteConfigFactoryManagementPre(server: ServerFacade): GetRouteConfigFactoryFn {
   const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
   const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
   const managementPreRouting = reportingFeaturePreRouting(() => 'management');
@@ -84,7 +83,7 @@ export function getRouteConfigFactoryManagementPre(server: KbnServer) {
 // TOC at the end of the PDF, but it's sending multiple cookies and causing our auth to fail with a 401.
 // Additionally, the range-request doesn't alleviate any performance issues on the server as the entire
 // download is loaded into memory.
-export function getRouteConfigFactoryDownloadPre(server: KbnServer) {
+export function getRouteConfigFactoryDownloadPre(server: ServerFacade): GetRouteConfigFactoryFn {
   const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server);
   return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),

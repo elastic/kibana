@@ -4,31 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('./lib/get_create_task_runner_function', () => ({
-  getCreateTaskRunnerFunction: jest.fn().mockReturnValue(jest.fn()),
-}));
-
+import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { SavedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../task_manager/task_manager.mock';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/plugin.mock';
+import { taskManagerMock } from '../../../../plugins/task_manager/server/task_manager.mock';
 
-const taskManager = taskManagerMock.create();
-
+const taskManager = taskManagerMock.setup();
 const alertTypeRegistryParams = {
-  isSecurityEnabled: true,
-  getServices() {
-    return {
-      log: jest.fn(),
-      callCluster: jest.fn(),
-      savedObjectsClient: SavedObjectsClientMock.create(),
-    };
-  },
   taskManager,
-  executeAction: jest.fn(),
-  getBasePath: jest.fn().mockReturnValue(undefined),
-  spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-  encryptedSavedObjectsPlugin: encryptedSavedObjectsMock.create(),
+  taskRunnerFactory: new TaskRunnerFactory(),
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -44,6 +27,7 @@ describe('has()', () => {
     registry.register({
       id: 'foo',
       name: 'Foo',
+      actionGroups: [],
       executor: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
@@ -55,34 +39,24 @@ describe('register()', () => {
     const alertType = {
       id: 'test',
       name: 'Test',
+      actionGroups: [],
       executor: jest.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getCreateTaskRunnerFunction } = require('./lib/get_create_task_runner_function');
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
-    getCreateTaskRunnerFunction.mockReturnValue(jest.fn());
     registry.register(alertType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "alerting:test": Object {
-      "createTaskRunner": [MockFunction],
-      "title": "Test",
-      "type": "alerting:test",
-    },
-  },
-]
-`);
-    expect(getCreateTaskRunnerFunction).toHaveBeenCalledWith({
-      alertType,
-      isSecurityEnabled: true,
-      getServices: alertTypeRegistryParams.getServices,
-      encryptedSavedObjectsPlugin: alertTypeRegistryParams.encryptedSavedObjectsPlugin,
-      getBasePath: alertTypeRegistryParams.getBasePath,
-      spaceIdToNamespace: alertTypeRegistryParams.spaceIdToNamespace,
-      executeAction: alertTypeRegistryParams.executeAction,
-    });
+      Array [
+        Object {
+          "alerting:test": Object {
+            "createTaskRunner": [Function],
+            "title": "Test",
+            "type": "alerting:test",
+          },
+        },
+      ]
+    `);
   });
 
   test('should throw an error if type is already registered', () => {
@@ -90,12 +64,14 @@ Array [
     registry.register({
       id: 'test',
       name: 'Test',
+      actionGroups: [],
       executor: jest.fn(),
     });
     expect(() =>
       registry.register({
         id: 'test',
         name: 'Test',
+        actionGroups: [],
         executor: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
@@ -108,16 +84,18 @@ describe('get()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
+      actionGroups: [],
       executor: jest.fn(),
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
-Object {
-  "executor": [MockFunction],
-  "id": "test",
-  "name": "Test",
-}
-`);
+      Object {
+        "actionGroups": Array [],
+        "executor": [MockFunction],
+        "id": "test",
+        "name": "Test",
+      }
+    `);
   });
 
   test(`should throw an error if type isn't registered`, () => {
@@ -140,16 +118,20 @@ describe('list()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
+      actionGroups: ['testActionGroup'],
       executor: jest.fn(),
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "id": "test",
-    "name": "Test",
-  },
-]
-`);
+      Array [
+        Object {
+          "actionGroups": Array [
+            "testActionGroup",
+          ],
+          "id": "test",
+          "name": "Test",
+        },
+      ]
+    `);
   });
 });

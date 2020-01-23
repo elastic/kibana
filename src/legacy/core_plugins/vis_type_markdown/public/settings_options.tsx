@@ -18,24 +18,16 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'ui/vis/editors/default';
-import { RangeOption, SwitchOption } from '../../kbn_vislib_vis_types/public/components';
+import { RangeOption, SwitchOption } from '../../vis_type_vislib/public';
 import { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
   return (
     <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
-        <h2>
-          <FormattedMessage id="visTypeMarkdown.params.settingsTitle" defaultMessage="Settings" />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-
       <RangeOption
         label={i18n.translate('visTypeMarkdown.params.fontSizeLabel', {
           defaultMessage: 'Base font size in points',

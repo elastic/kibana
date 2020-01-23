@@ -3,28 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
-import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
-import { loadLicense, LicenseApiResponse } from '../../services/rest/xpack';
+import useObservable from 'react-use/lib/useObservable';
+import { ILicense } from '../../../../../../plugins/licensing/public';
+import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 
-const initialLicense: LicenseApiResponse = {
-  features: {},
-  license: {
-    is_active: false
-  }
-};
-export const LicenseContext = React.createContext(initialLicense);
+export const LicenseContext = React.createContext<ILicense | undefined>(
+  undefined
+);
 
-export const LicenseProvider: React.FC = ({ children }) => {
-  const { data = initialLicense, status } = useFetcher(() => loadLicense(), []);
-  const hasValidLicense = data.license.is_active;
+export function LicenseProvider({ children }: { children: React.ReactChild }) {
+  const { license$ } = useApmPluginContext().plugins.licensing;
+  const license = useObservable(license$);
+  // if license is not loaded yet, consider it valid
+  const hasInvalidLicense = license?.isActive === false;
 
   // if license is invalid show an error message
-  if (status === FETCH_STATUS.SUCCESS && !hasValidLicense) {
+  if (hasInvalidLicense) {
     return <InvalidLicenseNotification />;
   }
 
   // render rest of application and pass down license via context
-  return <LicenseContext.Provider value={data} children={children} />;
-};
+  return <LicenseContext.Provider value={license} children={children} />;
+}

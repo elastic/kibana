@@ -4,31 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
 import { MlPopover } from './ml_popover';
 
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-
-jest.mock('../../lib/settings/use_kibana_ui_setting');
+jest.mock('ui/new_platform');
+jest.mock('../../lib/kibana');
 
 jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
   hasMlAdminPermissions: () => true,
 }));
 
 describe('MlPopover', () => {
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-
-  afterAll(() => {
-    console.error = originalError;
-  });
-
   test('shows upgrade popover on mouse click', () => {
-    const wrapper = mount(<MlPopover />);
+    const wrapper = mountWithIntl(<MlPopover />);
 
     // TODO: Update to use act() https://fb.me/react-wrap-tests-with-act
     wrapper

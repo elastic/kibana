@@ -19,17 +19,32 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
 
   describe('dashboard data-shared attributes', function describeIndexTests() {
     let originalPanelTitles;
 
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
       await PageObjects.dashboard.waitForRenderComplete();
+    });
+
+    it('should have time picker with data-shared-timefilter-duration', async () => {
+      await retry.try(async () => {
+        const sharedData = await PageObjects.timePicker.getTimeDurationForSharing();
+        expect(sharedData).to.not.be(null);
+      });
     });
 
     it('should have data-shared-items-count set to the number of embeddables on the dashboard', async () => {
@@ -52,7 +67,8 @@ export default function ({ getService, getPageObjects }) {
       const sharedContainerData = await PageObjects.dashboard.getSharedContainerData();
       expect(sharedContainerData.title).to.be('dashboard with everything');
       expect(sharedContainerData.description).to.be(
-        'I have one of every visualization type since the last time I was created!');
+        'I have one of every visualization type since the last time I was created!'
+      );
     });
 
     it('data-shared-item title should update a viz when using a custom panel title', async () => {
@@ -93,7 +109,10 @@ export default function ({ getService, getPageObjects }) {
 
     it('data-shared-item title should update a saved search when using a custom panel title', async () => {
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
-      await dashboardPanelActions.setCustomPanelTitle(CUSTOM_SEARCH_TITLE, 'Rendering Test: saved search');
+      await dashboardPanelActions.setCustomPanelTitle(
+        CUSTOM_SEARCH_TITLE,
+        'Rendering Test: saved search'
+      );
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find(item => {

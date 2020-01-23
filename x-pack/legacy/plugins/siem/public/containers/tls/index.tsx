@@ -8,17 +8,18 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
-  FlowTarget,
   PageInfoPaginated,
   TlsEdges,
   TlsSortField,
   GetTlsQuery,
+  FlowTargetSourceDest,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
@@ -40,7 +41,7 @@ export interface TlsArgs {
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: TlsArgs) => React.ReactNode;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   ip: string;
   type: networkModel.NetworkType;
 }
@@ -49,10 +50,10 @@ export interface TlsComponentReduxProps {
   activePage: number;
   isInspected: boolean;
   limit: number;
-  tlsSortField: TlsSortField;
+  sort: TlsSortField;
 }
 
-type TlsProps = OwnProps & TlsComponentReduxProps;
+type TlsProps = OwnProps & TlsComponentReduxProps & WithKibanaProps;
 
 class TlsComponentQuery extends QueryTemplatePaginated<
   TlsProps,
@@ -69,20 +70,21 @@ class TlsComponentQuery extends QueryTemplatePaginated<
       id = ID,
       ip,
       isInspected,
+      kibana,
       limit,
       skip,
       sourceId,
       startDate,
-      tlsSortField,
+      sort,
     } = this.props;
     const variables: GetTlsQuery.Variables = {
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
       filterQuery: createFilter(filterQuery),
       flowTarget,
       inspect: isInspected,
       ip,
       pagination: generateTablePaginationOptions(activePage, limit),
-      sort: tlsSortField,
+      sort,
       sourceId,
       timerange: {
         interval: '12h',
@@ -142,15 +144,16 @@ class TlsComponentQuery extends QueryTemplatePaginated<
 const makeMapStateToProps = () => {
   const getTlsSelector = networkSelectors.tlsSelector();
   const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+  return (state: State, { flowTarget, id = ID, type }: OwnProps) => {
     const { isInspected } = getQuery(state, id);
     return {
-      ...getTlsSelector(state),
+      ...getTlsSelector(state, type, flowTarget),
       isInspected,
     };
   };
-
-  return mapStateToProps;
 };
 
-export const TlsQuery = connect(makeMapStateToProps)(TlsComponentQuery);
+export const TlsQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(TlsComponentQuery);

@@ -6,31 +6,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTitle
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 
-export function StatementListHeading({
-  iconType,
-  title
-}) {
+export function StatementListHeading({ iconType, title }) {
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      responsive={false}
-      alignItems="baseline"
-    >
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="baseline">
       <EuiFlexItem grow={false}>
-        <EuiIcon
-          type={iconType}
-        />
+        <EuiIcon type={iconType} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
-          <h4>{title}</h4>
+          <h2>{title}</h2>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>

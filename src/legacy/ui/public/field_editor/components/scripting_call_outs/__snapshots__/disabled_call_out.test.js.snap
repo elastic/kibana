@@ -5,7 +5,6 @@ exports[`ScriptingDisabledCallOut should render normally 1`] = `
   <EuiCallOut
     color="danger"
     iconType="alert"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Scripting disabled"

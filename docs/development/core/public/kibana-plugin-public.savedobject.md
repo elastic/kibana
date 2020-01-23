@@ -15,7 +15,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [attributes](./kibana-plugin-public.savedobject.attributes.md) | <code>T</code> | The data for a Saved Object is stored in the <code>attributes</code> key as either an object or an array of objects. |
+|  [attributes](./kibana-plugin-public.savedobject.attributes.md) | <code>T</code> | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [error](./kibana-plugin-public.savedobject.error.md) | <code>{</code><br/><code>        message: string;</code><br/><code>        statusCode: number;</code><br/><code>    }</code> |  |
 |  [id](./kibana-plugin-public.savedobject.id.md) | <code>string</code> | The ID of this Saved Object, guaranteed to be unique for all objects of the same <code>type</code> |
 |  [migrationVersion](./kibana-plugin-public.savedobject.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |

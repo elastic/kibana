@@ -51,9 +51,16 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
     const { client, implementsCustomErrorState, variables } = props;
     const fetch = () => {
       setLoading(true);
-      client.query<T>({ fetchPolicy: 'network-only', query, variables }).then((result: any) => {
-        updateState(result.loading, result.data, result.errors);
-      });
+      client
+        .query<T>({ fetchPolicy: 'network-only', query, variables })
+        .then(
+          (result: any) => {
+            updateState(result.loading, result.data, result.errors);
+          },
+          (result: any) => {
+            updateState(false, undefined, result.graphQLErrors);
+          }
+        );
     };
     useEffect(() => {
       fetch();
@@ -68,6 +75,9 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
        * reassign the update function to do nothing with the returned values.
        */
       return () => {
+        // this component is planned to be deprecated, for the time being
+        // we will want to preserve this for the reason above.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         updateState = () => {};
       };
     }, [variables, lastRefresh]);

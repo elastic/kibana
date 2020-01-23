@@ -7,12 +7,7 @@
 import { get, omit, isEqual, defaultsDeep } from 'lodash';
 
 // This config template is presented to the user for the 'new pipeline' workflow
-const emptyPipeline = 'input {\n' +
-  '}\n' +
-  'filter {\n' +
-  '}\n' +
-  'output {\n' +
-  '}';
+const emptyPipeline = 'input {\n' + '}\n' + 'filter {\n' + '}\n' + 'output {\n' + '}';
 
 // Should be consistent with https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html
 const settingsDefaults = {
@@ -22,7 +17,7 @@ const settingsDefaults = {
   'queue.type': 'memory',
   'queue.max_bytes.number': 1,
   'queue.max_bytes.units': 'gb',
-  'queue.checkpoint.writes': 1024
+  'queue.checkpoint.writes': 1024,
 };
 
 export class Pipeline {
@@ -44,7 +39,7 @@ export class Pipeline {
 
   get clone() {
     return new Pipeline({
-      ...omit(this, [ 'id', 'username' ])
+      ...omit(this, ['id', 'username']),
     });
   }
 
@@ -65,7 +60,7 @@ export class Pipeline {
       description: this.description,
       pipeline: this.pipeline,
       username: this.username,
-      settings: upstreamSettings
+      settings: upstreamSettings,
     };
   }
 
@@ -90,20 +85,20 @@ export class Pipeline {
       description: pipeline.description,
       pipeline: pipeline.pipeline,
       username: pipeline.username,
-      settings
+      settings,
     });
   }
 
-  isEqualTo = (otherPipeline) => {
+  isEqualTo = otherPipeline => {
     // We need to create a POJO copies because isEqual would return false
     // because of property getters
     const cleanPipeline = {
-      ...this
+      ...this,
     };
     const cleanOtherPipeline = {
-      ...otherPipeline
+      ...otherPipeline,
     };
 
     return isEqual(cleanPipeline, cleanOtherPipeline);
-  }
+  };
 }

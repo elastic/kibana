@@ -39,7 +39,7 @@ export class DetailPanel extends Component {
     cluster: PropTypes.object,
     closeDetailPanel: PropTypes.func.isRequired,
     clusterName: PropTypes.string,
-  }
+  };
 
   renderSkipUnavailableValue(skipUnavailable) {
     if (skipUnavailable === true) {
@@ -177,7 +177,9 @@ export class DetailPanel extends Component {
               </EuiDescriptionListTitle>
 
               <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
-                {seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>)}
+                {seeds.map(seed => (
+                  <EuiText key={seed}>{seed}</EuiText>
+                ))}
               </EuiDescriptionListDescription>
             </EuiFlexItem>
 
@@ -240,9 +242,7 @@ export class DetailPanel extends Component {
 
     return (
       <EuiFlyoutBody>
-        {!cluster && (
-          this.renderClusterNotFound()
-        )}
+        {!cluster && this.renderClusterNotFound()}
         {cluster && (
           <Fragment>
             {this.renderClusterConfiguredByNodeWarning(cluster)}
@@ -254,11 +254,7 @@ export class DetailPanel extends Component {
   }
 
   renderFlyoutFooter() {
-    const {
-      cluster,
-      clusterName,
-      closeDetailPanel,
-    } = this.props;
+    const { cluster, clusterName, closeDetailPanel } = this.props;
 
     return (
       <EuiFlyoutFooter>
@@ -282,7 +278,7 @@ export class DetailPanel extends Component {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <RemoveClusterButtonProvider clusterNames={[clusterName]}>
-                    {(removeCluster) => (
+                    {removeCluster => (
                       <EuiButtonEmpty
                         color="danger"
                         onClick={removeCluster}

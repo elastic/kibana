@@ -30,7 +30,8 @@
 }
 
 .mapLayerPanel__sourceDetail {
-  margin-bottom: 0px !important;
+  // sass-lint:disable-block no-important
+  margin-bottom: 0 !important;
 }
 
 .mapLayerPanel__footer {

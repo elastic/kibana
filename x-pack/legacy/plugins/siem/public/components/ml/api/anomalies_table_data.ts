@@ -6,10 +6,8 @@
 
 import chrome from 'ui/chrome';
 
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
-import { throwIfNotOk } from './throw_if_not_ok';
+import { throwIfNotOk } from '../../../hooks/api/api';
 export interface Body {
   jobIds: string[];
   criteriaFields: CriteriaFields[];
@@ -23,22 +21,18 @@ export interface Body {
   maxExamples: number;
 }
 
-export const anomaliesTableData = async (
-  body: Body,
-  headers: Record<string, string | undefined>
-): Promise<Anomalies> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/results/anomalies_table_data`, {
     method: 'POST',
     credentials: 'same-origin',
     body: JSON.stringify(body),
     headers: {
-      'kbn-system-api': 'true',
       'content-Type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
+    signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };

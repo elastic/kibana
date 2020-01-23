@@ -17,22 +17,15 @@
  * under the License.
  */
 
-import { AggParamType } from 'ui/agg_types/param_types/agg';
+import { AggParamType } from './param_types/agg';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
 import { StringParamType } from './param_types/string';
 import { JsonParamType } from './param_types/json';
 import { BaseParamType } from './param_types/base';
-import { AggConfig } from '../vis/agg_config';
-import { AggConfigs } from '../vis/agg_configs';
 
-export type AggParam = BaseParamType;
-
-export interface AggParamOption {
-  val: string;
-  display: string;
-  enabled?(agg: AggConfig): boolean;
-}
+import { AggConfig } from './agg_config';
+import { AggConfigs } from './agg_configs';
 
 const paramTypeMap = {
   field: FieldParamType,
@@ -43,16 +36,22 @@ const paramTypeMap = {
   _default: BaseParamType,
 } as Record<string, any>;
 
-interface AggParamConfig {
-  type: string;
+export type AggParam = BaseParamType;
+
+export interface AggParamOption {
+  val: string;
+  display: string;
+  enabled?(agg: AggConfig): boolean;
 }
 
-export const initParams = (params: AggParamConfig[]): AggParam[] => {
-  return params.map((config: AggParamConfig) => {
+export const initParams = <TAggParam extends AggParamType = AggParamType>(
+  params: TAggParam[]
+): TAggParam[] =>
+  params.map((config: TAggParam) => {
     const Class = paramTypeMap[config.type] || paramTypeMap._default;
+
     return new Class(config);
-  }) as AggParam[];
-};
+  }) as TAggParam[];
 
 /**
  * Reads an aggConfigs
@@ -68,20 +67,25 @@ export const initParams = (params: AggParamConfig[]): AggParam[] => {
  *         output object which is used to create the agg dsl for the search request. All other properties
  *         are dependent on the AggParam#write methods which should be studied for each AggType.
  */
-export const writeParams = (
-  params: AggParam[],
-  aggConfig: AggConfig,
+export const writeParams = <
+  TAggConfig extends AggConfig = AggConfig,
+  TAggParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
+>(
+  params: Array<Partial<TAggParam>> = [],
+  aggConfig: TAggConfig,
   aggs?: AggConfigs,
   locals?: Record<string, any>
 ) => {
   const output = { params: {} as Record<string, any> };
   locals = locals || {};
 
-  params.forEach(function(param) {
+  params.forEach(param => {
     if (param.write) {
       param.write(aggConfig, output, aggs, locals);
     } else {
-      output.params[param.name] = aggConfig.params[param.name];
+      if (param && param.name) {
+        output.params[param.name] = aggConfig.params[param.name];
+      }
     }
   });
 

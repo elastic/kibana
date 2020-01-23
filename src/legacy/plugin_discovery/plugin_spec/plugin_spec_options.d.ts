@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Server } from '../../server/kbn_server';
-import { Capabilities } from '../../../core/public';
+import { Capabilities } from '../../../core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagementDefinition } from '../../../core/server/saved_objects/management';
 

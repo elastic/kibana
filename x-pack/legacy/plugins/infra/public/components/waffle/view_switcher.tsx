@@ -5,29 +5,27 @@
  */
 
 import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import React from 'react';
 
 interface Props {
   view: string;
   onChange: EuiButtonGroupProps['onChange'];
-  intl: InjectedIntl;
 }
 
-export const ViewSwitcher = injectI18n(({ view, onChange, intl }: Props) => {
+export const ViewSwitcher = ({ view, onChange }: Props) => {
   const buttons = [
     {
       id: 'map',
-      label: intl.formatMessage({
-        id: 'xpack.infra.viewSwitcher.mapViewLabel',
+      label: i18n.translate('xpack.infra.viewSwitcher.mapViewLabel', {
         defaultMessage: 'Map view',
       }),
       iconType: 'apps',
     },
     {
       id: 'table',
-      label: intl.formatMessage({
-        id: 'xpack.infra.viewSwitcher.tableViewLabel',
+      label: i18n.translate('xpack.infra.viewSwitcher.tableViewLabel', {
         defaultMessage: 'Table view',
       }),
       iconType: 'editorUnorderedList',
@@ -35,8 +33,7 @@ export const ViewSwitcher = injectI18n(({ view, onChange, intl }: Props) => {
   ];
   return (
     <EuiButtonGroup
-      legend={intl.formatMessage({
-        id: 'xpack.infra.viewSwitcher.lenged',
+      legend={i18n.translate('xpack.infra.viewSwitcher.lenged', {
         defaultMessage: 'Switch between table and map view',
       })}
       options={buttons}
@@ -45,4 +42,4 @@ export const ViewSwitcher = injectI18n(({ view, onChange, intl }: Props) => {
       onChange={onChange}
     />
   );
-});
+};

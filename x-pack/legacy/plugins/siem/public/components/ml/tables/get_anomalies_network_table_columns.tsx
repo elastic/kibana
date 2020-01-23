@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import moment from 'moment';
-import { Columns } from '../../load_more_table';
-import { Anomaly, NarrowDateRange, AnomaliesByNetwork } from '../types';
+
+import { Columns } from '../../paginated_table';
+import { Anomaly, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { EntityDraggable } from '../entity_draggable';
 import { createCompoundNetworkKey } from './create_compound_key';
@@ -18,16 +20,15 @@ import * as i18n from './translations';
 import { getEntries } from '../get_entries';
 import { DraggableScore } from '../score/draggable_score';
 import { createExplorerLink } from '../links/create_explorer_link';
-import { LocalizedDateTooltip } from '../../localized_date_tooltip';
-import { PreferenceFormattedDate } from '../../formatted_date';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { NetworkType } from '../../../store/network/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
+import { FlowTarget } from '../../../graphql/types';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: number,
   endDate: number,
-  interval: string,
-  narrowDateRange: NarrowDateRange
+  flowTarget?: FlowTarget
 ): [
   Columns<AnomaliesByNetwork['ip'], AnomaliesByNetwork>,
   Columns<Anomaly['severity'], AnomaliesByNetwork>,
@@ -45,7 +46,7 @@ export const getAnomaliesNetworkTableColumns = (
         rowItem: ip,
         attrName: anomaliesByNetwork.type,
         idPrefix: `anomalies-network-table-ip-${createCompoundNetworkKey(anomaliesByNetwork)}`,
-        render: item => <IPDetailsLink ip={item} />,
+        render: item => <IPDetailsLink ip={item} flowTarget={flowTarget} />,
       }),
   },
   {
@@ -120,11 +121,7 @@ export const getAnomaliesNetworkTableColumns = (
     name: i18n.TIME_STAMP,
     field: 'anomaly.time',
     sortable: true,
-    render: time => (
-      <LocalizedDateTooltip date={moment(new Date(time)).toDate()}>
-        <PreferenceFormattedDate value={new Date(time)} />
-      </LocalizedDateTooltip>
-    ),
+    render: time => <FormattedRelativePreferenceDate value={time} />,
   },
 ];
 
@@ -132,10 +129,9 @@ export const getAnomaliesNetworkTableColumnsCurated = (
   pageType: NetworkType,
   startDate: number,
   endDate: number,
-  interval: string,
-  narrowDateRange: NarrowDateRange
+  flowTarget?: FlowTarget
 ) => {
-  const columns = getAnomaliesNetworkTableColumns(startDate, endDate, interval, narrowDateRange);
+  const columns = getAnomaliesNetworkTableColumns(startDate, endDate, flowTarget);
 
   // Columns to exclude from ip details pages
   if (pageType === NetworkType.details) {

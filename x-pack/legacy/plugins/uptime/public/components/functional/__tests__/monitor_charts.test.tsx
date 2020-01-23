@@ -5,11 +5,25 @@
  */
 
 import React from 'react';
+import DateMath from '@elastic/datemath';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorChartsComponent } from '../monitor_charts';
 import { MonitorChart } from '../../../../common/graphql/types';
+import { renderWithRouter } from '../../../lib';
 
 describe('MonitorCharts component', () => {
+  let dateMathSpy: any;
+  const MOCK_DATE_VALUE = 20;
+
+  beforeEach(() => {
+    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy.mockReturnValue(MOCK_DATE_VALUE);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const chartResponse: { monitorChartsData: MonitorChart } = {
     monitorChartsData: {
       locationDurationLines: [
@@ -50,17 +64,19 @@ describe('MonitorCharts component', () => {
 
   it('renders the component without errors', () => {
     const component = shallowWithIntl(
-      <MonitorChartsComponent
-        danger="dangerColor"
-        data={{ monitorChartsData: chartResponse.monitorChartsData }}
-        loading={false}
-        mean="mean"
-        range="range"
-        success="success"
-        monitorId="something"
-        dateRangeStart="2011-12-03T10:15:30+01:00"
-        dateRangeEnd="2011-12-03T10:15:30+01:00"
-      />
+      renderWithRouter(
+        <MonitorChartsComponent
+          danger="dangerColor"
+          data={{ monitorChartsData: chartResponse.monitorChartsData }}
+          loading={false}
+          mean="mean"
+          range="range"
+          success="success"
+          monitorId="something"
+          dateRangeStart="2011-12-03T10:15:30+01:00"
+          dateRangeEnd="2011-12-03T10:15:30+01:00"
+        />
+      )
     );
     expect(component).toMatchSnapshot();
   });

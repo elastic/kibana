@@ -45,6 +45,7 @@ Array [
       }
     }
     responsive={true}
+    tableLayout="fixed"
   >
     <div
       className="euiBasicTable euiBasicTable-loading"
@@ -83,6 +84,7 @@ Array [
         </EuiTableHeaderMobile>
         <EuiTable
           responsive={true}
+          tableLayout="fixed"
         >
           <table
             className="euiTable euiTable--responsive"
@@ -91,7 +93,7 @@ Array [
               <caption
                 aria-live="polite"
                 aria-relevant="text"
-                className="euiScreenReaderOnly"
+                className="euiScreenReaderOnly euiTableCaption"
                 role="status"
               >
                 <EuiDelayRender
@@ -112,6 +114,11 @@ Array [
                       data-test-subj="tableHeaderCell_object_title_0"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -134,6 +141,11 @@ Array [
                       data-test-subj="tableHeaderCell_created_at_1"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -156,6 +168,11 @@ Array [
                       data-test-subj="tableHeaderCell_status_2"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -176,6 +193,11 @@ Array [
                       className="euiTableHeaderCell"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent euiTableCellContent--alignRight"
@@ -205,6 +227,11 @@ Array [
                       <td
                         className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
                         colSpan={4}
+                        style={
+                          Object {
+                            "width": undefined,
+                          }
+                        }
                       >
                         <div
                           className="euiTableCellContent euiTableCellContent--alignCenter"
@@ -224,76 +251,6 @@ Array [
           </table>
         </EuiTable>
       </div>
-      <PaginationBar
-        onPageChange={[Function]}
-        onPageSizeChange={[Function]}
-        pagination={
-          Object {
-            "hidePerPageOptions": true,
-            "pageIndex": 0,
-            "pageSize": 10,
-            "totalItemCount": 0,
-          }
-        }
-      >
-        <div>
-          <EuiSpacer
-            size="m"
-          >
-            <div
-              className="euiSpacer euiSpacer--m"
-            />
-          </EuiSpacer>
-          <EuiTablePagination
-            activePage={0}
-            hidePerPageOptions={true}
-            itemsPerPage={10}
-            itemsPerPageOptions={
-              Array [
-                10,
-                25,
-                50,
-              ]
-            }
-            onChangeItemsPerPage={[Function]}
-            onChangePage={[Function]}
-            pageCount={0}
-          >
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              responsive={false}
-            >
-              <div
-                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-              >
-                <EuiFlexItem
-                  grow={false}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                  >
-                    <EuiPagination
-                      activePage={0}
-                      onPageClick={[Function]}
-                      pageCount={0}
-                    >
-                      <span />
-                    </EuiPagination>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-          </EuiTablePagination>
-        </div>
-      </PaginationBar>
     </div>
   </EuiBasicTable>,
   <div
@@ -333,6 +290,7 @@ Array [
       </EuiTableHeaderMobile>
       <EuiTable
         responsive={true}
+        tableLayout="fixed"
       >
         <table
           className="euiTable euiTable--responsive"
@@ -341,7 +299,7 @@ Array [
             <caption
               aria-live="polite"
               aria-relevant="text"
-              className="euiScreenReaderOnly"
+              className="euiScreenReaderOnly euiTableCaption"
               role="status"
             >
               <EuiDelayRender
@@ -362,6 +320,11 @@ Array [
                     data-test-subj="tableHeaderCell_object_title_0"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -384,6 +347,11 @@ Array [
                     data-test-subj="tableHeaderCell_created_at_1"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -406,6 +374,11 @@ Array [
                     data-test-subj="tableHeaderCell_status_2"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -426,6 +399,11 @@ Array [
                     className="euiTableHeaderCell"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent euiTableCellContent--alignRight"
@@ -455,6 +433,11 @@ Array [
                     <td
                       className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
                       colSpan={4}
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent euiTableCellContent--alignCenter"
@@ -474,76 +457,6 @@ Array [
         </table>
       </EuiTable>
     </div>
-    <PaginationBar
-      onPageChange={[Function]}
-      onPageSizeChange={[Function]}
-      pagination={
-        Object {
-          "hidePerPageOptions": true,
-          "pageIndex": 0,
-          "pageSize": 10,
-          "totalItemCount": 0,
-        }
-      }
-    >
-      <div>
-        <EuiSpacer
-          size="m"
-        >
-          <div
-            className="euiSpacer euiSpacer--m"
-          />
-        </EuiSpacer>
-        <EuiTablePagination
-          activePage={0}
-          hidePerPageOptions={true}
-          itemsPerPage={10}
-          itemsPerPageOptions={
-            Array [
-              10,
-              25,
-              50,
-            ]
-          }
-          onChangeItemsPerPage={[Function]}
-          onChangePage={[Function]}
-          pageCount={0}
-        >
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            responsive={false}
-          >
-            <div
-              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-            >
-              <EuiFlexItem
-                grow={false}
-              >
-                <div
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <div
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <EuiPagination
-                    activePage={0}
-                    onPageClick={[Function]}
-                    pageCount={0}
-                  >
-                    <span />
-                  </EuiPagination>
-                </div>
-              </EuiFlexItem>
-            </div>
-          </EuiFlexGroup>
-        </EuiTablePagination>
-      </div>
-    </PaginationBar>
   </div>,
 ]
 `;

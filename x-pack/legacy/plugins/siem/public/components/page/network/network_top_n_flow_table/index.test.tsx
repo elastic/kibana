@@ -4,45 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { FlowTargetNew } from '../../../../graphql/types';
-import {
-  apolloClientObservable,
-  mockGlobalState,
-  mockIndexPattern,
-  TestProviders,
-} from '../../../../mock';
+import { FlowTargetSourceDest } from '../../../../graphql/types';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
-jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
+  const mount = useMountAppended();
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
   });
 
   describe('rendering', () => {
-    test('it renders the default NetworkTopNFlow table', () => {
+    test('it renders the default NetworkTopNFlow table on the Network page', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
             data={mockData.NetworkTopNFlow.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
-            flowTargeted={FlowTargetNew.source}
+            flowTargeted={FlowTargetSourceDest.source}
             id="topNFlowSource"
-            indexPattern={mockIndexPattern}
             isInspect={false}
             loading={false}
             loadPage={loadPage}
@@ -57,7 +52,32 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
+    });
+
+    test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
+      const wrapper = shallow(
+        <ReduxStoreProvider store={store}>
+          <NetworkTopNFlowTable
+            data={mockData.NetworkTopNFlow.edges}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
+            flowTargeted={FlowTargetSourceDest.source}
+            id="topNFlowSource"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(
+              false,
+              'showMorePagesIndicator',
+              mockData.NetworkTopNFlow.pageInfo
+            )}
+            totalCount={mockData.NetworkTopNFlow.totalCount}
+            type={networkModel.NetworkType.details}
+          />
+        </ReduxStoreProvider>
+      );
+
+      expect(wrapper.find('Connect(Component)')).toMatchSnapshot();
     });
   });
 
@@ -69,10 +89,9 @@ describe('NetworkTopNFlow Table Component', () => {
             <NetworkTopNFlowTable
               data={mockData.NetworkTopNFlow.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkTopNFlow.pageInfo)}
-              flowTargeted={FlowTargetNew.source}
+              flowTargeted={FlowTargetSourceDest.source}
               id="topNFlowSource"
               isInspect={false}
-              indexPattern={mockIndexPattern}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(
@@ -86,7 +105,7 @@ describe('NetworkTopNFlow Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.page.queries.topNFlowSource.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries.topNFlowSource.sort).toEqual({
         direction: 'desc',
         field: 'bytes_out',
       });
@@ -98,7 +117,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries.topNFlowSource.topNFlowSort).toEqual({
+      expect(store.getState().network.page.queries.topNFlowSource.sort).toEqual({
         direction: 'asc',
         field: 'bytes_out',
       });

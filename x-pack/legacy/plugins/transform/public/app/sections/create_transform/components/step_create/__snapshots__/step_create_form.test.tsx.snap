@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: <StepCreateForm /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "initialized": false,
+      }
+    }
+  >
+    <Component
+      createIndexPattern={false}
+      onChange={[Function]}
+      overrides={
+        Object {
+          "created": false,
+          "indexPatternId": undefined,
+          "started": false,
+        }
+      }
+      transformConfig={Object {}}
+      transformId="the-transform-id"
+    />
+  </ContextProvider>
+</div>
+`;

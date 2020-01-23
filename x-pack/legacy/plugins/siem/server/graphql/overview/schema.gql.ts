@@ -27,6 +27,13 @@ export const overviewSchema = gql`
     auditbeatPackage: Float
     auditbeatProcess: Float
     auditbeatUser: Float
+    endgameDns: Float
+    endgameFile: Float
+    endgameImageLoad: Float
+    endgameNetwork: Float
+    endgameProcess: Float
+    endgameRegistry: Float
+    endgameSecurity: Float
     filebeatSystemModule: Float
     winlogbeat: Float
     inspect: Inspect

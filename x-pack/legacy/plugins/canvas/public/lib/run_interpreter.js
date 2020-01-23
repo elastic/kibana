@@ -6,6 +6,7 @@
 
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { interpretAst } from 'plugins/interpreter/interpreter';
+import { loadLegacyServerFunctionWrappers } from 'plugins/interpreter/canvas/load_legacy_server_function_wrappers';
 import { notify } from './notify';
 
 /**
@@ -19,7 +20,8 @@ import { notify } from './notify';
  * @returns {promise}
  */
 export function runInterpreter(ast, context = null, options = {}) {
-  return interpretAst(ast, context)
+  return loadLegacyServerFunctionWrappers()
+    .then(() => interpretAst(ast, context))
     .then(renderable => {
       if (getType(renderable) === 'render') {
         return renderable;

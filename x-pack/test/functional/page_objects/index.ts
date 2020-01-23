@@ -33,7 +33,6 @@ import { GisPageProvider } from './gis_page';
 import { StatusPagePageProvider } from './status_page';
 // @ts-ignore not ts yet
 import { UpgradeAssistantProvider } from './upgrade_assistant';
-import { CodeHomePageProvider } from './code_page';
 // @ts-ignore not ts yet
 import { RollupPageProvider } from './rollup_page';
 import { UptimePageProvider } from './uptime_page';
@@ -44,6 +43,9 @@ import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
+import { LensPageProvider } from './lens_page';
+import { InfraMetricExplorerProvider } from './infra_metric_explorer';
+import { RoleMappingsPageProvider } from './role_mappings_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -60,11 +62,11 @@ export const pageObjects = {
   reporting: ReportingPageProvider,
   spaceSelector: SpaceSelectorPageProvider,
   infraHome: InfraHomePageProvider,
+  infraMetricExplorer: InfraMetricExplorerProvider,
   infraLogs: InfraLogsPageProvider,
   maps: GisPageProvider,
   statusPage: StatusPagePageProvider,
   upgradeAssistant: UpgradeAssistantProvider,
-  code: CodeHomePageProvider,
   uptime: UptimePageProvider,
   rollup: RollupPageProvider,
   licenseManagement: LicenseManagementPageProvider,
@@ -74,4 +76,6 @@ export const pageObjects = {
   crossClusterReplication: CrossClusterReplicationPageProvider,
   remoteClusters: RemoteClustersPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
+  lens: LensPageProvider,
+  roleMappings: RoleMappingsPageProvider,
 };

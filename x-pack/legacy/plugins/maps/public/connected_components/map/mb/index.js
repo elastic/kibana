@@ -13,18 +13,17 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
-  setTooltipState,
   setMapInitError,
-  updateDrawState
 } from '../../../actions/map_actions';
 import {
   getTooltipState,
   getLayerList,
   getMapReady,
   getGoto,
-  getDrawState,
-  isDrawingFilter,
-  getScrollZoom
+  getScrollZoom,
+  isInteractiveDisabled,
+  isTooltipControlDisabled,
+  isViewControlHidden,
 } from '../../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 
@@ -35,18 +34,20 @@ function mapStateToProps(state = {}) {
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     tooltipState: getTooltipState(state),
-    drawState: getDrawState(state),
-    isDrawingFilter: isDrawingFilter(state),
-    scrollZoom: getScrollZoom(state)
+    scrollZoom: getScrollZoom(state),
+    disableInteractive: isInteractiveDisabled(state),
+    disableTooltipControl: isTooltipControlDisabled(state),
+    disableTooltipControl: isTooltipControlDisabled(state),
+    hideViewControl: isViewControlHidden(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    extentChanged: (e) => {
+    extentChanged: e => {
       dispatch(mapExtentChanged(e));
     },
-    onMapReady: (e) => {
+    onMapReady: e => {
       dispatch(clearGoto());
       dispatch(mapExtentChanged(e));
       dispatch(mapReady());
@@ -63,17 +64,13 @@ function mapDispatchToProps(dispatch) {
     clearGoto: () => {
       dispatch(clearGoto());
     },
-    setTooltipState(tooltipState) {
-      dispatch(setTooltipState(tooltipState));
-    },
     setMapInitError(errorMessage) {
       dispatch(setMapInitError(errorMessage));
     },
-    disableDrawState() {
-      dispatch(updateDrawState(null));
-    }
   };
 }
 
-const connectedMBMapContainer = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(MBMapContainer);
+const connectedMBMapContainer = connect(mapStateToProps, mapDispatchToProps, null, {
+  withRef: true,
+})(MBMapContainer);
 export { connectedMBMapContainer as MBMapContainer };

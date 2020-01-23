@@ -5,6 +5,7 @@
  */
 
 import { InmemoryConfigurationAdapter } from '../configuration/inmemory_configuration_adapter';
+import { defaultIndexPattern } from '../../../default_index_pattern';
 
 import { ConfigurationSourcesAdapter } from './configuration';
 import { PartialSourceConfiguration } from './types';
@@ -75,7 +76,7 @@ describe('the ConfigurationSourcesAdapter', () => {
       new InmemoryConfigurationAdapter({
         sources: {
           sourceOne: {
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: defaultIndexPattern,
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },

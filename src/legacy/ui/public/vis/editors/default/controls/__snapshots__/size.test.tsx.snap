@@ -4,7 +4,9 @@ exports[`SizeParamEditor should init with the default set of props 1`] = `
 <EuiFormRow
   compressed={true}
   describedByIds={Array []}
+  display="row"
   fullWidth={true}
+  hasChildLabel={true}
   hasEmptyLabelSpace={false}
   isInvalid={false}
   label={
@@ -19,11 +21,10 @@ exports[`SizeParamEditor should init with the default set of props 1`] = `
   labelType="label"
 >
   <EuiFieldNumber
-    compressed={false}
+    compressed={true}
     data-test-subj="sizeParamEditor"
     fullWidth={true}
     isInvalid={false}
-    isLoading={false}
     min={1}
     onBlur={[MockFunction]}
     onChange={[Function]}

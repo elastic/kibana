@@ -5,7 +5,7 @@
 <titleabbrev>Limitations</titleabbrev>
 ++++
 
-[float]
+[discrete]
 === Limited support for multiple indices
 The graph API can explore multiple indices, types, or aliases in a
 single API request, but the assumption is that each "hop" it performs

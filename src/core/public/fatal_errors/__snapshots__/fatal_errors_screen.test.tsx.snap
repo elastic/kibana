@@ -2,19 +2,15 @@
 
 exports[`rendering render matches snapshot 1`] = `
 <EuiPage
-  restrictWidth={false}
   style={
     Object {
       "minHeight": "100vh",
     }
   }
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <EuiPageContent
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <EuiEmptyPrompt
@@ -69,7 +65,6 @@ exports[`rendering render matches snapshot 1`] = `
         color="danger"
         iconType="alert"
         key="0"
-        size="m"
         title="foo"
       >
         <EuiCodeBlock
@@ -86,7 +81,6 @@ Error: foo
         color="danger"
         iconType="alert"
         key="1"
-        size="m"
         title="bar"
       >
         <EuiCodeBlock

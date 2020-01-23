@@ -20,7 +20,7 @@
 import React from 'react';
 import { EuiFieldText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CidrMask } from '../../../../../utils/cidr_mask';
+import { CidrMask } from '../../../../../agg_types/buckets/lib/cidr_mask';
 import { InputList, InputListConfig, InputObject, InputModel, InputItem } from './input_list';
 
 const EMPTY_STRING = '';
@@ -78,6 +78,7 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
             values: { mask: mask.value || '*' },
           })}
           compressed
+          fullWidth
           isInvalid={showValidation ? mask.isInvalid : false}
           placeholder="*"
           onChange={ev => {

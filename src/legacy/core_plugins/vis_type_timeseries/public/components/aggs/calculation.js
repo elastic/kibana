@@ -18,16 +18,14 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import _ from 'lodash';
-import uuid from 'uuid';
+import React, { useEffect } from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
-import { CalculationVars } from './vars';
+import { CalculationVars, newVariable } from './vars';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -38,102 +36,103 @@ import {
   EuiTextArea,
   EuiFormRow,
   EuiCode,
+  EuiSpacer,
 } from '@elastic/eui';
 
-export class CalculationAgg extends Component {
-  componentWillMount() {
-    if (!this.props.model.variables) {
-      this.props.onChange(
-        _.assign({}, this.props.model, {
-          variables: [{ id: uuid.v1() }],
-        })
-      );
+const checkModel = model => Array.isArray(model.variables) && model.script !== undefined;
+
+export function CalculationAgg(props) {
+  const htmlId = htmlIdGenerator();
+  const { siblings, model } = props;
+
+  const handleChange = createChangeHandler(props.onChange, model);
+  const handleSelectChange = createSelectHandler(handleChange);
+  const handleTextChange = createTextHandler(handleChange);
+
+  useEffect(() => {
+    if (!checkModel(model)) {
+      handleChange({
+        variables: [newVariable()],
+        script: '',
+      });
     }
-  }
+  }, [handleChange, model]);
 
-  render() {
-    const { siblings } = this.props;
+  return (
+    <AggRow
+      disableDelete={props.disableDelete}
+      model={props.model}
+      onAdd={props.onAdd}
+      onDelete={props.onDelete}
+      siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
+    >
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="visTypeTimeseries.calculation.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <EuiSpacer size="xs" />
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
 
-    const defaults = { script: '' };
-    const model = { ...defaults, ...this.props.model };
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('variables')}>
+            <FormattedMessage
+              id="visTypeTimeseries.calculation.variablesLabel"
+              defaultMessage="Variables"
+            />
+          </EuiFormLabel>
+          <EuiSpacer size="xs" />
+          <CalculationVars
+            id={htmlId('variables')}
+            metrics={siblings}
+            onChange={handleChange}
+            name="variables"
+            model={model}
+          />
+        </EuiFlexItem>
 
-    const handleChange = createChangeHandler(this.props.onChange, model);
-    const handleSelectChange = createSelectHandler(handleChange);
-    const handleTextChange = createTextHandler(handleChange);
-
-    const htmlId = htmlIdGenerator();
-
-    return (
-      <AggRow
-        disableDelete={this.props.disableDelete}
-        model={this.props.model}
-        onAdd={this.props.onAdd}
-        onDelete={this.props.onDelete}
-        siblings={this.props.siblings}
-        dragHandleProps={this.props.dragHandleProps}
-      >
-        <EuiFlexGroup direction="column" gutterSize="l">
-          <EuiFlexItem>
-            <EuiFormLabel htmlFor={htmlId('aggregation')}>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('painless')}
+            label={
               <FormattedMessage
-                id="visTypeTimeseries.calculation.aggregationLabel"
-                defaultMessage="Aggregation"
+                id="visTypeTimeseries.calculation.painlessScriptLabel"
+                defaultMessage="Painless Script"
               />
-            </EuiFormLabel>
-            <AggSelect
-              id={htmlId('aggregation')}
-              panelType={this.props.panel.type}
-              siblings={this.props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiFormLabel htmlFor={htmlId('variables')}>
-              <FormattedMessage id="visTypeTimeseries.calculation.variablesLabel" defaultMessage="Variables" />
-            </EuiFormLabel>
-            <CalculationVars
-              id={htmlId('variables')}
-              metrics={siblings}
-              onChange={handleChange}
-              name="variables"
-              model={model}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiFormRow
-              id={htmlId('painless')}
-              label={
+            }
+            fullWidth
+            helpText={
+              <div>
                 <FormattedMessage
-                  id="visTypeTimeseries.calculation.painlessScriptLabel"
-                  defaultMessage="Painless Script"
-                />
-              }
-              fullWidth
-              helpText={
-                <div>
-                  <FormattedMessage
-                    id="visTypeTimeseries.calculation.painlessScriptDescription"
-                    defaultMessage="Variables are keys on the {params} object, i.e. {paramsName}. To access the bucket
+                  id="visTypeTimeseries.calculation.painlessScriptDescription"
+                  defaultMessage="Variables are keys on the {params} object, i.e. {paramsName}. To access the bucket
                     interval (in milliseconds) use {paramsInterval}."
-                    values={{
-                      params: <EuiCode>params</EuiCode>,
-                      paramsName: <EuiCode>params.&lt;name&gt;</EuiCode>,
-                      paramsInterval: <EuiCode>params._interval</EuiCode>,
-                    }}
-                  />
-                </div>
-              }
-            >
-              <EuiTextArea onChange={handleTextChange('script')} value={model.script} fullWidth />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </AggRow>
-    );
-  }
+                  values={{
+                    params: <EuiCode>params</EuiCode>,
+                    paramsName: <EuiCode>params.&lt;name&gt;</EuiCode>,
+                    paramsInterval: <EuiCode>params._interval</EuiCode>,
+                  }}
+                />
+              </div>
+            }
+          >
+            <EuiTextArea onChange={handleTextChange('script')} value={model.script} fullWidth />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </AggRow>
+  );
 }
 
 CalculationAgg.propTypes = {

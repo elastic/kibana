@@ -22,13 +22,13 @@ export class Enabler {
       await this.$http.put('../api/monitoring/v1/elasticsearch_settings/set/collection_interval');
       this.updateModel({
         isCollectionIntervalUpdated: true,
-        isCollectionIntervalUpdating: false
+        isCollectionIntervalUpdating: false,
       });
     } catch (err) {
       this.updateModel({
         errors: err.data,
         isCollectionIntervalUpdated: false,
-        isCollectionIntervalUpdating: false
+        isCollectionIntervalUpdating: false,
       });
     }
   }
@@ -39,13 +39,13 @@ export class Enabler {
       await this.$http.put('../api/monitoring/v1/elasticsearch_settings/set/collection_enabled');
       this.updateModel({
         isCollectionEnabledUpdated: true,
-        isCollectionEnabledUpdating: false
+        isCollectionEnabledUpdating: false,
       });
     } catch (err) {
       this.updateModel({
         errors: err.data,
         isCollectionEnabledUpdated: false,
-        isCollectionEnabledUpdating: false
+        isCollectionEnabledUpdating: false,
       });
     }
   }

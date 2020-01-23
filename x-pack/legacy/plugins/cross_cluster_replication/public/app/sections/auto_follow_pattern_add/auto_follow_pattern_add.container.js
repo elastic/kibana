@@ -13,13 +13,14 @@ import { AutoFollowPatternAdd as AutoFollowPatternAddView } from './auto_follow_
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   apiStatus: getApiStatus(`${scope}-save`)(state),
   apiError: getApiError(`${scope}-save`)(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-  saveAutoFollowPattern: (id, autoFollowPattern) => dispatch(saveAutoFollowPattern(id, autoFollowPattern)),
+  saveAutoFollowPattern: (id, autoFollowPattern) =>
+    dispatch(saveAutoFollowPattern(id, autoFollowPattern)),
   clearApiError: () => dispatch(clearApiError(scope)),
 });
 

@@ -21,12 +21,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { createSelector } from 'reselect';
 
-import {
-  EuiSpacer,
-  EuiOverlayMask,
-  EuiConfirmModal,
-  EUI_MODAL_CONFIRM_BUTTON,
-} from '@elastic/eui';
+import { EuiSpacer, EuiOverlayMask, EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import { Table } from './components/table';
 import { Header } from './components/header';
@@ -58,7 +53,7 @@ export class SourceFiltersTable extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.updateFilters();
   }
 
@@ -120,10 +115,7 @@ export class SourceFiltersTable extends Component {
   onAddFilter = async value => {
     const { indexPattern, onAddOrRemoveFilter } = this.props;
 
-    indexPattern.sourceFilters = [
-      ...(indexPattern.sourceFilters || []),
-      { value },
-    ];
+    indexPattern.sourceFilters = [...(indexPattern.sourceFilters || []), { value }];
 
     this.setState({ isSaving: true });
     await indexPattern.save();
@@ -162,24 +154,30 @@ export class SourceFiltersTable extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={<FormattedMessage
-            id="kbn.management.editIndexPattern.source.deleteSourceFilterLabel"
-            defaultMessage="Delete source filter '{value}'?"
-            values={{
-              value: filterToDelete.value,
-            }}
-          />}
+          title={
+            <FormattedMessage
+              id="kbn.management.editIndexPattern.source.deleteSourceFilterLabel"
+              defaultMessage="Delete source filter '{value}'?"
+              values={{
+                value: filterToDelete.value,
+              }}
+            />
+          }
           onCancel={this.hideDeleteConfirmationModal}
           onConfirm={this.deleteFilter}
-          cancelButtonText={<FormattedMessage
-            id="kbn.management.editIndexPattern.source.deleteFilter.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />}
+          cancelButtonText={
+            <FormattedMessage
+              id="kbn.management.editIndexPattern.source.deleteFilter.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
           buttonColor="danger"
-          confirmButtonText={<FormattedMessage
-            id="kbn.management.editIndexPattern.source.deleteFilter.deleteButtonLabel"
-            defaultMessage="Delete"
-          />}
+          confirmButtonText={
+            <FormattedMessage
+              id="kbn.management.editIndexPattern.source.deleteFilter.deleteButtonLabel"
+              defaultMessage="Delete"
+            />
+          }
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />
       </EuiOverlayMask>

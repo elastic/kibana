@@ -19,7 +19,7 @@
 
 import { Readable } from 'stream';
 
-export function createWreckResponseStub(response) {
+export function createResponseStub(response) {
   return async () => {
     const resp = new Readable({
       read() {
@@ -27,14 +27,14 @@ export function createWreckResponseStub(response) {
           this.push(response);
         }
         this.push(null);
-      }
+      },
     });
 
     resp.statusCode = 200;
     resp.statusMessage = 'OK';
     resp.headers = {
       'content-type': 'text/plain',
-      'content-length': String(response ? response.length : 0)
+      'content-length': String(response ? response.length : 0),
     };
 
     return resp;

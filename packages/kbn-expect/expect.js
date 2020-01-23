@@ -98,6 +98,9 @@ Assertion.prototype.assert = function (truth, msg, error, expected) {
 
   if (!ok) {
     err = new Error(msg.call(this));
+    if (this.customMsg) {
+      err.message = this.customMsg;
+    }
     if (arguments.length > 3) {
       err.actual = this.obj;
       err.expected = expected;
@@ -217,7 +220,10 @@ Assertion.prototype.empty = function () {
  */
 
 Assertion.prototype.be =
-Assertion.prototype.equal = function (obj) {
+Assertion.prototype.equal = function (obj, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   this.assert(
       obj === this.obj
     , function(){ return 'expected ' + i(this.obj) + ' to equal ' + i(obj) }
@@ -231,7 +237,10 @@ Assertion.prototype.equal = function (obj) {
  * @api public
  */
 
-Assertion.prototype.eql = function (obj) {
+Assertion.prototype.eql = function (obj, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   this.assert(
       expect.eql(this.obj, obj)
     , function(){ return 'expected ' + i(this.obj) + ' to sort of equal ' + i(obj) }
@@ -248,7 +257,10 @@ Assertion.prototype.eql = function (obj) {
  * @api public
  */
 
-Assertion.prototype.within = function (start, finish) {
+Assertion.prototype.within = function (start, finish, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   var range = start + '..' + finish;
   this.assert(
       this.obj >= start && this.obj <= finish
@@ -298,7 +310,10 @@ Assertion.prototype.an = function (type) {
  */
 
 Assertion.prototype.greaterThan =
-Assertion.prototype.above = function (n) {
+Assertion.prototype.above = function (n, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   this.assert(
       this.obj > n
     , function(){ return 'expected ' + i(this.obj) + ' to be above ' + n }
@@ -314,7 +329,10 @@ Assertion.prototype.above = function (n) {
  */
 
 Assertion.prototype.lessThan =
-Assertion.prototype.below = function (n) {
+Assertion.prototype.below = function (n, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   this.assert(
       this.obj < n
     , function(){ return 'expected ' + i(this.obj) + ' to be below ' + n }
@@ -329,7 +347,10 @@ Assertion.prototype.below = function (n) {
  * @api public
  */
 
-Assertion.prototype.match = function (regexp) {
+Assertion.prototype.match = function (regexp, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   this.assert(
       regexp.exec(this.obj)
     , function(){ return 'expected ' + i(this.obj) + ' to match ' + regexp }
@@ -344,7 +365,10 @@ Assertion.prototype.match = function (regexp) {
  * @api public
  */
 
-Assertion.prototype.length = function (n) {
+Assertion.prototype.length = function (n, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   expect(this.obj).to.have.property('length');
   var len = this.obj.length;
   this.assert(
@@ -410,7 +434,10 @@ Assertion.prototype.property = function (name, val) {
  */
 
 Assertion.prototype.string =
-Assertion.prototype.contain = function (obj) {
+Assertion.prototype.contain = function (obj, msg) {
+  if (typeof(msg) === 'string') {
+    this.customMsg = msg;
+  }
   if ('string' == typeof this.obj) {
     this.assert(
         ~this.obj.indexOf(obj)

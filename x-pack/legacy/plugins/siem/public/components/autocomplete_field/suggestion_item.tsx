@@ -7,24 +7,19 @@
 import { EuiIcon } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import styled from 'styled-components';
 import euiStyled from '../../../../../common/eui_styled_components';
+import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 interface SuggestionItemProps {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
-  suggestion: AutocompleteSuggestion;
+  suggestion: autocomplete.QuerySuggestion;
 }
 
-export class SuggestionItem extends React.PureComponent<SuggestionItemProps> {
-  public static defaultProps: Partial<SuggestionItemProps> = {
-    isSelected: false,
-  };
-
-  public render() {
-    const { isSelected, onClick, onMouseEnter, suggestion } = this.props;
+export const SuggestionItem = React.memo<SuggestionItemProps>(
+  ({ isSelected = false, onClick, onMouseEnter, suggestion }) => {
     return (
       <SuggestionItemContainer
         isSelected={isSelected}
@@ -40,7 +35,9 @@ export class SuggestionItem extends React.PureComponent<SuggestionItemProps> {
       </SuggestionItemContainer>
     );
   }
-}
+);
+
+SuggestionItem.displayName = 'SuggestionItem';
 
 const SuggestionItemContainer = euiStyled.div<{
   isSelected?: boolean;

@@ -4,7 +4,7 @@
  *    individual widgets.
  */
 
- .mapWidgetOverlay {
+.mapWidgetOverlay {
   position: absolute;
   z-index: $euiZLevel1;
   top: $euiSizeM;
@@ -29,6 +29,7 @@
   width: 100%;
   overflow: hidden;
   padding-bottom: $euiSizeS; // ensures the scrollbar doesn't appear unnecessarily because of flex group negative margins
+  // sass-lint:disable-block no-important
   border-color: transparent !important;
   flex-direction: column;
   display: flex;

@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { logout } from '../../lib/logout';
 import {
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_DROPPED_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_EMPTY,
 } from '../../lib/timeline/selectors';
-import { dragFromAllHostsToTimeline, toggleTimelineVisibility } from '../../lib/timeline/helpers';
+import {
+  createNewTimeline,
+  dragFromAllHostsToTimeline,
+  toggleTimelineVisibility,
+} from '../../lib/timeline/helpers';
 import { ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS } from '../../lib/hosts/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
 import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
@@ -18,19 +21,20 @@ import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
 import { drag, dragWithoutDrop } from '../../lib/drag_n_drop/helpers';
 
 describe('timeline data providers', () => {
-  beforeEach(() => {
+  before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
+    waitForAllHostsWidget();
+  });
+
+  beforeEach(() => {
+    toggleTimelineVisibility();
   });
 
   afterEach(() => {
-    return logout();
+    createNewTimeline();
   });
 
   it('renders the data provider of a host dragged from the All Hosts widget on the hosts page', () => {
-    waitForAllHostsWidget();
-
-    toggleTimelineVisibility();
-
     dragFromAllHostsToTimeline();
 
     cy.get(TIMELINE_DROPPED_DATA_PROVIDERS, {
@@ -50,10 +54,6 @@ describe('timeline data providers', () => {
   });
 
   it('sets the background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers', () => {
-    waitForAllHostsWidget();
-
-    toggleTimelineVisibility();
-
     cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
       .first()
       .then(host => drag(host));
@@ -61,15 +61,11 @@ describe('timeline data providers', () => {
     cy.get(TIMELINE_DATA_PROVIDERS).should(
       'have.css',
       'background',
-      'rgba(125, 226, 209, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
+      'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
     );
   });
 
   it('sets the background to euiColorSuccess with a 20% alpha channel when the user starts dragging a host AND is hovering over the data providers', () => {
-    waitForAllHostsWidget();
-
-    toggleTimelineVisibility();
-
     cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
       .first()
       .then(host => drag(host));
@@ -81,15 +77,11 @@ describe('timeline data providers', () => {
     cy.get(TIMELINE_DATA_PROVIDERS_EMPTY).should(
       'have.css',
       'background',
-      'rgba(125, 226, 209, 0.2) none repeat scroll 0% 0% / auto padding-box border-box'
+      'rgba(1, 125, 115, 0.2) none repeat scroll 0% 0% / auto padding-box border-box'
     );
   });
 
   it('renders the dashed border color as euiColorSuccess when hovering over the data providers', () => {
-    waitForAllHostsWidget();
-
-    toggleTimelineVisibility();
-
     cy.get(ALL_HOSTS_WIDGET_DRAGGABLE_HOSTS)
       .first()
       .then(host => drag(host));
@@ -101,7 +93,7 @@ describe('timeline data providers', () => {
     cy.get(TIMELINE_DATA_PROVIDERS).should(
       'have.css',
       'border',
-      '3.1875px dashed rgb(125, 226, 209)'
+      '3.1875px dashed rgb(1, 125, 115)'
     );
   });
 });

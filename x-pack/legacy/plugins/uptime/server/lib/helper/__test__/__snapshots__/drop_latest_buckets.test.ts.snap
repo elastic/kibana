@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`dropLatestBucket drops the last of a list with greater length than 1 1`] = `
-Array [
-  Object {
-    "prop": "val",
-  },
-]
-`;

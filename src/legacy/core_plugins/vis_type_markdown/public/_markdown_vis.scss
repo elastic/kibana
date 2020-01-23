@@ -4,13 +4,8 @@
 }
 
 .visEditor--markdown {
-  vis-editor-vis-options, vis-options-react-wrapper {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .visEditor--markdown__textarea {
+  .visEditorSidebar__config > *,
+  .visEditor--markdown__textarea  {
     flex-grow: 1;
   }
 

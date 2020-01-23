@@ -5,73 +5,62 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { injectI18n, InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { NoIndices } from '../../../components/empty_states/no_indices';
-import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 import {
   ViewSourceConfigurationButton,
   ViewSourceConfigurationButtonHrefBase,
 } from '../../../components/source_configuration';
 
-interface LogsPageNoIndicesContentProps {
-  intl: InjectedIntl;
-  uiCapabilities: UICapabilities;
-}
+export const LogsPageNoIndicesContent = () => {
+  const {
+    services: { application, http },
+  } = useKibana<{}>();
 
-export const LogsPageNoIndicesContent = injectUICapabilities(
-  injectI18n((props: LogsPageNoIndicesContentProps) => {
-    const { intl, uiCapabilities } = props;
+  const canConfigureSource = application?.capabilities?.logs?.configureSource ? true : false;
+  const prependBasePath = http?.basePath.prepend ?? identity;
 
-    return (
-      <WithKibanaChrome>
-        {({ basePath }) => (
-          <NoIndices
-            data-test-subj="noLogsIndicesPrompt"
-            title={intl.formatMessage({
-              id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
-              defaultMessage: "Looks like you don't have any logging indices.",
-            })}
-            message={intl.formatMessage({
-              id: 'xpack.infra.logsPage.noLoggingIndicesDescription',
-              defaultMessage: "Let's add some!",
-            })}
-            actions={
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiButton
-                    href={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
-                    color="primary"
-                    fill
-                    data-test-subj="logsViewSetupInstructionsButton"
-                  >
-                    {intl.formatMessage({
-                      id: 'xpack.infra.logsPage.noLoggingIndicesInstructionsActionLabel',
-                      defaultMessage: 'View setup instructions',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-                {uiCapabilities.logs.configureSource ? (
-                  <EuiFlexItem>
-                    <ViewSourceConfigurationButton
-                      data-test-subj="configureSourceButton"
-                      hrefBase={ViewSourceConfigurationButtonHrefBase.logs}
-                    >
-                      {intl.formatMessage({
-                        id: 'xpack.infra.configureSourceActionLabel',
-                        defaultMessage: 'Change source configuration',
-                      })}
-                    </ViewSourceConfigurationButton>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            }
-          />
-        )}
-      </WithKibanaChrome>
-    );
-  })
-);
+  return (
+    <NoIndices
+      data-test-subj="noLogsIndicesPrompt"
+      title={i18n.translate('xpack.infra.logsPage.noLoggingIndicesTitle', {
+        defaultMessage: "Looks like you don't have any logging indices.",
+      })}
+      message={i18n.translate('xpack.infra.logsPage.noLoggingIndicesDescription', {
+        defaultMessage: "Let's add some!",
+      })}
+      actions={
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButton
+              href={prependBasePath('/app/kibana#/home/tutorial_directory/logging')}
+              color="primary"
+              fill
+              data-test-subj="logsViewSetupInstructionsButton"
+            >
+              {i18n.translate('xpack.infra.logsPage.noLoggingIndicesInstructionsActionLabel', {
+                defaultMessage: 'View setup instructions',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          {canConfigureSource ? (
+            <EuiFlexItem>
+              <ViewSourceConfigurationButton
+                data-test-subj="configureSourceButton"
+                hrefBase={ViewSourceConfigurationButtonHrefBase.logs}
+              >
+                {i18n.translate('xpack.infra.configureSourceActionLabel', {
+                  defaultMessage: 'Change source configuration',
+                })}
+              </ViewSourceConfigurationButton>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      }
+    />
+  );
+};

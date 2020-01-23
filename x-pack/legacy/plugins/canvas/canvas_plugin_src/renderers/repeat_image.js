@@ -8,11 +8,15 @@ import $ from 'jquery';
 import { times } from 'lodash';
 import { elasticOutline } from '../lib/elastic_outline';
 import { isValidUrl } from '../../common/lib/url';
+import { RendererStrings, ErrorStrings } from '../../i18n';
+
+const { repeatImage: strings } = RendererStrings;
+const { RepeatImage: errors } = ErrorStrings;
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: 'Image repeat',
-  help: 'Repeat an image a given number of times',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const settings = {
@@ -46,7 +50,7 @@ export const repeatImage = () => ({
 
       if (isValidUrl(settings.emptyImage)) {
         if (settings.max == null) {
-          throw new Error('max must be set if using an emptyImage');
+          throw new Error(errors.getMissingMaxArgumentErrorMessage());
         }
 
         const emptyImage = new Image();

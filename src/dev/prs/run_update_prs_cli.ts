@@ -86,7 +86,7 @@ run(
         // attempt to init upstream remote
         await execInDir('git', ['remote', 'add', 'upstream', UPSTREAM_URL]);
       } catch (error) {
-        if (error.code !== 128) {
+        if (error.exitCode !== 128) {
           throw error;
         }
 

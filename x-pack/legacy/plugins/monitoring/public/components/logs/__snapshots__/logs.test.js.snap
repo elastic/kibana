@@ -2,8 +2,7 @@
 
 exports[`Logs should render a link to filter by cluster uuid 1`] = `
 <EuiCallOut
-  color="primary"
-  iconType="loggingApp"
+  iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
 >
@@ -13,13 +12,11 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345"
-            type="button"
           >
             Logs
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -29,8 +26,7 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
 
 exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] = `
 <EuiCallOut
-  color="primary"
-  iconType="loggingApp"
+  iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
 >
@@ -40,13 +36,11 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.index.name:6789"
-            type="button"
           >
             Logs
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -56,8 +50,7 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
 
 exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] = `
 <EuiCallOut
-  color="primary"
-  iconType="loggingApp"
+  iconType="logsApp"
   size="m"
   title="Want to see more log entries?"
 >
@@ -67,13 +60,11 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            color="primary"
+          "link": <ForwardRef
             href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.node.id:6789"
-            type="button"
           >
             Logs
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -279,13 +270,13 @@ exports[`Logs should render normally 1`] = `
     }
     noItemsMessage="No items found"
     responsive={true}
+    tableLayout="fixed"
   />
   <EuiSpacer
     size="m"
   />
   <EuiCallOut
-    color="primary"
-    iconType="loggingApp"
+    iconType="logsApp"
     size="m"
     title="Want to see more log entries?"
   >
@@ -295,13 +286,11 @@ exports[`Logs should render normally 1`] = `
         id="xpack.monitoring.logs.listing.linkText"
         values={
           Object {
-            "link": <EuiLink
-              color="primary"
+            "link": <ForwardRef
               href="/app/infra#/link-to/internal-stack-monitoring/logs"
-              type="button"
             >
               Logs
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />

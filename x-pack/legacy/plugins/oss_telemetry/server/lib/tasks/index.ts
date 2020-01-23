@@ -4,30 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HapiServer } from '../../../';
-import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_TELEMETRY_TASK_NUM_WORKERS } from '../../../constants';
+import { CoreSetup, Logger } from 'kibana/server';
+import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
+import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
+import { LegacyConfig } from '../../plugin';
+import {
+  TaskInstance,
+  TaskManagerStartContract,
+  TaskManagerSetupContract,
+} from '../../../../../../plugins/task_manager/server';
 
-export function registerTasks(server: HapiServer) {
-  const taskManager = server.plugins.task_manager;
+export function registerTasks({
+  taskManager,
+  logger,
+  elasticsearch,
+  config,
+}: {
+  taskManager?: TaskManagerSetupContract;
+  logger: Logger;
+  elasticsearch: CoreSetup['elasticsearch'];
+  config: LegacyConfig;
+}) {
+  if (!taskManager) {
+    logger.debug('Task manager is not available');
+    return;
+  }
 
   taskManager.registerTaskDefinitions({
     [VIS_TELEMETRY_TASK]: {
       title: 'X-Pack telemetry calculator for Visualizations',
       type: VIS_TELEMETRY_TASK,
-      numWorkers: VIS_TELEMETRY_TASK_NUM_WORKERS, // by default it's 100% their workers
-      createTaskRunner({ taskInstance }: { taskInstance: any }) {
+      createTaskRunner({ taskInstance }: { taskInstance: TaskInstance }) {
         return {
-          run: visualizationsTaskRunner(taskInstance, server),
+          run: visualizationsTaskRunner(taskInstance, config, elasticsearch),
         };
       },
     },
   });
 }
 
-export function scheduleTasks(server: HapiServer) {
-  const taskManager = server.plugins.task_manager;
-  const { kbnServer } = server.plugins.xpack_main.status.plugin;
+export function scheduleTasks({
+  taskManager,
+  xpackMainStatus,
+  logger,
+}: {
+  taskManager?: TaskManagerStartContract;
+  xpackMainStatus: { kbnServer: KbnServer };
+  logger: Logger;
+}) {
+  if (!taskManager) {
+    logger.debug('Task manager is not available');
+    return;
+  }
+
+  const { kbnServer } = xpackMainStatus;
 
   kbnServer.afterPluginsInit(() => {
     // The code block below can't await directly within "afterPluginsInit"
@@ -38,13 +69,14 @@ export function scheduleTasks(server: HapiServer) {
     // function block.
     (async () => {
       try {
-        await taskManager.schedule({
+        await taskManager.ensureScheduled({
           id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}`,
           taskType: VIS_TELEMETRY_TASK,
           state: { stats: {}, runs: 0 },
+          params: {},
         });
       } catch (e) {
-        server.log(['warning', 'telemetry'], `Error scheduling task, received ${e.message}`);
+        logger.debug(`Error scheduling task, received ${e.message}`);
       }
     })();
   });

@@ -7,7 +7,6 @@ Object {
       "environments": Object {
         "terms": Object {
           "field": "service.environment",
-          "missing": "ENVIRONMENT_NOT_DEFINED",
           "size": 100,
         },
       },
@@ -45,6 +44,7 @@ Object {
 exports[`agent configuration queries fetches configurations 1`] = `
 Object {
   "index": "myIndex",
+  "size": 200,
 }
 `;
 
@@ -53,21 +53,57 @@ Object {
   "body": Object {
     "query": Object {
       "bool": Object {
-        "filter": Array [
+        "minimum_should_match": 2,
+        "should": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "constant_score": Object {
+              "boost": 2,
+              "filter": Object {
+                "term": Object {
+                  "service.name": Object {
+                    "value": "foo",
+                  },
+                },
+              },
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "bar",
+            "constant_score": Object {
+              "boost": 1,
+              "filter": Object {
+                "term": Object {
+                  "service.environment": Object {
+                    "value": "bar",
+                  },
+                },
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.environment",
+                  },
+                },
+              ],
             },
           },
         ],
       },
     },
-    "size": 1,
   },
   "index": "myIndex",
 }
@@ -78,25 +114,45 @@ Object {
   "body": Object {
     "query": Object {
       "bool": Object {
-        "filter": Array [
+        "minimum_should_match": 2,
+        "should": Array [
           Object {
-            "term": Object {
-              "service.name": "foo",
+            "constant_score": Object {
+              "boost": 2,
+              "filter": Object {
+                "term": Object {
+                  "service.name": Object {
+                    "value": "foo",
+                  },
+                },
+              },
             },
           },
           Object {
             "bool": Object {
-              "must_not": Object {
-                "exists": Object {
-                  "field": "service.environment",
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.name",
+                  },
                 },
-              },
+              ],
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.environment",
+                  },
+                },
+              ],
             },
           },
         ],
       },
     },
-    "size": 1,
   },
   "index": "myIndex",
 }
@@ -109,7 +165,7 @@ Object {
       "services": Object {
         "terms": Object {
           "field": "service.name",
-          "size": 100,
+          "size": 50,
         },
       },
     },
@@ -145,8 +201,8 @@ Object {
       "environments": Object {
         "terms": Object {
           "field": "service.environment",
-          "missing": "ENVIRONMENT_NOT_DEFINED",
-          "size": 100,
+          "missing": "ALL_OPTION_VALUE",
+          "size": 50,
         },
       },
     },

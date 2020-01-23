@@ -13,9 +13,7 @@ import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import {
-  isPipelineMonitoringSupportedInVersion
-} from 'plugins/monitoring/lib/logstash/pipelines';
+import { isPipelineMonitoringSupportedInVersion } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { MonitoringViewBaseEuiTableController } from '../../../';
@@ -24,7 +22,8 @@ import { PipelineListing } from '../../../../components/logstash/pipeline_listin
 import { DetailStatus } from '../../../../components/logstash/detail_status';
 import { CODE_PATH_LOGSTASH } from '../../../../../common/constants';
 
-const getPageData = ($injector) => {
+const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
+  _api; // fixing eslint
   const $route = $injector.get('$route');
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
@@ -34,15 +33,17 @@ const getPageData = ($injector) => {
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/logstash/node/${logstashUuid}/pipelines`;
   const timeBounds = timefilter.getBounds();
 
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    }
-  })
+  return $http
+    .post(url, {
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+      ...routeOptions,
+    })
     .then(response => response.data)
-    .catch((err) => {
+    .catch(err => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -55,47 +56,55 @@ function makeUpgradeMessage(logstashVersion) {
 
   return i18n.translate('xpack.monitoring.logstash.node.pipelines.notAvailableDescription', {
     defaultMessage:
-    'Pipeline monitoring is only available in Logstash version 6.0.0 or higher. This node is running version {logstashVersion}.',
+      'Pipeline monitoring is only available in Logstash version 6.0.0 or higher. This node is running version {logstashVersion}.',
     values: {
-      logstashVersion
-    }
+      logstashVersion,
+    },
   });
 }
 
-uiRoutes
-  .when('/logstash/node/:uuid/pipelines', {
-    template,
-    resolve: {
-      clusters(Private) {
-        const routeInit = Private(routeInitProvider);
-        return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
-      },
-      pageData: getPageData
+uiRoutes.when('/logstash/node/:uuid/pipelines', {
+  template,
+  resolve: {
+    clusters(Private) {
+      const routeInit = Private(routeInitProvider);
+      return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
-    controller: class extends MonitoringViewBaseEuiTableController {
-      constructor($injector, $scope) {
-        const kbnUrl = $injector.get('kbnUrl');
-        const config = $injector.get('config');
+  },
+  controller: class extends MonitoringViewBaseEuiTableController {
+    constructor($injector, $scope) {
+      const kbnUrl = $injector.get('kbnUrl');
+      const config = $injector.get('config');
 
-        super({
-          defaultData: {},
-          getPageData,
-          reactNodeId: 'monitoringLogstashNodePipelinesApp',
-          $scope,
-          $injector
-        });
+      super({
+        defaultData: {},
+        getPageData,
+        reactNodeId: 'monitoringLogstashNodePipelinesApp',
+        $scope,
+        $injector,
+        fetchDataImmediately: false, // We want to apply pagination before sending the first request
+      });
 
-        $scope.$watch(() => this.data, data => {
+      $scope.$watch(
+        () => this.data,
+        data => {
           if (!data || !data.nodeSummary) {
             return;
           }
 
-          this.setTitle(i18n.translate('xpack.monitoring.logstash.node.pipelines.routeTitle', {
-            defaultMessage: 'Logstash - {nodeName} - Pipelines',
-            values: {
-              nodeName: data.nodeSummary.name
-            }
-          }));
+          this.setTitle(
+            i18n.translate('xpack.monitoring.logstash.node.pipelines.routeTitle', {
+              defaultMessage: 'Logstash - {nodeName} - Pipelines',
+              values: {
+                nodeName: data.nodeSummary.name,
+              },
+            })
+          );
+
+          const pagination = {
+            ...this.pagination,
+            totalItemCount: data.totalPipelineCount,
+          };
 
           this.renderReact(
             <I18nContext>
@@ -106,9 +115,7 @@ uiRoutes
                 stats={data.nodeSummary}
                 statusComponent={DetailStatus}
                 data={data.pipelines}
-                sorting={this.sorting}
-                pagination={this.pagination}
-                onTableChange={this.onTableChange}
+                {...this.getPaginationTableProps(pagination)}
                 dateFormat={config.get('dateFormat')}
                 upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
                 angular={{
@@ -118,7 +125,8 @@ uiRoutes
               />
             </I18nContext>
           );
-        });
-      }
+        }
+      );
     }
-  });
+  },
+});

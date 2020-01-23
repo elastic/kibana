@@ -19,10 +19,12 @@
 
 import Boom from 'boom';
 import { first } from 'rxjs/operators';
-import { resolve, join, sep } from 'path';
+import { resolve, join } from 'path';
 import url from 'url';
 import { has, isEmpty, head, pick } from 'lodash';
 
+// @ts-ignore
+import { addProcessorDefinition } from './server/api_server/es_6_0/ingest';
 // @ts-ignore
 import { resolveApi } from './server/api_server/server';
 // @ts-ignore
@@ -49,12 +51,9 @@ function filterHeaders(originalHeaders: any, headersToKeep: any) {
 
 // eslint-disable-next-line
 export default function(kibana: any) {
-  const modules = resolve(__dirname, 'public/webpackShims/');
-  const quarantinedSrc = resolve(__dirname, 'public/quarantined/src/');
-  const npSrc = resolve(__dirname, 'np_ready/public');
+  const npSrc = resolve(__dirname, 'public/np_ready');
 
   let defaultVars: any;
-  const apps: any[] = [];
   return new kibana.Plugin({
     id: 'console',
     require: ['elasticsearch'],
@@ -119,12 +118,14 @@ export default function(kibana: any) {
 
     async init(server: any, options: any) {
       server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
+      server.expose('addProcessorDefinition', addProcessorDefinition);
+
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
 
       const config = server.config();
-      const legacyEsConfig = await server.newPlatform.setup.core.elasticsearch.legacy.config$
+      const legacyEsConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
         .pipe(first())
         .toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
@@ -138,7 +139,7 @@ export default function(kibana: any) {
 
       server.route(
         createProxyRoute({
-          baseUrl: head(legacyEsConfig.hosts),
+          hosts: legacyEsConfig.hosts,
           pathFilters: proxyPathFilters,
           getConfigForReq(req: any, uri: any) {
             const filteredHeaders = filterHeaders(
@@ -177,18 +178,10 @@ export default function(kibana: any) {
     },
 
     uiExports: {
-      apps,
-      hacks: ['plugins/console/quarantined/hacks/register'],
-      devTools: [`${npSrc}/legacy`],
-      styleSheetPaths: resolve(__dirname, 'public/quarantined/index.scss'),
-
+      devTools: [resolve(__dirname, 'public/legacy')],
+      styleSheetPaths: resolve(npSrc, 'application/styles/index.scss'),
       injectDefaultVars: () => defaultVars,
-
-      noParse: [
-        join(modules, 'ace' + sep),
-        join(modules, 'moment_src/moment' + sep),
-        join(quarantinedSrc, 'sense_editor/mode/worker.js'),
-      ],
+      noParse: [join(npSrc, 'application/models/legacy_core_editor/mode/worker/worker.js')],
     },
   } as any);
 }

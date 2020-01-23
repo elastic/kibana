@@ -7,7 +7,6 @@
 import { useMemo } from 'react';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
-import { callApmApi } from '../services/rest/callApmApi';
 import { getWaterfall } from '../components/app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 const INITIAL_DATA = {
@@ -18,20 +17,23 @@ const INITIAL_DATA = {
 
 export function useWaterfall(urlParams: IUrlParams) {
   const { traceId, start, end, transactionId } = urlParams;
-  const { data = INITIAL_DATA, status, error } = useFetcher(() => {
-    if (traceId && start && end) {
-      return callApmApi({
-        pathname: '/api/apm/traces/{traceId}',
-        params: {
-          path: { traceId },
-          query: {
-            start,
-            end
+  const { data = INITIAL_DATA, status, error } = useFetcher(
+    callApmApi => {
+      if (traceId && start && end) {
+        return callApmApi({
+          pathname: '/api/apm/traces/{traceId}',
+          params: {
+            path: { traceId },
+            query: {
+              start,
+              end
+            }
           }
-        }
-      });
-    }
-  }, [traceId, start, end]);
+        });
+      }
+    },
+    [traceId, start, end]
+  );
 
   const waterfall = useMemo(() => getWaterfall(data, transactionId), [
     data,

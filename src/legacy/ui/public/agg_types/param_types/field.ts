@@ -20,13 +20,12 @@
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from '../../vis';
-// @ts-ignore
-import { SavedObjectNotFound } from '../../errors';
+import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
 import { FieldParamEditor } from '../../vis/editors/default/controls/field';
 import { BaseParamType } from './base';
 import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
-import { Field } from '../../index_patterns';
+import { Field, IFieldList } from '../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 
@@ -80,7 +79,7 @@ export class FieldParamType extends BaseParamType {
       if (!aggConfig) {
         throw new Error('aggConfig was not provided to FieldParamType deserialize function');
       }
-      const field = aggConfig.getIndexPattern().fields.byName[fieldName];
+      const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
 
       if (!field) {
         throw new SavedObjectNotFound('index-pattern-field', fieldName);
@@ -112,11 +111,14 @@ export class FieldParamType extends BaseParamType {
   /**
    * filter the fields to the available ones
    */
-  getAvailableFields = (fields: Field[]) => {
+  getAvailableFields = (fields: IFieldList) => {
     const filteredFields = fields.filter((field: Field) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
-      if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {
+      if (
+        (onlyAggregatable && (!field.aggregatable || field.subType?.nested)) ||
+        (!scriptable && field.scripted)
+      ) {
         return false;
       }
 

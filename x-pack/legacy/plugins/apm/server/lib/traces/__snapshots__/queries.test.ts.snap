@@ -16,6 +16,7 @@ Object {
               "processor.event": Array [
                 "span",
                 "transaction",
+                "error",
               ],
             },
           },
@@ -54,6 +55,7 @@ Object {
         },
       },
     ],
+    "track_total_hits": true,
   },
   "index": Array [
     "myIndex",

@@ -17,57 +17,62 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { AggParamType } from '../../../../agg_types/param_types/agg';
+import React, { useEffect } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+
+import { AggParamType } from 'ui/agg_types/param_types/agg';
 import { AggConfig } from '../../..';
-import { AggParamEditorProps, DefaultEditorAggParams } from '..';
+import { useSubAggParamsHandlers } from './utils';
+import { AggParamEditorProps, DefaultEditorAggParams, AggGroupNames } from '..';
 
 function SubAggParamEditor({
   agg,
+  aggParam,
+  formIsTouched,
   value,
   metricAggs,
   state,
   setValue,
   setValidity,
   setTouched,
-  subAggParams,
-}: AggParamEditorProps<AggConfig>) {
+}: AggParamEditorProps<AggConfig, AggParamType>) {
   useEffect(() => {
     // we aren't creating a custom aggConfig
     if (agg.params.metricAgg !== 'custom') {
       setValue(undefined);
     } else if (!agg.params.customMetric) {
-      const customMetric = agg.type.paramByName('customMetric');
-      if (customMetric) {
-        setValue((customMetric as AggParamType).makeAgg(agg));
-      }
+      setValue(aggParam.makeAgg(agg));
     }
   }, [value, metricAggs]);
 
-  const [innerState, setInnerState] = useState(true);
+  const { onAggTypeChange, setAggParamValue } = useSubAggParamsHandlers(
+    agg,
+    aggParam,
+    agg.params.customMetric,
+    setValue
+  );
 
   if (agg.params.metricAgg !== 'custom' || !agg.params.customMetric) {
     return null;
   }
 
   return (
-    <DefaultEditorAggParams
-      agg={agg.params.customMetric}
-      groupName="metrics"
-      className="visEditorAgg__subAgg"
-      formIsTouched={subAggParams.formIsTouched}
-      indexPattern={agg.getIndexPattern()}
-      metricAggs={metricAggs}
-      state={state}
-      onAggParamsChange={(...rest) => {
-        // to force update when sub-agg params are changed
-        setInnerState(!innerState);
-        subAggParams.onAggParamsChange(...rest);
-      }}
-      onAggTypeChange={subAggParams.onAggTypeChange}
-      setValidity={setValidity}
-      setTouched={setTouched}
-    />
+    <>
+      <EuiSpacer size="m" />
+      <DefaultEditorAggParams
+        agg={agg.params.customMetric}
+        groupName={AggGroupNames.Metrics}
+        className="visEditorAgg__subAgg"
+        formIsTouched={formIsTouched}
+        indexPattern={agg.getIndexPattern()}
+        metricAggs={metricAggs}
+        state={state}
+        setAggParamValue={setAggParamValue}
+        onAggTypeChange={onAggTypeChange}
+        setValidity={setValidity}
+        setTouched={setTouched}
+      />
+    </>
   );
 }
 

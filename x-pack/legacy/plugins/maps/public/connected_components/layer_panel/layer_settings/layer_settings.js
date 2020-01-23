@@ -6,29 +6,16 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiPanel,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSpacer,
-  EuiSwitch,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
 import { ValidatedRange } from '../../../components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ValidatedDualRange } from 'ui/validated_range';
-
-const MIN_ZOOM = 0;
-const MAX_ZOOM = 24;
+import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 
 export function LayerSettings(props) {
-
-  const onLabelChange = (event) => {
+  const onLabelChange = event => {
     const label = event.target.value;
     props.updateLabel(props.layerId, label);
   };
@@ -38,134 +25,91 @@ export function LayerSettings(props) {
     props.updateMaxZoom(props.layerId, Math.min(MAX_ZOOM, parseInt(max, 10)));
   };
 
-  const onAlphaChange = (alpha) => {
-    props.updateAlpha(props.layerId, alpha);
-  };
-
-  const onApplyGlobalQueryChange = event => {
-    props.setLayerApplyGlobalQuery(props.layerId, event.target.checked);
+  const onAlphaChange = alpha => {
+    const alphaDecimal = alpha / 100;
+    props.updateAlpha(props.layerId, alphaDecimal);
   };
 
   const renderZoomSliders = () => {
     return (
-      <EuiFormRow
+      <ValidatedDualRange
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
-          defaultMessage: 'Zoom range for layer visibility'
+          defaultMessage: 'Visibility',
         })}
-      >
-        <ValidatedDualRange
-          min={MIN_ZOOM}
-          max={MAX_ZOOM}
-          value={[props.minZoom, props.maxZoom]}
-          showInput
-          showRange
-          onChange={onZoomChange}
-          allowEmptyRange={false}
-        />
-      </EuiFormRow>
+        formRowDisplay="columnCompressed"
+        min={MIN_ZOOM}
+        max={MAX_ZOOM}
+        value={[props.minZoom, props.maxZoom]}
+        showInput="inputWithPopover"
+        showRange
+        showLabels
+        onChange={onZoomChange}
+        allowEmptyRange={false}
+        compressed
+        prepend={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoom', {
+          defaultMessage: 'Zoom levels',
+        })}
+      />
     );
   };
 
   const renderLabel = () => {
     return (
       <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerNameLabel', {
-            defaultMessage: 'Layer name'
-          })
-        }
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerNameLabel', {
+          defaultMessage: 'Name',
+        })}
+        display="columnCompressed"
       >
-        <EuiFieldText
-          value={props.label}
-          onChange={onLabelChange}
-        />
+        <EuiFieldText value={props.label} onChange={onLabelChange} compressed />
       </EuiFormRow>
     );
   };
 
   const renderAlphaSlider = () => {
+    const alphaPercent = Math.round(props.alpha * 100);
+
     return (
       <EuiFormRow
-        label={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
-            defaultMessage: 'Layer transparency'
-          })
-        }
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
+          defaultMessage: 'Opacity',
+        })}
+        display="columnCompressed"
       >
-        <div className="mapAlphaRange">
-          <ValidatedRange
-            min={.00}
-            max={1.00}
-            step={.05}
-            value={props.alpha}
-            onChange={onAlphaChange}
-            showLabels
-            showInput
-            showRange
-          />
-        </div>
-      </EuiFormRow>
-    );
-  };
-
-  const renderApplyGlobalQueryCheckbox = () => {
-    const layerSupportsGlobalQuery = props.layer.getIndexPatternIds().length;
-
-    const applyGlobalQueryCheckbox = (
-      <EuiFormRow>
-        <EuiSwitch
-          label={
-            i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
-              defaultMessage: `Apply global filter to layer`
-            })
-          }
-          checked={layerSupportsGlobalQuery ? props.applyGlobalQuery : false}
-          onChange={onApplyGlobalQueryChange}
-          disabled={!layerSupportsGlobalQuery}
-          data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
+        <ValidatedRange
+          min={0}
+          max={100}
+          step={1}
+          value={alphaPercent}
+          onChange={onAlphaChange}
+          showInput
+          showRange
+          compressed
+          append={i18n.translate('xpack.maps.layerPanel.settingsPanel.percentageLabel', {
+            defaultMessage: '%',
+            description: 'Percentage',
+          })}
         />
       </EuiFormRow>
-    );
-
-    if (layerSupportsGlobalQuery) {
-      return applyGlobalQueryCheckbox;
-    }
-
-    return (
-      <EuiToolTip
-        position="top"
-        content={
-          i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckbox.disableTooltip', {
-            defaultMessage: `Layer does not support filtering.`
-          })
-        }
-      >
-        {applyGlobalQueryCheckbox}
-      </EuiToolTip>
     );
   };
 
   return (
     <Fragment>
       <EuiPanel>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h5>
-                <FormattedMessage
-                  id="xpack.maps.layerPanel.layerSettingsTitle"
-                  defaultMessage="Layer Settings"
-                />
-              </h5>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.maps.layerPanel.layerSettingsTitle"
+              defaultMessage="Layer settings"
+            />
+          </h5>
+        </EuiTitle>
 
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         {renderLabel()}
         {renderZoomSliders()}
         {renderAlphaSlider()}
-        {renderApplyGlobalQueryCheckbox()}
       </EuiPanel>
 
       <EuiSpacer size="s" />

@@ -25,8 +25,29 @@ export { SavedObjectsManagement } from './management';
 
 export * from './import';
 
-export { getSortedObjectsForExport, SavedObjectsExportOptions } from './export';
+export {
+  getSortedObjectsForExport,
+  SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
+} from './export';
 
 export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serialization';
 
 export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
+
+export {
+  SavedObjectsService,
+  InternalSavedObjectsServiceStart,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
+  InternalSavedObjectsServiceSetup,
+  SavedObjectsRepositoryFactory,
+} from './saved_objects_service';
+
+export {
+  ISavedObjectsRepository,
+  SavedObjectsIncrementCounterOptions,
+  SavedObjectsDeleteByNamespaceOptions,
+} from './service/lib/repository';
+
+export { config } from './saved_objects_config';

@@ -1,0 +1,52 @@
+{
+  "config": {
+    "id": "fq_outlier_1222",
+    "source": {
+      "index": [
+        "farequote-2019"
+      ],
+      "query": {
+        "match_all": {}
+      }
+    },
+    "dest": {
+      "index": "fq_outlier_1222",
+      "results_field": "ml"
+    },
+    "analysis": {
+      "outlier_detection": {}
+    },
+    "analyzed_fields": {
+      "includes": [],
+      "excludes": []
+    },
+    "model_memory_limit": "50mb",
+    "create_time": 1568974998023,
+    "version": "8.0.0"
+  },
+  "id": "fq_outlier_1222",
+  "checkpointing": {},
+  "mode": "batch",
+  "stats": {
+    "id": "fq_outlier_1222",
+    "state": "stopped",
+    "progress": [
+      {
+        "phase": "reindexing",
+        "progress_percent": 100
+      },
+      {
+        "phase": "loading_data",
+        "progress_percent": 100
+      },
+      {
+        "phase": "analyzing",
+        "progress_percent": 100
+      },
+      {
+        "phase": "writing_results",
+        "progress_percent": 100
+      }
+    ]
+  }
+}

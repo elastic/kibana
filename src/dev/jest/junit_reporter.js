@@ -18,12 +18,11 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 
-import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-import { escapeCdata } from '@kbn/test';
+import { escapeCdata, makeJunitReportPath } from '@kbn/test';
 
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
@@ -46,7 +45,7 @@ export default class JestJUnitReporter {
    * @return {undefined}
    */
   onRunComplete(contexts, results) {
-    if (!process.env.CI || !results.testResults.length) {
+    if (!process.env.CI || process.env.DISABLE_JUNIT_REPORTER || !results.testResults.length) {
       return;
     }
 
@@ -103,21 +102,9 @@ export default class JestJUnitReporter {
       });
     });
 
-    const reportPath = resolve(
-      rootDirectory,
-      'target/junit',
-      process.env.JOB || '.',
-      `TEST-${reportName}.xml`
-    );
-
-    const reportXML = root.end({
-      pretty: true,
-      indent: '  ',
-      newline: '\n',
-      spacebeforeslash: '',
-    });
-
-    mkdirp.sync(dirname(reportPath));
+    const reportPath = makeJunitReportPath(rootDirectory, reportName);
+    const reportXML = root.end();
+    mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   }
 }

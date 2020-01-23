@@ -16,9 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 export function Status({ stats }) {
   const {
-    apms: {
-      total
-    },
+    apms: { total },
     totalEvents,
     timeOfLastEvent,
   } = stats;
@@ -26,30 +24,33 @@ export function Status({ stats }) {
   const metrics = [
     {
       label: i18n.translate('xpack.monitoring.apm.instances.status.serversLabel', {
-        defaultMessage: 'Servers'
+        defaultMessage: 'Servers',
       }),
       value: total,
-      'data-test-subj': 'total'
+      'data-test-subj': 'total',
     },
     {
       label: i18n.translate('xpack.monitoring.apm.instances.status.totalEventsLabel', {
-        defaultMessage: 'Total Events'
+        defaultMessage: 'Total Events',
       }),
       value: formatMetric(totalEvents, '0.[0]a'),
-      'data-test-subj': 'totalEvents'
+      'data-test-subj': 'totalEvents',
     },
     {
       label: i18n.translate('xpack.monitoring.apm.instances.status.lastEventLabel', {
-        defaultMessage: 'Last Event'
+        defaultMessage: 'Last Event',
       }),
       value: i18n.translate('xpack.monitoring.apm.instances.status.lastEventDescription', {
         defaultMessage: '{timeOfLastEvent} ago',
         values: {
-          timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
-        }
+          timeOfLastEvent: formatTimestampToDuration(
+            +moment(timeOfLastEvent),
+            CALCULATE_DURATION_SINCE
+          ),
+        },
       }),
       'data-test-subj': 'timeOfLastEvent',
-    }
+    },
   ];
 
   const IconComponent = ({ status }) => (
@@ -58,9 +59,7 @@ export function Status({ stats }) {
         id="xpack.monitoring.apm.instances.statusDescription"
         defaultMessage="Status: {apmStatusIcon}"
         values={{
-          apmStatusIcon: (
-            <ApmStatusIcon status={status} />
-          )
+          apmStatusIcon: <ApmStatusIcon status={status} />,
         }}
       />
     </Fragment>

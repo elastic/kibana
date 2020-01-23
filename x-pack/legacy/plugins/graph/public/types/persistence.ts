@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'ui/saved_objects/saved_object';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
+import { SavedObject } from '../legacy_imports';
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
@@ -37,7 +37,7 @@ export interface SerializedUrlTemplate extends Omit<UrlTemplate, 'encoder' | 'ic
   encoderID: string;
   iconClass?: string;
 }
-export interface SerializedField extends Omit<WorkspaceField, 'icon'> {
+export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type' | 'aggregatable'> {
   iconClass: string;
 }
 

@@ -4,6 +4,8 @@
 
 ## OverlayRef interface
 
+Returned by [OverlayStart](./kibana-plugin-public.overlaystart.md) methods for closing a mounted overlay.
+
 <b>Signature:</b>
 
 ```typescript

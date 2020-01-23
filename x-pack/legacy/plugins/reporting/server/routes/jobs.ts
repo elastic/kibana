@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import boom from 'boom';
-import { Request, ResponseToolkit } from 'hapi';
 import { API_BASE_URL } from '../../common/constants';
-import { JobDoc, KbnServer } from '../../types';
+import {
+  ServerFacade,
+  ExportTypesRegistry,
+  Logger,
+  ReportingResponseToolkit,
+  JobDocOutput,
+  JobSource,
+  ListQuery,
+} from '../../types';
 // @ts-ignore
 import { jobsQueryFactory } from '../lib/jobs_query';
 // @ts-ignore
@@ -16,10 +24,15 @@ import {
   getRouteConfigFactoryDownloadPre,
   getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
+import { makeRequestFacade } from './lib/make_request_facade';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export function registerJobs(server: KbnServer) {
+export function registerJobInfoRoutes(
+  server: ServerFacade,
+  exportTypesRegistry: ExportTypesRegistry,
+  logger: Logger
+) {
   const jobsQuery = jobsQueryFactory(server);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server);
@@ -28,14 +41,13 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/list`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
-      // @ts-ignore
-      const page = parseInt(request.query.page, 10) || 0;
-      // @ts-ignore
-      const size = Math.min(100, parseInt(request.query.size, 10) || 10);
-      // @ts-ignore
-      const jobIds = request.query.ids ? request.query.ids.split(',') : null;
+    options: getRouteConfig(),
+    handler: (legacyRequest: Legacy.Request) => {
+      const request = makeRequestFacade(legacyRequest);
+      const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
+      const page = parseInt(queryPage, 10) || 0;
+      const size = Math.min(100, parseInt(querySize, 10) || 10);
+      const jobIds = queryIds ? queryIds.split(',') : null;
 
       const results = jobsQuery.list(
         request.pre.management.jobTypes,
@@ -52,8 +64,9 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/count`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (legacyRequest: Legacy.Request) => {
+      const request = makeRequestFacade(legacyRequest);
       const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
       return results;
     },
@@ -63,23 +76,25 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/output/{docId}`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (legacyRequest: Legacy.Request) => {
+      const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
       return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
-        (doc: any): JobDoc => {
-          const job = doc._source;
-          if (!job) {
+        (result): JobDocOutput => {
+          if (!result) {
             throw boom.notFound();
           }
+          const {
+            _source: { jobtype: jobType, output: jobOutput },
+          } = result;
 
-          const { jobtype: jobType } = job;
           if (!request.pre.management.jobTypes.includes(jobType)) {
             throw boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
           }
 
-          return job.output;
+          return jobOutput;
         }
       );
     },
@@ -89,41 +104,41 @@ export function registerJobs(server: KbnServer) {
   server.route({
     path: `${MAIN_ENTRY}/info/{docId}`,
     method: 'GET',
-    config: getRouteConfig(),
-    handler: (request: Request) => {
+    options: getRouteConfig(),
+    handler: (legacyRequest: Legacy.Request) => {
+      const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
-      return jobsQuery.get(request.pre.user, docId).then(
-        (doc: any): JobDoc => {
-          const job: JobDoc = doc._source;
-          if (!job) {
-            throw boom.notFound();
-          }
-
-          const { jobtype: jobType, payload } = job;
-          if (!request.pre.management.jobTypes.includes(jobType)) {
-            throw boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
-          }
-
-          return {
-            ...doc._source,
-            payload: {
-              ...payload,
-              headers: undefined,
-            },
-          };
+      return jobsQuery.get(request.pre.user, docId).then((result): JobSource<any>['_source'] => {
+        if (!result) {
+          throw boom.notFound();
         }
-      );
+
+        const { _source: job } = result;
+        const { jobtype: jobType, payload: jobPayload } = job;
+        if (!request.pre.management.jobTypes.includes(jobType)) {
+          throw boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+        }
+
+        return {
+          ...job,
+          payload: {
+            ...jobPayload,
+            headers: undefined,
+          },
+        };
+      });
     },
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server);
+  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
-    config: getRouteConfigDownload(),
-    handler: async (request: Request, h: ResponseToolkit) => {
+    options: getRouteConfigDownload(),
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
       let response = await jobResponseHandler(
@@ -135,13 +150,15 @@ export function registerJobs(server: KbnServer) {
       const { statusCode } = response;
 
       if (statusCode !== 200) {
-        const logLevel = statusCode === 500 ? 'error' : 'debug';
-        server.log(
-          [logLevel, 'reporting', 'download'],
-          `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
-            response.source
-          )}]`
-        );
+        if (statusCode === 500) {
+          logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
+        } else {
+          logger.debug(
+            `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
+              response.source
+            )}]`
+          );
+        }
       }
 
       if (!response.isBoom) {

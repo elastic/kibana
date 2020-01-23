@@ -18,8 +18,10 @@
  */
 
 import angular from 'angular';
+import { first } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
-import { LegacyCoreSetup, LegacyCoreStart } from '../';
+import { LegacyCoreSetup, LegacyCoreStart, MountPoint } from '../';
 
 /** @internal */
 export interface LegacyPlatformParams {
@@ -40,7 +42,7 @@ interface StartDeps {
 }
 
 interface BootstrapModule {
-  bootstrap: (targetDomElement: HTMLElement) => void;
+  bootstrap: MountPoint;
 }
 
 /**
@@ -51,8 +53,12 @@ interface BootstrapModule {
  * setup either the app or browser tests.
  */
 export class LegacyPlatformService {
+  /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
+  public readonly legacyId = Symbol();
   private bootstrapModule?: BootstrapModule;
   private targetDomElement?: HTMLElement;
+  private readonly startDependencies$ = new Subject<[LegacyCoreStart, object]>();
+  private readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
 
   constructor(private readonly params: LegacyPlatformParams) {}
 
@@ -68,12 +74,15 @@ export class LegacyPlatformService {
         appUrl: navLink.url,
         subUrlBase: navLink.subUrlBase,
         linkToLastSubUrl: navLink.linkToLastSubUrl,
+        category: navLink.category,
       })
     );
 
     const legacyCore: LegacyCoreSetup = {
       ...core,
+      getStartServices: () => this.startDependencies,
       application: {
+        ...core.application,
         register: notSupported(`core.application.register()`),
         registerMountContext: notSupported(`core.application.registerMountContext()`),
       },
@@ -117,6 +126,8 @@ export class LegacyPlatformService {
         registerMountContext: notSupported(`core.application.registerMountContext()`),
       },
     };
+
+    this.startDependencies$.next([legacyCore, plugins]);
 
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts

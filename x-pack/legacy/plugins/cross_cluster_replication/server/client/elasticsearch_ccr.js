@@ -14,19 +14,19 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     urls: [
       {
         fmt: '/_security/user/_has_privileges',
-      }
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ccr.autoFollowPatterns = ca({
     urls: [
       {
         fmt: '/_ccr/auto_follow',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ccr.autoFollowPattern = ca({
@@ -35,12 +35,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ccr/auto_follow/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ccr.saveAutoFollowPattern = ca({
@@ -49,13 +49,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ccr/auto_follow/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 
   ccr.deleteAutoFollowPattern = ca({
@@ -64,13 +64,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ccr/auto_follow/<%=id%>',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   ccr.info = ca({
@@ -79,21 +79,21 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=id%>/_ccr/info',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ccr.stats = ca({
     urls: [
       {
         fmt: '/_ccr/stats',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ccr.followerIndexStats = ca({
@@ -102,12 +102,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=id%>/_ccr/stats',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ccr.saveFollowerIndex = ca({
@@ -116,13 +116,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=name%>/_ccr/follow',
         req: {
           name: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 
   ccr.pauseFollowerIndex = ca({
@@ -131,12 +131,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=id%>/_ccr/pause_follow',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   ccr.resumeFollowerIndex = ca({
@@ -145,13 +145,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=id%>/_ccr/resume_follow',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ccr.unfollowLeaderIndex = ca({
@@ -160,11 +160,11 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=id%>/_ccr/unfollow',
         req: {
           id: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 };

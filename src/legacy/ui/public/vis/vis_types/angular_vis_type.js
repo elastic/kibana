@@ -17,65 +17,56 @@
  * under the License.
  */
 
-import { BaseVisType } from './base_vis_type';
 import $ from 'jquery';
+import { isEqual } from 'lodash';
+import chrome from 'ui/chrome';
 
+export class AngularVisController {
+  constructor(domeElement, vis) {
+    this.el = $(domeElement);
+    this.vis = vis;
+  }
 
-export function AngularVisTypeProvider($compile, $rootScope) {
+  render(esResponse, visParams, status) {
+    return new Promise(async (resolve, reject) => {
+      if (!this.$rootScope) {
+        const $injector = await chrome.dangerouslyGetActiveInjector();
+        this.$rootScope = $injector.get('$rootScope');
+        this.$compile = $injector.get('$compile');
+      }
+      const updateScope = () => {
+        this.$scope.vis = this.vis;
+        this.$scope.visState = this.vis.getState();
+        this.$scope.esResponse = esResponse;
 
-  class AngularVisController {
-    constructor(domeElement, vis) {
-      this.el = $(domeElement);
-      this.vis = vis;
-    }
-
-    render(esResponse, visParams, status) {
-
-      return new Promise((resolve, reject) => {
-        const updateScope = () => {
-          this.$scope.vis = this.vis;
-          this.$scope.visState = this.vis.getState();
-          this.$scope.esResponse = esResponse;
-          this.$scope.visParams = visParams;
-          this.$scope.renderComplete = resolve;
-          this.$scope.renderFailed = reject;
-          this.$scope.resize = Date.now();
-          this.$scope.updateStatus = status;
-          this.$scope.$apply();
-        };
-
-        if (!this.$scope) {
-          this.$scope = $rootScope.$new();
-          this.$scope.uiState = this.vis.getUiState();
-          updateScope();
-          this.el.html($compile(this.vis.type.visConfig.template)(this.$scope));
-          this.$scope.$apply();
-        } else {
-          updateScope();
+        if (!isEqual(this.$scope.visParams, visParams)) {
+          this.vis.emit('updateEditorStateParams', visParams);
         }
-      });
-    }
 
-    destroy() {
-      if (this.$scope) {
-        this.$scope.$destroy();
-        this.$scope = null;
+        this.$scope.visParams = visParams;
+        this.$scope.renderComplete = resolve;
+        this.$scope.renderFailed = reject;
+        this.$scope.resize = Date.now();
+        this.$scope.updateStatus = status;
+        this.$scope.$apply();
+      };
+
+      if (!this.$scope) {
+        this.$scope = this.$rootScope.$new();
+        this.$scope.uiState = this.vis.getUiState();
+        updateScope();
+        this.el.html(this.$compile(this.vis.type.visConfig.template)(this.$scope));
+        this.$scope.$apply();
+      } else {
+        updateScope();
       }
-    }
+    });
   }
 
-  class AngularVisType extends BaseVisType {
-    constructor(opts) {
-      opts.visualization = AngularVisController;
-
-      super(opts);
-
-      this.visConfig.template = opts.visConfig ? opts.visConfig.template : opts.template;
-      if (!this.visConfig.template) {
-        throw new Error('Missing template for AngularVisType');
-      }
+  destroy() {
+    if (this.$scope) {
+      this.$scope.$destroy();
+      this.$scope = null;
     }
   }
-
-  return AngularVisType;
 }

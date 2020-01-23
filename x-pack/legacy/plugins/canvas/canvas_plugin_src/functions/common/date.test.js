@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { getFunctionErrors } from '../../strings';
+import { getFunctionErrors } from '../../../i18n';
 import { date } from './date';
 
 const errors = getFunctionErrors().date;

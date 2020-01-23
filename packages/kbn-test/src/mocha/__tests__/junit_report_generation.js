@@ -25,6 +25,7 @@ import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
 import expect from '@kbn/expect';
+import { makeJunitReportPath } from '@kbn/test';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
 
@@ -50,10 +51,7 @@ describe('dev/mocha/junit report generation', () => {
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise(resolve => mocha.run(resolve));
     const report = await fcb(cb =>
-      parseString(
-        readFileSync(resolve(PROJECT_DIR, 'target/junit', process.env.JOB || '.', 'TEST-test.xml')),
-        cb
-      )
+      parseString(readFileSync(makeJunitReportPath(PROJECT_DIR, 'test')), cb)
     );
 
     // test case results are wrapped in <testsuites></testsuites>
@@ -91,6 +89,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE works',
         time: testPass.$.time,
+        'metadata-json': '{}',
       },
       'system-out': testPass['system-out'],
     });
@@ -102,6 +101,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE fails',
         time: testFail.$.time,
+        'metadata-json': '{}',
       },
       'system-out': testFail['system-out'],
       failure: [testFail.failure[0]],
@@ -117,6 +117,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE "before each" hook: fail hook for "never runs"',
         time: beforeEachFail.$.time,
+        'metadata-json': '{}',
       },
       'system-out': testFail['system-out'],
       failure: [beforeEachFail.failure[0]],
@@ -126,6 +127,7 @@ describe('dev/mocha/junit report generation', () => {
       $: {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE never runs',
+        'metadata-json': '{}',
       },
       'system-out': testFail['system-out'],
       skipped: [''],

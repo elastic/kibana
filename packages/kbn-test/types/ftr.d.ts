@@ -18,7 +18,9 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Config, Lifecycle } from '../src/functional_test_runner/lib';
+import { Config, Lifecycle, FailureMetadata } from '../src/functional_test_runner/lib';
+
+export { Lifecycle, Config, FailureMetadata };
 
 interface AsyncInstance<T> {
   /**
@@ -37,13 +39,16 @@ interface AsyncInstance<T> {
 type MaybeAsyncInstance<T> = T extends Promise<infer X> ? AsyncInstance<X> & X : T;
 
 /**
+ * Covert a Provider type to the instance type it provides
+ */
+export type ProvidedType<T extends (...args: any[]) => any> = MaybeAsyncInstance<ReturnType<T>>;
+
+/**
  * Convert a map of providers to a map of the instance types they provide, also converting
  * promise types into the async instances that other providers will receive.
  */
 type ProvidedTypeMap<T extends {}> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any
-    ? MaybeAsyncInstance<ReturnType<T[K]>>
-    : unknown;
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? ProvidedType<T[K]> : unknown;
 };
 
 export interface GenericFtrProviderContext<
@@ -56,7 +61,7 @@ export interface GenericFtrProviderContext<
    * Determine if a service is avaliable
    * @param serviceName
    */
-  hasService(serviceName: 'config' | 'log' | 'lifecycle'): true;
+  hasService(serviceName: 'config' | 'log' | 'lifecycle' | 'failureMetadata'): true;
   hasService<K extends keyof ServiceMap>(serviceName: K): serviceName is K;
   hasService(serviceName: string): serviceName is Extract<keyof ServiceMap, string>;
 
@@ -68,6 +73,7 @@ export interface GenericFtrProviderContext<
   getService(serviceName: 'config'): Config;
   getService(serviceName: 'log'): ToolingLog;
   getService(serviceName: 'lifecycle'): Lifecycle;
+  getService(serviceName: 'failureMetadata'): FailureMetadata;
   getService<T extends keyof ServiceMap>(serviceName: T): ServiceMap[T];
 
   /**

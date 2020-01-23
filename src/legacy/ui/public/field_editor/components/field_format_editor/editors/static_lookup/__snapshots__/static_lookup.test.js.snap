@@ -1,18 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StaticLookupFormatEditorComponent should render multiple lookup entries and unknown key value 1`] = `
+exports[`StaticLookupFormatEditor should render multiple lookup entries and unknown key value 1`] = `
 <Fragment>
   <EuiBasicTable
     columns={
       Array [
         Object {
           "field": "key",
-          "name": "Key",
+          "name": <FormattedMessage
+            defaultMessage="Key"
+            id="common.ui.fieldEditor.staticLookup.keyLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "value",
-          "name": "Value",
+          "name": <FormattedMessage
+            defaultMessage="Value"
+            id="common.ui.fieldEditor.staticLookup.valueLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
@@ -51,6 +59,7 @@ exports[`StaticLookupFormatEditorComponent should render multiple lookup entries
         "maxWidth": "400px",
       }
     }
+    tableLayout="fixed"
   />
   <EuiSpacer
     size="m"
@@ -71,7 +80,9 @@ exports[`StaticLookupFormatEditorComponent should render multiple lookup entries
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -83,9 +94,6 @@ exports[`StaticLookupFormatEditorComponent should render multiple lookup entries
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="Leave blank to keep value as-is"
       value="test value"
@@ -97,19 +105,27 @@ exports[`StaticLookupFormatEditorComponent should render multiple lookup entries
 </Fragment>
 `;
 
-exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
+exports[`StaticLookupFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiBasicTable
     columns={
       Array [
         Object {
           "field": "key",
-          "name": "Key",
+          "name": <FormattedMessage
+            defaultMessage="Key"
+            id="common.ui.fieldEditor.staticLookup.keyLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
           "field": "value",
-          "name": "Value",
+          "name": <FormattedMessage
+            defaultMessage="Value"
+            id="common.ui.fieldEditor.staticLookup.valueLabel"
+            values={Object {}}
+          />,
           "render": [Function],
         },
         Object {
@@ -142,6 +158,7 @@ exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
         "maxWidth": "400px",
       }
     }
+    tableLayout="fixed"
   />
   <EuiSpacer
     size="m"
@@ -162,7 +179,9 @@ exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
       <FormattedMessage
@@ -174,9 +193,6 @@ exports[`StaticLookupFormatEditorComponent should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="Leave blank to keep value as-is"
       value=""

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { resolve } from 'path';
 import * as fs from 'fs';
@@ -37,7 +37,7 @@ export const getEsArchiver = (options: {
     writeTo: process.stdout,
   });
 
-  const client = new elasticsearch.Client({
+  const client = new legacyElasticsearch.Client({
     hosts: esConfig.hosts,
     httpAuth: esConfig.username ? `${esConfig.username}:${esConfig.password}` : undefined,
     log: options.logLevel,

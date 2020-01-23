@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { Feature } from './feature';
+import { Feature } from '../common/feature';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
@@ -46,12 +46,12 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       icon: 'visualizeApp',
       navLinkId: 'kibana:visualize',
-      app: ['kibana'],
+      app: ['kibana', 'lens'],
       catalogue: ['visualize'],
       privileges: {
         all: {
           savedObject: {
-            all: ['visualization', 'url', 'query'],
+            all: ['visualization', 'url', 'query', 'lens'],
             read: ['index-pattern', 'search'],
           },
           ui: ['show', 'createShortUrl', 'delete', 'save', 'saveQuery'],
@@ -59,7 +59,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
         read: {
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'visualization', 'query'],
+            read: ['index-pattern', 'search', 'visualization', 'query', 'lens'],
           },
           ui: ['show'],
         },
@@ -84,6 +84,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'visualization',
               'timelion-sheet',
               'canvas-workpad',
+              'lens',
               'map',
             ],
           },

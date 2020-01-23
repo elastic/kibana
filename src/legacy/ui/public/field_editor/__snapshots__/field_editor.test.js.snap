@@ -150,7 +150,13 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      error="Script is required"
+      error={
+        <FormattedMessage
+          defaultMessage="Script is required"
+          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          values={Object {}}
+        />
+      }
       fullWidth={true}
       isInvalid={true}
       label="Script"
@@ -677,7 +683,13 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      error="Script is required"
+      error={
+        <FormattedMessage
+          defaultMessage="Script is required"
+          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          values={Object {}}
+        />
+      }
       fullWidth={true}
       isInvalid={true}
       label="Script"
@@ -906,16 +918,16 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "boolean",
             },
             Object {
-              "text": "geo_point",
-              "value": "geo_point",
-            },
-            Object {
               "text": "object",
               "value": "object",
             },
             Object {
               "text": "nested",
               "value": "nested",
+            },
+            Object {
+              "text": "geo_point",
+              "value": "geo_point",
             },
             Object {
               "text": "geo_shape",
@@ -934,12 +946,12 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "_source",
             },
             Object {
-              "text": "unknown",
-              "value": "unknown",
-            },
-            Object {
               "text": "conflict",
               "value": "conflict",
+            },
+            Object {
+              "text": "unknown",
+              "value": "unknown",
             },
           ]
         }
@@ -1243,6 +1255,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <div>
+      <eui-spacer
+        size="m"
+      />
       <eui-call-out
         color="warning"
         iconType="alert"
@@ -1343,7 +1358,13 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <eui-form-row
-      error="Script is required"
+      error={
+        <FormattedMessage
+          defaultMessage="Script is required"
+          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          values={Object {}}
+        />
+      }
       fullWidth={true}
       isInvalid={true}
       label="Script"

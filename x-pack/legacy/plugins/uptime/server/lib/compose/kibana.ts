@@ -4,40 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMXPackAuthAdapter } from '../adapters/auth';
-import { UMKibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
 import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
-import { ElasticsearchMonitorsAdapter } from '../adapters/monitors';
-import { ElasticsearchPingsAdapter } from '../adapters/pings';
-import { UMAuthDomain, UMMonitorsDomain, UMPingsDomain } from '../domains';
+import { elasticsearchMonitorsAdapter } from '../adapters/monitors';
+import { elasticsearchPingsAdapter } from '../adapters/pings';
+import { licenseCheck } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
-import { UMMonitorStatesDomain } from '../domains/monitor_states';
-import { ElasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
+import { elasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
+import { savedObjectsAdapter } from '../adapters/saved_objects';
+import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
-export function compose(hapiServer: any): UMServerLibs {
-  const framework = new UMKibanaBackendFrameworkAdapter(hapiServer);
-  const database = new UMKibanaDatabaseAdapter(hapiServer.plugins.elasticsearch);
-
-  const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
-  const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(hapiServer.plugins.xpack_main), {});
-  const monitorsDomain = new UMMonitorsDomain(new ElasticsearchMonitorsAdapter(database), {});
-  const monitorStatesDomain = new UMMonitorStatesDomain(
-    new ElasticsearchMonitorStatesAdapter(database),
-    {}
-  );
+export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UMServerLibs {
+  const framework = new UMKibanaBackendFrameworkAdapter(server);
 
   const domainLibs: UMDomainLibs = {
-    auth: authDomain,
-    monitors: monitorsDomain,
-    monitorStates: monitorStatesDomain,
-    pings: pingsDomain,
+    license: licenseCheck,
+    monitors: elasticsearchMonitorsAdapter,
+    monitorStates: elasticsearchMonitorStatesAdapter,
+    pings: elasticsearchPingsAdapter,
+    savedObjects: savedObjectsAdapter,
   };
 
-  const libs: UMServerLibs = {
+  return {
     framework,
-    database,
     ...domainLibs,
   };
-
-  return libs;
 }

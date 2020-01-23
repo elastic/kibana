@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, merge as mergeObject, set, omit } from 'lodash/fp';
+import {
+  get,
+  has,
+  merge as mergeObject,
+  set,
+  omit,
+  isObject,
+  toString as fpToString,
+} from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, Observable, empty, merge } from 'rxjs';
@@ -20,6 +28,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
@@ -40,6 +49,7 @@ import {
   removeColumn,
   removeProvider,
   updateColumns,
+  updateEventType,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
@@ -52,6 +62,8 @@ import {
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
+  setFilters,
+  setSavedQueryId,
   startTimelineSaving,
   endTimelineSaving,
   createTimeline,
@@ -81,11 +93,14 @@ const timelineActionsType = [
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
+  setFilters.type,
+  setSavedQueryId.type,
   updateColumns.type,
   updateDataProviderEnabled.type,
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
   updateDescription.type,
+  updateEventType.type,
   updateKqlMode.type,
   updateProviders.type,
   updateSort.type,
@@ -93,6 +108,9 @@ const timelineActionsType = [
   updateRange.type,
   upsertColumn.type,
 ];
+
+const isItAtimelineAction = (timelineId: string | undefined) =>
+  timelineId && timelineId.toLowerCase().startsWith('timeline');
 
 export const createTimelineEpic = <State>(): Epic<
   Action,
@@ -104,38 +122,34 @@ export const createTimelineEpic = <State>(): Epic<
   state$,
   { selectNotesByIdSelector, timelineByIdSelector, timelineTimeRangeSelector, apolloClient$ }
 ) => {
-  const timeline$ = state$.pipe(
-    map(timelineByIdSelector),
-    filter(isNotNull)
-  );
+  const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
-  const notes$ = state$.pipe(
-    map(selectNotesByIdSelector),
-    filter(isNotNull)
-  );
+  const notes$ = state$.pipe(map(selectNotesByIdSelector), filter(isNotNull));
 
-  const timelineTimeRange$ = state$.pipe(
-    map(timelineTimeRangeSelector),
-    filter(isNotNull)
-  );
+  const timelineTimeRange$ = state$.pipe(map(timelineTimeRangeSelector), filter(isNotNull));
 
   return merge(
     action$.pipe(
       withLatestFrom(timeline$),
       filter(([action, timeline]) => {
-        const timelineId: TimelineModel = timeline[get('payload.id', action)];
+        const timelineId: string = get('payload.id', action);
+        const timelineObj: TimelineModel = timeline[timelineId];
         if (action.type === addError.type) {
           return true;
         }
-        if (action.type === createTimeline.type) {
+        if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
           myEpicTimelineId.setTimelineId(null);
           myEpicTimelineId.setTimelineVersion(null);
-        } else if (action.type === addTimeline.type) {
+        } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
           return true;
-        } else if (timelineActionsType.includes(action.type) && !timelineId.isLoading) {
+        } else if (
+          timelineActionsType.includes(action.type) &&
+          !timelineObj.isLoading &&
+          isItAtimelineAction(timelineId)
+        ) {
           return true;
         }
         return false;
@@ -236,14 +250,17 @@ const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
   description: null,
+  eventType: null,
+  filters: null,
   kqlMode: null,
   kqlQuery: null,
   title: null,
   dateRange: null,
+  savedQueryId: null,
   sort: null,
 };
 
-const convertTimelineAsInput = (
+export const convertTimelineAsInput = (
   timeline: TimelineModel,
   timelineTimeRange: TimeRange
 ): TimelineInput =>
@@ -259,6 +276,65 @@ const convertTimelineAsInput = (
           get(key, timeline).map((col: ColumnHeader) => omit(['width', '__typename'], col)),
           acc
         );
+      } else if (key === 'filters' && get(key, timeline) != null) {
+        const filters = get(key, timeline);
+        return set(
+          key,
+          filters != null
+            ? filters.map((myFilter: esFilters.Filter) => {
+                const basicFilter = omit(['$state'], myFilter);
+                return {
+                  ...basicFilter,
+                  meta: {
+                    ...basicFilter.meta,
+                    field:
+                      (esFilters.isMatchAllFilter(basicFilter) ||
+                        esFilters.isPhraseFilter(basicFilter) ||
+                        esFilters.isPhrasesFilter(basicFilter) ||
+                        esFilters.isRangeFilter(basicFilter)) &&
+                      basicFilter.meta.field != null
+                        ? convertToString(basicFilter.meta.field)
+                        : null,
+                    value:
+                      basicFilter.meta.value != null
+                        ? convertToString(basicFilter.meta.value)
+                        : null,
+                    params:
+                      basicFilter.meta.params != null
+                        ? convertToString(basicFilter.meta.params)
+                        : null,
+                  },
+                  ...(esFilters.isMatchAllFilter(basicFilter)
+                    ? {
+                        match_all: convertToString(
+                          (basicFilter as esFilters.MatchAllFilter).match_all
+                        ),
+                      }
+                    : { match_all: null }),
+                  ...(esFilters.isMissingFilter(basicFilter) && basicFilter.missing != null
+                    ? { missing: convertToString(basicFilter.missing) }
+                    : { missing: null }),
+                  ...(esFilters.isExistsFilter(basicFilter) && basicFilter.exists != null
+                    ? { exists: convertToString(basicFilter.exists) }
+                    : { exists: null }),
+                  ...((esFilters.isQueryStringFilter(basicFilter) ||
+                    get('query', basicFilter) != null) &&
+                  basicFilter.query != null
+                    ? { query: convertToString(basicFilter.query) }
+                    : { query: null }),
+                  ...(esFilters.isRangeFilter(basicFilter) && basicFilter.range != null
+                    ? { range: convertToString(basicFilter.range) }
+                    : { range: null }),
+                  ...(esFilters.isRangeFilter(basicFilter) &&
+                  basicFilter.script !=
+                    null /* TODO remove it when PR50713 is merged || esFilters.isPhraseFilter(basicFilter) */
+                    ? { script: convertToString(basicFilter.script) }
+                    : { script: null }),
+                };
+              })
+            : [],
+          acc
+        );
       }
       return set(key, get(key, timeline), acc);
     }
@@ -272,3 +348,14 @@ const omitTypenameInTimeline = (
   oldTimeline: TimelineModel,
   newTimeline: TimelineResult
 ): TimelineModel => JSON.parse(JSON.stringify(mergeObject(oldTimeline, newTimeline)), omitTypename);
+
+const convertToString = (obj: unknown) => {
+  try {
+    if (isObject(obj)) {
+      return JSON.stringify(obj);
+    }
+    return fpToString(obj);
+  } catch {
+    return '';
+  }
+};

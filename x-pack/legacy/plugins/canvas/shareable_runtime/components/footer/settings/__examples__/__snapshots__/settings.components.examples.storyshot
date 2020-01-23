@@ -1,0 +1,479 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/Settings/components AutoplaySettings, autoplay disabled 1`] = `
+<div
+  style={
+    Object {
+      "padding": 16,
+    }
+  }
+>
+  <div
+    className="euiSwitch"
+  >
+    <input
+      checked={false}
+      className="euiSwitch__input"
+      id="cycle"
+      name="cycle"
+      onChange={[Function]}
+      type="checkbox"
+    />
+    <span
+      className="euiSwitch__body"
+    >
+      <span
+        className="euiSwitch__thumb"
+      />
+      <span
+        className="euiSwitch__track"
+      >
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </span>
+    </span>
+    <label
+      className="euiSwitch__label"
+      htmlFor="cycle"
+    >
+      Cycle Slides
+    </label>
+  </div>
+  <hr
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+  />
+  <form
+    onSubmit={[Function]}
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Set a custom interval
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-describedby="generated-id-help"
+                  className="euiFieldText euiFieldText--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  type="text"
+                  value="5s"
+                />
+              </div>
+            </div>
+            <div
+              className="euiFormHelpText euiFormRow__text"
+              id="generated-id-help"
+            >
+              Use shorthand notation, like 30s, 10m, or 1h
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiFormRow"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+               
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <button
+              className="euiButton euiButton--primary euiButton--small"
+              disabled={false}
+              id="generated-id"
+              onBlur={[Function]}
+              onFocus={[Function]}
+              style={
+                Object {
+                  "minWidth": "auto",
+                }
+              }
+              type="submit"
+            >
+              <span
+                className="euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Set
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+`;
+
+exports[`Storyshots shareables/Settings/components AutoplaySettings, autoplay enabled 1`] = `
+<div
+  style={
+    Object {
+      "padding": 16,
+    }
+  }
+>
+  <div
+    className="euiSwitch"
+  >
+    <input
+      checked={true}
+      className="euiSwitch__input"
+      id="cycle"
+      name="cycle"
+      onChange={[Function]}
+      type="checkbox"
+    />
+    <span
+      className="euiSwitch__body"
+    >
+      <span
+        className="euiSwitch__thumb"
+      />
+      <span
+        className="euiSwitch__track"
+      >
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+        <svg
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+          focusable="false"
+          height={16}
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </span>
+    </span>
+    <label
+      className="euiSwitch__label"
+      htmlFor="cycle"
+    >
+      Cycle Slides
+    </label>
+  </div>
+  <hr
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+  />
+  <form
+    onSubmit={[Function]}
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Set a custom interval
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  aria-describedby="generated-id-help"
+                  className="euiFieldText euiFieldText--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  type="text"
+                  value="5s"
+                />
+              </div>
+            </div>
+            <div
+              className="euiFormHelpText euiFormRow__text"
+              id="generated-id-help"
+            >
+              Use shorthand notation, like 30s, 10m, or 1h
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiFormRow"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+               
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <button
+              className="euiButton euiButton--primary euiButton--small"
+              disabled={false}
+              id="generated-id"
+              onBlur={[Function]}
+              onFocus={[Function]}
+              style={
+                Object {
+                  "minWidth": "auto",
+                }
+              }
+              type="submit"
+            >
+              <span
+                className="euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Set
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+`;
+
+exports[`Storyshots shareables/Settings/components ToolbarSettings, autohide disabled 1`] = `
+<div
+  style={
+    Object {
+      "padding": 16,
+    }
+  }
+>
+  <div
+    className="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        className="euiSwitch"
+      >
+        <input
+          aria-describedby="generated-id-help"
+          checked={false}
+          className="euiSwitch__input"
+          data-test-subj="hideToolbarSwitch"
+          id="generated-id"
+          name="toolbarHide"
+          onBlur={[Function]}
+          onChange={[Function]}
+          onFocus={[Function]}
+          type="checkbox"
+        />
+        <span
+          className="euiSwitch__body"
+        >
+          <span
+            className="euiSwitch__thumb"
+          />
+          <span
+            className="euiSwitch__track"
+          >
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+        </span>
+        <label
+          className="euiSwitch__label"
+          htmlFor="generated-id"
+        >
+          Hide Toolbar
+        </label>
+      </div>
+      <div
+        className="euiFormHelpText euiFormRow__text"
+        id="generated-id-help"
+      >
+        Hide the toolbar when the mouse is not within the Canvas?
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Settings/components ToolbarSettings, autohide enabled 1`] = `
+<div
+  style={
+    Object {
+      "padding": 16,
+    }
+  }
+>
+  <div
+    className="euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        className="euiSwitch"
+      >
+        <input
+          aria-describedby="generated-id-help"
+          checked={true}
+          className="euiSwitch__input"
+          data-test-subj="hideToolbarSwitch"
+          id="generated-id"
+          name="toolbarHide"
+          onBlur={[Function]}
+          onChange={[Function]}
+          onFocus={[Function]}
+          type="checkbox"
+        />
+        <span
+          className="euiSwitch__body"
+        >
+          <span
+            className="euiSwitch__thumb"
+          />
+          <span
+            className="euiSwitch__track"
+          >
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <svg
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+              focusable="false"
+              height={16}
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+        </span>
+        <label
+          className="euiSwitch__label"
+          htmlFor="generated-id"
+        >
+          Hide Toolbar
+        </label>
+      </div>
+      <div
+        className="euiFormHelpText euiFormRow__text"
+        id="generated-id-help"
+      >
+        Hide the toolbar when the mouse is not within the Canvas?
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -1,5 +1,6 @@
 @import '@elastic/eui/src/components/header/variables';
 
+// sass-lint:disable no-ids
 #maps-plugin {
   display: flex;
   flex-direction: column;
@@ -9,6 +10,7 @@
 }
 
 .mapFullScreen {
+  // sass-lint:disable no-important
   height: 100vh !important;
 }
 

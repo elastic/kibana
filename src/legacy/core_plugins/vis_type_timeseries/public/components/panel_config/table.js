@@ -51,7 +51,7 @@ export class TablePanelConfig extends Component {
     this.state = { selectedTab: 'data' };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { model } = this.props;
     const parts = {};
     if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
@@ -147,7 +147,10 @@ export class TablePanelConfig extends Component {
                   <EuiFormRow
                     id={htmlId('pivotRowsInput')}
                     label={
-                      <FormattedMessage id="visTypeTimeseries.table.dataTab.rowsLabel" defaultMessage="Rows" />
+                      <FormattedMessage
+                        id="visTypeTimeseries.table.dataTab.rowsLabel"
+                        defaultMessage="Rows"
+                      />
                     }
                   >
                     {/*
@@ -180,7 +183,10 @@ export class TablePanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="visTypeTimeseries.table.optionsTab.dataLabel" defaultMessage="Data" />
+                <FormattedMessage
+                  id="visTypeTimeseries.table.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -249,7 +255,7 @@ export class TablePanelConfig extends Component {
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="m" />
                 <YesNo
                   id={htmlId('globalFilterOption')}
                   value={model.ignore_global_filter}
@@ -266,7 +272,10 @@ export class TablePanelConfig extends Component {
       <div>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
-            <FormattedMessage id="visTypeTimeseries.table.dataTab.columnsButtonLabel" defaultMessage="Columns" />
+            <FormattedMessage
+              id="visTypeTimeseries.table.dataTab.columnsButtonLabel"
+              defaultMessage="Columns"
+            />
           </EuiTab>
           <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
             <FormattedMessage

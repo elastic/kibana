@@ -12,11 +12,10 @@ import {
   RouteProps,
   withRouter
 } from 'react-router-dom';
-import { StringMap } from '../../../../typings/common';
 import { RouteName } from './route_config/route_names';
 
 type LocationMatch = Pick<
-  RouteComponentProps<StringMap<string>>,
+  RouteComponentProps<Record<string, string>>,
   'location' | 'match'
 >;
 
@@ -75,7 +74,7 @@ export function getBreadcrumb({
       return null;
     }
 
-    const match = matchPath<StringMap<string>>(currentPath, route);
+    const match = matchPath<Record<string, string>>(currentPath, route);
 
     if (match) {
       return parse({

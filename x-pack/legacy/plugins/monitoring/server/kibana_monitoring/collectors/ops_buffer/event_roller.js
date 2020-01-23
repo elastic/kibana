@@ -33,49 +33,43 @@ export class EventRoller {
     return {
       concurrent_connections: sum([
         event.concurrent_connections,
-        this.getFromRollup('concurrent_connections')
+        this.getFromRollup('concurrent_connections'),
       ]),
       // memory/os stats use the latest event's details
       os: {
         load: {
           '1m': get(event, 'osload[0]'),
           '5m': get(event, 'osload[1]'),
-          '15m': get(event, 'osload[2]')
+          '15m': get(event, 'osload[2]'),
         },
         memory: {
           total_in_bytes: get(event, 'osmem.total'),
           free_in_bytes: get(event, 'osmem.free'),
-          used_in_bytes: get(event, 'osmem.total') - get(event, 'osmem.free')
+          used_in_bytes: get(event, 'osmem.total') - get(event, 'osmem.free'),
         },
-        uptime_in_millis: event.osup * 1000 // seconds to milliseconds
+        uptime_in_millis: event.osup * 1000, // seconds to milliseconds
       },
       process: {
-        event_loop_delay: sum([
-          event.psdelay,
-          this.getFromRollup('process.event_loop_delay')
-        ]),
+        event_loop_delay: sum([event.psdelay, this.getFromRollup('process.event_loop_delay')]),
         memory: {
           heap: {
             total_in_bytes: get(event, 'psmem.heapTotal'),
             used_in_bytes: get(event, 'psmem.heapUsed'),
-            size_limit: heapStats.heap_size_limit
+            size_limit: heapStats.heap_size_limit,
           },
-          resident_set_size_in_bytes: get(event, 'psmem.rss')
+          resident_set_size_in_bytes: get(event, 'psmem.rss'),
         },
-        uptime_in_millis: event.psup * 1000 // seconds to milliseconds
+        uptime_in_millis: event.psup * 1000, // seconds to milliseconds
       },
       requests: {
-        disconnects: sum([
-          requests.disconnects,
-          this.getFromRollup('requests.disconnects')
-        ]),
+        disconnects: sum([requests.disconnects, this.getFromRollup('requests.disconnects')]),
         total: sum([requests.total, this.getFromRollup('requests.total')]),
       },
       response_times: maxRollup(
         mapResponseTimes(event.responseTimes),
         this.getFromRollup('response_times')
       ),
-      timestamp: moment.utc().toISOString()
+      timestamp: moment.utc().toISOString(),
     };
   }
 

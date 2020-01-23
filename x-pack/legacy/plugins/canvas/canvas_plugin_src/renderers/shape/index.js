@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RendererStrings } from '../../../i18n';
 import { shapes } from './shapes';
+
+const { shape: strings } = RendererStrings;
 
 export const shape = () => ({
   name: 'shape',
-  displayName: 'Shape',
-  help: 'Render an shape',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { shape, fill, border, borderWidth, maintainAspect } = config;

@@ -1,0 +1,2160 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Flyout apm part one should render normally 1`] = `
+<EuiFlyout
+  aria-labelledby="flyoutTitle"
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[Function]}
+  ownFocus={false}
+  size="m"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2
+        id="flyoutTitle"
+      >
+        Monitor \`APM\` server with Metricbeat
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Typically a single URL. If multiple URLs, separate with a comma.
+                The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
+        label="URL of monitoring cluster"
+        labelType="label"
+      >
+        <EuiFieldText
+          fullWidth={true}
+          onChange={[Function]}
+          value="http://localhost:9200"
+        />
+      </EuiFormRow>
+    </EuiForm>
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter
+    style={
+      Object {
+        "marginBottom": "64px",
+      }
+    }
+  >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="cross"
+          onClick={[Function]}
+        >
+          Close
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          iconSide="right"
+          iconType="sortRight"
+          isDisabled={false}
+          onClick={[Function]}
+          type="submit"
+        >
+          Next
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout apm part two should show instructions to disable internal collection 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Add the following setting in the APM server's configuration file ({file}):"
+                  id="xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.description"
+                  values={
+                    Object {
+                      "file": <Monospace>
+                        apm-server.yml
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              monitoring.enabled: false
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You'll need to restart the APM server after making this change."
+                  id="xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.note"
+                  values={Object {}}
+                />
+              </p>
+            </EuiText>
+          </React.Fragment>,
+          "title": "Disable self monitoring of the APM server's monitoring metrics",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="Data is still coming from self monitoring"
+          >
+            <p>
+              It can take up to 30 seconds to detect data.
+            </p>
+            <p>
+              Last self monitoring was 0 seconds ago.
+            </p>
+          </EuiCallOut>,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout apm part two should show instructions to migrate to metricbeat 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/apm/metricbeat/current/metricbeat-installation.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.apmInstructions.installMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Install Metricbeat on the same server as the APM server",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              metricbeat modules enable beat-xpack
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="By default the module will collect APM server monitoring metrics from http://localhost:5066. If the local APM server has a different address, you must specify it via the {hosts} setting in the {file} file."
+                  id="xpack.monitoring.metricbeatMigration.apmInstructions.enableMetricbeatModuleDescription"
+                  values={
+                    Object {
+                      "file": <Monospace>
+                        modules.d/beat-xpack.yml
+                      </Monospace>,
+                      "hosts": <Monospace>
+                        hosts
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/apm/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Enable and configure the Beat x-pack module in Metricbeat",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <FormattedMessage
+                defaultMessage="Make these changes in your {file}."
+                id="xpack.monitoring.metricbeatMigration.apmInstructions.configureMetricbeatDescription"
+                values={
+                  Object {
+                    "file": <Monospace>
+                      metricbeat.yml
+                    </Monospace>,
+                  }
+                }
+              />
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+            >
+              output.elasticsearch:
+  hosts: ["http://localhost:9200"] ## Monitoring cluster
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+            </EuiCodeBlock>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/apm/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Configure Metricbeat to send to the monitoring cluster",
+        },
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/apm/metricbeat/current/metricbeat-starting.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.apmInstructions.startMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Start Metricbeat",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="No monitoring data detected, but we’ll continue checking."
+          />,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout beats part one should render normally 1`] = `
+<EuiFlyout
+  aria-labelledby="flyoutTitle"
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[Function]}
+  ownFocus={false}
+  size="m"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2
+        id="flyoutTitle"
+      >
+        Monitor \`Beats\` instance with Metricbeat
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Typically a single URL. If multiple URLs, separate with a comma.
+                The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
+        label="URL of monitoring cluster"
+        labelType="label"
+      >
+        <EuiFieldText
+          fullWidth={true}
+          onChange={[Function]}
+          value="http://localhost:9200"
+        />
+      </EuiFormRow>
+    </EuiForm>
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter
+    style={
+      Object {
+        "marginBottom": "64px",
+      }
+    }
+  >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="cross"
+          onClick={[Function]}
+        >
+          Close
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          iconSide="right"
+          iconType="sortRight"
+          isDisabled={false}
+          onClick={[Function]}
+          type="submit"
+        >
+          Next
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout beats part two should show instructions to disable internal collection 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Add the following setting in {beatType}'s configuration file ({file}):"
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.description"
+                  values={
+                    Object {
+                      "beatType": "beat",
+                      "file": <Monospace>
+                        .yml
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              monitoring.enabled: false
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You'll need to restart {beatType} after making this change."
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.note"
+                  values={
+                    Object {
+                      "beatType": "beat",
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+          </React.Fragment>,
+          "title": "Disable self monitoring of beat's monitoring metrics",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="Data is still coming from self monitoring"
+          >
+            <p>
+              It can take up to 30 seconds to detect data.
+            </p>
+            <p>
+              Last self monitoring was 0 seconds ago.
+            </p>
+          </EuiCallOut>,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout beats part two should show instructions to migrate to metricbeat 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Install Metricbeat on the same server as this beat",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              metricbeat modules enable beat-xpack
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="By default the module will collect {beatType} monitoring metrics from http://localhost:5066. If the {beatType} instance being monitored has a different address, you must specify it via the {hosts} setting in the {file} file."
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleDescription"
+                  values={
+                    Object {
+                      "beatType": "beat",
+                      "file": <Monospace>
+                        modules.d/beat-xpack.yml
+                      </Monospace>,
+                      "hosts": <Monospace>
+                        hosts
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="m"
+            />
+            <EuiCallOut
+              color="warning"
+              iconType="help"
+              title={
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      defaultMessage="In order for Metricbeat to collect metrics from the running {beatType}, you need to {link}."
+                      id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirections"
+                      values={
+                        Object {
+                          "beatType": "beat",
+                          "link": <ForwardRef
+                            href="https://www.elastic.co/guide/en/beats/metricbeat/current/http-endpoint.html"
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              defaultMessage="enable an HTTP endpoint for the {beatType} instance being monitored"
+                              id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirectionsLinkText"
+                              values={
+                                Object {
+                                  "beatType": undefined,
+                                }
+                              }
+                            />
+                          </ForwardRef>,
+                        }
+                      }
+                    />
+                  </p>
+                </EuiText>
+              }
+            />
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Enable and configure the Beat x-pack module in Metricbeat",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <FormattedMessage
+                defaultMessage="Make these changes in your {file}."
+                id="xpack.monitoring.metricbeatMigration.beatsInstructions.configureMetricbeatDescription"
+                values={
+                  Object {
+                    "file": <Monospace>
+                      metricbeat.yml
+                    </Monospace>,
+                  }
+                }
+              />
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+            >
+              output.elasticsearch:
+  hosts: ["http://localhost:9200"] ## Monitoring cluster
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+            </EuiCodeBlock>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Configure Metricbeat to send to the monitoring cluster",
+        },
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Start Metricbeat",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="No monitoring data detected, but we’ll continue checking."
+          />,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout elasticsearch part one should render normally 1`] = `
+<EuiFlyout
+  aria-labelledby="flyoutTitle"
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[Function]}
+  ownFocus={false}
+  size="m"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2
+        id="flyoutTitle"
+      >
+        Monitor \`Elasticsearch\` node with Metricbeat
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Typically a single URL. If multiple URLs, separate with a comma.
+                The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
+        label="URL of monitoring cluster"
+        labelType="label"
+      >
+        <EuiFieldText
+          fullWidth={true}
+          onChange={[Function]}
+          value="http://localhost:9200"
+        />
+      </EuiFormRow>
+    </EuiForm>
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter
+    style={
+      Object {
+        "marginBottom": "64px",
+      }
+    }
+  >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="cross"
+          onClick={[Function]}
+        >
+          Close
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          iconSide="right"
+          iconType="sortRight"
+          isDisabled={false}
+          onClick={[Function]}
+          type="submit"
+        >
+          Next
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout elasticsearch part two should show instructions to disable internal collection 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Disable self monitoring of Elasticsearch monitoring metrics. Set {monospace} to false on each server in the production cluster."
+                  id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollectionDescription"
+                  values={
+                    Object {
+                      "monospace": <Monospace>
+                        xpack.monitoring.elasticsearch.collection.enabled
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+              language="curl"
+            >
+              PUT _cluster/settings
+{
+  "persistent": {
+    "xpack.monitoring.elasticsearch.collection.enabled": false
+  }
+}
+          
+            </EuiCodeBlock>
+          </React.Fragment>,
+          "title": "Disable self monitoring of Elasticsearch monitoring metrics",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="Data is still coming from self monitoring"
+          >
+            <p>
+              It can take up to 30 seconds to detect data.
+            </p>
+            <p>
+              Last self monitoring was 0 seconds ago.
+            </p>
+          </EuiCallOut>,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout elasticsearch part two should show instructions to migrate to metricbeat 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow these instructions."
+                  id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Install Metricbeat on the same server as Elasticsearch",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <p>
+                From the installation directory, run:
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              metricbeat modules enable elasticsearch-xpack
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="By default the module collects Elasticsearch metrics from {url}. If the local server has a different address, add it to the hosts setting in {module}."
+                  id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleDescription"
+                  values={
+                    Object {
+                      "module": <Monospace>
+                        modules.d/elasticsearch-xpack.yml
+                      </Monospace>,
+                      "url": <Monospace>
+                        http://localhost:9200
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Enable and configure the Elasticsearch x-pack module in Metricbeat",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <FormattedMessage
+                defaultMessage="Modify {file} to set the connection information."
+                id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.configureMetricbeatDescription"
+                values={
+                  Object {
+                    "file": <Monospace>
+                      metricbeat.yml
+                    </Monospace>,
+                  }
+                }
+              />
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+            >
+              output.elasticsearch:
+  hosts: ["http://localhost:9200"] ## Monitoring cluster
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+            </EuiCodeBlock>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Configure Metricbeat to send data to the monitoring cluster",
+        },
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow these instructions."
+                  id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Start Metricbeat",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="No monitoring data detected, but we’ll continue checking."
+          />,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout kibana part one should render normally 1`] = `
+<EuiFlyout
+  aria-labelledby="flyoutTitle"
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[Function]}
+  ownFocus={false}
+  size="m"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2
+        id="flyoutTitle"
+      >
+        Monitor \`Kibana\` instance with Metricbeat
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Typically a single URL. If multiple URLs, separate with a comma.
+                The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
+        label="URL of monitoring cluster"
+        labelType="label"
+      >
+        <EuiFieldText
+          fullWidth={true}
+          onChange={[Function]}
+          value="http://localhost:9200"
+        />
+      </EuiFormRow>
+    </EuiForm>
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter
+    style={
+      Object {
+        "marginBottom": "64px",
+      }
+    }
+  >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="cross"
+          onClick={[Function]}
+        >
+          Close
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          iconSide="right"
+          iconType="sortRight"
+          isDisabled={false}
+          onClick={[Function]}
+          type="submit"
+        >
+          Next
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout kibana part two should show instructions to disable internal collection 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Add this setting to {file}."
+                  id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.description"
+                  values={
+                    Object {
+                      "file": <Monospace>
+                        kibana.yml
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              xpack.monitoring.kibana.collection.enabled: false
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="For {config}, leave the default value of ({defaultValue})."
+                  id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.note"
+                  values={
+                    Object {
+                      "config": <Monospace>
+                        xpack.monitoring.enabled
+                      </Monospace>,
+                      "defaultValue": <Monospace>
+                        true
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+          </React.Fragment>,
+          "title": "Disable self monitoring of Kibana monitoring metrics",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="Data is still coming from self monitoring"
+          >
+            <p>
+              It can take up to 30 seconds to detect data.
+            </p>
+            <p>
+              Last self monitoring was 0 seconds ago.
+            </p>
+          </EuiCallOut>,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout kibana part two should show instructions to migrate to metricbeat 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Install Metricbeat on the same server as Kibana",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              metricbeat modules enable kibana-xpack
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="By default the module will collect Kibana monitoring metrics from http://localhost:5601. If the local Kibana instance has a different address, you must specify it via the {hosts} setting in the {file} file."
+                  id="xpack.monitoring.metricbeatMigration.kibanaInstructions.enableMetricbeatModuleDescription"
+                  values={
+                    Object {
+                      "file": <Monospace>
+                        modules.d/kibana-xpack.yml
+                      </Monospace>,
+                      "hosts": <Monospace>
+                        hosts
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/kibana/reference/current/monitoring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Enable and configure the Kibana x-pack module in Metricbeat",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <FormattedMessage
+                defaultMessage="Make these changes in your {file}."
+                id="xpack.monitoring.metricbeatMigration.kibanaInstructions.configureMetricbeatDescription"
+                values={
+                  Object {
+                    "file": <Monospace>
+                      metricbeat.yml
+                    </Monospace>,
+                  }
+                }
+              />
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+            >
+              output.elasticsearch:
+  hosts: ["http://localhost:9200"] ## Monitoring cluster
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+            </EuiCodeBlock>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/kibana/reference/current/monitoring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Configure Metricbeat to send to the monitoring cluster",
+        },
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Start Metricbeat",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="No monitoring data detected, but we’ll continue checking."
+          />,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout logstash part one should render normally 1`] = `
+<EuiFlyout
+  aria-labelledby="flyoutTitle"
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[Function]}
+  ownFocus={false}
+  size="m"
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2
+        id="flyoutTitle"
+      >
+        Monitor \`Logstash\` node with Metricbeat
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiForm>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Typically a single URL. If multiple URLs, separate with a comma.
+                The running Metricbeat instance must be able to communicate with these Elasticsearch servers."
+        label="URL of monitoring cluster"
+        labelType="label"
+      >
+        <EuiFieldText
+          fullWidth={true}
+          onChange={[Function]}
+          value="http://localhost:9200"
+        />
+      </EuiFormRow>
+    </EuiForm>
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter
+    style={
+      Object {
+        "marginBottom": "64px",
+      }
+    }
+  >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="cross"
+          onClick={[Function]}
+        >
+          Close
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          iconSide="right"
+          iconType="sortRight"
+          isDisabled={false}
+          onClick={[Function]}
+          type="submit"
+        >
+          Next
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</EuiFlyout>
+`;
+
+exports[`Flyout logstash part two should show instructions to disable internal collection 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Add the following setting in the Logstash configuration file ({file}):"
+                  id="xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.description"
+                  values={
+                    Object {
+                      "file": <Monospace>
+                        logstash.yml
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              xpack.monitoring.enabled: false
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You'll need to restart Logstash after making this change."
+                  id="xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.note"
+                  values={Object {}}
+                />
+              </p>
+            </EuiText>
+          </React.Fragment>,
+          "title": "Disable self monitoring of Logstash monitoring metrics",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="Data is still coming from self monitoring"
+          >
+            <p>
+              It can take up to 30 seconds to detect data.
+            </p>
+            <p>
+              Last self monitoring was 0 seconds ago.
+            </p>
+          </EuiCallOut>,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout logstash part two should show instructions to migrate to metricbeat 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.logstashInstructions.installMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Install Metricbeat on the same server as Logstash",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              metricbeat modules enable logstash-xpack
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="By default the module will collect Logstash monitoring metrics from http://localhost:9600. If the local Logstash instance has a different address, you must specify it via the {hosts} setting in the {file} file."
+                  id="xpack.monitoring.metricbeatMigration.logstashInstructions.enableMetricbeatModuleDescription"
+                  values={
+                    Object {
+                      "file": <Monospace>
+                        modules.d/logstash-xpack.yml
+                      </Monospace>,
+                      "hosts": <Monospace>
+                        hosts
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/logstash/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Enable and configure the Logstash x-pack module in Metricbeat",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <FormattedMessage
+                defaultMessage="Make these changes in your {file}."
+                id="xpack.monitoring.metricbeatMigration.logstashInstructions.configureMetricbeatDescription"
+                values={
+                  Object {
+                    "file": <Monospace>
+                      metricbeat.yml
+                    </Monospace>,
+                  }
+                }
+              />
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+            >
+              output.elasticsearch:
+  hosts: ["http://localhost:9200"] ## Monitoring cluster
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+            </EuiCodeBlock>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/logstash/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Configure Metricbeat to send to the monitoring cluster",
+        },
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.logstashInstructions.startMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Start Metricbeat",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="No monitoring data detected, but we’ll continue checking."
+          />,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout should render a consistent completion state for all products 1`] = `
+Object {
+  "children": <EuiCallOut
+    color="success"
+    size="s"
+    title="Congratulations!"
+  >
+    <p>
+      Metricbeat is shipping monitoring data.
+    </p>
+  </EuiCallOut>,
+  "status": "complete",
+  "title": "Migration status",
+}
+`;
+
+exports[`Flyout should render the beat type for beats for the disabling internal collection step 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Add the following setting in {beatType}'s configuration file ({file}):"
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.description"
+                  values={
+                    Object {
+                      "beatType": "filebeat",
+                      "file": <Monospace>
+                        filebeat
+                        .yml
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              monitoring.enabled: false
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="You'll need to restart {beatType} after making this change."
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.note"
+                  values={
+                    Object {
+                      "beatType": "filebeat",
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+          </React.Fragment>,
+          "title": "Disable self monitoring of filebeat's monitoring metrics",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="Data is still coming from self monitoring"
+          >
+            <p>
+              It can take up to 30 seconds to detect data.
+            </p>
+            <p>
+              Last self monitoring was 0 seconds ago.
+            </p>
+          </EuiCallOut>,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout should render the beat type for beats for the enabling metricbeat step 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Install Metricbeat on the same server as this filebeat",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              metricbeat modules enable beat-xpack
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="By default the module will collect {beatType} monitoring metrics from http://localhost:5066. If the {beatType} instance being monitored has a different address, you must specify it via the {hosts} setting in the {file} file."
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleDescription"
+                  values={
+                    Object {
+                      "beatType": "filebeat",
+                      "file": <Monospace>
+                        modules.d/beat-xpack.yml
+                      </Monospace>,
+                      "hosts": <Monospace>
+                        hosts
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="m"
+            />
+            <EuiCallOut
+              color="warning"
+              iconType="help"
+              title={
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      defaultMessage="In order for Metricbeat to collect metrics from the running {beatType}, you need to {link}."
+                      id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirections"
+                      values={
+                        Object {
+                          "beatType": "filebeat",
+                          "link": <ForwardRef
+                            href="https://www.elastic.co/guide/en/beats/filebeat/current/http-endpoint.html"
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              defaultMessage="enable an HTTP endpoint for the {beatType} instance being monitored"
+                              id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirectionsLinkText"
+                              values={
+                                Object {
+                                  "beatType": "filebeat",
+                                }
+                              }
+                            />
+                          </ForwardRef>,
+                        }
+                      }
+                    />
+                  </p>
+                </EuiText>
+              }
+            />
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Enable and configure the Beat x-pack module in Metricbeat",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <FormattedMessage
+                defaultMessage="Make these changes in your {file}."
+                id="xpack.monitoring.metricbeatMigration.beatsInstructions.configureMetricbeatDescription"
+                values={
+                  Object {
+                    "file": <Monospace>
+                      metricbeat.yml
+                    </Monospace>,
+                  }
+                }
+              />
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+            >
+              output.elasticsearch:
+  hosts: ["http://localhost:9200"] ## Monitoring cluster
+
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+            </EuiCodeBlock>
+            <React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title={
+                  <EuiText>
+                    <FormattedMessage
+                      defaultMessage="If security is enabled, {link} might be required."
+                      id="xpack.monitoring.metricbeatMigration.securitySetup"
+                      values={
+                        Object {
+                          "link": <React.Fragment>
+                             
+                            <ForwardRef
+                              href="https://www.elastic.co/guide/en/beats/reference/current/configuring-metricbeat.html"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="additional setup"
+                                id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>
+                          </React.Fragment>,
+                        }
+                      }
+                    />
+                  </EuiText>
+                }
+              />
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Configure Metricbeat to send to the monitoring cluster",
+        },
+        Object {
+          "children": <EuiText>
+            <p>
+              <ForwardRef
+                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Follow the instructions here."
+                  id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>
+            </p>
+          </EuiText>,
+          "title": "Start Metricbeat",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="No monitoring data detected, but we’ll continue checking."
+          />,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;
+
+exports[`Flyout should show a restart warning for restarting the primary Kibana 1`] = `
+<EuiFlyoutBody>
+  <EuiSteps
+    steps={
+      Array [
+        Object {
+          "children": <React.Fragment>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Add this setting to {file}."
+                  id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.description"
+                  values={
+                    Object {
+                      "file": <Monospace>
+                        kibana.yml
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCodeBlock
+              isCopyable={true}
+              language="bash"
+            >
+              xpack.monitoring.kibana.collection.enabled: false
+            </EuiCodeBlock>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  defaultMessage="For {config}, leave the default value of ({defaultValue})."
+                  id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.note"
+                  values={
+                    Object {
+                      "config": <Monospace>
+                        xpack.monitoring.enabled
+                      </Monospace>,
+                      "defaultValue": <Monospace>
+                        true
+                      </Monospace>,
+                    }
+                  }
+                />
+              </p>
+            </EuiText>
+            <React.Fragment>
+              <EuiSpacer
+                size="s"
+              />
+              <EuiCallOut
+                color="warning"
+                iconType="help"
+                title="This step requires you to restart the Kibana server"
+              >
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      defaultMessage="Expect errors until the server is running again."
+                      id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.restartNote"
+                      values={Object {}}
+                    />
+                  </p>
+                </EuiText>
+              </EuiCallOut>
+            </React.Fragment>
+          </React.Fragment>,
+          "title": "Disable self monitoring of Kibana monitoring metrics",
+        },
+        Object {
+          "children": <EuiCallOut
+            color="warning"
+            size="s"
+            title="Data is still coming from self monitoring"
+          >
+            <p>
+              It can take up to 30 seconds to detect data.
+            </p>
+            <p>
+              Last self monitoring was 0 seconds ago.
+            </p>
+          </EuiCallOut>,
+          "status": "incomplete",
+          "title": "Migration status",
+        },
+      ]
+    }
+  />
+</EuiFlyoutBody>
+`;

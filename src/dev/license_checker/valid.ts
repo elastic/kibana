@@ -36,24 +36,21 @@ interface Options {
  *  violations or returns undefined.
  */
 export function assertLicensesValid({ packages, validLicenses }: Options) {
-  const invalidMsgs = packages.reduce(
-    (acc, pkg) => {
-      const invalidLicenses = pkg.licenses.filter(license => !validLicenses.includes(license));
+  const invalidMsgs = packages.reduce((acc, pkg) => {
+    const invalidLicenses = pkg.licenses.filter(license => !validLicenses.includes(license));
 
-      if (pkg.licenses.length && !invalidLicenses.length) {
-        return acc;
-      }
+    if (pkg.licenses.length && !invalidLicenses.length) {
+      return acc;
+    }
 
-      return acc.concat(dedent`
+    return acc.concat(dedent`
         ${pkg.name}
           version: ${pkg.version}
           all licenses: ${pkg.licenses}
           invalid licenses: ${invalidLicenses.join(', ')}
           path: ${pkg.relative}
       `);
-    },
-    [] as string[]
-  );
+  }, [] as string[]);
 
   if (invalidMsgs.length) {
     throw createFailError(

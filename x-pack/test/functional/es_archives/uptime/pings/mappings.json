@@ -3,7 +3,6 @@
   "value": {
     "index": "heartbeat-8.0.0",
     "mappings": {
-      "_doc": {
         "_meta": {
           "version": "8.0.0"
         },
@@ -1399,7 +1398,6 @@
             }
           }
         }
-      }
     },
     "settings": {
       "index": {

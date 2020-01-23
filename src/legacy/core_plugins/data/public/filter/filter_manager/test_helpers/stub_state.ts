@@ -19,11 +19,11 @@
 
 import sinon from 'sinon';
 
-import { Filter } from '@kbn/es-query';
 import { State } from 'ui/state_management/state';
+import { esFilters } from '../../../../../../../plugins/data/public';
 
 export class StubState implements State {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   save: sinon.SinonSpy<any[], any>;
 
   constructor() {

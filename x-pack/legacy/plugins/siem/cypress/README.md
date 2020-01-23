@@ -6,9 +6,9 @@ that rely on mocked API calls), that execute via [Cypress](https://www.cypress.i
 Cypress tests may be run against:
 
 - A local Kibana instance, interactively or via the command line. Credentials
-are specified via `kibna.dev.yml` or environment variables.
+are specified via `kibana.dev.yml` or environment variables.
 - A remote Elastic Cloud instance (override `baseUrl`), interactively or via
-the command line. Again, credentials are specified via `kibna.dev.yml` or
+the command line. Again, credentials are specified via `kibana.dev.yml` or
 environment variables.
 - As part of CI (override `baseUrl` and pass credentials via the
 `CYPRESS_ELASTICSEARCH_USERNAME` and `CYPRESS_ELASTICSEARCH_PASSWORD`
@@ -22,38 +22,51 @@ automatically when you submit a PR.
 
 Smoke Tests are located in `siem/cypress/integration/smoke_tests`
 
-## Test Helpers
+## Structure
 
-_Test helpers_ are functions that may be re-used across tests.
+### Tasks
 
-- Reusable code and CSS selectors should be added to
-`siem/cypress/integration/lib`, as described below.
+_Tasks_ are functions that my be re-used across tests. Inside the _tasks_ folder there are some other folders that represents 
+the page to which we will perform the actions. For each folder we are going to create a file for each one of the sections that
+ has the page.
 
-### Reusable Test Helper Functions and CSS Selectors
+i.e.
+- tasks
+  - hosts
+    - events.ts
 
-The `cypress/integration/lib` directory contains code intended to be re-used
-across many different tests. Add reusable test helper functions and CSS
-selectors to directories under `cypress/integration/lib`.
+### Screens
 
-- Files named `helpers.ts` (e.g. `siem/cypress/integration/lib/login/helpers.ts`)
-contain functions (e.g. `login`) that may be imported and invoked from multiple tests.
+In _screens_ folder we are going to find all the elements we want to interact in our tests. Inside _screens_ fonder there
+are some other folders that represents the page that contains the elements the tests are going to interact with. For each 
+folder we are going to create a file for each one of the sections that the page has.
 
-- Files named `selectors.ts` export CSS selectors for re-use. For example,
-`siem/cypress/integration/lib/login/selectors.ts` exports the following selector
-that matches the Username text area in the Kibana login page:
-
-```sh
-export const USERNAME = '[data-test-subj="loginUsername"]';
-```
+i.e.
+- tasks
+  - hosts
+    - events.ts      
 
 ## Mock Data
 
 We prefer not to mock API responses in most of our smoke tests, but sometimes
 it's necessary because a test must assert that a specific value is rendered,
 and it's not possible to derive that value based on the data in the
-envrionment where tests are running.
+environment where tests are running.
 
 Mocked responses API from the server are located in `siem/cypress/fixtures`.
+
+## Speeding up test execution time
+
+Loading the web page takes a big amount of time, in order to minimize that impact, the following points should be
+taken into consideration until another solution is implemented:
+
+- Don't refresh the page for every test to clean the state of it.
+- Instead, group the tests that are similar in different contexts.
+- For every context login only once, clean the state between tests if needed without re-loading the page.
+- All tests in a spec file must be order-independent. 
+    - If you need to reload the page to make the tests order-independent, consider to create a new context.
+
+Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
 ## Authentication
 
@@ -240,3 +253,7 @@ Videos are (optionally) output to:
 ```
 target/kibana-siem/cypress/videos
 ```
+
+## Linting 
+
+Optional linting rules for Cypress and linting setup can be found [here](https://github.com/cypress-io/eslint-plugin-cypress#usage)

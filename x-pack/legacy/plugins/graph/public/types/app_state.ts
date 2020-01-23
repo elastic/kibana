@@ -5,9 +5,9 @@
  */
 
 import { SimpleSavedObject } from 'src/core/public';
-import { Workspace } from './workspace_state';
-import { FontawesomeIcon } from '../services/style_choices';
-import { OutlinkEncoder } from '../services/outlink_encoders';
+import { FontawesomeIcon } from '../helpers/style_choices';
+import { OutlinkEncoder } from '../helpers/outlink_encoders';
+import { IndexPattern } from '../../../../../../src/plugins/data/public';
 
 export interface UrlTemplate {
   url: string;
@@ -24,6 +24,8 @@ export interface WorkspaceField {
   color: string;
   icon: FontawesomeIcon;
   selected: boolean;
+  type: string;
+  aggregatable: boolean;
 }
 
 export interface AdvancedSettings {
@@ -37,11 +39,6 @@ export interface AdvancedSettings {
 
 export type IndexPatternSavedObject = SimpleSavedObject<{ title: string }>;
 
-export interface AppState {
-  urlTemplates: UrlTemplate[];
-  advancedSettings: AdvancedSettings;
-  workspace: Workspace;
-  allFields: WorkspaceField[];
-  selectedFields: WorkspaceField[];
-  selectedIndex: IndexPatternSavedObject;
+export interface IndexPatternProvider {
+  get(id: string): Promise<IndexPattern>;
 }

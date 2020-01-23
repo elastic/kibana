@@ -17,11 +17,9 @@
  * under the License.
  */
 
-
 import keyMirror from 'keymirror';
 
 export default keyMirror({
-
   // Source code viewer actions
   OPEN_CODE_VIEWER: null,
   CLOSE_CODE_VIEWER: null,
@@ -33,5 +31,4 @@ export default keyMirror({
   // Example nav actions
   REGISTER_SECTION: null,
   UNREGISTER_SECTION: null,
-
 });

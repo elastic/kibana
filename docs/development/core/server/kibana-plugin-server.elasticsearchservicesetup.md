@@ -15,8 +15,7 @@ export interface ElasticsearchServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [adminClient$](./kibana-plugin-server.elasticsearchservicesetup.adminclient$.md) | <code>Observable&lt;ClusterClient&gt;</code> |  |
-|  [createClient](./kibana-plugin-server.elasticsearchservicesetup.createclient.md) | <code>(type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ClusterClient</code> | Create application specific Elasticsearch cluster API client with customized config. |
-|  [dataClient$](./kibana-plugin-server.elasticsearchservicesetup.dataclient$.md) | <code>Observable&lt;ClusterClient&gt;</code> |  |
-|  [legacy](./kibana-plugin-server.elasticsearchservicesetup.legacy.md) | <code>{</code><br/><code>        readonly config$: Observable&lt;ElasticsearchConfig&gt;;</code><br/><code>    }</code> |  |
+|  [adminClient](./kibana-plugin-server.elasticsearchservicesetup.adminclient.md) | <code>IClusterClient</code> | A client for the <code>admin</code> cluster. All Elasticsearch config value changes are processed under the hood. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->. |
+|  [createClient](./kibana-plugin-server.elasticsearchservicesetup.createclient.md) | <code>(type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ICustomClusterClient</code> | Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->. |
+|  [dataClient](./kibana-plugin-server.elasticsearchservicesetup.dataclient.md) | <code>IClusterClient</code> | A client for the <code>data</code> cluster. All Elasticsearch config value changes are processed under the hood. See [IClusterClient](./kibana-plugin-server.iclusterclient.md)<!-- -->. |
 

@@ -1,0 +1,23 @@
+.gphFieldPicker__popoverPanel {
+  width: 350px;
+  padding: $euiSizeXS;
+}
+
+.gphFieldPicker__selectableList {
+  margin: 0 (-$euiSizeXS) (-$euiSizeXS);
+}
+
+.gphFieldPicker__button {
+  @include gphFieldBadgeSize;
+  color: $euiColorPrimary;
+}
+
+.gphFieldPicker__button--disabled {
+  color: $euiColorMediumShade;
+  cursor: not-allowed !important;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}

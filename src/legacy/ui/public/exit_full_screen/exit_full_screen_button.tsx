@@ -31,7 +31,7 @@ interface Props {
 }
 
 export class ExitFullScreenButton extends PureComponent<Props> {
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     chrome.setVisible(false);
   }
 

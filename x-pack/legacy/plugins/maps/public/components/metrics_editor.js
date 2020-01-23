@@ -8,54 +8,44 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonIcon,
-  EuiButton,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { MetricEditor } from './metric_editor';
+import { METRIC_TYPE } from '../../common/constants';
 
 export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
-
   function renderMetrics() {
     return metrics.map((metric, index) => {
-      const onMetricChange = (metric) => {
-        onChange([
-          ...metrics.slice(0, index),
-          metric,
-          ...metrics.slice(index + 1)
-        ]);
+      const onMetricChange = metric => {
+        onChange([...metrics.slice(0, index), metric, ...metrics.slice(index + 1)]);
       };
 
       const onRemove = () => {
-        onChange([
-          ...metrics.slice(0, index),
-          ...metrics.slice(index + 1)
-        ]);
+        onChange([...metrics.slice(0, index), ...metrics.slice(index + 1)]);
       };
 
       let removeButton;
       if (index > 0) {
         removeButton = (
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
-              defaultMessage: 'Delete metric'
-            })}
-            title={i18n.translate('xpack.maps.metricsEditor.deleteMetricButtonLabel', {
-              defaultMessage: 'Delete metric'
-            })}
-            onClick={onRemove}
-          />
+          <div className="mapMetricEditorPanel__metricRemoveButton">
+            <EuiButtonEmpty
+              iconType="trash"
+              size="xs"
+              color="danger"
+              onClick={onRemove}
+              aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
+                defaultMessage: 'Delete metric',
+              })}
+            >
+              <FormattedMessage
+                id="xpack.maps.metricsEditor.deleteMetricButtonLabel"
+                defaultMessage="Delete metric"
+              />
+            </EuiButtonEmpty>
+          </div>
         );
       }
       return (
-        <EuiPanel
-          key={index}
-          className="mapMetricEditorPanel"
-          paddingSize="s"
-        >
+        <div key={index} className="mapMetricEditorPanel__metricEditor">
           <MetricEditor
             onChange={onMetricChange}
             metric={metric}
@@ -63,41 +53,38 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
             metricsFilter={metricsFilter}
             removeButton={removeButton}
           />
-        </EuiPanel>
+        </div>
       );
     });
   }
 
   function addMetric() {
-    onChange([
-      ...metrics,
-      {},
-    ]);
+    onChange([...metrics, {}]);
   }
 
   function renderAddMetricButton() {
-
     if (!allowMultipleMetrics) {
       return null;
     }
 
     return (
-      <EuiButton
-        onClick={addMetric}
-        style={{ topMargin: '4px' }}
-      >
-        <FormattedMessage
-          id="xpack.maps.metricsEditor.addMetricButtonLabel"
-          defaultMessage="Add metric"
-        />
-      </EuiButton>
+      <>
+        <EuiSpacer size="xs" />
+        <EuiTextAlign textAlign="center">
+          <EuiButtonEmpty onClick={addMetric} size="xs" iconType="plusInCircleFilled">
+            <FormattedMessage
+              id="xpack.maps.metricsEditor.addMetricButtonLabel"
+              defaultMessage="Add metric"
+            />
+          </EuiButtonEmpty>
+        </EuiTextAlign>
+      </>
     );
   }
 
-
   return (
     <Fragment>
-      {renderMetrics()}
+      <div className="mapMapLayerPanel__metrics">{renderMetrics()}</div>
 
       {renderAddMetricButton()}
     </Fragment>
@@ -106,15 +93,13 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
 
 MetricsEditor.propTypes = {
   metrics: PropTypes.array,
-  fields: PropTypes.object,  // indexPattern.fields IndexedArray object
+  fields: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   allowMultipleMetrics: PropTypes.bool,
   metricsFilter: PropTypes.func,
 };
 
 MetricsEditor.defaultProps = {
-  metrics: [
-    { type: 'count' }
-  ],
-  allowMultipleMetrics: true
+  metrics: [{ type: METRIC_TYPE.COUNT }],
+  allowMultipleMetrics: true,
 };

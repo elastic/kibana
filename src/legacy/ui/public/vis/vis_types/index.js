@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { BaseVisType } from './base_vis_type';
-import { AngularVisTypeProvider } from './angular_vis_type';
-import { VislibVisTypeProvider } from './vislib_vis_type';
-import { ReactVisType } from './react_vis_type';
+import { BaseVisType } from '../../../../core_plugins/visualizations/public/np_ready/public/types/base_vis_type';
+import { ReactVisType } from '../../../../core_plugins/visualizations/public/np_ready/public/types/react_vis_type';
 
-export { BaseVisType, AngularVisTypeProvider, VislibVisTypeProvider, ReactVisType };
+export { BaseVisType, ReactVisType };

@@ -23,13 +23,7 @@ import React from 'react';
 
 import { renderToHtml } from '../../services';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-  GuideText,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes, GuideText } from '../../components';
 
 import Basic from './button_basic';
 import basicSource from '!!raw-loader!./button_basic';
@@ -81,16 +75,20 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Basic Button"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: basicSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: basicHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: basicSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: basicHtml,
+        },
+      ]}
     >
       <GuideText>
-        Use the basic button for navigation elements or controls that are not the primary focus of the page (ex: pagination, toggles...etc).
+        Use the basic button for navigation elements or controls that are not the primary focus of
+        the page (ex: pagination, toggles...etc).
       </GuideText>
 
       <GuideDemo>
@@ -100,13 +98,16 @@ export default props => (
 
     <GuideSection
       title="Hollow Button"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: hollowSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: hollowHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: hollowSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: hollowHtml,
+        },
+      ]}
     >
       <GuideText>
         Use the hollow Button when presenting a neutral action, e.g. a &ldquo;Cancel&rdquo; button.
@@ -119,17 +120,20 @@ export default props => (
 
     <GuideSection
       title="Primary Button"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: primarySource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: primaryHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: primarySource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: primaryHtml,
+        },
+      ]}
     >
       <GuideText>
-        Use the primary Button to represent the most common action. Generally, there won&rsquo;t be a
-        need to present more than one of these at a time.
+        Use the primary Button to represent the most common action. Generally, there won&rsquo;t be
+        a need to present more than one of these at a time.
       </GuideText>
 
       <GuideDemo>
@@ -139,16 +143,20 @@ export default props => (
 
     <GuideSection
       title="Secondary Button"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: secondarySource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: secondaryHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: secondarySource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: secondaryHtml,
+        },
+      ]}
     >
       <GuideText>
-        Secondary buttons are usually used for actions (&ldquo;do this&rdquo;) that are optional actions on a page.
+        Secondary buttons are usually used for actions (&ldquo;do this&rdquo;) that are optional
+        actions on a page.
       </GuideText>
 
       <GuideDemo>
@@ -158,17 +166,18 @@ export default props => (
 
     <GuideSection
       title="Danger Button"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: dangerSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: dangerHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: dangerSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: dangerHtml,
+        },
+      ]}
     >
-      <GuideText>
-        Danger Buttons represent irreversible, potentially regrettable actions.
-      </GuideText>
+      <GuideText>Danger Buttons represent irreversible, potentially regrettable actions.</GuideText>
 
       <GuideDemo>
         <Danger />
@@ -177,17 +186,18 @@ export default props => (
 
     <GuideSection
       title="Warning Button"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: warningSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: warningHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: warningSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: warningHtml,
+        },
+      ]}
     >
-      <GuideText>
-        Warning Buttons represent potentially notable actions.
-      </GuideText>
+      <GuideText>Warning Buttons represent potentially notable actions.</GuideText>
 
       <GuideDemo>
         <Warning />
@@ -196,13 +206,16 @@ export default props => (
 
     <GuideSection
       title="Loading Button"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: loadingSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: loadingHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: loadingSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: loadingHtml,
+        },
+      ]}
     >
       <GuideDemo>
         <Loading />
@@ -211,20 +224,23 @@ export default props => (
 
     <GuideSection
       title="Button with icon"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: withIconSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: withIconHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: withIconSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: withIconHtml,
+        },
+      ]}
     >
       <GuideText>
         <p>
-          You can toss an icon into a Button, with or without text. You can also use a predefined icon
-          or specify custom icon classes. If you have a button without textual content, make sure you set
-          the <code>aria-label</code> attribute with a textual representation for screen readers (see
-          last example below).
+          You can toss an icon into a Button, with or without text. You can also use a predefined
+          icon or specify custom icon classes. If you have a button without textual content, make
+          sure you set the <code>aria-label</code> attribute with a textual representation for
+          screen readers (see last example below).
         </p>
       </GuideText>
 
@@ -235,13 +251,16 @@ export default props => (
 
     <GuideSection
       title="ButtonGroup"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: buttonGroupSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: buttonGroupHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: buttonGroupSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: buttonGroupHtml,
+        },
+      ]}
     >
       <GuideDemo>
         <ButtonGroup />
@@ -250,13 +269,16 @@ export default props => (
 
     <GuideSection
       title="United ButtonGroup"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: buttonGroupUnitedSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: buttonGroupUnitedHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: buttonGroupUnitedSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: buttonGroupUnitedHtml,
+        },
+      ]}
     >
       <GuideText>
         Use the united version of the ButtonGroup to emphasize the close relationship within a set
@@ -275,13 +297,16 @@ export default props => (
 
     <GuideSection
       title="Element variations"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: elementsSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: elementsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: elementsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: elementsHtml,
+        },
+      ]}
     >
       <GuideText>
         You can create a Button using a button element, link, or input[type=&ldquo;submit&rdquo;].
@@ -294,14 +319,14 @@ export default props => (
 
     <GuideSection
       title="Sizes"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: sizesHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: sizesHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={sizesHtml}
-      />
+      <GuideDemo html={sizesHtml} />
     </GuideSection>
   </GuidePage>
 );

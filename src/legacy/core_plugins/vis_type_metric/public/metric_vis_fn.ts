@@ -19,18 +19,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { ExpressionFunction, KibanaDatatable, Render, Range, Style } from '../../interpreter/types';
+import { vislibColorMaps, ColorSchemas } from './legacy_imports';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Range,
+  Render,
+  Style,
+} from '../../../../plugins/expressions/public';
+import { ColorModes } from '../../vis_type_vislib/public';
+import { visType, DimensionsVisParam, VisParams } from './types';
 
-type Context = KibanaDatatable;
+export type Context = KibanaDatatable;
 
 const name = 'metricVis';
 
 interface Arguments {
-  percentage: boolean;
-  colorScheme: string;
-  colorMode: string;
+  percentageMode: boolean;
+  colorSchema: ColorSchemas;
+  colorMode: ColorModes;
   useRanges: boolean;
   invertColors: boolean;
   showLabels: boolean;
@@ -42,39 +49,10 @@ interface Arguments {
   bucket: any; // these aren't typed yet
 }
 
-interface VisParams {
-  dimensions: DimensionsVisParam;
-  metric: MetricVisParam;
-}
-
-interface DimensionsVisParam {
-  metrics: any;
-  bucket?: any;
-}
-
-interface MetricVisParam {
-  percentageMode: Arguments['percentage'];
-  useRanges: Arguments['useRanges'];
-  colorSchema: Arguments['colorScheme'];
-  metricColorMode: Arguments['colorMode'];
-  colorsRange: Arguments['colorRange'];
-  labels: {
-    show: Arguments['showLabels'];
-  };
-  invertColors: Arguments['invertColors'];
-  style: {
-    bgFill: Arguments['bgFill'];
-    bgColor: boolean;
-    labelColor: boolean;
-    subText: Arguments['subText'];
-    fontSize: number;
-  };
-}
-
 interface RenderValue {
-  visType: 'metric';
+  visType: typeof visType;
   visData: Context;
-  visConfig: VisParams;
+  visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
   params: any;
 }
 
@@ -95,25 +73,25 @@ export const createMetricVisFn = (): ExpressionFunction<
     defaultMessage: 'Metric visualization',
   }),
   args: {
-    percentage: {
+    percentageMode: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('visTypeMetric.function.percentage.help', {
+      help: i18n.translate('visTypeMetric.function.percentageMode.help', {
         defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.',
       }),
     },
-    colorScheme: {
+    colorSchema: {
       types: ['string'],
       default: '"Green to Red"',
       options: Object.values(vislibColorMaps).map((value: any) => value.id),
-      help: i18n.translate('visTypeMetric.function.colorScheme.help', {
-        defaultMessage: 'Color scheme to use',
+      help: i18n.translate('visTypeMetric.function.colorSchema.help', {
+        defaultMessage: 'Color schema to use',
       }),
     },
     colorMode: {
       types: ['string'],
       default: '"None"',
-      options: ['None', 'Label', 'Background'],
+      options: [ColorModes.NONE, ColorModes.LABELS, ColorModes.BACKGROUND],
       help: i18n.translate('visTypeMetric.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
@@ -121,6 +99,7 @@ export const createMetricVisFn = (): ExpressionFunction<
     colorRange: {
       types: ['range'],
       multi: true,
+      default: '{range from=0 to=10000}',
       help: i18n.translate('visTypeMetric.function.colorRange.help', {
         defaultMessage:
           'A range object specifying groups of values to which different colors should be applied.',
@@ -195,23 +174,23 @@ export const createMetricVisFn = (): ExpressionFunction<
       dimensions.bucket = args.bucket;
     }
 
-    if (args.percentage && (!args.colorRange || args.colorRange.length === 0)) {
-      throw new Error('colorRange must be provided when using percentage');
+    if (args.percentageMode && (!args.colorRange || args.colorRange.length === 0)) {
+      throw new Error('colorRange must be provided when using percentageMode');
     }
 
-    const fontSize = Number.parseInt(args.font.spec.fontSize, 10);
+    const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: context,
-        visType: 'metric',
+        visType,
         visConfig: {
           metric: {
-            percentageMode: args.percentage,
+            percentageMode: args.percentageMode,
             useRanges: args.useRanges,
-            colorSchema: args.colorScheme,
+            colorSchema: args.colorSchema,
             metricColorMode: args.colorMode,
             colorsRange: args.colorRange,
             labels: {
@@ -220,8 +199,8 @@ export const createMetricVisFn = (): ExpressionFunction<
             invertColors: args.invertColors,
             style: {
               bgFill: args.bgFill,
-              bgColor: args.colorMode === 'Background',
-              labelColor: args.colorMode === 'Labels',
+              bgColor: args.colorMode === ColorModes.BACKGROUND,
+              labelColor: args.colorMode === ColorModes.LABELS,
               subText: args.subText,
               fontSize,
             },

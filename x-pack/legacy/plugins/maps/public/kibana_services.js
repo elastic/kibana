@@ -4,39 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-import { SearchSourceProvider } from 'ui/courier';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
-export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { setup as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from '../../../../../src/legacy/ui/public/courier';
+import { esFilters } from '../../../../../src/plugins/data/public';
+import { npStart } from 'ui/new_platform';
 
-export const indexPatternService = data.indexPatterns.indexPatterns;
+export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
+export { SearchSource } from '../../../../../src/legacy/ui/public/courier';
+export const indexPatternService = npStart.plugins.data.indexPatterns;
 
-export let SearchSource;
+let licenseId;
+export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);
+export const getLicenseId = () => {
+  return licenseId;
+};
 
-export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
-  const inspectorRequest = inspectorAdapters.requests.start(
-    requestName,
-    { id: requestId, description: requestDesc });
+export async function fetchSearchSourceAndRecordWithInspector({
+  searchSource,
+  requestId,
+  requestName,
+  requestDesc,
+  inspectorAdapters,
+  abortSignal,
+}) {
+  const inspectorRequest = inspectorAdapters.requests.start(requestName, {
+    id: requestId,
+    description: requestDesc,
+  });
   let resp;
   try {
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
     searchSource.getSearchRequestBody().then(body => {
       inspectorRequest.json(body);
     });
-    resp = await searchSource.fetch();
-    inspectorRequest
-      .stats(getResponseInspectorStats(searchSource, resp))
-      .ok({ json: resp });
-  } catch(error) {
+    resp = await searchSource.fetch({ abortSignal });
+    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+  } catch (error) {
     inspectorRequest.error({ error });
     throw error;
   }
 
   return resp;
 }
-
-uiModules.get('app/maps').run(($injector) => {
-  const Private = $injector.get('Private');
-  SearchSource = Private(SearchSourceProvider);
-});

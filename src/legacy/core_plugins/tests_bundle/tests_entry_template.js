@@ -19,7 +19,7 @@
 
 import pkg from '../../../../package.json';
 
-export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
+export const createTestEntryTemplate = defaultUiSettings => bundle => `
 /**
  * Test entry file
  *
@@ -29,16 +29,7 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  *
  */
 
-// import global polyfills before everything else
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
-import 'childnode-remove-polyfill';
 import fetchMock from 'fetch-mock/es5/client';
-import Symbol_observable from 'symbol-observable';
-
 import { CoreSystem } from '__kibanaCore__';
 
 // Fake uiCapabilities returned to Core in browser tests
@@ -70,9 +61,9 @@ const uiCapabilities = {
 
 // Mock fetch for CoreSystem calls.
 fetchMock.config.fallbackToNetwork = true;
-fetchMock.post(/\\/api\\/capabilities/, {
+fetchMock.post(/\\/api\\/core\\/capabilities/, {
   status: 200,
-  body: JSON.stringify({ capabilities: uiCapabilities }),
+  body: JSON.stringify(uiCapabilities),
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -87,12 +78,18 @@ const coreSystem = new CoreSystem({
     buildNumber: 1234,
     legacyMode: true,
     legacyMetadata: {
+      app: {
+        id: 'karma',
+        title: 'Karma',
+      },
       nav: [],
       version: '1.2.3',
       buildNum: 1234,
       devMode: true,
       uiSettings: {
-        defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
+        defaults: ${JSON.stringify(defaultUiSettings, null, 2)
+          .split('\n')
+          .join('\n    ')},
         user: {}
       },
       nav: []
@@ -121,7 +118,8 @@ const coreSystem = new CoreSystem({
       },
       mapConfig: {
         includeElasticMapsService: true,
-        manifestServiceUrl: 'https://catalogue-staging.maps.elastic.co/v2/manifest'
+        emsFileApiUrl: 'https://vector-staging.maps.elastic.co',
+        emsTileApiUrl: 'https://tiles.maps.elastic.co',
       },
       vegaConfig: {
         enabled: true,

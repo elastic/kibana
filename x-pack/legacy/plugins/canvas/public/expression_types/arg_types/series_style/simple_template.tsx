@@ -6,15 +6,16 @@
 
 import React, { Fragment, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
-// @ts-ignore Untyped local
-import { TooltipIcon } from '../../../components/tooltip_icon';
+import { TooltipIcon, IconType } from '../../../components/tooltip_icon';
 import { ExpressionAST, CanvasWorkpad } from '../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;
+const { SeriesStyle: strings } = ArgTypesStrings;
 
 interface Arguments {
   color: string;
@@ -45,22 +46,29 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
   };
 
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center" className="canvasArgSeries__colorPicker">
+    <EuiFlexGroup gutterSize="s" alignItems="center" className="canvasArgSeries__colorPicker">
       {!color || color.length === 0 ? (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <span>Color&nbsp;</span>
+            <EuiText size="xs">{strings.getColorLabel()}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink aria-label="Color: Auto" onClick={() => handleChange('color', '#000000')}>
-              Auto <EuiIcon type="bolt" />
-            </EuiLink>
+            <EuiText size="xs">
+              <EuiLink
+                aria-label={`${strings.getColorLabel()}: ${strings.getColorValueDefault()}`}
+                onClick={() => handleChange('color', '#000000')}
+              >
+                {strings.getColorValueDefault()}
+              </EuiLink>
+            </EuiText>
           </EuiFlexItem>
         </Fragment>
       ) : (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <label htmlFor="series-style">Color&nbsp;</label>
+            <label htmlFor="series-style">
+              <EuiText size="xs">{strings.getColorLabel()}</EuiText>
+            </label>
           </EuiFlexItem>
           <EuiFlexItem style={{ fontSize: 0 }}>
             <ColorPickerPopover
@@ -68,6 +76,7 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
               colors={workpad.colors}
               onChange={val => handleChange('color', val)}
               value={color}
+              ariaLabel={strings.getColorLabel()}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -75,7 +84,7 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
               iconType="cross"
               color="danger"
               onClick={() => handleChange('color', '')}
-              aria-label="Remove Series Color"
+              aria-label={strings.getRemoveAriaLabel()}
             />
           </EuiFlexItem>
         </Fragment>
@@ -84,8 +93,8 @@ export const SimpleTemplate: FunctionComponent<Props> = props => {
         <EuiFlexItem grow={false}>
           <TooltipIcon
             position="left"
-            icon="warning"
-            content="Data has no series to style, add a color dimension"
+            icon={IconType.warning}
+            content={strings.getNoSeriesTooltip()}
           />
         </EuiFlexItem>
       )}

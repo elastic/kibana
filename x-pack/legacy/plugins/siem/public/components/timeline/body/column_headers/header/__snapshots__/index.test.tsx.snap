@@ -1,24 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header renders correctly against snapshot 1`] = `
-<HeaderContainer
-  data-test-subj="header-container"
-  gutterSize="none"
-  key="@timestamp"
-  width="190px"
->
-  <Resizeable
-    handle={
-      <FullHeightFlexItem
-        grow={false}
-      >
-        <ColumnHeaderResizeHandle />
-      </FullHeightFlexItem>
+<Fragment>
+  <Memo(HeaderContentComponent)
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "@timestamp",
+        "width": 190,
+      }
     }
-    height="35px"
-    id="@timestamp"
-    onResize={[Function]}
-    render={[Function]}
+    isResizing={false}
+    onClick={[Function]}
+    sort={
+      Object {
+        "columnId": "@timestamp",
+        "sortDirection": "desc",
+      }
+    }
+  >
+    <Actions
+      header={
+        Object {
+          "columnHeaderType": "not-filtered",
+          "id": "@timestamp",
+          "width": 190,
+        }
+      }
+      onColumnRemoved={[MockFunction]}
+      sort={
+        Object {
+          "columnId": "@timestamp",
+          "sortDirection": "desc",
+        }
+      }
+    />
+  </Memo(HeaderContentComponent)>
+  <Filter
+    header={
+      Object {
+        "columnHeaderType": "not-filtered",
+        "id": "@timestamp",
+        "width": 190,
+      }
+    }
+    onFilterChange={[Function]}
   />
-</HeaderContainer>
+</Fragment>
 `;

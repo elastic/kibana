@@ -5,45 +5,82 @@
  */
 
 import { PLUGIN_ID } from '../../common/constants';
+import { ExportTypesRegistry, HeadlessChromiumDriverFactory } from '../../types';
+import { CancellationToken } from '../../common/cancellation_token';
 import {
   ESQueueInstance,
+  QueueConfig,
+  ExportTypeDefinition,
   ESQueueWorkerExecuteFn,
-  ExportType,
-  JobDoc,
+  JobDocPayload,
+  ImmediateExecuteFn,
   JobSource,
-  KbnServer,
+  RequestFacade,
+  ServerFacade,
 } from '../../types';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 import { LevelLogger } from './level_logger';
-import { oncePerServer } from './once_per_server';
 
-function createWorkerFn(server: KbnServer) {
+interface CreateWorkerFactoryOpts {
+  exportTypesRegistry: ExportTypesRegistry;
+  browserDriverFactory: HeadlessChromiumDriverFactory;
+}
+
+export function createWorkerFactory<JobParamsType>(
+  server: ServerFacade,
+  { exportTypesRegistry, browserDriverFactory }: CreateWorkerFactoryOpts
+) {
+  type JobDocPayloadType = JobDocPayload<JobParamsType>;
   const config = server.config();
-  const queueConfig = config.get('xpack.reporting.queue');
-  const kibanaName = config.get('server.name');
-  const kibanaId = config.get('server.uuid');
-  const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
+  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
+  const kibanaName: string = config.get('server.name');
+  const kibanaId: string = config.get('server.uuid');
 
   // Once more document types are added, this will need to be passed in
-  return function createWorker(queue: ESQueueInstance) {
+  return function createWorker(queue: ESQueueInstance<JobParamsType, JobDocPayloadType>) {
     // export type / execute job map
-    const jobExectors: Map<string, ESQueueWorkerExecuteFn> = new Map();
+    const jobExecutors: Map<
+      string,
+      ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>
+    > = new Map();
 
-    for (const exportType of exportTypesRegistry.getAll() as ExportType[]) {
-      const executeJob = exportType.executeJobFactory(server);
-      jobExectors.set(exportType.jobType, executeJob);
+    for (const exportType of exportTypesRegistry.getAll() as Array<
+      ExportTypeDefinition<JobParamsType, any, any, any>
+    >) {
+      // TODO: the executeJobFn should be unwrapped in the register method of the export types registry
+      const jobExecutor = exportType.executeJobFactory(server, { browserDriverFactory });
+      jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
-    const workerFn = (job: JobSource, jobdoc: JobDoc, cancellationToken: any) => {
+    const workerFn = (jobSource: JobSource<JobParamsType>, ...workerRestArgs: any[]) => {
+      const {
+        _id: jobId,
+        _source: { jobtype: jobType },
+      } = jobSource;
+
+      const jobTypeExecutor = jobExecutors.get(jobType);
       // pass the work to the jobExecutor
-      const jobExecutor = jobExectors.get(job._source.jobtype);
-      if (!jobExecutor) {
-        throw new Error(`Unable to find a job executor for the claimed job: [${job._id}]`);
+      if (!jobTypeExecutor) {
+        throw new Error(`Unable to find a job executor for the claimed job: [${jobId}]`);
       }
-      return jobExecutor(job._id, jobdoc, cancellationToken);
+
+      if (jobId) {
+        const jobExecutorWorker = jobTypeExecutor as ESQueueWorkerExecuteFn<JobDocPayloadType>;
+        return jobExecutorWorker(
+          jobId,
+          ...(workerRestArgs as [JobDocPayloadType, CancellationToken])
+        );
+      } else {
+        const jobExecutorImmediate = jobExecutors.get(jobType) as ImmediateExecuteFn<JobParamsType>;
+        return jobExecutorImmediate(
+          null,
+          ...(workerRestArgs as [JobDocPayload<JobParamsType>, RequestFacade])
+        );
+      }
     };
+
     const workerOptions = {
       kibanaName,
       kibanaId,
@@ -63,5 +100,3 @@ function createWorkerFn(server: KbnServer) {
     });
   };
 }
-
-export const createWorkerFactory = oncePerServer(createWorkerFn);

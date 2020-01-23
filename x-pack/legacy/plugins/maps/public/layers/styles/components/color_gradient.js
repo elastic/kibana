@@ -14,14 +14,7 @@ export const ColorGradient = ({ colorRamp, colorRampName, className }) => {
   }
 
   const classes = classNames('mapColorGradient', className);
-  const rgbColorStrings = colorRampName
-    ? getRGBColorRangeStrings(colorRampName)
-    : colorRamp;
+  const rgbColorStrings = colorRampName ? getRGBColorRangeStrings(colorRampName) : colorRamp;
   const background = getLinearGradient(rgbColorStrings);
-  return (
-    <div
-      className={classes}
-      style={{ background }}
-    />
-  );
+  return <div className={classes} style={{ background }} />;
 };

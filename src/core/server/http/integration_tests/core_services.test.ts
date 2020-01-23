@@ -39,7 +39,7 @@ describe('http service', () => {
       const cookieOptions = {
         name: 'sid',
         encryptionKey: 'something_at_least_32_characters',
-        validate: (session: StorageData) => true,
+        validate: () => ({ isValid: true }),
         isSecure: false,
         path: '/',
       };
@@ -126,39 +126,6 @@ describe('http service', () => {
           .expect(200, { authorization: token, custom: 'custom-header' });
       });
 
-      it('passes associated auth state to Legacy platform', async () => {
-        const user = { id: '42' };
-
-        const { http } = await root.setup();
-        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
-          cookieOptions
-        );
-        http.registerAuth((req, res, toolkit) => {
-          if (req.headers.authorization) {
-            const sessionStorage = sessionStorageFactory.asScoped(req);
-            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return toolkit.authenticated({ state: user });
-          } else {
-            return res.unauthorized();
-          }
-        });
-        await root.start();
-
-        const legacyUrl = '/legacy';
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
-          method: 'GET',
-          path: legacyUrl,
-          handler: kbnServer.newPlatform.setup.core.http.auth.get,
-        });
-
-        const response = await kbnTestServer.request.get(root, legacyUrl).expect(200);
-        expect(response.body.state).toEqual(user);
-        expect(response.body.status).toEqual('authenticated');
-
-        expect(response.header['set-cookie']).toHaveLength(1);
-      });
-
       it('attach security header to a successful response handled by Legacy platform', async () => {
         const authResponseHeader = {
           'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
@@ -166,7 +133,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth } = http;
 
-        await registerAuth((req, res, toolkit) => {
+        registerAuth((req, res, toolkit) => {
           return toolkit.authenticated({ responseHeaders: authResponseHeader });
         });
 
@@ -190,7 +157,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth } = http;
 
-        await registerAuth((req, res, toolkit) => {
+        registerAuth((req, res, toolkit) => {
           return toolkit.authenticated({ responseHeaders: authResponseHeader });
         });
 
@@ -255,19 +222,19 @@ describe('http service', () => {
       const { http } = await root.setup();
       const { registerAuth, createRouter } = http;
 
-      await registerAuth((req, res, toolkit) =>
-        toolkit.authenticated({ requestHeaders: authHeaders })
-      );
+      registerAuth((req, res, toolkit) => toolkit.authenticated({ requestHeaders: authHeaders }));
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        // it forces client initialization since the core creates them lazily.
+        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
+        await context.core.elasticsearch.dataClient.callAsCurrentUser('ping');
+        return res.ok();
+      });
 
       await root.start();
 
       await kbnTestServer.request.get(root, '/new-platform/').expect(200);
-
-      // called twice by elasticsearch service in http route handler context provider
-      expect(clusterClientMock).toBeCalledTimes(2);
 
       // admin client contains authHeaders for BWC with legacy platform.
       const [adminClient, dataClient] = clusterClientMock.mock.calls;
@@ -283,7 +250,12 @@ describe('http service', () => {
       const { createRouter } = http;
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        // it forces client initialization since the core creates them lazily.
+        await context.core.elasticsearch.adminClient.callAsCurrentUser('ping');
+        await context.core.elasticsearch.dataClient.callAsCurrentUser('ping');
+        return res.ok();
+      });
 
       await root.start();
 
@@ -291,9 +263,6 @@ describe('http service', () => {
         .get(root, '/new-platform/')
         .set('Authorization', authorizationHeader)
         .expect(200);
-
-      // called twice by elasticsearch service in http route handler context provider
-      expect(clusterClientMock).toBeCalledTimes(2);
 
       const [adminClient, dataClient] = clusterClientMock.mock.calls;
       const [, , adminClientHeaders] = adminClient;

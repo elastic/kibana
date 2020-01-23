@@ -7,19 +7,19 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import uiRoutes from'ui/routes';
+import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseEuiTableController } from '../..';
 import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { APM_CUSTOM_ID, CODE_PATH_APM } from '../../../../common/constants';
+import { APM_SYSTEM_ID, CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances', {
   template,
   resolve: {
-    clusters: function (Private) {
+    clusters: function(Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_APM] });
     },
@@ -29,46 +29,45 @@ uiRoutes.when('/apm/instances', {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
-        cluster_uuid: globalState.cluster_uuid
+        cluster_uuid: globalState.cluster_uuid,
       });
 
       super({
         title: i18n.translate('xpack.monitoring.apm.instances.routeTitle', {
           defaultMessage: '{apm} - Instances',
           values: {
-            apm: 'APM'
-          }
+            apm: 'APM',
+          },
         }),
         storageKey: 'apm.instances',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/instances`,
         defaultData: {},
         reactNodeId: 'apmInstancesReact',
         $scope,
-        $injector
+        $injector,
       });
 
       this.scope = $scope;
       this.injector = $injector;
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(data);
-      });
+      $scope.$watch(
+        () => this.data,
+        data => {
+          this.renderReact(data);
+        }
+      );
     }
 
     renderReact(data) {
-      const {
-        pagination,
-        sorting,
-        onTableChange,
-      } = this;
+      const { pagination, sorting, onTableChange } = this;
 
       const component = (
         <I18nContext>
           <SetupModeRenderer
             scope={this.scope}
             injector={this.injector}
-            productName={APM_CUSTOM_ID}
-            render={({ setupMode, flyoutComponent }) => (
+            productName={APM_SYSTEM_ID}
+            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
               <Fragment>
                 {flyoutComponent}
                 <ApmServerInstances
@@ -80,6 +79,7 @@ uiRoutes.when('/apm/instances', {
                     data,
                   }}
                 />
+                {bottomBarComponent}
               </Fragment>
             )}
           />
@@ -87,5 +87,5 @@ uiRoutes.when('/apm/instances', {
       );
       super.renderReact(component);
     }
-  }
+  },
 });

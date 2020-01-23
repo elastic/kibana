@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Draggable } from 'react-beautiful-dnd';
+/* eslint-disable react/display-name */
+
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -14,31 +15,29 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
+import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
+import { ToStringArray } from '../../graphql/types';
+import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
+import { DragEffects } from '../drag_and_drop/draggable_wrapper';
+import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
+import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
+import { DraggableFieldBadge } from '../draggables/field_badge';
+import { FieldName } from '../fields_browser/field_name';
+import { SelectableText } from '../selectable_text';
+import { OverflowField } from '../tables/helpers';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
-import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
-import { DefaultDraggable } from '../draggables';
-import { ToStringArray } from '../../graphql/types';
-import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
-import { DraggableFieldBadge } from '../draggables/field_badge';
+import { MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
-import { FieldName } from '../fields_browser/field_name';
-import { getIconFromType, getExampleText, getColumnsWithTimestamp } from './helpers';
-import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
 import { OnUpdateColumns } from '../timeline/events';
-import { SelectableText } from '../selectable_text';
-import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { WithHoverActions } from '../with_hover_actions';
-
+import { getIconFromType, getExampleText, getColumnsWithTimestamp } from './helpers';
 import * as i18n from './translations';
-import { OverflowField } from '../tables/helpers';
-import { DATE_FIELD_TYPE, MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
-import { EVENT_DURATION_FIELD_NAME } from '../duration';
 import { EventFieldsData } from './types';
 
 const HoverActionsContainer = styled(EuiPanel)`
@@ -181,28 +180,14 @@ export const getColumns = ({
                   data.field === MESSAGE_FIELD_NAME ? (
                     <OverflowField value={value} />
                   ) : (
-                    <DefaultDraggable
-                      data-test-subj="ip"
-                      field={data.field}
-                      id={`event-details-value-default-draggable-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-                      tooltipContent={
-                        data.type === DATE_FIELD_TYPE || data.field === EVENT_DURATION_FIELD_NAME
-                          ? null
-                          : data.field
-                      }
+                    <FormattedFieldValue
+                      contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                      eventId={eventId}
+                      fieldFormat={data.format}
+                      fieldName={data.field}
+                      fieldType={data.type}
                       value={value}
-                    >
-                      <EuiText size="xs">
-                        <FormattedFieldValue
-                          contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-                          eventId={eventId}
-                          fieldFormat={data.format}
-                          fieldName={data.field}
-                          fieldType={data.type}
-                          value={value}
-                        />
-                      </EuiText>
-                    </DefaultDraggable>
+                    />
                   )
                 }
               />

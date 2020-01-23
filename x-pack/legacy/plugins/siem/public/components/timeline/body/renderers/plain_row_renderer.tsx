@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React from 'react';
+
 import { RowRenderer } from './row_renderer';
-import { Row } from './helpers';
 
 export const plainRowRenderer: RowRenderer = {
   isInstance: _ => true,
-  renderRow: ({ children }) => <Row className="euiTableRow">{children}</Row>,
+  renderRow: ({ children }) => <>{children}</>,
 };

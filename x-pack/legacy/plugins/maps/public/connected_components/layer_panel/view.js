@@ -11,7 +11,6 @@ import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerErrors } from './layer_errors';
 import { LayerSettings } from './layer_settings';
-import { SourceSettings } from './source_settings';
 import { StyleSettings } from './style_settings';
 import {
   EuiButtonIcon,
@@ -29,9 +28,15 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+
+const localStorage = new Storage(window.localStorage);
+
+// This import will eventually become a dependency injected by the fully deangularized NP plugin.
+import { npStart } from 'ui/new_platform';
 
 export class LayerPanel extends React.Component {
-
   static getDerivedStateFromProps(nextProps, prevState) {
     const nextId = nextProps.selectedLayer ? nextProps.selectedLayer.getId() : null;
     if (nextId !== prevState.prevId) {
@@ -73,7 +78,7 @@ export class LayerPanel extends React.Component {
     }
 
     this.setState({ displayName });
-  }
+  };
 
   loadImmutableSourceProperties = async () => {
     if (this.state.hasLoadedSourcePropsForLayer || !this.props.selectedLayer) {
@@ -87,7 +92,11 @@ export class LayerPanel extends React.Component {
         hasLoadedSourcePropsForLayer: true,
       });
     }
-  }
+  };
+
+  _onSourceChange = ({ propName, value }) => {
+    this.props.updateSourceProp(this.props.selectedLayer.getId(), propName, value);
+  };
 
   _renderFilterSection() {
     if (!this.props.selectedLayer.supportsElasticsearchFilters()) {
@@ -97,7 +106,7 @@ export class LayerPanel extends React.Component {
     return (
       <Fragment>
         <EuiPanel>
-          <FilterEditor/>
+          <FilterEditor />
         </EuiPanel>
         <EuiSpacer size="s" />
       </Fragment>
@@ -112,7 +121,7 @@ export class LayerPanel extends React.Component {
     return (
       <Fragment>
         <EuiPanel>
-          <JoinEditor/>
+          <JoinEditor />
         </EuiPanel>
         <EuiSpacer size="s" />
       </Fragment>
@@ -123,14 +132,17 @@ export class LayerPanel extends React.Component {
     return this.state.immutableSourceProps.map(({ label, value, link }) => {
       function renderValue() {
         if (link) {
-          return (<EuiLink href={link} target="_blank">{value}</EuiLink>);
+          return (
+            <EuiLink href={link} target="_blank">
+              {value}
+            </EuiLink>
+          );
         }
-        return (<span>{value}</span>);
+        return <span>{value}</span>;
       }
       return (
         <p key={label} className="mapLayerPanel__sourceDetail">
-          <strong>{label}</strong>{' '}
-          {renderValue()}
+          <strong>{label}</strong> {renderValue()}
         </p>
       );
     });
@@ -144,75 +156,76 @@ export class LayerPanel extends React.Component {
     }
 
     return (
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
+      <KibanaContextProvider
+        services={{
+          appName: 'maps',
+          storage: localStorage,
+          data: npStart.plugins.data,
+          ...npStart.core,
+        }}
       >
-        <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={
-                  i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
-                    defaultMessage: 'Fit to bounds'
-                  })
-                }
-                iconType={selectedLayer.getLayerTypeIconName()}
-                onClick={this.props.fitToBounds}
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  aria-label={i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
+                    defaultMessage: 'Fit to bounds',
+                  })}
+                  iconType={selectedLayer.getLayerTypeIconName()}
+                  onClick={this.props.fitToBounds}
+                >
+                  <FormattedMessage
+                    id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
+                    defaultMessage="Fit"
+                  />
+                </EuiButtonIcon>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h2>{this.state.displayName}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <div className="mapLayerPanel__sourceDetails">
+              <EuiAccordion
+                id="accordion1"
+                buttonContent={i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
+                  defaultMessage: 'Source details',
+                })}
               >
-                <FormattedMessage
-                  id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
-                  defaultMessage="Fit"
-                />
+                <EuiText color="subdued" size="s">
+                  <EuiSpacer size="xs" />
+                  {this._renderSourceProperties()}
+                </EuiText>
+              </EuiAccordion>
+            </div>
+          </EuiFlyoutHeader>
 
-              </EuiButtonIcon>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2>{this.state.displayName}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <div className="mapLayerPanel__sourceDetails">
-            <EuiAccordion
-              id="accordion1"
-              buttonContent={
-                i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
-                  defaultMessage: 'Source details'
-                })
-              }
-            >
-              <EuiText color="subdued" size="s">
-                <EuiSpacer size="xs" />
-                {this._renderSourceProperties()}
-              </EuiText>
-            </EuiAccordion>
+          <div className="mapLayerPanel__body">
+            <div className="mapLayerPanel__bodyOverflow">
+              <LayerErrors />
+
+              <LayerSettings />
+
+              {this.props.selectedLayer.renderSourceSettingsEditor({
+                onChange: this._onSourceChange,
+              })}
+
+              {this._renderFilterSection()}
+
+              {this._renderJoinSection()}
+
+              <StyleSettings />
+            </div>
           </div>
-        </EuiFlyoutHeader>
 
-        <div className="mapLayerPanel__body">
-          <div className="mapLayerPanel__bodyOverflow">
-
-            <LayerErrors/>
-
-            <LayerSettings/>
-
-            <SourceSettings/>
-
-            {this._renderFilterSection()}
-
-            {this._renderJoinSection()}
-
-            <StyleSettings/>
-
-          </div>
-        </div>
-
-        <EuiFlyoutFooter className="mapLayerPanel__footer">
-          <FlyoutFooter />
-        </EuiFlyoutFooter>
-      </EuiFlexGroup>
+          <EuiFlyoutFooter className="mapLayerPanel__footer">
+            <FlyoutFooter />
+          </EuiFlyoutFooter>
+        </EuiFlexGroup>
+      </KibanaContextProvider>
     );
   }
 }

@@ -17,27 +17,25 @@ export const getTimeRange = async (
   logger.debug('getting timeRange');
 
   const timeRange: TimeRange | null = await browser.evaluate({
-    fn: (fromAttribute, toAttribute) => {
-      const fromElement = document.querySelector(`[${fromAttribute}]`);
-      const toElement = document.querySelector(`[${toAttribute}]`);
+    fn: durationAttribute => {
+      const durationElement = document.querySelector(`[${durationAttribute}]`);
 
-      if (!fromElement || !toElement) {
+      if (!durationElement) {
         return null;
       }
 
-      const from = fromElement.getAttribute(fromAttribute);
-      const to = toElement.getAttribute(toAttribute);
-      if (!to || !from) {
+      const duration = durationElement.getAttribute(durationAttribute);
+      if (!duration) {
         return null;
       }
 
-      return { from, to };
+      return { duration };
     },
-    args: [layout.selectors.timefilterFromAttribute, layout.selectors.timefilterToAttribute],
+    args: [layout.selectors.timefilterDurationAttribute],
   });
 
   if (timeRange) {
-    logger.debug(`timeRange from ${timeRange.from} to ${timeRange.to}`);
+    logger.info(`timeRange: ${timeRange.duration}`);
   } else {
     logger.debug('no timeRange');
   }

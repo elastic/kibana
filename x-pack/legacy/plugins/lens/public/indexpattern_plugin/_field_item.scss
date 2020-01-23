@@ -1,0 +1,86 @@
+.lnsFieldItem {
+  @include euiFontSizeS;
+  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+  border-radius: $euiBorderRadius;
+  margin-bottom: $euiSizeXS;
+}
+
+.lnsFieldItem__popoverAnchor:hover,
+.lnsFieldItem__popoverAnchor:focus,
+.lnsFieldItem__popoverAnchor:focus-within {
+  @include euiBottomShadowMedium;
+  border-radius: $euiBorderRadius;
+  z-index: 2;
+}
+
+.lnsFieldItem--missing {
+  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
+  color: $euiColorDarkShade;
+}
+
+.lnsFieldItem__info {
+  border-radius: $euiBorderRadius - 1px;
+  padding: $euiSizeS;
+  display: flex;
+  align-items: flex-start;
+  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
+              background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
+
+  .lnsFieldItem__name {
+    margin-left: $euiSizeXS;
+    flex-grow: 1;
+  }
+
+  .lnsFieldListPanel__fieldIcon,
+  .lnsFieldItem__infoIcon {
+    flex-shrink: 0;
+  }
+
+  .lnsFieldListPanel__fieldIcon {
+    margin-top: 2px;
+  }
+
+  .lnsFieldItem__infoIcon {
+    visibility: hidden;
+  }
+
+  &:hover,
+  &:focus {
+    cursor: grab;
+
+    .lnsFieldItem__infoIcon {
+      visibility: visible;
+    }
+  }
+}
+
+.lnsFieldItem__info-isOpen {
+  @include euiFocusRing;
+}
+
+.lnsFieldItem__topValue {
+  margin-bottom: $euiSizeS;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.lnsFieldItem__topValueProgress {
+  background-color: $euiColorLightestShade;
+
+  // sass-lint:disable-block no-vendor-prefixes
+  &::-webkit-progress-bar {
+    background-color: $euiColorLightestShade;
+  }
+}
+
+.lnsFieldItem__fieldPopoverPanel {
+  min-width: 260px;
+  max-width: 300px;
+}
+
+.lnsFieldItem__popoverButtonGroup {
+  // Enforce lowercase for buttons or else some browsers inherit all caps from popover title
+  text-transform: none;
+}

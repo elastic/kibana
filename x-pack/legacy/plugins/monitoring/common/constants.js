@@ -96,7 +96,7 @@ export const CALCULATE_DURATION_UNTIL = 'until';
 /**
  * In order to show ML Jobs tab in the Elasticsearch section / tab navigation, license must be supported
  */
-export const ML_SUPPORTED_LICENSES = ['trial', 'platinum'];
+export const ML_SUPPORTED_LICENSES = ['trial', 'platinum', 'enterprise'];
 
 /**
  * Metadata service URLs for the different cloud services that have constant URLs (e.g., unlike GCP, which is a constant prefix).
@@ -112,7 +112,7 @@ export const CLOUD_METADATA_SERVICES = {
 
   // GCP documentation shows both 'metadata.google.internal' (mostly) and '169.254.169.254' (sometimes)
   // To bypass potential DNS changes, the IP was used because it's shared with other cloud services
-  GCP_URL_PREFIX: 'http://169.254.169.254/computeMetadata/v1/instance'
+  GCP_URL_PREFIX: 'http://169.254.169.254/computeMetadata/v1/instance',
 };
 
 /**
@@ -122,13 +122,13 @@ export const LOGSTASH = {
   MAJOR_VER_REQD_FOR_PIPELINES: 6,
 
   /*
-  * Names ES keys on for different Logstash pipeline queues.
-  * @type {string}
-  */
+   * Names ES keys on for different Logstash pipeline queues.
+   * @type {string}
+   */
   QUEUE_TYPES: {
     MEMORY: 'memory',
-    PERSISTED: 'persisted'
-  }
+    PERSISTED: 'persisted',
+  },
 };
 
 export const DEBOUNCE_SLOW_MS = 17; // roughly how long it takes to render a frame at 60fps
@@ -141,12 +141,23 @@ export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notificat
 
 export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';
 
-export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*';
-export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*,.monitoring-kibana-7-*';
-export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logstash-7-*';
-export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
-export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7';
-export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
+const INDEX_PATTERN_NEW = ',monitoring-*-7-*,monitoring-*-8-*';
+const INDEX_PATTERN_KIBANA_NEW = ',monitoring-kibana-7-*,monitoring-kibana-8-*';
+const INDEX_PATTERN_LOGSTASH_NEW = ',monitoring-logstash-7-*,monitoring-logstash-8-*';
+const INDEX_PATTERN_BEATS_NEW = ',monitoring-beats-7-*,monitoring-beats-8-*';
+const INDEX_ALERTS_NEW = ',monitoring-alerts-7,monitoring-alerts-8';
+const INDEX_PATTERN_ELASTICSEARCH_NEW = ',monitoring-es-7-*,monitoring-es-8-*';
+
+export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*' + INDEX_PATTERN_NEW;
+export const INDEX_PATTERN_KIBANA =
+  '.monitoring-kibana-6-*,.monitoring-kibana-7-*' + INDEX_PATTERN_KIBANA_NEW;
+export const INDEX_PATTERN_LOGSTASH =
+  '.monitoring-logstash-6-*,.monitoring-logstash-7-*' + INDEX_PATTERN_LOGSTASH_NEW;
+export const INDEX_PATTERN_BEATS =
+  '.monitoring-beats-6-*,.monitoring-beats-7-*' + INDEX_PATTERN_BEATS_NEW;
+export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7' + INDEX_ALERTS_NEW;
+export const INDEX_PATTERN_ELASTICSEARCH =
+  '.monitoring-es-6-*,.monitoring-es-7-*' + INDEX_PATTERN_ELASTICSEARCH_NEW;
 
 export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
 
@@ -154,20 +165,20 @@ export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
 // We use this for metricbeat migration to identify specific products that we do not have constants for
-export const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
-export const APM_CUSTOM_ID = 'apm';
+export const ELASTICSEARCH_SYSTEM_ID = 'elasticsearch';
+
 /**
  * The id of the infra source owned by the monitoring plugin.
  */
 export const INFRA_SOURCE_ID = 'internal-stack-monitoring';
 
 /*
-* These constants represent code paths within `getClustersFromRequest`
-* that an api call wants to invoke. This is meant as an optimization to
-* avoid unnecessary ES queries (looking at you logstash) when the data
-* is not used. In the long term, it'd be nice to have separate api calls
-* instead of this path logic.
-*/
+ * These constants represent code paths within `getClustersFromRequest`
+ * that an api call wants to invoke. This is meant as an optimization to
+ * avoid unnecessary ES queries (looking at you logstash) when the data
+ * is not used. In the long term, it'd be nice to have separate api calls
+ * instead of this path logic.
+ */
 export const CODE_PATH_ALL = 'all';
 export const CODE_PATH_ALERTS = 'alerts';
 export const CODE_PATH_KIBANA = 'kibana';
@@ -178,3 +189,47 @@ export const CODE_PATH_LOGSTASH = 'logstash';
 export const CODE_PATH_APM = 'apm';
 export const CODE_PATH_LICENSE = 'license';
 export const CODE_PATH_LOGS = 'logs';
+
+/**
+ * The header sent by telemetry service when hitting Elasticsearch to identify query source
+ * @type {string}
+ */
+export const TELEMETRY_QUERY_SOURCE = 'TELEMETRY';
+
+/**
+ * The name of the Kibana System ID used to publish and look up Kibana stats through the Monitoring system.
+ * @type {string}
+ */
+export const KIBANA_SYSTEM_ID = 'kibana';
+
+/**
+ * The name of the Beats System ID used to publish and look up Beats stats through the Monitoring system.
+ * @type {string}
+ */
+export const BEATS_SYSTEM_ID = 'beats';
+
+/**
+ * The name of the Apm System ID used to publish and look up Apm stats through the Monitoring system.
+ * @type {string}
+ */
+export const APM_SYSTEM_ID = 'apm';
+
+/**
+ * The name of the Kibana System ID used to look up Logstash stats through the Monitoring system.
+ * @type {string}
+ */
+export const LOGSTASH_SYSTEM_ID = 'logstash';
+
+/**
+ * The name of the Kibana System ID used to look up Reporting stats through the Monitoring system.
+ * @type {string}
+ */
+export const REPORTING_SYSTEM_ID = 'reporting';
+
+/**
+ * The amount of time, in milliseconds, to wait between collecting kibana stats from es.
+ *
+ * Currently 24 hours kept in sync with reporting interval.
+ * @type {Number}
+ */
+export const TELEMETRY_COLLECTION_INTERVAL = 86400000;

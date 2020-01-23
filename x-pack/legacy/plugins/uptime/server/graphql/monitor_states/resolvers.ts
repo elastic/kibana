@@ -12,6 +12,7 @@ import {
   MonitorSummaryResult,
   StatesIndexStatus,
 } from '../../../common/graphql/types';
+import { CONTEXT_DEFAULTS } from '../../../common/constants/context_defaults';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,
@@ -38,28 +39,39 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
   return {
     Query: {
       async getMonitorStates(
-        resolver,
-        { dateRangeStart, dateRangeEnd, filters },
-        { req }
+        _resolver,
+        { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter },
+        { APICaller }
       ): Promise<MonitorSummaryResult> {
+        const decodedPagination = pagination
+          ? JSON.parse(decodeURIComponent(pagination))
+          : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
         const [
-          // TODO: rely on new summaries adapter function once continuous data frame is available
-          // summaries,
           totalSummaryCount,
-          legacySummaries,
+          { summaries, nextPagePagination, prevPagePagination },
         ] = await Promise.all([
-          // TODO: rely on new summaries adapter function once continuous data frame is available
-          // libs.monitorStates.getMonitorStates(req, pageIndex, pageSize, sortField, sortDirection),
-          libs.pings.getDocCount(req),
-          libs.monitorStates.legacyGetMonitorStates(req, dateRangeStart, dateRangeEnd, filters),
+          libs.pings.getDocCount({ callES: APICaller }),
+          libs.monitorStates.getMonitorStates({
+            callES: APICaller,
+            dateRangeStart,
+            dateRangeEnd,
+            pagination: decodedPagination,
+            filters,
+            // this is added to make typescript happy,
+            // this sort of reassignment used to be further downstream but I've moved it here
+            // because this code is going to be decomissioned soon
+            statusFilter: statusFilter || undefined,
+          }),
         ]);
         return {
-          summaries: legacySummaries,
+          summaries,
+          nextPagePagination,
+          prevPagePagination,
           totalSummaryCount,
         };
       },
-      async getStatesIndexStatus(resolver, {}, { req }): Promise<StatesIndexStatus> {
-        return await libs.monitorStates.statesIndexExists(req);
+      async getStatesIndexStatus(_resolver, {}, { APICaller }): Promise<StatesIndexStatus> {
+        return await libs.monitorStates.statesIndexExists({ callES: APICaller });
       },
     },
   };

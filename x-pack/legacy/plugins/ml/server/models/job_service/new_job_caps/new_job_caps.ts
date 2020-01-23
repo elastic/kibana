@@ -42,7 +42,11 @@ function convertForStringify(aggs: Aggregation[], fields: Field[]): void {
     delete f.aggs;
   });
   aggs.forEach(a => {
-    a.fieldIds = a.fields ? a.fields.map(f => f.id) : [];
+    if (a.fields !== undefined) {
+      // if the aggregation supports fields, i.e. it's fields list isn't undefined,
+      // create a list of field ids
+      a.fieldIds = a.fields.map(f => f.id);
+    }
     delete a.fields;
   });
 }

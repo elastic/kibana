@@ -18,9 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createTableVisResponseHandler } from './table_vis_request_handler';
+import { tableVisResponseHandler } from './table_vis_request_handler';
 
-import { ExpressionFunction, KibanaDatatable, Render } from '../../interpreter/types';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Render,
+} from '../../../../plugins/expressions/public';
 
 const name = 'kibana_table';
 
@@ -66,8 +70,7 @@ export const createTableVisFn = (): ExpressionFunction<
   },
   async fn(context, args) {
     const visConfig = args.visConfig && JSON.parse(args.visConfig);
-    const responseHandler = createTableVisResponseHandler();
-    const convertedData = await responseHandler(context, visConfig.dimensions);
+    const convertedData = await tableVisResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',

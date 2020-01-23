@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders without crashing 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <p
+        className="eui-textBreakAll"
+      >
+        <FormattedMessage
+          defaultMessage="Example: https://my-kibana.example{spaceIdentifier}/app/kibana."
+          id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
+          values={
+            Object {
+              "spaceIdentifier": <strong>
+                /s/
+                
+              </strong>,
+            }
+          }
+        />
+      </p>
+    }
+    isInvalid={false}
+    label={
+      <p>
+        <FormattedMessage
+          defaultMessage="URL identifier "
+          id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
+          values={Object {}}
+        />
+        <ForwardRef
+          aria-label="Customize the URL identifier"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="[customize]"
+            id="xpack.spaces.management.spaceIdentifier.customizeSpaceLinkText"
+            values={Object {}}
+          />
+        </ForwardRef>
+      </p>
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      fullWidth={true}
+      inputRef={[Function]}
+      onChange={[Function]}
+      placeholder="awesome-space"
+      readOnly={true}
+      value=""
+    />
+  </EuiFormRow>
+</Fragment>
+`;

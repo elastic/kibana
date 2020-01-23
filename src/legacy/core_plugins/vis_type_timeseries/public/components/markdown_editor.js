@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint max-len:0 */
 /* eslint-disable jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 // Markdown builder is not yet properly accessible
 
@@ -153,10 +152,16 @@ export class MarkdownEditor extends Component {
             <thead>
               <tr>
                 <th scope="col">
-                  <FormattedMessage id="visTypeTimeseries.markdownEditor.nameLabel" defaultMessage="Name" />
+                  <FormattedMessage
+                    id="visTypeTimeseries.markdownEditor.nameLabel"
+                    defaultMessage="Name"
+                  />
                 </th>
                 <th scope="col">
-                  <FormattedMessage id="visTypeTimeseries.markdownEditor.valueLabel" defaultMessage="Value" />
+                  <FormattedMessage
+                    id="visTypeTimeseries.markdownEditor.valueLabel"
+                    defaultMessage="Value"
+                  />
                 </th>
               </tr>
             </thead>

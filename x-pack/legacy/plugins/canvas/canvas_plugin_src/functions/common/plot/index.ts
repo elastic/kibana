@@ -7,7 +7,7 @@
 // @ts-ignore no @typed def
 import keyBy from 'lodash.keyby';
 import { groupBy, get, set, map, sortBy } from 'lodash';
-import { ExpressionFunction, Style } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction, Style } from 'src/plugins/expressions/common/types';
 // @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../../common/lib/get_colors_from_palette';
 // @ts-ignore untyped local
@@ -16,7 +16,7 @@ import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';
 import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
-import { getFunctionHelp } from '../../../strings';
+import { getFunctionHelp } from '../../../../i18n';
 import { AxisConfig, PointSeries, Render, SeriesStyle, Palette, Legend } from '../../../../types';
 
 interface Arguments {
@@ -56,7 +56,7 @@ export function plot(): ExpressionFunction<'plot', PointSeries, Arguments, Rende
         types: ['string', 'boolean'],
         help: argHelp.legend,
         default: 'ne',
-        options: Object.values(Legend).concat(false),
+        options: [...Object.values(Legend), false],
       },
       palette: {
         types: ['palette'],

@@ -6,8 +6,7 @@
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
@@ -34,11 +33,11 @@ interface Props {
   processExecutable: string | null | undefined;
   processTitle: string | null | undefined;
   workingDirectory: string | null | undefined;
-  args: string | null | undefined;
+  args: string[] | null | undefined;
   session: string | null | undefined;
 }
 
-export const AuditdGenericLine = pure<Props>(
+export const AuditdGenericLine = React.memo<Props>(
   ({
     id,
     contextId,
@@ -56,7 +55,7 @@ export const AuditdGenericLine = pure<Props>(
     session,
     text,
   }) => (
-    <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+    <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
       <SessionUserHostWorkingDir
         eventId={id}
         contextId={contextId}
@@ -75,6 +74,8 @@ export const AuditdGenericLine = pure<Props>(
       <TokensFlexItem grow={false} component="span">
         <ProcessDraggable
           contextId={contextId}
+          endgamePid={undefined}
+          endgameProcessName={undefined}
           eventId={id}
           processPid={processPid}
           processName={processName}
@@ -110,7 +111,7 @@ interface GenericDetailsProps {
   timelineId: string;
 }
 
-export const AuditdGenericDetails = pure<GenericDetailsProps>(
+export const AuditdGenericDetails = React.memo<GenericDetailsProps>(
   ({ data, contextId, text, timelineId }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
@@ -124,8 +125,7 @@ export const AuditdGenericDetails = pure<GenericDetailsProps>(
     const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
     const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
     const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
-    const rawArgs: string[] | null | undefined = get('process.args', data);
-    const args: string | null = rawArgs != null ? rawArgs.slice(1).join(' ') : null;
+    const args: string[] | null | undefined = get('process.args', data);
     if (data.process != null) {
       return (
         <Details>

@@ -5,8 +5,8 @@
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   value: string;

@@ -31,8 +31,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Index Pattern Conflicts"
@@ -47,17 +47,15 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
+                "indexPatternLink": <ForwardRef
                   href=""
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />
@@ -92,7 +90,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -118,7 +115,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
-      sorting={false}
+      tableLayout="fixed"
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
@@ -241,8 +238,8 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
 exports[`Flyout conflicts should handle errors 1`] = `
 <EuiCallOut
   color="warning"
+  data-test-subj="importSavedObjectsFailedWarning"
   iconType="help"
-  size="m"
   title={
     <FormattedMessage
       defaultMessage="Import failed"
@@ -270,8 +267,8 @@ exports[`Flyout conflicts should handle errors 1`] = `
 exports[`Flyout errors should display unsupported type errors properly 1`] = `
 <EuiCallOut
   color="warning"
+  data-test-subj="importSavedObjectsFailedWarning"
   iconType="help"
-  size="m"
   title={
     <FormattedMessage
       defaultMessage="Import failed"
@@ -329,8 +326,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsLegacyWarning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Support for JSON files is going away"
@@ -354,8 +351,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Index Pattern Conflicts"
@@ -370,17 +367,15 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
+                "indexPatternLink": <ForwardRef
                   href=""
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />
@@ -415,7 +410,6 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -452,7 +446,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
-      sorting={false}
+      tableLayout="fixed"
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
@@ -499,8 +493,8 @@ exports[`Flyout legacy conflicts should handle errors 1`] = `
 Array [
   <EuiCallOut
     color="warning"
+    data-test-subj="importSavedObjectsLegacyWarning"
     iconType="help"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Support for JSON files is going away"
@@ -519,8 +513,8 @@ Array [
   </EuiCallOut>,
   <EuiCallOut
     color="warning"
+    data-test-subj="importSavedObjectsConflictsWarning"
     iconType="help"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Index Pattern Conflicts"
@@ -535,17 +529,15 @@ Array [
         id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
-            "indexPatternLink": <EuiLink
-              color="primary"
+            "indexPatternLink": <ForwardRef
               href=""
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="create a new index pattern"
                 id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />
@@ -553,7 +545,6 @@ Array [
   </EuiCallOut>,
   <EuiCallOut
     color="danger"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Sorry, there was an error"
@@ -597,7 +588,9 @@ exports[`Flyout should render import step 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -623,7 +616,9 @@ exports[`Flyout should render import step 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         labelType="label"
       >

@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  cleanFeatures,
-  geoJsonCleanAndValidate,
-} from './geo_json_clean_and_validate';
+import { cleanGeometry, geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 const jsts = require('jsts');
 
 describe('geo_json_clean_and_validate', () => {
-
   const reader = new jsts.io.GeoJSONReader();
 
   it('should not modify valid features', () => {
@@ -19,25 +15,26 @@ describe('geo_json_clean_and_validate', () => {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [-104.05, 78.99],
-          [-87.22,  78.98],
-          [-86.58,  75.94],
-          [-104.03, 75.94],
-          [-104.05, 78.99]
-        ]]
+        coordinates: [
+          [
+            [-104.05, 78.99],
+            [-87.22, 78.98],
+            [-86.58, 75.94],
+            [-104.03, 75.94],
+            [-104.05, 78.99],
+          ],
+        ],
       },
     };
 
     // Confirm valid geometry
     const geoJson = reader.read(goodFeatureGeoJson);
-    const isSimpleOrValid = (geoJson.geometry.isSimple()
-      || geoJson.geometry.isValid());
+    const isSimpleOrValid = geoJson.geometry.isSimple() || geoJson.geometry.isValid();
     expect(isSimpleOrValid).toEqual(true);
 
     // Confirm no change to features
-    const cleanedFeatures = cleanFeatures([geoJson]);
-    expect(cleanedFeatures[0]).toEqual(goodFeatureGeoJson);
+    const cleanedFeature = cleanGeometry(geoJson);
+    expect(cleanedFeature).toEqual(goodFeatureGeoJson.geometry);
   });
 
   it('should modify incorrect features', () => {
@@ -50,49 +47,56 @@ describe('geo_json_clean_and_validate', () => {
           type: 'Feature',
           geometry: {
             type: 'Polygon',
-            coordinates: [[
-              [0, 0],
-              [2, 2],
-              [0, 2],
-              [2, 0],
-              [0, 0]
-            ]]
-          }
+            coordinates: [
+              [
+                [0, 0],
+                [2, 2],
+                [0, 2],
+                [2, 0],
+                [0, 0],
+              ],
+            ],
+          },
         },
         {
           type: 'Feature',
           geometry: {
             type: 'Polygon',
-            coordinates: [[
-              [2, 2],
-              [4, 0],
-              [2, 0],
-              [4, 2],
-              [2, 2]
-            ]]
-          }
-        }
-      ]
+            coordinates: [
+              [
+                [2, 2],
+                [4, 0],
+                [2, 0],
+                [4, 2],
+                [2, 2],
+              ],
+            ],
+          },
+        },
+      ],
     };
 
     // Confirm invalid geometry
     let geoJson = reader.read(badFeaturesGeoJson);
     let isSimpleOrValid;
     geoJson.features.forEach(feature => {
-      isSimpleOrValid = (feature.geometry.isSimple()
-        || feature.geometry.isValid());
+      isSimpleOrValid = feature.geometry.isSimple() || feature.geometry.isValid();
       expect(isSimpleOrValid).toEqual(false);
     });
 
     // Confirm changes to object
-    const cleanedFeatures = cleanFeatures(geoJson.features);
-    expect(cleanedFeatures).not.toEqual(badFeaturesGeoJson.features);
+    const cleanedFeatures = geoJson.features.map(feature => ({
+      ...feature,
+      geometry: cleanGeometry(feature),
+    }));
+    cleanedFeatures.forEach((feature, idx) =>
+      expect(feature).not.toEqual(badFeaturesGeoJson.features[idx])
+    );
 
     // Confirm now valid features geometry
     geoJson = reader.read({ ...badFeaturesGeoJson, features: cleanedFeatures });
     geoJson.features.forEach(feature => {
-      isSimpleOrValid = (feature.geometry.isSimple()
-        || feature.geometry.isValid());
+      isSimpleOrValid = feature.geometry.isSimple() || feature.geometry.isValid();
       expect(isSimpleOrValid).toEqual(true);
     });
   });
@@ -102,20 +106,23 @@ describe('geo_json_clean_and_validate', () => {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
-        coordinates: [[
-          [100, 0],
-          [101, 0],
-          [101, 1],
-          [100, 1],
-          [100, 0]
-        ], [
-          [100.2, 0.2],
-          [100.8, 0.2],
-          [100.8, 0.8],
-          [100.2, 0.8],
-          [100.2, 0.2]
-        ]]
-      }
+        coordinates: [
+          [
+            [100, 0],
+            [101, 0],
+            [101, 1],
+            [100, 1],
+            [100, 0],
+          ],
+          [
+            [100.2, 0.2],
+            [100.8, 0.2],
+            [100.8, 0.8],
+            [100.2, 0.8],
+            [100.2, 0.2],
+          ],
+        ],
+      },
     };
 
     // Confirm changes to object
@@ -130,7 +137,7 @@ describe('geo_json_clean_and_validate', () => {
   it('error out on invalid object', () => {
     const invalidGeoJson = {
       type: 'notMyType',
-      geometry: 'shmeometry'
+      geometry: 'shmeometry',
     };
 
     const notEvenCloseToGeoJson = [1, 2, 3, 4];

@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Lifecycle Management app', function() {
-    this.tags('ciGroup2');
+    this.tags('ciGroup7');
     loadTestFile(require.resolve('./home_page'));
   });
 };

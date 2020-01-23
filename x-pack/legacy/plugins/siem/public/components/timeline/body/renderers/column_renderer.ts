@@ -12,16 +12,18 @@ export interface ColumnRenderer {
   renderColumn: ({
     columnName,
     eventId,
-    values,
     field,
-    width,
     timelineId,
+    truncate,
+    values,
+    linkValues,
   }: {
     columnName: string;
     eventId: string;
-    values: string[] | null | undefined;
     field: ColumnHeader;
-    width?: string;
     timelineId: string;
+    truncate?: boolean;
+    values: string[] | null | undefined;
+    linkValues?: string[] | null | undefined;
   }) => React.ReactNode;
 }

@@ -6,6 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
 import {
@@ -14,7 +15,8 @@ import {
 } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { KqlMode, TimelineModel } from './model';
+import { EventType, KqlMode, TimelineModel } from './model';
+import { TimelineNonEcsData } from '../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
@@ -48,8 +50,22 @@ export const applyDeltaToColumnWidth = actionCreator<{
 
 export const createTimeline = actionCreator<{
   id: string;
+  dataProviders?: DataProvider[];
+  dateRange?: {
+    start: number;
+    end: number;
+  };
+  filters?: esFilters.Filter[];
   columns: ColumnHeader[];
+  itemsPerPage?: number;
+  kqlQuery?: {
+    filterQuery: SerializedFilterQuery | null;
+    filterQueryDraft: KueryFilterQuery | null;
+  };
   show?: boolean;
+  sort?: Sort;
+  showCheckboxes?: boolean;
+  showRowRenderers?: boolean;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
@@ -185,3 +201,48 @@ export const updateAutoSaveMsg = actionCreator<{
 }>('UPDATE_AUTO_SAVE');
 
 export const showCallOutUnauthorizedMsg = actionCreator('SHOW_CALL_OUT_UNAUTHORIZED_MSG');
+
+export const setSavedQueryId = actionCreator<{
+  id: string;
+  savedQueryId: string | null;
+}>('SET_TIMELINE_SAVED_QUERY');
+
+export const setFilters = actionCreator<{
+  id: string;
+  filters: esFilters.Filter[];
+}>('SET_TIMELINE_FILTERS');
+
+export const setSelected = actionCreator<{
+  id: string;
+  eventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  isSelected: boolean;
+  isSelectAllChecked: boolean;
+}>('SET_TIMELINE_SELECTED');
+
+export const clearSelected = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_SELECTED');
+
+export const setEventsLoading = actionCreator<{
+  id: string;
+  eventIds: string[];
+  isLoading: boolean;
+}>('SET_TIMELINE_EVENTS_LOADING');
+
+export const clearEventsLoading = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_EVENTS_LOADING');
+
+export const setEventsDeleted = actionCreator<{
+  id: string;
+  eventIds: string[];
+  isDeleted: boolean;
+}>('SET_TIMELINE_EVENTS_DELETED');
+
+export const clearEventsDeleted = actionCreator<{
+  id: string;
+}>('CLEAR_TIMELINE_EVENTS_DELETED');
+
+export const updateEventType = actionCreator<{ id: string; eventType: EventType }>(
+  'UPDATE_EVENT_TYPE'
+);

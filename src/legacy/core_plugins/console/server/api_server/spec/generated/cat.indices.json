@@ -5,8 +5,15 @@
       "bytes": [
         "b",
         "k",
+        "kb",
         "m",
-        "g"
+        "mb",
+        "g",
+        "gb",
+        "t",
+        "tb",
+        "p",
+        "pb"
       ],
       "local": "__flag__",
       "master_timeout": "",
@@ -19,6 +26,15 @@
       "help": "__flag__",
       "pri": "__flag__",
       "s": [],
+      "time": [
+        "d",
+        "h",
+        "m",
+        "s",
+        "ms",
+        "micros",
+        "nanos"
+      ],
       "v": "__flag__",
       "include_unloaded_segments": "__flag__"
     },

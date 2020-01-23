@@ -3,15 +3,14 @@
 exports[`DefaultEditorAggParams component should init with the default set of params 1`] = `
 <EuiForm
   data-test-subj="visAggEditorParams"
-  error={Array []}
+  error=""
   isInvalid={false}
 >
   <DefaultEditorAggSelect
     aggTypeOptions={Array []}
     indexPattern={Object {}}
     isSubAggregation={false}
-    setTouched={[Function]}
-    setValidity={[Function]}
+    onChangeAggType={[Function]}
     setValue={[Function]}
     showValidation={false}
     value={
@@ -33,27 +32,23 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
         "type": "string",
       }
     }
+    formIsTouched={false}
     key="customLabelundefined"
-    onChange={[MockFunction]}
-    setTouched={[Function]}
-    setValidity={[Function]}
+    onChangeParamsState={[Function]}
+    setAggParamValue={[MockFunction]}
     showValidation={false}
-    subAggParams={
-      Object {
-        "formIsTouched": false,
-        "onAggParamsChange": [MockFunction],
-        "onAggTypeChange": [MockFunction],
-      }
-    }
   />
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
   >
     <EuiAccordion
       buttonContent="Advanced"
+      data-test-subj="advancedParams-undefined"
       id="advancedAccordion"
       initialIsOpen={false}
       paddingSize="none"
@@ -69,18 +64,11 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
             "type": "json",
           }
         }
+        formIsTouched={false}
         key="jsonundefined"
-        onChange={[MockFunction]}
-        setTouched={[Function]}
-        setValidity={[Function]}
+        onChangeParamsState={[Function]}
+        setAggParamValue={[MockFunction]}
         showValidation={false}
-        subAggParams={
-          Object {
-            "formIsTouched": false,
-            "onAggParamsChange": [MockFunction],
-            "onAggTypeChange": [MockFunction],
-          }
-        }
       />
     </EuiAccordion>
   </EuiFormRow>

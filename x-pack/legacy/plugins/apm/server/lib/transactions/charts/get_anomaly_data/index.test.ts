@@ -8,6 +8,7 @@ import { getAnomalySeries } from '.';
 import { mlAnomalyResponse } from './mock-responses/mlAnomalyResponse';
 import { mlBucketSpanResponse } from './mock-responses/mlBucketSpanResponse';
 import { PromiseReturnType } from '../../../../../typings/common';
+import { APMConfig } from '../../../../../../../../plugins/apm/server';
 
 describe('getAnomalySeries', () => {
   let avgAnomalies: PromiseReturnType<typeof getAnomalySeries>;
@@ -26,11 +27,24 @@ describe('getAnomalySeries', () => {
         start: 0,
         end: 500000,
         client: { search: clientSpy } as any,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
+        internalClient: { search: clientSpy } as any,
+        config: new Proxy(
+          {},
+          {
+            get: () => 'myIndex'
+          }
+        ) as APMConfig,
+        uiFiltersES: [],
+        indices: {
+          'apm_oss.sourcemapIndices': 'myIndex',
+          'apm_oss.errorIndices': 'myIndex',
+          'apm_oss.onboardingIndices': 'myIndex',
+          'apm_oss.spanIndices': 'myIndex',
+          'apm_oss.transactionIndices': 'myIndex',
+          'apm_oss.metricsIndices': 'myIndex',
+          apmAgentConfigurationIndex: 'myIndex'
         },
-        uiFiltersES: []
+        dynamicIndexPattern: null as any
       }
     });
   });

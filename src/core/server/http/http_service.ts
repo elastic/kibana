@@ -17,84 +17,39 @@
  * under the License.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { Server } from 'hapi';
 
-import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
-
-import { Logger } from '../logging';
+import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
+import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
+import { CspConfigType, config as cspConfig } from '../csp';
 
-import { Router, IRouter } from './router';
-import { HttpConfig, HttpConfigType } from './http_config';
-import { HttpServer, HttpServerSetup } from './http_server';
+import { Router } from './router';
+import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
+import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
-import { RequestHandlerContextContainer, RequestHandlerContextProvider } from './types';
+import {
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
+  InternalHttpServiceSetup,
+  HttpServiceStart,
+} from './types';
 
 import { RequestHandlerContext } from '../../server';
+import { registerCoreHandlers } from './lifecycle_handlers';
 
 interface SetupDeps {
   context: ContextSetup;
 }
 
-/** @public */
-export type HttpServiceSetup = Omit<HttpServerSetup, 'registerRouter'> & {
-  /**
-   * Provides ability to declare a handler function for a particular path and HTTP request method.
-   * Each route can have only one handler functions, which is executed when the route is matched.
-   * All routes are prefixed with plugin name as a first segment of URL path.
-   * @example
-   * ```ts
-   * const router = createRouter();
-   * // handler is called when '${my-plugin-id}/path' resource is requested with `GET` method
-   * router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
-   * ```
-   * @public
-   */
-  createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
-  /**
-   * Register a context provider for a route handler.
-   * @example
-   * ```ts
-   *  // my-plugin.ts
-   *  deps.http.registerRouteHandlerContext(
-   *    'myApp',
-   *    (context, req) => {
-   *     async function search (id: string) {
-   *       return await context.elasticsearch.adminClient.callAsInternalUser('endpoint', id);
-   *     }
-   *     return { search };
-   *    }
-   *  );
-   *
-   * // my-route-handler.ts
-   *  router.get({ path: '/', validate: false }, async (context, req, res) => {
-   *    const response = await context.myApp.search(...);
-   *    return res.ok(response);
-   *  });
-   * ```
-   * @public
-   */
-  registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
-    pluginOpaqueId: PluginOpaqueId,
-    contextName: T,
-    provider: RequestHandlerContextProvider<RequestHandlerContext>
-  ) => RequestHandlerContextContainer<RequestHandlerContext>;
-};
-
-/** @public */
-export interface HttpServiceStart {
-  /** Indicates if http server is listening on a given port */
-  isListening: (port: number) => boolean;
-}
-
 /** @internal */
-export class HttpService implements CoreService<HttpServiceSetup, HttpServiceStart> {
+export class HttpService implements CoreService<InternalHttpServiceSetup, HttpServiceStart> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
@@ -102,20 +57,22 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
 
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
+  private readonly env: Env;
   private notReadyServer?: Server;
-  private requestHandlerContext?: RequestHandlerContextContainer<RequestHandlerContext>;
+  private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
-    this.logger = coreContext.logger;
-    this.log = coreContext.logger.get('http');
-    this.config$ = coreContext.configService
-      .atPath<HttpConfigType>('server')
-      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
+    const { logger, configService, env } = coreContext;
 
-    this.httpServer = new HttpServer(coreContext.logger, 'Kibana');
-    this.httpsRedirectServer = new HttpsRedirectServer(
-      coreContext.logger.get('http', 'redirect', 'server')
-    );
+    this.logger = logger;
+    this.env = env;
+    this.log = logger.get('http');
+    this.config$ = combineLatest([
+      configService.atPath<HttpConfigType>(httpConfig.path),
+      configService.atPath<CspConfigType>(cspConfig.path),
+    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+    this.httpServer = new HttpServer(logger, 'Kibana');
+    this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
   public async setup(deps: SetupDeps) {
@@ -125,7 +82,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
         // If the server is already running we can't make any config changes
         // to it, so we warn and don't allow the config to pass through.
         this.log.warn(
-          'Received new HTTP config after server was started. ' + 'Config will **not** be applied.'
+          'Received new HTTP config after server was started. Config will **not** be applied.'
         );
       }
     });
@@ -137,7 +94,10 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
     }
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
-    const contract: HttpServiceSetup = {
+
+    registerCoreHandlers(serverContract, config, this.env);
+
+    const contract: InternalHttpServiceSetup = {
       ...serverContract,
 
       createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
@@ -150,7 +110,7 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
       registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
         pluginOpaqueId: PluginOpaqueId,
         contextName: T,
-        provider: RequestHandlerContextProvider<RequestHandlerContext>
+        provider: RequestHandlerContextProvider<T>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 

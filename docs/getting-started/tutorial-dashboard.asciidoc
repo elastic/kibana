@@ -2,11 +2,12 @@
 === Add visualizations to a dashboard
 
 A dashboard is a collection of visualizations that you can arrange and share.
-You'll build a dashboard that contains the visualizations you saved during
+You'll build a dashboard that contains the visualizations and map that you saved during
 this tutorial.
 
 . Open *Dashboard*.
 . On the Dashboard overview page, click *Create new dashboard*.
+. Set the time filter to May 18, 2015 to May 20, 2015.
 . Click *Add* in the menu bar.
 . Add *Bar Example*, *Map Example*, *Markdown Example*, and *Pie Example*.
 +
@@ -26,12 +27,12 @@ is on the lower right.
 
 ==== Inspect the data
 
-Seeing visualizations of your data is great, 
+Seeing visualizations of your data is great,
 but sometimes you need to look at the actual data to
 understand what's really going on. You can inspect the data behind any visualization
 and view the {es} query used to retrieve it.
 
-. In the dashboard, hover the pointer over the pie chart, and then click the icon in the upper right. 
+. In the dashboard, hover the pointer over the pie chart, and then click the icon in the upper right.
 . From the *Options* menu, select *Inspect*.
 +
 [role="screenshot"]

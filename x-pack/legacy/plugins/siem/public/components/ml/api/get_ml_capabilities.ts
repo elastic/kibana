@@ -6,10 +6,8 @@
 
 import chrome from 'ui/chrome';
 
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
 import { InfluencerInput, MlCapabilities } from '../types';
-import { throwIfNotOk } from './throw_if_not_ok';
+import { throwIfNotOk } from '../../../hooks/api/api';
 
 export interface Body {
   jobIds: string[];
@@ -24,20 +22,17 @@ export interface Body {
   maxExamples: number;
 }
 
-export const getMlCapabilities = async (
-  headers: Record<string, string | undefined>
-): Promise<MlCapabilities> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabilities> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/ml_capabilities`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
-      'kbn-system-api': 'true',
       'content-Type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
+    signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };

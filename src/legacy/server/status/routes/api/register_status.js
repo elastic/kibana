@@ -18,31 +18,36 @@
  */
 
 import { wrapAuthConfig } from '../../wrap_auth_config';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../../../utils/artifact_type';
 
 const matchSnapshot = /-SNAPSHOT$/;
 
 export function registerStatusApi(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
 
-  server.route(wrapAuth({
-    method: 'GET',
-    path: '/api/status',
-    config: {
-      tags: ['api']
-    },
-    async handler() {
-      return {
-        name: config.get('server.name'),
-        uuid: config.get('server.uuid'),
-        version: {
-          number: config.get('pkg.version').replace(matchSnapshot, ''),
-          build_hash: config.get('pkg.buildSha'),
-          build_number: config.get('pkg.buildNum'),
-          build_snapshot: matchSnapshot.test(config.get('pkg.version'))
-        },
-        status: kbnServer.status.toJSON(),
-        metrics: kbnServer.metrics
-      };
-    }
-  }));
+  server.route(
+    wrapAuth({
+      method: 'GET',
+      path: '/api/status',
+      config: {
+        tags: ['api'],
+      },
+      async handler() {
+        return {
+          name: config.get('server.name'),
+          uuid: config.get('server.uuid'),
+          // flag to help tests know that kibana is running from source, not included in distributable response
+          ...(IS_KIBANA_DISTRIBUTABLE ? {} : { running_from_source: true }),
+          version: {
+            number: config.get('pkg.version').replace(matchSnapshot, ''),
+            build_hash: config.get('pkg.buildSha'),
+            build_number: config.get('pkg.buildNum'),
+            build_snapshot: matchSnapshot.test(config.get('pkg.version')),
+          },
+          status: kbnServer.status.toJSON(),
+          metrics: kbnServer.metrics,
+        };
+      },
+    })
+  );
 }

@@ -8,9 +8,16 @@
 
 ```typescript
 core: {
+        rendering: IScopedRenderingClient;
+        savedObjects: {
+            client: SavedObjectsClientContract;
+        };
         elasticsearch: {
-            dataClient: ScopedClusterClient;
-            adminClient: ScopedClusterClient;
+            dataClient: IScopedClusterClient;
+            adminClient: IScopedClusterClient;
+        };
+        uiSettings: {
+            client: IUiSettingsClient;
         };
     };
 ```

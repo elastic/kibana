@@ -6,15 +6,14 @@
 
 import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink } from './chart_context_menu';
-import { mountWithIntl } from '../../utils/enzyme_helpers';
+import { mount } from 'enzyme';
 import { options, source, timeRange, chartOptions } from '../../utils/fixtures/metrics_explorer';
-import { UICapabilities } from 'ui/capabilities';
-import { InfraNodeType } from '../../graphql/types';
 import DateMath from '@elastic/datemath';
 import { ReactWrapper } from 'enzyme';
+import { Capabilities } from 'src/core/public';
 
 const series = { id: 'exmaple-01', rows: [], columns: [] };
-const uiCapabilities: UICapabilities = {
+const uiCapabilities: Capabilities = {
   navLinks: { show: false },
   management: { fake: { show: false } },
   catalogue: { show: false },
@@ -29,7 +28,7 @@ describe('MetricsExplorerChartContextMenu', () => {
   describe('component', () => {
     it('should just work', async () => {
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
-      const component = mountWithIntl(
+      const component = mount(
         <MetricsExplorerChartContextMenu
           timeRange={timeRange}
           source={source}
@@ -50,7 +49,7 @@ describe('MetricsExplorerChartContextMenu', () => {
     it('should not display View metrics for incompatible groupBy', async () => {
       const customOptions = { ...options, groupBy: 'system.network.name' };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
-      const component = mountWithIntl(
+      const component = mount(
         <MetricsExplorerChartContextMenu
           timeRange={timeRange}
           source={source}
@@ -66,7 +65,7 @@ describe('MetricsExplorerChartContextMenu', () => {
     });
 
     it('should not display "Add Filter" without onFilter', async () => {
-      const component = mountWithIntl(
+      const component = mount(
         <MetricsExplorerChartContextMenu
           timeRange={timeRange}
           source={source}
@@ -84,7 +83,7 @@ describe('MetricsExplorerChartContextMenu', () => {
     it('should not display "Add Filter" without options.groupBy', async () => {
       const customOptions = { ...options, groupBy: void 0 };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
-      const component = mountWithIntl(
+      const component = mount(
         <MetricsExplorerChartContextMenu
           timeRange={timeRange}
           source={source}
@@ -102,7 +101,7 @@ describe('MetricsExplorerChartContextMenu', () => {
 
     it('should disable "Open in Visualize" when options.metrics is empty', async () => {
       const customOptions = { ...options, metrics: [] };
-      const component = mountWithIntl(
+      const component = mount(
         <MetricsExplorerChartContextMenu
           timeRange={timeRange}
           source={source}
@@ -122,7 +121,7 @@ describe('MetricsExplorerChartContextMenu', () => {
     it('should not display "Open in Visualize" when unavailble in uiCapabilities', async () => {
       const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
-      const component = mountWithIntl(
+      const component = mount(
         <MetricsExplorerChartContextMenu
           timeRange={timeRange}
           source={source}
@@ -142,7 +141,7 @@ describe('MetricsExplorerChartContextMenu', () => {
       const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const customOptions = { ...options, groupBy: void 0 };
-      const component = mountWithIntl(
+      const component = mount(
         <MetricsExplorerChartContextMenu
           timeRange={timeRange}
           source={source}
@@ -163,12 +162,7 @@ describe('MetricsExplorerChartContextMenu', () => {
       const toDateStrig = '2019-01-01T12:00:00Z';
       const to = DateMath.parse(toDateStrig, { roundUp: true })!;
       const from = DateMath.parse(fromDateStrig)!;
-      const link = createNodeDetailLink(
-        InfraNodeType.host,
-        'example-01',
-        fromDateStrig,
-        toDateStrig
-      );
+      const link = createNodeDetailLink('host', 'example-01', fromDateStrig, toDateStrig);
       expect(link).toBe(
         `#/link-to/host-detail/example-01?to=${to.valueOf()}&from=${from.valueOf()}`
       );

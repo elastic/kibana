@@ -17,18 +17,19 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
+export default function({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  describe('homepage app', function () {
+  describe('homepage app', function() {
     this.tags('ciGroup6');
 
-    before(function () {
+    before(function() {
       return browser.setWindowSize(1200, 800);
     });
 
     loadTestFile(require.resolve('./_navigation'));
     loadTestFile(require.resolve('./_home'));
+    loadTestFile(require.resolve('./_newsfeed'));
     loadTestFile(require.resolve('./_add_data'));
     loadTestFile(require.resolve('./_sample_data'));
   });

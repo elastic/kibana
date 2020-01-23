@@ -16,6 +16,6 @@ export class KpiNetwork {
     req: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<KpiNetworkData> {
-    return await this.adapter.getKpiNetwork(req, options);
+    return this.adapter.getKpiNetwork(req, options);
   }
 }

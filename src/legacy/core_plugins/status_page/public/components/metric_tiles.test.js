@@ -23,57 +23,44 @@ import { MetricTile } from './metric_tiles';
 
 const GENERAL_METRIC = {
   name: 'A metric',
-  value: 1.8
+  value: 1.8,
   // no type specified
 };
 
 const BYTE_METRIC = {
   name: 'Heap Total',
   value: 1501560832,
-  type: 'byte'
+  type: 'byte',
 };
 
 const FLOAT_METRIC = {
   name: 'Load',
   type: 'float',
-  value: [
-    4.0537109375,
-    3.36669921875,
-    3.1220703125
-  ]
+  value: [4.0537109375, 3.36669921875, 3.1220703125],
 };
 
 const MS_METRIC = {
   name: 'Response Time Max',
   type: 'ms',
-  value: 1234
+  value: 1234,
 };
 
 test('general metric', () => {
-  const component = shallow(<MetricTile
-    metric={GENERAL_METRIC}
-  />);
+  const component = shallow(<MetricTile metric={GENERAL_METRIC} />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('byte metric', () => {
-  const component = shallow(<MetricTile
-    metric={BYTE_METRIC}
-  />);
+  const component = shallow(<MetricTile metric={BYTE_METRIC} />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('float metric', () => {
-  const component = shallow(<MetricTile
-    metric={FLOAT_METRIC}
-  />);
+  const component = shallow(<MetricTile metric={FLOAT_METRIC} />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('millisecond metric', () => {
-  const component = shallow(<MetricTile
-    metric={MS_METRIC}
-  />);
+  const component = shallow(<MetricTile metric={MS_METRIC} />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
-

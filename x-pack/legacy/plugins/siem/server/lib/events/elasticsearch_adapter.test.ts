@@ -11,6 +11,7 @@ import {
   ElasticsearchEventsAdapter,
   formatEventsData,
   formatTimelineData,
+  getFieldCategory,
 } from './elasticsearch_adapter';
 import {
   mockDetailsQueryDsl,
@@ -520,10 +521,8 @@ describe('events elasticsearch_adapter', () => {
       const mockFramework: FrameworkAdapter = {
         version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -536,6 +535,16 @@ describe('events elasticsearch_adapter', () => {
       );
 
       expect(data).toEqual(mockTimelineDetailsResult);
+    });
+    describe('getFieldCategory', () => {
+      test('should return field category when passed field', () => {
+        const data = getFieldCategory('agent.id');
+        expect(data).toEqual('agent');
+      });
+      test('should return "base" when passed a category of type "baseCategoryField"', () => {
+        const data = getFieldCategory('@timestamp');
+        expect(data).toEqual('base');
+      });
     });
   });
 });

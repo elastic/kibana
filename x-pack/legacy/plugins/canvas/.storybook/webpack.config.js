@@ -47,15 +47,68 @@ module.exports = async ({ config }) => {
   });
 
   // Parse props data for .tsx files
+  // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
+  // See: https://github.com/storybookjs/storybook/issues/7998
+  // 
+  // config.module.rules.push({
+  //   test: /\.tsx$/,
+  //   // Exclude example files, as we don't display props info for them
+  //   exclude: /\.examples.tsx$/,
+  //   use: [
+  //     // Parse TS comments to create Props tables in the UI
+  //     require.resolve('react-docgen-typescript-loader'),
+  //   ],
+  // });
+
+  // Enable SASS, but exclude CSS Modules in Storybook
   config.module.rules.push({
-    test: /\.tsx$/,
-    // Exclude example files, as we don't display props info for them
-    exclude: /\.examples.tsx$/,
+    test: /\.scss$/,
+    exclude: /\.module.(s(a|c)ss)$/,
     use: [
-      // Parse TS comments to create Props tables in the UI
-      require.resolve('react-docgen-typescript-loader'),
+      { loader: 'style-loader' },
+      { loader: 'css-loader', options: { importLoaders: 2 } },
+      {
+        loader: 'postcss-loader',
+        options: {
+          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+        },
+      },
+      { loader: 'sass-loader' },
     ],
   });
+
+  // Enable CSS Modules in Storybook
+  config.module.rules.push({
+    test: /\.module\.s(a|c)ss$/,
+    loader: [
+      'style-loader',
+      {
+        loader: 'css-loader',
+        options: {
+          importLoaders: 2,
+          modules: true,
+          localIdentName: '[name]__[local]___[hash:base64:5]',
+        },
+      },
+      {
+        loader: 'postcss-loader',
+        options: {
+          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+        },
+      },
+      {
+        loader: 'sass-loader',
+      },
+    ],
+  });
+
+  // Ensure jQuery is global for Storybook, specifically for the runtime.
+  config.plugins.push(
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+    })
+  );
 
   // Reference the built DLL file of static(ish) dependencies, which are removed
   // during kbn:bootstrap and rebuilt if missing.
@@ -109,8 +162,8 @@ module.exports = async ({ config }) => {
     })
   );
 
-  // Tell Webpack about the ts/x extensions
-  config.resolve.extensions.push('.ts', '.tsx');
+  // Tell Webpack about relevant extensions
+  config.resolve.extensions.push('.ts', '.tsx', '.scss');
 
   // Alias imports to either a mock or the proper module or directory.
   // NOTE: order is important here - `ui/notify` will override `ui/notify/foo` if it

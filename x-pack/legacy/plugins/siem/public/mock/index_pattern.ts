@@ -84,6 +84,12 @@ export const mockIndexPattern = {
       type: 'string',
       aggregatable: true,
     },
+    {
+      name: 'host.name',
+      searchable: true,
+      type: 'string',
+      aggregatable: true,
+    },
   ],
   title: 'filebeat-*,auditbeat-*,packetbeat-*',
 };

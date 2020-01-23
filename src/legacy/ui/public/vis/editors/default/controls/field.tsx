@@ -23,9 +23,10 @@ import React, { useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggConfig } from '../../..';
-import { Field } from '../../../../index_patterns';
+import { Field } from '../../../../../../../plugins/data/public';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../../../utils';
 import { AggParam, FieldParamType } from '../../../../agg_types';
+import { useValidation } from './agg_utils';
 import { AggParamEditorProps, ComboBoxGroupedOptions } from '..';
 
 const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
@@ -78,13 +79,7 @@ function FieldParamEditor({
 
   const isValid = !!value && !errors.length;
 
-  useEffect(() => {
-    setValidity(isValid);
-
-    if (!!errors.length) {
-      setTouched();
-    }
-  }, [isValid]);
+  useValidation(setValidity, isValid);
 
   useEffect(() => {
     // set field if only one available
@@ -110,6 +105,7 @@ function FieldParamEditor({
       compressed
     >
       <EuiComboBox
+        compressed
         placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
           defaultMessage: 'Select a field',
         })}

@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
-import 'jest-styled-components';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../containers/source/mock';
 import { Direction } from '../../../graphql/types';
@@ -17,8 +15,7 @@ import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
-
-jest.mock('../../../lib/settings/use_kibana_ui_setting');
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -41,6 +38,8 @@ jest.mock('../../../lib/helpers/scheduler', () => ({
 }));
 
 describe('Body', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the column headers', () => {
       const wrapper = mount(
@@ -54,18 +53,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={jest.fn()}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -80,7 +85,7 @@ describe('Body', () => {
       ).toEqual(true);
     });
 
-    test('it renders the vertical scroll container', () => {
+    test('it renders the scroll container', () => {
       const wrapper = mount(
         <TestProviders>
           <Body
@@ -92,18 +97,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={jest.fn()}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -112,7 +123,7 @@ describe('Body', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="vertical-scroll-container"]')
+          .find('[data-test-subj="timeline-body"]')
           .first()
           .exists()
       ).toEqual(true);
@@ -130,18 +141,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={jest.fn()}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -170,18 +187,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={jest.fn()}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -206,15 +229,16 @@ describe('Body', () => {
     const dispatchAddNoteToEvent = jest.fn();
     const dispatchOnPinEvent = jest.fn();
 
-    const addaNoteToEvent = (wrapper: ReactWrapper, note: string) => {
+    const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper
-        .find('[data-test-subj="timeline-notes-icon"]')
+        .find('[data-test-subj="add-note"]')
         .first()
+        .find('button')
         .simulate('click');
       wrapper.update();
       wrapper
         .find('[data-test-subj="new-note-tabs"] textarea')
-        .simulate('change', { target: { value: 'hello world' } });
+        .simulate('change', { target: { value: note } });
       wrapper.update();
       wrapper
         .find('button[data-test-subj="add-note"]')
@@ -256,18 +280,24 @@ describe('Body', () => {
             eventIdToNoteIds={{}}
             height={testBodyHeight}
             id={'timeline-test'}
+            isSelectAllChecked={false}
             getNotesByIds={mockGetNotesByIds}
+            loadingEventIds={[]}
             onColumnRemoved={jest.fn()}
             onColumnResized={jest.fn()}
             onColumnSorted={jest.fn()}
             onFilterChange={jest.fn()}
             onPinEvent={dispatchOnPinEvent}
+            onRowSelected={jest.fn()}
+            onSelectAll={jest.fn()}
             onUnPinEvent={jest.fn()}
             onUpdateColumns={jest.fn()}
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
+            selectedEventIds={{}}
             sort={mockSort}
+            showCheckboxes={false}
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
@@ -296,30 +326,34 @@ describe('Body', () => {
           eventIdToNoteIds={{}}
           height={testBodyHeight}
           id={'timeline-test'}
+          isSelectAllChecked={false}
           getNotesByIds={mockGetNotesByIds}
+          loadingEventIds={[]}
           onColumnRemoved={jest.fn()}
           onColumnResized={jest.fn()}
           onColumnSorted={jest.fn()}
           onFilterChange={jest.fn()}
           onPinEvent={dispatchOnPinEvent}
+          onRowSelected={jest.fn()}
+          onSelectAll={jest.fn()}
           onUnPinEvent={jest.fn()}
           onUpdateColumns={jest.fn()}
           pinnedEventIds={{}}
           range={'1 Day'}
           rowRenderers={rowRenderers}
+          selectedEventIds={{}}
           sort={mockSort}
+          showCheckboxes={false}
           toggleColumn={jest.fn()}
           updateNote={jest.fn()}
         />
       );
       addaNoteToEvent(wrapper, 'hello world');
-
       dispatchAddNoteToEvent.mockClear();
       dispatchOnPinEvent.mockClear();
       wrapper.setProps({ pinnedEventIds: { 1: true } });
       wrapper.update();
       addaNoteToEvent(wrapper, 'new hello world');
-
       expect(dispatchAddNoteToEvent).toHaveBeenCalled();
       expect(dispatchOnPinEvent).not.toHaveBeenCalled();
     });

@@ -29,6 +29,8 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiFormRow,
+  EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -40,7 +42,8 @@ const TO_PLACEHOLDER = '+\u221E';
 const generateId = htmlIdGenerator();
 const isEmpty = (value: any) => value === undefined || value === null;
 
-interface RangeValues {
+export interface RangeValues {
+  type?: 'range';
   from?: number;
   to?: number;
 }
@@ -50,7 +53,7 @@ interface RangeValuesModel extends RangeValues {
 }
 
 interface RangesParamEditorProps {
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
   error?: React.ReactNode;
   value?: RangeValues[];
   hidePlaceholders?: boolean;
@@ -62,8 +65,8 @@ interface RangesParamEditorProps {
 }
 
 function RangesParamEditor({
+  'data-test-subj': dataTestSubj = 'range',
   addRangeValues,
-  dataTestSubj = 'range',
   error,
   value = [],
   hidePlaceholders,
@@ -153,6 +156,25 @@ function RangesParamEditor({
             [isFromValid, isToValid] = validateRange({ from, to }, index);
           }
 
+          const gtePrependLabel = i18n.translate(
+            'common.ui.aggTypes.ranges.greaterThanOrEqualPrepend',
+            {
+              defaultMessage: '\u2265',
+            }
+          );
+          const gteTooltipContent = i18n.translate(
+            'common.ui.aggTypes.ranges.greaterThanOrEqualTooltip',
+            {
+              defaultMessage: 'Greater than or equal to',
+            }
+          );
+          const ltPrependLabel = i18n.translate('common.ui.aggTypes.ranges.lessThanPrepend', {
+            defaultMessage: '\u003c',
+          });
+          const ltTooltipContent = i18n.translate('common.ui.aggTypes.ranges.lessThanTooltip', {
+            defaultMessage: 'Less than',
+          });
+
           return (
             <Fragment key={id}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -168,6 +190,11 @@ function RangesParamEditor({
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isFromValid}
+                    prepend={
+                      <EuiToolTip content={gteTooltipContent}>
+                        <EuiText size="s">{gtePrependLabel}</EuiText>
+                      </EuiToolTip>
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -185,6 +212,11 @@ function RangesParamEditor({
                     fullWidth={true}
                     compressed={true}
                     isInvalid={!isToValid}
+                    prepend={
+                      <EuiToolTip content={ltTooltipContent}>
+                        <EuiText size="s">{ltPrependLabel}</EuiText>
+                      </EuiToolTip>
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -207,7 +239,12 @@ function RangesParamEditor({
 
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAddRange} size="xs">
+          <EuiButtonEmpty
+            data-test-subj={`${dataTestSubj}__addRangeButton`}
+            iconType="plusInCircleFilled"
+            onClick={onAddRange}
+            size="xs"
+          >
             <FormattedMessage
               id="common.ui.aggTypes.ranges.addRangeButtonLabel"
               defaultMessage="Add range"

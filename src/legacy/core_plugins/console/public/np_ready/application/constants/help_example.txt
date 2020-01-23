@@ -1,0 +1,8 @@
+# index a doc
+PUT index/1
+{
+  "body": "here"
+}
+
+# and get it ...
+GET index/1

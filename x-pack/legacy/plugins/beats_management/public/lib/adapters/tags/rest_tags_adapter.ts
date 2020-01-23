@@ -20,9 +20,9 @@ export class RestTagsAdapter implements CMTagsAdapter {
 
   public async getTagsWithIds(tagIds: string[]): Promise<BeatTag[]> {
     try {
-      return (await this.REST.get<ReturnTypeBulkGet<BeatTag>>(
-        `/api/beats/tags/${uniq(tagIds).join(',')}`
-      )).items;
+      return (
+        await this.REST.get<ReturnTypeBulkGet<BeatTag>>(`/api/beats/tags/${uniq(tagIds).join(',')}`)
+      ).items;
     } catch (e) {
       return [];
     }
@@ -37,9 +37,9 @@ export class RestTagsAdapter implements CMTagsAdapter {
   }
 
   public async delete(tagIds: string[]): Promise<boolean> {
-    return (await this.REST.delete<ReturnTypeBulkDelete>(
-      `/api/beats/tags/${uniq(tagIds).join(',')}`
-    )).success;
+    return (
+      await this.REST.delete<ReturnTypeBulkDelete>(`/api/beats/tags/${uniq(tagIds).join(',')}`)
+    ).success;
   }
 
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
@@ -53,9 +53,11 @@ export class RestTagsAdapter implements CMTagsAdapter {
 
   public async getAssignable(beats: CMBeat[]) {
     try {
-      return (await this.REST.get<ReturnTypeBulkGet<BeatTag>>(
-        `/api/beats/tags/assignable/${beats.map(beat => beat.id).join(',')}`
-      )).items;
+      return (
+        await this.REST.get<ReturnTypeBulkGet<BeatTag>>(
+          `/api/beats/tags/assignable/${beats.map(beat => beat.id).join(',')}`
+        )
+      ).items;
     } catch (e) {
       return [];
     }

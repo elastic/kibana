@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -19,6 +18,8 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
+  EuiCodeBlock,
+  EuiText,
 } from '@elastic/eui';
 
 import 'brace/theme/textmate';
@@ -28,17 +29,23 @@ import { documentationLinksService } from '../../../../services/documentation';
 import {
   useLoadRepository,
   verifyRepository as verifyRepositoryRequest,
+  cleanupRepository as cleanupRepositoryRequest,
 } from '../../../../services/http';
 import { textService } from '../../../../services/text';
 import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
-import { Repository, RepositoryVerification } from '../../../../../../common/types';
+import {
+  Repository,
+  RepositoryVerification,
+  RepositoryCleanup,
+} from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
   SectionError,
   SectionLoading,
   RepositoryVerificationBadge,
+  Error,
 } from '../../../../components';
 import { TypeDetails } from './type_details';
 
@@ -60,7 +67,9 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   const { FormattedMessage } = i18n;
   const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
+  const [cleanup, setCleanup] = useState<RepositoryCleanup | undefined>(undefined);
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false);
+  const [isLoadingCleanup, setIsLoadingCleanup] = useState<boolean>(false);
 
   const verifyRepository = async () => {
     setIsLoadingVerification(true);
@@ -69,11 +78,20 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
     setIsLoadingVerification(false);
   };
 
-  // Reset verification state when repository name changes, either from adjust URL or clicking
+  const cleanupRepository = async () => {
+    setIsLoadingCleanup(true);
+    const { data } = await cleanupRepositoryRequest(repositoryName);
+    setCleanup(data.cleanup);
+    setIsLoadingCleanup(false);
+  };
+
+  // Reset verification state and cleanup when repository name changes, either from adjust URL or clicking
   // into a different repository in table list.
   useEffect(() => {
     setVerification(undefined);
     setIsLoadingVerification(false);
+    setCleanup(undefined);
+    setIsLoadingCleanup(false);
   }, [repositoryName]);
 
   const renderBody = () => {
@@ -98,7 +116,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   };
 
   const renderError = () => {
-    const notFound = error.status === 404;
+    const notFound = (error as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -122,7 +140,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading repository"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   };
@@ -230,6 +248,8 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />
         {renderVerification()}
+        <EuiHorizontalRule />
+        {renderCleanup()}
       </Fragment>
     );
   };
@@ -259,36 +279,13 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           </EuiTitle>
           <EuiSpacer size="s" />
           {verification ? (
-            <EuiCodeEditor
-              mode="json"
-              theme="textmate"
-              width="100%"
-              isReadOnly
-              value={JSON.stringify(
+            <EuiCodeBlock language="json" inline={false} data-test-subj="verificationCodeBlock">
+              {JSON.stringify(
                 verification.valid ? verification.response : verification.error,
                 null,
                 2
               )}
-              setOptions={{
-                showLineNumbers: false,
-                tabSize: 2,
-                maxLines: Infinity,
-              }}
-              editorProps={{
-                $blockScrolling: Infinity,
-              }}
-              showGutter={false}
-              minLines={6}
-              aria-label={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryDetails.verificationDetails"
-                  defaultMessage="Verification details repository '{name}'"
-                  values={{
-                    name,
-                  }}
-                />
-              }
-            />
+            </EuiCodeBlock>
           ) : null}
           <EuiSpacer size="m" />
           <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
@@ -315,6 +312,78 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
         </Fragment>
       )}
     </Fragment>
+  );
+
+  const renderCleanup = () => (
+    <>
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.cleanupTitle"
+            defaultMessage="Repository cleanup"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.cleanupRepositoryMessage"
+            defaultMessage="You can clean up a repository to delete any unreferenced data from a snapshot. This
+              may provide storage space savings. Note: If you regularly delete snapshots, this
+              functionality will likely not be as beneficial and should be used less frequently."
+          />
+        </p>
+      </EuiText>
+      {cleanup ? (
+        <>
+          <EuiSpacer size="s" />
+          {cleanup.cleaned ? (
+            <div>
+              <EuiTitle size="xs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryDetails.cleanupDetailsTitle"
+                    defaultMessage="Details"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiCodeBlock language="json" inline={false} data-test-subj="cleanupCodeBlock">
+                {JSON.stringify(cleanup.response, null, 2)}
+              </EuiCodeBlock>
+            </div>
+          ) : (
+            <EuiCallOut
+              color="danger"
+              iconType="alert"
+              title={i18n.translate('xpack.snapshotRestore.repositoryDetails.cleanupErrorTitle', {
+                defaultMessage: 'Sorry, there was an error cleaning the repository.',
+              })}
+            >
+              <p>
+                {cleanup.error
+                  ? JSON.stringify(cleanup.error)
+                  : i18n.translate('xpack.snapshotRestore.repositoryDetails.cleanupUnknownError', {
+                      defaultMessage: '503: Unknown error',
+                    })}
+              </p>
+            </EuiCallOut>
+          )}
+        </>
+      ) : null}
+      <EuiSpacer size="m" />
+      <EuiButton
+        onClick={cleanupRepository}
+        color="primary"
+        isLoading={isLoadingCleanup}
+        data-test-subj="cleanupRepositoryButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.cleanupButtonLabel"
+          defaultMessage="Clean up repository"
+        />
+      </EuiButton>
+    </>
   );
 
   const renderFooter = () => {

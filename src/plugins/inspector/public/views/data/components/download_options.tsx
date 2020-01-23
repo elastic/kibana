@@ -20,6 +20,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { DataViewColumn, DataViewRow } from '../types';
@@ -66,8 +67,14 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
   };
 
   exportCsv = (customParams: any = {}) => {
+    let filename = this.props.title;
+    if (!filename || filename.length === 0) {
+      filename = i18n.translate('inspector.data.downloadOptionsUnsavedFilename', {
+        defaultMessage: 'unsaved',
+      });
+    }
     exportAsCsv({
-      filename: `${this.props.title}.csv`,
+      filename: `${filename}.csv`,
       columns: this.props.columns,
       rows: this.props.rows,
       csvSeparator: this.props.csvSeparator,

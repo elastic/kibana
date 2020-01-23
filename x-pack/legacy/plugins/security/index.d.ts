@@ -5,13 +5,11 @@
  */
 
 import { Legacy } from 'kibana';
-import { AuthenticatedUser } from './common/model';
-import { AuthorizationService } from './server/lib/authorization/service';
+import { AuthenticatedUser } from '../../../plugins/security/public';
 
 /**
  * Public interface of the security plugin.
  */
 export interface SecurityPlugin {
-  authorization: Readonly<AuthorizationService>;
   getUser: (request: Legacy.Request) => Promise<AuthenticatedUser>;
 }

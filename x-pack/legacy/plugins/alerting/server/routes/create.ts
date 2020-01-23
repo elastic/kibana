@@ -6,66 +6,67 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { AlertAction } from '../types';
-import { SECONDS_REGEX, MINUTES_REGEX, HOURS_REGEX, DAYS_REGEX } from '../lib';
+import { getDurationSchema } from '../lib';
+import { IntervalSchedule } from '../types';
 
 interface ScheduleRequest extends Hapi.Request {
   payload: {
     enabled: boolean;
+    name: string;
+    tags: string[];
     alertTypeId: string;
-    interval: string;
-    actions: AlertAction[];
-    alertTypeParams: Record<string, any>;
+    consumer: string;
+    schedule: IntervalSchedule;
+    actions: Array<{
+      group: string;
+      id: string;
+      params: Record<string, any>;
+    }>;
+    params: Record<string, any>;
+    throttle: string | null;
   };
 }
 
-export function createAlertRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: '/api/alert',
-    options: {
-      tags: ['access:alerting-all'],
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: Joi.object()
-          .keys({
-            enabled: Joi.boolean().default(true),
-            alertTypeId: Joi.string().required(),
-            interval: Joi.alternatives()
-              .try(
-                Joi.string()
-                  .regex(SECONDS_REGEX, 'seconds (5s)')
-                  .required(),
-                Joi.string()
-                  .regex(MINUTES_REGEX, 'minutes (5m)')
-                  .required(),
-                Joi.string()
-                  .regex(HOURS_REGEX, 'hours (5h)')
-                  .required(),
-                Joi.string()
-                  .regex(DAYS_REGEX, 'days (5d)')
-                  .required()
-              )
-              .required(),
-            alertTypeParams: Joi.object().required(),
-            actions: Joi.array()
-              .items(
-                Joi.object().keys({
-                  group: Joi.string().required(),
-                  id: Joi.string().required(),
-                  params: Joi.object().required(),
-                })
-              )
-              .required(),
-          })
-          .required(),
+export const createAlertRoute = {
+  method: 'POST',
+  path: '/api/alert',
+  options: {
+    tags: ['access:alerting-all'],
+    validate: {
+      options: {
+        abortEarly: false,
       },
+      payload: Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          name: Joi.string().required(),
+          tags: Joi.array()
+            .items(Joi.string())
+            .default([]),
+          alertTypeId: Joi.string().required(),
+          consumer: Joi.string().required(),
+          throttle: getDurationSchema().default(null),
+          schedule: Joi.object()
+            .keys({
+              interval: getDurationSchema().required(),
+            })
+            .required(),
+          params: Joi.object().required(),
+          actions: Joi.array()
+            .items(
+              Joi.object().keys({
+                group: Joi.string().required(),
+                id: Joi.string().required(),
+                params: Joi.object().required(),
+              })
+            )
+            .required(),
+        })
+        .required(),
     },
-    async handler(request: ScheduleRequest) {
-      const alertsClient = request.getAlertsClient!();
-      return await alertsClient.create({ data: request.payload });
-    },
-  });
-}
+  },
+  async handler(request: ScheduleRequest) {
+    const alertsClient = request.getAlertsClient!();
+    return await alertsClient.create({ data: request.payload });
+  },
+};

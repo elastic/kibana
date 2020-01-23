@@ -350,12 +350,12 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
   return (
     <Fragment>
       <EuiTitle>
-        <h3>
+        <h2>
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepReviewTitle"
             defaultMessage="Review restore details"
           />
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiTabbedContent

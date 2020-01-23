@@ -24,9 +24,9 @@ import { AggGroupNames } from '../agg_groups';
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { act } from 'react-dom/test-utils';
 import { DefaultEditorAggParams } from './agg_params';
-import { IndexPattern } from 'ui/index_patterns';
 import { AggType } from 'ui/agg_types';
-import { Schema } from 'ui/vis/editors/default/schemas';
+import { IndexPattern } from '../../../../../../../plugins/data/public';
+import { AGGS_ACTION_KEYS } from './agg_group_state';
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -34,18 +34,18 @@ jest.mock('./agg_params', () => ({
 
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggProps;
-  let onAggParamsChange: jest.Mock;
-  let setTouched: jest.Mock;
+  let setAggParamValue: jest.Mock;
+  let setStateParamValue: jest.Mock;
   let onToggleEnableAgg: jest.Mock;
   let removeAgg: jest.Mock;
-  let setValidity: jest.Mock;
+  let setAggsState: jest.Mock;
 
   beforeEach(() => {
-    onAggParamsChange = jest.fn();
-    setTouched = jest.fn();
+    setAggParamValue = jest.fn();
+    setStateParamValue = jest.fn();
     onToggleEnableAgg = jest.fn();
     removeAgg = jest.fn();
-    setValidity = jest.fn();
+    setAggsState = jest.fn();
 
     defaultProps = {
       agg: {
@@ -61,15 +61,16 @@ describe('DefaultEditorAgg component', () => {
       dragHandleProps: null,
       formIsTouched: false,
       groupName: AggGroupNames.Metrics,
+      isDisabled: false,
       isDraggable: false,
       isLastBucket: false,
       isRemovable: false,
       metricAggs: [],
       state: {} as VisState,
-      onAggParamsChange,
+      setAggParamValue,
+      setStateParamValue,
       onAggTypeChange: () => {},
-      setValidity,
-      setTouched,
+      setAggsState,
       onToggleEnableAgg,
       removeAgg,
     };
@@ -98,7 +99,11 @@ describe('DefaultEditorAgg component', () => {
         .setValidity(false);
     });
     comp.update();
-    expect(setValidity).toBeCalledWith(false);
+    expect(setAggsState).toBeCalledWith({
+      type: AGGS_ACTION_KEYS.VALID,
+      payload: false,
+      aggId: defaultProps.agg.id,
+    });
 
     expect(
       comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').exists()
@@ -119,7 +124,11 @@ describe('DefaultEditorAgg component', () => {
         .setValidity(true);
     });
     comp.update();
-    expect(setValidity).toBeCalledWith(true);
+    expect(setAggsState).toBeCalledWith({
+      type: AGGS_ACTION_KEYS.VALID,
+      payload: true,
+      aggId: defaultProps.agg.id,
+    });
 
     expect(comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').text()).toBe(
       'Agg description'
@@ -128,16 +137,20 @@ describe('DefaultEditorAgg component', () => {
 
   it('should call setTouched when accordion is collapsed', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
-    expect(defaultProps.setTouched).toBeCalledTimes(0);
+    expect(defaultProps.setAggsState).toBeCalledTimes(0);
 
     comp.find('.euiAccordion__button').simulate('click');
     // make sure that the accordion is collapsed
     expect(comp.find('.euiAccordion-isOpen').exists()).toBeFalsy();
 
-    expect(defaultProps.setTouched).toBeCalledWith(true);
+    expect(defaultProps.setAggsState).toBeCalledWith({
+      type: AGGS_ACTION_KEYS.TOUCHED,
+      payload: true,
+      aggId: defaultProps.agg.id,
+    });
   });
 
-  it('should call setValidity inside onSetValidity', () => {
+  it('should call setAggsState inside setValidity', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     act(() => {
@@ -147,7 +160,11 @@ describe('DefaultEditorAgg component', () => {
         .setValidity(false);
     });
 
-    expect(setValidity).toBeCalledWith(false);
+    expect(setAggsState).toBeCalledWith({
+      type: AGGS_ACTION_KEYS.VALID,
+      payload: false,
+      aggId: defaultProps.agg.id,
+    });
 
     expect(
       comp.find('.visEditorSidebar__aggGroupAccordionButtonContent span').exists()
@@ -156,8 +173,8 @@ describe('DefaultEditorAgg component', () => {
 
   it('should add schema component', () => {
     defaultProps.agg.schema = {
-      editorComponent: () => <div className="schemaComponent"></div>,
-    } as Schema;
+      editorComponent: () => <div className="schemaComponent" />,
+    } as any;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
     expect(comp.find('.schemaComponent').exists()).toBeTruthy();
@@ -197,7 +214,19 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="toggleDisableAggregationBtn disable"] button').simulate('click');
 
-      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, false);
+      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg.id, false);
+    });
+
+    it('should disable the disableAggregation button', () => {
+      defaultProps.isDisabled = true;
+      defaultProps.isRemovable = true;
+      const comp = mount(<DefaultEditorAgg {...defaultProps} />);
+
+      expect(
+        comp
+          .find('EuiButtonIcon[data-test-subj="toggleDisableAggregationBtn disable"]')
+          .prop('disabled')
+      ).toBeTruthy();
     });
 
     it('should enable agg', () => {
@@ -205,7 +234,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="toggleDisableAggregationBtn enable"] button').simulate('click');
 
-      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg, true);
+      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg.id, true);
     });
 
     it('should call removeAgg', () => {
@@ -213,7 +242,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="removeDimensionBtn"] button').simulate('click');
 
-      expect(defaultProps.removeAgg).toBeCalledWith(defaultProps.agg);
+      expect(defaultProps.removeAgg).toBeCalledWith(defaultProps.agg.id);
     });
   });
 
@@ -236,10 +265,9 @@ describe('DefaultEditorAgg component', () => {
       expect(compHistogram.find(DefaultEditorAggParams).props()).toHaveProperty('disabledParams', [
         'min_doc_count',
       ]);
-      expect(compDateHistogram.find(DefaultEditorAggParams).props()).toHaveProperty(
-        'disabledParams',
-        ['min_doc_count']
-      );
+      expect(
+        compDateHistogram.find(DefaultEditorAggParams).props()
+      ).toHaveProperty('disabledParams', ['min_doc_count']);
     });
 
     it('should set error when agg is not histogram or date_histogram', () => {
@@ -258,8 +286,8 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.setProps({ agg: { ...defaultProps.agg, type: { name: 'histogram' } } });
 
-      expect(defaultProps.onAggParamsChange).toHaveBeenCalledWith(
-        defaultProps.agg.params,
+      expect(defaultProps.setAggParamValue).toHaveBeenCalledWith(
+        defaultProps.agg.id,
         'min_doc_count',
         true
       );
@@ -272,8 +300,8 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.setProps({ agg: { ...defaultProps.agg, type: { name: 'date_histogram' } } });
 
-      expect(defaultProps.onAggParamsChange).toHaveBeenCalledWith(
-        defaultProps.agg.params,
+      expect(defaultProps.setAggParamValue).toHaveBeenCalledWith(
+        defaultProps.agg.id,
         'min_doc_count',
         0
       );

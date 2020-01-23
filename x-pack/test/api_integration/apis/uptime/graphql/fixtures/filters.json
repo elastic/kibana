@@ -1,0 +1,12 @@
+{
+  "schemes": [
+    "http"
+  ],
+  "ports": [
+    5678
+  ],
+  "locations": [
+    "mpls"
+  ],
+  "tags": []
+}

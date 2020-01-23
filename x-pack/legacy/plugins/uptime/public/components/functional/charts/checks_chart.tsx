@@ -8,21 +8,18 @@ import {
   AreaSeries,
   Axis,
   Chart,
-  getAxisId,
-  getSpecId,
   Position,
   Settings,
   ScaleType,
   timeFormatter,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StatusData } from '../../../../common/graphql/types';
 import { getChartDateLabel } from '../../../lib/helper';
-import { UptimeSettingsContext } from '../../../contexts';
-import { getColorsMap } from './get_colors_map';
+import { useUrlParams } from '../../../hooks';
 
 interface ChecksChartProps {
   /**
@@ -45,9 +42,10 @@ interface ChecksChartProps {
  * @param props The props values required by this component.
  */
 export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartProps) => {
-  const upSeriesSpecId = getSpecId('Up');
-  const downSeriesSpecId = getSpecId('Down');
-  const { absoluteStartDate, absoluteEndDate } = useContext(UptimeSettingsContext);
+  const upSeriesSpecId = 'Up';
+  const downSeriesSpecId = 'Down';
+  const [getUrlParams] = useUrlParams();
+  const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
   const upString = i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
     defaultMessage: 'Up count',
@@ -71,19 +69,19 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
       </EuiTitle>
       <EuiPanel>
         <Chart>
-          <Settings xDomain={{ min: absoluteStartDate, max: absoluteEndDate }} showLegend={false} />
+          <Settings xDomain={{ min, max }} showLegend={false} />
           <Axis
-            id={getAxisId('checksBottom')}
+            id="checksBottom"
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={timeFormatter(getChartDateLabel(absoluteStartDate, absoluteEndDate))}
+            tickFormat={timeFormatter(getChartDateLabel(min, max))}
             title={i18n.translate('xpack.uptime.monitorChart.checksChart.bottomAxis.title', {
               defaultMessage: 'Timestamp',
               description: 'The heading of the x-axis of a chart of timeseries data.',
             })}
           />
           <Axis
-            id={getAxisId('left')}
+            id="left"
             position={Position.Left}
             tickFormat={d => Number(d).toFixed(0)}
             title={i18n.translate('xpack.uptime.monitorChart.checksChart.leftAxis.title', {
@@ -92,7 +90,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             })}
           />
           <AreaSeries
-            customSeriesColors={getColorsMap(successColor, upSeriesSpecId)}
+            customSeriesColors={[successColor]}
             data={status.map(({ x, up }) => ({
               x,
               [upString]: up || 0,
@@ -106,7 +104,7 @@ export const ChecksChart = ({ dangerColor, status, successColor }: ChecksChartPr
             yScaleType={ScaleType.Linear}
           />
           <AreaSeries
-            customSeriesColors={getColorsMap(dangerColor, downSeriesSpecId)}
+            customSeriesColors={[downSeriesSpecId]}
             data={status.map(({ x, down }) => ({
               x,
               [downString]: down || 0,

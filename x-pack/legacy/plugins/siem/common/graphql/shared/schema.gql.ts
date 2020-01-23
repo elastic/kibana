@@ -53,7 +53,7 @@ export const sharedSchema = gql`
     source
   }
 
-  enum FlowTargetNew {
+  enum FlowTargetSourceDest {
     destination
     source
   }

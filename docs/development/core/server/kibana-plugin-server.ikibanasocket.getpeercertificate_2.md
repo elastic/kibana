@@ -4,19 +4,23 @@
 
 ## IKibanaSocket.getPeerCertificate() method
 
+Returns an object representing the peer's certificate. The returned object has some properties corresponding to the field of the certificate. If detailed argument is true the full chain with issuer property will be returned, if false only the top certificate without issuer property. If the peer does not provide a certificate, it returns null.
+
 <b>Signature:</b>
 
 ```typescript
-getPeerCertificate(detailed: false): PeerCertificate | null;
+getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  detailed | <code>false</code> |  |
+|  detailed | <code>boolean</code> | If true; the full chain with issuer property will be returned. |
 
 <b>Returns:</b>
 
-`PeerCertificate | null`
+`PeerCertificate | DetailedPeerCertificate | null`
+
+An object representing the peer's certificate.
 

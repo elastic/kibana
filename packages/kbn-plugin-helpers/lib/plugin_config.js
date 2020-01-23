@@ -32,7 +32,7 @@ module.exports = function(root) {
     'yarn.lock',
     'tsconfig.json',
     'package.json',
-    'index.js',
+    'index.{js,ts}',
     '{lib,public,server,webpackShims,translations}/**/*',
   ];
 

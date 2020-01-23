@@ -50,7 +50,7 @@ Array [
         },
         "size": 0,
       },
-      "index": "myIndex",
+      "index": "apm-*",
     },
   ],
 ]

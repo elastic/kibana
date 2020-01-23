@@ -7,41 +7,12 @@
 import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
-  "The data used to enrich the filter bar."
-  type FilterBar {
-    "A series of monitor IDs in the heartbeat indices."
-    ids: [String!]
-    "The location values users have configured for the agents."
-    locations: [String!]
-    "The names users have configured for the monitors."
-    names: [String!]
-    "The ports of the monitored endpoints."
-    ports: [Int!]
-    "The schemes used by the monitors."
-    schemes: [String!]
-    "The possible status values contained in the indices."
-    statuses: [String!]
-    "The list of URLs"
-    urls: [String!]
-  }
-
   type HistogramDataPoint {
     upCount: Int
     downCount: Int
     x: UnsignedInteger
     x0: UnsignedInteger
     y: UnsignedInteger
-  }
-
-  type SnapshotCount {
-    up: Int!
-    down: Int!
-    mixed: Int!
-    total: Int!
-  }
-
-  type Snapshot {
-    counts: SnapshotCount!
   }
 
   type DataPoint {
@@ -122,30 +93,9 @@ export const monitorsSchema = gql`
     monitors: [LatestMonitor!]
   }
 
-  "A representation of an error state for a monitor."
-  type ErrorListItem {
-    "The number of times this error has occurred."
-    count: Int!
-    "The most recent message associated with this error type."
-    latestMessage: String
-    "The location assigned to the agent reporting this error."
-    location: String
-    "The ID of the monitor reporting the error."
-    monitorId: String
-    "The name configured for the monitor by the user."
-    name: String
-    "The status code, if available, of the error request."
-    statusCode: String
-    "When the most recent error state occurred."
-    timestamp: String
-    "What kind of error the monitor reported."
-    type: String!
-  }
-
-  type MonitorPageTitle {
-    id: String!
-    url: String
-    name: String
+  type HistogramResult {
+    histogram: [HistogramDataPoint]!
+    interval: UnsignedInteger!
   }
 
   extend type Query {
@@ -153,16 +103,16 @@ export const monitorsSchema = gql`
       dateRangeStart: String!
       dateRangeEnd: String!
       filters: String
+      statusFilter: String
     ): LatestMonitorsResult
-
-    getSnapshot(dateRangeStart: String!, dateRangeEnd: String!, filters: String): Snapshot
 
     getSnapshotHistogram(
       dateRangeStart: String!
       dateRangeEnd: String!
       filters: String
+      statusFilter: String
       monitorId: String
-    ): [HistogramDataPoint!]!
+    ): HistogramResult
 
     getMonitorChartsData(
       monitorId: String!
@@ -170,23 +120,5 @@ export const monitorsSchema = gql`
       dateRangeEnd: String!
       location: String
     ): MonitorChart
-
-    "Fetch the most recent event data for a monitor ID, date range, location."
-    getLatestMonitors(
-      "The lower limit of the date range."
-      dateRangeStart: String!
-      "The upper limit of the date range."
-      dateRangeEnd: String!
-      "Optional: a specific monitor ID filter."
-      monitorId: String
-      "Optional: a specific instance location filter."
-      location: String
-    ): [Ping!]!
-
-    getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
-
-    getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem!]
-
-    getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }
 `;

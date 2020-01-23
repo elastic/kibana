@@ -33,7 +33,7 @@ import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
-import { ES_TYPES } from '../../common/es_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import {
   isGteInterval,
@@ -47,7 +47,7 @@ import { PANEL_TYPES } from '../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 
-const RESTRICT_FIELDS = [ES_TYPES.DATE];
+const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
 const validateIntervalValue = intervalValue => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
@@ -123,9 +123,12 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             >
               <EuiComboBox
                 isClearable={false}
-                placeholder={i18n.translate('visTypeTimeseries.indexPattern.timeRange.selectTimeRange', {
-                  defaultMessage: 'Select',
-                })}
+                placeholder={i18n.translate(
+                  'visTypeTimeseries.indexPattern.timeRange.selectTimeRange',
+                  {
+                    defaultMessage: 'Select',
+                  }
+                )}
                 options={timeRangeOptions}
                 selectedOptions={selectedTimeRangeOption ? [selectedTimeRangeOption] : []}
                 onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
@@ -147,7 +150,9 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
-            label={i18n.translate('visTypeTimeseries.indexPatternLabel', { defaultMessage: 'Index pattern' })}
+            label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
+              defaultMessage: 'Index pattern',
+            })}
             helpText={
               isDefaultIndexPatternUsed &&
               i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {

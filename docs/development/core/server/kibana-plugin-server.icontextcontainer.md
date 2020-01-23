@@ -9,15 +9,8 @@ An object that handles registration of context providers and configuring handler
 <b>Signature:</b>
 
 ```typescript
-export interface IContextContainer<TContext extends {}, THandlerReturn, THandlerParameters extends any[] = []> 
+export interface IContextContainer<THandler extends HandlerFunction<any>> 
 ```
-
-## Methods
-
-|  Method | Description |
-|  --- | --- |
-|  [createHandler(pluginOpaqueId, handler)](./kibana-plugin-server.icontextcontainer.createhandler.md) | Create a new handler function pre-wired to context for the plugin. |
-|  [registerContext(pluginOpaqueId, contextName, provider)](./kibana-plugin-server.icontextcontainer.registercontext.md) | Register a new context provider. |
 
 ## Remarks
 
@@ -77,4 +70,11 @@ class MyPlugin {
 }
 
 ```
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [createHandler(pluginOpaqueId, handler)](./kibana-plugin-server.icontextcontainer.createhandler.md) | Create a new handler function pre-wired to context for the plugin. |
+|  [registerContext(pluginOpaqueId, contextName, provider)](./kibana-plugin-server.icontextcontainer.registercontext.md) | Register a new context provider. |
 

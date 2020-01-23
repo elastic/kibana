@@ -4,17 +4,10 @@
 
 ## CoreSetup.http property
 
+[HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md)
+
 <b>Signature:</b>
 
 ```typescript
-http: {
-        createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
-        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
-        registerAuth: HttpServiceSetup['registerAuth'];
-        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
-        basePath: HttpServiceSetup['basePath'];
-        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
-        registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(name: T, provider: RequestHandlerContextProvider<RequestHandlerContext>) => RequestHandlerContextContainer<RequestHandlerContext>;
-        createRouter: () => IRouter;
-    };
+http: HttpServiceSetup;
 ```

@@ -44,8 +44,9 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectAttributes } from '../../../../core/server';
+import { SavedObjectAttributes } from '../../../../core/public';
 import { SimpleSavedObject, CoreStart } from '../../../../core/public';
+import { useKibana } from '../context';
 
 // TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
 const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
@@ -63,6 +64,7 @@ export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): IconType;
   getTooltipForSavedObject?(savedObject: SimpleSavedObject<T>): string;
   showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
+  includeFields?: string[];
 }
 
 interface SavedObjectFinderState {
@@ -86,7 +88,8 @@ interface BaseSavedObjectFinder {
   onChoose?: (
     id: SimpleSavedObject<SavedObjectAttributes>['id'],
     type: SimpleSavedObject<SavedObjectAttributes>['type'],
-    name: string
+    name: string,
+    savedObject: SimpleSavedObject<SavedObjectAttributes>
   ) => void;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<SavedObjectAttributes>>;
@@ -102,12 +105,18 @@ interface SavedObjectFinderInitialPageSize extends BaseSavedObjectFinder {
   initialPageSize?: 5 | 10 | 15 | 25;
   fixedPageSize?: undefined;
 }
-type SavedObjectFinderProps = {
+
+export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize;
+
+export type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
-} & (SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize);
+} & SavedObjectFinderProps;
 
-class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObjectFinderState> {
+class SavedObjectFinderUi extends React.Component<
+  SavedObjectFinderUiProps,
+  SavedObjectFinderState
+> {
   public static propTypes = {
     onChoose: PropTypes.func,
     noItemsMessage: PropTypes.node,
@@ -122,10 +131,14 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
   private debouncedFetch = _.debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
 
+    const fields = Object.values(metaDataMap)
+      .map(metaData => metaData.includeFields || [])
+      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
+
     const perPage = this.props.uiSettings.get('savedObjects:listingLimit');
     const resp = await this.props.savedObjects.client.find({
       type: Object.keys(metaDataMap),
-      fields: ['title', 'visState'],
+      fields: [...new Set(fields)],
       search: query ? `${query}*` : undefined,
       page: 1,
       perPage,
@@ -168,7 +181,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
     }
   }, 300);
 
-  constructor(props: SavedObjectFinderProps) {
+  constructor(props: SavedObjectFinderUiProps) {
     super(props);
 
     this.state = {
@@ -333,6 +346,9 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
             placeholder={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
+            aria-label={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
+              defaultMessage: 'Search…',
+            })}
             fullWidth
             value={this.state.query}
             onChange={e => {
@@ -470,7 +486,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
                   onClick={
                     onChoose
                       ? () => {
-                          onChoose(item.id, item.type, fullName);
+                          onChoose(item.id, item.type, fullName, item.savedObject);
                         }
                       : undefined
                   }
@@ -517,4 +533,15 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
   }
 }
 
-export { SavedObjectFinder };
+const SavedObjectFinder = (props: SavedObjectFinderProps) => {
+  const { services } = useKibana();
+  return (
+    <SavedObjectFinderUi
+      {...props}
+      savedObjects={services.savedObject}
+      uiSettings={services.uiSettings}
+    />
+  );
+};
+
+export { SavedObjectFinder, SavedObjectFinderUi };

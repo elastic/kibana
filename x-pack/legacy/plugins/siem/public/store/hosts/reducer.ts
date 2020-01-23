@@ -10,8 +10,7 @@ import { Direction, HostsFields } from '../../graphql/types';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
-  applyHostsFilterQuery,
-  setHostsFilterQueryDraft,
+  setHostDetailsTablesActivePageToZero,
   setHostTablesActivePageToZero,
   updateHostsSort,
   updateTableActivePage,
@@ -20,7 +19,6 @@ import {
 import {
   setHostPageQueriesActivePageToZero,
   setHostDetailsQueriesActivePageToZero,
-  setHostsQueriesActivePageToZero,
 } from './helpers';
 import { HostsModel, HostsTableType } from './model';
 
@@ -48,9 +46,11 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
   details: {
     queries: {
@@ -73,9 +73,11 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
 };
 
@@ -86,6 +88,13 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       ...state.page,
       queries: setHostPageQueriesActivePageToZero(state),
     },
+    details: {
+      ...state.details,
+      queries: setHostDetailsQueriesActivePageToZero(state),
+    },
+  }))
+  .case(setHostDetailsTablesActivePageToZero, state => ({
+    ...state,
     details: {
       ...state.details,
       queries: setHostDetailsQueriesActivePageToZero(state),
@@ -129,22 +138,6 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
           sortField: sort.field,
         },
       },
-    },
-  }))
-  .case(setHostsFilterQueryDraft, (state, { filterQueryDraft, hostsType }) => ({
-    ...state,
-    [hostsType]: {
-      ...state[hostsType],
-      filterQueryDraft,
-    },
-  }))
-  .case(applyHostsFilterQuery, (state, { filterQuery, hostsType }) => ({
-    ...state,
-    [hostsType]: {
-      ...state[hostsType],
-      queries: setHostsQueriesActivePageToZero(state, hostsType),
-      filterQueryDraft: filterQuery.kuery,
-      filterQuery,
     },
   }))
   .build();

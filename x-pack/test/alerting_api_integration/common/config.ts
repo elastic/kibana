@@ -16,6 +16,22 @@ interface CreateTestConfigOptions {
   ssl?: boolean;
 }
 
+// test.not-enabled is specifically not enabled
+const enabledActionTypes = [
+  '.email',
+  '.index',
+  '.pagerduty',
+  '.server-log',
+  '.servicenow',
+  '.slack',
+  '.webhook',
+  'test.authorization',
+  'test.failing',
+  'test.index-record',
+  'test.noop',
+  'test.rate-limit',
+];
+
 // eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false } = options;
@@ -53,15 +69,18 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          '--xpack.actions.enabled=true',
           `--xpack.actions.whitelistedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
           ])}`,
+          `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.alerting.enabled=true',
+          '--xpack.event_log.logEntries=true',
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

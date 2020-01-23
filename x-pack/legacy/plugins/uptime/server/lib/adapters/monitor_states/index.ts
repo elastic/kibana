@@ -5,5 +5,4 @@
  */
 
 export * from './adapter_types';
-export { ElasticsearchMonitorStatesAdapter } from './elasticsearch_monitor_states_adapter';
-export { UMMemoryMonitorStatesAdapter } from './memory_monitor_states_adapter';
+export { elasticsearchMonitorStatesAdapter } from './elasticsearch_monitor_states_adapter';

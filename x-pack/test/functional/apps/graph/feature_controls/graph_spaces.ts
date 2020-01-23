@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
+  const spacesService = getService('spaces');
+  const PageObjects = getPageObjects(['common', 'graph', 'security', 'error', 'settings']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -35,27 +34,26 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        await PageObjects.settings.setNavType('individual');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Graph');
       });
 
-      it('landing page shows "Create new Workspace" button', async () => {
+      it('landing page shows "Create new graph" button', async () => {
         await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('workspaceLandingPage', { timeout: 10000 });
-        await testSubjects.existOrFail('graphCreateWorkspacePromptButton');
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 
-      it('allows creating a new workspace', async () => {
+      it('allows creating a new graph', async () => {
         await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.click('graphCreateWorkspacePromptButton');
-        const breadcrumb = await testSubjects.find('~graphCurrentWorkspaceBreadcrumb');
-        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved workspace');
+        await testSubjects.click('graphCreateGraphPromptButton');
+        const breadcrumb = await testSubjects.find('~graphCurrentGraphBreadcrumb');
+        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved graph');
       });
     });
 
@@ -76,9 +74,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Graph');
       });
 

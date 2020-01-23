@@ -17,13 +17,13 @@ describe('edgeFactory', () => {
     graph = {
       verticesById: {
         mygenerator: {},
-        myqueue: {}
-      }
+        myqueue: {},
+      },
     };
     edgeJson = {
       id: 12345,
       from: 'mygenerator',
-      to: 'myqueue'
+      to: 'myqueue',
     };
   });
 

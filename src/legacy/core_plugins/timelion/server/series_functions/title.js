@@ -25,7 +25,7 @@ export default new Chainable('title', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'title',
@@ -33,16 +33,16 @@ export default new Chainable('title', {
       help: i18n.translate('timelion.help.functions.title.args.titleHelpText', {
         defaultMessage: 'Title for the plot.',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.titleHelpText', {
     defaultMessage:
       'Adds a title to the top of the plot. If called on more than 1 seriesList the last call will be used.',
   }),
   fn: function hideFn(args) {
-    return alter(args, function (eachSeries, title) {
+    return alter(args, function(eachSeries, title) {
       eachSeries._title = title;
       return eachSeries;
     });
-  }
+  },
 });

@@ -19,24 +19,44 @@
 
 import { Url } from 'url';
 import { Request } from 'hapi';
-
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import { Observable, fromEvent, merge } from 'rxjs';
+import { shareReplay, first, takeUntil } from 'rxjs/operators';
 
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
-import { RouteMethod, RouteSchemas, RouteConfigOptions } from './route';
+import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
+import { RouteValidator, RouteValidatorFullConfig } from './validator';
 
 const requestSymbol = Symbol('request');
+
+/**
+ * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
+ * @public
+ */
+export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
+  ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
+  : Required<RouteConfigOptions<Method>>;
 
 /**
  * Request specific route information exposed to a handler.
  * @public
  * */
-export interface KibanaRequestRoute {
+export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
-  method: RouteMethod | 'patch' | 'options';
-  options: Required<RouteConfigOptions>;
+  method: Method;
+  options: KibanaRequestRouteOptions<Method>;
+}
+
+/**
+ * Request events.
+ * @public
+ * */
+export interface KibanaRequestEvents {
+  /**
+   * Observable that emits once if and when the request has been aborted.
+   */
+  aborted$: Observable<void>;
 }
 
 /**
@@ -50,18 +70,24 @@ export interface LegacyRequest extends Request {} // eslint-disable-line @typesc
  * Kibana specific abstraction for an incoming request.
  * @public
  */
-export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
+export class KibanaRequest<
+  Params = unknown,
+  Query = unknown,
+  Body = unknown,
+  Method extends RouteMethod = any
+> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
    * @internal
    */
-  public static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  public static from<P, Q, B>(
     req: Request,
-    routeSchemas?: RouteSchemas<P, Q, B>,
+    routeSchemas: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B> = {},
     withoutSecretHeaders: boolean = true
   ) {
-    const requestParts = KibanaRequest.validate(req, routeSchemas);
+    const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
+    const requestParts = KibanaRequest.validate(req, routeValidator);
     return new KibanaRequest(
       req,
       requestParts.params,
@@ -77,43 +103,24 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    * received in the route handler.
    * @internal
    */
-  private static validate<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
+  private static validate<P, Q, B>(
     req: Request,
-    routeSchemas: RouteSchemas<P, Q, B> | undefined
+    routeValidator: RouteValidator<P, Q, B>
   ): {
-    params: TypeOf<P>;
-    query: TypeOf<Q>;
-    body: TypeOf<B>;
+    params: P;
+    query: Q;
+    body: B;
   } {
-    if (routeSchemas === undefined) {
-      return {
-        body: {},
-        params: {},
-        query: {},
-      };
-    }
-
-    const params =
-      routeSchemas.params === undefined
-        ? {}
-        : routeSchemas.params.validate(req.params, {}, 'request params');
-
-    const query =
-      routeSchemas.query === undefined
-        ? {}
-        : routeSchemas.query.validate(req.query, {}, 'request query');
-
-    const body =
-      routeSchemas.body === undefined
-        ? {}
-        : routeSchemas.body.validate(req.payload, {}, 'request body');
+    const params = routeValidator.getParams(req.params, 'request params');
+    const query = routeValidator.getQuery(req.query, 'request query');
+    const body = routeValidator.getBody(req.payload, 'request body');
 
     return { query, params, body };
   }
   /** a WHATWG URL standard object. */
   public readonly url: Url;
   /** matched route details */
-  public readonly route: RecursiveReadonly<KibanaRequestRoute>;
+  public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
   /**
    * Readonly copy of incoming request headers.
    * @remarks
@@ -121,16 +128,19 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
    */
   public readonly headers: Headers;
 
+  /** {@link IKibanaSocket} */
   public readonly socket: IKibanaSocket;
+  /** Request events {@link KibanaRequestEvents} */
+  public readonly events: KibanaRequestEvents;
 
   /** @internal */
   protected readonly [requestSymbol]: Request;
 
   constructor(
     request: Request,
-    readonly params: Params,
-    readonly query: Query,
-    readonly body: Body,
+    public readonly params: Params,
+    public readonly query: Query,
+    public readonly body: Body,
     // @ts-ignore we will use this flag as soon as http request proxy is supported in the core
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
@@ -144,19 +154,42 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
       enumerable: false,
     });
 
-    this.route = deepFreeze(this.getRouteInfo());
+    this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = new KibanaSocket(request.raw.req.socket);
+    this.events = this.getEvents(request);
   }
 
-  private getRouteInfo() {
-    const request = this[requestSymbol];
+  private getEvents(request: Request): KibanaRequestEvents {
+    const finish$ = merge(
+      fromEvent(request.raw.req, 'end'), // all data consumed
+      fromEvent(request.raw.req, 'close') // connection was closed
+    ).pipe(shareReplay(1), first());
+    return {
+      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$)),
+    } as const;
+  }
+
+  private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
+    const method = request.method as Method;
+    const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
+
+    const options = ({
+      authRequired: request.route.settings.auth !== false,
+      tags: request.route.settings.tags || [],
+      body: ['get', 'options'].includes(method)
+        ? undefined
+        : {
+            parse,
+            maxBytes,
+            accepts: allow,
+            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
+          },
+    } as unknown) as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
+
     return {
       path: request.path,
-      method: request.method,
-      options: {
-        authRequired: request.route.settings.auth !== false,
-        tags: request.route.settings.tags || [],
-      },
+      method,
+      options,
     };
   }
 }

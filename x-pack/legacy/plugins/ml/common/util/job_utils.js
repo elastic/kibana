@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
 
-import { ALLOWED_DATA_UNITS } from '../constants/validation';
+import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
+import { maxLengthValidator } from './validators';
+import { CREATED_BY_LABEL } from '../../common/constants/new_job';
 
 // work out the default frequency based on the bucket_span in seconds
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
-
   let freq = 3600;
   if (bucketSpanSeconds <= 120) {
     freq = 60;
@@ -51,8 +50,10 @@ export function isTimeSeriesViewJob(job) {
 // Returns a flag to indicate whether the detector at the index in the specified job
 // is suitable for viewing in the Time Series dashboard.
 export function isTimeSeriesViewDetector(job, dtrIndex) {
-  return isSourceDataChartableForDetector(job, dtrIndex) ||
-    isModelPlotChartableForDetector(job, dtrIndex);
+  return (
+    isSourceDataChartableForDetector(job, dtrIndex) ||
+    isModelPlotChartableForDetector(job, dtrIndex)
+  );
 }
 
 // Returns a flag to indicate whether the source data can be plotted in a time
@@ -69,10 +70,11 @@ export function isSourceDataChartableForDetector(job, detectorIndex) {
     // (since mlcategory is a derived field which won't exist in the source data).
     // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
     // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
-    isSourceDataChartable = (mlFunctionToESAggregation(functionName) !== null) &&
-      (dtr.by_field_name !== 'mlcategory') &&
-      (dtr.partition_field_name !== 'mlcategory') &&
-      (dtr.over_field_name !== 'mlcategory');
+    isSourceDataChartable =
+      mlFunctionToESAggregation(functionName) !== null &&
+      dtr.by_field_name !== 'mlcategory' &&
+      dtr.partition_field_name !== 'mlcategory' &&
+      dtr.over_field_name !== 'mlcategory';
 
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
@@ -81,13 +83,12 @@ export function isSourceDataChartableForDetector(job, detectorIndex) {
     if (isSourceDataChartable === true && usesScriptFields === true) {
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = usesScriptFields ? _.keys(job.datafeed_config.script_fields) : [];
-      isSourceDataChartable = (
+      isSourceDataChartable =
         scriptFields.indexOf(dtr.field_name) === -1 &&
         scriptFields.indexOf(dtr.partition_field_name) === -1 &&
         scriptFields.indexOf(dtr.by_field_name) === -1 &&
-        scriptFields.indexOf(dtr.over_field_name) === -1);
+        scriptFields.indexOf(dtr.over_field_name) === -1;
     }
-
   }
 
   return isSourceDataChartable;
@@ -106,13 +107,19 @@ export function isModelPlotChartableForDetector(job, detectorIndex) {
 
     // Model plot can be charted for any of the functions which map to ES aggregations,
     // plus varp and info_content functions.
-    isModelPlotChartable = (mlFunctionToESAggregation(functionName) !== null) ||
-      (['varp', 'high_varp', 'low_varp', 'info_content',
-        'high_info_content', 'low_info_content'].includes(functionName) === true);
+    isModelPlotChartable =
+      mlFunctionToESAggregation(functionName) !== null ||
+      [
+        'varp',
+        'high_varp',
+        'low_varp',
+        'info_content',
+        'high_info_content',
+        'low_info_content',
+      ].includes(functionName) === true;
   }
 
   return isModelPlotChartable;
-
 }
 
 // Returns the names of the partition, by, and over fields for the detector with the
@@ -156,12 +163,13 @@ export function isModelPlotEnabled(job, detectorIndex, entityFields) {
       const terms = termsStr.split(',');
 
       if (detectorHasPartitionField === true) {
-        const partitionEntity = _.find(entityFields, { 'fieldName': detector.partition_field_name });
-        isEnabled = partitionEntity !== undefined && terms.indexOf(partitionEntity.fieldValue) !== -1;
+        const partitionEntity = _.find(entityFields, { fieldName: detector.partition_field_name });
+        isEnabled =
+          partitionEntity !== undefined && terms.indexOf(partitionEntity.fieldValue) !== -1;
       }
 
       if (isEnabled === true && detectorHasByField === true) {
-        const byEntity = _.find(entityFields, { 'fieldName': detector.by_field_name });
+        const byEntity = _.find(entityFields, { fieldName: detector.by_field_name });
         isEnabled = byEntity !== undefined && terms.indexOf(byEntity.fieldValue) !== -1;
       }
     }
@@ -182,26 +190,50 @@ export function isJobVersionGte(job, version) {
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
 export function mlFunctionToESAggregation(functionName) {
-  if (functionName === 'mean' || functionName === 'high_mean' || functionName === 'low_mean' ||
-    functionName === 'metric') {
+  if (
+    functionName === 'mean' ||
+    functionName === 'high_mean' ||
+    functionName === 'low_mean' ||
+    functionName === 'metric'
+  ) {
     return 'avg';
   }
 
-  if (functionName === 'sum' || functionName === 'high_sum' || functionName === 'low_sum' ||
-    functionName === 'non_null_sum' || functionName === 'low_non_null_sum' || functionName === 'high_non_null_sum') {
+  if (
+    functionName === 'sum' ||
+    functionName === 'high_sum' ||
+    functionName === 'low_sum' ||
+    functionName === 'non_null_sum' ||
+    functionName === 'low_non_null_sum' ||
+    functionName === 'high_non_null_sum'
+  ) {
     return 'sum';
   }
 
-  if (functionName === 'count' || functionName === 'high_count' || functionName === 'low_count' ||
-    functionName === 'non_zero_count' || functionName === 'low_non_zero_count' || functionName === 'high_non_zero_count') {
+  if (
+    functionName === 'count' ||
+    functionName === 'high_count' ||
+    functionName === 'low_count' ||
+    functionName === 'non_zero_count' ||
+    functionName === 'low_non_zero_count' ||
+    functionName === 'high_non_zero_count'
+  ) {
     return 'count';
   }
 
-  if (functionName === 'distinct_count' || functionName === 'low_distinct_count' || functionName === 'high_distinct_count') {
+  if (
+    functionName === 'distinct_count' ||
+    functionName === 'low_distinct_count' ||
+    functionName === 'high_distinct_count'
+  ) {
     return 'cardinality';
   }
 
-  if (functionName === 'median' || functionName === 'high_median' || functionName === 'low_median') {
+  if (
+    functionName === 'median' ||
+    functionName === 'high_median' ||
+    functionName === 'low_median'
+  ) {
     return 'percentiles';
   }
 
@@ -223,7 +255,7 @@ export function mlFunctionToESAggregation(functionName) {
 // Job name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
 // it must also start and end with an alphanumeric character'
 export function isJobIdValid(jobId) {
-  return (jobId.match(/^[a-z0-9\-\_]{1,64}$/g) && !jobId.match(/^([_-].*)?(.*[_-])?$/g)) ? true : false;
+  return /^[a-z0-9\-\_]+$/g.test(jobId) && !/^([_-].*)?(.*[_-])?$/g.test(jobId);
 }
 
 // To get median data for jobs and charts we need to use Elasticsearch's
@@ -237,9 +269,9 @@ export const ML_DATA_PREVIEW_COUNT = 10;
 
 // add a prefix to a datafeed id before the "datafeed-" part of the name
 export function prefixDatafeedId(datafeedId, prefix) {
-  return (datafeedId.match(/^datafeed-/)) ?
-    datafeedId.replace(/^datafeed-/, `datafeed-${prefix}`) :
-    `datafeed-${prefix}${datafeedId}`;
+  return datafeedId.match(/^datafeed-/)
+    ? datafeedId.replace(/^datafeed-/, `datafeed-${prefix}`)
+    : `datafeed-${prefix}${datafeedId}`;
 }
 
 // Returns a name which is safe to use in elasticsearch aggregations for the supplied
@@ -252,11 +284,7 @@ export function getSafeAggregationName(fieldName, index) {
 
 export function uniqWithIsEqual(arr) {
   return arr.reduce((dedupedArray, value) => {
-    if (
-      dedupedArray.filter(
-        compareValue => _.isEqual(compareValue, value)
-      ).length === 0
-    ) {
+    if (dedupedArray.filter(compareValue => _.isEqual(compareValue, value)).length === 0) {
       dedupedArray.push(value);
     }
     return dedupedArray;
@@ -278,30 +306,33 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
     } else if (isJobIdValid(job.job_id) === false) {
       messages.push({ id: 'job_id_invalid' });
       valid = false;
+    } else if (maxLengthValidator(JOB_ID_MAX_LENGTH)(job.job_id)) {
+      messages.push({ id: 'job_id_invalid_max_length', maxLength: JOB_ID_MAX_LENGTH });
+      valid = false;
     } else {
       messages.push({ id: 'job_id_valid' });
     }
 
     // group names
-    const {
-      messages: groupsMessages,
-      valid: groupsValid,
-    } = validateGroupNames(job);
+    const { messages: groupsMessages, valid: groupsValid } = validateGroupNames(job);
 
     messages.push(...groupsMessages);
-    valid = (valid && groupsValid);
+    valid = valid && groupsValid;
 
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
       let v = true;
-      _.each(job.analysis_config.categorization_filters, (d) => {
+      _.each(job.analysis_config.categorization_filters, d => {
         try {
           new RegExp(d);
         } catch (e) {
           v = false;
         }
 
-        if (job.analysis_config.categorization_field_name === undefined || job.analysis_config.categorization_field_name === '') {
+        if (
+          job.analysis_config.categorization_field_name === undefined ||
+          job.analysis_config.categorization_field_name === ''
+        ) {
           v = false;
         }
 
@@ -323,7 +354,7 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
       valid = false;
     } else {
       let v = true;
-      _.each(job.analysis_config.detectors, (d) => {
+      _.each(job.analysis_config.detectors, d => {
         if (_.isEmpty(d.function)) {
           v = false;
         }
@@ -340,13 +371,15 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
     if (job.analysis_config.detectors.length >= 2) {
       // create an array of objects with a subset of the attributes
       // where we want to make sure they are not be the same across detectors
-      const compareSubSet = job.analysis_config.detectors.map((d) => _.pick(d, [
-        'function',
-        'field_name',
-        'by_field_name',
-        'over_field_name',
-        'partition_field_name'
-      ]));
+      const compareSubSet = job.analysis_config.detectors.map(d =>
+        _.pick(d, [
+          'function',
+          'field_name',
+          'by_field_name',
+          'over_field_name',
+          'partition_field_name',
+        ])
+      );
 
       const dedupedSubSet = uniqWithIsEqual(compareSubSet);
 
@@ -369,22 +402,18 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
     }
     */
 
-    if (
-      job.analysis_config.bucket_span === '' ||
-      job.analysis_config.bucket_span === undefined
-    ) {
+    if (job.analysis_config.bucket_span === '' || job.analysis_config.bucket_span === undefined) {
       messages.push({ id: 'bucket_span_empty' });
       valid = false;
     } else {
-      const bucketSpan = parseInterval(job.analysis_config.bucket_span, false);
-      if (bucketSpan === null || bucketSpan.asMilliseconds() === 0) {
-        messages.push({ id: 'bucket_span_invalid' });
-        valid = false;
-      } else {
+      if (isValidTimeFormat(job.analysis_config.bucket_span)) {
         messages.push({
           id: 'bucket_span_valid',
-          bucketSpan: job.analysis_config.bucket_span
+          bucketSpan: job.analysis_config.bucket_span,
         });
+      } else {
+        messages.push({ id: 'bucket_span_invalid' });
+        valid = false;
       }
     }
 
@@ -401,27 +430,21 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
 
     if (skipMmlChecks === false) {
       // model memory limit
-      const {
-        messages: mmlUnitMessages,
-        valid: mmlUnitValid,
-      } = validateModelMemoryLimitUnits(job);
+      const mml = job.analysis_limits && job.analysis_limits.model_memory_limit;
+      const { messages: mmlUnitMessages, valid: mmlUnitValid } = validateModelMemoryLimitUnits(mml);
 
       messages.push(...mmlUnitMessages);
-      valid = (valid && mmlUnitValid);
+      valid = valid && mmlUnitValid;
 
       if (mmlUnitValid) {
         // if mml is a valid format,
         // run the validation against max mml
-        const {
-          messages: mmlMessages,
-          valid: mmlValid,
-        } = validateModelMemoryLimit(job, limits);
+        const { messages: mmlMessages, valid: mmlValid } = validateModelMemoryLimit(job, limits);
 
         messages.push(...mmlMessages);
-        valid = (valid && mmlValid);
+        valid = valid && mmlValid;
       }
     }
-
   } else {
     valid = false;
   }
@@ -429,8 +452,36 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   return {
     messages,
     valid,
-    contains: id =>  (messages.some(m => id === m.id)),
-    find: id => (messages.find(m => id === m.id)),
+    contains: id => messages.some(m => id === m.id),
+    find: id => messages.find(m => id === m.id),
+  };
+}
+
+export function basicDatafeedValidation(datafeed) {
+  const messages = [];
+  let valid = true;
+
+  if (datafeed) {
+    let queryDelayMessage = { id: 'query_delay_valid' };
+    if (isValidTimeFormat(datafeed.query_delay) === false) {
+      queryDelayMessage = { id: 'query_delay_invalid' };
+      valid = false;
+    }
+    messages.push(queryDelayMessage);
+
+    let frequencyMessage = { id: 'frequency_valid' };
+    if (isValidTimeFormat(datafeed.frequency) === false) {
+      frequencyMessage = { id: 'frequency_invalid' };
+      valid = false;
+    }
+    messages.push(frequencyMessage);
+  }
+
+  return {
+    messages,
+    valid,
+    contains: id => messages.some(m => id === m.id),
+    find: id => messages.find(m => id === m.id),
   };
 }
 
@@ -438,7 +489,10 @@ export function validateModelMemoryLimit(job, limits) {
   const messages = [];
   let valid = true;
   // model memory limit
-  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
+  if (
+    typeof job.analysis_limits !== 'undefined' &&
+    typeof job.analysis_limits.model_memory_limit !== 'undefined'
+  ) {
     if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
       const max = limits.max_model_memory_limit.toUpperCase();
       const mml = job.analysis_limits.model_memory_limit.toUpperCase();
@@ -446,7 +500,7 @@ export function validateModelMemoryLimit(job, limits) {
       const mmlBytes = numeral(mml).value();
       const maxBytes = numeral(max).value();
 
-      if(mmlBytes > maxBytes) {
+      if (mmlBytes > maxBytes) {
         messages.push({ id: 'model_memory_limit_invalid' });
         valid = false;
       } else {
@@ -457,19 +511,19 @@ export function validateModelMemoryLimit(job, limits) {
   return {
     valid,
     messages,
-    contains: id =>  (messages.some(m => id === m.id)),
-    find: id => (messages.find(m => id === m.id)),
+    contains: id => messages.some(m => id === m.id),
+    find: id => messages.find(m => id === m.id),
   };
 }
 
-export function validateModelMemoryLimitUnits(job) {
+export function validateModelMemoryLimitUnits(modelMemoryLimit) {
   const messages = [];
   let valid = true;
 
-  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
-    const mml = job.analysis_limits.model_memory_limit.toUpperCase();
-    const mmlSplit = mml.match(/\d+(\w+)/);
-    const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
+  if (modelMemoryLimit !== undefined) {
+    const mml = String(modelMemoryLimit).toUpperCase();
+    const mmlSplit = mml.match(/\d+(\w+)$/);
+    const unit = mmlSplit && mmlSplit.length === 2 ? mmlSplit[1] : null;
 
     if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
       messages.push({ id: 'model_memory_limit_units_invalid' });
@@ -481,34 +535,36 @@ export function validateModelMemoryLimitUnits(job) {
   return {
     valid,
     messages,
-    contains: id =>  (messages.some(m => id === m.id)),
-    find: id => (messages.find(m => id === m.id)),
+    contains: id => messages.some(m => id === m.id),
+    find: id => messages.find(m => id === m.id),
   };
 }
 
 export function validateGroupNames(job) {
-  const messages = [];
-  let valid = true;
-  if (job.groups !== undefined) {
-    let groupIdValid = true;
-    job.groups.forEach(group => {
-      if (isJobIdValid(group) === false) {
-        groupIdValid = false;
-        valid = false;
-      }
-    });
-    if (job.groups.length > 0 && groupIdValid) {
-      messages.push({ id: 'job_group_id_valid' });
-    } else if (job.groups.length > 0 && !groupIdValid) {
-      messages.push({ id: 'job_group_id_invalid' });
-    }
-  }
+  const { groups = [] } = job;
+  const errorMessages = [
+    ...(groups.some(group => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : []),
+    ...(groups.some(group => maxLengthValidator(JOB_ID_MAX_LENGTH)(group))
+      ? [{ id: 'job_group_id_invalid_max_length' }]
+      : []),
+  ];
+  const valid = errorMessages.length === 0;
+  const messages = valid && groups.length ? [{ id: 'job_group_id_valid' }] : errorMessages;
+
   return {
     valid,
     messages,
-    contains: id =>  (messages.some(m => id === m.id)),
-    find: id => (messages.find(m => id === m.id)),
+    contains: id => messages.some(m => id === m.id),
+    find: id => messages.find(m => id === m.id),
   };
+}
+
+function isValidTimeFormat(value) {
+  if (value === undefined) {
+    return true;
+  }
+  const interval = parseInterval(value, false);
+  return interval !== null && interval.asMilliseconds() !== 0;
 }
 
 // Returns the latest of the last source data and last processed bucket timestamp,
@@ -518,6 +574,17 @@ export function getLatestDataOrBucketTimestamp(latestDataTimestamp, latestBucket
   if (latestDataTimestamp !== undefined && latestBucketTimestamp !== undefined) {
     return Math.max(latestDataTimestamp, latestBucketTimestamp);
   } else {
-    return (latestDataTimestamp !== undefined) ? latestDataTimestamp : latestBucketTimestamp;
+    return latestDataTimestamp !== undefined ? latestDataTimestamp : latestBucketTimestamp;
+  }
+}
+
+/**
+ * If created_by is set in the job's custom_settings, remove it in case
+ * it was created by a job wizard as the rules cannot currently be edited
+ * in the job wizards and so would be lost in a clone.
+ */
+export function processCreatedBy(customSettings) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by)) {
+    delete customSettings.created_by;
   }
 }

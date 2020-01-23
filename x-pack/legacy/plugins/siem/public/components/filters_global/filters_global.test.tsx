@@ -5,11 +5,10 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import '../../mock/match_media';
-import { FiltersGlobal } from './index';
+import { FiltersGlobal } from './filters_global';
 
 describe('rendering', () => {
   test('renders correctly', () => {
@@ -18,6 +17,7 @@ describe('rendering', () => {
         <p>{'Additional filters here.'}</p>
       </FiltersGlobal>
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+
+    expect(wrapper).toMatchSnapshot();
   });
 });

@@ -8,12 +8,15 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter/common';
 import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
+import { RendererStrings } from '../../../i18n';
 import { TimeFilter } from './components/time_filter';
+
+const { timeFilter: strings } = RendererStrings;
 
 export const timeFilter = () => ({
   name: 'time_filter',
-  displayName: 'Time filter',
-  help: 'Set a time window',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true, // must be true, otherwise popovers don't work
   render(domNode, config, handlers) {
     const filterExpression = handlers.getFilter();

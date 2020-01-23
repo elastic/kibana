@@ -17,7 +17,7 @@ export type ElasticsearchMappingOf<Type> = Type extends string | string[]
   : never;
 
 export interface ElasticsearchStringFieldMapping {
-  type: 'keyword' | 'text';
+  type: 'keyword' | 'text' | 'date';
 }
 
 export interface ElasticsearchBooleanFieldMapping {

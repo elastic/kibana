@@ -40,8 +40,8 @@ const defaultIntegrateOptions = {
   ignoreUnused: false,
   config: {
     paths: {
-      'plugin-1': 'src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1',
-      'plugin-2': 'src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2',
+      'plugin-1': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1'],
+      'plugin-2': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2'],
     },
     exclude: [],
     translations: [],

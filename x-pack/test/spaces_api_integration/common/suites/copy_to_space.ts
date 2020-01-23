@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { EsArchiver } from 'src/es_archiver';
-import { DEFAULT_SPACE_ID } from '../../../../legacy/plugins/spaces/common/constants';
-import { CopyResponse } from '../../../../legacy/plugins/spaces/server/lib/copy_to_spaces';
+import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
+import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -87,14 +87,8 @@ export function copyToSpaceTestSuiteFactory(
       body: {
         size: 0,
         query: {
-          bool: {
-            must_not: {
-              term: {
-                // exclude spaces from the result set.
-                // we don't assert on these.
-                type: 'space',
-              },
-            },
+          terms: {
+            type: ['visualization', 'dashboard', 'index-pattern'],
           },
         },
         aggs: {
@@ -139,19 +133,16 @@ export function copyToSpaceTestSuiteFactory(
     }
 
     const { countByType } = spaceBucket;
-    const expectedBuckets = Object.entries(expectedCounts).reduce(
-      (acc, entry) => {
-        const [type, count] = entry;
-        return [
-          ...acc,
-          {
-            key: type,
-            doc_count: count,
-          },
-        ];
-      },
-      [] as CountByTypeBucket[]
-    );
+    const expectedBuckets = Object.entries(expectedCounts).reduce((acc, entry) => {
+      const [type, count] = entry;
+      return [
+        ...acc,
+        {
+          key: type,
+          doc_count: count,
+        },
+      ];
+    }, [] as CountByTypeBucket[]);
 
     expectedBuckets.sort(bucketSorter);
     countByType.buckets.sort(bucketSorter);

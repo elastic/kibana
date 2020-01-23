@@ -41,22 +41,21 @@ export const addEntitiesToKql = (
 ): string => {
   const value: RisonValue = decodeRison(kqlQuery);
   if (isRisonObject(value)) {
-    const filterQuery = value.filterQuery;
-    if (isRisonObject(filterQuery)) {
-      if (isRegularString(filterQuery.expression)) {
+    const appQuery = value;
+    if (isRisonObject(appQuery)) {
+      if (isRegularString(appQuery.query)) {
         const entitiesKql = entitiesToKql(entityNames, entities);
-        if (filterQuery.expression !== '' && entitiesKql !== '') {
-          filterQuery.expression = `(${entitiesKql}) and (${filterQuery.expression})`;
-        } else if (filterQuery.expression === '' && entitiesKql !== '') {
-          filterQuery.expression = `(${entitiesKql})`;
+        if (appQuery.query !== '' && entitiesKql !== '') {
+          appQuery.query = `(${entitiesKql}) and (${appQuery.query})`;
+        } else if (appQuery.query === '' && entitiesKql !== '') {
+          appQuery.query = `(${entitiesKql})`;
         }
         return encode(value);
       }
-    } else if (value.filterQuery == null) {
-      const entitiesKql = entitiesToKql(entityNames, entities);
-      value.filterQuery = { expression: `(${entitiesKql})` };
-      return encode(value);
     }
+  } else if (value == null) {
+    const entitiesKql = entitiesToKql(entityNames, entities);
+    return encode({ query: `(${entitiesKql})`, language: 'kuery' });
   }
   return kqlQuery;
 };

@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecurityService } from '../../../common/services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { isCustomRoleSpecification } from '../../common/types';
 import { UserScenarios } from '../scenarios';
 
 export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProviderContext) {
-  const securityService: SecurityService = getService('security');
+  const securityService = getService('security');
 
   describe('ui capabilities', function() {
-    this.tags('ciGroup4');
+    this.tags('ciGroup9');
 
     before(async () => {
       for (const user of UserScenarios) {

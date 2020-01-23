@@ -1,0 +1,132 @@
+<kbn-top-nav
+  app-name="'context'"
+  show-search-bar="true"
+  show-filter-bar="true"
+  show-save-query="false"
+  show-date-picker="false"
+
+  filters="contextApp.state.queryParameters.filters"
+  on-filters-updated="contextApp.actions.updateFilters"
+  index-patterns="[contextApp.indexPattern]"
+>
+</kbn-top-nav>
+
+
+<!-- Error feedback -->
+<div
+  class="kuiViewContent kuiViewContentItem"
+  ng-if="contextApp.state.loadingStatus.anchor.status === contextApp.constants.LOADING_STATUS.FAILED"
+>
+  <div class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm">
+    <div class="kuiInfoPanelHeader">
+      <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+      <span
+        class="kuiInfoPanelHeader__title"
+        i18n-id="kbn.context.failedToLoadAnchorDocumentDescription"
+        i18n-default-message="Failed to load the anchor document"
+      ></span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div
+        class="kuiInfoPanelBody__message"
+        ng-if="contextApp.state.loadingStatus.anchor.reason === contextApp.constants.FAILURE_REASONS.INVALID_TIEBREAKER"
+        i18n-id="kbn.context.noSearchableTiebreakerFieldDescription"
+        i18n-default-message="No searchable tiebreaker field could be found in the index pattern {indexPatternId}. Please change the advanced setting {tieBreakerFields} to include a valid field for this index pattern."
+        i18n-values="{
+          indexPatternId: contextApp.state.queryParameters.indexPatternId,
+          html_tieBreakerFields: '<code>context:tieBreakerFields</code>'
+        }"
+      >
+      </div>
+      <div
+        class="kuiInfoPanelBody__message"
+        ng-if="contextApp.state.loadingStatus.anchor.reason === contextApp.constants.FAILURE_REASONS.UNKNOWN"
+      >
+        <span
+          i18n-id="kbn.context.reloadPageDescription.reloadOrVisitTextMessage"
+          i18n-default-message="Please reload or visit"
+          i18n-description="Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
+        ></span>
+        <a
+          ng-href="{{ contextApp.state.navigation.discover.url }}"
+          i18n-id="kbn.context.reloadPageDescription.discoverLinkText"
+          i18n-default-message="Discover"
+          i18n-description="Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
+        ></a>
+        <span
+          i18n-id="kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
+          i18n-default-message="to select a valid anchor document."
+          i18n-description="Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
+      ></span>
+    </div>
+    </div>
+  </div>
+</div>
+
+<main
+  class="kuiViewContent kuiViewContentItem"
+  ng-if="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.FAILED"
+>
+  <!-- Controls -->
+  <context-action-bar
+        default-step-size="contextApp.state.queryParameters.defaultStepSize"
+        doc-count="contextApp.state.queryParameters.predecessorCount"
+        doc-count-available="contextApp.state.rows.predecessors.length"
+        is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
+        is-loading="![
+        contextApp.constants.LOADING_STATUS.LOADED,
+        contextApp.constants.LOADING_STATUS.FAILED,
+        ].includes(contextApp.state.loadingStatus.predecessors.status)"
+        on-change-count="contextApp.actions.fetchGivenPredecessorRows"
+        type="'predecessors'"
+  ></context-action-bar>
+
+
+  <!-- Loading feedback -->
+  <div
+    ng-if="[
+      contextApp.constants.LOADING_STATUS.UNINITIALIZED,
+      contextApp.constants.LOADING_STATUS.LOADING,
+    ].includes(contextApp.state.loadingStatus.anchor.status)"
+    class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
+  >
+    <div
+      class="kuiTableInfo"
+      i18n-id="kbn.context.loadingDescription"
+      i18n-default-message="Loading…"
+    ></div>
+  </div>
+
+  <!-- Table -->
+  <div
+    ng-if="contextApp.state.loadingStatus.anchor.status === contextApp.constants.LOADING_STATUS.LOADED"
+    class="kuiPanel kuiVerticalRhythm"
+  >
+    <div class="discover-table" fixed-scroll>
+      <doc-table
+        filter="contextApp.actions.addFilter"
+        hits="contextApp.state.rows.all"
+        index-pattern="contextApp.indexPattern"
+        sorting="contextApp.state.queryParameters.sort"
+        columns="contextApp.state.queryParameters.columns"
+        infinite-scroll="true"
+        minimum-visible-rows="contextApp.state.rows.all.length"
+      ></doc-table>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <context-action-bar
+    default-step-size="contextApp.state.queryParameters.defaultStepSize"
+    doc-count="contextApp.state.queryParameters.successorCount"
+    doc-count-available="contextApp.state.rows.successors.length"
+    is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
+    is-loading="![
+    contextApp.constants.LOADING_STATUS.LOADED,
+    contextApp.constants.LOADING_STATUS.FAILED,
+    ].includes(contextApp.state.loadingStatus.successors.status)"
+    on-change-count="contextApp.actions.fetchGivenSuccessorRows"
+    type="'successors'"
+  ></context-action-bar>
+</main>

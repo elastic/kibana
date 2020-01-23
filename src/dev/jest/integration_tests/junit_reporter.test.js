@@ -24,12 +24,13 @@ import { readFileSync } from 'fs';
 import del from 'del';
 import execa from 'execa';
 import xml2js from 'xml2js';
+import { makeJunitReportPath } from '@kbn/test';
 
 const MINUTE = 1000 * 60;
 const ROOT_DIR = resolve(__dirname, '../../../../');
 const FIXTURE_DIR = resolve(__dirname, '__fixtures__');
 const TARGET_DIR = resolve(FIXTURE_DIR, 'target');
-const XML_PATH = resolve(TARGET_DIR, 'junit', process.env.JOB || '.', 'TEST-Jest Tests.xml');
+const XML_PATH = makeJunitReportPath(FIXTURE_DIR, 'Jest Tests');
 
 afterAll(async () => {
   await del(TARGET_DIR);
@@ -52,7 +53,7 @@ it(
       }
     );
 
-    expect(result.code).toBe(1);
+    expect(result.exitCode).toBe(1);
     await expect(parseXml(readFileSync(XML_PATH, 'utf8'))).resolves.toEqual({
       testsuites: {
         $: {
@@ -78,16 +79,14 @@ it(
                 $: {
                   classname: 'Jest Tests.·',
                   name: 'fails',
-                  time: expect.anything()
+                  time: expect.anything(),
                 },
-                failure: [
-                  expect.stringMatching(/Error: failure\s+at /m)
-                ]
-              }
-            ]
-          }
-        ]
-      }
+                failure: [expect.stringMatching(/Error: failure\s+at /m)],
+              },
+            ],
+          },
+        ],
+      },
     });
   },
   3 * MINUTE

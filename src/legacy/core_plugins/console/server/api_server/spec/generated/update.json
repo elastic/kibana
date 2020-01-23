@@ -21,8 +21,7 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_update/{id}",
-      "{indices}/{type}/{id}/_update"
+      "{indices}/_update/{id}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update.html"
   }

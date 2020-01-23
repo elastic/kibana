@@ -5,9 +5,9 @@
  */
 
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import { Job } from '../types';
+import { SiemJob } from '../types';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -19,9 +19,9 @@ const StaticSwitch = styled(EuiSwitch)`
 StaticSwitch.displayName = 'StaticSwitch';
 
 export interface JobSwitchProps {
-  job: Job;
-  isSummaryLoading: boolean;
-  onJobStateChange: (jobName: string, latestTimestampMs: number, enable: boolean) => void;
+  job: SiemJob;
+  isSiemJobsLoading: boolean;
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
 }
 
 // Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
@@ -41,30 +41,42 @@ export const isFailure = (jobState: string, datafeedState: string): boolean => {
   return failureStates.includes(jobState) || failureStates.includes(datafeedState);
 };
 
-export const JobSwitch = React.memo<JobSwitchProps>(
-  ({ job, isSummaryLoading, onJobStateChange }) => {
-    const [isLoading, setIsLoading] = useState(false);
+export const JobSwitchComponent = ({
+  job,
+  isSiemJobsLoading,
+  onJobStateChange,
+}: JobSwitchProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const handleChange = useCallback(
+    e => {
+      setIsLoading(true);
+      onJobStateChange(job, job.latestTimestampMs || 0, e.target.checked);
+    },
+    [job, setIsLoading, onJobStateChange]
+  );
 
-    return (
-      <EuiFlexGroup justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          {isSummaryLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
-            <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
-          ) : (
-            <StaticSwitch
-              data-test-subj="job-switch"
-              disabled={isFailure(job.jobState, job.datafeedState)}
-              checked={isChecked(job.jobState, job.datafeedState)}
-              onChange={e => {
-                setIsLoading(true);
-                onJobStateChange(job.id, job.latestTimestampMs || 0, e.target.checked);
-              }}
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+  return (
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        {isSiemJobsLoading || isLoading || isJobLoading(job.jobState, job.datafeedId) ? (
+          <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
+        ) : (
+          <StaticSwitch
+            data-test-subj="job-switch"
+            disabled={isFailure(job.jobState, job.datafeedState)}
+            checked={isChecked(job.jobState, job.datafeedState)}
+            onChange={handleChange}
+            showLabel={false}
+            label=""
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+JobSwitchComponent.displayName = 'JobSwitchComponent';
+
+export const JobSwitch = React.memo(JobSwitchComponent);
 
 JobSwitch.displayName = 'JobSwitch';

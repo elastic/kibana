@@ -16,18 +16,83 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin } from '.';
+import {
+  FieldFormatRegisty,
+  Plugin,
+  FieldFormatsStart,
+  FieldFormatsSetup,
+  IndexPatternsContract,
+} from '.';
+import { searchSetupMock } from './search/mocks';
+import { queryServiceMock } from './query/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
+const autocompleteMock: any = {
+  getValueSuggestions: jest.fn(),
+  getQuerySuggestions: jest.fn(),
+  hasQuerySuggestions: jest.fn(),
+};
+
+const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
+  getByFieldType: jest.fn(),
+  getConfig: jest.fn(),
+  getDefaultConfig: jest.fn(),
+  getDefaultInstance: jest.fn() as any,
+  getDefaultInstanceCacheResolver: jest.fn(),
+  getDefaultInstancePlain: jest.fn(),
+  getDefaultType: jest.fn(),
+  getDefaultTypeName: jest.fn(),
+  getInstance: jest.fn() as any,
+  getType: jest.fn(),
+  getTypeNameByEsTypes: jest.fn(),
+  init: jest.fn(),
+  register: jest.fn(),
+  parseDefaultTypeMap: jest.fn(),
+};
+
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {};
+  const querySetupMock = queryServiceMock.createSetupContract();
+  const setupContract = {
+    autocomplete: autocompleteMock,
+    search: searchSetupMock,
+    fieldFormats: fieldFormatsMock as FieldFormatsSetup,
+    query: querySetupMock,
+  };
+
   return setupContract;
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = undefined;
+  const queryStartMock = queryServiceMock.createStartContract();
+  const startContract = {
+    autocomplete: autocompleteMock,
+    getSuggestions: jest.fn(),
+    search: {
+      search: jest.fn(),
+
+      __LEGACY: {
+        esClient: {
+          search: jest.fn(),
+          msearch: jest.fn(),
+        },
+      },
+    },
+    fieldFormats: fieldFormatsMock as FieldFormatsStart,
+    query: queryStartMock,
+    ui: {
+      IndexPatternSelect: jest.fn(),
+      SearchBar: jest.fn(),
+    },
+    __LEGACY: {
+      esClient: {
+        search: jest.fn(),
+        msearch: jest.fn(),
+      },
+    },
+    indexPatterns: {} as IndexPatternsContract,
+  };
   return startContract;
 };
 

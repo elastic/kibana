@@ -18,6 +18,7 @@ export default function({ getService }: FtrProviderContext) {
       createExpectEmpty,
       createExpectRbacForbidden,
       createExpectVisualizationResults,
+      expectFilterWrongTypeError,
       expectNotSpaceAwareResults,
       expectTypeRequired,
       findTest,
@@ -94,6 +95,31 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 400,
             response: expectTypeRequired,
           },
+          filterWithNotSpaceAwareType: {
+            description: 'forbidden login and find globaltype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('globaltype'),
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'forbidden',
+            statusCode: 403,
+            response: createExpectRbacForbidden('globaltype'),
+          },
         },
       });
 
@@ -135,6 +161,31 @@ export default function({ getService }: FtrProviderContext) {
             description: 'bad request, type is required',
             statusCode: 400,
             response: expectTypeRequired,
+          },
+          filterWithNotSpaceAwareType: {
+            description: 'only the globaltype',
+            statusCode: 200,
+            response: expectNotSpaceAwareResults,
+          },
+          filterWithHiddenType: {
+            description: 'empty result',
+            statusCode: 200,
+            response: createExpectEmpty(1, 20, 0),
+          },
+          filterWithUnknownType: {
+            description: 'empty result',
+            statusCode: 200,
+            response: createExpectEmpty(1, 20, 0),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -178,6 +229,31 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 400,
             response: expectTypeRequired,
           },
+          filterWithNotSpaceAwareType: {
+            description: 'forbidden login and find globaltype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('globaltype'),
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'forbidden',
+            statusCode: 403,
+            response: createExpectRbacForbidden('globaltype'),
+          },
         },
       });
 
@@ -219,6 +295,31 @@ export default function({ getService }: FtrProviderContext) {
             description: 'bad request, type is required',
             statusCode: 400,
             response: expectTypeRequired,
+          },
+          filterWithNotSpaceAwareType: {
+            description: 'only the globaltype',
+            statusCode: 200,
+            response: expectNotSpaceAwareResults,
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -262,6 +363,31 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 400,
             response: expectTypeRequired,
           },
+          filterWithNotSpaceAwareType: {
+            description: 'only the globaltype',
+            statusCode: 200,
+            response: expectNotSpaceAwareResults,
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
+          },
         },
       });
 
@@ -303,6 +429,31 @@ export default function({ getService }: FtrProviderContext) {
             description: 'bad request, type is required',
             statusCode: 400,
             response: expectTypeRequired,
+          },
+          filterWithNotSpaceAwareType: {
+            description: 'only the globaltype',
+            statusCode: 200,
+            response: expectNotSpaceAwareResults,
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -346,6 +497,31 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 400,
             response: expectTypeRequired,
           },
+          filterWithNotSpaceAwareType: {
+            description: 'only the globaltype',
+            statusCode: 200,
+            response: expectNotSpaceAwareResults,
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
+          },
         },
       });
 
@@ -387,6 +563,31 @@ export default function({ getService }: FtrProviderContext) {
             description: 'bad request, type is required',
             statusCode: 400,
             response: expectTypeRequired,
+          },
+          filterWithNotSpaceAwareType: {
+            description: 'only the globaltype',
+            statusCode: 200,
+            response: expectNotSpaceAwareResults,
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
           },
         },
       });
@@ -430,6 +631,31 @@ export default function({ getService }: FtrProviderContext) {
             statusCode: 400,
             response: expectTypeRequired,
           },
+          filterWithNotSpaceAwareType: {
+            description: 'only the globaltype',
+            statusCode: 200,
+            response: expectNotSpaceAwareResults,
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'Bad Request',
+            statusCode: 400,
+            response: expectFilterWrongTypeError,
+          },
         },
       });
 
@@ -471,6 +697,31 @@ export default function({ getService }: FtrProviderContext) {
             description: 'bad request, type is required',
             statusCode: 400,
             response: expectTypeRequired,
+          },
+          filterWithNotSpaceAwareType: {
+            description: 'forbidden login and find globaltype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('globaltype'),
+          },
+          filterWithHiddenType: {
+            description: 'forbidden find hiddentype message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('hiddentype'),
+          },
+          filterWithUnknownType: {
+            description: 'forbidden find wigwags message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('wigwags'),
+          },
+          filterWithNoType: {
+            description: 'bad request, type is required',
+            statusCode: 400,
+            response: expectTypeRequired,
+          },
+          filterWithUnAllowedType: {
+            description: 'forbidden',
+            statusCode: 403,
+            response: createExpectRbacForbidden('globaltype'),
           },
         },
       });

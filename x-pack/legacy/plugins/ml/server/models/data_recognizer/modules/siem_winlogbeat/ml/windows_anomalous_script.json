@@ -1,0 +1,44 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "SIEM Winlogbeat: Looks for unusual powershell scripts that may indicate execution of malware, or persistence mechanisms (beta)",
+  "groups": [
+    "siem",
+    "winlogbeat",
+    "powershell"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high_info_content(\"winlog.event_data.ScriptBlockText\")",
+        "function": "high_info_content",
+        "field_name": "winlog.event_data.ScriptBlockText"
+      }
+    ],
+    "influencers": [
+      "host.name",
+      "user.name",
+      "winlog.event_data.Path"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-siem-winlogbeat",
+    "custom_urls": [
+      {
+        "url_name": "Host Details by user name",
+        "url_value": "siem#/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      },
+      {
+        "url_name": "Hosts Overview by user name",
+        "url_value": "siem#/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      }
+    ]
+  }
+}

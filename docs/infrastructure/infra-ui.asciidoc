@@ -1,13 +1,13 @@
 [role="xpack"]
 [[infra-ui]]
-== Using the Infrastructure app
+== Using the Metrics app
 
-Use the Infrastructure app in {kib} to monitor your infrastructure and identify problems in real time.
+Use the Metrics app in {kib} to monitor your infrastructure metrics and identify problems in real time.
 You can explore metrics for hosts, containers, and services.
 You can also drill down to view more detailed metrics, or seamlessly switch to view the corresponding logs, application traces, and uptime information.
 
 Initially, the *Inventory* tab shows an overview of the hosts in of your infrastructure and the current CPU usage for each host.
-From here, you can drill down into areas of interest.
+From here, you can view other metrics or drill down into areas of interest.
 
 [role="screenshot"]
 image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
@@ -49,7 +49,7 @@ For example, enter `host.hostname : "host1"` to see only the information for `ho
 [[infra-date]]
 === Specify the time and date
 
-Click the time selector image:infrastructure/images/infra-time-selector.png[time selector icon] to choose the timeframe for the metrics.
+Click the time filter image:infrastructure/images/infra-time-selector.png[time filter icon] to choose the timeframe for the metrics.
 The values shown are the values for the last minute at the specified time and date.
 
 [float]
@@ -62,28 +62,29 @@ Select *Auto-refresh* to keep up-to-date metrics information coming in, or *Stop
 [[infra-configure-source]]
 === Configure the data to use for your metrics
 
-The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Infrastructure app settings] in the {kibana-ref}/settings.html[Kibana configuration file].
+If your metrics have custom index patterns, or use non-default field settings, you can override the default configuration settings.
+
+The default source configuration for metrics is specified in the {kibana-ref}/infrastructure-ui-settings-kb.html[Metrics app settings] in the {kibana-ref}/settings.html[Kibana configuration file].
 The default configuration uses the `metricbeat-*` index pattern to query the data.
 The default configuration also defines field settings for things like timestamps and container names.
 
-If your metrics have custom index patterns, or use non-default field settings, you can override the default settings.
-Click *Configuration* to change the settings.
-This opens the *Configure source* fly-out dialog.
+To change the configuration settings, click the *Settings* tab.
 
 NOTE: These settings are shared with logs. Changes you make here may also affect the settings used by the *Logs* app.
 
-In the *Configure source* dialog, you can change the following values:
+In the *Settings* tab, you can change the values in these sections:
 
 * *Name*: the name of the source configuration
-* *Indices*: the index pattern or patterns in the Elasticsearch indices to read metrics data and log data
-  from
+* *Indices*: the index pattern or patterns in the Elasticsearch indices to read metrics data and log data from
 * *Fields*: the names of specific fields in the indices that are used to query and interpret the data correctly
+
+When you have completed your changes, click *Apply*.
+
+If the fields are greyed out and cannot be edited, you may not have sufficient privileges to change the source configuration.
+For more information see <<xpack-security-authorization>>.
 
 TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration changes you make here are specific to the current space.
 You can make different subsets of data available by creating multiple spaces with different data source configurations.
-
-TIP: If you don't see the *Configuration* option, you may not have sufficient privileges to change the source configuration.
-For more information see <<xpack-security-authorization>>.
 
 [float]
 [[infra-metrics-explorer]]

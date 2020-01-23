@@ -7,13 +7,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import {
   PHASE_ROLLOVER_MINIMUM_AGE,
@@ -49,19 +43,28 @@ function getUnitsAriaLabelForPhase(phase) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
   switch (phase) {
     case PHASE_WARM:
-      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeUnitsAriaLabel', {
-        defaultMessage: 'Units for timing of warm phase',
-      });
+      return i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeUnitsAriaLabel',
+        {
+          defaultMessage: 'Units for timing of warm phase',
+        }
+      );
 
     case PHASE_COLD:
-      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel', {
-        defaultMessage: 'Units for timing of cold phase',
-      });
+      return i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel',
+        {
+          defaultMessage: 'Units for timing of cold phase',
+        }
+      );
 
     case PHASE_DELETE:
-      return i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeUnitsAriaLabel', {
-        defaultMessage: 'Units for timing of delete phase',
-      });
+      return i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeUnitsAriaLabel',
+        {
+          defaultMessage: 'Units for timing of delete phase',
+        }
+      );
   }
 }
 
@@ -70,23 +73,73 @@ export const MinAgeInput = props => {
 
   let daysOptionLabel;
   let hoursOptionLabel;
+  let minutesOptionLabel;
+  let secondsOptionLabel;
+  let millisecondsOptionLabel;
+  let microsecondsOptionLabel;
+  let nanosecondsOptionLabel;
 
   if (rolloverEnabled) {
-    daysOptionLabel = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.rolloverDaysOptionLabel', {
-      defaultMessage: 'days from rollover',
-    });
+    daysOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverDaysOptionLabel',
+      {
+        defaultMessage: 'days from rollover',
+      }
+    );
 
-    hoursOptionLabel = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.rolloverHoursOptionLabel', {
-      defaultMessage: 'hours from rollover',
-    });
+    hoursOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverHoursOptionLabel',
+      {
+        defaultMessage: 'hours from rollover',
+      }
+    );
+    minutesOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverMinutesOptionLabel',
+      {
+        defaultMessage: 'minutes from rollover',
+      }
+    );
+
+    secondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverSecondsOptionLabel',
+      {
+        defaultMessage: 'seconds from rollover',
+      }
+    );
+    millisecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverMilliSecondsOptionLabel',
+      {
+        defaultMessage: 'milliseconds from rollover',
+      }
+    );
+
+    microsecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverMicroSecondsOptionLabel',
+      {
+        defaultMessage: 'microseconds from rollover',
+      }
+    );
+
+    nanosecondsOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.rolloverNanoSecondsOptionLabel',
+      {
+        defaultMessage: 'nanoseconds from rollover',
+      }
+    );
   } else {
-    daysOptionLabel = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.creationDaysOptionLabel', {
-      defaultMessage: 'days from index creation',
-    });
+    daysOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationDaysOptionLabel',
+      {
+        defaultMessage: 'days from index creation',
+      }
+    );
 
-    hoursOptionLabel = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.creationHoursOptionLabel', {
-      defaultMessage: 'hours from index creation',
-    });
+    hoursOptionLabel = i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.creationHoursOptionLabel',
+      {
+        defaultMessage: 'hours from index creation',
+      }
+    );
   }
 
   return (
@@ -116,12 +169,12 @@ export const MinAgeInput = props => {
             onChange={async e => {
               setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
             }}
-            min={1}
+            min={0}
           />
         </ErrableFormRow>
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 220 }}>
-        <EuiFormRow hasEmptyLabelSpace >
+        <EuiFormRow hasEmptyLabelSpace>
           <EuiSelect
             aria-label={getUnitsAriaLabelForPhase(phase)}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
@@ -134,6 +187,26 @@ export const MinAgeInput = props => {
               {
                 value: 'h',
                 text: hoursOptionLabel,
+              },
+              {
+                value: 'm',
+                text: minutesOptionLabel,
+              },
+              {
+                value: 's',
+                text: secondsOptionLabel,
+              },
+              {
+                value: 'ms',
+                text: millisecondsOptionLabel,
+              },
+              {
+                value: 'micros',
+                text: microsecondsOptionLabel,
+              },
+              {
+                value: 'nanos',
+                text: nanosecondsOptionLabel,
               },
             ]}
           />

@@ -39,6 +39,8 @@ export default {
     '<rootDir>/test/functional/services/remote',
   ],
   collectCoverageFrom: [
+    'src/plugins/**/*.{ts,tsx}',
+    '!src/plugins/**/*.d.ts',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
     '!packages/kbn-ui-framework/src/components/**/*/index.js',
@@ -51,11 +53,14 @@ export default {
     '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
-    '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
+    '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
+    '^plugins/([^/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/dev/jest/mocks/file_mock.js',
+    '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+      '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
   },
   setupFiles: [
@@ -63,27 +68,12 @@ export default {
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
   ],
-  setupFilesAfterEnv: [
-    '<rootDir>/src/dev/jest/setup/mocks.js',
-  ],
+  setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/mocks.js'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
-  coverageReporters: [
-    'html',
-    'text',
-  ],
-  moduleFileExtensions: [
-    'js',
-    'json',
-    'ts',
-    'tsx',
-  ],
-  modulePathIgnorePatterns: [
-    '__fixtures__/',
-    'target/',
-  ],
-  testMatch: [
-    '**/*.test.{js,ts,tsx}'
-  ],
+  coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
+  modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
+  testMatch: ['**/*.test.{js,ts,tsx}'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',
@@ -95,15 +85,14 @@ export default {
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
-    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$',
-    'packages/kbn-pm/dist/index.js'
+    // ignore all node_modules except @elastic/eui and monaco-editor which both require babel transforms to handle dynamic import()
+    // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
+    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+    'packages/kbn-pm/dist/index.js',
   ],
   snapshotSerializers: [
+    '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
-  reporters: [
-    'default',
-    '<rootDir>/src/dev/jest/junit_reporter.js',
-  ],
+  reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],
 };

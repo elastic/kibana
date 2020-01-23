@@ -13,7 +13,11 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
 
   window.onload = function () {
     var files = [
-      '{{dllBundlePath}}/vendors.bundle.dll.js',
+      '{{dllBundlePath}}/vendors_runtime.bundle.dll.js',
+      {{#each dllJsChunks}}
+        '{{this}}',
+      {{/each}}
+      '{{regularBundlePath}}/kbn-ui-shared-deps/{{sharedDepsFilename}}',
       '{{regularBundlePath}}/commons.bundle.js',
       '{{regularBundlePath}}/{{appId}}.bundle.js'
     ];
@@ -46,7 +50,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
     function createJavascriptElement(path) {
       var dom = document.createElement('script');
 
-      dom.setAttribute('async', '');
+      dom.setAttribute('defer', 'defer');
       dom.addEventListener('error', failure);
       dom.setAttribute('src', file);
       dom.addEventListener('load', next);

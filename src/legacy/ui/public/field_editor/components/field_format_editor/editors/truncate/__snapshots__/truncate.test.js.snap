@@ -4,8 +4,10 @@ exports[`TruncateFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -18,14 +20,12 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {

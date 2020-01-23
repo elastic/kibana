@@ -14,26 +14,26 @@ export function InfraLogStreamProvider({ getService }: FtrProviderContext) {
   return {
     async getColumnHeaderLabels(): Promise<string[]> {
       const columnHeaderElements: WebElementWrapper[] = await testSubjects.findAll(
-        'logColumnHeader'
+        '~logColumnHeader'
       );
       return await Promise.all(columnHeaderElements.map(element => element.getVisibleText()));
     },
 
     async getStreamEntries(minimumItems = 1): Promise<WebElementWrapper[]> {
       await retry.try(async () => {
-        const elements = await testSubjects.findAll('streamEntry');
+        const elements = await testSubjects.findAll('~streamEntry');
         if (!elements || elements.length < minimumItems) {
           throw new Error();
         }
       });
 
-      return await testSubjects.findAll('streamEntry');
+      return await testSubjects.findAll('~streamEntry');
     },
 
     async getLogColumnsOfStreamEntry(
       entryElement: WebElementWrapper
     ): Promise<WebElementWrapper[]> {
-      return await testSubjects.findAllDescendant('logColumn', entryElement);
+      return await testSubjects.findAllDescendant('~logColumn', entryElement);
     },
   };
 }

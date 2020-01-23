@@ -16,12 +16,11 @@ import {
   EuiButton,
   EuiSelect,
   EuiSpacer,
+  EuiTextAlign,
+  EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ES_GEO_FIELD_TYPE,
-  ES_SPATIAL_RELATIONS,
-} from '../../common/constants';
+import { ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../common/constants';
 import { getEsSpatialRelationLabel } from '../../common/i18n_getters';
 
 const GEO_FIELD_VALUE_DELIMITER = '/'; // `/` is not allowed in index pattern name so should not have collisions
@@ -34,18 +33,18 @@ function splitIndexGeoFieldName(value) {
   const split = value.split(GEO_FIELD_VALUE_DELIMITER);
   return {
     indexPatternTitle: split[0],
-    geoFieldName: split[1]
+    geoFieldName: split[1],
   };
 }
 
 export class GeometryFilterForm extends Component {
-
   static propTypes = {
     buttonLabel: PropTypes.string.isRequired,
     geoFields: PropTypes.array.isRequired,
     intitialGeometryLabel: PropTypes.string.isRequired,
     onSubmit: PropTypes.func.isRequired,
     isFilterGeometryClosed: PropTypes.bool,
+    errorMsg: PropTypes.string,
   };
 
   static defaultProps = {
@@ -53,7 +52,9 @@ export class GeometryFilterForm extends Component {
   };
 
   state = {
-    geoFieldTag: this.props.geoFields.length ? createIndexGeoFieldName(this.props.geoFields[0]) : '',
+    geoFieldTag: this.props.geoFields.length
+      ? createIndexGeoFieldName(this.props.geoFields[0])
+      : '',
     geometryLabel: this.props.intitialGeometryLabel,
     relation: ES_SPATIAL_RELATIONS.INTERSECTS,
   };
@@ -63,32 +64,28 @@ export class GeometryFilterForm extends Component {
       return null;
     }
 
-    const {
-      indexPatternTitle,
-      geoFieldName
-    } = splitIndexGeoFieldName(this.state.geoFieldTag);
+    const { indexPatternTitle, geoFieldName } = splitIndexGeoFieldName(this.state.geoFieldTag);
 
     return this.props.geoFields.find(option => {
-      return option.indexPatternTitle === indexPatternTitle
-        && option.geoFieldName === geoFieldName;
+      return option.indexPatternTitle === indexPatternTitle && option.geoFieldName === geoFieldName;
     });
-  }
+  };
 
   _onGeoFieldChange = selectedValue => {
     this.setState({ geoFieldTag: selectedValue });
-  }
+  };
 
   _onGeometryLabelChange = e => {
     this.setState({
       geometryLabel: e.target.value,
     });
-  }
+  };
 
   _onRelationChange = e => {
     this.setState({
       relation: e.target.value,
     });
-  }
+  };
 
   _onSubmit = () => {
     const geoField = this._getSelectedGeoField();
@@ -99,7 +96,7 @@ export class GeometryFilterForm extends Component {
       geoFieldType: geoField.geoFieldType,
       relation: this.state.relation,
     });
-  }
+  };
 
   _renderRelationInput() {
     if (!this.state.geoFieldTag) {
@@ -116,30 +113,29 @@ export class GeometryFilterForm extends Component {
     const spatialRelations = this.props.isFilterGeometryClosed
       ? Object.values(ES_SPATIAL_RELATIONS)
       : Object.values(ES_SPATIAL_RELATIONS).filter(relation => {
-        // can not filter by within relation when filtering geometry is not closed
-        return relation !== ES_SPATIAL_RELATIONS.WITHIN;
-      });
-    const options = spatialRelations
-      .map(relation => {
-        return {
-          value: relation,
-          text: getEsSpatialRelationLabel(relation)
-        };
-      });
+          // can not filter by within relation when filtering geometry is not closed
+          return relation !== ES_SPATIAL_RELATIONS.WITHIN;
+        });
+    const options = spatialRelations.map(relation => {
+      return {
+        value: relation,
+        text: getEsSpatialRelationLabel(relation),
+      };
+    });
 
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.geometryFilterForm.relationLabel', {
-          defaultMessage: 'Spatial relation'
+          defaultMessage: 'Spatial relation',
         })}
-        compressed
+        display="rowCompressed"
       >
         <EuiSelect
+          compressed
           options={options}
           value={this.state.relation}
           onChange={this._onRelationChange}
         />
-
       </EuiFormRow>
     );
   }
@@ -148,7 +144,7 @@ export class GeometryFilterForm extends Component {
     const options = this.props.geoFields.map(({ indexPatternTitle, geoFieldName }) => {
       return {
         inputDisplay: (
-          <EuiText>
+          <EuiText size="s" component="span">
             <EuiTextColor color="subdued">
               <small>{indexPatternTitle}</small>
             </EuiTextColor>
@@ -156,20 +152,23 @@ export class GeometryFilterForm extends Component {
             {geoFieldName}
           </EuiText>
         ),
-        value: createIndexGeoFieldName({ indexPatternTitle, geoFieldName })
+        value: createIndexGeoFieldName({ indexPatternTitle, geoFieldName }),
       };
     });
+    let error;
+    if (this.props.errorMsg) {
+      error = <EuiFormErrorText>{this.props.errorMsg}</EuiFormErrorText>;
+    }
     return (
       <EuiForm className={this.props.className}>
-        <EuiSpacer size="s" />
-
         <EuiFormRow
           label={i18n.translate('xpack.maps.geometryFilterForm.geometryLabelLabel', {
-            defaultMessage: 'Geometry label'
+            defaultMessage: 'Geometry label',
           })}
-          compressed
+          display="rowCompressed"
         >
           <EuiFieldText
+            compressed
             value={this.state.geometryLabel}
             onChange={this._onGeometryLabelChange}
           />
@@ -178,9 +177,9 @@ export class GeometryFilterForm extends Component {
         <EuiFormRow
           className="mapGeometryFilter__geoFieldSuperSelectWrapper"
           label={i18n.translate('xpack.maps.geometryFilterForm.geoFieldLabel', {
-            defaultMessage: 'Filtered field'
+            defaultMessage: 'Filtered field',
           })}
-          compressed
+          display="rowCompressed"
         >
           <EuiSuperSelect
             className="mapGeometryFilter__geoFieldSuperSelect"
@@ -196,15 +195,22 @@ export class GeometryFilterForm extends Component {
 
         {this._renderRelationInput()}
 
-        <EuiButton
-          size="s"
-          onClick={this._onSubmit}
-          isDisabled={!this.state.geometryLabel || !this.state.geoFieldTag}
-        >
-          {this.props.buttonLabel}
-        </EuiButton>
+        <EuiSpacer size="m" />
+
+        {error}
+
+        <EuiTextAlign textAlign="right">
+          <EuiButton
+            size="s"
+            fill
+            onClick={this._onSubmit}
+            isDisabled={!this.state.geometryLabel || !this.state.geoFieldTag}
+            isLoading={this.props.isLoading}
+          >
+            {this.props.buttonLabel}
+          </EuiButton>
+        </EuiTextAlign>
       </EuiForm>
     );
   }
 }
-

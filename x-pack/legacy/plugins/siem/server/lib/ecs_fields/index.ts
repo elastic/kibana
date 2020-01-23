@@ -33,6 +33,7 @@ export const cloudFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const fileMap: Readonly<Record<string, string>> = {
+  'file.name': 'file.name',
   'file.path': 'file.path',
   'file.target_path': 'file.target_path',
   'file.extension': 'file.extension',
@@ -68,6 +69,9 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const processFieldsMap: Readonly<Record<string, string>> = {
+  'process.hash.md5': 'process.hash.md5',
+  'process.hash.sha1': 'process.hash.sha1',
+  'process.hash.sha256': 'process.hash.sha256',
   'process.pid': 'process.pid',
   'process.name': 'process.name',
   'process.ppid': 'process.ppid',
@@ -79,6 +83,7 @@ export const processFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const userFieldsMap: Readonly<Record<string, string>> = {
+  'user.domain': 'user.domain',
   'user.id': 'user.id',
   'user.name': 'user.name',
   // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
@@ -89,6 +94,10 @@ export const userFieldsMap: Readonly<Record<string, string>> = {
   'user.hash': 'user.hash',
   // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
   'user.group': 'user.group',
+};
+
+export const winlogFieldsMap: Readonly<Record<string, string>> = {
+  'winlog.event_id': 'winlog.event_id',
 };
 
 export const suricataFieldsMap: Readonly<Record<string, string>> = {
@@ -219,9 +228,33 @@ export const geoFieldsMap: Readonly<Record<string, string>> = {
   'geo.country_iso_code': 'destination.geo.country_iso_code',
 };
 
+export const dnsFieldsMap: Readonly<Record<string, string>> = {
+  'dns.question.name': 'dns.question.name',
+  'dns.question.type': 'dns.question.type',
+  'dns.resolved_ip': 'dns.resolved_ip',
+  'dns.response_code': 'dns.response_code',
+};
+
+export const endgameFieldsMap: Readonly<Record<string, string>> = {
+  'endgame.exit_code': 'endgame.exit_code',
+  'endgame.file_name': 'endgame.file_name',
+  'endgame.file_path': 'endgame.file_path',
+  'endgame.logon_type': 'endgame.logon_type',
+  'endgame.parent_process_name': 'endgame.parent_process_name',
+  'endgame.pid': 'endgame.pid',
+  'endgame.process_name': 'endgame.process_name',
+  'endgame.subject_domain_name': 'endgame.subject_domain_name',
+  'endgame.subject_logon_id': 'endgame.subject_logon_id',
+  'endgame.subject_user_name': 'endgame.subject_user_name',
+  'endgame.target_domain_name': 'endgame.target_domain_name',
+  'endgame.target_logon_id': 'endgame.target_logon_id',
+  'endgame.target_user_name': 'endgame.target_user_name',
+};
+
 export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   'event.action': 'event.action',
   'event.category': 'event.category',
+  'event.code': 'event.code',
   'event.created': 'event.created',
   'event.dataset': 'event.dataset',
   'event.duration': 'event.duration',
@@ -251,16 +284,54 @@ export const systemFieldsMap: Readonly<Record<string, string>> = {
   'system.auth.ssh.method': 'system.auth.ssh.method',
 };
 
+export const signalFieldsMap: Readonly<Record<string, string>> = {
+  'signal.original_time': 'signal.original_time',
+  'signal.rule.id': 'signal.rule.id',
+  'signal.rule.saved_id': 'signal.rule.saved_id',
+  'signal.rule.timeline_id': 'signal.rule.timeline_id',
+  'signal.rule.timeline_title': 'signal.rule.timeline_title',
+  'signal.rule.output_index': 'signal.rule.output_index',
+  'signal.rule.from': 'signal.rule.from',
+  'signal.rule.index': 'signal.rule.index',
+  'signal.rule.language': 'signal.rule.language',
+  'signal.rule.query': 'signal.rule.query',
+  'signal.rule.to': 'signal.rule.to',
+  'signal.rule.filters': 'signal.rule.filters',
+  'signal.rule.rule_id': 'signal.rule.rule_id',
+  'signal.rule.false_positives': 'signal.rule.false_positives',
+  'signal.rule.max_signals': 'signal.rule.max_signals',
+  'signal.rule.risk_score': 'signal.rule.risk_score',
+  'signal.rule.description': 'signal.rule.description',
+  'signal.rule.name': 'signal.rule.name',
+  'signal.rule.immutable': 'signal.rule.immutable',
+  'signal.rule.references': 'signal.rule.references',
+  'signal.rule.severity': 'signal.rule.severity',
+  'signal.rule.tags': 'signal.rule.tags',
+  'signal.rule.threats': 'signal.rule.threats',
+  'signal.rule.type': 'signal.rule.type',
+  'signal.rule.size': 'signal.rule.size',
+  'signal.rule.enabled': 'signal.rule.enabled',
+  'signal.rule.created_at': 'signal.rule.created_at',
+  'signal.rule.updated_at': 'signal.rule.updated_at',
+  'signal.rule.created_by': 'signal.rule.created_by',
+  'signal.rule.updated_by': 'signal.rule.updated_by',
+  'signal.rule.version': 'signal.rule.version',
+};
+
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',
   message: 'message',
   ...{ ...auditdMap },
   ...{ ...destinationFieldsMap },
+  ...{ ...dnsFieldsMap },
+  ...{ ...endgameFieldsMap },
   ...{ ...eventBaseFieldsMap },
+  ...{ ...fileMap },
   ...{ ...geoFieldsMap },
   ...{ ...hostFieldsMap },
   ...{ ...networkFieldsMap },
+  ...{ ...signalFieldsMap },
   ...{ ...sourceFieldsMap },
   ...{ ...suricataFieldsMap },
   ...{ ...systemFieldsMap },
@@ -268,6 +339,6 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...zeekFieldsMap },
   ...{ ...httpFieldsMap },
   ...{ ...userFieldsMap },
+  ...{ ...winlogFieldsMap },
   ...{ ...processFieldsMap },
-  ...{ ...fileMap },
 };

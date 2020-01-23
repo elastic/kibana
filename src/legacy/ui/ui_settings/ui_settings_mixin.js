@@ -19,12 +19,6 @@
 
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 import { getUiSettingsServiceForRequest } from './ui_settings_service_for_request';
-import {
-  deleteRoute,
-  getRoute,
-  setManyRoute,
-  setRoute,
-} from './routes';
 
 export function uiSettingsMixin(kbnServer, server) {
   const { uiSettingDefaults = {} } = kbnServer.uiExports;
@@ -42,22 +36,15 @@ export function uiSettingsMixin(kbnServer, server) {
     acc[currentKey] = updatedDefaultSetting;
     return acc;
   }, {});
-  const getDefaults = () => mergedUiSettingDefaults;
-  const overrides = kbnServer.config.get('uiSettings.overrides');
+
+  kbnServer.newPlatform.__internals.uiSettings.register(mergedUiSettingDefaults);
 
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
-    return uiSettingsServiceFactory(server, {
-      getDefaults,
-      overrides,
-      ...options
-    });
+    return uiSettingsServiceFactory(server, options);
   });
 
   server.addMemoizedFactoryToRequest('getUiSettingsService', request => {
-    return getUiSettingsServiceForRequest(server, request, {
-      getDefaults,
-      overrides,
-    });
+    return getUiSettingsServiceForRequest(server, request);
   });
 
   server.decorate('server', 'uiSettings', () => {
@@ -65,9 +52,4 @@ export function uiSettingsMixin(kbnServer, server) {
       server.uiSettings has been removed, see https://github.com/elastic/kibana/pull/12243.
     `);
   });
-
-  server.route(deleteRoute);
-  server.route(getRoute);
-  server.route(setManyRoute);
-  server.route(setRoute);
 }

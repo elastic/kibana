@@ -19,12 +19,8 @@
 
 import { createGunzip } from 'zlib';
 import { PassThrough } from 'stream';
-
-import {
-  createSplitStream,
-  createReplaceStream,
-  createMapStream,
-} from '../../../legacy/utils';
+import { createFilterStream } from '../../../legacy/utils/streams/filter_stream';
+import { createSplitStream, createReplaceStream, createMapStream } from '../../../legacy/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 
@@ -33,6 +29,7 @@ export function createParseArchiveStreams({ gzip = false } = {}) {
     gzip ? createGunzip() : new PassThrough(),
     createReplaceStream('\r\n', '\n'),
     createSplitStream(RECORD_SEPARATOR),
+    createFilterStream(l => l.match(/[^\s]/)),
     createMapStream(json => JSON.parse(json.trim())),
   ];
 }

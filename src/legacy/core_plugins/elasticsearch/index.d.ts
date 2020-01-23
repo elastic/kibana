@@ -482,7 +482,7 @@ export interface CallCluster {
   (endpoint: 'indices.upgrade', params: IndicesUpgradeParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['upgrade']>;
   (endpoint: 'indices.validateQuery', params: IndicesValidateQueryParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['validateQuery']>;
 
-  // ingest namepsace
+  // ingest namespace
   (endpoint: 'ingest.deletePipeline', params: IngestDeletePipelineParams, options?: CallClusterOptions): ReturnType<ESClient['ingest']['deletePipeline']>;
   (endpoint: 'ingest.getPipeline', params: IngestGetPipelineParams, options?: CallClusterOptions): ReturnType<ESClient['ingest']['getPipeline']>;
   (endpoint: 'ingest.putPipeline', params: IngestPutPipelineParams, options?: CallClusterOptions): ReturnType<ESClient['ingest']['putPipeline']>;

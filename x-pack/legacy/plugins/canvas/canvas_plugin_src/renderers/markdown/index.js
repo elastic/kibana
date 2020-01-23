@@ -7,13 +7,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Markdown from 'markdown-it';
+import { RendererStrings } from '../../../i18n';
+
+const { markdown: strings } = RendererStrings;
 
 const md = new Markdown();
 
 export const markdown = () => ({
   name: 'markdown',
-  displayName: 'Markdown',
-  help: 'Render HTML Markup using Markdown input',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const html = { __html: md.render(String(config.content)) };

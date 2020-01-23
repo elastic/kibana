@@ -26,13 +26,14 @@ import { toArray } from 'rxjs/operators';
 import { deleteIndex } from './delete_index';
 import { collectUiExports } from '../../../legacy/ui/ui_exports';
 import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
+import { SavedObjectsSchema } from '../../../core/server/saved_objects';
 import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
 /**
  * Load the uiExports for a Kibana instance, only load uiExports from xpack if
  * it is enabled in the Kibana server.
  */
-const getUiExports = async (kibanaPluginIds) => {
+const getUiExports = async kibanaPluginIds => {
   const xpackEnabled = kibanaPluginIds.includes('xpack_main');
 
   const { spec$ } = await findPluginSpecs({
@@ -77,39 +78,41 @@ export async function deleteKibanaIndices({ client, stats, log }) {
  */
 export async function migrateKibanaIndex({ client, log, kibanaPluginIds }) {
   const uiExports = await getUiExports(kibanaPluginIds);
-  const version = await loadElasticVersion();
+  const kibanaVersion = await loadKibanaVersion();
+
   const config = {
-    'kibana.index': '.kibana',
-    'migrations.scrollDuration': '5m',
-    'migrations.batchSize': 100,
-    'migrations.pollInterval': 100,
     'xpack.task_manager.index': '.kibana_task_manager',
   };
-  const ready = async () => undefined;
-  const elasticsearch = {
-    getCluster: () => ({
-      callWithInternalUser: (path, ...args) => _.get(client, path).call(client, ...args),
-    }),
-    waitUntilReady: ready,
+
+  const migratorOptions = {
+    config: { get: path => config[path] },
+    savedObjectsConfig: {
+      scrollDuration: '5m',
+      batchSize: 100,
+      pollInterval: 100,
+    },
+    kibanaConfig: {
+      index: '.kibana',
+    },
+    logger: {
+      trace: log.verbose.bind(log),
+      debug: log.debug.bind(log),
+      info: log.info.bind(log),
+      warn: log.warning.bind(log),
+      error: log.error.bind(log),
+    },
+    version: kibanaVersion,
+    savedObjectSchemas: new SavedObjectsSchema(uiExports.savedObjectSchemas),
+    savedObjectMappings: uiExports.savedObjectMappings,
+    savedObjectMigrations: uiExports.savedObjectMigrations,
+    savedObjectValidations: uiExports.savedObjectValidations,
+    callCluster: (path, ...args) => _.get(client, path).call(client, ...args),
   };
 
-  const server = {
-    log: ([logType, messageType], ...args) => log[logType](`[${messageType}] ${args.join(' ')}`),
-    config: () => ({ get: path => config[path] }),
-    plugins: { elasticsearch },
-  };
-
-  const kbnServer = {
-    server,
-    version,
-    uiExports,
-    ready,
-  };
-
-  return await new KibanaMigrator({ kbnServer }).awaitMigration();
+  return await new KibanaMigrator(migratorOptions).runMigrations();
 }
 
-async function loadElasticVersion() {
+async function loadKibanaVersion() {
   const readFile = promisify(fs.readFile);
   const packageJson = await readFile(path.join(__dirname, '../../../../package.json'));
   return JSON.parse(packageJson).version;
@@ -152,11 +155,15 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }
           },
         },
       },
-      ignore: [409]
+      ignore: [409],
     });
 
     if (resp.total !== resp.deleted) {
-      log.warning('delete by query deleted %d of %d total documents, trying again', resp.deleted, resp.total);
+      log.warning(
+        'delete by query deleted %d of %d total documents, trying again',
+        resp.deleted,
+        resp.total
+      );
       continue;
     }
 
@@ -174,7 +181,6 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaPluginIds }
 export async function createDefaultSpace({ index, client }) {
   await client.create({
     index,
-    type: '_doc',
     id: 'space:default',
     ignore: 409,
     body: {

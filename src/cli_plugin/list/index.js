@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import list from './list';
 import Logger from '../lib/logger';
 import { parse } from './settings';

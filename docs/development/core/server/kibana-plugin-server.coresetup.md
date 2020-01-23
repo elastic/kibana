@@ -9,14 +9,24 @@ Context passed to the plugins `setup` method.
 <b>Signature:</b>
 
 ```typescript
-export interface CoreSetup 
+export interface CoreSetup<TPluginsStart extends object = object> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [context](./kibana-plugin-server.coresetup.context.md) | <code>{</code><br/><code>        createContextContainer: ContextSetup['createContextContainer'];</code><br/><code>    }</code> |  |
-|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>{</code><br/><code>        adminClient$: Observable&lt;ClusterClient&gt;;</code><br/><code>        dataClient$: Observable&lt;ClusterClient&gt;;</code><br/><code>        createClient: (type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ClusterClient;</code><br/><code>    }</code> |  |
-|  [http](./kibana-plugin-server.coresetup.http.md) | <code>{</code><br/><code>        createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];</code><br/><code>        registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];</code><br/><code>        registerAuth: HttpServiceSetup['registerAuth'];</code><br/><code>        registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];</code><br/><code>        basePath: HttpServiceSetup['basePath'];</code><br/><code>        isTlsEnabled: HttpServiceSetup['isTlsEnabled'];</code><br/><code>        registerRouteHandlerContext: &lt;T extends keyof RequestHandlerContext&gt;(name: T, provider: RequestHandlerContextProvider&lt;RequestHandlerContext&gt;) =&gt; RequestHandlerContextContainer&lt;RequestHandlerContext&gt;;</code><br/><code>        createRouter: () =&gt; IRouter;</code><br/><code>    }</code> |  |
+|  [capabilities](./kibana-plugin-server.coresetup.capabilities.md) | <code>CapabilitiesSetup</code> | [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
+|  [context](./kibana-plugin-server.coresetup.context.md) | <code>ContextSetup</code> | [ContextSetup](./kibana-plugin-server.contextsetup.md) |
+|  [elasticsearch](./kibana-plugin-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md) |
+|  [http](./kibana-plugin-server.coresetup.http.md) | <code>HttpServiceSetup</code> | [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |
+|  [savedObjects](./kibana-plugin-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) |
+|  [uiSettings](./kibana-plugin-server.coresetup.uisettings.md) | <code>UiSettingsServiceSetup</code> | [UiSettingsServiceSetup](./kibana-plugin-server.uisettingsservicesetup.md) |
+|  [uuid](./kibana-plugin-server.coresetup.uuid.md) | <code>UuidServiceSetup</code> | [UuidServiceSetup](./kibana-plugin-server.uuidservicesetup.md) |
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [getStartServices()](./kibana-plugin-server.coresetup.getstartservices.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 

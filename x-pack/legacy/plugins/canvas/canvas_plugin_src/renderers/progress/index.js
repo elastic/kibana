@@ -5,12 +5,15 @@
  */
 
 import { getId } from '../../../public/lib/get_id';
+import { RendererStrings } from '../../../i18n';
 import { shapes } from './shapes';
+
+const { progress: strings } = RendererStrings;
 
 export const progress = () => ({
   name: 'progress',
-  displayName: 'Progress',
-  help: 'Reveal a percentage of an element',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { shape, value, max, valueColor, barColor, valueWeight, barWeight, label, font } = config;

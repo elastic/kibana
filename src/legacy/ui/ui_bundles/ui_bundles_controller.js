@@ -20,19 +20,19 @@
 import { resolve, relative, isAbsolute } from 'path';
 import { createHash } from 'crypto';
 import { promisify } from 'util';
-import { existsSync } from 'fs';
+import { existsSync, mkdir } from 'fs';
 
 import del from 'del';
 import { makeRe } from 'minimatch';
-import mkdirp from 'mkdirp';
 import jsonStableStringify from 'json-stable-stringify';
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
-
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import { UiBundle } from './ui_bundle';
 import { appEntryTemplate } from './app_entry_template';
 
-const mkdirpAsync = promisify(mkdirp);
+const mkdirAsync = promisify(mkdir);
 const REPO_ROOT = fromRoot();
 
 function getWebpackAliases(pluginSpecs) {
@@ -45,7 +45,7 @@ function getWebpackAliases(pluginSpecs) {
 
     return {
       ...aliases,
-      [`plugins/${spec.getId()}`]: publicDir
+      [`plugins/${spec.getId()}`]: publicDir,
     };
   }, {});
 }
@@ -62,7 +62,7 @@ function stableCloneAppExtensions(appExtensions) {
           }
           return moduleId.replace(/\\/g, '/');
         })
-        .sort((a, b) => a.localeCompare(b))
+        .sort((a, b) => a.localeCompare(b)),
     ])
   );
 }
@@ -84,14 +84,14 @@ export class UiBundlesController {
     this._filter = makeRe(config.get('optimize.bundleFilter') || '*', {
       noglobstar: true,
       noext: true,
-      matchBase: true
+      matchBase: true,
     });
 
     this._appExtensions = uiExports.appExtensions || {};
 
     this._webpackAliases = {
       ...getWebpackAliases(pluginSpecs),
-      ...uiExports.webpackAliases
+      ...uiExports.webpackAliases,
     };
     this._webpackPluginProviders = uiExports.webpackPluginProviders;
     this._webpackNoParseRules = uiExports.webpackNoParseRules;
@@ -102,7 +102,7 @@ export class UiBundlesController {
     this.add({
       id: 'core',
       modules: [],
-      template: appEntryTemplate
+      template: appEntryTemplate,
     });
 
     // create a bundle for each uiApp
@@ -116,21 +116,18 @@ export class UiBundlesController {
   }
 
   add(bundleSpec) {
-    const {
-      id,
-      modules,
-      template,
-      extendConfig,
-    } = bundleSpec;
+    const { id, modules, template, extendConfig } = bundleSpec;
 
     if (this._filter.test(id)) {
-      this._bundles.push(new UiBundle({
-        id,
-        modules,
-        template,
-        controller: this,
-        extendConfig,
-      }));
+      this._bundles.push(
+        new UiBundle({
+          id,
+          modules,
+          template,
+          controller: this,
+          extendConfig,
+        })
+      );
     }
   }
 
@@ -168,7 +165,7 @@ export class UiBundlesController {
 
   getContext() {
     return jsonStableStringify(this._context, {
-      space: '  '
+      space: '  ',
     });
   }
 
@@ -179,14 +176,14 @@ export class UiBundlesController {
   async resetBundleDir() {
     if (!existsSync(this._workingDir)) {
       // create a fresh working directory
-      await mkdirpAsync(this._workingDir);
+      await mkdirAsync(this._workingDir, { recursive: true });
     } else {
       // delete all children of the working directory
       await del(this.resolvePath('*'), {
         // since we know that `this.resolvePath()` is going to return an absolute path based on the `optimize.bundleDir`
         // and since we don't want to require that users specify a bundleDir that is within the cwd or limit the cwd
         // directory used to run Kibana in any way we use force here
-        force: true
+        force: true,
       });
     }
 
@@ -232,7 +229,7 @@ export class UiBundlesController {
 
   async areAllBundleCachesValid() {
     for (const bundle of this._bundles) {
-      if (!await bundle.isCacheValid()) {
+      if (!(await bundle.isCacheValid())) {
         return false;
       }
     }
@@ -241,15 +238,17 @@ export class UiBundlesController {
   }
 
   toWebpackEntries() {
-    return this._bundles.reduce((entries, bundle) => ({
-      ...entries,
-      [bundle.getId()]: bundle.getEntryPath(),
-    }), {});
+    return this._bundles.reduce(
+      (entries, bundle) => ({
+        ...entries,
+        [bundle.getId()]: bundle.getEntryPath(),
+      }),
+      {}
+    );
   }
 
   getIds() {
-    return this._bundles
-      .map(bundle => bundle.getId());
+    return this._bundles.map(bundle => bundle.getId());
   }
 
   getExtendedConfig(webpackConfig) {

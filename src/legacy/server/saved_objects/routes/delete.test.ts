@@ -20,19 +20,11 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createDeleteRoute } from './delete';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     savedObjectsClient.delete.mockImplementation(() => Promise.resolve('{}'));

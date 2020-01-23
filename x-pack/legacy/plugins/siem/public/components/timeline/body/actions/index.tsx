@@ -3,35 +3,43 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  EuiButtonIcon,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
-import { noop } from 'lodash/fp';
-import * as React from 'react';
-import styled from 'styled-components';
+import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 
 import { Note } from '../../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { Pin } from '../../../pin';
 import { NotesButton } from '../../properties/helpers';
+import { EventsLoading, EventsTd, EventsTdContent, EventsTdGroupActions } from '../../styles';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import * as i18n from '../translations';
+import { OnRowSelected } from '../../events';
+import { Ecs } from '../../../../graphql/types';
+
+export interface TimelineActionProps {
+  eventId: string;
+  ecsData: Ecs;
+}
+
+export interface TimelineAction {
+  getAction: ({ eventId, ecsData }: TimelineActionProps) => JSX.Element;
+  width: number;
+  id: string;
+}
 
 interface Props {
   actionsColumnWidth: number;
+  additionalActions?: JSX.Element[];
   associateNote: AssociateNote;
   checked: boolean;
+  onRowSelected: OnRowSelected;
   expanded: boolean;
   eventId: string;
   eventIsPinned: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
   loading: boolean;
+  loadingEventIds: Readonly<string[]>;
   noteIds: string[];
   onEventToggled: () => void;
   onPinClicked: () => void;
@@ -41,46 +49,12 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
-  overflow: hidden;
-  width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
-`;
-
-ActionsContainer.displayName = 'ActionsContainer';
-
-const ActionLoading = styled(EuiLoadingSpinner)`
-  position: relative;
-  top: 3px;
-`;
-
-ActionLoading.displayName = 'ActionLoading';
-
-const PinContainer = styled.div`
-  position: relative;
-  top: -1px;
-  width: 27px;
-`;
-
-PinContainer.displayName = 'PinContainer';
-
-const SelectEventContainer = styled(EuiFlexItem)`
-  padding: 4px 0 0 7px;
-`;
-
-SelectEventContainer.displayName = 'SelectEventContainer';
-
-const NotesButtonContainer = styled(EuiFlexItem)`
-  position: relative;
-  top: -1px;
-`;
-
-NotesButtonContainer.displayName = 'NotesButtonContainer';
-
 const emptyNotes: string[] = [];
 
 export const Actions = React.memo<Props>(
   ({
     actionsColumnWidth,
+    additionalActions,
     associateNote,
     checked,
     expanded,
@@ -89,56 +63,64 @@ export const Actions = React.memo<Props>(
     getNotesByIds,
     isEventViewer = false,
     loading = false,
+    loadingEventIds,
     noteIds,
     onEventToggled,
     onPinClicked,
+    onRowSelected,
     showCheckboxes,
     showNotes,
     toggleShowNotes,
     updateNote,
   }) => (
-    <ActionsContainer
+    <EventsTdGroupActions
       actionsColumnWidth={actionsColumnWidth}
       data-test-subj="event-actions-container"
     >
-      <EuiFlexGroup
-        alignItems="flexStart"
-        data-test-subj="event-actions"
-        direction="row"
-        gutterSize="none"
-        justifyContent="spaceBetween"
-      >
-        {showCheckboxes && (
-          <SelectEventContainer data-test-subj="select-event-container" grow={false}>
-            <EuiCheckbox
-              data-test-subj="select-event"
-              id={eventId}
-              checked={checked}
-              onChange={noop}
-            />
-          </SelectEventContainer>
-        )}
-
-        <EuiFlexItem grow={false}>
-          <div>
-            {loading && <ActionLoading size="m" />}
-            {!loading && (
-              <EuiButtonIcon
-                aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-                color="subdued"
-                iconType={expanded ? 'arrowDown' : 'arrowRight'}
-                data-test-subj="expand-event"
+      {showCheckboxes && (
+        <EventsTd data-test-subj="select-event-container">
+          <EventsTdContent textAlign="center">
+            {loadingEventIds.includes(eventId) ? (
+              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
+            ) : (
+              <EuiCheckbox
+                data-test-subj="select-event"
                 id={eventId}
-                onClick={onEventToggled}
-                size="s"
+                checked={checked}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  onRowSelected({
+                    eventIds: [eventId],
+                    isSelected: event.currentTarget.checked,
+                  });
+                }}
               />
             )}
-          </div>
-        </EuiFlexItem>
+          </EventsTdContent>
+        </EventsTd>
+      )}
 
-        {!isEventViewer && (
-          <>
-            <EuiFlexItem grow={false}>
+      <>{additionalActions}</>
+
+      <EventsTd>
+        <EventsTdContent textAlign="center">
+          {loading && <EventsLoading />}
+
+          {!loading && (
+            <EuiButtonIcon
+              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+              data-test-subj="expand-event"
+              iconType={expanded ? 'arrowDown' : 'arrowRight'}
+              id={eventId}
+              onClick={onEventToggled}
+            />
+          )}
+        </EventsTdContent>
+      </EventsTd>
+
+      {!isEventViewer && (
+        <>
+          <EventsTd>
+            <EventsTdContent textAlign="center">
               <EuiToolTip
                 data-test-subj="timeline-action-pin-tool-tip"
                 content={getPinTooltip({
@@ -146,18 +128,18 @@ export const Actions = React.memo<Props>(
                   eventHasNotes: eventHasNotes(noteIds),
                 })}
               >
-                <PinContainer>
-                  <Pin
-                    allowUnpinning={!eventHasNotes(noteIds)}
-                    pinned={eventIsPinned}
-                    data-test-subj="pin-event"
-                    onClick={onPinClicked}
-                  />
-                </PinContainer>
+                <Pin
+                  allowUnpinning={!eventHasNotes(noteIds)}
+                  data-test-subj="pin-event"
+                  onClick={onPinClicked}
+                  pinned={eventIsPinned}
+                />
               </EuiToolTip>
-            </EuiFlexItem>
+            </EventsTdContent>
+          </EventsTd>
 
-            <NotesButtonContainer grow={false}>
+          <EventsTd>
+            <EventsTdContent textAlign="center">
               <NotesButton
                 animate={false}
                 associateNote={associateNote}
@@ -170,11 +152,11 @@ export const Actions = React.memo<Props>(
                 toolTip={i18n.NOTES_TOOLTIP}
                 updateNote={updateNote}
               />
-            </NotesButtonContainer>
-          </>
-        )}
-      </EuiFlexGroup>
-    </ActionsContainer>
+            </EventsTdContent>
+          </EventsTd>
+        </>
+      )}
+    </EventsTdGroupActions>
   ),
   (nextProps, prevProps) => {
     return (
@@ -184,11 +166,12 @@ export const Actions = React.memo<Props>(
       prevProps.eventId === nextProps.eventId &&
       prevProps.eventIsPinned === nextProps.eventIsPinned &&
       prevProps.loading === nextProps.loading &&
+      prevProps.loadingEventIds === nextProps.loadingEventIds &&
       prevProps.noteIds === nextProps.noteIds &&
+      prevProps.onRowSelected === nextProps.onRowSelected &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.showNotes === nextProps.showNotes
     );
   }
 );
-
 Actions.displayName = 'Actions';

@@ -9,5 +9,5 @@ Additional route options [RouteConfigOptions](./kibana-plugin-server.routeconfig
 <b>Signature:</b>
 
 ```typescript
-options?: RouteConfigOptions;
+options?: RouteConfigOptions<Method>;
 ```

@@ -21,18 +21,8 @@ import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 // TODO: Remove once typescript definitions are in EUI
 
 declare module '@elastic/eui' {
-  export const EuiSideNav: React.SFC<any>;
-
-  export interface EuiTableCriteria {
-    page: { index: number; size: number };
-    sort?: {
-      field?: string;
-      direction?: Direction;
-    };
-  }
-  export const EuiBasicTable: React.ComponentClass<{
-    onTableChange?: (criteria: EuiTableCriteria) => void;
-    sorting: { sort?: EuiTableCriteria['sort'] };
-    [key: string]: any;
-  }>;
+  export const EuiSideNav: React.FC<any>;
+  export const EuiDescribedFormGroup: React.FC<any>;
+  export const EuiCodeEditor: React.FC<any>;
+  export const Query: any;
 }

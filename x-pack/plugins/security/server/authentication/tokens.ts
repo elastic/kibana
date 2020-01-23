@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterClient, Logger } from '../../../../../src/core/server';
+import { IClusterClient, Logger } from '../../../../../src/core/server';
 import { getErrorStatusCode } from '../errors';
 
 /**
@@ -34,9 +34,7 @@ export class Tokens {
    */
   private readonly logger: Logger;
 
-  constructor(
-    private readonly options: Readonly<{ client: PublicMethodsOf<ClusterClient>; logger: Logger }>
-  ) {
+  constructor(private readonly options: Readonly<{ client: IClusterClient; logger: Logger }>) {
     this.logger = options.logger;
   }
 
@@ -98,10 +96,11 @@ export class Tokens {
     if (refreshToken) {
       let invalidatedTokensCount;
       try {
-        invalidatedTokensCount = (await this.options.client.callAsInternalUser(
-          'shield.deleteAccessToken',
-          { body: { refresh_token: refreshToken } }
-        )).invalidated_tokens;
+        invalidatedTokensCount = (
+          await this.options.client.callAsInternalUser('shield.deleteAccessToken', {
+            body: { refresh_token: refreshToken },
+          })
+        ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate refresh token: ${err.message}`);
         // We don't re-throw the error here to have a chance to invalidate access token if it's provided.
@@ -122,10 +121,11 @@ export class Tokens {
     if (accessToken) {
       let invalidatedTokensCount;
       try {
-        invalidatedTokensCount = (await this.options.client.callAsInternalUser(
-          'shield.deleteAccessToken',
-          { body: { token: accessToken } }
-        )).invalidated_tokens;
+        invalidatedTokensCount = (
+          await this.options.client.callAsInternalUser('shield.deleteAccessToken', {
+            body: { token: accessToken },
+          })
+        ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate access token: ${err.message}`);
         invalidationError = err;

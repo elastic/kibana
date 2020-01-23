@@ -37,7 +37,7 @@ function PercentilesEditor({
   });
   const [isValid, setIsValid] = useState(true);
 
-  const setModelValidy = (isListValid: boolean) => {
+  const setModelValidity = (isListValid: boolean) => {
     setIsValid(isListValid);
     setValidity(isListValid);
   };
@@ -62,7 +62,7 @@ function PercentilesEditor({
         showValidation={showValidation}
         onChange={setValue}
         setTouched={setTouched}
-        setValidity={setModelValidy}
+        setValidity={setModelValidity}
       />
     </EuiFormRow>
   );

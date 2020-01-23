@@ -5,27 +5,31 @@
  */
 
 import React from 'react';
-import { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
-import { GraphSaveModal, OnSaveGraphProps } from '../components/graph_save_modal';
+import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
+import { SaveResult } from '../legacy_imports';
 
-export function save({
+export type SaveWorkspaceHandler = (
+  saveOptions: {
+    confirmOverwrite: boolean;
+    isTitleDuplicateConfirmed: boolean;
+    onTitleDuplicate: () => void;
+  },
+  dataConsent: boolean
+) => Promise<SaveResult>;
+
+export function openSaveModal({
   savePolicy,
   hasData,
   workspace,
   saveWorkspace,
+  showSaveModal,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
   workspace: GraphWorkspaceSavedObject;
-  saveWorkspace: (
-    saveOptions: {
-      confirmOverwrite: boolean;
-      isTitleDuplicateConfirmed: boolean;
-      onTitleDuplicate: () => void;
-    },
-    dataConsent: boolean
-  ) => Promise<SaveResult>;
+  saveWorkspace: SaveWorkspaceHandler;
+  showSaveModal: (el: React.ReactNode) => void;
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;
@@ -55,7 +59,7 @@ export function save({
     });
   };
   showSaveModal(
-    <GraphSaveModal
+    <SaveModal
       savePolicy={savePolicy}
       hasData={hasData}
       onSave={onSave}

@@ -15,8 +15,9 @@ import {
   EuiAvatar,
 } from '@elastic/eui';
 import { NewTimeline, Description, NotesButton } from './helpers';
-import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal';
-import { InspectButton } from '../../inspect';
+import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
+import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
+import { InspectButton, InspectButtonContainer } from '../../inspect';
 
 import * as i18n from './translations';
 import { AssociateNote } from '../../notes/helpers';
@@ -75,32 +76,38 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   onToggleShowNotes: () => void;
+  onCloseTimelineModal: () => void;
+  onOpenTimelineModal: () => void;
+  showTimelineModal: boolean;
   updateNote: UpdateNote;
 }
 
-export const PropertiesRight = React.memo<Props>(
-  ({
-    onButtonClick,
-    showActions,
-    onClosePopover,
-    createTimeline,
-    timelineId,
-    isDataInTimeline,
-    showNotesFromWidth,
-    showNotes,
-    showDescription,
-    showUsersView,
-    usersViewing,
-    description,
-    updateDescription,
-    associateNote,
-    getNotesByIds,
-    noteIds,
-    onToggleShowNotes,
-    updateNote,
-  }) => (
-    <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
-      <EuiFlexItem grow={false}>
+const PropertiesRightComponent: React.FC<Props> = ({
+  onButtonClick,
+  showActions,
+  onClosePopover,
+  createTimeline,
+  timelineId,
+  isDataInTimeline,
+  showNotesFromWidth,
+  showNotes,
+  showDescription,
+  showUsersView,
+  usersViewing,
+  description,
+  updateDescription,
+  associateNote,
+  getNotesByIds,
+  noteIds,
+  onToggleShowNotes,
+  updateNote,
+  showTimelineModal,
+  onCloseTimelineModal,
+  onOpenTimelineModal,
+}) => (
+  <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
+    <EuiFlexItem grow={false}>
+      <InspectButtonContainer>
         <EuiPopover
           anchorPosition="downRight"
           button={
@@ -125,7 +132,7 @@ export const PropertiesRight = React.memo<Props>(
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <OpenTimelineModalButton />
+              <OpenTimelineModalButton onClick={onOpenTimelineModal} />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -135,7 +142,6 @@ export const PropertiesRight = React.memo<Props>(
                 inspectIndex={0}
                 isDisabled={!isDataInTimeline}
                 onCloseInspect={onClosePopover}
-                show={true}
                 title={i18n.INSPECT_TIMELINE_TITLE}
               />
             </EuiFlexItem>
@@ -170,24 +176,26 @@ export const PropertiesRight = React.memo<Props>(
             ) : null}
           </EuiFlexGroup>
         </EuiPopover>
-      </EuiFlexItem>
+      </InspectButtonContainer>
+    </EuiFlexItem>
 
-      {showUsersView
-        ? usersViewing.map(user => (
-            // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
-            // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
-            <HiddenFlexItem key={user}>
-              <EuiToolTip
-                data-test-subj="timeline-action-pin-tool-tip"
-                content={`${user} ${i18n.IS_VIEWING}`}
-              >
-                <Avatar data-test-subj="avatar" size="s" name={user} />
-              </EuiToolTip>
-            </HiddenFlexItem>
-          ))
-        : null}
-    </PropertiesRightStyle>
-  )
+    {showUsersView
+      ? usersViewing.map(user => (
+          // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
+          // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
+          <HiddenFlexItem key={user}>
+            <EuiToolTip
+              data-test-subj="timeline-action-pin-tool-tip"
+              content={`${user} ${i18n.IS_VIEWING}`}
+            >
+              <Avatar data-test-subj="avatar" size="s" name={user} />
+            </EuiToolTip>
+          </HiddenFlexItem>
+        ))
+      : null}
+
+    {showTimelineModal ? <OpenTimelineModal onClose={onCloseTimelineModal} /> : null}
+  </PropertiesRightStyle>
 );
 
-PropertiesRight.displayName = 'PropertiesRight';
+export const PropertiesRight = React.memo(PropertiesRightComponent);

@@ -113,6 +113,12 @@
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "statusFilter",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "LatestMonitorsResult", "ofType": null },
@@ -148,6 +154,12 @@
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "statusFilter",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": { "kind": "OBJECT", "name": "Snapshot", "ofType": null },
@@ -180,6 +192,12 @@
               },
               {
                 "name": "filters",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "statusFilter",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
@@ -335,68 +353,6 @@
             "deprecationReason": null
           },
           {
-            "name": "getErrorsList",
-            "description": "",
-            "args": [
-              {
-                "name": "dateRangeStart",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "dateRangeEnd",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "filters",
-                "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "OBJECT", "name": "ErrorListItem", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "getMonitorPageTitle",
-            "description": "",
-            "args": [
-              {
-                "name": "monitorId",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": { "kind": "OBJECT", "name": "MonitorPageTitle", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "getMonitorStates",
             "description": "Fetches the current state of Uptime monitors for the given parameters.",
             "args": [
@@ -421,7 +377,19 @@
                 "defaultValue": null
               },
               {
+                "name": "pagination",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
                 "name": "filters",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "statusFilter",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
@@ -2187,18 +2155,6 @@
             "deprecationReason": null
           },
           {
-            "name": "mixed",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "total",
             "description": "",
             "args": [],
@@ -2505,22 +2461,6 @@
             "deprecationReason": null
           },
           {
-            "name": "names",
-            "description": "The names users have configured for the monitors.",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "ports",
             "description": "The ports of the monitored endpoints.",
             "args": [],
@@ -2592,131 +2532,25 @@
       },
       {
         "kind": "OBJECT",
-        "name": "ErrorListItem",
-        "description": "A representation of an error state for a monitor.",
-        "fields": [
-          {
-            "name": "count",
-            "description": "The number of times this error has occurred.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "latestMessage",
-            "description": "The most recent message associated with this error type.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "location",
-            "description": "The location assigned to the agent reporting this error.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "monitorId",
-            "description": "The ID of the monitor reporting the error.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "name",
-            "description": "The name configured for the monitor by the user.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "statusCode",
-            "description": "The status code, if available, of the error request.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "timestamp",
-            "description": "When the most recent error state occurred.",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "type",
-            "description": "What kind of error the monitor reported.",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "MonitorPageTitle",
-        "description": "",
-        "fields": [
-          {
-            "name": "id",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "url",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "name",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "MonitorSummaryResult",
         "description": "The primary object returned for monitor states.",
         "fields": [
+          {
+            "name": "prevPagePagination",
+            "description": "Used to go to the next page of results",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "nextPagePagination",
+            "description": "Used to go to the previous page of results",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "summaries",
             "description": "The objects representing the state of a series of heartbeat monitors.",
@@ -4265,6 +4099,32 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "CursorDirection",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "AFTER", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "BEFORE", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "SortOrder",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "ASC", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "DESC", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       }
     ],

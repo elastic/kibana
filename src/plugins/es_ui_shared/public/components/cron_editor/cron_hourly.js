@@ -20,26 +20,16 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-export const CronHourly = ({
-  minute,
-  minuteOptions,
-  onChange,
-}) => (
+export const CronHourly = ({ minute, minuteOptions, onChange }) => (
   <Fragment>
     <EuiFormRow
-      label={(
-        <FormattedMessage
-          id="esUi.cronEditor.cronHourly.fieldTimeLabel"
-          defaultMessage="Minute"
-        />
-      )}
+      label={
+        <FormattedMessage id="esUi.cronEditor.cronHourly.fieldTimeLabel" defaultMessage="Minute" />
+      }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
@@ -48,16 +38,9 @@ export const CronHourly = ({
         value={minute}
         onChange={e => onChange({ minute: e.target.value })}
         fullWidth
-        prepend={(
-          <EuiText size="xs">
-            <strong>
-              <FormattedMessage
-                id="esUi.cronEditor.cronHourly.fieldMinute.textAtLabel"
-                defaultMessage="At"
-              />
-            </strong>
-          </EuiText>
-        )}
+        prepend={i18n.translate('esUi.cronEditor.cronHourly.fieldMinute.textAtLabel', {
+          defaultMessage: 'At',
+        })}
         data-test-subj="cronFrequencyHourlyMinuteSelect"
       />
     </EuiFormRow>

@@ -18,6 +18,27 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
+import { SavedObjectsMapping } from './mappings';
+import { MigrationDefinition } from './migrations/core/document_migrator';
+import { SavedObjectsSchemaDefinition } from './schema';
+import { PropertyValidators } from './validation';
+
+export {
+  SavedObjectsImportResponse,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
+} from './import/types';
+
+import { SavedObjectAttributes } from '../../types';
+export {
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+} from '../../types';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.
@@ -36,29 +57,6 @@ import { SavedObjectsClient } from './service/saved_objects_client';
  */
 export interface SavedObjectsMigrationVersion {
   [pluginName: string]: string;
-}
-
-/**
- *
- * @public
- */
-export type SavedObjectAttribute =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes
-  | SavedObjectAttributes[];
-
-/**
- * The data for a Saved Object is stored in the `attributes` key as either an
- * object or an array of objects.
- *
- * @public
- */
-export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttribute | SavedObjectAttribute[];
 }
 
 /**
@@ -119,6 +117,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   searchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
+  filter?: string;
 }
 
 /**
@@ -129,6 +128,12 @@ export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
 }
+
+/**
+ * Elasticsearch Refresh setting for mutating operation
+ * @public
+ */
+export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
@@ -196,8 +201,20 @@ export interface SavedObjectsBaseOptions {
  * so we throw a special 503 with the intention of informing the user that their
  * Elasticsearch settings need to be updated.
  *
+ * See {@link SavedObjectsClient}
  * See {@link SavedObjectsErrorHelpers}
  *
  * @public
  */
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyUiExports {
+  savedObjectMappings: SavedObjectsMapping[];
+  savedObjectMigrations: MigrationDefinition;
+  savedObjectSchemas: SavedObjectsSchemaDefinition;
+  savedObjectValidations: PropertyValidators;
+}

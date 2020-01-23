@@ -5,14 +5,16 @@
  */
 
 // @ts-ignore not ts yet
-import { EsProvider } from './es';
+import { LegacyEsProvider } from './legacy_es';
 
+import { services as commonServices } from '../../../common/services';
 import { services as apiIntegrationServices } from '../../../api_integration/services';
 import { services as kibanaApiIntegrationServices } from '../../../../../test/api_integration/services';
 import { services as kibanaFunctionalServices } from '../../../../../test/functional/services';
 
 export const services = {
-  es: EsProvider,
+  ...commonServices,
+  legacyEs: LegacyEsProvider,
   esSupertestWithoutAuth: apiIntegrationServices.esSupertestWithoutAuth,
   supertest: kibanaApiIntegrationServices.supertest,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,

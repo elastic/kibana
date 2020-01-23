@@ -19,7 +19,7 @@
 
 import { IContextContainer } from './context';
 
-export type ContextContainerMock = jest.Mocked<IContextContainer<any, any, any>>;
+export type ContextContainerMock = jest.Mocked<IContextContainer<any>>;
 
 const createContextMock = () => {
   const contextMock: ContextContainerMock = {

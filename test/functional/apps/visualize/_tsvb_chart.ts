@@ -25,10 +25,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
+  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45315
-  describe.skip('visual builder', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     this.tags('smoke');
     beforeEach(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
@@ -60,8 +59,19 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('157');
       });
+
+      it('should populate fields for basic functions', async () => {
+        const { visualBuilder } = PageObjects;
+
+        await visualBuilder.selectAggType('Average');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
+
+        expect(isFieldForAggregationValid).to.be(true);
+      });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/46677
     describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -70,7 +80,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should verify gauge label and count display', async () => {
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -86,7 +96,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should verify topN label and count display', async () => {
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
@@ -94,8 +104,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/44132
-    describe.skip('switch index patterns', () => {
+    describe('switch index patterns', () => {
       beforeEach(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
@@ -106,12 +115,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await esArchiver.unload('kibana_sample_data_flights');
       });
-      it('should be able to switch between index patterns', async () => {
+
+      // FLAKY: https://github.com/elastic/kibana/issues/43150
+      it.skip('should be able to switch between index patterns', async () => {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('156');
         await PageObjects.visualBuilder.clickPanelOptions('metric');
-        const fromTime = '2018-10-22 00:00:00.000';
-        const toTime = '2018-10-28 23:59:59.999';
+        const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
+        const toTime = 'Oct 28, 2018 @ 23:59:59.999';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
         await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');

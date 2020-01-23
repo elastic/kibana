@@ -26,14 +26,13 @@ import { inspect } from 'util';
 
 import vfs from 'vinyl-fs';
 import { promisify } from 'bluebird';
-import mkdirpCb from 'mkdirp';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
 import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
 
 import tar from 'tar';
 
-const mkdirpAsync = promisify(mkdirpCb);
+const mkdirAsync = promisify(fs.mkdir);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
@@ -60,13 +59,13 @@ export function isFileAccessible(path) {
 
 function longInspect(value) {
   return inspect(value, {
-    maxArrayLength: Infinity
+    maxArrayLength: Infinity,
   });
 }
 
 export async function mkdirp(path) {
   assertAbsolute(path);
-  await mkdirpAsync(path);
+  await mkdirAsync(path, { recursive: true });
 }
 
 export async function write(path, contents) {
@@ -100,7 +99,7 @@ export async function deleteAll(patterns, log) {
   }
 
   const files = await del(patterns, {
-    concurrency: 4
+    concurrency: 4,
   });
 
   if (log) {
@@ -114,17 +113,20 @@ export async function deleteEmptyFolders(log, rootFolderPath, foldersToKeep) {
     throw new TypeError('Expected root folder to be a string path');
   }
 
-  log.debug('Deleting all empty folders and their children recursively starting on ', rootFolderPath);
+  log.debug(
+    'Deleting all empty folders and their children recursively starting on ',
+    rootFolderPath
+  );
   assertAbsolute(rootFolderPath.startsWith('!') ? rootFolderPath.slice(1) : rootFolderPath);
 
   // Delete empty is used to gather all the empty folders and
   // then we use del to actually delete them
   const emptyFoldersList = await deleteEmpty(rootFolderPath, { dryRun: true });
-  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
+  const foldersToDelete = emptyFoldersList.filter(folderToDelete => {
     return !foldersToKeep.some(folderToKeep => folderToDelete.includes(folderToKeep));
   });
   const deletedEmptyFolders = await del(foldersToDelete, {
-    concurrency: 4
+    concurrency: 4,
   });
 
   log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
@@ -132,11 +134,7 @@ export async function deleteEmptyFolders(log, rootFolderPath, foldersToKeep) {
 }
 
 export async function copyAll(sourceDir, destination, options = {}) {
-  const {
-    select = ['**/*'],
-    dot = false,
-    time,
-  } = options;
+  const { select = ['**/*'], dot = false, time } = options;
 
   assertAbsolute(sourceDir);
   assertAbsolute(destination);
@@ -148,7 +146,7 @@ export async function copyAll(sourceDir, destination, options = {}) {
       base: sourceDir,
       dot,
     }),
-    vfs.dest(destination)
+    vfs.dest(destination),
   ]);
 
   // we must update access and modified file times after the file copy
@@ -161,7 +159,7 @@ export async function copyAll(sourceDir, destination, options = {}) {
         base: destination,
         dot,
       }),
-      createMapStream(file => utimesAsync(file.path, time, time))
+      createMapStream(file => utimesAsync(file.path, time, time)),
     ]);
   }
 }
@@ -185,14 +183,14 @@ export async function untar(source, destination, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirpAsync(destination);
+  await mkdirAsync(destination, { recursive: true });
 
   await createPromiseFromStreams([
     fs.createReadStream(source),
     createGunzip(),
     tar.extract({
       ...extractOptions,
-      cwd: destination
+      cwd: destination,
     }),
   ]);
 }
@@ -200,11 +198,9 @@ export async function untar(source, destination, extractOptions = {}) {
 export async function compress(type, options = {}, source, destination) {
   const output = fs.createWriteStream(destination);
   const archive = archiver(type, options.archiverOptions);
-  const name = (options.createRootDirectory ? source.split(sep).slice(-1)[0] : false);
+  const name = options.createRootDirectory ? source.split(sep).slice(-1)[0] : false;
 
   archive.pipe(output);
 
-  return archive
-    .directory(source, name)
-    .finalize();
+  return archive.directory(source, name).finalize();
 }

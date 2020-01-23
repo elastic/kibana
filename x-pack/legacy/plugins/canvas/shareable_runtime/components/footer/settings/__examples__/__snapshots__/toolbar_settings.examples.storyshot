@@ -1,0 +1,301 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: off 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#fff",
+      "border": "1px solid #ccc",
+      "height": 124,
+      "overflow": "hidden",
+      "padding": 16,
+      "position": "relative",
+      "width": 256,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "padding": 16,
+      }
+    }
+  >
+    <div
+      className="euiFormRow"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiSwitch"
+        >
+          <button
+            aria-checked={false}
+            aria-describedby="generated-id-help"
+            aria-labelledby="generated-id"
+            className="euiSwitch__button"
+            data-test-subj="hideToolbarSwitch"
+            id="generated-id"
+            name="toolbarHide"
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            role="switch"
+            type="button"
+          >
+            <span
+              className="euiSwitch__body"
+            >
+              <span
+                className="euiSwitch__thumb"
+              />
+              <span
+                className="euiSwitch__track"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </span>
+            </span>
+          </button>
+          <span
+            className="euiSwitch__label"
+            id="generated-id"
+            onClick={[Function]}
+          >
+            Hide Toolbar
+          </span>
+        </div>
+        <div
+          className="euiFormHelpText euiFormRow__text"
+          id="generated-id-help"
+        >
+          Hide the toolbar when the mouse is not within the Canvas?
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer/Settings/ToolbarSettings component: on 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#fff",
+      "border": "1px solid #ccc",
+      "height": 124,
+      "overflow": "hidden",
+      "padding": 16,
+      "position": "relative",
+      "width": 256,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "padding": 16,
+      }
+    }
+  >
+    <div
+      className="euiFormRow"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiSwitch"
+        >
+          <button
+            aria-checked={true}
+            aria-describedby="generated-id-help"
+            aria-labelledby="generated-id"
+            className="euiSwitch__button"
+            data-test-subj="hideToolbarSwitch"
+            id="generated-id"
+            name="toolbarHide"
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            role="switch"
+            type="button"
+          >
+            <span
+              className="euiSwitch__body"
+            >
+              <span
+                className="euiSwitch__thumb"
+              />
+              <span
+                className="euiSwitch__track"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </span>
+            </span>
+          </button>
+          <span
+            className="euiSwitch__label"
+            id="generated-id"
+            onClick={[Function]}
+          >
+            Hide Toolbar
+          </span>
+        </div>
+        <div
+          className="euiFormHelpText euiFormRow__text"
+          id="generated-id-help"
+        >
+          Hide the toolbar when the mouse is not within the Canvas?
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer/Settings/ToolbarSettings contextual 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#fff",
+      "border": "1px solid #ccc",
+      "height": 124,
+      "overflow": "hidden",
+      "padding": 16,
+      "position": "relative",
+      "width": 256,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "padding": 16,
+      }
+    }
+  >
+    <div
+      className="euiFormRow"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <div
+          className="euiSwitch"
+        >
+          <button
+            aria-checked={false}
+            aria-describedby="generated-id-help"
+            aria-labelledby="generated-id"
+            className="euiSwitch__button"
+            data-test-subj="hideToolbarSwitch"
+            id="generated-id"
+            name="toolbarHide"
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            role="switch"
+            type="button"
+          >
+            <span
+              className="euiSwitch__body"
+            >
+              <span
+                className="euiSwitch__thumb"
+              />
+              <span
+                className="euiSwitch__track"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </span>
+            </span>
+          </button>
+          <span
+            className="euiSwitch__label"
+            id="generated-id"
+            onClick={[Function]}
+          >
+            Hide Toolbar
+          </span>
+        </div>
+        <div
+          className="euiFormHelpText euiFormRow__text"
+          id="generated-id-help"
+        >
+          Hide the toolbar when the mouse is not within the Canvas?
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -18,19 +18,13 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiForm,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Query, QueryBarInput } from 'plugins/data';
 import { AggConfig } from '../../..';
 import { npStart } from '../../../../new_platform';
-import { Storage } from '../../../../storage';
+import { Query, QueryStringInput } from '../../../../../../../plugins/data/public';
+import { Storage } from '../../../../../../../plugins/kibana_utils/public';
+import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
 const localStorage = new Storage(window.localStorage);
 
 interface FilterRowProps {
@@ -67,53 +61,54 @@ function FilterRow({
   });
 
   const FilterControl = (
-    <EuiFlexGroup gutterSize="s" responsive={false}>
-      <EuiFlexItem>
-        <EuiButtonIcon
-          iconType="tag"
-          aria-label={i18n.translate('common.ui.aggTypes.filters.toggleFilterButtonAriaLabel', {
-            defaultMessage: 'Toggle filter label',
-          })}
-          aria-expanded={showCustomLabel}
-          aria-controls={`visEditorFilterLabel${arrayIndex}`}
-          onClick={() => setShowCustomLabel(!showCustomLabel)}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          disabled={disableRemove}
-          aria-label={i18n.translate('common.ui.aggTypes.filters.removeFilterButtonAriaLabel', {
-            defaultMessage: 'Remove this filter',
-          })}
-          onClick={() => onRemoveFilter(id)}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div>
+      <EuiButtonIcon
+        iconType="tag"
+        aria-label={i18n.translate('common.ui.aggTypes.filters.toggleFilterButtonAriaLabel', {
+          defaultMessage: 'Toggle filter label',
+        })}
+        aria-expanded={showCustomLabel}
+        aria-controls={`visEditorFilterLabel${arrayIndex}`}
+        onClick={() => setShowCustomLabel(!showCustomLabel)}
+      />
+      <EuiButtonIcon
+        iconType="trash"
+        color="danger"
+        disabled={disableRemove}
+        aria-label={i18n.translate('common.ui.aggTypes.filters.removeFilterButtonAriaLabel', {
+          defaultMessage: 'Remove this filter',
+        })}
+        onClick={() => onRemoveFilter(id)}
+      />
+    </div>
   );
 
+  // TODO: KibanaContextProvider should be raised to the top of the vis plugin
   return (
     <EuiForm>
       <EuiFormRow
         label={`${filterLabel}${customLabel ? ` - ${customLabel}` : ''}`}
         labelAppend={FilterControl}
         fullWidth={true}
-        compressed
       >
-        <QueryBarInput
-          query={value}
-          indexPatterns={[agg.getIndexPattern()]}
-          appName="filtersAgg"
-          onChange={(query: Query) => onChangeValue(id, query, customLabel)}
-          disableAutoFocus={!autoFocus}
-          data-test-subj={dataTestSubj}
-          bubbleSubmitEvent={true}
-          languageSwitcherPopoverAnchorPosition="leftDown"
-          store={localStorage}
-          uiSettings={npStart.core.uiSettings}
-          savedObjectsClient={npStart.core.savedObjects.client}
-        />
+        <KibanaContextProvider
+          services={{
+            appName: 'filtersAgg',
+            storage: localStorage,
+            data: npStart.plugins.data,
+            ...npStart.core,
+          }}
+        >
+          <QueryStringInput
+            query={value}
+            indexPatterns={[agg.getIndexPattern()]}
+            onChange={(query: Query) => onChangeValue(id, query, customLabel)}
+            disableAutoFocus={!autoFocus}
+            dataTestSubj={dataTestSubj}
+            bubbleSubmitEvent={true}
+            languageSwitcherPopoverAnchorPosition="leftDown"
+          />
+        </KibanaContextProvider>
       </EuiFormRow>
       {showCustomLabel ? (
         <EuiFormRow
@@ -136,9 +131,11 @@ function FilterRow({
             })}
             onChange={ev => onChangeValue(id, value, ev.target.value)}
             fullWidth={true}
+            compressed
           />
         </EuiFormRow>
       ) : null}
+      <EuiSpacer size="m" />
     </EuiForm>
   );
 }

@@ -24,6 +24,7 @@ const createStartContractMock = () => {
     client: {
       create: jest.fn(),
       bulkCreate: jest.fn(),
+      bulkUpdate: jest.fn(),
       delete: jest.fn(),
       bulkGet: jest.fn(),
       find: jest.fn(),

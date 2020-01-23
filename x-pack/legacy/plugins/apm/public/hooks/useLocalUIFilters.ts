@@ -6,7 +6,6 @@
 
 import { omit } from 'lodash';
 import { useFetcher } from './useFetcher';
-import { callApi } from '../services/rest/callApi';
 import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_filters';
 import { useUrlParams } from './useUrlParams';
 import {
@@ -18,6 +17,7 @@ import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../context/UrlParamsContext/helpers';
 import { PROJECTION } from '../../common/projections/typings';
 import { pickKeys } from '../utils/pickKeys';
+import { useCallApi } from './useCallApi';
 
 const getInitialData = (
   filterNames: LocalUIFilterName[]
@@ -38,6 +38,7 @@ export function useLocalUIFilters({
   params?: Record<string, string | number | boolean | undefined>;
 }) {
   const { uiFilters, urlParams } = useUrlParams();
+  const callApi = useCallApi();
 
   const values = pickKeys(uiFilters, ...filterNames);
 
@@ -75,7 +76,15 @@ export function useLocalUIFilters({
         ...params
       }
     });
-  }, [uiFilters, urlParams, params, filterNames, projection]);
+  }, [
+    callApi,
+    projection,
+    uiFilters,
+    urlParams.start,
+    urlParams.end,
+    filterNames,
+    params
+  ]);
 
   const filters = data.map(filter => ({
     ...filter,

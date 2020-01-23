@@ -197,7 +197,12 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
         access_token: accessToken,
         refresh_token: refreshToken,
       } = await this.options.client.callAsInternalUser('shield.oidcAuthenticate', {
-        body: { state: stateOIDCState, nonce: stateNonce, redirect_uri: authenticationResponseURI },
+        body: {
+          state: stateOIDCState,
+          nonce: stateNonce,
+          redirect_uri: authenticationResponseURI,
+          realm: this.realm,
+        },
       });
 
       this.logger.debug('Request has been authenticated via OpenID Connect.');
@@ -245,7 +250,9 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
       const { state, nonce, redirect } = await this.options.client.callAsInternalUser(
         'shield.oidcPrepare',
-        { body: oidcPrepareParams }
+        {
+          body: oidcPrepareParams,
+        }
       );
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
@@ -424,7 +431,9 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo(`${this.options.basePath.get(request)}/logged_out`);
+      return DeauthenticationResult.redirectTo(
+        `${this.options.basePath.serverBasePath}/logged_out`
+      );
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);

@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState } from '../../../../mock';
@@ -42,7 +41,7 @@ describe('KpiNetwork Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('KpiNetworkComponent')).toMatchSnapshot();
     });
 
     test('it renders the default widget', () => {
@@ -59,7 +58,7 @@ describe('KpiNetwork Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('KpiNetworkComponent')).toMatchSnapshot();
     });
   });
 });

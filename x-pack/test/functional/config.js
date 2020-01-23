@@ -13,7 +13,7 @@ import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -34,6 +34,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
+      resolve(__dirname, './apps/lens'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
@@ -43,7 +44,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
-      resolve(__dirname, './apps/code'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/saved_objects_management'),
@@ -55,6 +55,8 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
+      resolve(__dirname, './apps/transform'),
+      resolve(__dirname, './apps/endpoint'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -67,7 +69,7 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['path.repo=/tmp/'],
     },
 
     kbnTestServer: {
@@ -78,13 +80,14 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
-        '--xpack.telemetry.banner=false',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
         '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.encrypted_saved_objects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -99,6 +102,9 @@ export default async function ({ readConfigFile }) {
     // Kibana's config in order to use this helper
     apps: {
       ...kibanaFunctionalConfig.get('apps'),
+      lens: {
+        pathname: '/app/lens',
+      },
       login: {
         pathname: '/login',
       },
@@ -137,22 +143,18 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
-      code: {
-        pathname: '/app/code',
-        hash: '/admin',
-      },
-      codeSearch: {
-        pathname: '/app/code',
-        hash: '/search',
-      },
       uptime: {
         pathname: '/app/uptime',
       },
       apm: {
-        pathname: '/app/apm'
+        pathname: '/app/apm',
       },
       ml: {
-        pathname: '/app/ml'
+        pathname: '/app/ml',
+      },
+      roleMappings: {
+        pathname: '/app/kibana',
+        hash: '/management/security/role_mappings',
       },
       rollupJob: {
         pathname: '/app/kibana',
@@ -188,6 +190,13 @@ export default async function ({ readConfigFile }) {
       watcher: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/watcher/watches/',
+      },
+      transform: {
+        pathname: '/app/kibana/',
+        hash: '/management/elasticsearch/transform',
+      },
+      endpoint: {
+        pathname: '/app/endpoint',
       },
     },
 

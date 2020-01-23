@@ -5,84 +5,93 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import * as React from 'react';
-import { compose } from 'redux';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
+import { compose } from 'redux';
 
-import { ActionCreator } from 'typescript-fsa';
+import { useParams } from 'react-router-dom';
+import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
+import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
+import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
+import { SiemNavigation } from '../../components/navigation';
 import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';
+import { SiemSearchBar } from '../../components/search_bar';
+import { WrapperPage } from '../../components/wrapper_page';
 import { GlobalTimeArgs } from '../../containers/global_time';
 import { KpiHostsQuery } from '../../containers/kpi_hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
-import { hostsModel, hostsSelectors, State } from '../../store';
-
-import { HostsEmptyPage } from './hosts_empty_page';
-import { HostsKql } from './kql';
+import { useKibana } from '../../lib/kibana';
+import { convertToBuildEsQuery } from '../../lib/keury';
+import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
-import { SiemNavigation } from '../../components/navigation';
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { FiltersGlobal } from '../../components/filters_global';
-
+import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { HostsEmptyPage } from './hosts_empty_page';
+import { HostsTabs } from './hosts_tabs';
+import { navTabsHosts } from './nav_tabs';
 import * as i18n from './translations';
-import {
-  navTabsHosts,
-  AnomaliesQueryTabBodyProps,
-  HostsComponentsQueryProps,
-} from './hosts_navigations';
-import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
+import { HostsComponentProps, HostsComponentReduxProps } from './types';
+import { filterAlertsHosts } from './navigation';
+import { HostsTableType } from '../../store/hosts/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
-interface HostsComponentReduxProps {
-  filterQuery: string;
-}
-
-interface HostsComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: number;
-    to: number;
-  }>;
-}
-
-export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
-export type AnonamaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;
-
-export type HostsQueryProps = GlobalTimeArgs;
-
-export type HostsComponentProps = HostsComponentReduxProps &
-  HostsComponentDispatchProps &
-  HostsQueryProps;
-
-const HostsComponent = React.memo<HostsComponentProps>(
-  ({ isInitializing, filterQuery, from, setAbsoluteRangeDatePicker, setQuery, to }) => {
+export const HostsComponent = React.memo<HostsComponentProps>(
+  ({
+    deleteQuery,
+    isInitializing,
+    filters,
+    from,
+    query,
+    setAbsoluteRangeDatePicker,
+    setQuery,
+    to,
+    hostsPagePath,
+  }) => {
     const capabilities = React.useContext(MlCapabilitiesContext);
+    const kibana = useKibana();
+    const { tabName } = useParams();
+    const hostsFilters = React.useMemo(() => {
+      if (tabName === HostsTableType.alerts) {
+        return filters.length > 0 ? [...filters, ...filterAlertsHosts] : filterAlertsHosts;
+      }
+      return filters;
+    }, [tabName, filters]);
+    const narrowDateRange = useCallback(
+      (min: number, max: number) => {
+        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
     return (
       <>
         <WithSource sourceId="default">
-          {({ indicesExist, indexPattern }) =>
-            indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+          {({ indicesExist, indexPattern }) => {
+            const filterQuery = convertToBuildEsQuery({
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              indexPattern,
+              queries: [query],
+              filters: hostsFilters,
+            });
+            return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
               <StickyContainer>
                 <FiltersGlobal>
-                  <HostsKql
-                    indexPattern={indexPattern}
-                    setQuery={setQuery}
-                    type={hostsModel.HostsType.page}
-                  />
+                  <SiemSearchBar indexPattern={indexPattern} id="global" />
                 </FiltersGlobal>
 
-                <HeaderPage
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
-                  title={i18n.PAGE_TITLE}
-                />
-                <>
+                <WrapperPage>
+                  <HeaderPage
+                    border
+                    subtitle={<LastEventTime indexKey={LastEventIndexKey.hosts} />}
+                    title={i18n.PAGE_TITLE}
+                  />
+
                   <KpiHostsQuery
                     endDate={to}
                     filterQuery={filterQuery}
@@ -100,58 +109,66 @@ const HostsComponent = React.memo<HostsComponentProps>(
                         refetch={refetch}
                         setQuery={setQuery}
                         to={to}
-                        narrowDateRange={(min: number, max: number) => {
-                          /**
-                           * Using setTimeout here because of this issue:
-                           * https://github.com/elastic/elastic-charts/issues/360
-                           * Need to remove the setTimeout here after this issue is fixed.
-                           * */
-                          setTimeout(() => {
-                            setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
-                          }, 500);
-                        }}
+                        narrowDateRange={narrowDateRange}
                       />
                     )}
                   </KpiHostsQuery>
+
                   <EuiSpacer />
-                  <SiemNavigation
-                    navTabs={navTabsHosts(hasMlUserPermissions(capabilities))}
-                    display="default"
-                    showBorder={true}
+
+                  <SiemNavigation navTabs={navTabsHosts(hasMlUserPermissions(capabilities))} />
+
+                  <EuiSpacer />
+
+                  <HostsTabs
+                    deleteQuery={deleteQuery}
+                    to={to}
+                    filterQuery={filterQuery}
+                    isInitializing={isInitializing}
+                    setQuery={setQuery}
+                    from={from}
+                    type={hostsModel.HostsType.page}
+                    indexPattern={indexPattern}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                    hostsPagePath={hostsPagePath}
                   />
-                  <EuiSpacer />
-                </>
+                </WrapperPage>
               </StickyContainer>
             ) : (
-              <>
-                <HeaderPage title={i18n.PAGE_TITLE} />
+              <WrapperPage>
+                <HeaderPage border title={i18n.PAGE_TITLE} />
+
                 <HostsEmptyPage />
-              </>
-            )
-          }
+              </WrapperPage>
+            );
+          }}
         </WithSource>
+
         <SpyRoute />
       </>
     );
   }
 );
-
 HostsComponent.displayName = 'HostsComponent';
 
 const makeMapStateToProps = () => {
-  const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const mapStateToProps = (state: State): HostsComponentReduxProps => ({
-    filterQuery: getHostsFilterQueryAsJson(state, hostsModel.HostsType.page) || '',
+    query: getGlobalQuerySelector(state),
+    filters: getGlobalFiltersQuerySelector(state),
   });
+
   return mapStateToProps;
 };
 
+interface HostsProps extends GlobalTimeArgs {
+  hostsPagePath: string;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const Hosts = compose<React.ComponentClass<GlobalTimeArgs>>(
-  connect(
-    makeMapStateToProps,
-    {
-      setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-    }
-  )
+export const Hosts = compose<React.ComponentClass<HostsProps>>(
+  connect(makeMapStateToProps, {
+    setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
+  })
 )(HostsComponent);

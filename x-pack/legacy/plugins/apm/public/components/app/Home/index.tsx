@@ -23,41 +23,67 @@ import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink'
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
+import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
+import { ServiceMap } from '../ServiceMap';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
-const homeTabs = [
-  {
-    link: (
-      <ServiceOverviewLink>
-        {i18n.translate('xpack.apm.home.servicesTabLabel', {
-          defaultMessage: 'Services'
-        })}
-      </ServiceOverviewLink>
-    ),
-    render: () => <ServiceOverview />,
-    name: 'services'
-  },
-  {
-    link: (
-      <TraceOverviewLink>
-        {i18n.translate('xpack.apm.home.tracesTabLabel', {
-          defaultMessage: 'Traces'
-        })}
-      </TraceOverviewLink>
-    ),
-    render: () => <TraceOverview />,
-    name: 'traces'
+function getHomeTabs({
+  serviceMapEnabled = false
+}: {
+  serviceMapEnabled: boolean;
+}) {
+  const homeTabs = [
+    {
+      link: (
+        <ServiceOverviewLink>
+          {i18n.translate('xpack.apm.home.servicesTabLabel', {
+            defaultMessage: 'Services'
+          })}
+        </ServiceOverviewLink>
+      ),
+      render: () => <ServiceOverview />,
+      name: 'services'
+    },
+    {
+      link: (
+        <TraceOverviewLink>
+          {i18n.translate('xpack.apm.home.tracesTabLabel', {
+            defaultMessage: 'Traces'
+          })}
+        </TraceOverviewLink>
+      ),
+      render: () => <TraceOverview />,
+      name: 'traces'
+    }
+  ];
+
+  if (serviceMapEnabled) {
+    homeTabs.push({
+      link: (
+        <ServiceMapLink>
+          {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+            defaultMessage: 'Service Map'
+          })}
+        </ServiceMapLink>
+      ),
+      render: () => <ServiceMap />,
+      name: 'service-map'
+    });
   }
-];
 
+  return homeTabs;
+}
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
   defaultMessage: 'Settings'
 });
 
 interface Props {
-  tab: 'traces' | 'services';
+  tab: 'traces' | 'services' | 'service-map';
 }
 
 export function Home({ tab }: Props) {
+  const { config } = useApmPluginContext();
+  const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
     homeTab => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;

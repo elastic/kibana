@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/FontPicker default 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <input
+      defaultValue=""
+      type="hidden"
+    />
+    <div
+      className="euiFormControlLayout euiFormControlLayout--compressed"
+    >
+      <div
+        className="euiFormControlLayout__childrenWrapper"
+      >
+        <span
+          className="euiScreenReaderOnly"
+          id="generated-id"
+        >
+          Select an option: , is selected
+        </span>
+        <button
+          aria-haspopup="true"
+          aria-labelledby="undefined generated-id"
+          aria-selected={true}
+          className="euiSuperSelectControl euiSuperSelectControl--compressed"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          role="option"
+          type="button"
+        >
+          
+        </button>
+        <div
+          className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+        >
+          <span
+            className="euiFormControlLayoutCustomIcon"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/FontPicker with value 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <input
+      type="hidden"
+      value="'American Typewriter', 'Courier New', Courier, Monaco, mono"
+    />
+    <div
+      className="euiFormControlLayout euiFormControlLayout--compressed"
+    >
+      <div
+        className="euiFormControlLayout__childrenWrapper"
+      >
+        <span
+          className="euiScreenReaderOnly"
+          id="generated-id"
+        >
+          Select an option: 
+          <div
+            style={
+              Object {
+                "fontFamily": "'American Typewriter', 'Courier New', Courier, Monaco, mono",
+              }
+            }
+          >
+            American Typewriter
+          </div>
+          , is selected
+        </span>
+        <button
+          aria-haspopup="true"
+          aria-labelledby="undefined generated-id"
+          aria-selected={true}
+          className="euiSuperSelectControl euiSuperSelectControl--compressed"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          role="option"
+          type="button"
+        >
+          <div
+            style={
+              Object {
+                "fontFamily": "'American Typewriter', 'Courier New', Courier, Monaco, mono",
+              }
+            }
+          >
+            American Typewriter
+          </div>
+        </button>
+        <div
+          className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+        >
+          <span
+            className="euiFormControlLayoutCustomIcon"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

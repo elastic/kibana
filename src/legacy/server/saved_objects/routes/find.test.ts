@@ -20,22 +20,20 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createFindRoute } from './find';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('GET /api/saved_objects/_find', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
+  const clientResponse = {
+    total: 0,
+    saved_objects: [],
+    per_page: 0,
+    page: 0,
+  };
   beforeEach(() => {
-    savedObjectsClient.find.mockImplementation(() => Promise.resolve(''));
+    savedObjectsClient.find.mockImplementation(() => Promise.resolve(clientResponse));
     server = createMockServer();
 
     const prereqs = {
@@ -76,15 +74,18 @@ describe('GET /api/saved_objects/_find', () => {
       url: '/api/saved_objects/_find?type=index-pattern',
     };
 
-    const clientResponse = {
+    const findResponse = {
       total: 2,
-      data: [
+      per_page: 2,
+      page: 1,
+      saved_objects: [
         {
           type: 'index-pattern',
           id: 'logstash-*',
           title: 'logstash-*',
           timeFieldName: '@timestamp',
           notExpandable: true,
+          attributes: {},
           references: [],
         },
         {
@@ -93,18 +94,19 @@ describe('GET /api/saved_objects/_find', () => {
           title: 'stocks-*',
           timeFieldName: '@timestamp',
           notExpandable: true,
+          attributes: {},
           references: [],
         },
       ],
     };
 
-    savedObjectsClient.find.mockImplementation(() => Promise.resolve(clientResponse));
+    savedObjectsClient.find.mockImplementation(() => Promise.resolve(findResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
     expect(statusCode).toBe(200);
-    expect(response).toEqual(clientResponse);
+    expect(response).toEqual(findResponse);
   });
 
   it('calls upon savedObjectClient.find with defaults', async () => {

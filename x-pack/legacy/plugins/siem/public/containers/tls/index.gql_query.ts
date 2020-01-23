@@ -10,7 +10,7 @@ export const tlsQuery = gql`
   query GetTlsQuery(
     $sourceId: ID!
     $filterQuery: String
-    $flowTarget: FlowTarget!
+    $flowTarget: FlowTargetSourceDest!
     $ip: String!
     $pagination: PaginationInputPaginated!
     $sort: TlsSortField!

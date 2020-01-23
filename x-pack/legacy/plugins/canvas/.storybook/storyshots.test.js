@@ -12,6 +12,11 @@ import initStoryshots, { multiSnapshotWithOptions } from '@storybook/addon-story
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
 import { addSerializer } from 'jest-specific-snapshot';
 
+// Several of the renderers, used by the runtime, use jQuery.
+import jquery from 'jquery';
+global.$ = jquery;
+global.jQuery = jquery;
+
 // Set our default timezone to UTC for tests so we can generate predictable snapshots
 moment.tz.setDefault('UTC');
 
@@ -47,11 +52,24 @@ jest.mock('plugins/interpreter/registries', () => ({}));
 
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
 jest.mock(
-  '../public/components/workpad_header/workpad_export/__examples__/disabled_panel.examples',
+  '../public/components/workpad_header/workpad_export/__examples__/disabled_panel.stories',
   () => {
     return 'Disabled Panel';
   }
 );
+
+// Disabling this test due to https://github.com/elastic/eui/issues/2242
+jest.mock(
+  '../public/components/workpad_header/workpad_export/flyout/__examples__/share_website_flyout.stories',
+  () => {
+    return 'Disabled Panel';
+  }
+);
+
+// This element uses a `ref` and cannot be rendered by Jest snapshots.
+import { RenderedElement } from '../shareable_runtime/components/rendered_element';
+jest.mock('../shareable_runtime/components/rendered_element');
+RenderedElement.mockImplementation(() => 'RenderedElement');
 
 addSerializer(styleSheetSerializer);
 

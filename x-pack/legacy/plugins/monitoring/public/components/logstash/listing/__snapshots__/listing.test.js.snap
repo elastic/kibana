@@ -55,7 +55,7 @@ exports[`Listing should render with certain data pieces missing 1`] = `
       ],
     }
   }
-  nameField="name"
+  productName="logstash"
   rows={
     Array [
       Object {
@@ -82,7 +82,6 @@ exports[`Listing should render with certain data pieces missing 1`] = `
     }
   }
   setupMode={Object {}}
-  setupNewButtonLabel="Setup monitoring for new Logstash node"
   sorting={
     Object {
       "sort": Object {
@@ -93,7 +92,6 @@ exports[`Listing should render with certain data pieces missing 1`] = `
       },
     }
   }
-  uuidField="logstash.uuid"
 />
 `;
 
@@ -152,7 +150,7 @@ exports[`Listing should render with expected props 1`] = `
       ],
     }
   }
-  nameField="name"
+  productName="logstash"
   rows={
     Array [
       Object {
@@ -211,7 +209,6 @@ exports[`Listing should render with expected props 1`] = `
     }
   }
   setupMode={Object {}}
-  setupNewButtonLabel="Setup monitoring for new Logstash node"
   sorting={
     Object {
       "sort": Object {
@@ -222,6 +219,5 @@ exports[`Listing should render with expected props 1`] = `
       },
     }
   }
-  uuidField="logstash.uuid"
 />
 `;

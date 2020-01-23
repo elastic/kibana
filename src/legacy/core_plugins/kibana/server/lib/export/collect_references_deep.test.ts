@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { SavedObject, SavedObjectsClient } from 'src/core/server';
+import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 import { collectReferencesDeep } from './collect_references_deep';
+import { savedObjectsClientMock } from '../../../../../../core/server/mocks';
 
-const data = [
+const data: Array<SavedObject<SavedObjectAttributes>> = [
   {
     id: '1',
     type: 'dashboard',
@@ -78,6 +79,7 @@ const data = [
     attributes: {
       title: 'pattern*',
     },
+    references: [],
   },
   {
     id: '5',
@@ -100,97 +102,93 @@ const data = [
 ];
 
 test('collects dashboard and all dependencies', async () => {
-  const savedObjectClient = ({
-    errors: {} as any,
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-    bulkGet: jest.fn(getObjects => {
-      return {
-        saved_objects: getObjects.map((obj: SavedObject) =>
-          data.find(row => row.id === obj.id && row.type === obj.type)
-        ),
-      };
-    }),
-  } as unknown) as SavedObjectsClient;
+  const savedObjectClient = savedObjectsClientMock.create();
+  savedObjectClient.bulkGet.mockImplementation(objects => {
+    if (!objects) {
+      throw new Error('Invalid test data');
+    }
+    return Promise.resolve({
+      saved_objects: objects.map(
+        (obj: any) => data.find(row => row.id === obj.id && row.type === obj.type)!
+      ),
+    });
+  });
   const objects = await collectReferencesDeep(savedObjectClient, [{ type: 'dashboard', id: '1' }]);
   expect(objects).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {
-      "panelsJSON": "[{\\"panelRefName\\":\\"panel_0\\"},{\\"panelRefName\\":\\"panel_1\\"}]",
-    },
-    "id": "1",
-    "references": Array [
+    Array [
       Object {
+        "attributes": Object {
+          "panelsJSON": "[{\\"panelRefName\\":\\"panel_0\\"},{\\"panelRefName\\":\\"panel_1\\"}]",
+        },
+        "id": "1",
+        "references": Array [
+          Object {
+            "id": "2",
+            "name": "panel_0",
+            "type": "visualization",
+          },
+          Object {
+            "id": "3",
+            "name": "panel_1",
+            "type": "visualization",
+          },
+        ],
+        "type": "dashboard",
+      },
+      Object {
+        "attributes": Object {
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+          },
+        },
         "id": "2",
-        "name": "panel_0",
+        "references": Array [
+          Object {
+            "id": "4",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+            "type": "index-pattern",
+          },
+        ],
         "type": "visualization",
       },
       Object {
+        "attributes": Object {
+          "savedSearchRefName": "search_0",
+        },
         "id": "3",
-        "name": "panel_1",
+        "references": Array [
+          Object {
+            "id": "5",
+            "name": "search_0",
+            "type": "search",
+          },
+        ],
         "type": "visualization",
       },
-    ],
-    "type": "dashboard",
-  },
-  Object {
-    "attributes": Object {
-      "kibanaSavedObjectMeta": Object {
-        "searchSourceJSON": "{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
-      },
-    },
-    "id": "2",
-    "references": Array [
       Object {
+        "attributes": Object {
+          "title": "pattern*",
+        },
         "id": "4",
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "references": Array [],
         "type": "index-pattern",
       },
-    ],
-    "type": "visualization",
-  },
-  Object {
-    "attributes": Object {
-      "savedSearchRefName": "search_0",
-    },
-    "id": "3",
-    "references": Array [
       Object {
+        "attributes": Object {
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+          },
+        },
         "id": "5",
-        "name": "search_0",
+        "references": Array [
+          Object {
+            "id": "4",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+            "type": "index-pattern",
+          },
+        ],
         "type": "search",
       },
-    ],
-    "type": "visualization",
-  },
-  Object {
-    "attributes": Object {
-      "title": "pattern*",
-    },
-    "id": "4",
-    "type": "index-pattern",
-  },
-  Object {
-    "attributes": Object {
-      "kibanaSavedObjectMeta": Object {
-        "searchSourceJSON": "{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
-      },
-    },
-    "id": "5",
-    "references": Array [
-      Object {
-        "id": "4",
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "search",
-  },
-]
-`);
+    ]
+  `);
 });

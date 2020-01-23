@@ -7,6 +7,7 @@
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 import 'ui/kbn_top_nav';
+import 'ui/directives/storage';
 import 'ui/autoload/all';
 import 'plugins/monitoring/filters';
 import 'plugins/monitoring/services/clusters';
@@ -21,17 +22,23 @@ import 'plugins/monitoring/views/all';
 const uiSettings = chrome.getUiSettingsClient();
 
 // default timepicker default to the last hour
-uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify({
-  from: 'now-1h',
-  to: 'now',
-  mode: 'quick'
-}));
+uiSettings.overrideLocalDefault(
+  'timepicker:timeDefaults',
+  JSON.stringify({
+    from: 'now-1h',
+    to: 'now',
+    mode: 'quick',
+  })
+);
 
 // default autorefresh to active and refreshing every 10 seconds
-uiSettings.overrideLocalDefault('timepicker:refreshIntervalDefaults', JSON.stringify({
-  pause: false,
-  value: 10000
-}));
+uiSettings.overrideLocalDefault(
+  'timepicker:refreshIntervalDefaults',
+  JSON.stringify({
+    pause: false,
+    value: 10000,
+  })
+);
 
 // Enable Angular routing
 uiRoutes.enable();

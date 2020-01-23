@@ -5,47 +5,41 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { EmbeddedMap } from './embedded_map';
+import React from 'react';
+
+import { useIndexPatterns } from '../../hooks/use_index_patterns';
+import { EmbeddedMapComponent } from './embedded_map';
 import { SetQuery } from './types';
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      injectedMetadata: {
-        getKibanaVersion: () => '8.0.0',
-      },
-    },
-  },
-  npSetup: {
-    core: {
-      uiSettings: {
-        get$: () => 'world',
-      },
-    },
+jest.mock('../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
   },
 }));
 
-describe('EmbeddedMap', () => {
-  let applyFilterQueryFromKueryExpression: (expression: string) => void;
+const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
+jest.mock('../../hooks/use_index_patterns');
+mockUseIndexPatterns.mockImplementation(() => [true, []]);
+
+jest.mock('../../lib/kibana');
+
+describe('EmbeddedMapComponent', () => {
   let setQuery: SetQuery;
 
   beforeEach(() => {
-    applyFilterQueryFromKueryExpression = jest.fn(expression => {});
     setQuery = jest.fn();
   });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <EmbeddedMap
-        applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
-        queryExpression={''}
-        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
+      <EmbeddedMapComponent
         endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
+        filters={[]}
+        query={{ query: '', language: 'kuery' }}
         setQuery={setQuery}
+        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
       />
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
-import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const introspectionQuery = gql`
@@ -20,9 +19,10 @@ const introspectionQuery = gql`
 `;
 
 export default function({ getService }: FtrProviderContext) {
+  const config = getService('config');
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
   const clientFactory = getService('siemGraphQLClientFactory');
 
   const expectGraphQL404 = (result: any) => {
@@ -82,6 +82,11 @@ export default function({ getService }: FtrProviderContext) {
   };
 
   describe('feature controls', () => {
+    let isProd = false;
+    before(() => {
+      const kbnConfig = config.get('servers.kibana');
+      isProd = kbnConfig.hostname === 'localhost' && kbnConfig.port === 5620 ? false : true;
+    });
     it(`APIs can't be accessed by user with no privileges`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
@@ -130,7 +135,11 @@ export default function({ getService }: FtrProviderContext) {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQLResponse(graphQLIResult);
+        if (!isProd) {
+          expectGraphIQLResponse(graphQLIResult);
+        } else {
+          expectGraphIQL404(graphQLIResult);
+        }
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -225,7 +234,11 @@ export default function({ getService }: FtrProviderContext) {
         expectGraphQLResponse(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password, space1Id);
-        expectGraphIQLResponse(graphQLIResult);
+        if (!isProd) {
+          expectGraphIQLResponse(graphQLIResult);
+        } else {
+          expectGraphIQL404(graphQLIResult);
+        }
       });
 
       it(`user_1 can't access APIs in space_2`, async () => {

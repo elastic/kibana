@@ -16,31 +16,6 @@ import { MouseEventHandler, ReactType, Ref } from 'react';
 import { JsonObject } from '../common/typed_json';
 
 declare module '@elastic/eui' {
-  export interface EuiBreadcrumbDefinition {
-    text: React.ReactNode;
-    href?: string;
-    onClick?: React.MouseEventHandler<any>;
-  }
-  type EuiBreadcrumbsProps = CommonProps & {
-    responsive?: boolean;
-    truncate?: boolean;
-    max?: number;
-    breadcrumbs: EuiBreadcrumbDefinition[];
-  };
-
-  type EuiHeaderProps = CommonProps;
-  export const EuiHeader: React.SFC<EuiHeaderProps>;
-
-  export type EuiHeaderSectionSide = 'left' | 'right';
-  type EuiHeaderSectionProps = CommonProps & {
-    side?: EuiHeaderSectionSide;
-    grow?: boolean;
-  };
-  export const EuiHeaderSection: React.SFC<EuiHeaderSectionProps>;
-
-  type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
-  export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
-
   interface EuiFormControlLayoutIconProps {
     type: IconType;
     side?: 'left' | 'right';
@@ -59,43 +34,18 @@ declare module '@elastic/eui' {
       items: Array<{
         id: string;
         name: string;
-        onClick: () => void;
+        onClick?: () => void;
       }>;
     }>;
     mobileTitle?: React.ReactNode;
     toggleOpenOnMobile?: () => void;
     isOpenOnMobile?: boolean;
   };
-  export const EuiSideNav: React.SFC<EuiSideNavProps>;
-
-  type EuiErrorBoundaryProps = CommonProps & {
-    children: React.ReactNode;
-  };
+  export const EuiSideNav: React.FC<EuiSideNavProps>;
 
   type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
   type EuiResponsiveProps = CommonProps & {
     children: React.ReactNode;
     sizes: EuiSizesResponsive[];
   };
-
-  export const EuiHideFor: React.SFC<EuiResponsiveProps>;
-
-  export const EuiShowFor: React.SFC<EuiResponsiveProps>;
-
-  type EuiInMemoryTableProps = CommonProps & {
-    items?: any;
-    columns?: any;
-    sorting?: any;
-    search?: any;
-    selection?: any;
-    pagination?: any;
-    itemId?: any;
-    isSelectable?: any;
-    loading?: any;
-    hasActions?: any;
-    message?: any;
-    rowProps?: any;
-    cellProps?: any;
-  };
-  export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 }

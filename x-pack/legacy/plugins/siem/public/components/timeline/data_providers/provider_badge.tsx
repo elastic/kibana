@@ -8,7 +8,6 @@ import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { getEmptyString } from '../../empty_value';
@@ -53,12 +52,12 @@ interface ProviderBadgeProps {
   isEnabled: boolean;
   isExcluded: boolean;
   providerId: string;
-  togglePopover?: () => void;
+  togglePopover: () => void;
   val: string | number;
   operator: QueryOperator;
 }
 
-export const ProviderBadge = pure<ProviderBadgeProps>(
+export const ProviderBadge = React.memo<ProviderBadgeProps>(
   ({ deleteProvider, field, isEnabled, isExcluded, operator, providerId, togglePopover, val }) => {
     const deleteFilter: React.MouseEventHandler<HTMLButtonElement> = (
       event: React.MouseEvent<HTMLButtonElement>
@@ -78,8 +77,6 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     const title = `${field}: "${formattedValue}"`;
 
     return (
-      // Ref: https://github.com/elastic/eui/issues/1655
-      // @ts-ignore
       <ProviderBadgeStyled
         id={`${providerId}-${field}-${val}`}
         className={classes}

@@ -6,45 +6,67 @@
 
 import chrome from 'ui/chrome';
 import {
+  CheckRecognizerProps,
   CloseJobsResponse,
-  Group,
-  IndexPatternResponse,
-  IndexPatternSavedObject,
-  Job,
+  ErrorResponse,
+  GetModulesProps,
+  JobSummary,
   MlSetupArgs,
+  Module,
+  RecognizerModule,
   SetupMlResponse,
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from './types';
-import {
-  throwIfNotOk,
-  throwIfErrorAttached,
-  throwIfErrorAttachedToSetup,
-} from '../ml/api/throw_if_not_ok';
-import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../common/constants';
-
-const emptyIndexPattern: IndexPatternSavedObject[] = [];
+import { throwIfErrorAttached, throwIfErrorAttachedToSetup } from '../ml/api/throw_if_not_ok';
+import { throwIfNotOk } from '../../hooks/api/api';
 
 /**
- * Fetches ML Groups Data
+ * Checks the ML Recognizer API to see if a given indexPattern has any compatible modules
  *
- * @param headers
+ * @param indexPatternName ES index pattern to check for compatible modules
+ * @param signal to cancel request
  */
-export const groupsData = async (headers: Record<string, string | undefined>): Promise<Group[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/groups`, {
+export const checkRecognizer = async ({
+  indexPatternName,
+  signal,
+}: CheckRecognizerProps): Promise<RecognizerModule[]> => {
+  const response = await fetch(
+    `${chrome.getBasePath()}/api/ml/modules/recognize/${indexPatternName}`,
+    {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-system-api': 'true',
+        'kbn-xsrf': 'true',
+      },
+      signal,
+    }
+  );
+  await throwIfNotOk(response);
+  return response.json();
+};
+
+/**
+ * Returns ML Module for given moduleId. Returns all modules if no moduleId specified
+ *
+ * @param moduleId id of the module to retrieve
+ * @param signal to cancel request
+ */
+export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> => {
+  const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
       'content-type': 'application/json',
       'kbn-system-api': 'true',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
+      'kbn-xsrf': 'true',
     },
+    signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };
 
 /**
@@ -52,18 +74,18 @@ export const groupsData = async (headers: Record<string, string | undefined>): P
  *
  * @param configTemplate - name of configTemplate to setup
  * @param indexPatternName - default index pattern configTemplate should be installed with
+ * @param jobIdErrorFilter - if provided, filters all errors except for given jobIds
  * @param groups - list of groups to add to jobs being installed
  * @param prefix - prefix to be added to job name
- * @param headers
+ * @param headers optional headers to add
  */
 export const setupMlJob = async ({
   configTemplate,
   indexPatternName = 'auditbeat-*',
+  jobIdErrorFilter = [],
   groups = ['siem'],
   prefix = '',
-  headers = {},
 }: MlSetupArgs): Promise<SetupMlResponse> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
   const response = await fetch(`${chrome.getBasePath()}/api/ml/modules/setup/${configTemplate}`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -75,15 +97,14 @@ export const setupMlJob = async ({
       useDedicatedIndex: true,
     }),
     headers: {
-      'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
   });
   await throwIfNotOk(response);
   const json = await response.json();
-  throwIfErrorAttachedToSetup(json);
+  throwIfErrorAttachedToSetup(json, jobIdErrorFilter);
   return json;
 };
 
@@ -92,14 +113,14 @@ export const setupMlJob = async ({
  *
  * @param datafeedIds
  * @param start
- * @param headers
  */
-export const startDatafeeds = async (
-  datafeedIds: string[],
-  headers: Record<string, string | undefined>,
-  start = 0
-): Promise<StartDatafeedResponse> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+export const startDatafeeds = async ({
+  datafeedIds,
+  start = 0,
+}: {
+  datafeedIds: string[];
+  start: number;
+}): Promise<StartDatafeedResponse> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/force_start_datafeeds`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -108,10 +129,9 @@ export const startDatafeeds = async (
       ...(start !== 0 && { start }),
     }),
     headers: {
-      'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
   });
   await throwIfNotOk(response);
@@ -124,13 +144,13 @@ export const startDatafeeds = async (
  * Stops the given dataFeedIds and sets the corresponding Job's jobState to closed
  *
  * @param datafeedIds
- * @param headers
+ * @param headers optional headers to add
  */
-export const stopDatafeeds = async (
-  datafeedIds: string[],
-  headers: Record<string, string | undefined>
-): Promise<[StopDatafeedResponse, CloseJobsResponse]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+export const stopDatafeeds = async ({
+  datafeedIds,
+}: {
+  datafeedIds: string[];
+}): Promise<[StopDatafeedResponse | ErrorResponse, CloseJobsResponse]> => {
   const stopDatafeedsResponse = await fetch(`${chrome.getBasePath()}/api/ml/jobs/stop_datafeeds`, {
     method: 'POST',
     credentials: 'same-origin',
@@ -138,10 +158,9 @@ export const stopDatafeeds = async (
       datafeedIds,
     }),
     headers: {
-      'kbn-system-api': 'true',
       'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
     },
   });
 
@@ -162,8 +181,7 @@ export const stopDatafeeds = async (
     headers: {
       'content-type': 'application/json',
       'kbn-system-api': 'true',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
+      'kbn-xsrf': 'true',
     },
   });
 
@@ -172,59 +190,25 @@ export const stopDatafeeds = async (
 };
 
 /**
- * Fetches Job Details for given jobIds
+ * Fetches a summary of all ML jobs currently installed
  *
- * @param jobIds
- * @param headers
+ * NOTE: If not sending jobIds in the body, you must at least send an empty body or the server will
+ * return a 500
+ *
+ * @param signal to cancel request
  */
-export const jobsSummary = async (
-  jobIds: string[],
-  headers: Record<string, string | undefined>
-): Promise<Job[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/jobs/jobs_summary`, {
     method: 'POST',
     credentials: 'same-origin',
-    body: JSON.stringify({ jobIds }),
+    body: JSON.stringify({}),
     headers: {
       'content-type': 'application/json',
-      'kbn-xsrf': kbnVersion,
       'kbn-system-api': 'true',
-      ...headers,
+      'kbn-xsrf': 'true',
     },
+    signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
-};
-
-/**
- * Fetches Configured Index Patterns from the Kibana saved objects API (as ML does during create job flow)
- * TODO: Used by more than just ML now -- refactor to shared component https://github.com/elastic/siem-team/issues/448
- * @param headers
- */
-export const getIndexPatterns = async (
-  headers: Record<string, string | undefined>
-): Promise<IndexPatternSavedObject[]> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const response = await fetch(
-    `${chrome.getBasePath()}/api/saved_objects/_find?type=index-pattern&fields=title&fields=type&per_page=10000`,
-    {
-      method: 'GET',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-xsrf': kbnVersion,
-        'kbn-system-api': 'true',
-        ...headers,
-      },
-    }
-  );
-  await throwIfNotOk(response);
-  const results: IndexPatternResponse = await response.json();
-
-  if (results.saved_objects && Array.isArray(results.saved_objects)) {
-    return results.saved_objects;
-  } else {
-    return emptyIndexPattern;
-  }
+  return response.json();
 };

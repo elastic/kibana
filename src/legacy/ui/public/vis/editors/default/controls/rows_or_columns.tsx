@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggControlProps } from './agg_control_props';
 
@@ -28,8 +28,8 @@ const PARAMS = {
   COLUMNS: 'visEditorSplitBy__false',
 };
 
-function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps<boolean>) {
-  const idSelected = `visEditorSplitBy__${aggParams.row}`;
+function RowsOrColumnsControl({ agg, setAggParamValue }: AggControlProps) {
+  const idSelected = `visEditorSplitBy__${agg.params.row}`;
   const options = [
     {
       id: PARAMS.ROWS,
@@ -44,14 +44,14 @@ function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps<boolean>)
       }),
     },
   ];
+  const onChange = useCallback(
+    optionId => setAggParamValue(agg.id, PARAMS.NAME, optionId === PARAMS.ROWS),
+    [setAggParamValue]
+  );
 
   return (
-    <EuiFormRow compressed fullWidth={true} className="visEditorSidebar__aggParamFormRow">
-      <>
-        {/*
-          We have to put it into React.Fragment to avoid errors:
-          EuiFormRow will try to put "compressed" as attribute into a EuiButtonGroup div
-        */}
+    <>
+      <EuiFormRow compressed fullWidth={true}>
         <EuiButtonGroup
           data-test-subj="visEditorSplitBy"
           legend={i18n.translate('common.ui.vis.defaultEditor.controls.splitByLegend', {
@@ -60,10 +60,11 @@ function RowsOrColumnsControl({ aggParams, setValue }: AggControlProps<boolean>)
           options={options}
           isFullWidth={true}
           idSelected={idSelected}
-          onChange={optionId => setValue(aggParams, PARAMS.NAME, optionId === PARAMS.ROWS)}
+          onChange={onChange}
         />
-      </>
-    </EuiFormRow>
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+    </>
   );
 }
 

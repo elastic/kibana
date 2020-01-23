@@ -5,5 +5,4 @@
  */
 
 export * from './adapter_types';
-export { ElasticsearchMonitorsAdapter } from './elasticsearch_monitors_adapter';
-export { UMMemoryMonitorsAdapter } from './memory_pings_adapter';
+export { elasticsearchMonitorsAdapter } from './elasticsearch_monitors_adapter';

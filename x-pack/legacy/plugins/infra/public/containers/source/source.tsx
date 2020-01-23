@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -176,3 +176,4 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 };
 
 export const Source = createContainer(useSource);
+export const [SourceProvider, useSourceContext] = Source;

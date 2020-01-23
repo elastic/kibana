@@ -15,7 +15,7 @@ interface Props {
   state: any;
 }
 
-export const SnapshotState: React.SFC<Props> = ({ state }) => {
+export const SnapshotState: React.FC<Props> = ({ state }) => {
   const {
     core: { i18n },
   } = useAppDependencies();

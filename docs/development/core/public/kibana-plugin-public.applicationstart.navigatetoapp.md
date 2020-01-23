@@ -4,7 +4,7 @@
 
 ## ApplicationStart.navigateToApp() method
 
-Navigiate to a given app
+Navigate to a given app
 
 <b>Signature:</b>
 
@@ -12,7 +12,7 @@ Navigiate to a given app
 navigateToApp(appId: string, options?: {
         path?: string;
         state?: any;
-    }): void;
+    }): Promise<void>;
 ```
 
 ## Parameters
@@ -24,5 +24,5 @@ navigateToApp(appId: string, options?: {
 
 <b>Returns:</b>
 
-`void`
+`Promise<void>`
 

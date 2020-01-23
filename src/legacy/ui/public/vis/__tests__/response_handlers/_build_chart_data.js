@@ -23,16 +23,16 @@ import sinon from 'sinon';
 import { aggResponseIndex } from '../../../agg_response';
 import { vislibSeriesResponseHandlerProvider as vislibReponseHandler } from '../../response_handlers/vislib';
 
-describe('renderbot#buildChartData', function () {
+describe('renderbot#buildChartData', function() {
   const buildChartData = vislibReponseHandler().handler;
 
-  describe('for hierarchical vis', function () {
-    it('defers to hierarchical aggResponse converter', function () {
+  describe('for hierarchical vis', function() {
+    it('defers to hierarchical aggResponse converter', function() {
       const football = {};
       const renderbot = {
         vis: {
-          isHierarchical: _.constant(true)
-        }
+          isHierarchical: _.constant(true),
+        },
       };
 
       const stub = sinon.stub(aggResponseIndex, 'hierarchical').returns(football);
@@ -43,12 +43,12 @@ describe('renderbot#buildChartData', function () {
     });
   });
 
-  describe('for point plot', function () {
-    it('calls tabify to simplify the data into a table', function () {
+  describe('for point plot', function() {
+    it('calls tabify to simplify the data into a table', function() {
       const renderbot = {
         vis: {
-          isHierarchical: _.constant(false)
-        }
+          isHierarchical: _.constant(false),
+        },
       };
       const football = { tables: [], hits: { total: 1 } };
 
@@ -59,24 +59,24 @@ describe('renderbot#buildChartData', function () {
       expect(stub.firstCall.args[1]).to.be(football);
     });
 
-    it('returns a single chart if the tabify response contains only a single table', function () {
+    it('returns a single chart if the tabify response contains only a single table', function() {
       const chart = { hits: 1, rows: [], columns: [] };
       const renderbot = {
         vis: {
           isHierarchical: _.constant(false),
           type: {
-            responseConverter: _.constant(chart)
-          }
-        }
+            responseConverter: _.constant(chart),
+          },
+        },
       };
       const esResp = { hits: { total: 1 } };
-      const tabbed = { tables: [ {}] };
+      const tabbed = { tables: [{}] };
 
       sinon.stub(aggResponseIndex, 'tabify').returns(tabbed);
       expect(buildChartData.call(renderbot, esResp)).to.eql(chart);
     });
 
-    it('converts table groups into rows/columns wrappers for charts', function () {
+    it('converts table groups into rows/columns wrappers for charts', function() {
       const converter = sinon.stub().returns('chart');
       const esResp = { hits: { total: 1 } };
       const tables = [{}, {}, {}, {}];
@@ -85,9 +85,9 @@ describe('renderbot#buildChartData', function () {
         vis: {
           isHierarchical: _.constant(false),
           type: {
-            responseConverter: converter
-          }
-        }
+            responseConverter: converter,
+          },
+        },
       };
 
       sinon.stub(aggResponseIndex, 'tabify').returns({
@@ -97,28 +97,28 @@ describe('renderbot#buildChartData', function () {
             tables: [
               {
                 aggConfig: { params: { row: false } },
-                tables: [ tables[0] ]
+                tables: [tables[0]],
               },
               {
                 aggConfig: { params: { row: false } },
-                tables: [ tables[1] ]
-              }
-            ]
+                tables: [tables[1]],
+              },
+            ],
           },
           {
             aggConfig: { params: { row: true } },
             tables: [
               {
                 aggConfig: { params: { row: false } },
-                tables: [ tables[2] ]
+                tables: [tables[2]],
               },
               {
                 aggConfig: { params: { row: false } },
-                tables: [ tables[3] ]
-              }
-            ]
-          }
-        ]
+                tables: [tables[3]],
+              },
+            ],
+          },
+        ],
       });
 
       const chartData = buildChartData.call(renderbot, esResp);
@@ -132,9 +132,9 @@ describe('renderbot#buildChartData', function () {
 
       expect(chartData).to.have.property('rows');
       expect(chartData.rows).to.have.length(2);
-      chartData.rows.forEach(function (row) {
+      chartData.rows.forEach(function(row) {
         expect(row).to.have.property('columns');
-        expect(row.columns).to.eql([ 'chart', 'chart' ]);
+        expect(row.columns).to.eql(['chart', 'chart']);
       });
     });
   });

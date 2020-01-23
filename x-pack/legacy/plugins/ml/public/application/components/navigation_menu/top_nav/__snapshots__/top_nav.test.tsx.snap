@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Navigation Menu: <TopNav /> Minimal initialization. 1`] = `
+<Fragment>
+  <div
+    className="mlNavigationMenu__topNav"
+  >
+    <EuiSuperDatePicker
+      commonlyUsedRanges={
+        Array [
+          Object {
+            "end": "now/d",
+            "label": "Today",
+            "start": "now/d",
+          },
+          Object {
+            "end": "now/w",
+            "label": "This week",
+            "start": "now/w",
+          },
+          Object {
+            "end": "now/M",
+            "label": "This month",
+            "start": "now/M",
+          },
+          Object {
+            "end": "now/y",
+            "label": "This year",
+            "start": "now/y",
+          },
+          Object {
+            "end": "now-1d/d",
+            "label": "Yesterday",
+            "start": "now-1d/d",
+          },
+          Object {
+            "end": "now",
+            "label": "Week to date",
+            "start": "now/w",
+          },
+          Object {
+            "end": "now",
+            "label": "Month to date",
+            "start": "now/M",
+          },
+          Object {
+            "end": "now",
+            "label": "Year to date",
+            "start": "now/y",
+          },
+        ]
+      }
+      dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
+      end="Sun Sep 29 2019 01:45:36 GMT+0200"
+      isAutoRefreshOnly={false}
+      isDisabled={false}
+      isPaused={true}
+      onRefresh={[Function]}
+      onRefreshChange={[Function]}
+      onTimeChange={[Function]}
+      recentlyUsedRanges={
+        Array [
+          Object {
+            "end": "Sun Sep 29 2019 01:45:36 GMT+0200",
+            "start": "Thu Aug 29 2019 02:04:19 GMT+0200",
+          },
+        ]
+      }
+      refreshInterval={0}
+      showUpdateButton={true}
+      start="Thu Aug 29 2019 02:04:19 GMT+0200"
+      timeFormat="HH:mm"
+    />
+  </div>
+</Fragment>
+`;

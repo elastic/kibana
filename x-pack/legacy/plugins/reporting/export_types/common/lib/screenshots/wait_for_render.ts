@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CaptureConfig } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 
 export const waitForRenderComplete = async (
-  captureConfig: any,
+  captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   layout: LayoutInstance,
   logger: LevelLogger

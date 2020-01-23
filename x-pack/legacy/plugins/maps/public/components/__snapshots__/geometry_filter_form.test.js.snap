@@ -2,30 +2,27 @@
 
 exports[`should not render relation select when geo field is geo_point 1`] = `
 <EuiForm>
-  <EuiSpacer
-    size="s"
-  />
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Geometry label"
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
-      isLoading={false}
+      compressed={true}
       onChange={[Function]}
       value="My shape"
     />
   </EuiFormRow>
   <EuiFormRow
     className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Filtered field"
     labelType="label"
@@ -41,7 +38,10 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
       options={
         Array [
           Object {
-            "inputDisplay": <EuiText>
+            "inputDisplay": <EuiText
+              component="span"
+              size="s"
+            >
               <EuiTextColor
                 color="subdued"
               >
@@ -59,42 +59,47 @@ exports[`should not render relation select when geo field is geo_point 1`] = `
       valueOfSelected="My index/my geo field"
     />
   </EuiFormRow>
-  <EuiButton
-    isDisabled={false}
-    onClick={[Function]}
-    size="s"
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTextAlign
+    textAlign="right"
   >
-    Create filter
-  </EuiButton>
+    <EuiButton
+      fill={true}
+      isDisabled={false}
+      onClick={[Function]}
+      size="s"
+    >
+      Create filter
+    </EuiButton>
+  </EuiTextAlign>
 </EuiForm>
 `;
 
 exports[`should not show "within" relation when filter geometry is not closed 1`] = `
 <EuiForm>
-  <EuiSpacer
-    size="s"
-  />
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Geometry label"
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
-      isLoading={false}
+      compressed={true}
       onChange={[Function]}
       value="My shape"
     />
   </EuiFormRow>
   <EuiFormRow
     className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Filtered field"
     labelType="label"
@@ -110,7 +115,10 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
       options={
         Array [
           Object {
-            "inputDisplay": <EuiText>
+            "inputDisplay": <EuiText
+              component="span"
+              size="s"
+            >
               <EuiTextColor
                 color="subdued"
               >
@@ -129,18 +137,16 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
     />
   </EuiFormRow>
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Spatial relation"
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
+      compressed={true}
       onChange={[Function]}
       options={
         Array [
@@ -157,42 +163,47 @@ exports[`should not show "within" relation when filter geometry is not closed 1`
       value="INTERSECTS"
     />
   </EuiFormRow>
-  <EuiButton
-    isDisabled={false}
-    onClick={[Function]}
-    size="s"
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTextAlign
+    textAlign="right"
   >
-    Create filter
-  </EuiButton>
+    <EuiButton
+      fill={true}
+      isDisabled={false}
+      onClick={[Function]}
+      size="s"
+    >
+      Create filter
+    </EuiButton>
+  </EuiTextAlign>
 </EuiForm>
 `;
 
-exports[`should render relation select when geo field is geo_shape 1`] = `
+exports[`should render error message 1`] = `
 <EuiForm>
-  <EuiSpacer
-    size="s"
-  />
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Geometry label"
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
-      isLoading={false}
+      compressed={true}
       onChange={[Function]}
       value="My shape"
     />
   </EuiFormRow>
   <EuiFormRow
     className="mapGeometryFilter__geoFieldSuperSelectWrapper"
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Filtered field"
     labelType="label"
@@ -208,7 +219,90 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
       options={
         Array [
           Object {
-            "inputDisplay": <EuiText>
+            "inputDisplay": <EuiText
+              component="span"
+              size="s"
+            >
+              <EuiTextColor
+                color="subdued"
+              >
+                <small>
+                  My index
+                </small>
+              </EuiTextColor>
+              <br />
+              my geo field
+            </EuiText>,
+            "value": "My index/my geo field",
+          },
+        ]
+      }
+      valueOfSelected="My index/my geo field"
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormErrorText>
+    Simulated error
+  </EuiFormErrorText>
+  <EuiTextAlign
+    textAlign="right"
+  >
+    <EuiButton
+      fill={true}
+      isDisabled={false}
+      onClick={[Function]}
+      size="s"
+    >
+      Create filter
+    </EuiButton>
+  </EuiTextAlign>
+</EuiForm>
+`;
+
+exports[`should render relation select when geo field is geo_shape 1`] = `
+<EuiForm>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Geometry label"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      onChange={[Function]}
+      value="My shape"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    className="mapGeometryFilter__geoFieldSuperSelectWrapper"
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Filtered field"
+    labelType="label"
+  >
+    <EuiSuperSelect
+      className="mapGeometryFilter__geoFieldSuperSelect"
+      compressed={true}
+      fullWidth={true}
+      hasDividers={true}
+      isInvalid={false}
+      itemClassName="mapGeometryFilter__geoFieldItem"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "inputDisplay": <EuiText
+              component="span"
+              size="s"
+            >
               <EuiTextColor
                 color="subdued"
               >
@@ -227,18 +321,16 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
     />
   </EuiFormRow>
   <EuiFormRow
-    compressed={true}
     describedByIds={Array []}
+    display="rowCompressed"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Spatial relation"
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
+      compressed={true}
       onChange={[Function]}
       options={
         Array [
@@ -259,12 +351,20 @@ exports[`should render relation select when geo field is geo_shape 1`] = `
       value="INTERSECTS"
     />
   </EuiFormRow>
-  <EuiButton
-    isDisabled={false}
-    onClick={[Function]}
-    size="s"
+  <EuiSpacer
+    size="m"
+  />
+  <EuiTextAlign
+    textAlign="right"
   >
-    Create filter
-  </EuiButton>
+    <EuiButton
+      fill={true}
+      isDisabled={false}
+      onClick={[Function]}
+      size="s"
+    >
+      Create filter
+    </EuiButton>
+  </EuiTextAlign>
 </EuiForm>
 `;

@@ -8,7 +8,7 @@ import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
-import chrome from 'ui/chrome';
+import { useUiSetting$ } from '../../../lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetHostFirstLastSeenQuery } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
@@ -36,11 +36,12 @@ export function useFirstLastSeenHostQuery<TCache = object>(
   apolloClient: ApolloClient<TCache>
 ) {
   const [loading, updateLoading] = useState(false);
-  const [firstSeen, updateFirstSeen] = useState(null);
-  const [lastSeen, updateLastSeen] = useState(null);
-  const [errorMessage, updateErrorMessage] = useState(null);
+  const [firstSeen, updateFirstSeen] = useState<Date | null>(null);
+  const [lastSeen, updateLastSeen] = useState<Date | null>(null);
+  const [errorMessage, updateErrorMessage] = useState<string | null>(null);
+  const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
 
-  async function fetchFirstLastSeenHost() {
+  async function fetchFirstLastSeenHost(signal: AbortSignal) {
     updateLoading(true);
     return apolloClient
       .query<GetHostFirstLastSeenQuery.Query, GetHostFirstLastSeenQuery.Variables>({
@@ -49,7 +50,12 @@ export function useFirstLastSeenHostQuery<TCache = object>(
         variables: {
           sourceId,
           hostName,
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+          defaultIndex,
+        },
+        context: {
+          fetchOptions: {
+            signal,
+          },
         },
       })
       .then(
@@ -58,24 +64,21 @@ export function useFirstLastSeenHostQuery<TCache = object>(
           updateFirstSeen(get('data.source.HostFirstLastSeen.firstSeen', result));
           updateLastSeen(get('data.source.HostFirstLastSeen.lastSeen', result));
           updateErrorMessage(null);
-          return result;
         },
         error => {
           updateLoading(false);
+          updateFirstSeen(null);
+          updateLastSeen(null);
           updateErrorMessage(error.message);
-          return error;
         }
       );
   }
 
   useEffect(() => {
-    try {
-      fetchFirstLastSeenHost();
-    } catch (err) {
-      updateFirstSeen(null);
-      updateLastSeen(null);
-      updateErrorMessage(err.toString());
-    }
+    const abortCtrl = new AbortController();
+    const signal = abortCtrl.signal;
+    fetchFirstLastSeenHost(signal);
+    return () => abortCtrl.abort();
   }, []);
 
   return { firstSeen, lastSeen, loading, errorMessage };

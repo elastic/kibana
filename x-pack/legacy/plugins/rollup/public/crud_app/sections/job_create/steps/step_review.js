@@ -22,7 +22,6 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
-
 const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_SUMMARY,
   JOB_DETAILS_TAB_TERMS,
@@ -104,13 +103,13 @@ export class StepReviewUi extends Component {
     return (
       <Fragment>
         <EuiTitle data-test-subj="rollupJobCreateReviewTitle">
-          <h3>
+          <h2>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepReviewTitle"
               defaultMessage="Review details for '{jobId}'"
               values={{ jobId: job.id }}
             />
-          </h3>
+          </h2>
         </EuiTitle>
 
         {this.renderTabs()}

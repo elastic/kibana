@@ -1,22 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Pane renders correctly against snapshot 1`] = `
-<Component>
-  <Connect(FlyoutPaneComponent)
-    flyoutHeight={980}
-    headerHeight={60}
-    onClose={[MockFunction]}
-    timelineId="test"
-    usersViewing={
-      Array [
-        "elastic",
-      ]
-    }
-    width={640}
-  >
-    <span>
-      I am a child of flyout
-    </span>
-  </Connect(FlyoutPaneComponent)>
-</Component>
+<Pane
+  flyoutHeight={980}
+  headerHeight={60}
+  onClose={[MockFunction]}
+  timelineId="test"
+  usersViewing={
+    Array [
+      "elastic",
+    ]
+  }
+  width={640}
+>
+  <span>
+    I am a child of flyout
+  </span>
+</Pane>
 `;

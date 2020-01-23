@@ -38,13 +38,28 @@ export type ResponseError =
 
 /**
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
+ * @public
+ */
+export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
+  readonly status: number;
+  readonly payload?: T;
+  readonly options: HttpResponseOptions;
+}
+
+export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
+  return typeof response.status === 'number' && typeof response.options === 'object';
+}
+
+/**
+ * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @internal
  */
-export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
+export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
+  implements IKibanaResponse<T> {
   constructor(
-    readonly status: number,
-    readonly payload?: T,
-    readonly options: HttpResponseOptions = {}
+    public readonly status: number,
+    public readonly payload?: T,
+    public readonly options: HttpResponseOptions = {}
   ) {}
 }
 

@@ -1,0 +1,16 @@
+{
+  "description": "Linux: Nmap Activity",
+  "enabled": false,
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "Linux: Nmap Activity",
+  "query": "process.name: nmap",
+  "risk_score": 50,
+  "rule_id": "c87fca17-b3a9-4e83-b545-f30746c53920",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

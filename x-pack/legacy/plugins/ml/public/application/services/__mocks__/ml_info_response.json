@@ -1,0 +1,21 @@
+{
+  "defaults": {
+    "anomaly_detectors": {
+      "model_memory_limit": "128mb",
+      "categorization_examples_limit": 4,
+      "model_snapshot_retention_days": 1
+    },
+    "datafeeds": {
+      "scroll_size": 1000
+    }
+  },
+  "upgrade_mode": false,
+  "native_code": {
+    "version": "8.0.0-SNAPSHOT",
+    "build_hash": "4cde1d7c50fc28"
+  },
+  "limits": {
+    "max_model_memory_limit": "128mb"
+  },
+  "cloudId": "cloud_message_test:ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg=="
+}

@@ -85,9 +85,9 @@ export class AssetManager extends PureComponent<Props, State> {
     const confirmModal = (
       <ConfirmModal
         isOpen={this.state.deleteId !== null}
-        title={strings.getConfirmModalTitleText()}
+        title={strings.getConfirmModalTitle()}
         message={strings.getConfirmModalMessageText()}
-        confirmButtonText={strings.getConfirmModalBtnText()}
+        confirmButtonText={strings.getConfirmModalButtonLabel()}
         onConfirm={this.doDelete}
         onCancel={this.resetDelete}
       />
@@ -95,7 +95,7 @@ export class AssetManager extends PureComponent<Props, State> {
 
     return (
       <Fragment>
-        <EuiButtonEmpty onClick={this.showModal}>{strings.getBtnText()}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={this.showModal}>{strings.getButtonLabel()}</EuiButtonEmpty>
         {isModalVisible ? assetModal : null}
         {confirmModal}
       </Fragment>

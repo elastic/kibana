@@ -6,19 +6,11 @@
 
 export const mlPrivileges = {
   cluster: [
-    'cluster:monitor/data_frame/get',
-    'cluster:monitor/data_frame/stats/get',
     'cluster:monitor/xpack/ml/job/get',
     'cluster:monitor/xpack/ml/job/stats/get',
     'cluster:monitor/xpack/ml/datafeeds/get',
     'cluster:monitor/xpack/ml/datafeeds/stats/get',
     'cluster:monitor/xpack/ml/calendars/get',
-    'cluster:admin/data_frame/delete',
-    'cluster:admin/data_frame/preview',
-    'cluster:admin/data_frame/put',
-    'cluster:admin/data_frame/start',
-    'cluster:admin/data_frame/start_task',
-    'cluster:admin/data_frame/stop',
     'cluster:admin/xpack/ml/job/put',
     'cluster:admin/xpack/ml/job/delete',
     'cluster:admin/xpack/ml/job/update',

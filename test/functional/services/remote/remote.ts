@@ -17,6 +17,11 @@
  * under the License.
  */
 
+import Fs from 'fs';
+import { resolve } from 'path';
+
+import { mergeMap } from 'rxjs/operators';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
@@ -26,8 +31,36 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const browserType: Browsers = config.get('browser.type');
+  const collectCoverage: boolean = !!process.env.CODE_COVERAGE;
+  const coveragePrefix = 'coveragejson:';
+  const coverageDir = resolve(__dirname, '../../../../target/kibana-coverage/functional');
+  let coverageCounter = 1;
+  type BrowserStorage = 'sessionStorage' | 'localStorage';
 
-  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
+  const clearBrowserStorage = async (storageType: BrowserStorage) => {
+    try {
+      await driver.executeScript(`window.${storageType}.clear();`);
+    } catch (error) {
+      if (!error.message.includes(`Failed to read the '${storageType}' property from 'Window'`)) {
+        throw error;
+      }
+    }
+  };
+
+  const writeCoverage = (coverageJson: string) => {
+    const id = coverageCounter++;
+    const timestamp = Date.now();
+    const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+    log.info('writing coverage to', path);
+    Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+  };
+
+  const { driver, By, until, consoleLog$ } = await initWebDriver(
+    log,
+    browserType,
+    lifecycle,
+    config.get('browser.logPollingMs')
+  );
   const isW3CEnabled = (driver as any).executor_.w3c;
 
   const caps = await driver.getCapabilities();
@@ -37,31 +70,89 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   if (browserType === Browsers.Chrome) {
     log.info(
-      `Chromedriver version: ${caps.get('chrome').chromedriverVersion}, w3c=${isW3CEnabled}`
+      `Chromedriver version: ${
+        caps.get('chrome').chromedriverVersion
+      }, w3c=${isW3CEnabled}, codeCoverage=${collectCoverage}`
     );
   }
+  // code coverage is supported only in Chrome browser
+  if (collectCoverage) {
+    // We are running xpack tests with different configs and cleanup will delete collected coverage
+    // del.sync(coverageDir);
+    Fs.mkdirSync(coverageDir, { recursive: true });
+  }
 
-  lifecycle.on('beforeTests', async () => {
+  consoleLog$
+    .pipe(
+      mergeMap(logEntry => {
+        if (collectCoverage && logEntry.message.includes(coveragePrefix)) {
+          const [, coverageJsonBase64] = logEntry.message.split(coveragePrefix);
+          const coverageJson = Buffer.from(coverageJsonBase64, 'base64').toString('utf8');
+          writeCoverage(coverageJson);
+
+          // filter out this message
+          return [];
+        }
+
+        return [logEntry];
+      })
+    )
+    .subscribe({
+      next({ message, level }) {
+        const msg = message.replace(/\\n/g, '\n');
+        log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
+          `browser[${level}] ${msg}`
+        );
+      },
+    });
+
+  lifecycle.beforeTests.add(async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await (driver.manage().window() as any).setRect({ width: 1600, height: 1000 });
+    await driver
+      .manage()
+      .window()
+      .setRect({ width: 1600, height: 1000 });
   });
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
-  lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.unshift(await (driver.manage().window() as any).getRect());
+  lifecycle.beforeTestSuite.add(async () => {
+    windowSizeStack.unshift(
+      await driver
+        .manage()
+        .window()
+        .getRect()
+    );
   });
 
-  lifecycle.on('beforeEachTest', async () => {
-    await (driver.manage() as any).setTimeouts({ implicit: config.get('timeouts.find') });
+  lifecycle.beforeEachTest.add(async () => {
+    await driver.manage().setTimeouts({ implicit: config.get('timeouts.find') });
   });
 
-  lifecycle.on('afterTestSuite', async () => {
+  lifecycle.afterTestSuite.add(async () => {
     const { width, height } = windowSizeStack.shift()!;
-    await (driver.manage().window() as any).setRect({ width, height });
+    await driver
+      .manage()
+      .window()
+      .setRect({ width, height });
+    await clearBrowserStorage('sessionStorage');
+    await clearBrowserStorage('localStorage');
   });
 
-  lifecycle.on('cleanup', async () => await driver.quit());
+  lifecycle.cleanup.add(async () => {
+    // Getting the last piece of code coverage before closing browser
+    if (collectCoverage) {
+      const coverageJson = await driver
+        .executeScript('return window.__coverage__')
+        .catch(() => undefined)
+        .then(coverage => coverage && JSON.stringify(coverage));
+      if (coverageJson) {
+        writeCoverage(coverageJson);
+      }
+    }
 
-  return { driver, By, Key, until, LegacyActionSequence, browserType };
+    await driver.quit();
+  });
+
+  return { driver, By, until, browserType, consoleLog$ };
 }

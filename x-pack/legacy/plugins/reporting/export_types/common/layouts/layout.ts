@@ -26,8 +26,7 @@ export interface LayoutSelectorDictionary {
   screenshot: string;
   renderComplete: string;
   itemsCountAttribute: string;
-  timefilterFromAttribute: string;
-  timefilterToAttribute: string;
+  timefilterDurationAttribute: string;
   toastHeader: string;
 }
 
@@ -35,6 +34,14 @@ export interface PdfImageSize {
   width: number;
   height?: number;
 }
+
+export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
+  screenshot: '[data-shared-items-container]',
+  renderComplete: '[data-shared-item]',
+  itemsCountAttribute: 'data-shared-items-count',
+  timefilterDurationAttribute: 'data-shared-timefilter-duration',
+  toastHeader: '[data-test-subj="euiToastHeader"]',
+});
 
 export abstract class Layout {
   public id: string = '';

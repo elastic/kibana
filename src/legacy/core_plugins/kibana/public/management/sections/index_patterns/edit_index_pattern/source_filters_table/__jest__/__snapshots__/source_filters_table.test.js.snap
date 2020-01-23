@@ -3,7 +3,7 @@
 exports[`SourceFiltersTable should add a filter 1`] = `
 <div>
   <header />
-  <InjectIntl(AddFilterComponent)
+  <AddFilter
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -56,7 +56,7 @@ exports[`SourceFiltersTable should add a filter 1`] = `
 exports[`SourceFiltersTable should filter based on the query bar 1`] = `
 <div>
   <header />
-  <InjectIntl(AddFilterComponent)
+  <AddFilter
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -97,7 +97,7 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
 exports[`SourceFiltersTable should remove a filter 1`] = `
 <div>
   <header />
-  <InjectIntl(AddFilterComponent)
+  <AddFilter
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -152,7 +152,7 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
 exports[`SourceFiltersTable should render normally 1`] = `
 <div>
   <header />
-  <InjectIntl(AddFilterComponent)
+  <AddFilter
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -201,7 +201,7 @@ exports[`SourceFiltersTable should render normally 1`] = `
 exports[`SourceFiltersTable should should a loading indicator when saving 1`] = `
 <div>
   <header />
-  <InjectIntl(AddFilterComponent)
+  <AddFilter
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -236,7 +236,7 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
 exports[`SourceFiltersTable should show a delete modal 1`] = `
 <div>
   <header />
-  <InjectIntl(AddFilterComponent)
+  <AddFilter
     onAddFilter={[Function]}
   />
   <eui-spacer
@@ -303,7 +303,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
 exports[`SourceFiltersTable should update a filter 1`] = `
 <div>
   <header />
-  <InjectIntl(AddFilterComponent)
+  <AddFilter
     onAddFilter={[Function]}
   />
   <eui-spacer

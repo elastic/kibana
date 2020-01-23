@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { Render, Style } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { Render, Style, ExpressionFunction } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 type Context = number | string | null;
 

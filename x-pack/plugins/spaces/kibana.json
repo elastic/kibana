@@ -1,0 +1,10 @@
+{
+  "id": "spaces",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "spaces"],
+  "requiredPlugins": ["features", "licensing"],
+  "optionalPlugins": ["security", "home", "usageCollection"],
+  "server": true,
+  "ui": false
+}

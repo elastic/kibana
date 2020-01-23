@@ -17,33 +17,32 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
-export default function (plugin, server, requestDelay) {
+export default function(plugin, server, requestDelay, ignoreVersionMismatch) {
   plugin.status.yellow('Waiting for Elasticsearch');
 
   function waitUntilReady() {
-    return new Promise((resolve) => {
+    return new Bluebird(resolve => {
       plugin.status.once('green', resolve);
     });
   }
 
   function check() {
-    return ensureEsVersion(server, kibanaVersion.get())
+    return ensureEsVersion(server, kibanaVersion.get(), ignoreVersionMismatch)
       .then(() => plugin.status.green('Ready'))
       .catch(err => plugin.status.red(err));
   }
-
 
   let timeoutId = null;
 
   function scheduleCheck(ms) {
     if (timeoutId) return;
 
-    const myId = setTimeout(function () {
-      check().finally(function () {
+    const myId = setTimeout(function() {
+      check().finally(function() {
         if (timeoutId === myId) startorRestartChecking();
       });
     }, ms);
@@ -69,6 +68,8 @@ export default function (plugin, server, requestDelay) {
     run: check,
     start: startorRestartChecking,
     stop: stopChecking,
-    isRunning: function () { return !!timeoutId; },
+    isRunning: function() {
+      return !!timeoutId;
+    },
   };
 }

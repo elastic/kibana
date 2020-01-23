@@ -31,9 +31,11 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: 4,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
   details: {
     queries: {
@@ -56,9 +58,11 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
+      [HostsTableType.alerts]: {
+        activePage: 4,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
-    filterQuery: null,
-    filterQueryDraft: null,
   },
 };
 
@@ -85,6 +89,10 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
+        alerts: {
+          activePage: 0,
+          limit: 10,
+        },
       });
     });
 
@@ -106,6 +114,10 @@ describe('Hosts redux store', () => {
           limit: 10,
         },
         uncommonProcesses: {
+          activePage: 0,
+          limit: 10,
+        },
+        alerts: {
           activePage: 0,
           limit: 10,
         },

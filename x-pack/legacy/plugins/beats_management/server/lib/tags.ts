@@ -40,15 +40,12 @@ export class CMTagsDomain {
   public async getNonConflictingTags(user: FrameworkUser, existingTagIds: string[]) {
     const tags = await this.adapter.getTagsWithIds(user, existingTagIds);
     const existingUniqueBlockTypes = uniq(
-      tags.reduce(
-        (existingUniqueTypes, tag) => {
-          if (tag.hasConfigurationBlocksTypes) {
-            existingUniqueTypes = existingUniqueTypes.concat(tag.hasConfigurationBlocksTypes);
-          }
-          return existingUniqueTypes;
-        },
-        [] as string[]
-      )
+      tags.reduce((existingUniqueTypes, tag) => {
+        if (tag.hasConfigurationBlocksTypes) {
+          existingUniqueTypes = existingUniqueTypes.concat(tag.hasConfigurationBlocksTypes);
+        }
+        return existingUniqueTypes;
+      }, [] as string[])
     ).filter(type => UNIQUENESS_ENFORCING_TYPES.includes(type));
 
     const safeTags = await this.adapter.getWithoutConfigTypes(user, existingUniqueBlockTypes);

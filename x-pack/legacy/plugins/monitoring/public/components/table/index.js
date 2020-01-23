@@ -5,4 +5,10 @@
  */
 
 export { EuiMonitoringTable } from './eui_table';
-export { tableStorageGetter, tableStorageSetter, euiTableStorageGetter, euiTableStorageSetter } from './storage';
+export { EuiMonitoringSSPTable } from './eui_table_ssp';
+export {
+  tableStorageGetter,
+  tableStorageSetter,
+  euiTableStorageGetter,
+  euiTableStorageSetter,
+} from './storage';

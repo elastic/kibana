@@ -5,28 +5,28 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr } from 'lodash/fp';
 import React, { Fragment, useState } from 'react';
+import styled from 'styled-components';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { pure } from 'recompose';
-import {
-  AutonomousSystem,
-  FlowTarget,
-  HostEcsFields,
-  IpOverviewData,
-  Overview,
-} from '../../graphql/types';
+import { AutonomousSystem, FlowTarget, HostEcsFields, IpOverviewData } from '../../graphql/types';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
-import { FormattedDate } from '../formatted_date';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
-
-import * as i18n from '../page/network/ip_overview/translations';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { Spacer } from '../page';
+import * as i18n from '../page/network/ip_overview/translations';
+
+const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
+  flex-grow: unset;
+`;
 
 export const IpOverviewId = 'ip-overview';
+
+/** The default max-height of the popover used to show "+n More" items (e.g. `+9 More`) */
+export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 export const locationRenderer = (fieldNames: string[], data: IpOverviewData): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every(fieldName => getOr(null, fieldName, data)) ? (
@@ -51,8 +51,8 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
     getEmptyTagValue()
   );
 
-export const dateRenderer = (fieldName: string, data: Overview): React.ReactElement => (
-  <FormattedDate value={getOr(null, fieldName, data)} fieldName={fieldName} />
+export const dateRenderer = (timestamp?: string | null): React.ReactElement => (
+  <FormattedRelativePreferenceDate value={timestamp} />
 );
 
 export const autonomousSystemRenderer = (
@@ -145,13 +145,20 @@ interface DefaultFieldRendererProps {
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
-  maxOverflow?: number;
+  moreMaxHeight?: string;
 }
 
 // TODO: This causes breaks between elements until the ticket below is fixed
 // https://github.com/elastic/ingest-dev/issues/474
-export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
-  ({ rowItems, attrName, idPrefix, render, displayCount = 1, maxOverflow = 5 }) => {
+export const DefaultFieldRenderer = React.memo<DefaultFieldRendererProps>(
+  ({
+    attrName,
+    displayCount = 1,
+    idPrefix,
+    moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
+    render,
+    rowItems,
+  }) => {
     if (rowItems != null && rowItems.length > 0) {
       const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
         const id = escapeDataProviderId(
@@ -173,7 +180,7 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
       });
 
       return draggables.length > 0 ? (
-        <EuiFlexGroup alignItems="center" gutterSize="none">
+        <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
           {draggables}{' '}
           {
             <DefaultFieldRendererOverflow
@@ -181,10 +188,10 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
               idPrefix={idPrefix}
               render={render}
               overflowIndexStart={displayCount}
-              maxOverflowItems={maxOverflow}
+              moreMaxHeight={moreMaxHeight}
             />
           }
-        </EuiFlexGroup>
+        </DraggableContainerFlexGroup>
       ) : (
         getEmptyTagValue()
       );
@@ -199,16 +206,46 @@ DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 interface DefaultFieldRendererOverflowProps {
   rowItems: string[];
   idPrefix: string;
-  render?: (item: string) => JSX.Element;
+  render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
-  maxOverflowItems?: number;
+  moreMaxHeight: string;
 }
 
-export const DefaultFieldRendererOverflow = pure<DefaultFieldRendererOverflowProps>(
-  ({ rowItems, idPrefix, render, overflowIndexStart = 5, maxOverflowItems = 5 }): JSX.Element => {
+interface MoreContainerProps {
+  idPrefix: string;
+  render?: (item: string) => React.ReactNode;
+  rowItems: string[];
+  moreMaxHeight: string;
+  overflowIndexStart: number;
+}
+
+/** A container (with overflow) for showing "More" items in a popover */
+export const MoreContainer = React.memo<MoreContainerProps>(
+  ({ idPrefix, render, rowItems, moreMaxHeight, overflowIndexStart }) => (
+    <div
+      data-test-subj="more-container"
+      style={{
+        maxHeight: moreMaxHeight,
+        overflow: 'auto',
+        paddingRight: '2px',
+      }}
+    >
+      {rowItems.slice(overflowIndexStart).map((rowItem, i) => (
+        <EuiText key={`${idPrefix}-${rowItem}-${i}`} size="s">
+          {render ? render(rowItem) : rowItem}
+        </EuiText>
+      ))}
+    </div>
+  )
+);
+
+MoreContainer.displayName = 'MoreContainer';
+
+export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
+  ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-      <>
+      <EuiFlexItem grow={false}>
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
@@ -227,27 +264,16 @@ export const DefaultFieldRendererOverflow = pure<DefaultFieldRendererOverflowPro
             isOpen={isOpen}
             closePopover={() => setIsOpen(!isOpen)}
           >
-            <>
-              {rowItems
-                .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
-                .map(rowItem => (
-                  <EuiText key={`${idPrefix}-${rowItem}`}>
-                    {render ? render(rowItem) : rowItem}
-                  </EuiText>
-                ))}
-              {rowItems.length > overflowIndexStart + maxOverflowItems && (
-                <b>
-                  <br />
-                  <FormattedMessage
-                    id="xpack.siem.fieldRenderers.moreOverflowLabel"
-                    defaultMessage="More..."
-                  />
-                </b>
-              )}
-            </>
+            <MoreContainer
+              idPrefix={idPrefix}
+              render={render}
+              rowItems={rowItems}
+              moreMaxHeight={moreMaxHeight}
+              overflowIndexStart={overflowIndexStart}
+            />
           </EuiPopover>
         )}
-      </>
+      </EuiFlexItem>
     );
   }
 );

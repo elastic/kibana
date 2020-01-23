@@ -50,7 +50,7 @@ test('correctly forwards log records.', () => {
     level: LogLevel.Trace,
     context: 'some-context.sub-context',
     message: 'some-message',
-    meta: { tags: ['important', 'tags'] },
+    meta: { tags: ['important', 'tags'], unknown: 2 },
   };
 
   loggingServer.log(firstLogRecord);
@@ -85,7 +85,14 @@ Object {
 
   expect(thirdCall).toMatchInlineSnapshot(`
 Object {
-  "data": "some-message",
+  "data": Object {
+    Symbol(log message with metadata): Object {
+      "message": "some-message",
+      "metadata": Object {
+        "unknown": 2,
+      },
+    },
+  },
   "tags": Array [
     "debug",
     "some-context",

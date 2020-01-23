@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore
-  EuiCodeEditor,
-} from '@elastic/eui';
+import { EuiCodeEditor } from '@elastic/eui';
 import { set } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DetailItem } from '../../graphql/types';
@@ -26,7 +22,7 @@ const JsonEditor = styled.div`
 
 JsonEditor.displayName = 'JsonEditor';
 
-export const JsonView = pure<Props>(({ data }) => (
+export const JsonView = React.memo<Props>(({ data }) => (
   <JsonEditor data-test-subj="jsonView">
     <EuiCodeEditor
       isReadOnly

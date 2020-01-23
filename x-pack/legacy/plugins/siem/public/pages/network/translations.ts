@@ -14,15 +14,42 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.network.pageTitle', {
   defaultMessage: 'Network',
 });
 
-export const EMPTY_TITLE = i18n.translate('xpack.siem.network.emptyTitle', {
-  defaultMessage:
-    'It looks like you don’t have any indices relevant to network in the SIEM application',
+export const NAVIGATION_FLOWS_TITLE = i18n.translate('xpack.siem.network.navigation.flowsTitle', {
+  defaultMessage: 'Flows',
 });
 
-export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.network.emptyActionPrimary', {
-  defaultMessage: 'View setup instructions',
+export const NAVIGATION_DNS_TITLE = i18n.translate('xpack.siem.network.navigation.dnsTitle', {
+  defaultMessage: 'DNS',
 });
 
-export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.network.emptyActionSecondary', {
-  defaultMessage: 'Go to documentation',
+export const ERROR_FETCHING_DNS_DATA = i18n.translate(
+  'xpack.siem.hosts.navigation.dns.histogram.errorFetchingDnsData',
+  {
+    defaultMessage: 'Failed to query DNS data',
+  }
+);
+
+export const NAVIGATION_TLS_TITLE = i18n.translate('xpack.siem.network.navigation.tlsTitle', {
+  defaultMessage: 'TLS',
 });
+
+export const NAVIGATION_HTTP_TITLE = i18n.translate('xpack.siem.network.navigation.httpTitle', {
+  defaultMessage: 'HTTP',
+});
+
+export const NAVIGATION_ANOMALIES_TITLE = i18n.translate(
+  'xpack.siem.network.navigation.anomaliesTitle',
+  {
+    defaultMessage: 'Anomalies',
+  }
+);
+
+export const NAVIGATION_ALERTS_TITLE = i18n.translate('xpack.siem.network.navigation.alertsTitle', {
+  defaultMessage: 'Alerts',
+});
+
+export const DOMAINS_COUNT_BY = (groupByField: string) =>
+  i18n.translate('xpack.siem.network.dns.stackByUniqueSubdomain', {
+    values: { groupByField },
+    defaultMessage: 'Top domains by {groupByField}',
+  });

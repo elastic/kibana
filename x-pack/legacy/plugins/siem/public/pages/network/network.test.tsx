@@ -5,24 +5,27 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import { cloneDeep } from 'lodash/fp';
+import React from 'react';
 import { Router } from 'react-router-dom';
+import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
-import '../../mock/ui_settings';
-import { Network } from './network';
-
+import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
 import { mocksSource } from '../../containers/source/mock';
-import { TestProviders } from '../../mock';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { cloneDeep } from 'lodash/fp';
+import { TestProviders, mockGlobalState, apolloClientObservable } from '../../mock';
+import { State, createStore } from '../../store';
+import { inputsActions } from '../../store/inputs';
+import { Network } from './network';
+import { NetworkRoutes } from './navigation';
 
-jest.mock('../../lib/settings/use_kibana_ui_setting');
-
-jest.mock('ui/documentation_links', () => ({
-  documentationLinks: {
-    kibana: 'http://www.example.com',
-  },
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar and QueryBar
+jest.mock('../../components/search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+jest.mock('../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 let localSource: Array<{
@@ -59,17 +62,21 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
+
+const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
+const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
+
+const getMockProps = () => ({
+  networkPagePath: '',
+  to,
+  from,
+  isInitializing: false,
+  setQuery: jest.fn(),
+  capabilitiesFetched: true,
+  hasMlUserPermissions: true,
+});
 
 describe('rendering - rendering', () => {
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
   beforeEach(() => {
     localSource = cloneDeep(mocksSource);
   });
@@ -80,7 +87,7 @@ describe('rendering - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Network />
+            <Network {...getMockProps()} />
           </Router>
         </MockedProvider>
       </TestProviders>
@@ -97,7 +104,7 @@ describe('rendering - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Network />
+            <Network {...getMockProps()} />
           </Router>
         </MockedProvider>
       </TestProviders>
@@ -106,5 +113,59 @@ describe('rendering - rendering', () => {
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+  });
+
+  test('it should add the new filters after init', async () => {
+    const newFilters: esFilters.Filter[] = [
+      {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'host.name': 'ItRocks',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        meta: {
+          alias: '',
+          disabled: false,
+          key: 'bool',
+          negate: false,
+          type: 'custom',
+          value:
+            '{"query": {"bool": {"filter": [{"bool": {"should": [{"match_phrase": {"host.name": "ItRocks"}}],"minimum_should_match": 1}}]}}}',
+        },
+      },
+    ];
+    localSource[0].result.data.source.status.indicesExist = true;
+    const myState: State = mockGlobalState;
+    const myStore = createStore(myState, apolloClientObservable);
+    const wrapper = mount(
+      <TestProviders store={myStore}>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Network {...getMockProps()} />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    await new Promise(resolve => setTimeout(resolve));
+    wrapper.update();
+
+    myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+    wrapper.update();
+    expect(wrapper.find(NetworkRoutes).props().filterQuery).toEqual(
+      '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+    );
   });
 });

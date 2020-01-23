@@ -20,11 +20,67 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
-import { ConfigPath, EnvironmentMode } from '../config';
+import { RecursiveReadonly } from 'kibana/public';
+import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
+import { KibanaConfigType } from '../kibana_config';
+import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
+import { PathConfigType } from '../path';
 import { CoreSetup, CoreStart } from '..';
 
-export type PluginConfigSchema = Type<unknown> | null;
+/**
+ * Dedicated type for plugin configuration schema.
+ *
+ * @public
+ */
+export type PluginConfigSchema<T> = Type<T>;
+
+/**
+ * Describes a plugin configuration properties.
+ *
+ * @example
+ * ```typescript
+ * // my_plugin/server/index.ts
+ * import { schema, TypeOf } from '@kbn/config-schema';
+ * import { PluginConfigDescriptor } from 'kibana/server';
+ *
+ * const configSchema = schema.object({
+ *   secret: schema.string({ defaultValue: 'Only on server' }),
+ *   uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+ * });
+ *
+ * type ConfigType = TypeOf<typeof configSchema>;
+ *
+ * export const config: PluginConfigDescriptor<ConfigType> = {
+ *   exposeToBrowser: {
+ *     uiProp: true,
+ *   },
+ *   schema: configSchema,
+ *   deprecations: ({ rename, unused }) => [
+ *     rename('securityKey', 'secret'),
+ *     unused('deprecatedProperty'),
+ *   ],
+ * };
+ * ```
+ *
+ * @public
+ */
+export interface PluginConfigDescriptor<T = any> {
+  /**
+   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
+   */
+  deprecations?: ConfigDeprecationProvider;
+  /**
+   * List of configuration properties that will be available on the client-side plugin.
+   */
+  exposeToBrowser?: { [P in keyof T]?: boolean };
+  /**
+   * Schema to use to validate the plugin configuration.
+   *
+   * {@link PluginConfigSchema}
+   */
+  schema: PluginConfigSchema<T>;
+}
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -49,7 +105,8 @@ export type PluginOpaqueId = symbol;
  */
 export interface PluginManifest {
   /**
-   * Identifier of the plugin.
+   * Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract.
+   * Other plugins leverage it to access plugin API, navigate to the plugin, etc.
    */
   readonly id: PluginName;
 
@@ -65,7 +122,11 @@ export interface PluginManifest {
 
   /**
    * Root {@link ConfigPath | configuration path} used by the plugin, defaults
-   * to "id".
+   * to "id" in snake_case format.
+   *
+   * @example
+   * id: myPlugin
+   * configPath: my_plugin
    */
   readonly configPath: ConfigPath;
 
@@ -106,7 +167,7 @@ export interface DiscoveredPlugin {
   readonly id: PluginName;
 
   /**
-   * Root configuration path used by the plugin, defaults to "id".
+   * Root configuration path used by the plugin, defaults to "id" in snake_case format.
    */
   readonly configPath: ConfigPath;
 
@@ -125,15 +186,14 @@ export interface DiscoveredPlugin {
 }
 
 /**
- * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
- * be exposed to client-side code.
  * @internal
  */
-export interface DiscoveredPluginInternal extends DiscoveredPlugin {
+export interface InternalPluginInfo {
   /**
-   * Path on the filesystem where plugin was loaded from.
+   * Path to the client-side entrypoint file to be used to build the client-side
+   * bundle for a plugin.
    */
-  readonly path: string;
+  readonly entryPointPath: string;
 }
 
 /**
@@ -152,6 +212,22 @@ export interface Plugin<
   stop?(): void;
 }
 
+export const SharedGlobalConfigKeys = {
+  // We can add more if really needed
+  kibana: ['defaultAppId', 'index'] as const,
+  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
+  path: ['data'] as const,
+};
+
+/**
+ * @public
+ */
+export type SharedGlobalConfig = RecursiveReadonly<{
+  kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
+  elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
+  path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+}>;
+
 /**
  * Context that's available to plugins during initialization stage.
  *
@@ -159,9 +235,13 @@ export interface Plugin<
  */
 export interface PluginInitializerContext<ConfigSchema = unknown> {
   opaqueId: PluginOpaqueId;
-  env: { mode: EnvironmentMode };
+  env: {
+    mode: EnvironmentMode;
+    packageInfo: Readonly<PackageInfo>;
+  };
   logger: LoggerFactory;
   config: {
+    legacy: { globalConfig$: Observable<SharedGlobalConfig> };
     create: <T = ConfigSchema>() => Observable<T>;
     createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };

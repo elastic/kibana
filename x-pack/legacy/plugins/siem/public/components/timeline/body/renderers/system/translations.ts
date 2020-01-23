@@ -32,8 +32,19 @@ export const WAS_AUTHORIZED_TO_USE = i18n.translate(
   }
 );
 
+export const ACCEPTED_A_CONNECTION_VIA = i18n.translate(
+  'xpack.siem.system.acceptedAConnectionViaDescription',
+  {
+    defaultMessage: 'accepted a connection via',
+  }
+);
+
 export const ATTEMPTED_LOGIN = i18n.translate('xpack.siem.system.attemptedLoginDescription', {
   defaultMessage: 'attempted a login via',
+});
+
+export const DISCONNECTED_VIA = i18n.translate('xpack.siem.system.disconnectedViaDescription', {
+  defaultMessage: 'disconnected via',
 });
 
 export const LOGGED_OUT = i18n.translate('xpack.siem.system.loggedOutDescription', {
@@ -50,6 +61,18 @@ export const PROCESS_STARTED = i18n.translate('xpack.siem.system.processStartedD
 
 export const PROCESS_STOPPED = i18n.translate('xpack.siem.system.processStoppedDescription', {
   defaultMessage: 'stopped process',
+});
+
+export const TERMINATED_PROCESS = i18n.translate('xpack.siem.system.terminatedProcessDescription', {
+  defaultMessage: 'terminated process',
+});
+
+export const CREATED_FILE = i18n.translate('xpack.siem.system.createdFileDescription', {
+  defaultMessage: 'created a file',
+});
+
+export const DELETED_FILE = i18n.translate('xpack.siem.system.deletedFileDescription', {
+  defaultMessage: 'deleted a file',
 });
 
 export const EXISTING_PROCESS = i18n.translate('xpack.siem.system.existingProcessDescription', {
@@ -122,4 +145,16 @@ export const PACKAGE_REMOVED = i18n.translate('xpack.siem.system.packageRemovedD
 
 export const USER_REMOVED = i18n.translate('xpack.siem.system.userRemovedDescription', {
   defaultMessage: 'was removed',
+});
+
+export const VIA = i18n.translate('xpack.siem.system.viaDescription', {
+  defaultMessage: 'via',
+});
+
+export const VIA_PARENT_PROCESS = i18n.translate('xpack.siem.system.viaParentProcessDescription', {
+  defaultMessage: 'via parent process',
+});
+
+export const WITH_EXIT_CODE = i18n.translate('xpack.siem.system.withExitCodeDescription', {
+  defaultMessage: 'with exit code',
 });

@@ -6,19 +6,14 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function StyleSettings({ layer, updateStyleDescriptor }) {
-
-  const settingsEditor = layer.renderStyleEditor({ onStyleDescriptorChange: updateStyleDescriptor });
+  const settingsEditor = layer.renderStyleEditor({
+    onStyleDescriptorChange: updateStyleDescriptor,
+  });
 
   if (!settingsEditor) {
     return null;
@@ -40,7 +35,7 @@ export function StyleSettings({ layer, updateStyleDescriptor }) {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
 
         {settingsEditor}
       </EuiPanel>

@@ -5,43 +5,95 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Server } from 'hapi';
-import {
-  UMBackendFrameworkAdapter,
-  UMFrameworkRequest,
-  UMFrameworkResponse,
-  UMFrameworkRouteOptions,
-  UMHapiGraphQLPluginOptions,
-} from './adapter_types';
-import { uptimeGraphQLHapiPlugin } from './apollo_framework_adapter';
+import { schema as kbnSchema } from '@kbn/config-schema';
+import { runHttpQuery } from 'apollo-server-core';
+import { UptimeCoreSetup } from './adapter_types';
+import { UMBackendFrameworkAdapter } from './adapter_types';
+import { UMKibanaRoute } from '../../../rest_api';
 
 export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
-  private server: Server;
-
-  constructor(hapiServer: Server) {
-    this.server = hapiServer;
+  constructor(private readonly server: UptimeCoreSetup) {
+    this.server = server;
   }
 
-  public registerRoute<
-    RouteRequest extends UMFrameworkRequest,
-    RouteResponse extends UMFrameworkResponse
-  >(route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>) {
-    this.server.route(route);
+  public registerRoute({ handler, method, options, path, validate }: UMKibanaRoute) {
+    const routeDefinition = {
+      path,
+      validate,
+      options,
+    };
+    switch (method) {
+      case 'GET':
+        this.server.route.get(routeDefinition, handler);
+        break;
+      case 'POST':
+        this.server.route.post(routeDefinition, handler);
+        break;
+      default:
+        throw new Error(`Handler for method ${method} is not defined`);
+    }
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.register<UMHapiGraphQLPluginOptions>({
-      options: {
-        graphQLOptions: (req: any) => ({
-          context: { req },
-          schema,
-        }),
+    this.server.route.post(
+      {
         path: routePath,
-        route: {
+        validate: {
+          body: kbnSchema.object({
+            operationName: kbnSchema.nullable(kbnSchema.string()),
+            query: kbnSchema.string(),
+            variables: kbnSchema.recordOf(kbnSchema.string(), kbnSchema.any()),
+          }),
+        },
+        options: {
           tags: ['access:uptime'],
         },
       },
-      plugin: uptimeGraphQLHapiPlugin,
-    });
+      async (context, request, resp): Promise<any> => {
+        const {
+          core: {
+            elasticsearch: {
+              dataClient: { callAsCurrentUser },
+            },
+          },
+        } = context;
+        const options = {
+          graphQLOptions: (_req: any) => {
+            return {
+              context: { ...context, APICaller: callAsCurrentUser },
+              schema,
+            };
+          },
+          path: routePath,
+          route: {
+            tags: ['access:uptime'],
+          },
+        };
+        try {
+          const query = request.body as Record<string, any>;
+
+          const graphQLResponse = await runHttpQuery([request], {
+            method: 'POST',
+            options: options.graphQLOptions,
+            query,
+          });
+
+          return resp.ok({
+            body: graphQLResponse,
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
+        } catch (error) {
+          if (error.isGraphQLError === true) {
+            return resp.internalError({
+              body: { message: error.message },
+              headers: { 'content-type': 'application/json' },
+            });
+          }
+          return resp.internalError();
+        }
+      }
+    );
   }
 }

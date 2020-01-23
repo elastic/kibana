@@ -2,12 +2,8 @@
 
 exports[`get_column_renderer renders correctly against snapshot 1`] = `
 <span>
-  <Row
-    className="euiTableRow"
-  >
-    <span>
-      some child
-    </span>
-  </Row>
+  <span>
+    some child
+  </span>
 </span>
 `;

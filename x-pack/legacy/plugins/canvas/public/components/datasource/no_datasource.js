@@ -6,19 +6,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
+
+import { ComponentStrings } from '../../../i18n';
+const { DatasourceNoDatasource: strings } = ComponentStrings;
 
 export const NoDatasource = () => (
-  <EuiPanel>
-    <EuiText>
-      <h4>No data source present</h4>
-      <p>
-        This element does not have an attached data source. This is usually because the element is
-        an image or other static asset. If that's not the case you might want to check your
-        expression to make sure it is not malformed.
-      </p>
-    </EuiText>
-  </EuiPanel>
+  <div className="canvasDataSource__section">
+    <EuiCallOut title={strings.getPanelTitle()} iconType="iInCircle">
+      <p>{strings.getPanelDescription()}</p>
+    </EuiCallOut>
+  </div>
 );
 
 NoDatasource.propTypes = {

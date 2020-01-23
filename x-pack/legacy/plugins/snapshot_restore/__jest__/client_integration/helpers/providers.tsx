@@ -10,7 +10,15 @@ import { setAppDependencies } from '../../../public/app/index';
 
 const { core, plugins } = createShim();
 const appDependencies = {
-  core,
+  core: {
+    ...core,
+    chrome: {
+      ...core.chrome,
+      // mock getInjected() to return true
+      // this is used so the policy tab renders (slmUiEnabled config)
+      getInjected: () => true,
+    },
+  },
   plugins,
 };
 

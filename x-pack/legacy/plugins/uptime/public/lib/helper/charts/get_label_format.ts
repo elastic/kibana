@@ -7,11 +7,12 @@
 import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
 
 const {
-  FIFTEEN_DAYS,
   EIGHT_MINUTES,
   FOUR_YEARS,
   THIRTY_SIX_HOURS,
   THREE_WEEKS,
+  SIX_MONTHS,
+  NINE_DAYS,
 } = CHART_FORMAT_LIMITS;
 
 /**
@@ -30,16 +31,20 @@ const dateStops: Array<{ key: number; value: string }> = [
     value: 'HH:mm',
   },
   {
-    key: FIFTEEN_DAYS,
-    value: 'MM-dd HH:mm',
+    key: NINE_DAYS,
+    value: 'MM-DD HH:mm',
   },
   {
     key: THREE_WEEKS,
-    value: 'MM-dd',
+    value: 'MM-DD',
+  },
+  {
+    key: SIX_MONTHS,
+    value: 'YYYY-MM-DD',
   },
   {
     key: FOUR_YEARS,
-    value: 'yyyy-MM',
+    value: 'YYYY-MM',
   },
 ];
 

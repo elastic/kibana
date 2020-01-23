@@ -19,9 +19,9 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
   describe('create', () => {
@@ -33,16 +33,20 @@ export default function ({ getService }) {
           .post(`/api/saved_objects/visualization`)
           .send({
             attributes: {
-              title: 'My favorite vis'
-            }
+              title: 'My favorite vis',
+            },
           })
           .expect(200)
           .then(resp => {
             // loose uuid validation
-            expect(resp.body).to.have.property('id').match(/^[0-9a-f-]{36}$/);
+            expect(resp.body)
+              .to.have.property('id')
+              .match(/^[0-9a-f-]{36}$/);
 
             // loose ISO8601 UTC time with milliseconds validation
-            expect(resp.body).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+            expect(resp.body)
+              .to.have.property('updated_at')
+              .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
 
             expect(resp.body).to.eql({
               id: resp.body.id,
@@ -51,7 +55,7 @@ export default function ({ getService }) {
               updated_at: resp.body.updated_at,
               version: 'WzgsMV0=',
               attributes: {
-                title: 'My favorite vis'
+                title: 'My favorite vis',
               },
               references: [],
             });
@@ -61,29 +65,34 @@ export default function ({ getService }) {
     });
 
     describe('without kibana index', () => {
-      before(async () => (
-        // just in case the kibana server has recreated it
-        await es.indices.delete({
-          index: '.kibana',
-          ignore: [404],
-        })
-      ));
+      before(
+        async () =>
+          // just in case the kibana server has recreated it
+          await es.indices.delete({
+            index: '.kibana',
+            ignore: [404],
+          })
+      );
 
       it('should return 200 and create kibana index', async () => {
         await supertest
           .post(`/api/saved_objects/visualization`)
           .send({
             attributes: {
-              title: 'My favorite vis'
-            }
+              title: 'My favorite vis',
+            },
           })
           .expect(200)
           .then(resp => {
             // loose uuid validation
-            expect(resp.body).to.have.property('id').match(/^[0-9a-f-]{36}$/);
+            expect(resp.body)
+              .to.have.property('id')
+              .match(/^[0-9a-f-]{36}$/);
 
             // loose ISO8601 UTC time with milliseconds validation
-            expect(resp.body).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+            expect(resp.body)
+              .to.have.property('updated_at')
+              .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
 
             expect(resp.body).to.eql({
               id: resp.body.id,
@@ -92,15 +101,14 @@ export default function ({ getService }) {
               updated_at: resp.body.updated_at,
               version: 'WzAsMV0=',
               attributes: {
-                title: 'My favorite vis'
+                title: 'My favorite vis',
               },
               references: [],
             });
             expect(resp.body.migrationVersion).to.be.ok();
           });
 
-        expect(await es.indices.exists({ index: '.kibana' }))
-          .to.be(true);
+        expect(await es.indices.exists({ index: '.kibana' })).to.be(true);
       });
     });
   });

@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/Page component 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 720,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="root"
+    id="page-d8b39380-a8f5-4a52-afe7-c8f6a4eade7b"
+    style={
+      Object {
+        "background": "#b83c6f",
+        "height": 720,
+        "width": 1280,
+      }
+    }
+  >
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Page contextual: austin 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 720,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="root"
+    id="page-d8b39380-a8f5-4a52-afe7-c8f6a4eade7b"
+    style={
+      Object {
+        "background": "#b83c6f",
+        "height": 720,
+        "width": 1280,
+      }
+    }
+  >
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+    RenderedElement
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Page contextual: hello 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 720,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="root"
+    id="page-7186b301-f8a7-4c65-8b89-38d68d31cfc4"
+    style={
+      Object {
+        "background": "#777777",
+        "height": 720,
+        "width": 1080,
+      }
+    }
+  >
+    RenderedElement
+  </div>
+</div>
+`;

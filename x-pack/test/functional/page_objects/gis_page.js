@@ -16,14 +16,12 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
-  const browser = getService('browser');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
   }
 
   class GisPage {
-
     constructor() {
       this.basePath = '';
     }
@@ -215,12 +213,16 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return links.length;
     }
 
+    async isSetViewPopoverOpen() {
+      return await testSubjects.exists('mapSetViewForm', { timeout: 500 });
+    }
+
     async openSetViewPopover() {
-      const isOpen = await testSubjects.exists('mapSetViewForm');
+      const isOpen = await this.isSetViewPopoverOpen();
       if (!isOpen) {
         await retry.try(async () => {
           await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          const isOpenAfterClick = await this.isSetViewPopoverOpen();
           if (!isOpenAfterClick) {
             throw new Error('set view popover not opened');
           }
@@ -229,11 +231,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async closeSetViewPopover() {
-      const isOpen = await testSubjects.exists('mapSetViewForm');
+      const isOpen = await this.isSetViewPopoverOpen();
       if (isOpen) {
         await retry.try(async () => {
           await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          const isOpenAfterClick = await this.isSetViewPopoverOpen();
           if (isOpenAfterClick) {
             throw new Error('set view popover not closed');
           }
@@ -242,7 +244,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async setView(lat, lon, zoom) {
-      log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
+      log.debug(
+        `Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`
+      );
       await this.openSetViewPopover();
       await testSubjects.setValue('latitudeInput', lat.toString());
       await testSubjects.setValue('longitudeInput', lon.toString());
@@ -261,7 +265,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
-        zoom: parseFloat(zoom)
+        zoom: parseFloat(zoom),
       };
     }
 
@@ -311,14 +315,19 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async disableApplyGlobalQuery() {
-      const element = await testSubjects.find('mapLayerPanelApplyGlobalQueryCheckbox');
-      const isSelected = await element.isSelected();
-      if(isSelected) {
+      const isSelected = await testSubjects.getAttribute(
+        'mapLayerPanelApplyGlobalQueryCheckbox',
+        'aria-checked'
+      );
+      if (isSelected === 'true') {
         await retry.try(async () => {
           log.debug(`disabling applyGlobalQuery`);
           await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
-          const isStillSelected = await element.isSelected();
-          if (isStillSelected) {
+          const isStillSelected = await testSubjects.getAttribute(
+            'mapLayerPanelApplyGlobalQueryCheckbox',
+            'aria-checked'
+          );
+          if (isStillSelected === 'true') {
             throw new Error('applyGlobalQuery not disabled');
           }
         });
@@ -327,7 +336,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async doesLayerExist(layerName) {
-      return await testSubjects.exists(`layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`);
+      return await testSubjects.exists(
+        `layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`
+      );
     }
 
     async hasFilePickerLoadedFile(fileName) {
@@ -377,6 +388,27 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async closeOrCancelLayer(layerName) {
+      log.debug(`Close or cancel layer add`);
+      const cancelExists = await testSubjects.exists('layerAddCancelButton');
+      const closeExists = await testSubjects.exists('layerPanelCancelButton');
+      if (cancelExists) {
+        log.debug(`Cancel layer add.`);
+        await testSubjects.click('layerAddCancelButton');
+      } else if (closeExists) {
+        log.debug(`Close layer add.`);
+        await testSubjects.click('layerPanelCancelButton');
+      } else {
+        log.debug(`No need to close or cancel.`);
+        return;
+      }
+
+      await this.waitForLayerAddPanelClosed();
+      if (layerName) {
+        await this.waitForLayerDeleted(layerName);
+      }
+    }
+
     async importFileButtonEnabled() {
       log.debug(`Check "Import file" button enabled`);
       const importFileButton = await testSubjects.find('importFileButton');
@@ -407,9 +439,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async setIndexType(indexType) {
       log.debug(`Set index type to: ${indexType}`);
-      await find.clickByCssSelector(
-        `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
-      );
+      await testSubjects.selectValue('fileImportIndexSelect', indexType);
     }
 
     async indexTypeOptionExists(indexType) {
@@ -421,9 +451,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getCodeBlockParsedJson(dataTestSubjName) {
       log.debug(`Get parsed code block for ${dataTestSubjName}`);
-      const indexRespCodeBlock = await find.byCssSelector(
-        `[data-test-subj="${dataTestSubjName}"]`
-      );
+      const indexRespCodeBlock = await find.byCssSelector(`[data-test-subj="${dataTestSubjName}"]`);
       const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
       return JSON.parse(indexRespJson);
     }
@@ -442,7 +470,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.openLayerPanel(layerName);
       await testSubjects.click('mapLayerPanelOpenFilterEditorButton');
       const filterEditorContainer = await testSubjects.find('mapFilterEditor');
-      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      const queryBarInFilterEditor = await testSubjects.findDescendant(
+        'queryInput',
+        filterEditorContainer
+      );
       await queryBarInFilterEditor.click();
       const input = await find.activeElement();
       await retry.try(async () => {
@@ -461,7 +492,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.openLayerPanel(layerName);
       await testSubjects.click('mapJoinWhereExpressionButton');
       const filterEditorContainer = await testSubjects.find('mapJoinWhereFilterEditor');
-      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      const queryBarInFilterEditor = await testSubjects.findDescendant(
+        'queryInput',
+        filterEditorContainer
+      );
       await queryBarInFilterEditor.click();
       const input = await find.activeElement();
       await input.clearValue();
@@ -482,12 +516,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async uploadJsonFileForIndexing(path) {
       log.debug(`Setting the path on the file input`);
-      if (browser.isW3CEnabled) {
-        const input = await find.byCssSelector('.euiFilePicker__input');
-        await input.type(path);
-      } else {
-        await find.setValue('.euiFilePicker__input', path);
-      }
+      const input = await find.byCssSelector('.euiFilePicker__input');
+      await input.type(path);
       log.debug(`File selected`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -569,7 +599,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       let mapboxStyle;
       try {
         mapboxStyle = JSON.parse(mapboxStyleJson);
-      } catch(err) {
+      } catch (err) {
         throw new Error(`Unable to parse mapbox style, error: ${err.message}`);
       }
       return mapboxStyle;
@@ -579,7 +609,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const STATS_ROW_NAME_INDEX = 0;
       const STATS_ROW_VALUE_INDEX = 1;
 
-      const statsRow = stats.find((statsRow) => {
+      const statsRow = stats.find(statsRow => {
         return statsRow[STATS_ROW_NAME_INDEX] === rowName;
       });
       if (!statsRow) {
@@ -593,7 +623,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
       await PageObjects.timePicker.resumeAutoRefresh();
       log.debug('waiting to give time for refresh timer to fire');
-      await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
+      await PageObjects.common.sleep(refreshInterval + refreshInterval / 2);
       await PageObjects.timePicker.pauseAutoRefresh();
       await this.waitForLayersToLoad();
     }

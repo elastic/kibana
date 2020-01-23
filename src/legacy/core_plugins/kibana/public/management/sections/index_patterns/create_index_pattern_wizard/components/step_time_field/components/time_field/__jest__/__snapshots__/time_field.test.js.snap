@@ -4,7 +4,9 @@ exports[`TimeField should render a loading state 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <div>
@@ -53,12 +55,8 @@ exports[`TimeField should render a loading state 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={true}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       name="timeField"
       options={
         Array [
@@ -77,7 +75,9 @@ exports[`TimeField should render a selected time field 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <div>
@@ -117,29 +117,24 @@ exports[`TimeField should render a selected time field 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiLink
+          <ForwardRef
             className="timeFieldRefreshButton"
-            color="primary"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Refresh"
               id="kbn.management.createIndexPattern.stepTime.refreshButton"
               values={Object {}}
             />
-          </EuiLink>
+          </ForwardRef>
         </EuiFlexItem>
       </ForwardRef>
     }
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isLoading={false}
       name="timeField"
       onChange={[Function]}
@@ -161,7 +156,9 @@ exports[`TimeField should render normally 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <div>
@@ -201,29 +198,24 @@ exports[`TimeField should render normally 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiLink
+          <ForwardRef
             className="timeFieldRefreshButton"
-            color="primary"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Refresh"
               id="kbn.management.createIndexPattern.stepTime.refreshButton"
               values={Object {}}
             />
-          </EuiLink>
+          </ForwardRef>
         </EuiFlexItem>
       </ForwardRef>
     }
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isLoading={false}
       name="timeField"
       onChange={[Function]}

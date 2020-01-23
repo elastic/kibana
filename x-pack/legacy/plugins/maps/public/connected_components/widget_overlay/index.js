@@ -7,5 +7,14 @@
 import { connect } from 'react-redux';
 import { WidgetOverlay } from './widget_overlay';
 
-const connectedWidgetOverlay = connect(null, null)(WidgetOverlay);
+import { isLayerControlHidden, isViewControlHidden } from '../../selectors/map_selectors';
+
+function mapStateToProps(state = {}) {
+  return {
+    hideLayerControl: isLayerControlHidden(state),
+    hideViewControl: isViewControlHidden(state),
+  };
+}
+
+const connectedWidgetOverlay = connect(mapStateToProps, null)(WidgetOverlay);
 export { connectedWidgetOverlay as WidgetOverlay };

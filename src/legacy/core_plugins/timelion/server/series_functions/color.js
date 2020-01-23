@@ -26,7 +26,7 @@ export default new Chainable('color', {
   args: [
     {
       name: 'inputSeries',
-      types: ['seriesList']
+      types: ['seriesList'],
     },
     {
       name: 'color',
@@ -36,7 +36,7 @@ export default new Chainable('color', {
           'Color of series, as hex, e.g., #c6c6c6 is a lovely light grey. If you specify multiple \
 colors, and have multiple series, you will get a gradient, e.g., "#00B1CC:#00FF94:#FF3A39:#CC1A6F"',
       }),
-    }
+    },
   ],
   help: i18n.translate('timelion.help.functions.colorHelpText', {
     defaultMessage: 'Change the color of the series',
@@ -55,7 +55,7 @@ colors, and have multiple series, you will get a gradient, e.g., "#00B1CC:#00FF9
     }
 
     let i = 0;
-    return alter(args, function (eachSeries) {
+    return alter(args, function(eachSeries) {
       if (gradient) {
         eachSeries.color = gradient[i++].toHexString();
       } else if (colors.length === 1 || gradientStops === 1) {
@@ -70,5 +70,5 @@ colors, and have multiple series, you will get a gradient, e.g., "#00B1CC:#00FF9
 
       return eachSeries;
     });
-  }
+  },
 });

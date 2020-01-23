@@ -6,41 +6,44 @@
 
 import React from 'react';
 import { GRID_RESOLUTION } from '../../grid_resolution';
-import {
-  EuiSuperSelect,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const OPTIONS = [
   {
     value: GRID_RESOLUTION.COARSE,
-    inputDisplay: i18n.translate('xpack.maps.source.esGrid.coarseDropdownOption', {
-      defaultMessage: 'coarse'
-    })
+    text: i18n.translate('xpack.maps.source.esGrid.coarseDropdownOption', {
+      defaultMessage: 'coarse',
+    }),
   },
-  { value: GRID_RESOLUTION.FINE,
-    inputDisplay: i18n.translate('xpack.maps.source.esGrid.fineDropdownOption', {
-      defaultMessage: 'fine'
-    })
-
+  {
+    value: GRID_RESOLUTION.FINE,
+    text: i18n.translate('xpack.maps.source.esGrid.fineDropdownOption', {
+      defaultMessage: 'fine',
+    }),
   },
   {
     value: GRID_RESOLUTION.MOST_FINE,
-    inputDisplay: i18n.translate('xpack.maps.source.esGrid.finestDropdownOption', {
-      defaultMessage: 'finest'
-    })
-  }
+    text: i18n.translate('xpack.maps.source.esGrid.finestDropdownOption', {
+      defaultMessage: 'finest',
+    }),
+  },
 ];
 
 export function ResolutionEditor({ resolution, onChange }) {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.maps.geoGrid.resolutionLabel', {
-        defaultMessage: 'Grid resolution'
+        defaultMessage: 'Grid resolution',
       })}
+      display="columnCompressed"
     >
-      <EuiSuperSelect options={OPTIONS} valueOfSelected={resolution} onChange={onChange} />
+      <EuiSelect
+        options={OPTIONS}
+        value={resolution}
+        onChange={e => onChange(e.target.value)}
+        compressed
+      />
     </EuiFormRow>
   );
 }

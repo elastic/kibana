@@ -24,8 +24,18 @@
         },
         "foo": {
           "type": "long"
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
+            }
+          }
         }
       }
     }
   }
 }
+
+

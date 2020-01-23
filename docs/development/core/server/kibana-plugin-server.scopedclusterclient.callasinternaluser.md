@@ -4,12 +4,12 @@
 
 ## ScopedClusterClient.callAsInternalUser() method
 
-Calls specified `endpoint` with provided `clientParams` on behalf of the Kibana internal user.
+Calls specified `endpoint` with provided `clientParams` on behalf of the Kibana internal user. See [APICaller](./kibana-plugin-server.apicaller.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<unknown>;
+callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
 ```
 
 ## Parameters
@@ -22,5 +22,5 @@ callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options
 
 <b>Returns:</b>
 
-`Promise<unknown>`
+`Promise<any>`
 

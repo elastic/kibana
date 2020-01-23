@@ -19,117 +19,123 @@
 
 import { constant, once, compact, flatten } from 'lodash';
 
-
 import { isWorker } from 'cluster';
-import { fromRoot, pkg } from '../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot, pkg } from '../../core/server/utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
-import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import { usageMixin } from './usage';
 import { statusMixin } from './status';
 import pidMixin from './pid';
-import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
-import { transformDeprecations } from './config/transform_deprecations';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects/saved_objects_mixin';
-import { sampleDataMixin } from './sample_data';
 import { capabilitiesMixin } from './capabilities';
-import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
 import { i18nMixin } from './i18n';
 
+/**
+ * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
+ * @typedef {import('./kbn_server').KibanaCore} KibanaCore
+ * @typedef {import('./kbn_server').LegacyPlugins} LegacyPlugins
+ */
+
 const rootDir = fromRoot('.');
 
 export default class KbnServer {
-  constructor(settings, core) {
+  /**
+   * @param {Record<string, any>} settings
+   * @param {KibanaConfig} config
+   * @param {KibanaCore} core
+   * @param {LegacyPlugins} legacyPlugins
+   */
+  constructor(settings, config, core, legacyPlugins) {
     this.name = pkg.name;
     this.version = pkg.version;
     this.build = pkg.build || false;
     this.rootDir = rootDir;
     this.settings = settings || {};
+    this.config = config;
 
-    const { setupDeps, startDeps, handledConfigPaths, logger } = core;
+    const { setupDeps, startDeps, logger, __internals, env } = core;
+
+    this.server = __internals.hapiServer;
     this.newPlatform = {
+      env: {
+        mode: env.mode,
+        packageInfo: env.packageInfo,
+      },
+      __internals,
       coreContext: {
         logger,
       },
       setup: setupDeps,
       start: startDeps,
       stop: null,
-      params: {
-        handledConfigPaths,
-      },
     };
 
-    this.ready = constant(this.mixin(
-      Plugins.waitForInitSetupMixin,
+    this.uiExports = legacyPlugins.uiExports;
+    this.pluginSpecs = legacyPlugins.pluginSpecs;
+    this.disabledPluginSpecs = legacyPlugins.disabledPluginSpecs;
 
-      // sets this.config, reads this.settings
-      configSetupMixin,
+    this.ready = constant(
+      this.mixin(
+        Plugins.waitForInitSetupMixin,
 
-      // sets this.server
-      httpMixin,
+        // Sets global HTTP behaviors
+        httpMixin,
 
-      coreMixin,
+        coreMixin,
 
-      // adds methods for extending this.server
-      serverExtensionsMixin,
-      loggingMixin,
-      configDeprecationWarningsMixin,
-      warningsMixin,
-      usageMixin,
-      statusMixin,
+        // adds methods for extending this.server
+        serverExtensionsMixin,
+        loggingMixin,
+        warningsMixin,
+        statusMixin,
 
-      // writes pid file
-      pidMixin,
+        // writes pid file
+        pidMixin,
 
-      // scan translations dirs, register locale files and initialize i18n engine.
-      i18nMixin,
+        // scan translations dirs, register locale files and initialize i18n engine.
+        i18nMixin,
 
-      // find plugins and set this.plugins and this.pluginSpecs
-      Plugins.scanMixin,
+        // find plugins and set this.plugins and this.pluginSpecs
+        Plugins.scanMixin,
 
-      // tell the config we are done loading plugins
-      configCompleteMixin,
+        // tell the config we are done loading plugins
+        configCompleteMixin,
 
-      // setup this.uiExports and this.uiBundles
-      uiMixin,
-      indexPatternsMixin,
+        // setup this.uiBundles
+        uiMixin,
+        indexPatternsMixin,
 
-      // setup saved object routes
-      savedObjectsMixin,
+        // setup saved object routes
+        savedObjectsMixin,
 
-      // setup capabilities routes
-      capabilitiesMixin,
+        // setup capabilities routes
+        capabilitiesMixin,
 
-      // setup routes for installing/uninstalling sample data sets
-      sampleDataMixin,
+        // ensure that all bundles are built, or that the
+        // watch bundle server is running
+        optimizeMixin,
 
-      // setup routes for short urls
-      urlShorteningMixin,
+        // transpiles SCSS into CSS
+        sassMixin,
 
-      // ensure that all bundles are built, or that the
-      // watch bundle server is running
-      optimizeMixin,
+        // initialize the plugins
+        Plugins.initializeMixin,
 
-      // transpiles SCSS into CSS
-      sassMixin,
-
-      // initialize the plugins
-      Plugins.initializeMixin,
-
-      // notify any deferred setup logic that plugins have initialized
-      Plugins.waitForInitResolveMixin,
-    ));
+        // notify any deferred setup logic that plugins have initialized
+        Plugins.waitForInitResolveMixin
+      )
+    );
 
     this.listen = once(this.listen);
   }
@@ -161,18 +167,17 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    await server.kibanaMigrator.awaitMigration();
-
     if (isWorker) {
       // help parent process know when we are ready
       process.send(['WORKER_LISTENING']);
     }
 
-    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
-      config.get('server.rewriteBasePath')
-        ? config.get('server.basePath')
-        : ''
-    }`);
+    server.log(
+      ['listening', 'info'],
+      `Server running at ${server.info.uri}${
+        config.get('server.rewriteBasePath') ? config.get('server.basePath') : ''
+      }`
+    );
 
     return server;
   }
@@ -194,10 +199,7 @@ export default class KbnServer {
   }
 
   applyLoggingConfiguration(settings) {
-    const config = new Config(
-      this.config.getSchema(),
-      transformDeprecations(settings)
-    );
+    const config = new Config(this.config.getSchema(), settings);
 
     const loggingOptions = loggingConfiguration(config);
     const subset = {

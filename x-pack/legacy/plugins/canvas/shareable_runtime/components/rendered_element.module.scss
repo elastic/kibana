@@ -1,0 +1,21 @@
+:global .kbnCanvas :local .root,
+:global .kbnCanvas :local .render {
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  composes: canvas__element from global;
+  composes: canvasElement from global;
+}
+
+.content {
+  composes: canvasElement__content from global;
+}
+
+.renderContainer {
+  composes: canvasWorkpad--element_render from global;
+  composes: canvasRenderEl from global;
+  height: 100%;
+  width: 100%;
+}

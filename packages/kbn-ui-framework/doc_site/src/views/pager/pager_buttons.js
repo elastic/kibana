@@ -19,17 +19,14 @@
 
 import React from 'react';
 
-import {
-  KuiButton,
-  KuiPagerButtonGroup
-} from '../../../../components';
+import { KuiButton, KuiPagerButtonGroup } from '../../../../components';
 
 export class PagerButtons extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       item: 1,
-      maxItems: 3
+      maxItems: 3,
     };
   }
 
@@ -58,7 +55,7 @@ export class PagerButtons extends React.Component {
           onNext={this.onNext}
           onPrevious={this.onPrevious}
         />
-        { this.getPage() }
+        {this.getPage()}
       </div>
     );
   }

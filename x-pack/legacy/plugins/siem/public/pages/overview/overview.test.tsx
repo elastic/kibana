@@ -6,20 +6,37 @@
 
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 
+import '../../mock/match_media';
+import { TestProviders } from '../../mock';
+import { mocksSource } from '../../containers/source/mock';
 import { Overview } from './index';
 
-import '../../mock/ui_settings';
-import { mocksSource } from '../../containers/source/mock';
-import { TestProviders } from '../../mock';
-
-jest.mock('ui/documentation_links', () => ({
-  documentationLinks: {
-    kibana: 'http://www.example.com',
+jest.mock('ui/chrome', () => ({
+  getBasePath: () => {
+    return '<basepath>';
   },
+  getKibanaVersion: () => {
+    return 'v8.0.0';
+  },
+  breadcrumbs: {
+    set: jest.fn(),
+  },
+  getUiSettingsClient: () => ({
+    get: jest.fn(),
+  }),
+}));
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar and QueryBar
+jest.mock('../../components/search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+jest.mock('../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 let localSource: Array<{

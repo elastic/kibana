@@ -38,10 +38,8 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockFramework: FrameworkAdapter = {
         version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -74,10 +72,8 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockFramework: FrameworkAdapter = {
         version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -114,10 +110,8 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockFramework: FrameworkAdapter = {
         version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -136,6 +130,13 @@ describe('Siem Overview elasticsearch_adapter', () => {
     describe('Unhappy Path - No data', () => {
       const mockNoDataResponse = cloneDeep(mockResponseHost);
       mockNoDataResponse.aggregations.auditd_count.doc_count = 0;
+      mockNoDataResponse.aggregations.endgame_module.dns_event_count.doc_count = 0;
+      mockNoDataResponse.aggregations.endgame_module.file_event_count.doc_count = 0;
+      mockNoDataResponse.aggregations.endgame_module.image_load_event_count.doc_count = 0;
+      mockNoDataResponse.aggregations.endgame_module.network_event_count.doc_count = 0;
+      mockNoDataResponse.aggregations.endgame_module.process_event_count.doc_count = 0;
+      mockNoDataResponse.aggregations.endgame_module.registry_event.doc_count = 0;
+      mockNoDataResponse.aggregations.endgame_module.security_event_count.doc_count = 0;
       mockNoDataResponse.aggregations.fim_count.doc_count = 0;
       mockNoDataResponse.aggregations.system_module.login_count.doc_count = 0;
       mockNoDataResponse.aggregations.system_module.package_count.doc_count = 0;
@@ -148,10 +149,8 @@ describe('Siem Overview elasticsearch_adapter', () => {
       const mockFramework: FrameworkAdapter = {
         version: 'mock',
         callWithRequest: mockCallWithRequest,
-        exposeStaticDir: jest.fn(),
         registerGraphQLEndpoint: jest.fn(),
         getIndexPatternsService: jest.fn(),
-        getSavedObjectsService: jest.fn(),
       };
       jest.doMock('../framework', () => ({
         callWithRequest: mockCallWithRequest,
@@ -174,6 +173,13 @@ describe('Siem Overview elasticsearch_adapter', () => {
           auditbeatPackage: 0,
           auditbeatProcess: 0,
           auditbeatUser: 0,
+          endgameDns: 0,
+          endgameFile: 0,
+          endgameImageLoad: 0,
+          endgameNetwork: 0,
+          endgameProcess: 0,
+          endgameRegistry: 0,
+          endgameSecurity: 0,
           filebeatSystemModule: 0,
           winlogbeat: 0,
         });
