@@ -5,8 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import sinon from 'sinon';
-import { authorizedUserPreRoutingFactory } from '../authorized_user_pre_routing';
+import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 
 describe('authorized_user_pre_routing', function() {
   // the getClientShield is using `once` which forces us to use a constant mock
@@ -14,14 +13,14 @@ describe('authorized_user_pre_routing', function() {
   // so createMockServer reuses the same 'instance' of the server and overwrites
   // the properties to contain different values
   const createMockServer = (function() {
-    const getUserStub = sinon.stub();
+    const getUserStub = jest.fn();
     let mockConfig;
 
     const mockServer = {
-      expose: function() {},
-      config: function() {
+      expose() {},
+      config() {
         return {
-          get: function(key) {
+          get(key) {
             return mockConfig[key];
           },
         };
@@ -45,7 +44,7 @@ describe('authorized_user_pre_routing', function() {
       mockServer.plugins.xpack_main = {
         info: !xpackInfoUndefined && {
           isAvailable: () => xpackInfoAvailable,
-          feature: function(featureName) {
+          feature(featureName) {
             if (featureName === 'security') {
               return {
                 isEnabled: () => securityEnabled,
@@ -56,17 +55,18 @@ describe('authorized_user_pre_routing', function() {
         },
       };
 
-      getUserStub.resetHistory();
-      getUserStub.resolves(user);
+      getUserStub.mockReset();
+      getUserStub.mockResolvedValue(user);
       return mockServer;
     };
   })();
+  const getMockLogger = () => ({ warn: jest.fn() });
 
   it('should return with boom notFound when xpackInfo is undefined', async function() {
     const mockServer = createMockServer({ xpackInfoUndefined: true });
 
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
-    const response = await authorizedUserPreRouting();
+    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer, getMockLogger());
+    const response = await authorizedUserPreRouting({});
     expect(response.isBoom).to.be(true);
     expect(response.output.statusCode).to.be(404);
   });
@@ -74,7 +74,7 @@ describe('authorized_user_pre_routing', function() {
   it(`should return with boom notFound when xpackInfo isn't available`, async function() {
     const mockServer = createMockServer({ xpackInfoAvailable: false });
 
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
+    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer, getMockLogger());
     const response = await authorizedUserPreRouting();
     expect(response.isBoom).to.be(true);
     expect(response.output.statusCode).to.be(404);
@@ -83,7 +83,7 @@ describe('authorized_user_pre_routing', function() {
   it('should return with null user when security is disabled in Elasticsearch', async function() {
     const mockServer = createMockServer({ securityEnabled: false });
 
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
+    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer, getMockLogger());
     const response = await authorizedUserPreRouting();
     expect(response).to.be(null);
   });
@@ -91,7 +91,7 @@ describe('authorized_user_pre_routing', function() {
   it('should return with boom unauthenticated when security is enabled but no authenticated user', async function() {
     const mockServer = createMockServer({ user: null });
 
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
+    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer, getMockLogger());
     const response = await authorizedUserPreRouting();
     expect(response.isBoom).to.be(true);
     expect(response.output.statusCode).to.be(401);
@@ -103,7 +103,7 @@ describe('authorized_user_pre_routing', function() {
       config: { 'xpack.reporting.roles.allow': ['.reporting_user'] },
     });
 
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
+    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer, getMockLogger());
     const response = await authorizedUserPreRouting();
     expect(response.isBoom).to.be(true);
     expect(response.output.statusCode).to.be(403);
@@ -116,7 +116,7 @@ describe('authorized_user_pre_routing', function() {
       config: { 'xpack.reporting.roles.allow': ['.reporting_user'] },
     });
 
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
+    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer, getMockLogger());
     const response = await authorizedUserPreRouting();
     expect(response).to.be(user);
   });
@@ -128,7 +128,7 @@ describe('authorized_user_pre_routing', function() {
       config: { 'xpack.reporting.roles.allow': [] },
     });
 
-    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer);
+    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockServer, getMockLogger());
     const response = await authorizedUserPreRouting();
     expect(response).to.be(user);
   });
