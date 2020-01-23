@@ -439,7 +439,8 @@ Add a `<script>` tag to the HTML page and use the `elasticApm` global object to 
 Don't forget to download the latest version of the RUM Agent from [GitHub]({GitHubLink}) or [UNPKG]({UnpkgLink}), \
 and host the file on your Server/CDN before deploying to production.",
       values: {
-        documentationLink: '{config.docs.base_url}guide/en/apm/agent/rum-js/current/index.html',
+        GitHubLink: 'https://github.com/elastic/apm-agent-rum-js/releases/latest',
+        UnpkgLink: 'https://unpkg.com/@elastic/apm-rum/dist/bundles/elastic-apm-rum.umd.min.js',
       },
     }),
   },
