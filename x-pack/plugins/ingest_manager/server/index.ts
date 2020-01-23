@@ -12,7 +12,6 @@ export const config = {
   exposeToBrowser: {
     epm: true,
     fleet: true,
-    agentConfig: true,
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -20,9 +19,6 @@ export const config = {
       enabled: schema.boolean({ defaultValue: true }),
     }),
     fleet: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-    }),
-    agentConfig: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
   }),
