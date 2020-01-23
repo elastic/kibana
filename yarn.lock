@@ -21870,6 +21870,18 @@ object-path@0.11.4:
   resolved "https://registry.yarnpkg.com/object-path/-/object-path-0.11.4.tgz#370ae752fbf37de3ea70a861c23bba8915691949"
   integrity sha1-NwrnUvvzfePqcKhhwju6iRVpGUk=
 
+object-prototype-functions@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/object-prototype-functions/-/object-prototype-functions-1.2.0.tgz#59ffa520f2e7ef3b3ba427ba81178eb8feca1048"
+  integrity sha512-7pfkHi5KHFz/B3RhQVORykDYF2CdQY/h1isJzCJJfEubKkSO59io1raYHAMUrx0Im3fUSrU1oX6E4KeCwyU/jQ==
+
+object-prototype@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/object-prototype/-/object-prototype-2.0.0.tgz#8173498090e6f5ad05337615147c3f330b50ba1f"
+  integrity sha512-hbGRLa+asxkpcg1CFd1ewOHp8P9Iyuo8AAeGJpUd/QGXJ4wloYb4RO4ZgbsWd3V+TcI9HH9aui8g7wWF45PP5Q==
+  dependencies:
+    object-prototype-functions "^1.2.0"
+
 object-values@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/object-values/-/object-values-1.0.0.tgz#72af839630119e5b98c3b02bb8c27e3237158105"
