@@ -965,16 +965,15 @@ export class TimeSeriesExplorer extends React.Component {
       !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-      !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
+      previousProps.selectedForecastId !== this.props.selectedForecastId ||
       previousProps.selectedJobId !== this.props.selectedJobId
     ) {
       const fullRefresh =
         previousProps === undefined ||
         !isEqual(previousProps.bounds, this.props.bounds) ||
-        !isEqual(previousProps.lastRefresh, this.props.lastRefresh) ||
         !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
-        !isEqual(previousProps.selectedForecastId, this.props.selectedForecastId) ||
+        previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId;
       this.loadSingleMetricData(fullRefresh);
     }
