@@ -20,14 +20,14 @@
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
 
 import { AppSetupUIPluginDependencies } from './types';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
-  constructor(private readonly ctx: PluginInitializerContext) {}
+  constructor() {}
 
   async setup(
     { notifications, getStartServices }: CoreSetup,
@@ -56,7 +56,11 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       enableRouting: false,
       mount: async ({ core: { docLinks, i18n: i18nDep } }, { element }) => {
         const { boot } = await import('./application');
-        const { elasticsearchUrl } = this.ctx.config.get<any>();
+        const [{ injectedMetadata }] = await getStartServices();
+        const elasticsearchUrl = injectedMetadata.getInjectedVar(
+          'elasticsearchUrl',
+          'http://localhost:9200'
+        ) as string;
         render(
           boot({
             docLinkVersion: docLinks.DOC_LINK_VERSION,

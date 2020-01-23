@@ -34,7 +34,14 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup> {
     this.log = this.ctx.logger.get();
   }
 
-  async setup({ http }: CoreSetup) {
+  async setup({ http, capabilities, getStartServices }: CoreSetup) {
+    capabilities.registerProvider(() => ({
+      dev_tools: {
+        show: true,
+        save: true,
+      },
+    }));
+
     const config = await this.ctx.config
       .create()
       .pipe(first())
@@ -69,6 +76,6 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup> {
       addProcessorDefinition,
     };
   }
-  async start() {}
-  stop() {}
+
+  start() {}
 }
