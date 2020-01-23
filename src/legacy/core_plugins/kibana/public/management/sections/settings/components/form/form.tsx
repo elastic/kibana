@@ -301,8 +301,8 @@ export class Form extends PureComponent<FormProps> {
     return (
       <EuiBottomBar>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTextColor className="mgtAdvancedSettingsForm__unsavedCount" color="ghost">
+          <EuiFlexItem grow={false} className="mgtAdvancedSettingsForm__unsavedCount">
+            <EuiTextColor className="mgtAdvancedSettingsForm__unsavedCountMessage" color="ghost">
               <FormattedMessage
                 id="kbn.management.settings.form.countOfSettingsChanged"
                 defaultMessage="{settingsCount} {hiddenCountCopy} unsaved settings"

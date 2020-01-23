@@ -2,6 +2,10 @@
   + * {
     margin-top: $euiSize;
   }
+
+
+  padding-left: $euiSizeS;
+  margin-left: -$euiSizeS;
   &--unsaved {
     // Simulates a left side border without shifting content
     box-shadow: -$euiSizeXS 0px $euiColorSecondary;
@@ -23,7 +27,14 @@
     }
   }
 }
+
 .mgtAdvancedSettingsForm__unsavedCount {
+  @include euiBreakpoint('xs', 's') {
+    display: none;
+  }
+}
+
+.mgtAdvancedSettingsForm__unsavedCountMessage{
   // Simulates a left side border without shifting content
   box-shadow: -$euiSizeXS 0px $euiColorSecondary;
   padding-left: $euiSizeS;

@@ -639,31 +639,27 @@ export class Field extends PureComponent<FieldProps> {
     });
 
     return (
-      <EuiFlexGroup className={className}>
-        <EuiFlexItem>
-          <EuiDescribedFormGroup
-            className="mgtAdvancedSettings__fieldWrapper"
-            title={this.renderTitle(setting)}
-            description={this.renderDescription(setting)}
-            idAria={`${setting.name}-aria`}
-            fullWidth
-          >
-            <EuiFormRow
-              isInvalid={isInvalid}
-              error={error}
-              label={this.renderLabel(setting)}
-              helpText={this.renderHelpText(setting)}
-              describedByIds={[`${setting.name}-aria`]}
-              className="mgtAdvancedSettings__fieldRow"
-              // @ts-ignore
-              hasChildLabel={setting.type !== 'boolean'}
-              fullWidth
-            >
-              {this.renderField(setting)}
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiDescribedFormGroup
+        className={className}
+        title={this.renderTitle(setting)}
+        description={this.renderDescription(setting)}
+        idAria={`${setting.name}-aria`}
+        fullWidth
+      >
+        <EuiFormRow
+          isInvalid={isInvalid}
+          error={error}
+          label={this.renderLabel(setting)}
+          helpText={this.renderHelpText(setting)}
+          describedByIds={[`${setting.name}-aria`]}
+          className="mgtAdvancedSettings__fieldRow"
+          // @ts-ignore
+          hasChildLabel={setting.type !== 'boolean'}
+          fullWidth
+        >
+          {this.renderField(setting)}
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
     );
   }
 }
