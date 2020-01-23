@@ -28,7 +28,7 @@ import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { OrderAggParamEditor } from '../../vis/editors/default/controls/order_agg';
 import { OrderParamEditor } from '../../vis/editors/default/controls/order';
-import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/controls/order_by';
+import { OrderByParamEditor } from '../../vis/editors/default/controls/order_by';
 import { SizeParamEditor } from '../../vis/editors/default/controls/size';
 import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
 import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
@@ -37,26 +37,12 @@ import { AggConfigs } from '../agg_configs';
 import { Adapters } from '../../../../../plugins/inspector/public';
 import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
-// @ts-ignore
-import { Schemas } from '../../vis/editors/default/schemas';
-
 import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
   // @ts-ignore
 } from './_terms_other_bucket_helper';
-
-const [orderAggSchema] = new Schemas([
-  {
-    group: 'none',
-    name: 'orderAgg',
-    // This string is never visible to the user so it doesn't need to be translated
-    title: 'Order Agg',
-    hideCustomLabel: true,
-    aggFilter,
-  },
-]).all;
 
 const termsTitle = i18n.translate('common.ui.aggTypes.buckets.termsTitle', {
   defaultMessage: 'Terms',
@@ -152,7 +138,6 @@ export const termsBucketAgg = new BucketAggType({
       editorComponent: OrderAggParamEditor,
       makeAgg(termsAgg, state) {
         state = state || {};
-        state.schema = orderAggSchema;
         const orderAgg = termsAgg.aggConfigs.createAggConfig<IBucketAggConfig>(state, {
           addToAggConfigs: false,
         });

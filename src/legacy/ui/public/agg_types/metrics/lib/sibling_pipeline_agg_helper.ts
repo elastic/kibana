@@ -24,50 +24,6 @@ import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers
 
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
-// @ts-ignore
-import { Schemas } from '../../../vis/editors/default/schemas';
-
-const metricAggFilter: string[] = [
-  '!top_hits',
-  '!percentiles',
-  '!percentile_ranks',
-  '!median',
-  '!std_dev',
-  '!sum_bucket',
-  '!avg_bucket',
-  '!min_bucket',
-  '!max_bucket',
-  '!derivative',
-  '!moving_avg',
-  '!serial_diff',
-  '!cumulative_sum',
-  '!geo_bounds',
-  '!geo_centroid',
-];
-const bucketAggFilter: string[] = [];
-
-const [metricAggSchema] = new Schemas([
-  {
-    group: 'none',
-    name: 'metricAgg',
-    title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
-      defaultMessage: 'Metric agg',
-    }),
-    aggFilter: metricAggFilter,
-  },
-]).all;
-
-const [bucketAggSchema] = new Schemas([
-  {
-    group: 'none',
-    title: i18n.translate('common.ui.aggTypes.metrics.bucketAggTitle', {
-      defaultMessage: 'Bucket agg',
-    }),
-    name: 'bucketAgg',
-    aggFilter: bucketAggFilter,
-  },
-]).all;
-
 const siblingPipelineAggHelper = {
   subtype: i18n.translate('common.ui.aggTypes.metrics.siblingPipelineAggregationsSubtypeTitle', {
     defaultMessage: 'Sibling pipeline aggregations',
@@ -80,7 +36,6 @@ const siblingPipelineAggHelper = {
         default: null,
         makeAgg(agg: IMetricAggConfig, state: any) {
           state = state || { type: 'date_histogram' };
-          state.schema = bucketAggSchema;
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-bucket';
 
@@ -98,7 +53,6 @@ const siblingPipelineAggHelper = {
         default: null,
         makeAgg(agg: IMetricAggConfig, state: any) {
           state = state || { type: 'count' };
-          state.schema = metricAggSchema;
           const orderAgg = agg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
           orderAgg.id = agg.id + '-metric';
 

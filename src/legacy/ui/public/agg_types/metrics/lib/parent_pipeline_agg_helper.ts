@@ -25,39 +25,12 @@ import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
-// @ts-ignore
-import { Schemas } from '../../../vis/editors/default/schemas';
-
-const metricAggFilter = [
-  '!top_hits',
-  '!percentiles',
-  '!percentile_ranks',
-  '!median',
-  '!std_dev',
-  '!geo_bounds',
-  '!geo_centroid',
-];
-
-const metricAggTitle = i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
-  defaultMessage: 'Metric agg',
-});
-
 const subtypeLabel = i18n.translate(
   'common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle',
   {
     defaultMessage: 'Parent Pipeline Aggregations',
   }
 );
-
-const [metricAggSchema] = new Schemas([
-  {
-    group: 'none',
-    name: 'metricAgg',
-    title: metricAggTitle,
-    hideCustomLabel: true,
-    aggFilter: metricAggFilter,
-  },
-]).all;
 
 export const parentPipelineAggHelper = {
   subtype: subtypeLabel,
@@ -76,7 +49,6 @@ export const parentPipelineAggHelper = {
         type: 'agg',
         makeAgg(termsAgg, state: any) {
           state = state || { type: 'count' };
-          state.schema = metricAggSchema;
 
           const metricAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
 
