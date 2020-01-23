@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Check } from '../../../../../common/graphql/types';
 import { LocationLink } from './location_link';
 import { MonitorStatusRow } from './monitor_status_row';
-import { UNNAMED_LOCATION } from '../../../../../common/constants';
+import { DOWN, UNNAMED_LOCATION, UP } from '../../../../../common/constants';
 
 interface MonitorStatusListProps {
   /**
@@ -19,9 +19,6 @@ interface MonitorStatusListProps {
    */
   checks: Check[];
 }
-
-export const UP = 'up';
-export const DOWN = 'down';
 
 export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
   const upChecks: Set<string> = new Set();

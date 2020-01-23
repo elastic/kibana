@@ -5,7 +5,9 @@ exports[`MonitorListStatusColumn can handle a non-numeric timestamp value 1`] = 
   alignItems="center"
   gutterSize="none"
 >
-  <EuiFlexItem>
+  <EuiFlexItem
+    grow={1}
+  >
     <EuiHealth
       color="success"
       style={
@@ -16,25 +18,36 @@ exports[`MonitorListStatusColumn can handle a non-numeric timestamp value 1`] = 
     >
       Up
     </EuiHealth>
-    <EuiToolTip
-      content={
+    <styled.span>
+      <EuiToolTip
+        content={
+          <EuiText
+            color="ghost"
+            size="xs"
+          >
+            Thu May 09 2019 10:15:11 GMT-0400
+          </EuiText>
+        }
+        delay="regular"
+        position="top"
+      >
         <EuiText
-          color="ghost"
+          color="subdued"
           size="xs"
         >
-          Thu May 09 2019 10:15:11 GMT-0400
+          a few seconds ago
         </EuiText>
-      }
-      delay="regular"
-      position="top"
+      </EuiToolTip>
+    </styled.span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={2}
+  >
+    <EuiText
+      size="s"
     >
-      <EuiText
-        color="subdued"
-        size="xs"
-      >
-        a few seconds ago
-      </EuiText>
-    </EuiToolTip>
+      in 0/0 Locations
+    </EuiText>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -44,7 +57,9 @@ exports[`MonitorListStatusColumn provides expected tooltip and display times 1`]
   alignItems="center"
   gutterSize="none"
 >
-  <EuiFlexItem>
+  <EuiFlexItem
+    grow={1}
+  >
     <EuiHealth
       color="success"
       style={
@@ -55,25 +70,88 @@ exports[`MonitorListStatusColumn provides expected tooltip and display times 1`]
     >
       Up
     </EuiHealth>
-    <EuiToolTip
-      content={
+    <styled.span>
+      <EuiToolTip
+        content={
+          <EuiText
+            color="ghost"
+            size="xs"
+          >
+            Thu May 09 2019 10:15:11 GMT-0400
+          </EuiText>
+        }
+        delay="regular"
+        position="top"
+      >
         <EuiText
-          color="ghost"
+          color="subdued"
           size="xs"
         >
-          Thu May 09 2019 10:15:11 GMT-0400
+          a few seconds ago
         </EuiText>
-      }
-      delay="regular"
-      position="top"
+      </EuiToolTip>
+    </styled.span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={2}
+  >
+    <EuiText
+      size="s"
     >
-      <EuiText
-        color="subdued"
-        size="xs"
+      in 0/0 Locations
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`MonitorListStatusColumn will display location status 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+>
+  <EuiFlexItem
+    grow={1}
+  >
+    <EuiHealth
+      color="success"
+      style={
+        Object {
+          "display": "block",
+        }
+      }
+    >
+      Up
+    </EuiHealth>
+    <styled.span>
+      <EuiToolTip
+        content={
+          <EuiText
+            color="ghost"
+            size="xs"
+          >
+            Thu May 09 2019 10:15:11 GMT-0400
+          </EuiText>
+        }
+        delay="regular"
+        position="top"
       >
-        a few seconds ago
-      </EuiText>
-    </EuiToolTip>
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          a few seconds ago
+        </EuiText>
+      </EuiToolTip>
+    </styled.span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={2}
+  >
+    <EuiText
+      size="s"
+    >
+      in 3/3 Locations
+    </EuiText>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
