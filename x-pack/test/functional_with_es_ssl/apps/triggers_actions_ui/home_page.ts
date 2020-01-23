@@ -77,15 +77,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         );
 
-        // Navigate to the alerts tab via connectrors as we don't yet
-        // have a refresh button
-        pageObjects.triggersActionsUI.changeTabs('connectorsTab');
-        pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        // refresh to see alert
+        await browser.refresh();
 
         await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify url
-        expect(await browser.getCurrentUrl()).to.contain(`/alerts`);
 
         // Verify content
         await testSubjects.existOrFail('alertsList');

@@ -11,12 +11,14 @@ import {
   deleteAlerts,
   disableAlerts,
   enableAlerts,
+  loadAlert,
   loadAlerts,
   loadAlertTypes,
   muteAlerts,
   unmuteAlerts,
   updateAlert,
 } from './alert_api';
+import uuid from 'uuid';
 
 const http = httpServiceMock.createStartContract();
 
@@ -39,6 +41,31 @@ describe('loadAlertTypes', () => {
         "/api/alert/types",
       ]
     `);
+  });
+});
+
+describe('loadAlert', () => {
+  test('should call get API with base parameters', async () => {
+    const alertId = uuid.v4();
+    const resolvedValue = {
+      id: alertId,
+      name: 'name',
+      tags: [],
+      enabled: true,
+      alertTypeId: '.noop',
+      interval: '1s',
+      actions: [],
+      params: {},
+      createdBy: null,
+      updatedBy: null,
+      throttle: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+    } as Alert;
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    expect(await loadAlert(http, alertId)).toEqual(resolvedValue);
+    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
   });
 });
 

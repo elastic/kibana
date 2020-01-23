@@ -162,6 +162,7 @@ export const AlertsList: React.FunctionComponent = () => {
       render: (name: string, alert: AlertTableItem) => {
         return (
           <EuiLink
+            title={name}
             onClick={() => {
               history.push(`${location.pathname}/${alert.id}`);
             }}
