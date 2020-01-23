@@ -50,6 +50,6 @@ describe('Port', () => {
         .find('a')
         .first()
         .props().href
-    ).toEqual('#/link-to/network/ip/10.1.2.3');
+    ).toEqual('#/link-to/network/ip/10.1.2.3/source');
   });
 });

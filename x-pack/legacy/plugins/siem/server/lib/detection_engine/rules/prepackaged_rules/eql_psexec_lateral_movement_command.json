@@ -1,17 +1,20 @@
 {
-  "rule_id": "55d551c6-333b-4665-ab7e-5d14a59715ce",
-  "risk_score": 50,
-  "description": "EQL - PsExec Lateral Movement Command",
+  "description": "Identifies use of the SysInternals tool PsExec to execute commands on a remote host. This is an indication of lateral movement and may detect adversaries.",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
   "immutable": true,
   "interval": "5m",
-  "name": "EQL - PsExec Lateral Movement Command",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name:psexec.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" ",
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "PsExec Lateral Movement Command",
+  "query": "process.name:psexec.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" ",
+  "risk_score": 50,
+  "rule_id": "55d551c6-333b-4665-ab7e-5d14a59715ce",
+  "severity": "low",
+  "tags": [
+    "EIA"
+  ],
+  "to": "now",
+  "type": "query",
   "version": 1
 }

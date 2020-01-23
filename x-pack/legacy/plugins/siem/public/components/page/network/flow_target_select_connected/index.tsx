@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import { EuiFlexItem } from '@elastic/eui';
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
 
 import { FlowDirection, FlowTarget } from '../../../../graphql/types';
-import { State } from '../../../../store';
-import { networkActions, networkSelectors } from '../../../../store/network';
 import * as i18nIp from '../ip_overview/translations';
 
 import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
@@ -24,20 +22,33 @@ const SelectTypeItem = styled(EuiFlexItem)`
 
 SelectTypeItem.displayName = 'SelectTypeItem';
 
-interface FlowTargetSelectReduxProps {
+interface Props {
   flowTarget: FlowTarget;
 }
 
-export interface FlowTargetSelectDispatchProps {
-  updateIpDetailsFlowTarget: ActionCreator<{
-    flowTarget: FlowTarget;
-  }>;
-}
+const getUpdatedFlowTargetPath = (
+  location: Location,
+  currentFlowTarget: FlowTarget,
+  newFlowTarget: FlowTarget
+) => {
+  const newPathame = location.pathname.replace(currentFlowTarget, newFlowTarget);
 
-type FlowTargetSelectProps = FlowTargetSelectReduxProps & FlowTargetSelectDispatchProps;
+  return `${newPathame}${location.search}`;
+};
 
-const FlowTargetSelectComponent = React.memo<FlowTargetSelectProps>(
-  ({ flowTarget, updateIpDetailsFlowTarget }) => (
+const FlowTargetSelectConnectedComponent: React.FC<Props> = ({ flowTarget }) => {
+  const history = useHistory();
+  const location = useLocation();
+
+  const updateIpDetailsFlowTarget = useCallback(
+    (newFlowTarget: FlowTarget) => {
+      const newPath = getUpdatedFlowTargetPath(location, flowTarget, newFlowTarget);
+      history.push(newPath);
+    },
+    [history, location, flowTarget]
+  );
+
+  return (
     <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-flow-target`}>
       <FlowTargetSelect
         id={IpOverviewId}
@@ -48,20 +59,7 @@ const FlowTargetSelectComponent = React.memo<FlowTargetSelectProps>(
         updateFlowTargetAction={updateIpDetailsFlowTarget}
       />
     </SelectTypeItem>
-  )
-);
-
-FlowTargetSelectComponent.displayName = 'FlowTargetSelectComponent';
-
-const makeMapStateToProps = () => {
-  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
-  return (state: State) => {
-    return {
-      flowTarget: getIpDetailsFlowTargetSelector(state),
-    };
-  };
+  );
 };
 
-export const FlowTargetSelectConnected = connect(makeMapStateToProps, {
-  updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
-})(FlowTargetSelectComponent);
+export const FlowTargetSelectConnected = React.memo(FlowTargetSelectConnectedComponent);

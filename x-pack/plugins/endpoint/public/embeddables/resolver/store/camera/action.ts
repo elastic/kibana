@@ -4,20 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2 } from '../../types';
+import { Vector2, PanDirection } from '../../types';
 
-interface UserScaled {
-  readonly type: 'userScaled';
+interface UserSetZoomLevel {
+  readonly type: 'userSetZoomLevel';
   /**
-   * A vector who's `x` and `y` component will be the new scaling factors for the projection.
+   * A number whose value is always between 0 and 1 and will be the new scaling factor for the projection.
    */
-  readonly payload: Vector2;
+  readonly payload: number;
+}
+
+interface UserClickedZoomOut {
+  readonly type: 'userClickedZoomOut';
+}
+
+interface UserClickedZoomIn {
+  readonly type: 'userClickedZoomIn';
 }
 
 interface UserZoomed {
   readonly type: 'userZoomed';
   /**
-   * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`, pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
+   * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
+   * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
    */
   payload: number;
 }
@@ -55,6 +64,14 @@ interface UserStoppedPanning {
   readonly type: 'userStoppedPanning';
 }
 
+interface UserClickedPanControl {
+  readonly type: 'userClickedPanControl';
+  /**
+   * String that represents the direction in which Resolver can be panned
+   */
+  readonly payload: PanDirection;
+}
+
 interface UserMovedPointer {
   readonly type: 'userMovedPointer';
   /**
@@ -65,10 +82,13 @@ interface UserMovedPointer {
 }
 
 export type CameraAction =
-  | UserScaled
+  | UserSetZoomLevel
   | UserSetRasterSize
   | UserSetPositionOfCamera
   | UserStartedPanning
   | UserStoppedPanning
   | UserZoomed
-  | UserMovedPointer;
+  | UserMovedPointer
+  | UserClickedZoomOut
+  | UserClickedZoomIn
+  | UserClickedPanControl;

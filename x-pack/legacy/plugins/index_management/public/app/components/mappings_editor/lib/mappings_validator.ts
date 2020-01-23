@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Joi from 'joi';
+import { pick } from 'lodash';
+import * as t from 'io-ts';
+import { ordString } from 'fp-ts/lib/Ord';
+import { toArray } from 'fp-ts/lib/Set';
+import { isLeft, isRight } from 'fp-ts/lib/Either';
+import { errorReporter } from './error_reporter';
 import { ALL_DATA_TYPES, PARAMETERS_DEFINITION } from '../constants';
 import { FieldMeta } from '../types';
 import { getFieldMeta } from '../lib';
@@ -72,7 +77,7 @@ const validateParameter = (parameter: string, value: any): boolean => {
 
   const parameterSchema = (PARAMETERS_DEFINITION as any)[parameter]!.schema;
   if (parameterSchema) {
-    return Boolean(Joi.validate(value, parameterSchema).error) === false;
+    return isRight(parameterSchema.decode(value));
   }
 
   // Fallback, if no schema defined for the parameter (this should not happen in theory)
@@ -192,54 +197,55 @@ export const validateProperties = (properties = {}): PropertiesValidatorResponse
  * Single source of truth to validate the *configuration* of the mappings.
  * Whenever a user loads a JSON object it will be validate against this Joi schema.
  */
-export const mappingsConfigurationSchema = Joi.object().keys({
-  dynamic: Joi.any().valid([true, false, 'strict']),
-  date_detection: Joi.boolean().strict(),
-  numeric_detection: Joi.boolean().strict(),
-  dynamic_date_formats: Joi.array().items(Joi.string()),
-  _source: Joi.object().keys({
-    enabled: Joi.boolean().strict(),
-    includes: Joi.array().items(Joi.string()),
-    excludes: Joi.array().items(Joi.string()),
+export const mappingsConfigurationSchema = t.partial({
+  dynamic: t.union([t.literal(true), t.literal(false), t.literal('strict')]),
+  date_detection: t.boolean,
+  numeric_detection: t.boolean,
+  dynamic_date_formats: t.array(t.string),
+  _source: t.partial({
+    enabled: t.boolean,
+    includes: t.array(t.string),
+    excludes: t.array(t.string),
   }),
-  _meta: Joi.object(),
-  _routing: Joi.object().keys({
-    required: Joi.boolean().strict(),
+  _meta: t.UnknownRecord,
+  _routing: t.partial({
+    required: t.boolean,
   }),
 });
+
+const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.props);
 
 const validateMappingsConfiguration = (
   mappingsConfiguration: any
 ): { value: any; errors: MappingsValidationError[] } => {
-  // Array to keep track of invalid configuration parameters.
-  const configurationRemoved: string[] = [];
+  // Set to keep track of invalid configuration parameters.
+  const configurationRemoved: Set<string> = new Set();
 
-  const { value: parsedConfiguration, error: configurationError } = Joi.validate(
-    mappingsConfiguration,
-    mappingsConfigurationSchema,
-    {
-      stripUnknown: true,
-      abortEarly: false,
-    }
-  );
+  let copyOfMappingsConfig = { ...mappingsConfiguration };
+  const result = mappingsConfigurationSchema.decode(mappingsConfiguration);
 
-  if (configurationError) {
+  if (isLeft(result)) {
     /**
      * To keep the logic simple we will strip out the parameters that contain errors
      */
-    configurationError.details.forEach(error => {
+    const errors = errorReporter.report(result);
+    errors.forEach(error => {
       const configurationName = error.path[0];
-      configurationRemoved.push(configurationName);
-      delete parsedConfiguration[configurationName];
+      configurationRemoved.add(configurationName);
+      delete copyOfMappingsConfig[configurationName];
     });
   }
 
-  const errors: MappingsValidationError[] = configurationRemoved.map(configName => ({
-    code: 'ERR_CONFIG',
-    configName,
-  }));
+  copyOfMappingsConfig = pick(copyOfMappingsConfig, mappingsConfigurationSchemaKeys);
 
-  return { value: parsedConfiguration, errors };
+  const errors: MappingsValidationError[] = toArray<string>(ordString)(configurationRemoved)
+    .map(configName => ({
+      code: 'ERR_CONFIG',
+      configName,
+    }))
+    .sort((a, b) => a.configName.localeCompare(b.configName)) as MappingsValidationError[];
+
+  return { value: copyOfMappingsConfig, errors };
 };
 
 export const validateMappings = (mappings: any = {}): MappingsValidatorResponse => {

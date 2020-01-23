@@ -78,7 +78,9 @@ export interface UserProvidedValues<T = any> {
  * @public
  * */
 export interface DeprecationSettings {
+  /** Deprecation message */
   message: string;
+  /** Key to documentation links */
   docLinksKey: string;
 }
 

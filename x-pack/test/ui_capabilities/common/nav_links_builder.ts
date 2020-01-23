@@ -13,7 +13,7 @@ export class NavLinksBuilder {
       ...features,
       // management isn't a first-class "feature", but it makes our life easier here to pretend like it is
       management: {
-        navLinkId: 'kibana:management',
+        navLinkId: 'kibana:stack_management',
       },
     };
   }

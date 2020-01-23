@@ -31,7 +31,7 @@ import {
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 import { ElementCard } from '../element_card';
-import { ComponentStrings } from '../../../i18n';
+import { ComponentStrings } from '../../../i18n/components';
 
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;

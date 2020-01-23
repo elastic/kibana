@@ -6,7 +6,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import Joi from 'joi';
+import * as t from 'io-ts';
 
 import { EuiLink, EuiCode } from '@elastic/eui';
 import {
@@ -17,7 +17,13 @@ import {
   fieldFormatters,
   FieldConfig,
 } from '../shared_imports';
-import { AliasOption, DataType, ComboBoxOption } from '../types';
+import {
+  AliasOption,
+  DataType,
+  ComboBoxOption,
+  ParameterName,
+  ParameterDefinition,
+} from '../types';
 import { documentationService } from '../../../services/documentation';
 import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
@@ -100,11 +106,10 @@ const fielddataFrequencyFilterParam = {
       },
     },
   },
-  schema: Joi.object().keys({
-    min: Joi.number(),
-    max: Joi.number(),
-    min_segment_size: Joi.number(),
-  }),
+  schema: t.record(
+    t.union([t.literal('min'), t.literal('max'), t.literal('min_segment_size')]),
+    t.number
+  ),
 };
 
 const analyzerValidations = [
@@ -125,7 +130,7 @@ const analyzerValidations = [
  *
  * As a consequence, if a parameter is *not* declared here, we won't be able to declare it in the Json editor.
  */
-export const PARAMETERS_DEFINITION = {
+export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinition } = {
   name: {
     fieldConfig: {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.nameFieldLabel', {
@@ -178,40 +183,40 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   store: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   index: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   doc_values: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   doc_values_binary: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   fielddata: {
     fieldConfig: {
       type: FIELD_TYPES.CHECKBOX,
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   fielddata_frequency_filter: fielddataFrequencyFilterParam,
   fielddata_frequency_filter_percentage: {
@@ -280,19 +285,19 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   coerce_shape: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   ignore_malformed: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   null_value: {
     fieldConfig: {
@@ -300,7 +305,6 @@ export const PARAMETERS_DEFINITION = {
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
     },
-    schema: Joi.string(),
   },
   null_value_ip: {
     fieldConfig: {
@@ -323,7 +327,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   null_value_boolean: {
     fieldConfig: {
@@ -332,7 +336,7 @@ export const PARAMETERS_DEFINITION = {
       deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
       serializer: (value: number) => mapIndexToValue[value],
     },
-    schema: Joi.any().valid([true, false, 'true', 'false']),
+    schema: t.union([t.literal(true), t.literal(false), t.literal('true'), t.literal('false')]),
   },
   null_value_geo_point: {
     fieldConfig: {
@@ -376,7 +380,7 @@ export const PARAMETERS_DEFINITION = {
         }
       },
     },
-    schema: Joi.any(),
+    schema: t.any,
   },
   copy_to: {
     fieldConfig: {
@@ -398,7 +402,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   max_input_length: {
     fieldConfig: {
@@ -421,7 +425,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   locale: {
     fieldConfig: {
@@ -454,7 +458,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   orientation: {
     fieldConfig: {
@@ -464,7 +468,7 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Orientation',
       }),
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   boost: {
     fieldConfig: {
@@ -484,7 +488,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     } as FieldConfig,
-    schema: Joi.number(),
+    schema: t.number,
   },
   scaling_factor: {
     title: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldTitle', {
@@ -535,27 +539,39 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Value must be greater than 0.',
       }),
     } as FieldConfig,
-    schema: Joi.number(),
+    schema: t.number,
   },
   dynamic: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicFieldLabel', {
-        defaultMessage: 'Dynamic',
-      }),
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.union([t.boolean, t.literal('strict')]),
+  },
+  dynamic_toggle: {
+    fieldConfig: {
+      defaultValue: true,
+    },
+  },
+  dynamic_strict: {
+    fieldConfig: {
+      defaultValue: false,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicStrictParameter.fieldTitle', {
+        defaultMessage: 'Throw an exception when the object contains an unmapped property',
+      }),
+      helpText: i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.dynamicStrictParameter.fieldHelpText',
+        {
+          defaultMessage:
+            'By default, unmapped properties will be silently ignored when dynamic mapping is disabled. Optionally, you can choose to throw an exception when an object contains an unmapped property.',
+        }
+      ),
+    },
   },
   enabled: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.enabledFieldLabel', {
-        defaultMessage: 'Enabled',
-      }),
-      type: FIELD_TYPES.CHECKBOX,
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   format: {
     fieldConfig: {
@@ -577,7 +593,7 @@ export const PARAMETERS_DEFINITION = {
         />
       ),
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   analyzer: {
     fieldConfig: {
@@ -587,7 +603,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: analyzerValidations,
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   search_analyzer: {
     fieldConfig: {
@@ -597,7 +613,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: analyzerValidations,
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   search_quote_analyzer: {
     fieldConfig: {
@@ -607,7 +623,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: INDEX_DEFAULT,
       validations: analyzerValidations,
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   normalizer: {
     fieldConfig: {
@@ -636,76 +652,81 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: `The name of a normalizer defined in the index's settings.`,
       }),
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   index_options: {
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'positions',
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   index_options_keyword: {
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'docs',
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   index_options_flattened: {
     fieldConfig: {
       ...indexOptionsConfig,
       defaultValue: 'docs',
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   eager_global_ordinals: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
+  },
+  eager_global_ordinals_join: {
+    fieldConfig: {
+      defaultValue: true,
+    },
   },
   index_phrases: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   preserve_separators: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   preserve_position_increments: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   ignore_z_value: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   points_only: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   norms: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   norms_keyword: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   term_vector: {
     fieldConfig: {
@@ -715,7 +736,7 @@ export const PARAMETERS_DEFINITION = {
       }),
       defaultValue: 'no',
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   path: {
     fieldConfig: {
@@ -741,7 +762,7 @@ export const PARAMETERS_DEFINITION = {
       serializer: (value: AliasOption[]) => (value.length === 0 ? '' : value[0].id),
     } as FieldConfig<any, string>,
     targetTypesNotAllowed: ['object', 'nested', 'alias'] as DataType[],
-    schema: Joi.string(),
+    schema: t.string,
   },
   position_increment_gap: {
     fieldConfig: {
@@ -771,7 +792,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   index_prefixes: {
     fieldConfig: { defaultValue: {} }, // Needed for FieldParams typing
@@ -791,9 +812,9 @@ export const PARAMETERS_DEFINITION = {
         } as FieldConfig,
       },
     },
-    schema: Joi.object().keys({
-      min_chars: Joi.number(),
-      max_chars: Joi.number(),
+    schema: t.partial({
+      min_chars: t.number,
+      max_chars: t.number,
     }),
   },
   similarity: {
@@ -804,13 +825,13 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Similarity algorithm',
       }),
     },
-    schema: Joi.string(),
+    schema: t.string,
   },
   split_queries_on_whitespace: {
     fieldConfig: {
       defaultValue: false,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   ignore_above: {
     fieldConfig: {
@@ -842,13 +863,13 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   enable_position_increments: {
     fieldConfig: {
       defaultValue: true,
     },
-    schema: Joi.boolean().strict(),
+    schema: t.boolean,
   },
   depth_limit: {
     fieldConfig: {
@@ -868,7 +889,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.number(),
+    schema: t.number,
   },
   dims: {
     fieldConfig: {
@@ -894,6 +915,23 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
     },
-    schema: Joi.string(),
+    schema: t.string,
+  },
+  relations: {
+    fieldConfig: {
+      defaultValue: [] as any, // Needed for FieldParams typing
+    },
+    schema: t.record(t.string, t.union([t.string, t.array(t.string)])),
+  },
+  max_shingle_size: {
+    fieldConfig: {
+      type: FIELD_TYPES.SELECT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.largestShingleSizeFieldLabel', {
+        defaultMessage: 'Max shingle size',
+      }),
+      defaultValue: 3,
+      formatters: [toInt],
+    },
+    schema: t.union([t.literal(2), t.literal(3), t.literal(4)]),
   },
 };

@@ -28,12 +28,16 @@ export interface MatrixHistogramOption {
 }
 
 export type GetSubTitle = (count: number) => string;
+export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
+
 export interface MatrixHistogramBasicProps {
   defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
   endDate: number;
+  headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
   id: string;
+  legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   setQuery: SetQuery;
   sourceId: string;
@@ -56,12 +60,12 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   skip: boolean;
   startDate: number;
-  title: string;
+  title: string | GetTitle;
   isAlertsHistogram?: boolean;
   isAnomaliesHistogram?: boolean;
   isAuthenticationsHistogram?: boolean;
-  isDNSHistogram?: boolean;
-  isEventsType?: boolean;
+  isDnsHistogram?: boolean;
+  isEventsHistogram?: boolean;
   isInspected: boolean;
   isPtrIncluded?: boolean;
   pagination?: PaginationInputPaginated;

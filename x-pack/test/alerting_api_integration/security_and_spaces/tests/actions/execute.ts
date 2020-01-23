@@ -311,11 +311,8 @@ export default function({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'child "params" fails because ["params" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['params'],
-                },
+                message:
+                  '[request body.params]: expected value of type [object] but got [undefined]',
               });
               break;
             default:
