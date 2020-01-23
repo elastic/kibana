@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
@@ -30,6 +30,7 @@ import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
+import { routeToAlertDetails } from '../../../constants';
 
 const ENTER_KEY = 13;
 
@@ -41,7 +42,6 @@ export const AlertsList: React.FunctionComponent = () => {
     legacy: { capabilities },
   } = useAppDependencies();
   const history = useHistory();
-  const location = useLocation();
   const canDelete = hasDeleteAlertsCapability(capabilities.get());
   const canSave = hasSaveAlertsCapability(capabilities.get());
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
@@ -164,7 +164,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiLink
             title={name}
             onClick={() => {
-              history.push(`${location.pathname}/${alert.id}`);
+              history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
             }}
           >
             {name}

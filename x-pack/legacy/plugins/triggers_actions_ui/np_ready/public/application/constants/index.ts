@@ -13,7 +13,7 @@ export type Section = 'connectors' | 'alerts';
 export const routeToHome = `${BASE_PATH}`;
 export const routeToConnectors = `${BASE_PATH}/connectors`;
 export const routeToAlerts = `${BASE_PATH}/alerts`;
-export const routeToAlertDetails = `${BASE_PATH}/alerts/:alertId`;
+export const routeToAlertDetails = `${BASE_PATH}/alert/:alertId`;
 
 export { TIME_UNITS } from './time_units';
 export enum SORT_ORDERS {
