@@ -644,7 +644,7 @@ function discoverController(
 
       // fetch data when filters fire fetch event
       subscriptions.add(
-        subscribeWithScope($scope, filterManager.getUpdates$(), {
+        subscribeWithScope($scope, filterManager.getFetches$(), {
           next: $scope.fetch,
         })
       );
@@ -1010,7 +1010,7 @@ function discoverController(
       query: '',
       language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
     };
-    filterManager.removeAll();
+    filterManager.setFilters(filterManager.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };
@@ -1018,7 +1018,9 @@ function discoverController(
   const updateStateFromSavedQuery = savedQuery => {
     $state.query = savedQuery.attributes.query;
     $state.save();
-    filterManager.setFilters(savedQuery.attributes.filters || []);
+    const savedQueryFilters = savedQuery.attributes.filters || [];
+    const globalFilters = filterManager.getGlobalFilters();
+    filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({

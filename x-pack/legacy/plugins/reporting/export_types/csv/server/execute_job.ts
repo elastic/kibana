@@ -5,13 +5,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExecuteJobFactory, ESQueueWorkerExecuteFn, ServerFacade } from '../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest } from '../../../../../../../src/core/server';
+import {
+  ExecuteJobFactory,
+  ESQueueWorkerExecuteFn,
+  FieldFormats,
+  ServerFacade,
+} from '../../../types';
 import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { JobDocPayloadDiscoverCsv } from '../types';
-// @ts-ignore untyped module TODO
 import { createGenerateCsv } from './lib/generate_csv';
-// @ts-ignore untyped module TODO
 import { fieldFormatMapFactory } from './lib/field_format_map';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
@@ -79,14 +84,16 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       return callWithRequest(fakeRequest, endpoint, clientParams, options);
     };
     const savedObjects = server.savedObjects;
-    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
+    const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+      (fakeRequest as unknown) as KibanaRequest
+    );
     const uiConfig = server.uiSettingsServiceFactory({
       savedObjectsClient,
     });
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
-        const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
+        const fieldFormats = (await server.fieldFormatServiceFactory(uiConfig)) as FieldFormats;
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),
       (async () => {

@@ -86,7 +86,7 @@ export class LegacyService implements CoreService {
   public legacyInternals?: ILegacyInternals;
 
   constructor(private readonly coreContext: CoreContext) {
-    const { logger, configService } = coreContext;
+    const { logger, configService, env } = coreContext;
 
     this.log = logger.get('legacy-service');
     this.devConfig$ = configService
@@ -95,7 +95,7 @@ export class LegacyService implements CoreService {
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
-    ).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
@@ -256,6 +256,16 @@ export class LegacyService implements CoreService {
     startDeps: LegacyServiceStartDeps,
     legacyPlugins: LegacyPlugins
   ) {
+    const coreStart: CoreStart = {
+      capabilities: startDeps.core.capabilities,
+      savedObjects: {
+        getScopedClient: startDeps.core.savedObjects.getScopedClient,
+        createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
+        createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+      },
+      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+    };
+
     const coreSetup: CoreSetup = {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
@@ -280,10 +290,8 @@ export class LegacyService implements CoreService {
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
       savedObjects: {
-        setClientFactory: setupDeps.core.savedObjects.setClientFactory,
+        setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
-        createInternalRepository: setupDeps.core.savedObjects.createInternalRepository,
-        createScopedRepository: setupDeps.core.savedObjects.createScopedRepository,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
@@ -291,11 +299,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
-    };
-    const coreStart: CoreStart = {
-      capabilities: startDeps.core.capabilities,
-      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
-      uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      getStartServices: () => Promise.resolve([coreStart, startDeps.plugins]),
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
