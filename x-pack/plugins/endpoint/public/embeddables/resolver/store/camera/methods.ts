@@ -7,10 +7,15 @@
 import { translation } from './selectors';
 import { CameraState, Vector2 } from '../../types';
 
+/**
+ * Return a new `CameraState` with the `animation` property
+ * set. The camera will animate to `targetTranslation` over `duration`.
+ */
 export function animatePanning(
   state: CameraState,
   startTime: Date,
-  targetTranslation: Vector2
+  targetTranslation: Vector2,
+  duration: number
 ): CameraState {
   const nextState: CameraState = {
     ...state,
@@ -20,6 +25,7 @@ export function animatePanning(
       startTime,
       targetTranslation,
       initialTranslation: translation(state)(startTime),
+      duration,
     },
   };
 

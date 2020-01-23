@@ -35,6 +35,11 @@ export interface CameraAnimationState {
    * when the animation began.
    */
   readonly initialTranslation: Vector2;
+
+  /**
+   * The duration, in milliseconds, that the animation should last. Should be > 0
+   */
+  readonly duration: number;
 }
 
 /**

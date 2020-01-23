@@ -23,7 +23,6 @@ import {
   Matrix3,
   CameraStateWhenPanning,
   CameraStateWhenNotAnimatingOrPanning,
-  CameraAnimationState,
 } from '../../types';
 
 interface ClippingPlanes {
