@@ -37,44 +37,49 @@ interface Props {
   to: number;
 }
 
-export const EventCounts = React.memo<Props>(
-  ({ filters = NO_FILTERS, from, indexPattern, query = DEFAULT_QUERY, setQuery, to }) => {
-    const kibana = useKibana();
+const EventCountsComponent: React.FC<Props> = ({
+  filters = NO_FILTERS,
+  from,
+  indexPattern,
+  query = DEFAULT_QUERY,
+  setQuery,
+  to,
+}) => {
+  const kibana = useKibana();
 
-    return (
-      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-        <EuiFlexItem grow={true}>
-          <OverviewHost
-            endDate={to}
-            filterQuery={convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-              indexPattern,
-              queries: [query],
-              filters,
-            })}
-            startDate={from}
-            setQuery={setQuery}
-          />
-        </EuiFlexItem>
+  return (
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+      <EuiFlexItem grow={true}>
+        <OverviewHost
+          endDate={to}
+          filterQuery={convertToBuildEsQuery({
+            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+            indexPattern,
+            queries: [query],
+            filters,
+          })}
+          startDate={from}
+          setQuery={setQuery}
+        />
+      </EuiFlexItem>
 
-        <HorizontalSpacer grow={false} />
+      <HorizontalSpacer grow={false} />
 
-        <EuiFlexItem grow={true}>
-          <OverviewNetwork
-            endDate={to}
-            filterQuery={convertToBuildEsQuery({
-              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-              indexPattern,
-              queries: [query],
-              filters,
-            })}
-            startDate={from}
-            setQuery={setQuery}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+      <EuiFlexItem grow={true}>
+        <OverviewNetwork
+          endDate={to}
+          filterQuery={convertToBuildEsQuery({
+            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+            indexPattern,
+            queries: [query],
+            filters,
+          })}
+          startDate={from}
+          setQuery={setQuery}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
-EventCounts.displayName = 'EventCounts';
+export const EventCounts = React.memo(EventCountsComponent);

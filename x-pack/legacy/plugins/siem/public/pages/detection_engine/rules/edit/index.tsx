@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import {
   EuiButton,
   EuiCallOut,
@@ -14,16 +16,16 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
-import { HeaderPage } from '../../../../components/header_page';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useUserInfo } from '../../components/user_info';
+import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { FormHook, FormData } from '../components/shared_imports';
 import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
@@ -48,7 +50,7 @@ interface ScheduleStepRuleForm extends StepRuleForm {
   data: ScheduleStepRule | null;
 }
 
-export const EditRuleComponent = memo(() => {
+const EditRulePageComponent: FC = () => {
   const [, dispatchToaster] = useStateToaster();
   const {
     loading: initLoading,
@@ -281,7 +283,7 @@ export const EditRuleComponent = memo(() => {
   return (
     <>
       <WrapperPage restrictWidth>
-        <HeaderPage
+        <DetectionEngineHeaderPage
           backOptions={{
             href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`,
             text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
@@ -351,5 +353,6 @@ export const EditRuleComponent = memo(() => {
       <SpyRoute state={{ ruleName: rule?.name }} />
     </>
   );
-});
-EditRuleComponent.displayName = 'EditRuleComponent';
+};
+
+export const EditRulePage = memo(EditRulePageComponent);

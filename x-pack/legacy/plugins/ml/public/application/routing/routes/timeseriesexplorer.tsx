@@ -72,6 +72,11 @@ const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   );
 };
 
+interface AppStateZoom {
+  from: string;
+  to: string;
+}
+
 interface TimeSeriesExplorerUrlStateManager {
   config: any;
   jobsWithTimeRange: MlJobWithTimeRange[];
@@ -159,10 +164,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     : +appState?.mlTimeSeriesExplorer?.detectorIndex || 0;
   const selectedEntities = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.entities;
   const selectedForecastId = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.forecastId;
-  const zoom: {
-    from: string;
-    to: string;
-  } = isJobChange ? undefined : appState?.mlTimeSeriesExplorer?.zoom;
+  const zoom: AppStateZoom | undefined = isJobChange
+    ? undefined
+    : appState?.mlTimeSeriesExplorer?.zoom;
 
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
   const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
@@ -195,6 +199,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
         case APP_STATE_ACTION.SET_FORECAST_ID:
           mlTimeSeriesExplorer.forecastId = payload;
+          delete mlTimeSeriesExplorer.zoom;
           break;
 
         case APP_STATE_ACTION.SET_ZOOM:
@@ -213,6 +218,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const boundsMinMs = bounds?.min?.valueOf();
   const boundsMaxMs = bounds?.max?.valueOf();
+
+  const [selectedForecastIdProp, setSelectedForecastIdProp] = useState<string | undefined>(
+    appState?.mlTimeSeriesExplorer?.forecastId
+  );
+
   useEffect(() => {
     if (
       autoZoomDuration !== undefined &&
@@ -221,6 +231,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       selectedJob !== undefined &&
       selectedForecastId !== undefined
     ) {
+      if (selectedForecastIdProp !== selectedForecastId) {
+        setSelectedForecastIdProp(undefined);
+      }
       mlForecastService
         .getForecastDateRange(selectedJob, selectedForecastId)
         .then(resp => {
@@ -231,20 +244,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           const earliest = moment(resp.earliest || boundsMinMs);
           const latest = moment(resp.latest || boundsMaxMs);
 
-          // Set the zoom to centre on the start of the forecast range, depending
-          // on the time range of the forecast and data.
-          // const earliestDataDate = first(contextChartData).date;
-          const zoomLatestMs = Math.min(
-            earliest.valueOf() + autoZoomDuration / 2,
-            latest.valueOf()
-          );
-          const zoomEarliestMs = zoomLatestMs - autoZoomDuration;
-          const zoomState = {
-            from: moment(zoomEarliestMs).toISOString(),
-            to: moment(zoomLatestMs).toISOString(),
-          };
-          appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
-
           if (earliest.isBefore(moment(boundsMinMs)) || latest.isAfter(moment(boundsMaxMs))) {
             const earliestMs = Math.min(earliest.valueOf(), boundsMinMs);
             const latestMs = Math.max(latest.valueOf(), boundsMaxMs);
@@ -253,6 +252,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
               to: moment(latestMs).toISOString(),
             });
           }
+          setSelectedForecastIdProp(selectedForecastId);
         })
         .catch(resp => {
           // eslint-disable-next-line no-console
@@ -282,6 +282,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     return null;
   }
 
+  const zoomProp: AppStateZoom | undefined =
+    typeof selectedForecastId === 'string' && selectedForecastIdProp === undefined
+      ? undefined
+      : zoom;
+
   return (
     <TimeSeriesExplorer
       {...{
@@ -293,12 +298,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         selectedJobId,
         selectedDetectorIndex,
         selectedEntities,
-        selectedForecastId,
-        setGlobalState,
+        selectedForecastId: selectedForecastIdProp,
         tableInterval: tableInterval.val,
         tableSeverity: tableSeverity.val,
         timefilter,
-        zoom,
+        zoom: zoomProp,
       }}
     />
   );
