@@ -98,6 +98,7 @@ module.exports = function({ name, targetPath, isKibanaPlugin }) {
       try {
         await execa('yarn', ['lint:es', `./${dir}/**/*.ts*`, '--no-ignore', '--fix']);
       } catch (error) {
+        console.error(error);
         throw new Error(
           `Failure when running prettier on the generated output: ${error.all || error}`
         );

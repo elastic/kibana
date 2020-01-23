@@ -18,7 +18,6 @@
  */
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
@@ -46,7 +45,7 @@ interface <%= upperCamelCaseName %>AppDeps {
   navigation: NavigationPublicPluginStart;
 }
 
-const <%= upperCamelCaseName %>App = ({ basename, notifications, http, navigation }: <%= upperCamelCaseName %>AppDeps) => {
+export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, navigation }: <%= upperCamelCaseName %>AppDeps) => {
   // Use React hooks to manage state.
   const [timestamp, setTimestamp] = useState<string | undefined>();
 
@@ -122,22 +121,4 @@ const <%= upperCamelCaseName %>App = ({ basename, notifications, http, navigatio
       </I18nProvider>
     </Router>
   );
-};
-
-export const renderApp = (
-  { notifications, http }: CoreStart,
-  { navigation }: any,
-  { appBasePath, element }: AppMountParameters
-) => {
-  ReactDOM.render(
-    <<%= upperCamelCaseName %>App
-      basename={appBasePath}
-      notifications={notifications}
-      http={http}
-      navigation={navigation}
-    />,
-    element
-  );
-
-  return () => ReactDOM.unmountComponentAtNode(element);
 };
