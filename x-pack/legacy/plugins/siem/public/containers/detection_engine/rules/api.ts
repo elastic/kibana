@@ -22,12 +22,14 @@ import {
   RuleError,
   RuleStatusResponse,
   ImportRulesResponse,
+  PrePackagedRulesStatusResponse,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
-  DETECTION_ENGINE_RULES_STATUS,
+  DETECTION_ENGINE_RULES_STATUS_URL,
+  DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
 } from '../../../../common/constants';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 
@@ -59,7 +61,7 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
 export const fetchRules = async ({
   filterOptions = {
     filter: '',
-    sortField: 'enabled',
+    sortField: 'name',
     sortOrder: 'desc',
   },
   pagination = {
@@ -275,6 +277,7 @@ export const exportRules = async ({
  * Get Rule Status provided Rule ID
  *
  * @param id string of Rule ID's (not rule_id)
+ * @param signal AbortSignal for cancelling request
  *
  * @throws An error if response is not OK
  */
@@ -286,10 +289,35 @@ export const getRuleStatusById = async ({
   signal: AbortSignal;
 }): Promise<RuleStatusResponse> => {
   const response = await npStart.core.http.fetch<RuleStatusResponse>(
-    DETECTION_ENGINE_RULES_STATUS,
+    DETECTION_ENGINE_RULES_STATUS_URL,
     {
       method: 'GET',
       query: { ids: JSON.stringify([id]) },
+      signal,
+      asResponse: true,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
+};
+
+/**
+ * Get pre packaged rules Status
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const getPrePackagedRulesStatus = async ({
+  signal,
+}: {
+  signal: AbortSignal;
+}): Promise<PrePackagedRulesStatusResponse> => {
+  const response = await npStart.core.http.fetch<PrePackagedRulesStatusResponse>(
+    DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
+    {
+      method: 'GET',
       signal,
       asResponse: true,
     }

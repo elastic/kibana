@@ -94,6 +94,8 @@ function getEntityControlOptions(fieldValues) {
     return [];
   }
 
+  fieldValues.sort();
+
   return fieldValues.map(value => {
     return { label: value };
   });
@@ -163,7 +165,6 @@ export class TimeSeriesExplorer extends React.Component {
     selectedDetectorIndex: PropTypes.number,
     selectedEntities: PropTypes.object,
     selectedForecastId: PropTypes.string,
-    setGlobalState: PropTypes.func.isRequired,
     tableInterval: PropTypes.string,
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,

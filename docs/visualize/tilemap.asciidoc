@@ -17,36 +17,11 @@ in `kibana.yml`.
 [[coordinate-map-aggregation]]
 === Supported aggregations
 
-Coordinate maps support the metric and bucket aggregations.
+Coordinate maps support the following aggregations:
 
-[float]
-===== Metric aggregations
+* <<visualize-metric-aggregations,Metric>>
 
-The following metric aggregations are supported:
-
-{ref}/search-aggregations-metrics-valuecount-aggregation.html[Count]:: Returns a raw count of
-the elements in the index pattern. The default metrics aggregation for a coordinate map is *Count*.
-
-{ref}/search-aggregations-metrics-avg-aggregation.html[Average]:: Returns the average of a numeric
-field.
-
-{ref}/search-aggregations-metrics-sum-aggregation.html[Sum]:: Returns the total sum of a numeric
-field.
-
-{ref}/search-aggregations-metrics-min-aggregation.html[Min]:: Returns the minimum value of a
-numeric field.
-
-{ref}/search-aggregations-metrics-max-aggregation.html[Max]:: Returns the maximum value of a
-numeric field.
-
-{ref}/search-aggregations-metrics-cardinality-aggregation.html[Unique Count]:: Returns
-the number of unique values in a field.
-
-[float]
-[[coordinate-bucket-aggregation]]
-===== Bucket aggregation
-
-Coordinate maps support the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] bucket aggregation.
+* <<visualize-bucket-aggregations,Geohash Bucket aggregation>>
 
 When you deselect *Change precision on map zoom*, the *Precision* slider appears. The *Precision* slider determines the granularity of the results displayed on the map. For details on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
 

@@ -196,3 +196,9 @@ export interface RuleInfoStatus {
 }
 
 export type RuleStatusResponse = Record<string, RuleStatus>;
+
+export interface PrePackagedRulesStatusResponse {
+  rules_installed: number;
+  rules_not_installed: number;
+  rules_not_updated: number;
+}
