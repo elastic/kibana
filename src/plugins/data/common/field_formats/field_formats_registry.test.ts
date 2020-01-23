@@ -26,7 +26,7 @@ const getValueOfPrivateField = (instance: any, field: string) => instance[field]
 describe('FieldFormatRegistry', () => {
   let fieldFormatRegistry: FieldFormatRegistry;
   let defaultMap = {};
-  const getConfig = (() => {}) as GetConfigFn;
+  const getConfig = (() => defaultMap) as GetConfigFn;
 
   beforeEach(() => {
     fieldFormatRegistry = new FieldFormatRegistry();
