@@ -212,7 +212,7 @@ export const mappingsConfigurationSchema = t.partial({
   }),
 });
 
-const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.props);
+export const mappingsConfigurationSchemaKeys = Object.keys(mappingsConfigurationSchema.props);
 
 export const validateMappingsConfiguration = (
   mappingsConfiguration: any

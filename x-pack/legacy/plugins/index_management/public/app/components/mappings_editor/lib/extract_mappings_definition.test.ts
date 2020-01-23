@@ -52,6 +52,30 @@ describe('extractMappingsDefinition', () => {
     expect(extractMappingsDefinition(mappings)).toBe(null);
   });
 
+  test('should detect that one of the mapping type is invalid and filter it out', () => {
+    const mappings = {
+      type1: {
+        invalidSetting: {
+          excludes: [],
+          includes: [],
+          enabled: true,
+        },
+        _routing: {
+          required: false,
+        },
+      },
+      type2: {
+        properties: {
+          name2: {
+            type: 'keyword',
+          },
+        },
+      },
+    };
+
+    expect(extractMappingsDefinition(mappings)).toBe(mappings.type2);
+  });
+
   test('should detect that the mappings has one type and return its mapping definition', () => {
     const mappings = {
       myType: {
