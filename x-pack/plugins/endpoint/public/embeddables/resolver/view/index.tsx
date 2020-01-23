@@ -24,6 +24,20 @@ export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, Reso
   );
 });
 
+const StyledEvent = styled(Event)`
+  position: absolute;
+  left: 1em;
+  top: 1em;
+  width: 30em;
+  max-width: 50%;
+`;
+
+const StyledGraphControls = styled(GraphControls)`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+`;
+
 const Resolver = styled(
   React.memo(function Resolver({ className }: { className?: string }) {
     const { processNodePositions, edgeLineSegments } = useSelector(
@@ -34,7 +48,6 @@ const Resolver = styled(
 
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
-        <GraphControls />
         <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
           {Array.from(processNodePositions).map(([processEvent, position], index) => (
             <ProcessEventDot
@@ -53,8 +66,8 @@ const Resolver = styled(
             />
           ))}
         </div>
-        {/* Place `Event` after the map so that backdrop-filter will work */}
-        <Event />
+        <StyledEvent />
+        <StyledGraphControls />
       </div>
     );
   })

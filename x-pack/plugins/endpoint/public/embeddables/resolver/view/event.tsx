@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 import { EuiPanel, EuiBadge, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiHorizontalRule, EuiInMemoryTable } from '@elastic/eui';
@@ -13,14 +12,6 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
-
-const Panel = styled(EuiPanel)`
-  position: absolute;
-  left: 1em;
-  top: 1em;
-  width: 30em;
-  max-width: 50%;
-`;
 
 const HorizontalRule = memo(function HorizontalRule() {
   return (
@@ -41,7 +32,7 @@ const HorizontalRule = memo(function HorizontalRule() {
   );
 });
 
-export const Event = memo(function Event() {
+export const Event = memo(function Event({ className }: { className?: string }) {
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
   interface ProcessTableView {
     name: string;
@@ -118,7 +109,7 @@ export const Event = memo(function Event() {
     [formatter, handleBringIntoViewClick]
   );
   return (
-    <Panel>
+    <EuiPanel className={className}>
       <EuiTitle size="xs">
         <h4>Hey There</h4>
       </EuiTitle>
@@ -129,6 +120,6 @@ export const Event = memo(function Event() {
         pagination
         sorting
       />
-    </Panel>
+    </EuiPanel>
   );
 });

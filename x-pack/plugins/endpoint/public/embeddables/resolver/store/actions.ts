@@ -15,5 +15,4 @@ interface UserBroughtProcessIntoView {
   };
 }
 
-// TODO, Data is no longer a concern. its nested under camera and also nested under graph
 export type ResolverAction = CameraAction | DataAction | UserBroughtProcessIntoView;

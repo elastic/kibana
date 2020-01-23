@@ -116,10 +116,6 @@ export const GraphControls = styled(
     }
   )
 )`
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  z-index: 1;
   background-color: #d4d4d4;
   color: #333333;
 
