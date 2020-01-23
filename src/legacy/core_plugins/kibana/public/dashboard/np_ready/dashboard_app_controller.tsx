@@ -23,6 +23,7 @@ import React from 'react';
 import angular from 'angular';
 
 import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -71,9 +72,11 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { SavedObjectFinderProps, SavedObjectFinderUi } from '../../../../../../plugins/kibana_react/public';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../../plugins/kibana_react/public';
 import { removeQueryParam, unhashUrl } from '../../../../../../plugins/kibana_utils/public';
-import { map } from 'rxjs/operators';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
