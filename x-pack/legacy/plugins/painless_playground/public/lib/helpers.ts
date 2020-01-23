@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Response, Request, ExecutionError, JsonObject } from './types';
+import { Response, Request, ExecutionError, JsonObject } from '../common/types';
 
 export function parseJSON(text: string) {
   try {
@@ -71,7 +71,7 @@ export function formatJson(json: unknown): string {
   }
 }
 
-export function formatResponse(response: Response) {
+export function formatResponse(response: Response): string {
   if (response.result) {
     return response.result;
   } else if (response.error) {
@@ -80,7 +80,7 @@ export function formatResponse(response: Response) {
   return formatJson(response);
 }
 
-export function formatExecutionError(json: ExecutionError) {
+export function formatExecutionError(json: ExecutionError): string {
   if (json.script_stack && json.caused_by) {
     return `Unhandled Exception ${json.caused_by.type}
 
