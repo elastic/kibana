@@ -3,7 +3,7 @@
       "visualization": "7.2.0"
    }, 
    "visualization": {
-      "visState": "{\"title\":\"SMB Version by Src and Dest IP (Doughnut)\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":false,\"labels\":{\"show\":false,\"values\":false,\"last_level\":false,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"},{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"SrcIP\",\"order\":\"desc\",\"size\":20,\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Src IP\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"DestIP\",\"order\":\"desc\",\"size\":20,\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dest IP\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"significant_terms\",\"schema\":\"segment\",\"params\":{\"field\":\"Version.keyword\",\"size\":20,\"customLabel\":\"SMB Version\"}}]}", 
+      "visState": "{\"title\":\"SMB Version by Src and Dest IP (Doughnut)\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":false,\"labels\":{\"show\":false,\"values\":false,\"last_level\":false,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"},{\"accessor\":2,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"ip\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"},{\"accessor\":4,\"format\":{\"id\":\"string\"},\"params\":{},\"aggType\":\"significant_terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"SrcIP\",\"order\":\"desc\",\"size\":10,\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Src IP\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"DestIP\",\"order\":\"desc\",\"size\":10,\"orderBy\":\"1\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dest IP\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"significant_terms\",\"schema\":\"segment\",\"params\":{\"field\":\"Version.keyword\",\"size\":10,\"customLabel\":\"SMB Version\"}}]}", 
       "description": "", 
       "title": "SMB Version by Src and Dest IP (Doughnut)", 
       "uiStateJSON": "{}", 
@@ -13,17 +13,17 @@
       }
    }, 
    "type": "visualization", 
-   "updated_at": "2020-01-16T21:35:46.898Z", 
+   "updated_at": "2020-01-23T21:31:39.726Z", 
    "references": [
       {
          "type": "index-pattern", 
-         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b", 
-         "name": "kibanaSavedObjectMeta.searchSourceJSON.index"
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
       }, 
       {
          "type": "index-pattern", 
-         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b", 
-         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index", 
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
       }
    ]
 }
