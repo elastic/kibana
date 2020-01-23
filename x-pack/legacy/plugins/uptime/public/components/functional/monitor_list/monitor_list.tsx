@@ -61,8 +61,8 @@ export const MonitorListComponent = (props: Props) => {
 
   const items = data?.monitorStates?.summaries ?? [];
 
-  const nextPagePagination = data?.monitorStates?.nextPagePagination;
-  const prevPagePagination = data?.monitorStates?.prevPagePagination;
+  const nextPagePagination = data?.monitorStates?.nextPagePagination ?? '';
+  const prevPagePagination = data?.monitorStates?.prevPagePagination ?? '';
 
   const getExpandedRowMap = () => {
     return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
@@ -84,7 +84,9 @@ export const MonitorListComponent = (props: Props) => {
       field: 'state.monitor.status',
       name: labels.STATUS_COLUMN_LABEL,
       render: (status: string, { state: { timestamp, checks } }: MonitorSummary) => {
-        return <MonitorListStatusColumn status={status} timestamp={timestamp} checks={checks} />;
+        return (
+          <MonitorListStatusColumn status={status} timestamp={timestamp} checks={checks ?? []} />
+        );
       },
     },
     {

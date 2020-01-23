@@ -17,7 +17,7 @@ import { DOWN, SHORT_TIMESPAN_LOCALE, UNNAMED_LOCATION, UP } from '../../../../c
 interface MonitorListStatusColumnProps {
   status: string;
   timestamp: string;
-  checks?: Check[];
+  checks: Check[];
 }
 
 const PaddedSpan = styled.span`
