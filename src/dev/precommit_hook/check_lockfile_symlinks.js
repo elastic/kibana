@@ -29,7 +29,7 @@ function listPaths(paths) {
   return paths.map(path => ` - ${path}`).join('\n');
 }
 
-async function checkProhibitedLockfiles(log, files) {
+async function checkOnlyLockfileAtProjectRoot(files) {
   const errorPaths = [];
 
   files
@@ -143,7 +143,7 @@ async function checkMissingSymlinks(log, files) {
 
 export async function checkLockfileSymlinks(log, files) {
   const filtered = files.filter(file => !matchesAnyGlob(file.getRelativePath(), IGNORE_FILE_GLOBS));
-  await checkProhibitedLockfiles(log, filtered);
+  await checkOnlyLockfileAtProjectRoot(filtered);
   await checkSuperfluousSymlinks(log, filtered);
   await checkMissingSymlinks(log, filtered);
 }
