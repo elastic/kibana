@@ -11,14 +11,24 @@ export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };
 
-export let track: (type: UiStatsMetricType, event: string | string[], count?: number) => void;
+type TrackFn = (type: UiStatsMetricType, event: string | string[], count?: number) => void;
+
+let _track: TrackFn;
+
+export const track: TrackFn = (type, event, count) => {
+  try {
+    _track(type, event, count);
+  } catch (error) {
+    // ignore failed tracking call
+  }
+};
 
 export const initTelemetry = (usageCollection: SetupPlugins['usageCollection'], appId: string) => {
-  // @ts-ignore
-  if (track) {
-    throw new Error('Telemetry already initialized');
+  try {
+    _track = usageCollection.reportUiStats.bind(null, appId);
+  } catch (error) {
+    // ignore failed setup here, as we'll just have an inert tracker
   }
-  track = usageCollection.reportUiStats.bind(null, appId);
 };
 
 export enum TELEMETRY_EVENT {
