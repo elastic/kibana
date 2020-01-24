@@ -23,6 +23,7 @@ import moment from 'moment';
 import { isColorDark } from '@elastic/eui';
 
 import { PointSeries } from './_point_series';
+import { getHeatmapColors } from '../../.../../../../../../../plugins/charts/public';
 
 const defaults = {
   color: undefined, // todo
@@ -42,7 +43,6 @@ export class HeatmapChart extends PointSeries {
   constructor(handler, chartEl, chartData, seriesConfigArgs, deps) {
     super(handler, chartEl, chartData, seriesConfigArgs, deps);
 
-    this.colorMaps = deps.charts.colorMaps;
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
 
     this.handler.visConfig.set('legend', {
@@ -117,7 +117,7 @@ export class HeatmapChart extends PointSeries {
     for (const i in labels) {
       if (labels[i]) {
         const val = invertColors ? 1 - i / labels.length : i / labels.length;
-        colors[labels[i]] = this.colorMaps.getHeatmapColors(val, colorSchema);
+        colors[labels[i]] = getHeatmapColors(val, colorSchema);
       }
     }
     return colors;

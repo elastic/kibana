@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
 
-import { VisTypeVislibDependencies } from '../plugin';
+import { colorSchemas } from '../../../../../plugins/charts/public';
 
 export const Positions = Object.freeze({
   RIGHT: 'right' as 'right',
@@ -326,16 +326,16 @@ const getConfigCollections = () => ({
   thresholdLineStyles: getThresholdLineStyles(),
 });
 
-const getGaugeCollections = (colorMaps: VisTypeVislibDependencies['colorMaps']) => ({
+const getGaugeCollections = () => ({
   gaugeTypes: getGaugeTypes(),
   alignments: getAlignments(),
-  colorSchemas: colorMaps.colorSchemas,
+  colorSchemas,
 });
 
-const getHeatmapCollections = (colorMaps: VisTypeVislibDependencies['colorMaps']) => ({
+const getHeatmapCollections = () => ({
   legendPositions: getPositions(),
   scales: getScaleTypes(),
-  colorSchemas: colorMaps.colorSchemas,
+  colorSchemas,
 });
 
 export {

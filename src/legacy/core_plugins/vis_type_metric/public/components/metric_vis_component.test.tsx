@@ -20,14 +20,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { npSetup } from 'ui/new_platform';
-
 import { Vis } from '../legacy_imports';
-import { createMetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
+import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
 
 jest.mock('ui/new_platform');
-
-const MetricVisComponent = createMetricVisComponent(npSetup.plugins.charts.colorMaps);
 
 type Props = MetricVisComponentProps;
 

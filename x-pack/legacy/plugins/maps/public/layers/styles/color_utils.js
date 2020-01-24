@@ -5,14 +5,16 @@
  */
 
 import React from 'react';
-
-import { getLegendColors, getColor } from 'ui/vis/map/color_util';
-import { ColorGradient } from './components/color_gradient';
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';
-import { colorMaps } from '../../kibana_services';
+
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+
+import { getLegendColors, getColor } from 'ui/vis/map/color_util';
+
+import { ColorGradient } from './components/color_gradient';
 import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
+import { vislibColorMaps } from '../../../../../../../src/plugins/charts/public';
 
 const GRADIENT_INTERVALS = 8;
 
@@ -29,11 +31,11 @@ export const DEFAULT_LINE_COLORS = [
 ];
 
 function getColorRamp(colorRampName) {
-  const colorRamp = colorMaps.vislibColorMaps[colorRampName];
+  const colorRamp = vislibColorMaps[colorRampName];
   if (!colorRamp) {
     throw new Error(
       `${colorRampName} not found. Expected one of following values: ${Object.keys(
-        colorMaps.vislibColorMaps
+        vislibColorMaps
       )}`
     );
   }
@@ -75,12 +77,12 @@ export function getOrdinalColorRampStops(colorRampName, numberColors = GRADIENT_
   );
 }
 
-export const COLOR_GRADIENTS = Object.keys(colorMaps.vislibColorMaps).map(colorRampName => ({
+export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName => ({
   value: colorRampName,
   inputDisplay: <ColorGradient colorRampName={colorRampName} />,
 }));
 
-export const COLOR_RAMP_NAMES = Object.keys(colorMaps.vislibColorMaps);
+export const COLOR_RAMP_NAMES = Object.keys(vislibColorMaps);
 
 export function getLinearGradient(colorStrings) {
   const intervals = colorStrings.length;

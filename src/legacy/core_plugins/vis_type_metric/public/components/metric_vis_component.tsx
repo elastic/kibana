@@ -27,9 +27,9 @@ import { MetricVisValue } from './metric_vis_value';
 import { FieldFormat, ContentType } from '../../../../../plugins/data/public';
 import { Context } from '../metric_vis_fn';
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
+import { getHeatmapColors } from '../../../../../plugins/charts/public';
 import { VisParams, MetricVisMetric } from '../types';
 import { SchemaConfig } from '../../../visualizations/public';
-import { MetricVisDependencies } from '../plugin';
 
 export interface MetricVisComponentProps {
   visParams: VisParams;
@@ -38,170 +38,168 @@ export interface MetricVisComponentProps {
   renderComplete: () => void;
 }
 
-export function createMetricVisComponent(colorMaps: MetricVisDependencies['colorMaps']) {
-  return class MetricVisComponent extends Component<MetricVisComponentProps> {
-    private getLabels() {
-      const config = this.props.visParams.metric;
-      const isPercentageMode = config.percentageMode;
-      const colorsRange = config.colorsRange;
-      const max = last(colorsRange).to;
-      const labels: string[] = [];
+export class MetricVisComponent extends Component<MetricVisComponentProps> {
+  private getLabels() {
+    const config = this.props.visParams.metric;
+    const isPercentageMode = config.percentageMode;
+    const colorsRange = config.colorsRange;
+    const max = last(colorsRange).to;
+    const labels: string[] = [];
 
-      colorsRange.forEach((range: any) => {
-        const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
-        const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
-        labels.push(`${from} - ${to}`);
-      });
-      return labels;
+    colorsRange.forEach((range: any) => {
+      const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
+      const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
+      labels.push(`${from} - ${to}`);
+    });
+    return labels;
+  }
+
+  private getColors() {
+    const config = this.props.visParams.metric;
+    const invertColors = config.invertColors;
+    const colorSchema = config.colorSchema;
+    const colorsRange = config.colorsRange;
+    const labels = this.getLabels();
+    const colors: any = {};
+    for (let i = 0; i < labels.length; i += 1) {
+      const divider = Math.max(colorsRange.length - 1, 1);
+      const val = invertColors ? 1 - i / divider : i / divider;
+      colors[labels[i]] = getHeatmapColors(val, colorSchema);
+    }
+    return colors;
+  }
+
+  private getBucket(val: number) {
+    const config = this.props.visParams.metric;
+    let bucket = findIndex(config.colorsRange, (range: any) => {
+      return range.from <= val && range.to > val;
+    });
+
+    if (bucket === -1) {
+      if (val < config.colorsRange[0].from) bucket = 0;
+      else bucket = config.colorsRange.length - 1;
     }
 
-    private getColors() {
-      const config = this.props.visParams.metric;
-      const invertColors = config.invertColors;
-      const colorSchema = config.colorSchema;
-      const colorsRange = config.colorsRange;
-      const labels = this.getLabels();
-      const colors: any = {};
-      for (let i = 0; i < labels.length; i += 1) {
-        const divider = Math.max(colorsRange.length - 1, 1);
-        const val = invertColors ? 1 - i / divider : i / divider;
-        colors[labels[i]] = colorMaps.getHeatmapColors(val, colorSchema);
-      }
-      return colors;
+    return bucket;
+  }
+
+  private getColor(val: number, labels: string[], colors: { [label: string]: string }) {
+    const bucket = this.getBucket(val);
+    const label = labels[bucket];
+    return colors[label];
+  }
+
+  private needsLightText(bgColor: string) {
+    const colors = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(bgColor);
+    if (!colors) {
+      return false;
     }
 
-    private getBucket(val: number) {
-      const config = this.props.visParams.metric;
-      let bucket = findIndex(config.colorsRange, (range: any) => {
-        return range.from <= val && range.to > val;
-      });
+    const [red, green, blue] = colors.slice(1).map(parseInt);
+    return isColorDark(red, green, blue);
+  }
 
-      if (bucket === -1) {
-        if (val < config.colorsRange[0].from) bucket = 0;
-        else bucket = config.colorsRange.length - 1;
-      }
+  private getFormattedValue = (
+    fieldFormatter: FieldFormat,
+    value: any,
+    format: ContentType = 'text'
+  ) => {
+    if (isNaN(value)) return '-';
+    return fieldFormatter.convert(value, format);
+  };
 
-      return bucket;
+  private processTableGroups(table: KibanaDatatable) {
+    const config = this.props.visParams.metric;
+    const dimensions = this.props.visParams.dimensions;
+    const isPercentageMode = config.percentageMode;
+    const min = config.colorsRange[0].from;
+    const max = last(config.colorsRange).to;
+    const colors = this.getColors();
+    const labels = this.getLabels();
+    const metrics: MetricVisMetric[] = [];
+
+    let bucketColumnId: string;
+    let bucketFormatter: FieldFormat;
+
+    if (dimensions.bucket) {
+      bucketColumnId = table.columns[dimensions.bucket.accessor].id;
+      bucketFormatter = getFormat(dimensions.bucket.format);
     }
 
-    private getColor(val: number, labels: string[], colors: { [label: string]: string }) {
-      const bucket = this.getBucket(val);
-      const label = labels[bucket];
-      return colors[label];
-    }
+    dimensions.metrics.forEach((metric: SchemaConfig) => {
+      const columnIndex = metric.accessor;
+      const column = table?.columns[columnIndex];
+      const formatter = getFormat(metric.format);
+      table.rows.forEach((row, rowIndex) => {
+        let title = column.name;
+        let value: any = row[column.id];
+        const color = this.getColor(value, labels, colors);
 
-    private needsLightText(bgColor: string) {
-      const colors = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(bgColor);
-      if (!colors) {
-        return false;
-      }
+        if (isPercentageMode) {
+          value = (value - min) / (max - min);
+        }
+        value = this.getFormattedValue(formatter, value, 'html');
 
-      const [red, green, blue] = colors.slice(1).map(parseInt);
-      return isColorDark(red, green, blue);
-    }
+        if (bucketColumnId) {
+          const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
+          title = `${bucketValue} - ${title}`;
+        }
 
-    private getFormattedValue = (
-      fieldFormatter: FieldFormat,
-      value: any,
-      format: ContentType = 'text'
-    ) => {
-      if (isNaN(value)) return '-';
-      return fieldFormatter.convert(value, format);
-    };
+        const shouldColor = config.colorsRange.length > 1;
 
-    private processTableGroups(table: KibanaDatatable) {
-      const config = this.props.visParams.metric;
-      const dimensions = this.props.visParams.dimensions;
-      const isPercentageMode = config.percentageMode;
-      const min = config.colorsRange[0].from;
-      const max = last(config.colorsRange).to;
-      const colors = this.getColors();
-      const labels = this.getLabels();
-      const metrics: MetricVisMetric[] = [];
-
-      let bucketColumnId: string;
-      let bucketFormatter: FieldFormat;
-
-      if (dimensions.bucket) {
-        bucketColumnId = table.columns[dimensions.bucket.accessor].id;
-        bucketFormatter = getFormat(dimensions.bucket.format);
-      }
-
-      dimensions.metrics.forEach((metric: SchemaConfig) => {
-        const columnIndex = metric.accessor;
-        const column = table?.columns[columnIndex];
-        const formatter = getFormat(metric.format);
-        table.rows.forEach((row, rowIndex) => {
-          let title = column.name;
-          let value: any = row[column.id];
-          const color = this.getColor(value, labels, colors);
-
-          if (isPercentageMode) {
-            value = (value - min) / (max - min);
-          }
-          value = this.getFormattedValue(formatter, value, 'html');
-
-          if (bucketColumnId) {
-            const bucketValue = this.getFormattedValue(bucketFormatter, row[bucketColumnId]);
-            title = `${bucketValue} - ${title}`;
-          }
-
-          const shouldColor = config.colorsRange.length > 1;
-
-          metrics.push({
-            label: title,
-            value,
-            color: shouldColor && config.style.labelColor ? color : undefined,
-            bgColor: shouldColor && config.style.bgColor ? color : undefined,
-            lightText: shouldColor && config.style.bgColor && this.needsLightText(color),
-            rowIndex,
-          });
+        metrics.push({
+          label: title,
+          value,
+          color: shouldColor && config.style.labelColor ? color : undefined,
+          bgColor: shouldColor && config.style.bgColor ? color : undefined,
+          lightText: shouldColor && config.style.bgColor && this.needsLightText(color),
+          rowIndex,
         });
       });
+    });
 
-      return metrics;
+    return metrics;
+  }
+
+  private filterBucket = (metric: MetricVisMetric) => {
+    const dimensions = this.props.visParams.dimensions;
+    if (!dimensions.bucket) {
+      return;
     }
-
-    private filterBucket = (metric: MetricVisMetric) => {
-      const dimensions = this.props.visParams.dimensions;
-      if (!dimensions.bucket) {
-        return;
-      }
-      const table = this.props.visData;
-      this.props.vis.API.events.filter({
-        table,
-        column: dimensions.bucket.accessor,
-        row: metric.rowIndex,
-      });
-    };
-
-    private renderMetric = (metric: MetricVisMetric, index: number) => {
-      return (
-        <MetricVisValue
-          key={index}
-          metric={metric}
-          fontSize={this.props.visParams.metric.style.fontSize}
-          onFilter={this.props.visParams.dimensions.bucket ? this.filterBucket : undefined}
-          showLabel={this.props.visParams.metric.labels.show}
-        />
-      );
-    };
-
-    componentDidMount() {
-      this.props.renderComplete();
-    }
-
-    componentDidUpdate() {
-      this.props.renderComplete();
-    }
-
-    render() {
-      let metricsHtml;
-      if (this.props.visData) {
-        const metrics = this.processTableGroups(this.props.visData);
-        metricsHtml = metrics.map(this.renderMetric);
-      }
-      return <div className="mtrVis">{metricsHtml}</div>;
-    }
+    const table = this.props.visData;
+    this.props.vis.API.events.filter({
+      table,
+      column: dimensions.bucket.accessor,
+      row: metric.rowIndex,
+    });
   };
+
+  private renderMetric = (metric: MetricVisMetric, index: number) => {
+    return (
+      <MetricVisValue
+        key={index}
+        metric={metric}
+        fontSize={this.props.visParams.metric.style.fontSize}
+        onFilter={this.props.visParams.dimensions.bucket ? this.filterBucket : undefined}
+        showLabel={this.props.visParams.metric.labels.show}
+      />
+    );
+  };
+
+  componentDidMount() {
+    this.props.renderComplete();
+  }
+
+  componentDidUpdate() {
+    this.props.renderComplete();
+  }
+
+  render() {
+    let metricsHtml;
+    if (this.props.visData) {
+      const metrics = this.processTableGroups(this.props.visData);
+      metricsHtml = metrics.map(this.renderMetric);
+    }
+    return <div className="mtrVis">{metricsHtml}</div>;
+  }
 }

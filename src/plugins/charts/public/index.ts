@@ -24,4 +24,4 @@ export const plugin = () => new ChartsPlugin();
 export type ChartsPluginSetup = ReturnType<ChartsPlugin['setup']>;
 export type ChartsPluginStart = ReturnType<ChartsPlugin['start']>;
 
-export { ColorSchemas, ColorSchema } from './services/color_maps';
+export * from './static';

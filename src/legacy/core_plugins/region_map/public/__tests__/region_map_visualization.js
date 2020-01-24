@@ -40,9 +40,6 @@ import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
-// TODO: Remove when converted to jest
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { colorMapsService as colorMaps } from '../../../../../plugins/charts/public/services';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
@@ -108,7 +105,6 @@ describe('RegionMapsVisualizationTests', function() {
         $injector,
         regionmapsConfig,
         uiSettings,
-        colorMaps,
       };
 
       if (!visRegComplete) {

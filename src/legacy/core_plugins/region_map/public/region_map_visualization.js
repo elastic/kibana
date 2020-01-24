@@ -23,16 +23,12 @@ import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { toastNotifications } from 'ui/notify';
 
 import { TileMapTooltipFormatter } from './tooltip_formatter';
+import { truncatedColorMaps } from '../../../../plugins/charts/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 
-export function createRegionMapVisualization({
-  serviceSettings,
-  $injector,
-  uiSettings,
-  colorMaps,
-}) {
+export function createRegionMapVisualization({ serviceSettings, $injector, uiSettings }) {
   const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
   const tooltipFormatter = new TileMapTooltipFormatter($injector);
 
@@ -116,7 +112,7 @@ export function createRegionMapVisualization({
       const metricFieldFormatter = getFormat(this._params.metric.format);
 
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
-      this._choroplethLayer.setColorRamp(colorMaps.truncatedColorMaps[visParams.colorSchema].value);
+      this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
       this._choroplethLayer.setTooltipFormatter(
         tooltipFormatter,
@@ -153,8 +149,7 @@ export function createRegionMapVisualization({
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          serviceSettings,
-          colorMaps
+          serviceSettings
         );
       } else {
         this._choroplethLayer = new ChoroplethLayer(
@@ -164,8 +159,7 @@ export function createRegionMapVisualization({
           showAllData,
           this._params.selectedLayer.meta,
           this._params.selectedLayer,
-          serviceSettings,
-          colorMaps
+          serviceSettings
         );
       }
 

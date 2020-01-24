@@ -136,13 +136,6 @@ export const npSetup = {
       },
     },
     charts: {
-      colorMaps: {
-        getHeatmapColors: sinon.fake(),
-        vislibColorMaps: {},
-        colorSchemas: [],
-        truncatedColorMaps: {},
-        truncatedColorSchemas: [],
-      },
       theme: {
         chartsTheme$: mockObservable,
         useChartsTheme: sinon.fake(),
@@ -293,13 +286,6 @@ export const npStart = {
       },
     },
     charts: {
-      colorMaps: {
-        getHeatmapColors: sinon.fake(),
-        vislibColorMaps: {},
-        colorSchemas: [],
-        truncatedColorMaps: {},
-        truncatedColorSchemas: [],
-      },
       theme: {
         chartsTheme$: mockObservable,
         useChartsTheme: sinon.fake(),

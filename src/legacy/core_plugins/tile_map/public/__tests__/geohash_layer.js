@@ -25,9 +25,6 @@ import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 // import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 import GeoHashSampleData from './dummy_es_response.json';
-// TODO: Mock this plugin in jest tests
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { colorMapsService } from '../../../../../plugins/charts/public/services';
 
 describe('geohash_layer', function() {
   let domNode;
@@ -105,8 +102,7 @@ describe('geohash_layer', function() {
           GeoHashSampleData.meta,
           geohashGridOptions,
           kibanaMap.getZoomLevel(),
-          kibanaMap,
-          colorMapsService
+          kibanaMap
         );
         kibanaMap.addLayer(geohashLayer);
 
@@ -128,8 +124,7 @@ describe('geohash_layer', function() {
         {},
         { mapType: 'Scaled Circle Markers', colorRamp: 'Yellow to Red' },
         kibanaMap.getZoomLevel(),
-        kibanaMap,
-        colorMapsService
+        kibanaMap
       );
       kibanaMap.addLayer(geohashLayer);
 

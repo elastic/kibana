@@ -32,10 +32,6 @@ export interface MetricVisPluginSetupDependencies {
   charts: ChartsPluginSetup;
 }
 
-export interface MetricVisDependencies {
-  colorMaps: ChartsPluginSetup['colorMaps'];
-}
-
 /** @internal */
 export class MetricVisPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext;
@@ -48,14 +44,8 @@ export class MetricVisPlugin implements Plugin<void, void> {
     core: CoreSetup,
     { expressions, visualizations, charts }: MetricVisPluginSetupDependencies
   ) {
-    const visualizationDependencies: Readonly<MetricVisDependencies> = {
-      colorMaps: charts.colorMaps,
-    };
-
-    expressions.registerFunction(() => createMetricVisFn(visualizationDependencies));
-    visualizations.types.createReactVisualization(
-      createMetricVisTypeDefinition(visualizationDependencies)
-    );
+    expressions.registerFunction(createMetricVisFn);
+    visualizations.types.createReactVisualization(createMetricVisTypeDefinition());
   }
 
   public start(core: CoreStart) {

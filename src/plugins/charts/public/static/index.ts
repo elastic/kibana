@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { ColorsService } from './colors';
-export { ThemeService } from './theme';
+export * from './color_maps';

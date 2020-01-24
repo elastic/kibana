@@ -2,9 +2,7 @@
 
 The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations.
 
-## ColorMaps
-
-The `colorMaps` service provides access to shared color palletes.
+## Static methods
 
 ### `vislibColorMaps`
 

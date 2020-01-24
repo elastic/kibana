@@ -44,9 +44,12 @@ interface RenderValue {
 
 type Return = Promise<Render<RenderValue>>;
 
-export const createVisTypeVislibFn = (
-  deps: VisTypeVislibDependencies
-) => (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const createVisTypeVislibFn = (deps: VisTypeVislibDependencies) => (): ExpressionFunction<
+  typeof name,
+  Context,
+  Arguments,
+  Return
+> => ({
   name: 'vislib',
   type: 'render',
   context: {

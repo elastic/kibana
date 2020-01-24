@@ -24,6 +24,8 @@ import $ from 'jquery';
 import { EventEmitter } from 'events';
 import * as colorUtil from 'ui/vis/map/color_util';
 
+import { truncatedColorMaps } from '../../../../../plugins/charts/public';
+
 export class ScaledCirclesMarkers extends EventEmitter {
   constructor(
     featureCollection,
@@ -31,8 +33,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     options,
     targetZoom,
     kibanaMap,
-    metricAgg,
-    colorMaps
+    metricAgg
   ) {
     super();
     this._featureCollection = featureCollection;
@@ -40,7 +41,6 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     this._zoom = targetZoom;
     this._metricAgg = metricAgg;
-    this._colorMaps = colorMaps;
 
     this._valueFormatter =
       options.valueFormatter ||
@@ -225,7 +225,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
   }
 
   getLegendColors() {
-    const colorRamp = _.get(this._colorMaps.truncatedColorMaps[this._colorRamp], 'value');
+    const colorRamp = _.get(truncatedColorMaps[this._colorRamp], 'value');
     return colorUtil.getLegendColors(colorRamp);
   }
 }

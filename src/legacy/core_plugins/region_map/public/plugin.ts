@@ -32,19 +32,16 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
 /** @private */
 interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
   uiSettings: IUiSettingsClient;
-  colorMaps: ChartsPluginSetup['colorMaps'];
 }
 
 /** @internal */
 export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  charts: ChartsPluginSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
 
@@ -64,10 +61,9 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, charts, __LEGACY }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, __LEGACY }: RegionMapPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
-      colorMaps: charts.colorMaps,
       uiSettings: core.uiSettings,
       ...(await __LEGACY.setup()),
     };

@@ -22,7 +22,7 @@ import { getHeatmapColors } from './heatmap_color';
 import { truncatedColorMaps, truncatedColorSchemas } from './truncated_color_maps';
 
 // Note: Using actual values due to existing test dependencies
-export const colorMapsServiceMock = {
+export const colorMapsMock = {
   getHeatmapColors: jest.fn(getHeatmapColors),
   vislibColorMaps,
   colorSchemas,

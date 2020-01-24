@@ -29,7 +29,6 @@ import { Vis } from '../../../vis';
 
 // TODO: Remove when converted to jest mocks
 import {
-  colorMapsService as colorMaps,
   ColorsService,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../plugins/charts/public/services';
@@ -74,7 +73,6 @@ const getDeps = () => {
     uiSettings,
     charts: {
       colors,
-      colorMaps,
     },
     vislibSeriesResponseHandlerProvider,
     vislibSlicesResponseHandlerProvider,

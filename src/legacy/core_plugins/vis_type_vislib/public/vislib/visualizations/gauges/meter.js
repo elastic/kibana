@@ -20,6 +20,8 @@
 import d3 from 'd3';
 import _ from 'lodash';
 
+import { getHeatmapColors } from '../../../../../../../plugins/charts/public';
+
 const arcAngles = {
   angleFactor: 0.75,
   maxAngle: 2 * Math.PI * 1.3,
@@ -56,9 +58,8 @@ const defaultConfig = {
 };
 
 export class MeterGauge {
-  constructor(gaugeChart, { charts }) {
+  constructor(gaugeChart) {
     this.gaugeChart = gaugeChart;
-    this.colorMaps = charts.colorMaps;
     this.gaugeConfig = gaugeChart.gaugeConfig;
     this.gaugeConfig = _.defaultsDeep(this.gaugeConfig, defaultConfig);
 
@@ -99,7 +100,7 @@ export class MeterGauge {
     for (let i = 0; i < labels.length; i += 1) {
       const divider = Math.max(colorsRange.length - 1, 1);
       const val = invertColors ? 1 - i / divider : i / divider;
-      colors[labels[i]] = this.colorMaps.getHeatmapColors(val, colorSchema);
+      colors[labels[i]] = getHeatmapColors(val, colorSchema);
     }
     return colors;
   }

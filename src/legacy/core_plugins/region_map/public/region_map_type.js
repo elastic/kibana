@@ -23,12 +23,13 @@ import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { Status } from '../../visualizations/public';
 import { RegionMapOptions } from './components/region_map_options';
+import { truncatedColorSchemas } from '../../../../plugins/charts/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { ORIGIN } from '../../tile_map/common/origin';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const { uiSettings, regionmapsConfig, serviceSettings, colorMaps } = dependencies;
+  const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
 
   return {
@@ -59,7 +60,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
     editorConfig: {
       optionsTemplate: props => <RegionMapOptions {...props} serviceSettings={serviceSettings} />,
       collections: {
-        colorSchemas: colorMaps.truncatedColorSchemas,
+        colorSchemas: truncatedColorSchemas,
         vectorLayers: [],
         tmsLayers: [],
       },

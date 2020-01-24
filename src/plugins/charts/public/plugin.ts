@@ -19,20 +19,13 @@
 
 import { Plugin, CoreSetup } from 'kibana/public';
 
-import { colorMapsService, ThemeService, ColorsService } from './services';
-
-/** @public */
-export type ColorMapsSetup = typeof colorMapsService;
-
-/** @public */
-export type ColorMapsStart = ColorMapsSetup;
+import { ThemeService, ColorsService } from './services';
 
 export type Theme = Omit<ThemeService, 'init'>;
 export type Color = Omit<ColorsService, 'init'>;
 
 /** @public */
 export interface ChartsPluginSetup {
-  colorMaps: ColorMapsSetup;
   colors: Color;
   theme: Theme;
 }
@@ -50,7 +43,6 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
     this.colorsService.init(uiSettings);
 
     return {
-      colorMaps: colorMapsService,
       colors: this.colorsService,
       theme: this.themeService,
     };
@@ -58,7 +50,6 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
 
   public start(): ChartsPluginStart {
     return {
-      colorMaps: colorMapsService,
       colors: this.colorsService,
       theme: this.themeService,
     };

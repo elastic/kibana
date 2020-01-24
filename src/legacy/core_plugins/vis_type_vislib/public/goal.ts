@@ -75,7 +75,7 @@ export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
     },
   },
   editorConfig: {
-    collections: getGaugeCollections(deps.charts.colorMaps),
+    collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,
     schemas: new Schemas([
       {

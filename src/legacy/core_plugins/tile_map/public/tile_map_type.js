@@ -28,10 +28,11 @@ import { Status } from '../../visualizations/public';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
 import { supportsCssFilters } from './css_filters';
+import { truncatedColorSchemas } from '../../../../plugins/charts/public';
 
 export function createTileMapTypeDefinition(dependencies) {
   const CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-  const { uiSettings, serviceSettings, colorMaps } = dependencies;
+  const { uiSettings, serviceSettings } = dependencies;
 
   return {
     name: 'tile_map',
@@ -62,7 +63,7 @@ export function createTileMapTypeDefinition(dependencies) {
     responseHandler: convertToGeoJson,
     editorConfig: {
       collections: {
-        colorSchemas: colorMaps.truncatedColorSchemas,
+        colorSchemas: truncatedColorSchemas,
         legendPositions: [
           {
             value: 'bottomleft',
