@@ -14,6 +14,7 @@ import {
   transformField,
   findFieldByPath,
   IndexPatternField,
+  createFieldFormatMap,
 } from './install';
 import { Fields, Field } from '../../fields/field';
 
@@ -226,6 +227,72 @@ describe('creating index patterns from yaml fields', () => {
     tests.forEach(test => {
       const res = test.fields.map(transformField);
       expect(res[0][test.attr]).toBe(test.expect);
+    });
+  });
+
+  describe('createFieldFormatMap creates correct map based on inputs', () => {
+    test('field with no format or pattern have empty fieldFormatMap', () => {
+      const fieldsToFormat = [{ name: 'fieldName', input_format: 'inputFormatVal' }];
+      const fieldFormatMap = createFieldFormatMap(fieldsToFormat);
+      expect(fieldFormatMap).toEqual({});
+    });
+    test('field with pattern and no format creates fieldFormatMap with no id', () => {
+      const fieldsToFormat = [
+        { name: 'fieldName', pattern: 'patternVal', input_format: 'inputFormatVal' },
+      ];
+      const fieldFormatMap = createFieldFormatMap(fieldsToFormat);
+      const expectedFieldFormatMap = {
+        fieldName: {
+          params: {
+            pattern: 'patternVal',
+            input_format: 'inputFormatVal',
+          },
+        },
+      };
+      expect(fieldFormatMap).toEqual(expectedFieldFormatMap);
+    });
+
+    test('field with format and params creates fieldFormatMap with id', () => {
+      const fieldsToFormat = [
+        {
+          name: 'fieldName',
+          format: 'formatVal',
+          pattern: 'patternVal',
+          input_format: 'inputFormatVal',
+        },
+      ];
+      const fieldFormatMap = createFieldFormatMap(fieldsToFormat);
+      const expectedFieldFormatMap = {
+        fieldName: {
+          id: 'formatVal',
+          params: {
+            pattern: 'patternVal',
+            input_format: 'inputFormatVal',
+          },
+        },
+      };
+      expect(fieldFormatMap).toEqual(expectedFieldFormatMap);
+    });
+
+    test('all variations and all the params get passed through', () => {
+      const fieldsToFormat = [
+        { name: 'fieldPattern', pattern: 'patternVal' },
+        { name: 'fieldFormat', format: 'formatVal' },
+        { name: 'fieldFormatWithParam', format: 'formatVal', output_precision: 2 },
+        { name: 'fieldFormatAndPattern', format: 'formatVal', pattern: 'patternVal' },
+        {
+          name: 'fieldFormatAndAllParams',
+          format: 'formatVal',
+          pattern: 'pattenVal',
+          input_format: 'inputFormatVal',
+          output_format: 'outputFormalVal',
+          output_precision: 3,
+          label_template: 'labelTemplateVal',
+          openLinkInCurrentTab: true,
+        },
+      ];
+      const fieldFormatMap = createFieldFormatMap(fieldsToFormat);
+      expect(fieldFormatMap).toMatchSnapshot('createFieldFormatMap');
     });
   });
 });

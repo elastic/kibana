@@ -11,21 +11,32 @@ import { getAssetsData } from '../../packages/assets';
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39
 export interface Field {
   name: string;
-  path?: string;
   type?: string;
-  count?: number;
-  index?: boolean;
-  analyzed?: boolean;
-  required?: boolean;
   description?: string;
+  format?: string;
   fields?: Fields;
+  enabled?: boolean;
+  path?: string;
+  index?: boolean;
+  required?: boolean;
   multi_fields?: Fields;
+  doc_values?: boolean;
+
+  // Kibana specific
+  analyzed?: boolean;
+  count?: number;
   searchable?: boolean;
   aggregatable?: boolean;
-  doc_values?: boolean;
-  enabled?: boolean;
-  readFromDocValues?: boolean;
   script?: string;
+  readFromDocValues?: boolean;
+
+  // Kibana field format params
+  pattern?: string;
+  input_format?: string;
+  output_format?: string;
+  output_precision?: number;
+  label_template?: string;
+  openLinkInCurrentTab?: boolean;
 }
 
 export type Fields = Field[];

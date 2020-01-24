@@ -1,5 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`creating index patterns from yaml fields createFieldFormatMap creates correct map based on inputs all variations and all the params get passed through: createFieldFormatMap 1`] = `
+{
+  "fieldPattern": {
+    "params": {
+      "pattern": "patternVal"
+    }
+  },
+  "fieldFormat": {
+    "id": "formatVal"
+  },
+  "fieldFormatWithParam": {
+    "id": "formatVal",
+    "params": {
+      "output_precision": 2
+    }
+  },
+  "fieldFormatAndPattern": {
+    "id": "formatVal",
+    "params": {
+      "pattern": "patternVal"
+    }
+  },
+  "fieldFormatAndAllParams": {
+    "id": "formatVal",
+    "params": {
+      "pattern": "pattenVal",
+      "input_format": "inputFormatVal",
+      "output_format": "outputFormalVal",
+      "output_precision": 3,
+      "label_template": "labelTemplateVal",
+      "openLinkInCurrentTab": true
+    }
+  }
+}
+`;
+
 exports[`creating index patterns from yaml fields dedupFields function remove duplicated fields when parsing multiple files: dedupeFields 1`] = `
 [
   {
