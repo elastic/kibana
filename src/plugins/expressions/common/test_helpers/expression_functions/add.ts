@@ -17,11 +17,28 @@
  * under the License.
  */
 
-export * from './types';
-export * from './parser';
-export * from './expression_types';
-export * from './expression_functions';
-export * from './executor';
-export * from './execution';
-export * from './fonts';
-export * from './util';
+import { ExpressionFunctionDefinition } from '../../expression_functions';
+import { ExpressionValueNum } from '../../expression_types';
+
+export const add: ExpressionFunctionDefinition<
+  'add',
+  ExpressionValueNum,
+  { val: number },
+  ExpressionValueNum
+> = {
+  name: 'add',
+  help: 'This function adds a number to input',
+  args: {
+    val: {
+      default: 0,
+      help: 'Number to add to input',
+      types: ['number'],
+    },
+  },
+  fn: ({ value }, args, context) => {
+    return {
+      type: 'num',
+      value: value + args.val,
+    };
+  },
+};

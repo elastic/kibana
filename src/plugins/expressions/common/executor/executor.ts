@@ -33,6 +33,8 @@ import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { getType } from '../expression_types';
 import { ExpressionAstExpression, ExpressionAstNode, parseExpression } from '../parser';
+import { typeSpecs } from '../expression_types/specs';
+import { functionSpecs } from '../expression_functions/specs';
 
 export class TypesRegistry implements IRegistry<ExpressionType> {
   constructor(private readonly executor: Executor) {}
@@ -79,6 +81,13 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 }
 
 export class Executor {
+  static createWithDefaults(state?: ExecutorState): Executor {
+    const executor = new Executor(state);
+    for (const type of typeSpecs) executor.registerType(type);
+    for (const func of functionSpecs) executor.registerFunction(func);
+    return executor;
+  }
+
   public readonly state: ExecutorContainer;
 
   /**

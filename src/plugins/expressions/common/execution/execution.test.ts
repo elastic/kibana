@@ -17,16 +17,12 @@
  * under the License.
  */
 
-import { Executor } from '../executor';
-import { typeSpecs } from '../expression_types';
-import { functionSpecs } from '../expression_functions';
 import { Execution } from './execution';
 import { parseExpression } from '../parser';
+import { createUnitTestExecutor } from '../test_helpers';
 
 const createExecution = (expression: string = 'foo bar=123') => {
-  const executor = new Executor();
-  for (const type of typeSpecs) executor.registerType(type);
-  for (const func of functionSpecs) executor.registerFunction(func);
+  const executor = createUnitTestExecutor();
   const execution = new Execution({
     executor,
     ast: parseExpression(expression),
@@ -72,5 +68,20 @@ describe('Execution', () => {
     /* eslint-disable no-console */
     console.log = console$log;
     /* eslint-enable no-console */
+  });
+
+  test('executes a chain of multiple "add" functions', async () => {
+    const execution = createExecution('add val=1 | add val=2 | add val=3');
+    execution.start({
+      type: 'num',
+      value: -1,
+    });
+
+    const result = await execution.result;
+
+    expect(result).toEqual({
+      type: 'num',
+      value: 5,
+    });
   });
 });

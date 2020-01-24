@@ -17,11 +17,11 @@
  * under the License.
  */
 
-export * from './types';
-export * from './parser';
-export * from './expression_types';
-export * from './expression_functions';
-export * from './executor';
-export * from './execution';
-export * from './fonts';
-export * from './util';
+import { Executor } from '../executor';
+import { add } from './expression_functions/add';
+
+export const createUnitTestExecutor = () => {
+  const executor = Executor.createWithDefaults();
+  executor.registerFunction(add);
+  return executor;
+};
