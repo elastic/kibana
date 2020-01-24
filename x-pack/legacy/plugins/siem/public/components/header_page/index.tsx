@@ -63,6 +63,12 @@ const Badge = styled(EuiBadge)`
 `;
 Badge.displayName = 'Badge';
 
+const StyledEuiBetaBadge = styled(EuiBetaBadge)`
+  vertical-align: middle;
+`;
+
+StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
+
 interface BackOptions {
   href: LinkIconProps['href'];
   text: LinkIconProps['children'];
@@ -89,71 +95,70 @@ export interface HeaderPageProps extends HeaderProps {
   title: string | React.ReactNode;
 }
 
-export const HeaderPage = React.memo<HeaderPageProps>(
-  ({
-    backOptions,
-    badgeOptions,
-    border,
-    children,
-    draggableArguments,
-    isLoading,
-    subtitle,
-    subtitle2,
-    title,
-    ...rest
-  }) => (
-    <Header border={border} {...rest}>
-      <EuiFlexGroup alignItems="center">
-        <FlexItem>
-          {backOptions && (
-            <LinkBack>
-              <LinkIcon href={backOptions.href} iconType="arrowLeft">
-                {backOptions.text}
-              </LinkIcon>
-            </LinkBack>
-          )}
-
-          <EuiTitle size="l">
-            <h1 data-test-subj="header-page-title">
-              {!draggableArguments ? (
-                title
-              ) : (
-                <DefaultDraggable
-                  data-test-subj="header-page-draggable"
-                  id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
-                  field={draggableArguments.field}
-                  value={`${draggableArguments.value}`}
-                />
-              )}
-              {badgeOptions && (
-                <>
-                  {' '}
-                  {badgeOptions.beta ? (
-                    <EuiBetaBadge
-                      label={badgeOptions.text}
-                      tooltipContent={badgeOptions.tooltip}
-                      tooltipPosition="bottom"
-                    />
-                  ) : (
-                    <Badge color="hollow">{badgeOptions.text}</Badge>
-                  )}
-                </>
-              )}
-            </h1>
-          </EuiTitle>
-
-          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
-          {border && isLoading && <EuiProgress size="xs" color="accent" />}
-        </FlexItem>
-
-        {children && (
-          <FlexItem data-test-subj="header-page-supplements" grow={false}>
-            {children}
-          </FlexItem>
+const HeaderPageComponent: React.FC<HeaderPageProps> = ({
+  backOptions,
+  badgeOptions,
+  border,
+  children,
+  draggableArguments,
+  isLoading,
+  subtitle,
+  subtitle2,
+  title,
+  ...rest
+}) => (
+  <Header border={border} {...rest}>
+    <EuiFlexGroup alignItems="center">
+      <FlexItem>
+        {backOptions && (
+          <LinkBack>
+            <LinkIcon href={backOptions.href} iconType="arrowLeft">
+              {backOptions.text}
+            </LinkIcon>
+          </LinkBack>
         )}
-      </EuiFlexGroup>
-    </Header>
-  )
+
+        <EuiTitle size="l">
+          <h1 data-test-subj="header-page-title">
+            {!draggableArguments ? (
+              title
+            ) : (
+              <DefaultDraggable
+                data-test-subj="header-page-draggable"
+                id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
+                field={draggableArguments.field}
+                value={`${draggableArguments.value}`}
+              />
+            )}
+            {badgeOptions && (
+              <>
+                {' '}
+                {badgeOptions.beta ? (
+                  <StyledEuiBetaBadge
+                    label={badgeOptions.text}
+                    tooltipContent={badgeOptions.tooltip}
+                    tooltipPosition="bottom"
+                  />
+                ) : (
+                  <Badge color="hollow">{badgeOptions.text}</Badge>
+                )}
+              </>
+            )}
+          </h1>
+        </EuiTitle>
+
+        {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
+        {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+        {border && isLoading && <EuiProgress size="xs" color="accent" />}
+      </FlexItem>
+
+      {children && (
+        <FlexItem data-test-subj="header-page-supplements" grow={false}>
+          {children}
+        </FlexItem>
+      )}
+    </EuiFlexGroup>
+  </Header>
 );
-HeaderPage.displayName = 'HeaderPage';
+
+export const HeaderPage = React.memo(HeaderPageComponent);

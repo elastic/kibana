@@ -55,7 +55,7 @@ import {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
+import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
@@ -77,7 +77,17 @@ import {
 } from './context';
 
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly } from '../utils';
+export { RecursiveReadonly, DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  AppCategory,
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+  ImageValidation,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
+} from '../types';
 
 export {
   ApplicationSetup,
@@ -232,6 +242,8 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
+  /** {@link FatalErrorsStart} */
+  fatalErrors: FatalErrorsStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -302,6 +314,7 @@ export {
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,
+  FatalErrorsStart,
   HttpSetup,
   HttpStart,
   I18nStart,

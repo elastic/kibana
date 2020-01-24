@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ISearchStart } from 'src/plugins/data/public';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { SearchRequest, SearchResponse } from '../types';
 
@@ -35,7 +36,7 @@ export interface FetchOptions {
 }
 
 export interface FetchHandlers {
-  es: ApiCaller;
+  searchService: ISearchStart;
   config: IUiSettingsClient;
   esShardTimeout: number;
 }
