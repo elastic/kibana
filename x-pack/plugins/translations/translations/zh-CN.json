@@ -11406,7 +11406,6 @@
     "xpack.siem.overview.startedText.docsLinkText": "文档",
     "xpack.siem.overview.startedText.siemSolutionLinkText": "SIEM 解决方案",
     "xpack.siem.overview.startedTitle": "入门",
-    "xpack.siem.overview.winlogbeatTitle": "Winlogbeat",
     "xpack.siem.pages.fourohfour.noContentFoundDescription": "未找到任何内容",
     "xpack.siem.paginatedTable.rowsButtonLabel": "每页行数",
     "xpack.siem.paginatedTable.showingSubtitle": "显示",
