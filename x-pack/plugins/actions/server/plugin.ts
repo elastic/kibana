@@ -62,6 +62,7 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   execute(options: ExecuteOptions): Promise<void>;
+  getActionsClientWithRequest(request: KibanaRequest): Promise<ActionsClient>;
 }
 
 export interface ActionsPluginsSetup {
@@ -171,7 +172,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    const { logger, actionExecutor, actionTypeRegistry, taskRunnerFactory } = this;
+    const {
+      logger,
+      actionExecutor,
+      actionTypeRegistry,
+      taskRunnerFactory,
+      kibanaIndex,
+      adminClient,
+    } = this;
 
     actionExecutor!.initialize({
       logger,
@@ -194,6 +202,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
         getBasePath: this.getBasePath,
       }),
+      // Ability to get an actions client from legacy code
+      async getActionsClientWithRequest(request: KibanaRequest) {
+        return new ActionsClient({
+          savedObjectsClient: core.savedObjects.getScopedClient(request),
+          actionTypeRegistry: actionTypeRegistry!,
+          defaultKibanaIndex: await kibanaIndex,
+          scopedClusterClient: adminClient!.asScoped(request),
+        });
+      },
     };
   }
 

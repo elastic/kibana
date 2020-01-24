@@ -36,7 +36,7 @@ const RulesPageComponent: React.FC = () => {
     isSignalIndexExists,
     isAuthenticated,
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
   } = useUserInfo();
   const {
@@ -49,7 +49,7 @@ const RulesPageComponent: React.FC = () => {
     rulesNotUpdated,
   } = usePrePackagedRules({
     canUserCRUD,
-    hasIndexManage,
+    hasIndexWrite,
     hasManageApiKey,
     isSignalIndexExists,
     isAuthenticated,

@@ -174,7 +174,7 @@ const updateAliasesReferences = (
     );
   }
 
-  const targetId = field.source.path!;
+  const targetId = field.source.path! as string;
 
   if (!updatedAliases[targetId]) {
     updatedAliases[targetId] = [];
@@ -420,7 +420,7 @@ export const reducer = (state: State, action: Action): State => {
         /**
          * If we delete an alias field, we need to remove its id from the reference Array
          */
-        const targetId = field.source.path;
+        const targetId = field.source.path as string;
         updatedFields.aliases = {
           ...updatedFields.aliases,
           [targetId]: updatedFields.aliases[targetId].filter(aliasId => aliasId !== id),
@@ -455,7 +455,7 @@ export const reducer = (state: State, action: Action): State => {
         updatedFields.aliases = updateAliasesReferences(
           newField,
           updatedFields,
-          previousField.source.path
+          previousField.source.path as string
         );
       }
 
@@ -489,9 +489,9 @@ export const reducer = (state: State, action: Action): State => {
           // We need to remove its reference from our state.aliases map
           updatedFields.aliases = {
             ...updatedFields.aliases,
-            [previousField.source.path]: updatedFields.aliases[previousField.source.path].filter(
-              aliasId => aliasId !== fieldToEdit
-            ),
+            [previousField.source.path as string]: updatedFields.aliases[
+              previousField.source.path as string
+            ].filter(aliasId => aliasId !== fieldToEdit),
           };
         } else {
           const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
