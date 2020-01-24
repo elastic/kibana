@@ -21,6 +21,7 @@ export * from './types';
 export * from './parser';
 export * from './expression_types';
 export * from './expression_functions';
+export * from './expression_renderers';
 export * from './executor';
 export * from './execution';
 export * from './fonts';

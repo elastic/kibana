@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../../common/types';
+import { ExpressionFunctionDefinition } from '../../common';
 import { KibanaContext } from '../../common/expression_types';
 import { savedObjects } from '../services';
 

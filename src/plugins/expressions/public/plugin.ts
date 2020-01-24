@@ -19,8 +19,15 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
-import { Executor, RenderFunctionsRegistry, FunctionsRegistry, TypesRegistry } from '../common';
+import {
+  Executor,
+  ExpressionRendererRegistry,
+  FunctionsRegistry,
+  serializeProvider,
+  TypesRegistry,
+} from '../common';
 import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
 import {
   setCoreStart,
   setInspector,
@@ -28,37 +35,13 @@ import {
   setRenderersRegistry,
   setNotifications,
 } from './services';
-import { clog as clogFunction } from './functions/clog';
-import { font as fontFunction } from './functions/font';
-import { kibana as kibanaFunction } from './functions/kibana';
-import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
-import { variable } from './functions/var';
-import { variableSet } from './functions/var_set';
-import {
-  boolean as booleanType,
-  datatable as datatableType,
-  error as errorType,
-  filter as filterType,
-  image as imageType,
-  nullType,
-  number as numberType,
-  pointseries,
-  range as rangeType,
-  render as renderType,
-  shape as shapeType,
-  string as stringType,
-  style as styleType,
-  kibanaContext as kibanaContextType,
-  kibanaDatatable as kibanaDatatableType,
-} from '../common/expression_types';
+import { kibanaContext as kibanaContextFunction } from './expression_functions/kibana_context';
 import { interpreterProvider } from './interpreter_provider';
 import { createHandlers } from './create_handlers';
 import { ExpressionRendererImplementation } from './expression_renderer';
 import { ExpressionLoader, loader } from './loader';
 import { ExpressionDataHandler, execute } from './execute';
 import { render, ExpressionRenderHandler } from './render';
-import { ExpressionFunctionDefinition, AnyExpressionType } from '../common/types';
-import { serializeProvider } from '../common';
 
 export interface ExpressionsSetupDeps {
   bfetch: BfetchPublicSetup;
@@ -71,15 +54,13 @@ export interface ExpressionsStartDeps {
 }
 
 export interface ExpressionsSetup {
-  registerFunction: (
-    fn: ExpressionFunctionDefinition | (() => ExpressionFunctionDefinition)
-  ) => void;
-  registerRenderer: (renderer: any) => void;
-  registerType: (type: () => AnyExpressionType) => void;
+  registerType: Executor['registerType'];
+  registerFunction: Executor['registerFunction'];
+  registerRenderer: ExpressionRendererRegistry['register'];
   __LEGACY: {
-    functions: FunctionsRegistry;
-    renderers: RenderFunctionsRegistry;
     types: TypesRegistry;
+    functions: FunctionsRegistry;
+    renderers: ExpressionRendererRegistry;
     getExecutor: () => ExpressionExecutor;
     loadLegacyServerFunctionWrappers: () => Promise<void>;
   };
@@ -98,41 +79,21 @@ export interface ExpressionsStart {
 export class ExpressionsPublicPlugin
   implements
     Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
-  private readonly executor = new Executor();
+  private readonly executor: Executor = new Executor();
+  private readonly renderers: ExpressionRendererRegistry = new ExpressionRendererRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
-    const { executor } = this;
+    const { executor, renderers } = this;
 
-    setRenderersRegistry(executor.renderers);
+    executor.registerFunction(kibanaContextFunction());
 
-    const registerFunction = this.executor.registerFunction.bind(this.executor);
-    const registerType = this.executor.registerType.bind(this.executor);
-    const registerRenderer = this.executor.registerRenderer.bind(this.executor);
+    setRenderersRegistry(renderers);
 
-    registerFunction(clogFunction);
-    registerFunction(fontFunction);
-    registerFunction(kibanaFunction);
-    registerFunction(kibanaContextFunction);
-    registerFunction(variable);
-    registerFunction(variableSet);
-
-    registerType(booleanType);
-    registerType(datatableType);
-    registerType(errorType);
-    registerType(filterType);
-    registerType(imageType);
-    registerType(nullType);
-    registerType(numberType);
-    registerType(pointseries);
-    registerType(rangeType);
-    registerType(renderType);
-    registerType(shapeType);
-    registerType(stringType);
-    registerType(styleType);
-    registerType(kibanaContextType);
-    registerType(kibanaDatatableType);
+    const registerFunction = executor.registerFunction.bind(executor);
+    const registerType = executor.registerType.bind(executor);
+    const registerRenderer = renderers.register.bind(renderers);
 
     // TODO: Refactor this function.
     const getExecutor = () => {
@@ -155,7 +116,7 @@ export class ExpressionsPublicPlugin
         cached = (async () => {
           const serverFunctionList = await core.http.get(`/api/interpreter/fns`);
           const batchedFunction = bfetch.batchedFunction({ url: `/api/interpreter/fns` });
-          const { serialize } = serializeProvider(types.toJS());
+          const { serialize } = serializeProvider(executor.getTypes());
 
           // For every sever-side function, register a client-side
           // function that matches its definition, but which simply
@@ -179,9 +140,9 @@ export class ExpressionsPublicPlugin
       registerRenderer,
       registerType,
       __LEGACY: {
-        functions: executor.functions,
-        renderers: executor.renderers,
         types: executor.types,
+        functions: executor.functions,
+        renderers,
         getExecutor,
         loadLegacyServerFunctionWrappers,
       },
