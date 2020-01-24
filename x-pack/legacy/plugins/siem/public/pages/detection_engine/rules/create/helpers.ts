@@ -19,7 +19,7 @@ import {
   FormatRuleType,
 } from '../types';
 
-const getTimeTypeValue = (time: string): { unit: string; value: number } => {
+export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
     unit: '',
     value: 0,

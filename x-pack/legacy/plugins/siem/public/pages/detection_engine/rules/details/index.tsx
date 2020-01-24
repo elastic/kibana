@@ -119,10 +119,13 @@ const RuleDetailsPageComponent: FC<RuleDetailsComponentProps> = ({
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
-  const { aboutRuleData, defineRuleData, scheduleRuleData } = getStepsData({
-    rule,
-    detailsView: true,
-  });
+  const { aboutRuleData, defineRuleData, scheduleRuleData } =
+    rule != null
+      ? getStepsData({
+          rule,
+          detailsView: true,
+        })
+      : { aboutRuleData: null, defineRuleData: null, scheduleRuleData: null };
   const [lastSignals] = useSignalInfo({ ruleId });
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
