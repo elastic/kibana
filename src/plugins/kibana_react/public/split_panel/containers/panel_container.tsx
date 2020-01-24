@@ -46,7 +46,8 @@ export function PanelsContainer({
   onPanelWidthChange,
   resizerClassName,
 }: Props) {
-  const [firstChild, secondChild, thirdChild] = Children.toArray(children);
+  const childrenArray = Children.toArray(children);
+  const [firstChild, secondChild] = childrenArray;
 
   const registryRef = useRef(new PanelRegistry());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -92,14 +93,16 @@ export function PanelsContainer({
   );
 
   useEffect(() => {
-    // For now we only support bi-split
-    if (thirdChild) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        '[Split Panels Container] Detected more than two children; ignoring additional children.'
-      );
+    if (process.env.NODE_ENV !== 'production') {
+      // For now we only support bi-split
+      if (childrenArray.length > 2) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          '[Split Panels Container] Detected more than two children; ignoring additional children.'
+        );
+      }
     }
-  }, [thirdChild ? 1 : 0]);
+  }, [childrenArray.length]);
 
   const childrenWithResizer = [
     firstChild,
