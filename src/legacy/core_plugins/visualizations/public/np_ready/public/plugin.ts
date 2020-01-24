@@ -52,10 +52,9 @@ export interface VisualizationsSetup {
   types: TypesSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisualizationsStart {
   types: TypesStart;
-  savedVisualizations: SavedVisualizations;
+  getSavedVisualizationsLoader: () => SavedVisualizations;
 }
 
 export interface VisualizationsSetupDeps {
@@ -128,7 +127,7 @@ export class VisualizationsPlugin
 
     return {
       types,
-      savedVisualizations: this.getSavedVisualizationsLoader(),
+      getSavedVisualizationsLoader: () => this.getSavedVisualizationsLoader(),
     };
   }
 
