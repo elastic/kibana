@@ -17,6 +17,11 @@
  * under the License.
  */
 
-import { legacyResponseHandlerProvider } from './legacy_imports';
+import { version as kibanaVersion } from '../../../../../../package.json';
 
-export const tableVisResponseHandler = legacyResponseHandlerProvider().handler;
+export default {
+  // Make the version stubbable to improve testability.
+  get() {
+    return kibanaVersion;
+  },
+};
