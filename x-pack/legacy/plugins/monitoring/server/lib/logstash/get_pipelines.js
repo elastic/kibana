@@ -76,7 +76,13 @@ export async function processPipelinesAPIResponse(
   processedResponse.pipelines.forEach(pipeline => {
     pipeline.metrics = {
       throughput: pipeline.metrics[throughputMetricKey],
-      nodesCount: pipeline.metrics[nodesCountMetricKey],
+      nodesCount: {
+        ...pipeline.metrics[nodesCountMetricKey],
+        data: pipeline.metrics[nodesCountMetricKey].data.map(item => [
+          item[0],
+          item[1][pipeline.id],
+        ]),
+      },
     };
 
     pipeline.latestThroughput = last(pipeline.metrics.throughput.data)[1];
@@ -86,24 +92,29 @@ export async function processPipelinesAPIResponse(
   return processedResponse;
 }
 
-export async function getPipelines(
-  req,
-  logstashIndexPattern,
-  pipelineIds,
-  metricSet,
-  metricOptions = {}
-) {
+export async function getPipelines(req, logstashIndexPattern, pipelines, metricSet) {
   checkParam(logstashIndexPattern, 'logstashIndexPattern in logstash/getPipelines');
   checkParam(metricSet, 'metricSet in logstash/getPipelines');
 
   const filters = [];
 
-  const metricsResponse = await getMetrics(
-    req,
-    logstashIndexPattern,
-    metricSet,
-    filters,
-    metricOptions
+  const metricsResponse = await Promise.all(
+    pipelines.map(pipeline => {
+      return new Promise(async resolve => {
+        const data = await getMetrics(req, logstashIndexPattern, metricSet, filters, {
+          pipeline,
+        });
+
+        resolve({
+          id: pipeline.id,
+          metrics: Object.keys(data).reduce((accum, metricName) => {
+            accum[metricName] = data[metricName][0];
+            return accum;
+          }, {}),
+        });
+      });
+    })
   );
-  return handleGetPipelinesResponse(metricsResponse, pipelineIds);
+
+  return Object.values(metricsResponse);
 }
