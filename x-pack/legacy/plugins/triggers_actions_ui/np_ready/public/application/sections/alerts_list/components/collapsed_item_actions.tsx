@@ -92,7 +92,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <EuiSwitch
           name="mute"
           checked={item.muteAll}
-          disabled={!canSave || !item.enabled}
+          disabled={!(canSave && item.enabled)}
           data-test-subj="muteSwitch"
           onChange={async () => {
             if (item.muteAll) {

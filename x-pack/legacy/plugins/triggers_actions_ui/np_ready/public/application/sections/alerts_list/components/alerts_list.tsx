@@ -31,12 +31,12 @@ import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib
 
 const ENTER_KEY = 13;
 
-interface IAlertTypeState {
+interface AlertTypeState {
   isLoading: boolean;
   isInitialized: boolean;
   data: AlertTypeIndex;
 }
-interface IAlertState {
+interface AlertState {
   isLoading: boolean;
   data: Alert[];
   totalItemCount: number;
@@ -62,12 +62,12 @@ export const AlertsList: React.FunctionComponent = () => {
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
-  const [alertTypesState, setAlertTypesState] = useState<IAlertTypeState>({
+  const [alertTypesState, setAlertTypesState] = useState<AlertTypeState>({
     isLoading: false,
     isInitialized: false,
     data: {},
   });
-  const [alertsState, setAlertsState] = useState<IAlertState>({
+  const [alertsState, setAlertsState] = useState<AlertState>({
     isLoading: false,
     data: [],
     totalItemCount: 0,
