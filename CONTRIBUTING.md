@@ -338,7 +338,7 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 #### Setting Up SSL
 
-Kibana includes a self-signed certificate that can be used for development purposes: `yarn start --ssl`.
+Kibana includes self-signed certificates that can be used for development purposes in the browser and while communicating with Elasticsearch: `yarn start --ssl` & `yarn es snapshot --ssl`.
 
 ### Linting
 
