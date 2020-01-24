@@ -38,6 +38,7 @@ import { uiMetricService } from './ui_metric';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { Template } from '../../../common/types';
+import { doesMappingsHasType } from '../components/mappings_editor';
 
 let httpClient: ng.IHttpService;
 
@@ -229,8 +230,9 @@ export function loadIndexTemplate(name: Template['name']) {
 }
 
 export async function saveTemplate(template: Template, isClone?: boolean) {
+  const includeTypeName = doesMappingsHasType(template.mappings);
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/templates`,
+    path: `${API_BASE_PATH}/templates?include_type_name=${includeTypeName}`,
     method: 'put',
     body: JSON.stringify(template),
   });
@@ -243,9 +245,12 @@ export async function saveTemplate(template: Template, isClone?: boolean) {
 }
 
 export async function updateTemplate(template: Template) {
+  const includeTypeName = doesMappingsHasType(template.mappings);
   const { name } = template;
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
+    path: `${API_BASE_PATH}/templates/${encodeURIComponent(
+      name
+    )}?include_type_name=${includeTypeName}`,
     method: 'put',
     body: JSON.stringify(template),
   });
