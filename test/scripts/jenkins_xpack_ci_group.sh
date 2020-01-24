@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source test/scripts/jenkins_test_setup.sh
+source test/scripts/jenkins_test_siem_setup.sh
 
 installDir="$PARENT_DIR/install/kibana"
 destDir="${installDir}-${CI_WORKER_NUMBER}"
