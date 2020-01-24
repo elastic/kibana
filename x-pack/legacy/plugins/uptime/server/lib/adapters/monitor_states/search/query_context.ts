@@ -10,12 +10,12 @@ import { CursorPagination } from '../adapter_types';
 import { INDEX_NAMES } from '../../../../../common/constants';
 
 const parseRelativeDates = (startDate: string, _endDate: string): { tsStart: any; tsEnd: any } => {
-  let endDate: string = _endDate;
+  let endDate: string = _endDate ?? '';
   if (startDate === endDate && endDate.includes('now')) {
     endDate = 'now';
   }
 
-  const tsStart = DateMath.parse(endDate).subtract(10, 'seconds');
+  const tsStart = DateMath.parse(endDate)?.subtract(10, 'seconds');
   const tsEnd = DateMath.parse(endDate);
 
   return { tsStart, tsEnd };
