@@ -25,7 +25,6 @@ import { RegisterQuery, SignalsAggregation, SignalsTotal } from '../types';
 import { formatSignalsData, getSignalsHistogramQuery } from './helpers';
 import { useTheme } from '../../../../../components/charts/common';
 import { useKibana } from '../../../../../lib/kibana';
-import { inputsModel } from '../../../../../store';
 import { DETECTIONS_HISTOGRAM_ID } from '..';
 
 interface HistogramSignalsProps {
