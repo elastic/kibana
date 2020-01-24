@@ -7,7 +7,7 @@
 import { AlertAction, State, Context, AlertType } from '../types';
 import { Logger } from '../../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../../../plugins/actions/server';
 
 interface CreateExecutionHandlerOptions {
   alertId: string;

@@ -6,9 +6,7 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { findRulesRoute } from './find_rules_route';
@@ -43,26 +41,10 @@ describe('find_rules', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      findRulesRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getFindRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       findRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getFindRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      findRulesRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getFindRequest());
       expect(statusCode).toBe(404);
     });
   });
