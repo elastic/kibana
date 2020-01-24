@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { ExpressionAstExpression } from './types';
-import { parse } from './parse';
+import { ExpressionAstExpression, ExpressionAstArgument } from './types';
 
-/**
- * Given expression pipeline string, returns parsed AST.
- *
- * @param expression Expression pipeline string.
- */
-export function parseExpression(expression: string): ExpressionAstExpression {
-  return parse(expression, 'expression') as ExpressionAstExpression;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { parse: parseRaw } = require('@kbn/interpreter/common');
+
+export function parse(
+  expression: string,
+  startRule: 'expression' | 'argument'
+): ExpressionAstExpression | ExpressionAstArgument {
+  try {
+    return parseRaw(String(expression), { startRule });
+  } catch (e) {
+    throw new Error(`Unable to parse expression: ${e.message}`);
+  }
 }

@@ -17,14 +17,28 @@
  * under the License.
  */
 
-import { ExpressionAstExpression } from './types';
 import { parse } from './parse';
 
-/**
- * Given expression pipeline string, returns parsed AST.
- *
- * @param expression Expression pipeline string.
- */
-export function parseExpression(expression: string): ExpressionAstExpression {
-  return parse(expression, 'expression') as ExpressionAstExpression;
-}
+describe('parse()', () => {
+  test('parses an expression', () => {
+    const ast = parse('foo bar="baz"', 'expression');
+
+    expect(ast).toMatchObject({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          arguments: {
+            bar: ['baz'],
+          },
+          function: 'foo',
+        },
+      ],
+    });
+  });
+
+  test('parses an argument', () => {
+    const arg = parse('foo', 'argument');
+    expect(arg).toBe('foo');
+  });
+});

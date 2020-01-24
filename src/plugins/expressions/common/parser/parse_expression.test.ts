@@ -19,7 +19,7 @@
 
 import { parseExpression } from './parse_expression';
 
-describe('parse()', () => {
+describe('parseExpression()', () => {
   test('parses an expression', () => {
     const ast = parseExpression('foo bar="baz"');
 

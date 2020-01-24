@@ -17,9 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
-import { fromExpression } from '@kbn/interpreter/common';
-
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
@@ -31,6 +28,7 @@ import { ExecutionContext } from './types';
 import { getType } from '../expression_types';
 import { AnyExpressionFunctionDefinition, ArgumentType } from '../expression_functions';
 import { getByAlias } from './get_by_alias';
+import { parse } from '../parser/parse';
 
 export interface ExecutionParams {
   executor: Executor;
@@ -199,7 +197,7 @@ export class Execution {
       argDefs,
       (acc: any, argDef: any, argName: any) => {
         if (typeof acc[argName] === 'undefined' && typeof argDef.default !== 'undefined') {
-          acc[argName] = [(fromExpression as any)(argDef.default, 'argument')];
+          acc[argName] = [parse(argDef.default, 'argument')];
         }
 
         return acc;
