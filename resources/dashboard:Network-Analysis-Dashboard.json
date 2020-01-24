@@ -1,0 +1,76 @@
+{
+   "migrationVersion": {
+      "dashboard": "7.0.0"
+   }, 
+   "references": [
+      {
+         "type": "visualization", 
+         "name": "panel_0", 
+         "id": "Top-Applications-By-Bandwidth-(histogram)"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_1", 
+         "id": "c96326d0-0473-11ea-a805-f766c8673742"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_2", 
+         "id": "869c7760-0474-11ea-a805-f766c8673742"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_3", 
+         "id": "c0a848e0-0243-11ea-a805-f766c8673742"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_4", 
+         "id": "Top-Applications-By-Bandwidth-(pie)"
+      }, 
+      {
+         "type": "search", 
+         "name": "panel_5", 
+         "id": "Analyze-Table"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_6", 
+         "id": "8ab28290-0479-11ea-a805-f766c8673742"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_7", 
+         "id": "d95c8830-047b-11ea-a805-f766c8673742"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_8", 
+         "id": "2d11b480-1112-11ea-95dd-1b801e597b0f"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_9", 
+         "id": "f2d93d90-3648-11ea-b5ed-4526f976679a"
+      }, 
+      {
+         "type": "visualization", 
+         "name": "panel_10", 
+         "id": "fd6dc7f0-3c72-11ea-87ba-51cf87e796dd"
+      }
+   ], 
+   "type": "dashboard", 
+   "dashboard": {
+      "hits": 0, 
+      "timeRestore": false, 
+      "description": "", 
+      "title": "Network Analysis Dashboard", 
+      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"1\",\"w\":20,\"x\":0,\"y\":10},\"panelIndex\":\"1\",\"title\":\"Top Applications By Bandwidth\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Bandwidth Per Day (Bytes)\":\"#B7DBAB\",\"Total Bytes Per Day\":\"#F2C96D\"},\"legendOpen\":false}},\"gridData\":{\"h\":15,\"i\":\"2\",\"w\":13,\"x\":20,\"y\":10},\"panelIndex\":\"2\",\"title\":\"Bandwidth\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":14,\"i\":\"3\",\"w\":23,\"x\":25,\"y\":41},\"panelIndex\":\"3\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":0},\"panelIndex\":\"5\",\"title\":\"Top 5 Applications by Bandwidth\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"6\",\"w\":25,\"x\":0,\"y\":55},\"panelIndex\":\"6\",\"title\":\"Top Applications By Bandwidth\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"columns\":[\"SrcIP\",\"DestIP\",\"Application\",\"DestPort\",\"Duration\",\"TrafficDirection_NM\"]},\"gridData\":{\"h\":16,\"i\":\"7\",\"w\":48,\"x\":0,\"y\":70},\"panelIndex\":\"7\",\"title\":\"Network Analysis Table\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"8\",\"w\":15,\"x\":33,\"y\":10},\"panelIndex\":\"8\",\"title\":\"Application Family\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"9\",\"w\":23,\"x\":25,\"y\":55},\"panelIndex\":\"9\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"10\",\"w\":48,\"x\":0,\"y\":28},\"panelIndex\":\"10\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":3,\"i\":\"11\",\"w\":48,\"x\":0,\"y\":25},\"panelIndex\":\"11\",\"title\":\"System Rule Required Notice\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":14,\"i\":\"12\",\"w\":25,\"x\":0,\"y\":41},\"panelIndex\":\"12\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_10\"}]", 
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+      }
+   }, 
+   "updated_at": "2020-01-22T16:41:54.440Z"
+}

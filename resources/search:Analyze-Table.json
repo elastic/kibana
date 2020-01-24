@@ -5,8 +5,8 @@
    "references": [
       {
          "type": "index-pattern", 
-         "name": "kibanaSavedObjectMeta.searchSourceJSON.index", 
-         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b"
+         "id": "361f5c00-b47c-11e9-86a0-cd3d7bf2f81b", 
+         "name": "kibanaSavedObjectMeta.searchSourceJSON.index"
       }
    ], 
    "search": {
@@ -31,5 +31,5 @@
       ]
    }, 
    "type": "search", 
-   "updated_at": "2019-09-06T16:50:36.068Z"
+   "updated_at": "2020-01-14T21:04:24.718Z"
 }

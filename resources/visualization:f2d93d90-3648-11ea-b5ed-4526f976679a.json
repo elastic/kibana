@@ -1,0 +1,18 @@
+{
+   "migrationVersion": {
+      "visualization": "7.2.0"
+   }, 
+   "visualization": {
+      "visState": "{\"title\":\"Traffic Direction System Rule Required Notice\",\"type\":\"markdown\",\"params\":{\"markdown\":\"#### **Data will only be visible in the following table if you enable the Flow_IdentifyTrafficDirection system rule.**\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}", 
+      "description": "", 
+      "title": "Traffic Direction System Rule Required Notice", 
+      "uiStateJSON": "{}", 
+      "version": 1, 
+      "kibanaSavedObjectMeta": {
+         "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"filter\":[]}"
+      }
+   }, 
+   "type": "visualization", 
+   "updated_at": "2020-01-14T21:04:17.063Z", 
+   "references": []
+}

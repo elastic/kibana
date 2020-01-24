@@ -5,23 +5,53 @@
    "references": [
       {
          "type": "visualization", 
-         "name": "panel_0", 
-         "id": "Top-Applications-By-Bandwidth-(histogram)"
+         "id": "Top-Applications-By-Bandwidth-(histogram)", 
+         "name": "panel_0"
       }, 
       {
          "type": "visualization", 
-         "name": "panel_1", 
-         "id": "Application-Tags-Summary"
+         "id": "Top-Applications-By-Bandwidth-(pie)", 
+         "name": "panel_1"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "24203240-0486-11ea-a805-f766c8673742", 
+         "name": "panel_2"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "aa160500-0486-11ea-a805-f766c8673742", 
+         "name": "panel_3"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "9620c440-0486-11ea-a805-f766c8673742", 
+         "name": "panel_4"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "a6e79680-0488-11ea-a805-f766c8673742", 
+         "name": "panel_5"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "80851f20-0489-11ea-a805-f766c8673742", 
+         "name": "panel_6"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "bb34c5d0-0489-11ea-a805-f766c8673742", 
+         "name": "panel_7"
+      }, 
+      {
+         "type": "visualization", 
+         "id": "f1766400-0489-11ea-a805-f766c8673742", 
+         "name": "panel_8"
       }, 
       {
          "type": "search", 
-         "name": "panel_2", 
-         "id": "Application-Exploration-Table"
-      }, 
-      {
-         "type": "visualization", 
-         "name": "panel_3", 
-         "id": "Application-Families-By-Bandwidth"
+         "id": "Analyze-Table", 
+         "name": "panel_9"
       }
    ], 
    "type": "dashboard", 
@@ -30,12 +60,12 @@
       "timeRestore": false, 
       "description": "", 
       "title": "Application Exploration Dashboard", 
-      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":32,\"h\":24,\"i\":\"1\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":32,\"y\":12,\"w\":16,\"h\":12,\"i\":\"2\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"columns\":[\"SrcIP\",\"DestIP\",\"Application\",\"ApplicationFamily\",\"ApplicationTags\",\"Duration\",\"TotalBytes\",\"TotalPackets\",\"Session\"],\"sort\":[\"TimeUpdated\",\"desc\"]},\"panelIndex\":\"3\",\"gridData\":{\"x\":0,\"y\":24,\"w\":48,\"h\":20,\"i\":\"3\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":12,\"i\":\"4\"},\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"}]", 
-      "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}", 
-      "version": 1, 
+      "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"1\",\"w\":32,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"2\",\"w\":16,\"x\":32,\"y\":0},\"panelIndex\":\"2\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"4\",\"w\":16,\"x\":32,\"y\":15},\"panelIndex\":\"4\",\"title\":\"Application Family and Tags by Bandwidth\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":15,\"i\":\"5\",\"w\":16,\"x\":0,\"y\":15},\"panelIndex\":\"5\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":15,\"i\":\"6\",\"w\":16,\"x\":16,\"y\":15},\"panelIndex\":\"6\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"9\",\"w\":10,\"x\":14,\"y\":30},\"panelIndex\":\"9\",\"title\":\"Remote Access Protocols\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"10\",\"w\":13,\"x\":35,\"y\":30},\"panelIndex\":\"10\",\"title\":\"Databases\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"11\",\"w\":11,\"x\":24,\"y\":30},\"panelIndex\":\"11\",\"title\":\"IM Applications\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"12\",\"w\":14,\"x\":0,\"y\":30},\"panelIndex\":\"12\",\"title\":\"Cloud Applications\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"columns\":[\"SrcIP\",\"DestIP\",\"DestPort\",\"Application\",\"ApplicationFamily\",\"ApplicationTags\"]},\"gridData\":{\"h\":16,\"i\":\"13\",\"w\":48,\"x\":0,\"y\":40},\"panelIndex\":\"13\",\"title\":\"Application Exploration Table\",\"version\":\"7.2.0\",\"panelRefName\":\"panel_9\"}]", 
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}", 
+      "version": 2, 
       "kibanaSavedObjectMeta": {
-         "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true,\"time_zone\":\"America/Denver\"}},\"language\":\"lucene\"}}"
+         "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
       }
    }, 
-   "updated_at": "2019-09-26T17:16:45.808Z"
+   "updated_at": "2020-01-14T21:03:55.054Z"
 }
