@@ -31,7 +31,7 @@ describe('top-level navigation common to all pages in the SIEM app', () => {
   it('navigates to the Network page', () => {
     cy.get(NAVIGATION_NETWORK).click({ force: true });
 
-    cy.url().should('include', '/siem#/network');
+    cy.url().should('include', '/sieem#/network');
   });
 
   it('navigates to the Timelines page', () => {
