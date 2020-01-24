@@ -25,6 +25,9 @@ export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
 
 export const Angular = require('angular');
+export const KbnI18n = require('@kbn/i18n');
+export const KbnI18nAngular = require('@kbn/i18n/angular');
+export const KbnI18nReact = require('@kbn/i18n/react');
 export const ElasticCharts = require('@elastic/charts');
 export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
