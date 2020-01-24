@@ -1,6 +1,6 @@
 {
   "description": "Identifies loadable kernel module errors, often indicative of potential persistence attempts.",
-    "false_positives": ["Security tools and device drivers may load legitimate kernel modules."],
+  "false_positives": ["Security tools and device drivers may load legitimate kernel modules."],
   "index": ["auditbeat-*"],
   "language": "kuery",
   "max_signals": 33,

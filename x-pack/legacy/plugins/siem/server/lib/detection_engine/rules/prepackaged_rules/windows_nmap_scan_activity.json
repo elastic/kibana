@@ -1,6 +1,14 @@
 {
   "description": "Windows nmap scan activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Windows nmap scan activity",
   "query": "process.name:nmap.exe and event.action:\"Network connection detected (rule: NetworkConnect)\"",
   "risk_score": 50,

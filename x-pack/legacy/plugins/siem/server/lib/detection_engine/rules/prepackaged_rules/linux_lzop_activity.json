@@ -1,5 +1,13 @@
 {
   "description": "Linux lzop activity - possible @JulianRunnels",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Linux lzop activity",
   "query": "process.name:lzop and event.action:executed",

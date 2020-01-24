@@ -1,5 +1,13 @@
 {
   "description": "Windows Wireshark activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Wireshark activity",
   "query": "process.name:wireshark.exe",

@@ -1,6 +1,14 @@
 {
   "description": "Null user agent",
-    "filters": [
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "filters": [
     {
       "meta": {
         "alias": null,

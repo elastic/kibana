@@ -1,5 +1,13 @@
 {
   "description": "Network - PPTP (Point to Point Tunneling Protocol) Activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Network - PPTP (Point to Point Tunneling Protocol) Activity",
   "query": "destination.port:1723",

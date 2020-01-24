@@ -1,5 +1,13 @@
 {
   "description": "Windows Defense Evasion or Persistence via Hidden Files",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Defense Evasion or Persistence via Hidden Files",
   "query": "event.code:1 and process.name:attrib.exe and (process.args:\"+h\" or process.args:\"+s\")",

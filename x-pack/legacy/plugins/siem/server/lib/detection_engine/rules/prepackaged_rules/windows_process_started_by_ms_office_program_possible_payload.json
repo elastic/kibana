@@ -1,6 +1,14 @@
 {
   "description": "Process started by MS Office program - possible payload",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Process started by MS Office program - possible payload",
   "query": "process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or process.parent.name:OUTLOOK.EXE or process.parent.name:POWERPNT.EXE or process.parent.name:VISIO.EXE or process.parent.name:WINWORD.EXE and event.code:1",
   "risk_score": 50,

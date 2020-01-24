@@ -1,5 +1,13 @@
 {
   "description": "Windows Indirect Command Execution",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Indirect Command Execution",
   "query": "event.code:1 and process.parent.name:pcalua.exe or (process.name:bash.exe or process.name:forfiles.exe or process.name:pcalua.exe)",

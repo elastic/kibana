@@ -1,6 +1,14 @@
 {
   "description": "Windows Mimikatz activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Windows Mimikatz activity",
   "query": "event.code: 1 and process.name:mimikatz.exe",
   "risk_score": 50,

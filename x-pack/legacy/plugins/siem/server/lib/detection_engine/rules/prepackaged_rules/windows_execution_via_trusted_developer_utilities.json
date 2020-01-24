@@ -1,5 +1,13 @@
 {
   "description": "Windows Execution via Trusted Developer Utilities",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Execution via Trusted Developer Utilities",
   "query": "event.code:1 and (process.name:MSBuild.exe or process.name:msxsl.exe)",

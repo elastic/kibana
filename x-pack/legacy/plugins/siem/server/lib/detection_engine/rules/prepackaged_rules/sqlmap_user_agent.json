@@ -1,5 +1,13 @@
 {
   "description": "SQLmap user agent",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "SQLmap user agent",
   "query": "user_agent.original:\"sqlmap/1.3.11#stable (http://sqlmap.org)\"",

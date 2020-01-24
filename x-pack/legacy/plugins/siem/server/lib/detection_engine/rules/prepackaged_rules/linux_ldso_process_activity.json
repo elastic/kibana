@@ -1,5 +1,13 @@
 {
   "description": "Linux ld.so process activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Linux ld.so process activity",
   "query": "process.name:ld.so and event.action:executed",

@@ -1,6 +1,14 @@
 {
   "description": "Windows Netcat activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Windows Netcat activity",
   "query": "process.name:ncat.exe and event.code:1",
   "risk_score": 50,

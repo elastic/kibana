@@ -1,6 +1,14 @@
 {
   "description": "Windows whoami command activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Windows whoami command activity",
   "query": "process.name:whoami.exe and event.code:1",
   "risk_score": 50,

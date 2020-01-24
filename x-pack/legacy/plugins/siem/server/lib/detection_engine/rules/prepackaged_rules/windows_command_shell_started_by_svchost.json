@@ -1,5 +1,13 @@
 {
   "description": "Command shell started by Svchost",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Command shell started by Svchost",
   "query": "process.parent.name:svchost.exe and process.name:cmd.exe",

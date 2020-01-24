@@ -1,5 +1,13 @@
 {
   "description": "Identifies attempts to create new local users. This is sometimes done by attackers to increase access to a system or domain.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "User Account Creation",
   "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:(\"net.exe\" or \"net1.exe\") and not process.parent.name:\"net.exe\" and process.args:(\"user\" and (\"/add\" or \"/ad\")) ",

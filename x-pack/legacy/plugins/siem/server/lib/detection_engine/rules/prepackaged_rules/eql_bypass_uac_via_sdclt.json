@@ -1,5 +1,13 @@
 {
   "description": "Identifies User Account Control (UAC) bypass via cmstp.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Bypass UAC via SDCLT",
   "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"sdclt.exe\" and process.args:\"/kickoffelev\" and not process.executable:(\"C:\\Windows\\System32\\sdclt.exe\" or \"C:\\Windows\\System32\\control.exe\" or \"C:\\Windows\\SysWOW64\\sdclt.exe\" or \"C:\\Windows\\SysWOW64\\control.exe\")",

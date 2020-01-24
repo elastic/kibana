@@ -1,6 +1,14 @@
 {
   "description": "Linux: Rawshark Activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Linux: Rawshark Activity",
   "query": "process.name: rawshark and event.action:executed",
   "risk_score": 50,

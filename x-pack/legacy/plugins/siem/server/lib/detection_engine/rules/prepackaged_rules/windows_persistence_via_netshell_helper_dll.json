@@ -1,5 +1,13 @@
 {
   "description": "Windows Persistence via Netshell Helper DLL",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Persistence via Netshell Helper DLL",
   "query": "event.code:1 and process.name:netsh.exe and process.args:*helper*",

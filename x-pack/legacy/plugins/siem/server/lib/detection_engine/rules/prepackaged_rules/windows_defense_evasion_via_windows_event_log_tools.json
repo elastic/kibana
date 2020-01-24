@@ -1,5 +1,13 @@
 {
   "description": "Windows Defense Evasion via Windows Event Log Tools",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Defense Evasion via Windows Event Log Tools",
   "query": "event.code:1 and process.name:wevtutil.exe",

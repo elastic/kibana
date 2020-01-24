@@ -1,5 +1,13 @@
 {
   "description": "Identifies use of the wbadmin command to delete the backup catalog. Ransomware and other malware may do this to prevent system recovery.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Deleting Backup Catalogs with wbadmin",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"wbadmin.exe\" and  process.args:(\"delete\" and \"catalog\")",

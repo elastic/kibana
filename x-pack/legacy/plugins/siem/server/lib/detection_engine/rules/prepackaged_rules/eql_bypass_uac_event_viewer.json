@@ -1,5 +1,13 @@
 {
   "description": "Identifies User Account Control (UAC) bypass via eventvwr.  Attackers bypass UAC to stealthily execute code with elevated permissions.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Bypass UAC via Event Viewer",
   "query": "process.parent.name:eventvwr.exe and event.action:\"Process Create (rule: ProcessCreate)\" and not process.executable:(\"C:\\Windows\\System32\\mmc.exe\" or \"C:\\Windows\\SysWOW64\\mmc.exe\")",

@@ -1,5 +1,13 @@
 {
   "description": "Identifies use of the fsutil command to delete the volume USNJRNL. This technique is used by attackers to eliminate evidence of files created during post-exploitation activities.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Delete Volume USN Journal with fsutil",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and   process.name:\"fsutil.exe\" and    process.args:(\"usn\" and \"deletejournal\")",

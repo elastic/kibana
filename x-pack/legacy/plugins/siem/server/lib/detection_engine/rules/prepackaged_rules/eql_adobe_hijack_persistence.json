@@ -1,5 +1,13 @@
 {
   "description": "Detects writing executable files that will be automatically launched by Adobe on launch.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Adobe Hijack Persistence",
   "query": "file.path:(\"C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\" or \"C:\\Program Files\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\") and event.action:\"File created (rule: FileCreate)\" and not process.name:msiexeec.exe",

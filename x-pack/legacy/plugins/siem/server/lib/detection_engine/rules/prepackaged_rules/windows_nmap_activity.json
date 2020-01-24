@@ -1,6 +1,14 @@
 {
   "description": "Windows nmap activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Windows nmap activity",
   "query": "process.name:nmap.exe and event.code:1",
   "risk_score": 50,

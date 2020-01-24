@@ -1,6 +1,14 @@
 {
   "description": "Windows image load from a temp directory",
-    "filters": [
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "filters": [
     {
       "$state": {
         "store": "appState"

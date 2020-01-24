@@ -1,6 +1,14 @@
 {
   "description": "Windows Netcat network activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Windows Netcat network activity",
   "query": "process.name:ncat.exe and event.action:\"Network connection detected (rule: NetworkConnect)\"",
   "risk_score": 50,

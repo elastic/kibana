@@ -1,6 +1,14 @@
 {
   "description": "Linux: Nmap Activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Linux: Nmap Activity",
   "query": "process.name: nmap",
   "risk_score": 50,

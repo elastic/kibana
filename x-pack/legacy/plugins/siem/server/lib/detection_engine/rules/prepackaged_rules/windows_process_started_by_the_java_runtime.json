@@ -1,6 +1,14 @@
 {
   "description": "Windows process started by the Java runtime",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Windows process started by the Java runtime",
   "query": "process.parent.name:javaw.exe and event.code:1",
   "risk_score": 50,

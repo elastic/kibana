@@ -1,5 +1,13 @@
 {
   "description": "Windows Remote Management Execution",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Remote Management Execution",
   "query": "(process.name:wsmprovhost.exe or process.name:winrm.cmd) and (process.args:*Enable-PSRemoting -Force* or process.args:*Invoke-Command -computer_name* or process.args:*wmic*node*process call create*)",

@@ -342,28 +342,7 @@ describe('add prepackaged rules schema', () => {
     ).toEqual(true);
   });
 
-  test('immutable cannot be false', () => {
-    expect(
-      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        immutable: false,
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some-query',
-        language: 'kuery',
-        version: 1,
-      }).error.message
-    ).toEqual('child "immutable" fails because ["immutable" must be one of [true]]');
-  });
-
-  test('immutable can be true', () => {
+  test('immutable cannot be set in a pre-packaged rule', () => {
     expect(
       addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
         rule_id: 'rule-1',
@@ -380,8 +359,8 @@ describe('add prepackaged rules schema', () => {
         query: 'some-query',
         language: 'kuery',
         version: 1,
-      }).error
-    ).toBeFalsy();
+      }).error.message
+    ).toEqual('child "immutable" fails because ["immutable" is not allowed]');
   });
 
   test('defaults enabled to false', () => {
@@ -937,54 +916,6 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
-  test('You can optionally set the immutable to be true', () => {
-    expect(
-      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        immutable: true,
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).error
-    ).toBeFalsy();
-  });
-
-  test('You cannot set the immutable to be a number', () => {
-    expect(
-      addPrepackagedRulesSchema.validate<
-        Partial<Omit<PrepackagedRules, 'immutable'>> & { immutable: number }
-      >({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        immutable: 5,
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).error.message
-    ).toEqual('child "immutable" fails because ["immutable" must be a boolean]');
-  });
-
   test('You cannot set the risk_score to 101', () => {
     expect(
       addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
@@ -993,7 +924,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1016,7 +946,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1039,7 +968,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1062,7 +990,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1085,7 +1012,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1113,7 +1039,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1137,7 +1062,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1183,7 +1107,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1207,7 +1130,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1232,7 +1154,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1257,7 +1178,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',
@@ -1282,7 +1202,6 @@ describe('add prepackaged rules schema', () => {
         description: 'some description',
         from: 'now-5m',
         to: 'now',
-        immutable: true,
         index: ['index-1'],
         name: 'some-name',
         severity: 'low',

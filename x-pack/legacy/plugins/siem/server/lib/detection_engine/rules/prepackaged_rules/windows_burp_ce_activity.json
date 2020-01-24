@@ -1,5 +1,13 @@
 {
   "description": "Windows Burp CE activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Burp CE activity",
   "query": "process.name:BurpSuiteCommunity.exe",

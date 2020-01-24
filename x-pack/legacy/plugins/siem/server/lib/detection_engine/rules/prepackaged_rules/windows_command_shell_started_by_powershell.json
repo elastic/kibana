@@ -1,6 +1,14 @@
 {
   "description": "Command shell started by Powershell",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Command shell started by Powershell",
   "query": "process.parent.name:powershell.exe and process.name:cmd.exe",
   "risk_score": 50,

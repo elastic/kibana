@@ -1,5 +1,13 @@
 {
   "description": "Identifies use of vssadmin.exe for shadow copy deletion on endpoints.  This commonly occurs in tandem with ransomware or other destructive attacks.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Volume Shadow Copy Deletion via VssAdmin",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"vssadmin.exe\" and process.args:(\"delete\" and \"shadows\") ",

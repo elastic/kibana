@@ -1,6 +1,14 @@
 {
   "description": "Command shell started by Internet Explorer",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Command shell started by Internet Explorer",
   "query": "process.parent.name:iexplore.exe and process.name:cmd.exe",
   "risk_score": 50,

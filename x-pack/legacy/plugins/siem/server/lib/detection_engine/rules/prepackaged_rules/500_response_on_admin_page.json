@@ -1,5 +1,13 @@
 {
   "description": "500 Response on Admin page",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "500 Response on Admin page",
   "query": "url.path:\"/admin/\" and http.response.status_code:500",

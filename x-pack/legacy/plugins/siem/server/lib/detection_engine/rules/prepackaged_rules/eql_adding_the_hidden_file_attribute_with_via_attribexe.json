@@ -1,5 +1,13 @@
 {
   "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Adding the Hidden File Attribute with via attrib.exe",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"attrib.exe\" and process.args:\"+h\"",

@@ -1,5 +1,13 @@
 {
   "description": "Windows Iodine activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Iodine activity",
   "query": "event.code: 1 and process.name:iodine.exe or process.name:iodined.exe",

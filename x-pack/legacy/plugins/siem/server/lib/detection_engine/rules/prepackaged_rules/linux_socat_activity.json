@@ -1,6 +1,14 @@
 {
   "description": "Linux: socat activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Linux: Whoami Commmand",
   "query": "process.name:socat and not process.args:\"-V\" and event.action:executed",
   "risk_score": 50,

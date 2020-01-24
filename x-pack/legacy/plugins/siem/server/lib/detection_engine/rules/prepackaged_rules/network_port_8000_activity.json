@@ -1,5 +1,13 @@
 {
   "description": "Network - Port 8000 Activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Network - Port 8000 Activity",
   "query": "destination.port:8000",

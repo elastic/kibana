@@ -1,5 +1,13 @@
 {
   "description": "403 Response to a POST",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "403 Response to a POST",
   "query": "http.response.status_code:403 and http.request.method:post",

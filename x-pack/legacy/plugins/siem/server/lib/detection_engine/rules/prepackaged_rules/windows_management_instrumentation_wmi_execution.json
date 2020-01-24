@@ -1,5 +1,13 @@
 {
   "description": "Windows Management Instrumentation (WMI) Execution",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Management Instrumentation (WMI) Execution",
   "query": "event.code:1 and (process.parent.args:*wmiprvse.exe* or process.name:wmic.exe or process.args:*wmic* )",

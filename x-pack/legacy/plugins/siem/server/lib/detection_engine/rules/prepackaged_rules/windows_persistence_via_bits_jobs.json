@@ -1,5 +1,13 @@
 {
   "description": "Windows Persistence via BITS Jobs",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Persistence via BITS Jobs",
   "query": "event.code:1 and (process.name:bitsadmin.exe or process.args:*Start-BitsTransfer*)",

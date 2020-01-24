@@ -1,5 +1,13 @@
 {
   "description": "Windows Persistence via Application Shimming",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Persistence via Application Shimming",
   "query": "event.code:1 and process.name:sdbinst.exe",

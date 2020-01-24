@@ -1,5 +1,13 @@
 {
   "description": "Network - RPC (Remote Procedure Call) to the Internet",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Network - RPC (Remote Procedure Call) to the Internet",
   "query": "destination.port:135 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",

@@ -1,5 +1,13 @@
 {
   "description": "Identifies attempts to clear Windows event log stores. This is often done by attackers in an attempt evade detection or destroy forensic evidence on a system.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Clearing Windows Event Logs",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and (process.name:\"wevtutil.exe\" and process.args:\"cl\") or (process.name:\"powershell.exe\" and process.args:\"Clear-EventLog\")",

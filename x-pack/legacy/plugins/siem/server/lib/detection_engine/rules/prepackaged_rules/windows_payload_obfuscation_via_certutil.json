@@ -1,5 +1,13 @@
 {
   "description": "Windows Payload Obfuscation via Certutil",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Payload Obfuscation via Certutil",
   "query": "event.code:1 and process.name:certutil.exe and (process.args:*encode* or process.args:*ToBase64String*)",

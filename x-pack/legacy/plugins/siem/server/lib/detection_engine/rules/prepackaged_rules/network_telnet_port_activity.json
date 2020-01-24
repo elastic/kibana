@@ -1,5 +1,13 @@
 {
   "description": "Network - Telnet Port Activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Network - Telnet Port Activity",
   "query": "destination.port:23",

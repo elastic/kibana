@@ -1,5 +1,13 @@
 {
   "description": "Windows Execution via .NET COM Assemblies",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Execution via .NET COM Assemblies",
   "query": "event.code:1 and (process.name:regasm.exe or process.name:regsvcs.exe)",

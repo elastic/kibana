@@ -1,8 +1,5 @@
 {
   "description": "The 'whoami' command was executed on a Linux host. This is often used by tools and persistence mechanisms to test for privlieged access.",
-    "false_positives": [
-    "Security testing tools and frameworks may run this command. Some normal use of this command may originate from automation tools and frameworks."
-  ],
   "index": ["auditbeat-*"],
   "language": "kuery",
   "max_signals": 33,

@@ -1,5 +1,13 @@
 {
   "description": "WinDump activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "WinDump activity",
   "query": "process.name:WinDump.exe",

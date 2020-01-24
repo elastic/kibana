@@ -1,5 +1,13 @@
 {
   "description": "An adversary can leverage a computer's peripheral devices or applications to capture audio recordings for the purpose of listening into sensitive conversations to gather information.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Audio Capture via PowerShell",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"powershell.exe\" and process.args:\"WindowsAudioDevice-Powershell-Cmdlet\"",

@@ -1,5 +1,13 @@
 {
   "description": "Identifies unusual instances of Rundll32.exe making outbound network connections. This may indicate adversarial activity and may identify malicious DLLs.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Unusual Network Connection via RunDLL32",
   "query": "process.name:rundll32.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",

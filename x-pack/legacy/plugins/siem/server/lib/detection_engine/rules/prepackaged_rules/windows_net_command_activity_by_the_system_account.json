@@ -1,6 +1,14 @@
 {
   "description": "Windows net command activity by the SYSTEM account",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Windows net command activity by the SYSTEM account",
   "query": "process.name: (net.exe or net1.exe) and user.name:SYSTEM",
   "risk_score": 50,

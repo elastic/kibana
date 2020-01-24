@@ -1,5 +1,13 @@
 {
   "description": "Windows Execution via Regsvr32",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Execution via Regsvr32",
   "query": "event.code: 1 and scrobj.dll and (process.name:certutil.exe or process.name:regsvr32.exe or process.name:rundll32.exe)",

@@ -1,6 +1,14 @@
 {
   "description": "Linux: Hping Activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Linux: Hping Activity",
   "query": "process.name: hping  and event.action:executed",
   "risk_score": 50,

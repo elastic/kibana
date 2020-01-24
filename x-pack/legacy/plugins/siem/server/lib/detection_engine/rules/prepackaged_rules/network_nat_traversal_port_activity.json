@@ -1,5 +1,13 @@
 {
   "description": "Network - NAT Traversal Port Activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Network - NAT Traversal Port Activity",
   "query": "destination.port:4500",

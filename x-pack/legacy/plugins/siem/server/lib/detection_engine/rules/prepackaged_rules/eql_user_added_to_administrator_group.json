@@ -1,5 +1,13 @@
 {
   "description": "Identifies attempts to add a user to an administrative group with the \"net.exe\" command. This is sometimes done by attackers to increase access of a compromised account or create new account.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "User Added to Administrator Group",
   "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:(\"net.exe\" or \"net1.exe\") and not process.parent.name:\"net.exe\" and process.args:(\"group\" and \"admin\" and \"/add\") ",

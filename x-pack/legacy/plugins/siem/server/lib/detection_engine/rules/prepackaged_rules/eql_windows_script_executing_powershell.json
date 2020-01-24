@@ -1,5 +1,13 @@
 {
   "description": "Identifies a PowerShell process launched by either CScript or WScript. Observing Windows scripting processes executing a PowerShell script, may be indicative of malicious activity.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Script Executing PowerShell",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:(\"wscript.exe\" or \"cscript.exe\") and process.name:\"powershell.exe\"",

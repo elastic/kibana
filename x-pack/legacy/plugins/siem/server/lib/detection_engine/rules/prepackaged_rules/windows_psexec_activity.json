@@ -1,5 +1,13 @@
 {
   "description": "PSexec activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "PSexec activity",
   "query": "process.name:PsExec.exe or process.name:PsExec64.exe",

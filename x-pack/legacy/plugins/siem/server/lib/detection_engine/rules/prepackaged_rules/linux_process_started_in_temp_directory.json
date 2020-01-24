@@ -1,6 +1,6 @@
 {
   "description": "Identifies processes running in a temporary folder. This is sometimes done by adversaries to hide malware.",
-    "false_positives": ["Build systems like Jenkins may start processes in the /tmp directory."],
+  "false_positives": ["Build systems like Jenkins may start processes in the /tmp directory."],
   "index": ["auditbeat-*"],
   "language": "kuery",
   "max_signals": 33,

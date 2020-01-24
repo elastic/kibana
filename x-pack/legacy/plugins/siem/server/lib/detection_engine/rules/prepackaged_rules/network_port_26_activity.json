@@ -1,5 +1,13 @@
 {
   "description": "Network - Port 26 Activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Network - Port 26 Activity",
   "query": "destination.port:26",

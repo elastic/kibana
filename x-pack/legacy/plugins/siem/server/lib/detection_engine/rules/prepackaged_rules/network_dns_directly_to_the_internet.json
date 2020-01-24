@@ -1,5 +1,13 @@
 {
   "description": "Network - DNS Directly to the Internet",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Network - DNS Directly to the Internet",
   "query": "destination.port:53 and not destination.ip: 169.254.169.254/32 and not destination.ip:127.0.0.53/32 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",

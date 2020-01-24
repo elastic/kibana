@@ -42,9 +42,10 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  * Big differences between this schema and the createRulesSchema
  *  - rule_id is required here
  *  - output_index is not allowed (and instead the space index must be used)
- *  - immutable defaults to true instead of to false and if it is there can only be true
+ *  - immutable is forbidden but defaults to true instead of to false and it can only ever be true
  *  - enabled defaults to false instead of true
  *  - version is a required field that must exist
+ *  - index is a required field that must exist
  */
 export const addPrepackagedRulesSchema = Joi.object({
   description: description.required(),
@@ -53,7 +54,10 @@ export const addPrepackagedRulesSchema = Joi.object({
   filters,
   from: from.default('now-6m'),
   rule_id: rule_id.required(),
-  immutable: immutable.default(true).valid(true),
+  immutable: immutable
+    .forbidden()
+    .default(true)
+    .valid(true),
   index,
   interval: interval.default('5m'),
   query: query.allow('').default(''),

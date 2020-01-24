@@ -1,5 +1,13 @@
 {
   "description": "Windows Execution via Microsoft HTML Application (HTA)",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Execution via Microsoft HTML Application (HTA)",
   "query": "event.code:1 and (process.parent.args:*mshta* or process.args:*mshta*)",

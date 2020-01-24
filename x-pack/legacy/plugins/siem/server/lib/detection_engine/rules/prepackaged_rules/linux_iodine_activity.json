@@ -1,6 +1,14 @@
 {
   "description": "Linux: Iodine Activity",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Linux: Iodine Activity",
   "query": "process.name: (iodine or iodined) and event.action:executed",
   "risk_score": 50,

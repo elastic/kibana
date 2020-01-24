@@ -1,5 +1,13 @@
 {
   "description": "Windows Registry Query, Local",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Registry Query, Local",
   "query": "event.code: 1 and process.name:reg.exe and process.args:*query* and process.args:*reg*",

@@ -1,6 +1,6 @@
 {
   "description": "Identifies suspicious commands executed via a web server, which may suggest a vulnerability and remote shell access.",
-    "false_positives": [
+  "false_positives": [
     "Network monitoring or management products may have a web server component that runs shell commands as part of normal behavior."
   ],
   "index": ["auditbeat-*"],

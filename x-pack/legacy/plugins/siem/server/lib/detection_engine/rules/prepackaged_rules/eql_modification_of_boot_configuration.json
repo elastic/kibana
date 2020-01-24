@@ -1,5 +1,13 @@
 {
   "description": "Identifies use of the bcdedit command to delete boot configuration data. This tactic is sometimes used as by malware or an attacker as a destructive technique.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Modification of Boot Configuration",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and   process.name:\"bcdedit.exe\" and    process.args:\"set\" and    process.args:(     (\"bootstatuspolicy\" and \"ignoreallfailures\") or      (\"recoveryenabled\" and \"no\")   ) ",

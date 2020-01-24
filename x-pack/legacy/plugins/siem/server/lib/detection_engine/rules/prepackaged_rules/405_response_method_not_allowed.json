@@ -1,5 +1,13 @@
 {
   "description": "405 Response (Method Not Allowed)",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "405 Response (Method Not Allowed)",
   "query": "http.response.status_code:405",

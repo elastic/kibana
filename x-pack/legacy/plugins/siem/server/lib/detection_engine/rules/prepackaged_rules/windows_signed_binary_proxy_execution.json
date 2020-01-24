@@ -1,5 +1,13 @@
 {
   "description": "Windows Signed Binary Proxy Execution",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Signed Binary Proxy Execution",
   "query": "event.code:1 and http and (process.name:certutil.exe or process.name:msiexec.exe)",

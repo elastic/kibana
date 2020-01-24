@@ -1,6 +1,14 @@
 {
   "description": "Suspicious process started by a script",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Suspicious process started by a script",
   "query": "(process.parent.name:cmd.exe or process.parent.name:cscript.exe or process.parent.name:mshta.exe or process.parent.name:powershell.exe or process.parent.name:rundll32.exe or process.parent.name:wscript.exe or process.parent.name:wmiprvse.exe) and (process.name:bitsadmin.exe or process.name:certutil.exe or mshta.exe or process.name:nslookup.exe or process.name:schtasks.exe) and event.code:1",
   "risk_score": 50,

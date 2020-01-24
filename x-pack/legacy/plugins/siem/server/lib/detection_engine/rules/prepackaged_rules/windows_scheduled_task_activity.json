@@ -1,5 +1,13 @@
 {
   "description": "Windows Scheduled Task Activity",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Scheduled Task Activity",
   "query": "event.code:1 and (process.name:schtasks.exe or process.name:taskeng.exe) or (event.code:1 and process.name:svchost.exe and not process.parent.executable: \"C:\\Windows\\System32\\services.exe\" )",

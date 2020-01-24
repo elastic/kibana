@@ -1,6 +1,14 @@
 {
   "description": "Linux: Netcat Network Connection",
-    "language": "kuery",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
   "name": "Linux: Netcat Network Activity",
   "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional) and event.action: (connected-to or bound-socket or socket_opened)",
   "risk_score": 50,

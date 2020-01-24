@@ -1,5 +1,13 @@
 {
   "description": "Windows Persistence or Priv Escalation via Hooking",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Persistence or Priv Escalation via Hooking",
   "query": "event.code:1 and process.name:mavinject.exe and processs.args:*INJECTRUNNING*",

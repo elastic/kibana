@@ -1,5 +1,13 @@
 {
   "description": "Process Execution via WMI",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Process Execution via WMI",
   "query": "process.name:scrcons.exe",

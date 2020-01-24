@@ -1,5 +1,13 @@
 {
   "description": "Windows Data Compression Using Powershell",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Windows Data Compression Using Powershell",
   "query": "event.code: 1 and process.name:powershell.exe and (process.args:*Recurse* and process.args:*Compress-Archive*)",

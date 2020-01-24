@@ -1,5 +1,13 @@
 {
   "description": "Identifies the use of certutil.exe to encode or decode data. CertUtil is a native Windows component which is part of Certificate Services. CertUtil is often abused by attackers to encode or decode base64 data for stealthier command and control or exfiltration.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "name": "Encoding or Decoding Files via CertUtil",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and    process.name:\"certutil.exe\" and    process.args:(\"-encode\" or \"/encode\" or \"-decode\" or \"/decode\")",
