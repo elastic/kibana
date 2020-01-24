@@ -25,6 +25,7 @@ import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from '../config/types';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
+import { aggParamsMap } from './agg_params_map';
 import {
   aggTypeFilters,
   aggTypeFieldFilters,
@@ -86,14 +87,19 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 
     const type = param.advanced ? 'advanced' : 'basic';
 
+    const aggType = agg.type.type;
+    const aggName = agg.type.name;
+    const aggParams = get(aggParamsMap, [aggType, aggName], {});
+    const paramEditor = aggParams[param.name] || aggParamsMap.common[param.type];
+
     // show params with an editor component
-    if (param.editorComponent) {
+    if (paramEditor) {
       params[type].push({
         agg,
         aggParam: param,
         editorConfig,
         indexedFields,
-        paramEditor: param.editorComponent,
+        paramEditor,
         metricAggs,
         state,
         value: agg.params[param.name],

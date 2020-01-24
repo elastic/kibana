@@ -58,7 +58,7 @@ export function initEditorDirective(app, deps) {
     };
   });
 
-  initVisEditorDirective(app);
+  initVisEditorDirective(app, deps);
   initVisualizationDirective(app, deps);
 }
 

@@ -27,6 +27,7 @@ import { createFilterFilters } from './create_filter/filters';
 import { BucketAggType } from './_bucket_agg_type';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { getQueryLog, esQuery, Query } from '../../../../../plugins/data/public';
+import { BUCKET_TYPES } from './bucket_agg_types';
 
 const config = chrome.getUiSettingsClient();
 const storage = new Storage(window.localStorage);
@@ -44,7 +45,7 @@ interface FilterValue {
 }
 
 export const filtersBucketAgg = new BucketAggType({
-  name: 'filters',
+  name: BUCKET_TYPES.FILTERS,
   title: filtersTitle,
   createFilter: createFilterFilters,
   customLabels: false,
@@ -57,7 +58,12 @@ export const filtersBucketAgg = new BucketAggType({
         if (!_.size(inFilters)) return;
 
         inFilters.forEach(filter => {
-          const persistedLog = getQueryLog(config, storage, 'filtersAgg', filter.input.language);
+          const persistedLog = getQueryLog(
+            config,
+            storage,
+            'vis_default_editor',
+            filter.input.language
+          );
           persistedLog.add(filter.input.query);
         });
 

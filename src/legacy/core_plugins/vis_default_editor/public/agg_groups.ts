@@ -23,7 +23,6 @@ import { $Values } from '@kbn/utility-types';
 export const AggGroupNames = Object.freeze({
   Buckets: 'buckets' as 'buckets',
   Metrics: 'metrics' as 'metrics',
-  None: 'none' as 'none',
 });
 export type AggGroupNames = $Values<typeof AggGroupNames>;
 

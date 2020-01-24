@@ -21,13 +21,8 @@ import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { npStart } from 'ui/new_platform';
-import { Query, QueryStringInput } from 'src/plugins/data/public';
-import { Storage } from 'src/plugins/kibana_utils/public';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { Query, QueryStringInput } from '../../../../../../plugins/data/public';
 import { AggConfig } from '../../legacy_imports';
-
-const localStorage = new Storage(window.localStorage);
 
 interface FilterRowProps {
   id: string;
@@ -85,7 +80,6 @@ function FilterRow({
     </div>
   );
 
-  // TODO: KibanaContextProvider should be raised to the top of the vis plugin
   return (
     <EuiForm>
       <EuiFormRow
@@ -93,24 +87,15 @@ function FilterRow({
         labelAppend={FilterControl}
         fullWidth={true}
       >
-        <KibanaContextProvider
-          services={{
-            appName: 'filtersAgg',
-            storage: localStorage,
-            data: npStart.plugins.data,
-            ...npStart.core,
-          }}
-        >
-          <QueryStringInput
-            query={value}
-            indexPatterns={[agg.getIndexPattern()]}
-            onChange={(query: Query) => onChangeValue(id, query, customLabel)}
-            disableAutoFocus={!autoFocus}
-            dataTestSubj={dataTestSubj}
-            bubbleSubmitEvent={true}
-            languageSwitcherPopoverAnchorPosition="leftDown"
-          />
-        </KibanaContextProvider>
+        <QueryStringInput
+          query={value}
+          indexPatterns={[agg.getIndexPattern()]}
+          onChange={(query: Query) => onChangeValue(id, query, customLabel)}
+          disableAutoFocus={!autoFocus}
+          dataTestSubj={dataTestSubj}
+          bubbleSubmitEvent={true}
+          languageSwitcherPopoverAnchorPosition="leftDown"
+        />
       </EuiFormRow>
       {showCustomLabel ? (
         <EuiFormRow

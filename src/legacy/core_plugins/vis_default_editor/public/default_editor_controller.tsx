@@ -24,8 +24,12 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
 import { VisSavedObject } from 'src/legacy/core_plugins/visualizations/public/embeddable/visualize_embeddable';
+import { Storage } from '../../../../plugins/kibana_utils/public';
+import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
 import { DefaultEditor } from './default_editor';
 import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
+
+const localStorage = new Storage(window.localStorage);
 
 export interface DefaultEditorControllerState {
   savedObj: VisSavedObject;
@@ -72,10 +76,19 @@ class DefaultEditorController {
     };
   }
 
-  render(props: EditorRenderProps) {
+  render({ data, core, ...props }: EditorRenderProps) {
     render(
       <I18nProvider>
-        <DefaultEditor {...this.state} {...props} />
+        <KibanaContextProvider
+          services={{
+            appName: 'vis_default_editor',
+            storage: localStorage,
+            data,
+            ...core,
+          }}
+        >
+          <DefaultEditor {...this.state} {...props} />
+        </KibanaContextProvider>
       </I18nProvider>,
       this.el
     );

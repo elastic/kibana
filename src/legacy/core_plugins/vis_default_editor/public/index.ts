@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export { DefaultEditorController } from './default_editor_controller';
 export { DefaultEditorAggParams } from './components/agg_params';
 export { useValidation } from './components/controls/utils';
 export { RangesParamEditor, RangeValues } from './components/controls/ranges';

@@ -95,5 +95,7 @@ export { AggParam } from './agg_params';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
+export { BUCKET_TYPES } from './buckets/bucket_agg_types';
+export { METRIC_TYPES } from './metrics/metric_agg_types';
 
 export { setBounds };

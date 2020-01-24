@@ -18,7 +18,16 @@
  */
 
 /* `ui/agg_types` dependencies */
-export { AggType, AggConfig, AggConfigs, AggParam, aggTypes, FieldParamType } from 'ui/agg_types';
+export {
+  AggType,
+  AggConfig,
+  AggConfigs,
+  AggParam,
+  aggTypes,
+  FieldParamType,
+  BUCKET_TYPES,
+  METRIC_TYPES,
+} from 'ui/agg_types';
 export { aggTypeFilters, propFilter } from 'ui/agg_types/filter';
 export { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
 export { AggParamType } from 'ui/agg_types/param_types/agg';
