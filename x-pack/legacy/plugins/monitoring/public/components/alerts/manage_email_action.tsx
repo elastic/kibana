@@ -21,7 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionResult } from '../../../../actions/server/types';
+import { ActionResult } from '../../../../../../plugins/actions/common';
 import { getMissingFieldErrors, hasErrors, getRequiredFieldError } from '../../lib/form_validation';
 import { ALERT_EMAIL_SERVICES } from '../../../common/constants';
 

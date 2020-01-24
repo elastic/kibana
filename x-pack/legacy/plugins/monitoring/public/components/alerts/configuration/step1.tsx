@@ -19,7 +19,7 @@ import {
 import { kfetch } from 'ui/kfetch';
 import { omit, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ActionResult } from '../../../../../actions/server/types';
+import { ActionResult } from '../../../../../../../plugins/actions/common';
 import { ManageEmailAction, EmailActionData } from '../manage_email_action';
 import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
 import { NEW_ACTION_ID } from './configuration';

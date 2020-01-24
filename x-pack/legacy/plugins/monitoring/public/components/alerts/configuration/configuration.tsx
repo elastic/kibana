@@ -8,7 +8,7 @@ import React, { ReactNode } from 'react';
 import { kfetch } from 'ui/kfetch';
 import { EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionResult } from '../../../../../actions/server/types';
+import { ActionResult } from '../../../../../../../plugins/actions/common';
 import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
 import { getMissingFieldErrors } from '../../../lib/form_validation';
 import { Step1 } from './step1';
