@@ -69,7 +69,6 @@ export function rollup(kibana: any) {
         },
       });
 
-      // registerFieldsForWildcardRoute(server);
       // if (
       //   server.plugins.index_management &&
       //   server.plugins.index_management.addIndexManagementDataEnricher

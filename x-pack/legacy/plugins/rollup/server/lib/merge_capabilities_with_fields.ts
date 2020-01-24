@@ -6,13 +6,18 @@
 
 // Merge rollup capabilities information with field information
 
+export interface Field {
+  name?: string;
+  [key: string]: any;
+}
+
 export const mergeCapabilitiesWithFields = (
-  rollupIndexCapabilities,
-  fieldsFromFieldCapsApi,
-  previousFields = []
+  rollupIndexCapabilities: { [key: string]: any },
+  fieldsFromFieldCapsApi: { [key: string]: any },
+  previousFields: Field[] = []
 ) => {
   const rollupFields = [...previousFields];
-  const rollupFieldNames = [];
+  const rollupFieldNames: string[] = [];
 
   Object.keys(rollupIndexCapabilities).forEach(agg => {
     // Field names of the aggregation

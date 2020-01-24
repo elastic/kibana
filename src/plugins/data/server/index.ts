@@ -60,6 +60,7 @@ export {
   FieldDescriptor,
   shouldReadFieldFromDocValues,
   indexPatterns,
+  getFieldsForWildcard,
 } from './index_patterns';
 export * from './search';
 export {

@@ -14,7 +14,7 @@ import { ServerShim, RouteDependencies } from './types';
 
 import {
   registerIndicesRoute,
-  // registerFieldsForWildcardRoute,
+  registerFieldsForWildcardRoute,
   registerSearchRoute,
   registerJobsRoute,
 } from './routes/api';
@@ -48,7 +48,7 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
     );
 
     registerIndicesRoute(routeDependencies, serverShim);
-    // registerFieldsForWildcardRoute(routeDependencies);
+    registerFieldsForWildcardRoute(routeDependencies, serverShim);
     registerSearchRoute(routeDependencies, serverShim);
     registerJobsRoute(routeDependencies, serverShim);
 
