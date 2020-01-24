@@ -45,23 +45,7 @@ function animationIsActive(animation: CameraAnimationState, time: Date): boolean
 export const scale: (state: CameraState) => (time: Date) => Vector2 = createSelector(
   state => state.scalingFactor,
   state => state.animation,
-  state => {
-    /**
-     * Calculate the viewableBoundingBox without taking animation into account,
-     * otherwise you'd have circular logic since the scale, during animation,
-     * depends on viewableBoundingBox and the viewableBoundingBox always depends on
-     * scale.
-     */
-    if (state.animation) {
-      return viewableBoundingBox({
-        ...state,
-        animation: undefined,
-      });
-    } else {
-      return null;
-    }
-  },
-  (scalingFactor, animation, maybeViewableBoundingBox) => time => {
+  (scalingFactor, animation) => time => {
     const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
     if (
       animation !== undefined &&
@@ -69,26 +53,12 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
       animationIsGreaterThanNudge(animation, scaleNotCountingAnimation)
     ) {
       /**
-       * 0 meaning it just started,
-       * 1 meaning it is done.
-       */
-      // TODO make this a reusable function?
-      const animationProgress = clamp(
-        (time.getTime() - animation.startTime.getTime()) / animation.duration,
-        0,
-        1
-      );
-
-      /**
        * `t` goes from 0 -> 1 -> 0 at a linear rate as `animationProgress` goes from 0 -> 1
        */
-      const t = -Math.abs(2 * animationProgress - 1) + 1;
+      const t = -Math.abs(2 * animationProgress(animation, time) - 1) + 1;
 
       const easedValue = easing.inOutCubic(t);
 
-      /**
-       * play the animation at double speed, then at double speed in reverse.
-       */
       return vector2.lerp(
         scaleNotCountingAnimation,
         vector2.clamp(
@@ -109,8 +79,6 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
     }
   }
 );
-
-// TODO test that projection matrix doesn't change when simply moving the mouse?
 
 /**
  * The 2D clipping planes used for the orthographic projection. See https://en.wikipedia.org/wiki/Orthographic_projection
@@ -185,24 +153,11 @@ export const translation: (state: CameraState) => (time: Date) => Vector2 = crea
   (panning, translationNotCountingCurrentPanning, scaleAtTime, animation) => {
     return (time: Date) => {
       const [scaleX, scaleY] = scaleAtTime(time);
-      // TODO, calculate this inline somehow? or call a version that takes state and is a
-      // type predicate?
       if (animation !== undefined && animationIsActive(animation, time)) {
-        const delta = vector2.subtract(animation.targetTranslation, animation.initialTranslation);
-        const progress = clamp(
-          (time.getTime() - animation.startTime.getTime()) / animation.duration,
-          0,
-          1
-        );
-
-        /**
-         * play the animation at double speed, then at double speed in reverse.
-         */
-        // const inOutProgress = -Math.abs(2 * progress - 1) + 1;
-
-        return vector2.add(
+        return vector2.lerp(
           animation.initialTranslation,
-          vector2.scale(delta, easing.inOutCubic(progress))
+          animation.targetTranslation,
+          easing.inOutCubic(animationProgress(animation, time))
         );
       } else if (panning) {
         const changeInPanningOffset = vector2.subtract(panning.currentOffset, panning.origin);
@@ -380,4 +335,13 @@ function animationIsGreaterThanNudge(
       )
     )
   );
+}
+
+/**
+ * Returns a number 0<=n<=1 where:
+ * 0 meaning it just started,
+ * 1 meaning it is done.
+ */
+function animationProgress(animation: CameraAnimationState, time: Date): number {
+  return clamp((time.getTime() - animation.startTime.getTime()) / animation.duration, 0, 1);
 }
