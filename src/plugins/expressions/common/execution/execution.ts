@@ -18,15 +18,19 @@
  */
 
 // @ts-ignore
-import { fromExpression, getByAlias } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter/common';
 
 import { clone, each, keys, last, mapValues, reduce, zipObject } from 'lodash';
-import { Executor, getType } from '../executor';
+import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer } from '../../../kibana_utils/common';
-import { isExpressionValueError } from '../expression_types/error';
-import { ExpressionAstExpression } from '../parser';
+import { isExpressionValueError } from '../expression_types/specs/error';
+import { ExpressionAstExpression, ExpressionAstFunction } from '../parser';
+import { ExecutionContext } from './types';
+import { getType } from '../expression_types';
+import { AnyExpressionFunctionDefinition, ArgumentType } from '../expression_functions';
+import { getByAlias } from './get_by_alias';
 
 export interface ExecutionParams {
   executor: Executor;
