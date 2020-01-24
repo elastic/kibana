@@ -90,9 +90,9 @@ WARNING: Setting this to `true` when {es} is using certificates to authenticate 
 end users being executed as the identity tied to the {kib} server.
 
 `elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Paths to a PEM-encoded X.509 client certificate and its corresponding
-private key. These are used by {kib} to authenticate when making outbound SSL/TLS connections to {es}. For this setting to take effect, the
-`xpack.security.http.ssl.client_authentication` setting in {es} must be also be set to `"required"` or `"optional"` to request a client
-certificate from {kib}.
+private key. These are used by {kib} to authenticate itself when making outbound SSL/TLS connections to {es}. For this setting to take
+effect, the `xpack.security.http.ssl.client_authentication` setting in {es} must be also be set to `"required"` or `"optional"` to request a
+client certificate from {kib}.
 +
 NOTE: These settings cannot be used in conjunction with `elasticsearch.ssl.keystore.path`.
 
@@ -106,7 +106,7 @@ In addition to this setting, trusted certificates may be specified via `elastics
 `elasticsearch.ssl.key`. This value is optional, as the key may not be encrypted.
 
 `elasticsearch.ssl.keystore.path:`:: Path to a PKCS#12 keystore that contains an X.509 client certificate and its corresponding private key.
-These are used by {kib} to authenticate when making outbound SSL/TLS connections to {es}. For this setting to take effect, the
+These are used by {kib} to authenticate itself when making outbound SSL/TLS connections to {es}. For this setting to take effect, the
 `xpack.security.http.ssl.client_authentication` setting in {es} must also be set to `"required"` or `"optional"` to request a client
 certificate from {kib}.
 +

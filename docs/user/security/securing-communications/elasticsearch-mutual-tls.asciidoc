@@ -6,10 +6,11 @@
 ++++
 
 Secure Sockets Layer (SSL) and Transport Layer Security (TLS) provide encryption for data-in-transit. While these terms are often used
-interchangeably, {kib} only supports TLS, which has superseded the old SSL protocols.
+interchangeably, {kib} only supports TLS, which supersedes the old SSL protocols.
 
-TLS requires X.509 certificates to perform encryption and authentication of the application that is being communicated with. {kib} supports
-certificates and private keys in PEM or PKCS#12 format.
+TLS requires X.509 certificates to authenticate the communicating parties and perform encryption of data-in-transit. Each certificate
+contains a public key and has and an associated -- but separate -- private key; these keys are used for cryptographic operations. {kib}
+supports certificates and private keys in PEM or PKCS#12 format.
 
 In a standard TLS configuration, the server presents a signed certificate to authenticate itself to the client. In a mutual TLS
 configuration, the client also presents a signed certificate to authenticate itself to the server.
@@ -28,7 +29,7 @@ subscription page].
 
 To configure {kib} and {es} to use mutual TLS authentication:
 
-. *<<using-kibana-with-security,Set up {kib} to work with {security}>> with a username and password.*
+. *<<using-kibana-with-security,Set up {kib} to work with {security} with a username and password>>.*
 
 . *<<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.*
 +
@@ -48,11 +49,11 @@ certificate. For example:
 
 [source,sh]
 --------------------------------------------------------------------------------
-bin/elasticsearch-certutil cert -ca elastic-stack-ca.p12 -name kibana-client -dns <your_kibana_host>.com
+bin/elasticsearch-certutil cert -ca elastic-stack-ca.p12 -name kibana-client -dns <your_kibana_hostname>
 --------------------------------------------------------------------------------
 
 This will generate a client certificate and private key in a PKCS#12 file named `kibana-client.p12`. In this example, the client certificate
-has a Common Name (CN) of `"kibana-client"` and a subject alternative name (SAN) of `"<your_kibana_host>.com"`. The SAN may be required if
+has a Common Name (CN) of `"kibana-client"` and a subject alternative name (SAN) of `"<your_kibana_hostname>"`. The SAN may be required if
 you have hostname verification enabled on {es}.
 --
 
@@ -100,7 +101,7 @@ xpack.security.http.ssl.client_authentication: "optional"
 
 . *Restart {es}.*
 
-. *Use {kib} to create a <<role-mappings,role mapping>> in {es} for the client certificate.*
+. *Use {kib} to create a role mapping in {es} for the client certificate.*
 +
 --
 This role mapping will assign the `kibana_system` role to any user that matches the included mapping rule, which is set to equal the client
@@ -108,13 +109,15 @@ certificate's DN attribute:
 
 [role="screenshot"]
 image:user/security/images/mutual-tls-role-mapping.png["Role mapping for the {kib} client certificate"]
+
+For more information, see <<role-mappings,role mappings>>.
 --
 
 . *Configure {kib} to use the client certificate and private key.*
 +
 You need to specify the information required to access your client certificate and corresponding private key.
 
-.. If your certificate and private key are in a PKCS#12 file:
+.. If your certificate and private key are contained in a PKCS#12 file:
 +
 --
 Specify your PKCS#12 file in `kibana.yml`:
