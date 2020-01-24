@@ -71,7 +71,7 @@
 
 .conApp__resizer {
   @include kbnResizer;
-  // Give the aria selection border priority when the divider is selected
+  // Give the aria selection border priority when the divider is selected on IE11 and Chrome
   z-index: $euiZLevel1;
 }
 
