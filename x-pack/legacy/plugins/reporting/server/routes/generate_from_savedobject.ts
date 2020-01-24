@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { get } from 'lodash';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
-import { ServerFacade, ReportingResponseToolkit } from '../../types';
+import { ServerFacade, ReportingResponseToolkit, Logger } from '../../types';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { makeRequestFacade } from './lib/make_request_facade';
@@ -25,9 +25,10 @@ import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject
 export function registerGenerateCsvFromSavedObject(
   server: ServerFacade,
   handleRoute: HandlerFunction,
-  handleRouteError: HandlerErrorFunction
+  handleRouteError: HandlerErrorFunction,
+  logger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server);
+  const routeOptions = getRouteOptionsCsv(server, logger);
 
   server.route({
     path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,

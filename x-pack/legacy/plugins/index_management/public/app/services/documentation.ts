@@ -40,13 +40,17 @@ class DocumentationService {
     return `${this.kibanaDocsBase}/managing-indices.html`;
   }
 
-  public getTypeDocLink = (type: DataType, uri = 'main'): string | undefined => {
+  public getTypeDocLink = (type: DataType, docType = 'main'): string | undefined => {
     const typeDefinition = TYPE_DEFINITION[type];
 
-    if (!typeDefinition || !typeDefinition.documentation || !typeDefinition.documentation[uri]) {
+    if (
+      !typeDefinition ||
+      !typeDefinition.documentation ||
+      !typeDefinition.documentation[docType]
+    ) {
       return undefined;
     }
-    return `${this.esDocsBase}${typeDefinition.documentation[uri]}`;
+    return `${this.esDocsBase}${typeDefinition.documentation[docType]}`;
   };
 
   public getMappingTypesLink() {
@@ -177,8 +181,20 @@ class DocumentationService {
     return `${this.esDocsBase}/index-options.html`;
   }
 
+  public getAlternativeToMappingTypesLink() {
+    return `${this.esDocsBase}/removal-of-types.html#_alternatives_to_mapping_types`;
+  }
+
   public getJoinMultiLevelsPerformanceLink() {
     return `${this.esDocsBase}/parent-join.html#_parent_join_and_performance`;
+  }
+
+  public getDynamicLink() {
+    return `${this.esDocsBase}/dynamic.html`;
+  }
+
+  public getEnabledLink() {
+    return `${this.esDocsBase}/enabled.html`;
   }
 
   public getWellKnownTextLink() {
