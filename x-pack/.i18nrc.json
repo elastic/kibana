@@ -1,7 +1,7 @@
 {
   "prefix": "xpack",
   "paths": {
-    "xpack.actions": "legacy/plugins/actions",
+    "xpack.actions": "plugins/actions",
     "xpack.advancedUiActions": "plugins/advanced_ui_actions",
     "xpack.alerting": "legacy/plugins/alerting",
     "xpack.triggersActionsUI": "legacy/plugins/triggers_actions_ui",
@@ -40,7 +40,7 @@
     "xpack.transform": "legacy/plugins/transform",
     "xpack.upgradeAssistant": "legacy/plugins/upgrade_assistant",
     "xpack.uptime": "legacy/plugins/uptime",
-    "xpack.watcher": "legacy/plugins/watcher"
+    "xpack.watcher": "plugins/watcher"
   },
   "translations": [
     "plugins/translations/translations/zh-CN.json",

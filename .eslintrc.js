@@ -262,6 +262,8 @@ module.exports = {
                   'src/core/server/**/*',
                   '(src|x-pack)/plugins/*/server/**/*',
                   'examples/**/server/**/*',
+                  // TODO: Remove the 'joi' eslint rule once IE11 support is dropped
+                  'joi',
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',
