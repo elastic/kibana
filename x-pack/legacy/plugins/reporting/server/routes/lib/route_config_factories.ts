@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
-import { ServerFacade } from '../../../types';
+import { ServerFacade, Logger } from '../../../types';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import { reportingFeaturePreRoutingFactory } from './reporting_feature_pre_routing';
 import { GetReportingFeatureIdFn } from './reporting_feature_pre_routing';
@@ -25,9 +25,12 @@ export type GetRouteConfigFactoryFn = (
   getFeatureId?: GetReportingFeatureIdFn
 ) => RouteConfigFactory;
 
-export function getRouteConfigFactoryReportingPre(server: ServerFacade): GetRouteConfigFactoryFn {
-  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
-  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
+export function getRouteConfigFactoryReportingPre(
+  server: ServerFacade,
+  logger: Logger
+): GetRouteConfigFactoryFn {
+  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server, logger);
+  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server, logger);
 
   return (getFeatureId?: GetReportingFeatureIdFn): RouteConfigFactory => {
     const preRouting: any[] = [{ method: authorizedUserPreRouting, assign: 'user' }];
@@ -42,8 +45,8 @@ export function getRouteConfigFactoryReportingPre(server: ServerFacade): GetRout
   };
 }
 
-export function getRouteOptionsCsv(server: ServerFacade) {
-  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
+export function getRouteOptionsCsv(server: ServerFacade, logger: Logger) {
+  const getRouteConfig = getRouteConfigFactoryReportingPre(server, logger);
   return {
     ...getRouteConfig(() => CSV_FROM_SAVEDOBJECT_JOB_TYPE),
     validate: {
@@ -63,9 +66,12 @@ export function getRouteOptionsCsv(server: ServerFacade) {
   };
 }
 
-export function getRouteConfigFactoryManagementPre(server: ServerFacade): GetRouteConfigFactoryFn {
-  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server);
-  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server);
+export function getRouteConfigFactoryManagementPre(
+  server: ServerFacade,
+  logger: Logger
+): GetRouteConfigFactoryFn {
+  const authorizedUserPreRouting = authorizedUserPreRoutingFactory(server, logger);
+  const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(server, logger);
   const managementPreRouting = reportingFeaturePreRouting(() => 'management');
 
   return (): RouteConfigFactory => {
@@ -83,8 +89,11 @@ export function getRouteConfigFactoryManagementPre(server: ServerFacade): GetRou
 // TOC at the end of the PDF, but it's sending multiple cookies and causing our auth to fail with a 401.
 // Additionally, the range-request doesn't alleviate any performance issues on the server as the entire
 // download is loaded into memory.
-export function getRouteConfigFactoryDownloadPre(server: ServerFacade): GetRouteConfigFactoryFn {
-  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server);
+export function getRouteConfigFactoryDownloadPre(
+  server: ServerFacade,
+  logger: Logger
+): GetRouteConfigFactoryFn {
+  const getManagementRouteConfig = getRouteConfigFactoryManagementPre(server, logger);
   return (): RouteConfigFactory => ({
     ...getManagementRouteConfig(),
     tags: [API_TAG],
