@@ -35,7 +35,8 @@ export default function({ getService }: FtrProviderContext) {
         endgameRegistry: 1,
         endgameSecurity: 4,
         filebeatSystemModule: 0,
-        winlogbeat: 1,
+        winlogbeatSecurity: 0,
+        winlogbeatMWSysmonOperational: 0,
         __typename: 'OverviewHostData',
       };
 

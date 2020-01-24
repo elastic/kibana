@@ -117,11 +117,24 @@ export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] =>
     id: 'filebeatSystemModule',
   },
   {
-    count: data.winlogbeat ?? 0,
+    count: data.winlogbeatSecurity ?? 0,
     title: (
-      <FormattedMessage id="xpack.siem.overview.winlogbeatTitle" defaultMessage="Winlogbeat" />
+      <FormattedMessage
+        id="xpack.siem.overview.winlogbeatSecurityTitle"
+        defaultMessage="Security"
+      />
     ),
-    id: 'winlogbeat',
+    id: 'winlogbeatSecurity',
+  },
+  {
+    count: data.winlogbeatMWSysmonOperational ?? 0,
+    title: (
+      <FormattedMessage
+        id="xpack.siem.overview.winlogbeatMWSysmonOperational"
+        defaultMessage="Microsoft-Windows-Sysmon/Operational"
+      />
+    ),
+    id: 'winlogbeatMWSysmonOperational',
   },
 ];
 
@@ -182,7 +195,7 @@ const hostStatGroups: StatGroup[] = [
         defaultMessage="Winlogbeat"
       />
     ),
-    statIds: ['winlogbeat'],
+    statIds: ['winlogbeatSecurity', 'winlogbeatMWSysmonOperational'],
   },
 ];
 
