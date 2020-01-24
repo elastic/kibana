@@ -21,9 +21,9 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectLoader } from 'ui/saved_objects';
-import { createSavedVisLoader } from '../visualize';
 import { createSavedDashboardLoader } from '../dashboard';
 import { createSavedSearchesLoader } from '../discover';
+import { TypesService, createSavedVisLoader } from '../../../visualizations/public';
 
 /**
  * This registry is used for the editing mode of Saved Searches, Visualizations,
@@ -58,7 +58,10 @@ const services = {
 
 savedObjectManagementRegistry.register({
   id: 'savedVisualizations',
-  service: createSavedVisLoader(services),
+  service: createSavedVisLoader({
+    ...services,
+    ...{ visualizationTypes: new TypesService().start() },
+  }),
   title: 'visualizations',
 });
 
