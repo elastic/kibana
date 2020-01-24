@@ -81,7 +81,7 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
             response: [response],
           },
           loading: isLoadingSignals,
-          refetch: refetch as inputsModel.Refetch,
+          refetch,
         });
       }
     }, [registerQuery, isLoadingSignals, signalsData, response, request, refetch]);
