@@ -111,12 +111,20 @@ function createCoreSetupMock() {
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
   };
+
+  const savedObjectsService = savedObjectsServiceMock.createSetupContract();
+  const savedObjectMock: jest.Mocked<CoreSetup['savedObjects']> = {
+    addClientWrapper: savedObjectsService.addClientWrapper,
+    setClientFactoryProvider: savedObjectsService.setClientFactoryProvider,
+    registerMappings: jest.fn(),
+  };
+
   const mock: CoreSetupMockType = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
-    savedObjects: savedObjectsServiceMock.createSetupContract(),
+    savedObjects: savedObjectMock,
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
     getStartServices: jest

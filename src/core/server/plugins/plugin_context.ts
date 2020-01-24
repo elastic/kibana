@@ -168,6 +168,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
+      registerMappings: deps.savedObjects.registerMappings.bind(null, plugin.name),
     },
     uiSettings: {
       register: deps.uiSettings.register,

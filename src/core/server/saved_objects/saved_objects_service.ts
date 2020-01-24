@@ -27,6 +27,7 @@ import {
   SavedObjectsClientProviderOptions,
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
+import { SavedObjectsTypeMappingDefinitions } from './mappings';
 import { CoreContext } from '../core_context';
 import { LegacyServiceDiscoverPlugins } from '../legacy';
 import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
@@ -100,13 +101,19 @@ export interface SavedObjectsServiceSetup {
   ) => void;
 
   // registerMapping: (type: string, mapping: SavedObjectsMapping) => void;
-  // registerMappingFile: (mappings: Map<string, SOMapping>) => void;
+  /**
+   * TODO: doc + exemple
+   */
+  registerMappings: (mappings: SavedObjectsTypeMappingDefinitions) => void;
 }
 
 /**
  * @internal
  */
-export type InternalSavedObjectsServiceSetup = SavedObjectsServiceSetup;
+export interface InternalSavedObjectsServiceSetup
+  extends Omit<SavedObjectsServiceSetup, 'registerMappings'> {
+  registerMappings: (pluginId: string, mappings: SavedObjectsTypeMappingDefinitions) => void;
+}
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
@@ -250,6 +257,15 @@ export class SavedObjectsService
           id,
           factory,
         });
+      },
+      registerMappings: (pluginId, mappings) => {
+        this.mappings.push(
+          ...Object.entries(mappings).map(([type, definition]) => ({
+            pluginId,
+            type,
+            definition,
+          }))
+        );
       },
     };
   }
