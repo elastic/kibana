@@ -269,6 +269,7 @@ class SavedObjectFinderUi extends React.Component<
     this.setState(
       {
         isFetchingItems: true,
+        page: 0,
       },
       this.debouncedFetch.bind(null, this.state.query)
     );
