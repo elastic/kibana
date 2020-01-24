@@ -857,7 +857,30 @@ describe('import rules schema', () => {
       );
     });
 
-    test('You can optionally set the immutable to be true', () => {
+    test('You can optionally set the immutable to be false', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannnot set immutable to be true', () => {
       expect(
         importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
           rule_id: 'rule-1',
@@ -876,8 +899,8 @@ describe('import rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-        }).error
-      ).toBeFalsy();
+        }).error.message
+      ).toEqual('child "immutable" fails because ["immutable" must be one of [false]]');
     });
 
     test('You cannot set the immutable to be a number', () => {
@@ -914,7 +937,7 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
@@ -937,7 +960,7 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
@@ -960,7 +983,7 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
@@ -983,7 +1006,7 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
@@ -1006,7 +1029,7 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
@@ -1032,7 +1055,7 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
@@ -1056,7 +1079,7 @@ describe('import rules schema', () => {
           description: 'some description',
           from: 'now-5m',
           to: 'now',
-          immutable: true,
+          immutable: false,
           index: ['index-1'],
           name: 'some-name',
           severity: 'low',
