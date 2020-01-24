@@ -173,7 +173,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                         {headerFilterGroup}
                       </HeaderSection>
 
-                      {utilityBar?.(refetch as inputsModel.Refetch, totalCountMinusDeleted)}
+                      {utilityBar?.(refetch, totalCountMinusDeleted)}
 
                       <div
                         data-test-subj={`events-container-loading-${loading}`}
