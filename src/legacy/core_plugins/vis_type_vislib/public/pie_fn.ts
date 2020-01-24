@@ -24,7 +24,7 @@ import {
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 
 const name = 'kibana_pie';
 
@@ -42,7 +42,7 @@ interface RenderValue {
 
 type Return = Promise<Render<RenderValue>>;
 
-export const createPieVisFn = (deps: KbnVislibVisTypesDependencies) => (): ExpressionFunction<
+export const createPieVisFn = (deps: VisTypeVislibDependencies) => (): ExpressionFunction<
   typeof name,
   Context,
   Arguments,

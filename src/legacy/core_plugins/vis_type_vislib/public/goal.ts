@@ -23,10 +23,10 @@ import { Schemas, AggGroupNames } from './legacy_imports';
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
 import { createVislibVisController } from './vis_controller';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 import { ColorSchemas } from '../../../../plugins/charts/public';
 
-export const createGoalVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'goal',
   title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',

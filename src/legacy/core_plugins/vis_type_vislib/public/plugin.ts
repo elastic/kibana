@@ -26,7 +26,7 @@ import {
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
-import { createKbnVislibVisTypesFn } from './vis_type_vislib_vis_fn';
+import { createVisTypeVislibFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
 import {
   createHistogramVisTypeDefinition,
@@ -44,20 +44,20 @@ type ResponseHandlerProvider = () => {
   name: string;
   handler: (response: any, dimensions: any) => Promise<any>;
 };
-type KbnVislibVisTypesCoreSetup = CoreSetup<KbnVislibVisTypesPluginStartDependencies>;
+type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies>;
 
 export interface LegacyDependencies {
   vislibSeriesResponseHandlerProvider: ResponseHandlerProvider;
   vislibSlicesResponseHandlerProvider: ResponseHandlerProvider;
 }
 
-export type KbnVislibVisTypesDependencies = LegacyDependencies & {
+export type VisTypeVislibDependencies = LegacyDependencies & {
   uiSettings: IUiSettingsClient;
   charts: ChartsPluginSetup;
 };
 
 /** @internal */
-export interface KbnVislibVisTypesPluginSetupDependencies {
+export interface VisTypeVislibPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
@@ -65,26 +65,26 @@ export interface KbnVislibVisTypesPluginSetupDependencies {
 }
 
 /** @internal */
-export interface KbnVislibVisTypesPluginStartDependencies {
+export interface VisTypeVislibPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   visualizations: VisualizationsStart;
 }
 
 /** @internal */
-export class KbnVislibVisTypesPlugin implements Plugin<Promise<void>, void> {
+export class VisTypeVislibPlugin implements Plugin<Promise<void>, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(
-    core: KbnVislibVisTypesCoreSetup,
-    { expressions, visualizations, charts, __LEGACY }: KbnVislibVisTypesPluginSetupDependencies
+    core: VisTypeVislibCoreSetup,
+    { expressions, visualizations, charts, __LEGACY }: VisTypeVislibPluginSetupDependencies
   ) {
-    const visualizationDependencies: Readonly<KbnVislibVisTypesDependencies> = {
+    const visualizationDependencies: Readonly<VisTypeVislibDependencies> = {
       uiSettings: core.uiSettings,
       charts,
       ...__LEGACY,
     };
 
-    expressions.registerFunction(createKbnVislibVisTypesFn(visualizationDependencies));
+    expressions.registerFunction(createVisTypeVislibFn(visualizationDependencies));
     expressions.registerFunction(createPieVisFn(visualizationDependencies));
 
     [
@@ -99,7 +99,7 @@ export class KbnVislibVisTypesPlugin implements Plugin<Promise<void>, void> {
     ].forEach(vis => visualizations.types.createBaseVisualization(vis(visualizationDependencies)));
   }
 
-  public start(core: CoreStart, deps: KbnVislibVisTypesPluginStartDependencies) {
+  public start(core: CoreStart, deps: VisTypeVislibPluginStartDependencies) {
     // nothing to do here
   }
 }

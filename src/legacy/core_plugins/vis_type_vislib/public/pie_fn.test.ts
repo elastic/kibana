@@ -20,11 +20,11 @@
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 import { createPieVisFn } from './pie_fn';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 
 jest.mock('ui/new_platform');
 
-const deps: KbnVislibVisTypesDependencies = {
+const deps: VisTypeVislibDependencies = {
   vislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
 } as any;
 const mockResponseHandler = jest.fn().mockReturnValue(

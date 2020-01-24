@@ -24,7 +24,7 @@ import {
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
 
 const name = 'vislib';
 
@@ -44,8 +44,8 @@ interface RenderValue {
 
 type Return = Promise<Render<RenderValue>>;
 
-export const createKbnVislibVisTypesFn = (
-  deps: KbnVislibVisTypesDependencies
+export const createVisTypeVislibFn = (
+  deps: VisTypeVislibDependencies
 ) => (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
   name: 'vislib',
   type: 'render',

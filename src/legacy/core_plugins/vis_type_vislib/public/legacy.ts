@@ -29,15 +29,15 @@ import {
 
 import { plugin } from '.';
 import {
-  KbnVislibVisTypesPluginSetupDependencies,
-  KbnVislibVisTypesPluginStartDependencies,
+  VisTypeVislibPluginSetupDependencies,
+  VisTypeVislibPluginStartDependencies,
 } from './plugin';
 import {
   setup as visualizationsSetup,
   start as visualizationsStart,
 } from '../../visualizations/public/np_ready/public/legacy';
 
-const setupPlugins: Readonly<KbnVislibVisTypesPluginSetupDependencies> = {
+const setupPlugins: Readonly<VisTypeVislibPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
   charts: npSetup.plugins.charts,
@@ -47,7 +47,7 @@ const setupPlugins: Readonly<KbnVislibVisTypesPluginSetupDependencies> = {
   },
 };
 
-const startPlugins: Readonly<KbnVislibVisTypesPluginStartDependencies> = {
+const startPlugins: Readonly<VisTypeVislibPluginStartDependencies> = {
   expressions: npStart.plugins.expressions,
   visualizations: visualizationsStart,
 };
