@@ -16,14 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IndexPattern } from '../../../../kibana_services';
+// @ts-ignore
+import { isSortable } from './get_sort';
+import { SortOrder } from '../components/table_header/helpers';
 
-import { Env } from './env';
-
-export function createMockEnv(options: { dist?: boolean } = {}): Env {
-  return {
-    // required by CspConfig
-    packageInfo: {
-      dist: options.dist ?? true,
-    },
-  } as any;
+/**
+ * use in case the user didn't manually sort.
+ * the default sort is returned depending of the index pattern
+ */
+export function getDefaultSort(
+  indexPattern: IndexPattern,
+  defaultSortOrder: string = 'desc'
+): SortOrder[] {
+  if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName, indexPattern)) {
+    return [[indexPattern.timeFieldName, defaultSortOrder]];
+  } else {
+    return [['_score', defaultSortOrder]];
+  }
 }
