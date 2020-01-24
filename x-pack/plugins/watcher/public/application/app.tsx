@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Observable } from 'rxjs';
 import {
   ChromeStart,
   DocLinksStart,
@@ -47,12 +48,18 @@ export interface AppDeps {
   uiSettings: IUiSettingsClient;
   euiUtils: any;
   createTimeBuckets: () => any;
-  getLicenseStatus: () => LicenseStatus;
+  initialLicenseStatus: LicenseStatus;
+  licenseStatus$: Observable<LicenseStatus>;
   MANAGEMENT_BREADCRUMB: any;
 }
 
 export const App = (deps: AppDeps) => {
-  const { valid, message } = deps.getLicenseStatus();
+  const [{ valid, message }, setLicenseStatus] = useState(deps.initialLicenseStatus);
+
+  useEffect(() => {
+    const s = deps.licenseStatus$.subscribe(setLicenseStatus);
+    return () => s.unsubscribe();
+  }, [deps.licenseStatus$]);
 
   if (!valid) {
     return (
