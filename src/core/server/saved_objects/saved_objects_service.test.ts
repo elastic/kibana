@@ -105,6 +105,66 @@ describe('SavedObjectsService', () => {
         );
       });
     });
+
+    describe('#registerMappings', () => {
+      it('registers the mappings and uses them to create the migrator', async () => {
+        const coreContext = mockCoreContext.create();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        setup.registerMappings('pluginA', {
+          firstA: {
+            properties: {
+              field: { type: 'text' },
+            },
+          },
+          secondA: {
+            properties: {
+              field: { type: 'text' },
+            },
+          },
+        });
+        setup.registerMappings('pluginB', {
+          firstB: {
+            properties: {
+              field: { type: 'text' },
+            },
+          },
+        });
+
+        await soService.start({});
+
+        expect(KibanaMigratorMock.mock.calls[0][0].savedObjectMappings).toEqual([
+          {
+            pluginId: 'pluginA',
+            type: 'firstA',
+            definition: {
+              properties: {
+                field: { type: 'text' },
+              },
+            },
+          },
+          {
+            pluginId: 'pluginA',
+            type: 'secondA',
+            definition: {
+              properties: {
+                field: { type: 'text' },
+              },
+            },
+          },
+          {
+            pluginId: 'pluginB',
+            type: 'firstB',
+            definition: {
+              properties: {
+                field: { type: 'text' },
+              },
+            },
+          },
+        ]);
+      });
+    });
   });
 
   describe('#start()', () => {
