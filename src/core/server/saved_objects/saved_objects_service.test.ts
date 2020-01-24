@@ -164,6 +164,58 @@ describe('SavedObjectsService', () => {
           },
         ]);
       });
+
+      it('merges legacy mappings and mappings registered using the service', async () => {
+        const coreContext = mockCoreContext.create();
+        const soService = new SavedObjectsService(coreContext);
+        const setupDeps = createSetupDeps();
+
+        setupDeps.legacyPlugins.uiExports.savedObjectMappings = [
+          {
+            pluginId: 'legacyPlugin',
+            properties: {
+              legacyType: {
+                properties: {
+                  field: { type: 'text' },
+                },
+              },
+            },
+          },
+        ];
+
+        const setup = await soService.setup(setupDeps);
+
+        setup.registerMappings('pluginA', {
+          typeA: {
+            properties: {
+              field: { type: 'text' },
+            },
+          },
+        });
+
+        await soService.start({});
+
+        expect(KibanaMigratorMock.mock.calls[0][0].savedObjectMappings).toEqual([
+          {
+            pluginId: 'legacyPlugin',
+            type: 'legacyType',
+            definition: {
+              properties: {
+                field: { type: 'text' },
+              },
+            },
+          },
+          {
+            pluginId: 'pluginA',
+            type: 'typeA',
+            definition: {
+              properties: {
+                field: { type: 'text' },
+              },
+            },
+          },
+        ]);
+      });
     });
   });
 
