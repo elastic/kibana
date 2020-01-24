@@ -13,7 +13,7 @@ import {
   HeadlessChromiumDriverFactory,
   ReportingResponseToolkit,
   Logger,
-  JobDocOutputExecuted,
+  JobDocOutput,
 } from '../../types';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
@@ -33,7 +33,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   server: ServerFacade,
   parentLogger: Logger
 ) {
-  const routeOptions = getRouteOptionsCsv(server);
+  const routeOptions = getRouteOptionsCsv(server, parentLogger);
 
   /*
    * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
@@ -55,8 +55,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
        *
        * Calling an execute job factory requires passing a browserDriverFactory option, so we should not call the factory from here
        */
-      const createJobFn = createJobFactory(server);
-      const executeJobFn = executeJobFactory(server, {
+      const createJobFn = createJobFactory(server, logger);
+      const executeJobFn = executeJobFactory(server, logger, {
         browserDriverFactory: {} as HeadlessChromiumDriverFactory,
       });
       const jobDocPayload: JobDocPayloadPanelCsv = await createJobFn(
@@ -68,7 +68,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         content_type: jobOutputContentType,
         content: jobOutputContent,
         size: jobOutputSize,
-      }: JobDocOutputExecuted = await executeJobFn(null, jobDocPayload, request);
+      }: JobDocOutput = await executeJobFn(null, jobDocPayload, request);
 
       logger.info(`Job output size: ${jobOutputSize} bytes`);
 

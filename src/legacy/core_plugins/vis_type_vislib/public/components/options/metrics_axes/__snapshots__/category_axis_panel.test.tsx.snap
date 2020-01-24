@@ -19,6 +19,7 @@ exports[`CategoryAxisPanel component should init with the default set of props 1
     size="s"
   />
   <SelectOption
+    data-test-subj="categoryAxisPosition"
     label="Position"
     options={
       Array [

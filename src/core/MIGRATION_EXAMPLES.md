@@ -388,7 +388,7 @@ class Plugin {
           }),
         }
       },
-      router.wrapErrors((context, req, res) => {
+      router.handleLegacyErrors((context, req, res) => {
         throw Boom.notFound('not there'); // will be converted into proper New Platform error
       })
     )

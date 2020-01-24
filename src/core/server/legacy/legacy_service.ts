@@ -258,7 +258,11 @@ export class LegacyService implements CoreService {
   ) {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
-      savedObjects: { getScopedClient: startDeps.core.savedObjects.getScopedClient },
+      savedObjects: {
+        getScopedClient: startDeps.core.savedObjects.getScopedClient,
+        createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
+        createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+      },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
 
@@ -286,10 +290,8 @@ export class LegacyService implements CoreService {
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
       savedObjects: {
-        setClientFactory: setupDeps.core.savedObjects.setClientFactory,
+        setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
-        createInternalRepository: setupDeps.core.savedObjects.createInternalRepository,
-        createScopedRepository: setupDeps.core.savedObjects.createScopedRepository,
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,

@@ -92,247 +92,243 @@ interface OwnProps {
 
 type SignalsTableComponentProps = OwnProps & ReduxProps & DispatchProps;
 
-export const SignalsTableComponent = React.memo<SignalsTableComponentProps>(
-  ({
-    canUserCRUD,
-    clearEventsDeleted,
-    clearEventsLoading,
-    clearSelected,
-    defaultFilters = [],
-    from,
-    globalFilters,
-    globalQuery,
-    hasIndexWrite,
-    isSelectAllChecked,
-    loading,
-    loadingEventIds,
-    selectedEventIds,
-    setEventsDeleted,
-    setEventsLoading,
-    signalsIndex,
-    to,
-    updateTimeline,
-    updateTimelineIsLoading,
-  }) => {
-    const [selectAll, setSelectAll] = useState(false);
-    const apolloClient = useApolloClient();
+const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
+  canUserCRUD,
+  clearEventsDeleted,
+  clearEventsLoading,
+  clearSelected,
+  defaultFilters = [],
+  from,
+  globalFilters,
+  globalQuery,
+  hasIndexWrite,
+  isSelectAllChecked,
+  loading,
+  loadingEventIds,
+  selectedEventIds,
+  setEventsDeleted,
+  setEventsLoading,
+  signalsIndex,
+  to,
+  updateTimeline,
+  updateTimelineIsLoading,
+}) => {
+  const [selectAll, setSelectAll] = useState(false);
+  const apolloClient = useApolloClient();
 
-    const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
-    const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
-    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([signalsIndex]);
-    const kibana = useKibana();
+  const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
+  const [filterGroup, setFilterGroup] = useState<SignalFilterOption>(FILTER_OPEN);
+  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns([signalsIndex]);
+  const kibana = useKibana();
 
-    const getGlobalQuery = useCallback(() => {
-      if (browserFields != null && indexPatterns != null) {
-        return combineQueries({
-          config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-          dataProviders: [],
-          indexPattern: indexPatterns,
-          browserFields,
-          filters: globalFilters,
-          kqlQuery: globalQuery,
-          kqlMode: globalQuery.language,
-          start: from,
-          end: to,
-          isEventViewer: true,
-        });
-      }
-      return null;
-    }, [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]);
+  const getGlobalQuery = useCallback(() => {
+    if (browserFields != null && indexPatterns != null) {
+      return combineQueries({
+        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+        dataProviders: [],
+        indexPattern: indexPatterns,
+        browserFields,
+        filters: globalFilters,
+        kqlQuery: globalQuery,
+        kqlMode: globalQuery.language,
+        start: from,
+        end: to,
+        isEventViewer: true,
+      });
+    }
+    return null;
+  }, [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]);
 
-    // Callback for creating a new timeline -- utilized by row/batch actions
-    const createTimelineCallback = useCallback(
-      ({ from: fromTimeline, timeline, to: toTimeline }: CreateTimelineProps) => {
-        updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
-        updateTimeline({
-          duplicate: true,
-          from: fromTimeline,
-          id: 'timeline-1',
-          notes: [],
-          timeline: {
-            ...timeline,
-            show: true,
-          },
-          to: toTimeline,
-        })();
-      },
-      [updateTimeline, updateTimelineIsLoading]
-    );
+  // Callback for creating a new timeline -- utilized by row/batch actions
+  const createTimelineCallback = useCallback(
+    ({ from: fromTimeline, timeline, to: toTimeline }: CreateTimelineProps) => {
+      updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
+      updateTimeline({
+        duplicate: true,
+        from: fromTimeline,
+        id: 'timeline-1',
+        notes: [],
+        timeline: {
+          ...timeline,
+          show: true,
+        },
+        to: toTimeline,
+      })();
+    },
+    [updateTimeline, updateTimelineIsLoading]
+  );
 
-    const setEventsLoadingCallback = useCallback(
-      ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-        setEventsLoading!({ id: SIGNALS_PAGE_TIMELINE_ID, eventIds, isLoading });
-      },
-      [setEventsLoading, SIGNALS_PAGE_TIMELINE_ID]
-    );
+  const setEventsLoadingCallback = useCallback(
+    ({ eventIds, isLoading }: SetEventsLoadingProps) => {
+      setEventsLoading!({ id: SIGNALS_PAGE_TIMELINE_ID, eventIds, isLoading });
+    },
+    [setEventsLoading, SIGNALS_PAGE_TIMELINE_ID]
+  );
 
-    const setEventsDeletedCallback = useCallback(
-      ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-        setEventsDeleted!({ id: SIGNALS_PAGE_TIMELINE_ID, eventIds, isDeleted });
-      },
-      [setEventsDeleted, SIGNALS_PAGE_TIMELINE_ID]
-    );
+  const setEventsDeletedCallback = useCallback(
+    ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
+      setEventsDeleted!({ id: SIGNALS_PAGE_TIMELINE_ID, eventIds, isDeleted });
+    },
+    [setEventsDeleted, SIGNALS_PAGE_TIMELINE_ID]
+  );
 
-    // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
-    useEffect(() => {
-      if (!isSelectAllChecked) {
-        setShowClearSelectionAction(false);
-      } else {
-        setSelectAll(false);
-      }
-    }, [isSelectAllChecked]);
-
-    // Callback for when open/closed filter changes
-    const onFilterGroupChangedCallback = useCallback(
-      (newFilterGroup: SignalFilterOption) => {
-        clearEventsLoading!({ id: SIGNALS_PAGE_TIMELINE_ID });
-        clearEventsDeleted!({ id: SIGNALS_PAGE_TIMELINE_ID });
-        clearSelected!({ id: SIGNALS_PAGE_TIMELINE_ID });
-        setFilterGroup(newFilterGroup);
-      },
-      [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
-    );
-
-    // Callback for clearing entire selection from utility bar
-    const clearSelectionCallback = useCallback(() => {
-      clearSelected!({ id: SIGNALS_PAGE_TIMELINE_ID });
-      setSelectAll(false);
+  // Catches state change isSelectAllChecked->false upon user selection change to reset utility bar
+  useEffect(() => {
+    if (!isSelectAllChecked) {
       setShowClearSelectionAction(false);
-    }, [clearSelected, setSelectAll, setShowClearSelectionAction]);
+    } else {
+      setSelectAll(false);
+    }
+  }, [isSelectAllChecked]);
 
-    // Callback for selecting all events on all pages from utility bar
-    // Dispatches to stateful_body's selectAll via TimelineTypeContext props
-    // as scope of response data required to actually set selectedEvents
-    const selectAllCallback = useCallback(() => {
-      setSelectAll(true);
-      setShowClearSelectionAction(true);
-    }, [setSelectAll, setShowClearSelectionAction]);
+  // Callback for when open/closed filter changes
+  const onFilterGroupChangedCallback = useCallback(
+    (newFilterGroup: SignalFilterOption) => {
+      clearEventsLoading!({ id: SIGNALS_PAGE_TIMELINE_ID });
+      clearEventsDeleted!({ id: SIGNALS_PAGE_TIMELINE_ID });
+      clearSelected!({ id: SIGNALS_PAGE_TIMELINE_ID });
+      setFilterGroup(newFilterGroup);
+    },
+    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
+  );
 
-    const updateSignalsStatusCallback: UpdateSignalsStatus = useCallback(
-      async ({ signalIds, status }: UpdateSignalsStatusProps) => {
-        await updateSignalStatusAction({
-          query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
-          signalIds: Object.keys(selectedEventIds),
-          status,
-          setEventsDeleted: setEventsDeletedCallback,
-          setEventsLoading: setEventsLoadingCallback,
-        });
-      },
-      [
-        getGlobalQuery,
-        selectedEventIds,
-        setEventsDeletedCallback,
-        setEventsLoadingCallback,
-        showClearSelectionAction,
-      ]
-    );
+  // Callback for clearing entire selection from utility bar
+  const clearSelectionCallback = useCallback(() => {
+    clearSelected!({ id: SIGNALS_PAGE_TIMELINE_ID });
+    setSelectAll(false);
+    setShowClearSelectionAction(false);
+  }, [clearSelected, setSelectAll, setShowClearSelectionAction]);
 
-    // Callback for creating the SignalUtilityBar which receives totalCount from EventsViewer component
-    const utilityBarCallback = useCallback(
-      (totalCount: number) => {
-        return (
-          <SignalsUtilityBar
-            canUserCRUD={canUserCRUD}
-            areEventsLoading={loadingEventIds.length > 0}
-            clearSelection={clearSelectionCallback}
-            hasIndexWrite={hasIndexWrite}
-            isFilteredToOpen={filterGroup === FILTER_OPEN}
-            selectAll={selectAllCallback}
-            selectedEventIds={selectedEventIds}
-            showClearSelection={showClearSelectionAction}
-            totalCount={totalCount}
-            updateSignalsStatus={updateSignalsStatusCallback}
-          />
-        );
-      },
-      [
-        canUserCRUD,
-        hasIndexWrite,
-        clearSelectionCallback,
-        filterGroup,
-        loadingEventIds.length,
-        selectAllCallback,
-        selectedEventIds,
-        showClearSelectionAction,
-        updateSignalsStatusCallback,
-      ]
-    );
+  // Callback for selecting all events on all pages from utility bar
+  // Dispatches to stateful_body's selectAll via TimelineTypeContext props
+  // as scope of response data required to actually set selectedEvents
+  const selectAllCallback = useCallback(() => {
+    setSelectAll(true);
+    setShowClearSelectionAction(true);
+  }, [setSelectAll, setShowClearSelectionAction]);
 
-    // Send to Timeline / Update Signal Status Actions for each table row
-    const additionalActions = useMemo(
-      () =>
-        getSignalsActions({
-          apolloClient,
-          canUserCRUD,
-          hasIndexWrite,
-          createTimeline: createTimelineCallback,
-          setEventsLoading: setEventsLoadingCallback,
-          setEventsDeleted: setEventsDeletedCallback,
-          status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
-          updateTimelineIsLoading,
-        }),
-      [
+  const updateSignalsStatusCallback: UpdateSignalsStatus = useCallback(
+    async ({ signalIds, status }: UpdateSignalsStatusProps) => {
+      await updateSignalStatusAction({
+        query: showClearSelectionAction ? getGlobalQuery()?.filterQuery : undefined,
+        signalIds: Object.keys(selectedEventIds),
+        status,
+        setEventsDeleted: setEventsDeletedCallback,
+        setEventsLoading: setEventsLoadingCallback,
+      });
+    },
+    [
+      getGlobalQuery,
+      selectedEventIds,
+      setEventsDeletedCallback,
+      setEventsLoadingCallback,
+      showClearSelectionAction,
+    ]
+  );
+
+  // Callback for creating the SignalUtilityBar which receives totalCount from EventsViewer component
+  const utilityBarCallback = useCallback(
+    (totalCount: number) => {
+      return (
+        <SignalsUtilityBar
+          canUserCRUD={canUserCRUD}
+          areEventsLoading={loadingEventIds.length > 0}
+          clearSelection={clearSelectionCallback}
+          hasIndexWrite={hasIndexWrite}
+          isFilteredToOpen={filterGroup === FILTER_OPEN}
+          selectAll={selectAllCallback}
+          selectedEventIds={selectedEventIds}
+          showClearSelection={showClearSelectionAction}
+          totalCount={totalCount}
+          updateSignalsStatus={updateSignalsStatusCallback}
+        />
+      );
+    },
+    [
+      canUserCRUD,
+      hasIndexWrite,
+      clearSelectionCallback,
+      filterGroup,
+      loadingEventIds.length,
+      selectAllCallback,
+      selectedEventIds,
+      showClearSelectionAction,
+      updateSignalsStatusCallback,
+    ]
+  );
+
+  // Send to Timeline / Update Signal Status Actions for each table row
+  const additionalActions = useMemo(
+    () =>
+      getSignalsActions({
         apolloClient,
         canUserCRUD,
-        createTimelineCallback,
         hasIndexWrite,
-        filterGroup,
-        setEventsLoadingCallback,
-        setEventsDeletedCallback,
+        createTimeline: createTimelineCallback,
+        setEventsLoading: setEventsLoadingCallback,
+        setEventsDeleted: setEventsDeletedCallback,
+        status: filterGroup === FILTER_OPEN ? FILTER_CLOSED : FILTER_OPEN,
         updateTimelineIsLoading,
-      ]
-    );
-
-    const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
-    const defaultFiltersMemo = useMemo(
-      () => [
-        ...defaultFilters,
-        ...(filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters),
-      ],
-      [defaultFilters, filterGroup]
-    );
-
-    const timelineTypeContext = useMemo(
-      () => ({
-        documentType: i18n.SIGNALS_DOCUMENT_TYPE,
-        footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
-        loadingText: i18n.LOADING_SIGNALS,
-        queryFields: requiredFieldsForActions,
-        timelineActions: additionalActions,
-        title: i18n.SIGNALS_TABLE_TITLE,
-        selectAll: canUserCRUD ? selectAll : false,
       }),
-      [additionalActions, canUserCRUD, selectAll]
-    );
+    [
+      apolloClient,
+      canUserCRUD,
+      createTimelineCallback,
+      hasIndexWrite,
+      filterGroup,
+      setEventsLoadingCallback,
+      setEventsDeletedCallback,
+      updateTimelineIsLoading,
+    ]
+  );
 
-    if (loading || isEmpty(signalsIndex)) {
-      return (
-        <EuiPanel>
-          <HeaderSection title={i18n.SIGNALS_TABLE_TITLE} />
-          <EuiLoadingContent />
-        </EuiPanel>
-      );
-    }
+  const defaultIndices = useMemo(() => [signalsIndex], [signalsIndex]);
+  const defaultFiltersMemo = useMemo(
+    () => [
+      ...defaultFilters,
+      ...(filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters),
+    ],
+    [defaultFilters, filterGroup]
+  );
 
+  const timelineTypeContext = useMemo(
+    () => ({
+      documentType: i18n.SIGNALS_DOCUMENT_TYPE,
+      footerText: i18n.TOTAL_COUNT_OF_SIGNALS,
+      loadingText: i18n.LOADING_SIGNALS,
+      queryFields: requiredFieldsForActions,
+      timelineActions: additionalActions,
+      title: i18n.SIGNALS_TABLE_TITLE,
+      selectAll: canUserCRUD ? selectAll : false,
+    }),
+    [additionalActions, canUserCRUD, selectAll]
+  );
+
+  if (loading || isEmpty(signalsIndex)) {
     return (
-      <StatefulEventsViewer
-        defaultIndices={defaultIndices}
-        pageFilters={defaultFiltersMemo}
-        defaultModel={signalsDefaultModel}
-        end={to}
-        headerFilterGroup={
-          <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
-        }
-        id={SIGNALS_PAGE_TIMELINE_ID}
-        start={from}
-        timelineTypeContext={timelineTypeContext}
-        utilityBar={utilityBarCallback}
-      />
+      <EuiPanel>
+        <HeaderSection title={i18n.SIGNALS_TABLE_TITLE} />
+        <EuiLoadingContent />
+      </EuiPanel>
     );
   }
-);
 
-SignalsTableComponent.displayName = 'SignalsTableComponent';
+  return (
+    <StatefulEventsViewer
+      defaultIndices={defaultIndices}
+      pageFilters={defaultFiltersMemo}
+      defaultModel={signalsDefaultModel}
+      end={to}
+      headerFilterGroup={
+        <SignalsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />
+      }
+      id={SIGNALS_PAGE_TIMELINE_ID}
+      start={from}
+      timelineTypeContext={timelineTypeContext}
+      utilityBar={utilityBarCallback}
+    />
+  );
+};
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
@@ -386,4 +382,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateTimeline: dispatchUpdateTimeline(dispatch),
 });
 
-export const SignalsTable = connect(makeMapStateToProps, mapDispatchToProps)(SignalsTableComponent);
+export const SignalsTable = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(React.memo(SignalsTableComponent));
