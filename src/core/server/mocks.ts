@@ -43,7 +43,7 @@ import { uuidServiceMock } from './uuid/uuid_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
-    kibana: { defaultAppId: 'home-mocks', index: '.kibana-tests' },
+    kibana: { index: '.kibana-tests' },
     elasticsearch: {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
