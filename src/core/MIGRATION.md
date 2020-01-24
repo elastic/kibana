@@ -56,6 +56,8 @@
       - [On the server side](#on-the-server-side)
       - [On the client side](#on-the-client-side)
     - [Updates an application navlink at runtime](#updates-an-app-navlink-at-runtime)
+    - [Migrate my plugin's savedObjects definitions](#migrate-saved-object-definitions)
+        - [Mappings](#migrate-saved-object-mappings)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -1205,6 +1207,7 @@ In server code, `core` can be accessed from either `server.newPlatform` or `kbnS
 | `request.getSavedObjectsClient`                                               | [`context.core.savedObjects.client`](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.core.md)                                                                                                                                                                                      |                                                                             |
 | `request.getUiSettingsService`                                                | [`context.uiSettings.client`](/docs/development/core/server/kibana-plugin-server.iuisettingsclient.md)                                                                                                                                                                                                      |                                                                             |
 | `kibana.Plugin.deprecations`                                                  | [Handle plugin configuration deprecations](#handle-plugin-config-deprecations) and [`PluginConfigDescriptor.deprecations`](docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.md)                                                                                                     | Deprecations from New Platform are not applied to legacy configuration      |
+| `kibana.Plugin.mappings`                                                      | [Migrate my plugin's savedObjects definitions](#migrate-saved-object-definitions) and [`SavedObjectServices.registerMappings`](docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.registermappings.md)                                                                                                     | Deprecations from New Platform are not applied to legacy configuration      |
 
 _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
 
@@ -1654,4 +1657,105 @@ export class MyPlugin implements Plugin {
        tooltip: 'Application disabled',
      })
   }
+```
+
+### Migrate my plugin's savedObjects definitions
+
+Legacy plugins were using the `uiExports` in their plugin definition to define their saved object mappings, schema and migrations.
+
+```js
+import mappings from './mappings.json';
+import { migrations } from './migrations';
+
+new kibana.Plugin({
+  init(server){
+    // [...]
+  },
+  uiExports: {
+    mappings,
+    migrations,
+    savedObjectSchemas: {
+      'sample-data-telemetry': {
+        isNamespaceAgnostic: true,
+      },
+      'kql-telemetry': {
+        isNamespaceAgnostic: true,
+      },
+    },
+  },
+})
+```
+
+In the new platform, all these registration are to be performed programmatically during your plugin's `setup` phase,
+using the core `savedObjects` service APIs.
+        
+#### Mappings
+
+For mapping, `savedObjects.registerMappings` should be used. It expects a mappings definition in the exact same
+format they were in legacy.
+
+```js
+import mappings from './mappings.json';
+
+new kibana.Plugin({
+  uiExports: {
+    mappings,
+  },
+})
+```
+
+Would become:
+
+```typescript
+import mappings from './mappings.json';
+
+export class MyPlugin implements Plugin {
+  setup({ savedObjects }) {
+    savedObjects.registerMappings(mappings as SavedObjectsTypeMappingDefinitions);
+  }
+```
+
+Note: in new platform, there are now proper typescript types for the saved objects mappings. It's strongly
+advised to convert your json mapping file to typescript to ensure correct typings:
+
+```json
+// my-plugin/server/mappings.json
+{
+  "my-type": {
+    "properties": {
+      "afield": {
+        "type": "text"
+      }
+    }
+  }
+}
+```
+
+should be converted to a ts file
+
+```typescript
+// my-plugin/server/mappings.ts
+import { SavedObjectsTypeMappingDefinitions } from 'src/core/server';
+
+export const mappings: SavedObjectsTypeMappingDefinitions = {
+  'my-type': {
+    properties: {
+      afield: {
+        type: "text"
+      }
+    }
+  }   
+}
+```
+
+The usage would then become:
+
+```typescript
+import { mappings } from './mappings';
+
+export class MyPlugin implements Plugin {
+  setup({ savedObjects }) {
+    savedObjects.registerMappings(mappings);
+  }
+}
 ```

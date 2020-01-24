@@ -4,10 +4,46 @@
 
 ## SavedObjectsServiceSetup.registerMappings property
 
-TODO: doc + exemple
+Register [saved object type mappings](./kibana-plugin-server.savedobjectstypemappingdefinitions.md)
 
 <b>Signature:</b>
 
 ```typescript
 registerMappings: (mappings: SavedObjectsTypeMappingDefinitions) => void;
 ```
+
+## Remarks
+
+It's possible to directly use an imported json mappings file to call this API. However, as typescript ensure type validation of the mappings, it's strongly encouraged to use a typescript definition instead.
+
+## Example
+
+
+```ts
+// my-plugin/server/mappings.ts
+import { SavedObjectsTypeMappingDefinitions } from 'src/core/server';
+
+export const mappings: SavedObjectsTypeMappingDefinitions = {
+  'my-type': {
+    properties: {
+      afield: {
+        type: "text"
+      }
+    }
+  }
+}
+
+```
+
+```ts
+// my-plugin/server/plugin.ts
+import { mappings } from './mappings';
+
+export class MyPlugin implements Plugin {
+  setup({ savedObjects }) {
+    savedObjects.registerMappings(mappings);
+  }
+}
+
+```
+
