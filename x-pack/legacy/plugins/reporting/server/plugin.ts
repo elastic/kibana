@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
+import { CoreSetup, CoreStart, Plugin, LoggerFactory } from 'src/core/server';
 import { IUiSettingsClient } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
@@ -14,10 +14,14 @@ import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingPluginSpecOptions } from '../types.d';
 import { registerRoutes } from './routes';
-import { LevelLogger, checkLicenseFactory, getExportTypesRegistry, runValidations } from './lib';
+import { checkLicenseFactory, getExportTypesRegistry, runValidations, LevelLogger } from './lib';
 import { createBrowserDriverFactory } from './browsers';
 import { registerReportingUsageCollector } from './usage';
 import { logConfiguration } from '../log_configuration';
+
+export interface ReportingInitializerContext {
+  logger: LoggerFactory;
+}
 
 // For now there is no exposed functionality to other plugins
 export type ReportingSetup = object;
@@ -33,7 +37,6 @@ type LegacyPlugins = Legacy.Server['plugins'];
 export interface LegacySetup {
   config: Legacy.Server['config'];
   info: Legacy.Server['info'];
-  log: Legacy.Server['log'];
   plugins: {
     elasticsearch: LegacyPlugins['elasticsearch'];
     security: LegacyPlugins['security'];
@@ -59,10 +62,17 @@ export type ReportingPlugin = Plugin<
  * into `setup`. The factory parameters take the legacy dependencies, and the
  * `setup` method gets it from enclosure */
 export function reportingPluginFactory(
+  initializerContext: ReportingInitializerContext,
   __LEGACY: LegacySetup,
   legacyPlugin: ReportingPluginSpecOptions
 ) {
   return new (class ReportingPlugin implements ReportingPlugin {
+    private initializerContext: ReportingInitializerContext;
+
+    constructor(context: ReportingInitializerContext) {
+      this.initializerContext = context;
+    }
+
     public async setup(core: CoreSetup, plugins: ReportingSetupDeps): Promise<ReportingSetup> {
       const exportTypesRegistry = getExportTypesRegistry();
 
@@ -76,8 +86,8 @@ export function reportingPluginFactory(
         exportTypesRegistry
       );
 
-      const logger = LevelLogger.createForServer(__LEGACY, [PLUGIN_ID]);
-      const browserDriverFactory = await createBrowserDriverFactory(__LEGACY);
+      const logger = new LevelLogger(this.initializerContext.logger.get('reporting'));
+      const browserDriverFactory = await createBrowserDriverFactory(__LEGACY, logger);
 
       logConfiguration(__LEGACY, logger);
       runValidations(__LEGACY, logger, browserDriverFactory);
@@ -103,5 +113,5 @@ export function reportingPluginFactory(
     public start(core: CoreStart, plugins: ReportingStartDeps): ReportingStart {
       return {};
     }
-  })();
+  })(initializerContext);
 }
