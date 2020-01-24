@@ -36,7 +36,7 @@ export interface Field {
   output_format?: string;
   output_precision?: number;
   label_template?: string;
-  openLinkInCurrentTab?: boolean;
+  open_link_in_current_tab?: boolean;
 }
 
 export type Fields = Field[];
