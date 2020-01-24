@@ -153,11 +153,17 @@ export class IndexPattern implements IIndexPattern {
     if (!this.id) {
       return;
     }
-
-    if (forceFieldRefresh || this.isFieldRefreshRequired()) {
-      await this.refreshFields();
+    try {
+      if (forceFieldRefresh || this.isFieldRefreshRequired()) {
+        await this.refreshFields();
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`Refreshing fields of index pattern ${this.id} failed`, {
+        forceFieldRefresh,
+        fields: this.fields,
+      });
     }
-
     this.initFields();
   }
 
