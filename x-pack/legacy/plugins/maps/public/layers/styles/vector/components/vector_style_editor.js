@@ -147,6 +147,18 @@ export class VectorStyleEditor extends Component {
     this.props.handlePropertyChange(propertyName, styleDescriptor);
   };
 
+  _hasBorder() {
+    const width = this.props.styleProperties[VECTOR_STYLES.LINE_WIDTH];
+    return width.isDynamic() ? width.isComplete() : width.getOptions().size !== 0;
+  }
+
+  _hasLabel() {
+    const label = this.props.styleProperties[VECTOR_STYLES.LABEL_TEXT];
+    return label.isDynamic()
+      ? label.isComplete()
+      : label.getOptions().value != null && label.getOptions().value.length;
+  }
+
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
@@ -168,6 +180,8 @@ export class VectorStyleEditor extends Component {
   _renderLineColor() {
     return (
       <VectorStyleColorEditor
+        disabled={!this._hasBorder()}
+        disabledBy={VECTOR_STYLES.LINE_WIDTH}
         swatches={DEFAULT_LINE_COLORS}
         onStaticStyleChange={this._onStaticStyleChange}
         onDynamicStyleChange={this._onDynamicStyleChange}
@@ -218,6 +232,7 @@ export class VectorStyleEditor extends Component {
   }
 
   _renderLabelProperties() {
+    const hasLabel = this._hasLabel();
     return (
       <Fragment>
         <VectorStyleLabelEditor
@@ -235,6 +250,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleColorEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
           swatches={DEFAULT_LINE_COLORS}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
@@ -250,6 +267,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleSizeEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_SIZE]}
@@ -264,6 +283,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleColorEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
           swatches={DEFAULT_LINE_COLORS}
           onStaticStyleChange={this._onStaticStyleChange}
           onDynamicStyleChange={this._onDynamicStyleChange}
@@ -279,6 +300,8 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         <VectorStyleLabelBorderSizeEditor
+          disabled={!hasLabel}
+          disabledBy={VECTOR_STYLES.LABEL_TEXT}
           handlePropertyChange={this.props.handlePropertyChange}
           styleProperty={this.props.styleProperties[VECTOR_STYLES.LABEL_BORDER_SIZE]}
         />
