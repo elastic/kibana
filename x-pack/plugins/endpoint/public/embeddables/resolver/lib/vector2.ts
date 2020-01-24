@@ -59,8 +59,24 @@ export function angle(a: Vector2, b: Vector2) {
 }
 
 /**
+ * Clamp `vector`'s components.
+ */
+export function clamp([x, y]: Vector2, [minX, minY]: Vector2, [maxX, maxY]: Vector2): Vector2 {
+  return [Math.max(minX, Math.min(maxX, x)), Math.max(minY, Math.min(maxY, y))];
+}
+
+/**
  * Scale vector by number
  */
 export function scale(a: Vector2, n: number): Vector2 {
   return [a[0] * n, a[1] * n];
+}
+
+/**
+ * Linearly interpolate between `a` and `b`.
+ * `t` represents progress and:
+ * 0 <= `t` <= 1
+ */
+export function lerp(a: Vector2, b: Vector2, t: number): Vector2 {
+  return add(scale(a, 1 - t), scale(b, t));
 }

@@ -15,7 +15,7 @@ import {
   orthographicProjection,
   translationTransformation,
 } from '../../lib/transformation';
-import { maximum, minimum, zoomCurveRate } from './scaling_constants';
+import * as scalingConstants from './scaling_constants';
 import {
   Vector2,
   CameraState,
@@ -62,13 +62,46 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
     }
   },
   (scalingFactor, animation, maybeViewableBoundingBox) => time => {
-    const delta = maximum - minimum;
-    const value = Math.pow(scalingFactor, zoomCurveRate) * delta + minimum;
-    const scaleNotCountingAnimation: Vector2 = [value, value];
+    const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
     if (animation !== undefined && animationIsActive(animation, time)) {
-      return vector2.scale(scaleNotCountingAnimation, 0.5);
+      /**
+       * 0 meaning it just started,
+       * 1 meaning it is done.
+       */
+      // TODO make this a reusable function?
+      const animationProgress = clamp(
+        (time.getTime() - animation.startTime.getTime()) / animation.duration,
+        0,
+        1
+      );
+
+      /**
+       * `t` goes from 0 -> 1 -> 0 at a linear rate as `animationProgress` goes from 0 -> 1
+       */
+      const t = -Math.abs(2 * animationProgress - 1) + 1;
+
+      const easedValue = easing.inOutCubic(t);
+
+      /**
+       * play the animation at double speed, then at double speed in reverse.
+       */
+      return vector2.lerp(
+        scaleNotCountingAnimation,
+        vector2.clamp(
+          scaleFromScalingFactor(clamp(scalingFactor - 0.1, 0, 1)),
+          [scalingConstants.minimum, scalingConstants.minimum],
+          [scalingConstants.maximum, scalingConstants.maximum]
+        ),
+        easedValue
+      );
     } else {
       return scaleNotCountingAnimation;
+    }
+    function scaleFromScalingFactor(factor: number): Vector2 {
+      const delta = scalingConstants.maximum - scalingConstants.minimum;
+      const value =
+        Math.pow(factor, scalingConstants.zoomCurveRate) * delta + scalingConstants.minimum;
+      return [value, value];
     }
   }
 );
