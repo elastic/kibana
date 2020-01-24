@@ -13108,7 +13108,6 @@
     "xpack.siem.headerGlobal.buttonAddData": "データの追加",
     "xpack.siem.headerGlobal.siem": "SIEM",
     "xpack.siem.headerPage.pageSubtitle": "前回のイベント: {beat}",
-    "xpack.siem.headerPage.rules.pageSubtitle": "前回実行完了: {lastCompletedRun}",
     "xpack.siem.host.details.architectureLabel": "アーキテクチャー",
     "xpack.siem.host.details.firstSeenTitle": "初回の認識",
     "xpack.siem.host.details.lastSeenTitle": "前回の認識",

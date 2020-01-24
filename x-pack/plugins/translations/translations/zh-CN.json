@@ -13109,7 +13109,6 @@
     "xpack.siem.headerGlobal.buttonAddData": "添加数据",
     "xpack.siem.headerGlobal.siem": "SIEM",
     "xpack.siem.headerPage.pageSubtitle": "最后事件：{beat}",
-    "xpack.siem.headerPage.rules.pageSubtitle": "上次完成的运行：{lastCompletedRun}",
     "xpack.siem.host.details.architectureLabel": "架构",
     "xpack.siem.host.details.firstSeenTitle": "首次看到时间",
     "xpack.siem.host.details.lastSeenTitle": "最后看到时间",
