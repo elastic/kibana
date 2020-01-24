@@ -215,6 +215,15 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             height={overscanHeight}
             tickCount={tickCount}
           />
+
+          <SearchMarkers
+            buckets={summaryHighlightBuckets || []}
+            start={minTime}
+            end={maxTime}
+            width={width}
+            height={overscanHeight}
+            jumpToTarget={jumpToTarget}
+          />
         </g>
         {highlightedInterval ? (
           <HighlightedInterval
@@ -225,16 +234,6 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             target={target}
           />
         ) : null}
-        <g transform={`translate(${width * 0.5}, 0)`}>
-          <SearchMarkers
-            buckets={summaryHighlightBuckets || []}
-            start={minTime}
-            end={maxTime}
-            width={width / 2}
-            height={height}
-            jumpToTarget={jumpToTarget}
-          />
-        </g>
         <TimeCursor x1={width / 3} x2={width} y1={timeCursorY} y2={timeCursorY} />
         <DragTargetArea
           isGrabbing={Boolean(drag)}
