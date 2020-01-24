@@ -61,9 +61,9 @@ export const getStepsData = ({
   const fromDuration = moment.duration(interval.diff(from));
   let fromHumanize = `${Math.floor(fromDuration.asHours())}h`;
 
-  if (fromDuration.asSeconds() <= 60) {
+  if (fromDuration.asSeconds() < 60) {
     fromHumanize = `${Math.floor(fromDuration.asSeconds())}s`;
-  } else if (fromDuration.asMinutes() <= 60) {
+  } else if (fromDuration.asMinutes() < 60) {
     fromHumanize = `${Math.floor(fromDuration.asMinutes())}m`;
   }
 
