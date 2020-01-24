@@ -181,6 +181,10 @@ class DocumentationService {
     return `${this.esDocsBase}/index-options.html`;
   }
 
+  public getAlternativeToMappingTypesLink() {
+    return `${this.esDocsBase}/removal-of-types.html#_alternatives_to_mapping_types`;
+  }
+
   public getJoinMultiLevelsPerformanceLink() {
     return `${this.esDocsBase}/parent-join.html#_parent_join_and_performance`;
   }
