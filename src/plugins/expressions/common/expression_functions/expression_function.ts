@@ -19,7 +19,8 @@
 
 import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
-import { ExpressionValue } from '../expression_types';
+import { ExpressionValue } from '../expression_types/types';
+import { ExecutionContext } from '../execution';
 
 export class ExpressionFunction {
   /**
@@ -65,7 +66,8 @@ export class ExpressionFunction {
     this.name = name;
     this.type = type;
     this.aliases = aliases || [];
-    this.fn = (input, params, handlers) => Promise.resolve(fn(input, params, handlers));
+    this.fn = (input, params, handlers) =>
+      Promise.resolve(fn(input, params, handlers as ExecutionContext));
     this.help = help || '';
     this.context = context || {};
 

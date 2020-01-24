@@ -22,9 +22,7 @@
 import { ExpressionArgAST } from '@kbn/interpreter/target/common/lib/ast';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
-import { FunctionsRegistry, ExpressionFunction } from './expression_functions';
-import { Type, getType } from './expression_types';
-import { AnyExpressionFunctionDefinition, AnyExpressionType } from '../expression_functions';
+import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
 import {
   ExpressionRenderFunction,
   ExpressionRenderDefinition,
@@ -32,24 +30,30 @@ import {
 } from './expression_renderers';
 import { Execution } from '../execution/execution';
 import { IRegistry } from './types';
+import { ExpressionType } from '../expression_types/expression_type';
+import { AnyExpressionTypeDefinition } from '../expression_types/types';
+import { getType } from '../expression_types';
+import { ExpressionAstExpression } from '../parser';
 
-export class TypesRegistry implements IRegistry<Type> {
+export class TypesRegistry implements IRegistry<ExpressionType> {
   constructor(private readonly executor: Executor) {}
 
-  public register(typeDefinition: AnyExpressionType | (() => AnyExpressionType)) {
+  public register(
+    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+  ) {
     this.executor.registerType(typeDefinition);
   }
 
-  public get(id: string): Type | null {
+  public get(id: string): ExpressionType | null {
     return this.executor.state.selectors.getType(id);
   }
 
-  public toJS(): Record<string, undefined | Type> {
+  public toJS(): Record<string, ExpressionType> {
     return this.executor.getTypes();
   }
 
-  public toArray(): Type[] {
-    return Object.values(this.toJS() as Record<string, Type>);
+  public toArray(): ExpressionType[] {
+    return Object.values(this.toJS());
   }
 }
 
@@ -57,7 +61,7 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   constructor(private readonly executor: Executor) {}
 
   public register(
-    functionDefinition: ExpressionFunctionDefinition | (() => ExpressionFunctionDefinition)
+    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
   ) {
     this.executor.registerFunction(functionDefinition);
   }
@@ -67,11 +71,11 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 
   public toJS(): Record<string, ExpressionFunction> {
-    return { ...this.executor.state.get().functions };
+    return this.executor.getFunctions();
   }
 
   public toArray(): ExpressionFunction[] {
-    return Object.values(this.executor.state.get().functions);
+    return Object.values(this.toJS());
   }
 }
 
@@ -97,16 +101,20 @@ export class Executor {
     this.state.transitions.addFunction(fn);
   }
 
-  public getFunctions(): Record<string, undefined | ExpressionFunction> {
+  public getFunctions(): Record<string, ExpressionFunction> {
     return { ...this.state.get().functions };
   }
 
-  public registerType(typeDefinition: AnyExpressionType | (() => AnyExpressionType)) {
-    const type = new Type(typeof typeDefinition === 'object' ? typeDefinition : typeDefinition());
+  public registerType(
+    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+  ) {
+    const type = new ExpressionType(
+      typeof typeDefinition === 'object' ? typeDefinition : typeDefinition()
+    );
     this.state.transitions.addType(type);
   }
 
-  public getTypes(): Record<string, Type> {
+  public getTypes(): Record<string, ExpressionType> {
     return { ...this.state.get().types };
   }
 

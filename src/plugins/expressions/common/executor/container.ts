@@ -18,13 +18,13 @@
  */
 
 import { StateContainer, createStateContainer } from '../../../kibana_utils/public';
-import { ExpressionFunction } from './expression_functions';
 import { ExpressionRenderFunction } from './expression_renderers';
-import { Type } from './expression_types';
+import { ExpressionFunction } from '../expression_functions';
+import { ExpressionType } from '../expression_types';
 
 export interface ExecutorState {
   functions: Record<string, ExpressionFunction>;
-  types: Record<string, Type>;
+  types: Record<string, ExpressionType>;
   renderers: Record<string, ExpressionRenderFunction>;
   context: Record<string, unknown>;
 }
@@ -38,7 +38,7 @@ export const defaultState: ExecutorState = {
 
 export interface ExecutorPureTransitions {
   addFunction: (state: ExecutorState) => (fn: ExpressionFunction) => ExecutorState;
-  addType: (state: ExecutorState) => (type: Type) => ExecutorState;
+  addType: (state: ExecutorState) => (type: ExpressionType) => ExecutorState;
   addRenderer: (state: ExecutorState) => (renderer: ExpressionRenderFunction) => ExecutorState;
   extendContext: (state: ExecutorState) => (extraContext: Record<string, unknown>) => ExecutorState;
 }
@@ -58,7 +58,7 @@ export const pureTransitions: ExecutorPureTransitions = {
 
 export interface ExecutorPureSelectors {
   getFunction: (state: ExecutorState) => (id: string) => ExpressionFunction | null;
-  getType: (state: ExecutorState) => (id: string) => Type | null;
+  getType: (state: ExecutorState) => (id: string) => ExpressionType | null;
   getRenderer: (state: ExecutorState) => (id: string) => ExpressionRenderFunction | null;
   getContext: (state: ExecutorState) => () => ExecutorState['context'];
 }
