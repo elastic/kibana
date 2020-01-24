@@ -16,11 +16,17 @@ import { isEmpty } from 'lodash/fp';
 import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
-import { Direction, SortFieldCase, CaseSavedObject } from '../../../../containers/case/types';
+import {
+  Direction,
+  SortFieldCase,
+  FlattenedCaseSavedObject,
+} from '../../../../containers/case/types';
 import { useGetCases } from '../../../../containers/case/use_get_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
 import { Panel } from '../../../../components/panel';
 import { HeaderSection } from '../../../../components/header_section';
+import { CasesTableFilters } from './table_filters';
+
 import {
   UtilityBar,
   UtilityBarGroup,
@@ -37,11 +43,11 @@ export const AllCases = React.memo(() => {
       if (sort) {
         let newSort;
         switch (sort.field) {
-          case 'attributes.state':
+          case 'state':
             newSort = SortFieldCase.state;
             break;
-          case 'attributes.created_at':
-            newSort = 'attributes.created_at';
+          case 'created_at':
+            newSort = SortFieldCase.createdAt;
             break;
           case 'updated_at':
             newSort = SortFieldCase.updatedAt;
@@ -49,15 +55,10 @@ export const AllCases = React.memo(() => {
           default:
             newSort = SortFieldCase.createdAt;
         }
-        const oppositeSort = sort.direction === Direction.asc ? Direction.desc : Direction.asc;
-        const newOrder =
-          sort.direction === pagination.sortOrder && pagination.sortField === newSort
-            ? oppositeSort
-            : sort.direction;
         newPagination = {
           ...newPagination,
           sortField: newSort,
-          sortOrder: newOrder as Direction,
+          sortOrder: sort.direction as Direction,
         };
       }
       if (page) {
@@ -74,11 +75,12 @@ export const AllCases = React.memo(() => {
 
   const sorting = {
     sort: { field: pagination.sortField, direction: pagination.sortOrder },
-  } as EuiTableSortingType<CaseSavedObject>;
-  return isError ? null : (
+  } as EuiTableSortingType<FlattenedCaseSavedObject>;
+
+  return (
     <Panel loading={isLoading}>
       <HeaderSection split title={i18n.ALL_CASES}>
-        <p>{`TableFilters placeholder`}</p>
+        <CasesTableFilters onFilterChanged={() => {}} />
       </HeaderSection>
       {isLoading && isEmpty(data.saved_objects) && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />

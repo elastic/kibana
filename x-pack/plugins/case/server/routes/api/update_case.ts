@@ -25,7 +25,10 @@ export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
         const updatedCase = await caseService.updateCase({
           client: context.core.savedObjects.client,
           caseId: request.params.id,
-          updatedAttributes: request.body,
+          updatedAttributes: {
+            ...request.body,
+            updated_at: new Date().valueOf(),
+          },
         });
         return response.ok({ body: updatedCase });
       } catch (error) {

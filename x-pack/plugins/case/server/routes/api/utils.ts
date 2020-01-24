@@ -20,6 +20,7 @@ export const formatNewCase = (
 ): NewCaseFormatted => ({
   created_at: new Date().valueOf(),
   created_by: { full_name, username },
+  updated_at: new Date().valueOf(),
   ...newCase,
 });
 

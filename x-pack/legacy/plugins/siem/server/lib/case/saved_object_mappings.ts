@@ -23,16 +23,6 @@ export const caseSavedObjectMappings: {
 } = {
   [caseSavedObjectType]: {
     properties: {
-      assignees: {
-        properties: {
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-        },
-      },
       created_at: {
         type: 'date',
       },
@@ -60,6 +50,9 @@ export const caseSavedObjectMappings: {
       },
       case_type: {
         type: 'keyword',
+      },
+      updated_at: {
+        type: 'date',
       },
     },
   },

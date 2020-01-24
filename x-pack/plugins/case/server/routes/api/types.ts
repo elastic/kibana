@@ -26,13 +26,14 @@ export type UserType = TypeOf<typeof UserSchema>;
 export interface NewCaseFormatted extends NewCaseType {
   created_at: number;
   created_by: UserType;
+  updated_at: number;
 }
 
 export interface UpdatedCaseType {
-  assignees?: UpdatedCaseTyped['assignees'];
+  case_type?: UpdatedCaseTyped['case_type'];
   description?: UpdatedCaseTyped['description'];
-  title?: UpdatedCaseTyped['title'];
   state?: UpdatedCaseTyped['state'];
   tags?: UpdatedCaseTyped['tags'];
-  case_type?: UpdatedCaseTyped['case_type'];
+  title?: UpdatedCaseTyped['title'];
+  updated_at: number;
 }

@@ -20,41 +20,51 @@ export const ADD_NEW_CASE = i18n.translate('xpack.siem.caseTable.addNewCase', {
 });
 
 export const SHOWING_CASES = (totalRules: number) =>
-  i18n.translate('xpack.siem.caseTable.showingCasesTitle', {
+  i18n.translate('xpack.siem.case.caseTable.showingCasesTitle', {
     values: { totalRules },
     defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {case} other {cases}}',
   });
 
 export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.siem.caseTable.unit', {
+  i18n.translate('xpack.siem.case.caseTable.unit', {
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {case} other {cases}}`,
   });
 
-export const CASE_TITLE = i18n.translate('xpack.siem.caseTable.columnHeader.caseTitle', {
+export const CASE_TITLE = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
   defaultMessage: 'Case Title',
 });
 
-export const CASE_ID = i18n.translate('xpack.siem.caseTable.columnHeader.caseId', {
-  defaultMessage: 'Case Id',
-});
-
-export const TAGS = i18n.translate('xpack.siem.caseTable.columnHeader.tags', {
+export const TAGS = i18n.translate('xpack.siem.case.caseTable.columnHeader.tags', {
   defaultMessage: 'Tags',
 });
 
-export const CREATED_AT = i18n.translate('xpack.siem.caseTable.columnHeader.caseTitle', {
+export const CREATED_AT = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
   defaultMessage: 'Created at',
 });
 
-export const CREATED_BY = i18n.translate('xpack.siem.caseTable.columnHeader.caseTitle', {
+export const CREATED_BY = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
   defaultMessage: 'Created by',
 });
 
-export const LAST_UPDATED = i18n.translate('xpack.siem.caseTable.columnHeader.caseTitle', {
+export const LAST_UPDATED = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
   defaultMessage: 'Last updated',
 });
 
-export const STATE = i18n.translate('xpack.siem.caseTable.columnHeader.caseTitle', {
+export const STATE = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
   defaultMessage: 'State',
 });
+
+export const SEARCH_CASES = i18n.translate(
+  'xpack.siem.detectionEngine.case.caseTable.searchAriaLabel',
+  {
+    defaultMessage: 'Search cases',
+  }
+);
+
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.siem.detectionEngine.case.caseTable.searchPlaceholder',
+  {
+    defaultMessage: 'e.g. case name',
+  }
+);

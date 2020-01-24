@@ -4,28 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useReducer, useState } from 'react';
-
+import { useEffect, useReducer } from 'react';
 import chrome from 'ui/chrome';
-import { FlattenedCaseSavedObject } from './types';
-import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
-import { flattenSavedObject } from './utils';
-import { throwIfNotOk } from '../../hooks/api/api';
+import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
-import { useStateToaster } from '../../components/toasters';
+import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
+import { throwIfNotOk } from '../../hooks/api/api';
 
-interface CaseState {
-  data: FlattenedCaseSavedObject;
+interface TagsState {
+  data: string[];
   isLoading: boolean;
   isError: boolean;
 }
 interface Action {
   type: string;
-  payload?: FlattenedCaseSavedObject;
+  payload?: string[];
 }
 
-const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
+const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
   switch (action.type) {
     case FETCH_INIT:
       return {
@@ -34,7 +31,7 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         isError: false,
       };
     case FETCH_SUCCESS:
-      const getTypedPayload = (a: Action['payload']) => a as FlattenedCaseSavedObject;
+      const getTypedPayload = (a: Action['payload']) => a as string[];
       return {
         ...state,
         isLoading: false,
@@ -51,28 +48,14 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
       throw new Error();
   }
 };
-const initialData: FlattenedCaseSavedObject = {
-  case_type: '',
-  created_at: 0,
-  created_by: {
-    username: '',
-  },
-  description: '',
-  state: '',
-  tags: [],
-  title: '',
-  id: '',
-  type: '',
-  updated_at: 0,
-  version: '',
-};
-export const useGetCase = (initialCaseId: string): [CaseState] => {
+const initialData: string[] = [];
+
+export const useGetTags = (): [TagsState] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
     data: initialData,
   });
-  const [caseId, setCaseId] = useState(initialCaseId);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
@@ -80,21 +63,18 @@ export const useGetCase = (initialCaseId: string): [CaseState] => {
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const response = await fetch(
-          `${chrome.getBasePath()}/api/cases/${caseId}?includeComments=false`,
-          {
-            method: 'GET',
-            credentials: 'same-origin',
-            headers: {
-              'content-type': 'application/json',
-              'kbn-system-api': 'true',
-            },
-          }
-        );
+        const response = await fetch(`${chrome.getBasePath()}/api/cases/tags`, {
+          method: 'GET',
+          credentials: 'same-origin',
+          headers: {
+            'content-type': 'application/json',
+            'kbn-system-api': 'true',
+          },
+        });
         if (!didCancel) {
           await throwIfNotOk(response);
           const responseJson = await response.json();
-          dispatch({ type: FETCH_SUCCESS, payload: flattenSavedObject(responseJson) });
+          dispatch({ type: FETCH_SUCCESS, payload: responseJson });
         }
       } catch (error) {
         if (!didCancel) {
@@ -106,8 +86,7 @@ export const useGetCase = (initialCaseId: string): [CaseState] => {
     fetchData();
     return () => {
       didCancel = true;
-      setCaseId(initialCaseId);
     };
-  }, [caseId]);
+  }, []);
   return [state];
 };

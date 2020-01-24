@@ -7,6 +7,6 @@
 export const FETCH_INIT = 'FETCH_INIT';
 export const FETCH_SUCCESS = 'FETCH_SUCCESS';
 export const FETCH_FAILURE = 'FETCH_FAILURE';
-export const UPDATE_TABLE = 'UPDATE_TABLE';
+export const UPDATE_PAGINATION = 'UPDATE_PAGINATION';
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 5;

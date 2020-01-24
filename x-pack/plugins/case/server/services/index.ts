@@ -26,6 +26,7 @@ import {
   AuthenticatedUser,
   PluginSetupContract as SecurityPluginSetup,
 } from '../../../security/server';
+import { readTags } from './tags/read_tags';
 
 interface ClientArgs {
   client: SavedObjectsClientContract;
@@ -73,6 +74,7 @@ export interface CaseServiceSetup {
   getAllCaseComments(args: GetCaseArgs): Promise<SavedObjectsFindResponse>;
   getCase(args: GetCaseArgs): Promise<SavedObject>;
   getComment(args: GetCommentArgs): Promise<SavedObject>;
+  getTags(args: ClientArgs): Promise<string[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser>;
   postNewCase(args: PostCaseArgs): Promise<SavedObject>;
   postNewComment(args: PostCommentArgs): Promise<SavedObject>;
@@ -137,6 +139,15 @@ export class CaseService {
         });
       } catch (error) {
         this.log.debug(`Error on GET all comments for case ${caseId}: ${error}`);
+        throw error;
+      }
+    },
+    getTags: async ({ client }: ClientArgs) => {
+      try {
+        this.log.debug(`Attempting to GET all cases`);
+        return await readTags({ client });
+      } catch (error) {
+        this.log.debug(`Error on GET cases: ${error}`);
         throw error;
       }
     },

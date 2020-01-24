@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* tslint:disable */
+/* eslint-disable */
 import React, { useState } from 'react';
 import {
   EuiHealth,
@@ -276,7 +278,6 @@ export const CasesSearchBar = React.memo(() => {
     const queriedItems = EuiSearchBar.Query.execute(currentQuery, items, {
       defaultFields: ['owner', 'tag', 'type'],
     });
-    console.log('queriedItems', queriedItems);
 
     return <EuiBasicTable items={queriedItems} columns={columns} />;
   };
@@ -306,3 +307,5 @@ export const CasesSearchBar = React.memo(() => {
 });
 
 CasesSearchBar.displayName = 'CasesSearchBar';
+/* eslint-enable */
+/* tslint:enable */

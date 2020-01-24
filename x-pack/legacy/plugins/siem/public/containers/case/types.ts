@@ -29,6 +29,26 @@ export interface CaseResult {
   state: string;
   tags: string[] | [];
   title: string;
+  updated_at: number;
+}
+
+export interface FilterOptions {
+  filter: string;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+  tags?: string[];
+}
+
+export interface FlattenedCaseSavedObject extends CaseResult {
+  id: string;
+  type: string;
+  version: string;
+}
+export interface FlattenedCasesSavedObjects {
+  saved_objects: FlattenedCaseSavedObject[] | [];
+  page: number;
+  per_page: number;
+  total: number;
 }
 export enum SortFieldCase {
   createdAt = 'created_at',

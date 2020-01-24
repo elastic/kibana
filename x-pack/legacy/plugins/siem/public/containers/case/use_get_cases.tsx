@@ -5,18 +5,22 @@
  */
 
 import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
-
 import chrome from 'ui/chrome';
+
+import { throwIfNotOk } from '../../hooks/api/api';
 import {
   DEFAULT_TABLE_ACTIVE_PAGE,
   DEFAULT_TABLE_LIMIT,
   FETCH_FAILURE,
   FETCH_INIT,
   FETCH_SUCCESS,
-  UPDATE_TABLE,
+  UPDATE_PAGINATION,
 } from './constants';
-import { CasesSavedObjects, Direction, SortFieldCase } from './types';
-
+import { FlattenedCasesSavedObjects, Direction, SortFieldCase } from './types';
+import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { useStateToaster } from '../../components/toasters';
+import * as i18n from './translations';
+import { flattenSavedObjects } from './utils';
 interface PaginationArgs {
   page: number;
   perPage: number;
@@ -32,17 +36,14 @@ interface QueryArgs {
 }
 
 interface CasesState {
-  data: CasesSavedObjects;
+  data: FlattenedCasesSavedObjects;
   isLoading: boolean;
   isError: boolean;
   pagination: PaginationArgs;
 }
-interface PayloadObj {
-  [key: string]: unknown;
-}
 interface Action {
   type: string;
-  payload?: CasesSavedObjects | QueryArgs | PayloadObj;
+  payload?: FlattenedCasesSavedObjects | QueryArgs;
 }
 
 const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
@@ -54,12 +55,12 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
         isError: false,
       };
     case FETCH_SUCCESS:
-      const getSavedObject = (a: Action['payload']) => a as CasesSavedObjects;
+      const getTypedPayload = (a: Action['payload']) => a as FlattenedCasesSavedObjects;
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: getSavedObject(action.payload),
+        data: getTypedPayload(action.payload),
       };
     case FETCH_FAILURE:
       return {
@@ -67,7 +68,7 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
         isLoading: false,
         isError: true,
       };
-    case UPDATE_TABLE:
+    case UPDATE_PAGINATION:
       return {
         ...state,
         pagination: {
@@ -79,7 +80,7 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
       throw new Error();
   }
 };
-const initialData: CasesSavedObjects = {
+const initialData: FlattenedCasesSavedObjects = {
   page: 0,
   per_page: 0,
   total: 0,
@@ -98,9 +99,10 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
     },
   });
   const [query, setQuery] = useState(state.pagination as QueryArgs);
+  const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
-    dispatch({ type: UPDATE_TABLE, payload: query });
+    dispatch({ type: UPDATE_PAGINATION, payload: query });
   }, [query]);
 
   useEffect(() => {
@@ -112,7 +114,7 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
           (acc, [key, value]) => `${acc}${key}=${value}&`,
           '?'
         );
-        const result = await fetch(`${chrome.getBasePath()}/api/cases${queryParams}`, {
+        const response = await fetch(`${chrome.getBasePath()}/api/cases${queryParams}`, {
           method: 'GET',
           credentials: 'same-origin',
           headers: {
@@ -122,15 +124,19 @@ export const useGetCases = (): [CasesState, Dispatch<SetStateAction<QueryArgs>>]
           },
         });
         if (!didCancel) {
-          const resultJson = await result.json();
-          if (resultJson.statusCode >= 400) {
-            dispatch({ type: FETCH_FAILURE });
-          } else {
-            dispatch({ type: FETCH_SUCCESS, payload: resultJson });
-          }
+          await throwIfNotOk(response);
+          const responseJson = await response.json();
+          dispatch({
+            type: FETCH_SUCCESS,
+            payload: {
+              ...responseJson,
+              saved_objects: flattenSavedObjects(responseJson.saved_objects),
+            },
+          });
         }
       } catch (error) {
         if (!didCancel) {
+          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
           dispatch({ type: FETCH_FAILURE });
         }
       }

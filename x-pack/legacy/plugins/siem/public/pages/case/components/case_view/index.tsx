@@ -37,15 +37,15 @@ export const CaseView = React.memo(({ caseId }: Props) => {
   const caseDetailsDefinitions = [
     {
       title: <FormattedMessage id="xpack.siem.caseView.description" defaultMessage="Description" />,
-      definition: data.attributes.description,
+      definition: data.description,
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.case_type" defaultMessage="Case type" />,
-      definition: data.attributes.case_type,
+      definition: data.case_type,
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.state" defaultMessage="State" />,
-      definition: data.attributes.state,
+      definition: data.state,
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.updated_at" defaultMessage="Last updated" />,
@@ -53,18 +53,18 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.created_at" defaultMessage="Created at" />,
-      definition: data.attributes.created_at,
+      definition: data.created_at,
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.created_by" defaultMessage="Created by" />,
-      definition: data.attributes.created_by.username,
+      definition: data.created_by.username,
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.tags" defaultMessage="Tags" />,
       definition:
-        data.attributes.tags.length > 0 ? (
+        data.tags.length > 0 ? (
           <ul>
-            {data.attributes.tags.map((tag: string, key: number) => (
+            {data.tags.map((tag: string, key: number) => (
               <li key={key + tag}>{tag}</li>
             ))}
           </ul>
@@ -82,7 +82,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       <EuiText>
         <EuiLink href={getCaseUrl()}>{i18n.BACK_LABEL}</EuiLink>
       </EuiText>
-      <HeaderPage border subtitle={caseId} title={data!.attributes!.title} />
+      <HeaderPage border subtitle={caseId} title={data.title} />
       <EuiText>
         <dl className="eui-definitionListReverse">
           {caseDetailsDefinitions.map((dictionaryItem, key) =>
