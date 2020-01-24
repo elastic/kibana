@@ -175,7 +175,7 @@ export class VectorStyle extends AbstractStyle {
    * This method does not update its descriptor. It just returns a new descriptor that the caller
    * can then use to update store state via dispatch.
    */
-  getDescriptorWithMissingStylePropsRemoved(nextOrdinalFields) {
+  getDescriptorWithMissingStylePropsRemoved(nextFields) {
     const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
@@ -192,7 +192,7 @@ export class VectorStyle extends AbstractStyle {
         return;
       }
 
-      const matchingOrdinalField = nextOrdinalFields.find(ordinalField => {
+      const matchingOrdinalField = nextFields.find(ordinalField => {
         return fieldName === ordinalField.getName();
       });
 
@@ -579,9 +579,7 @@ export class VectorStyle extends AbstractStyle {
     //fieldDescriptor.label is ignored. This is essentially cruft duplicating label-info from the metric-selection
     //Ignore this custom label
     if (fieldDescriptor.origin === FIELD_ORIGIN.SOURCE) {
-      return this._source.createField({
-        fieldName: fieldDescriptor.name,
-      });
+      return this._source.getFieldByName(fieldDescriptor.name);
     } else if (fieldDescriptor.origin === FIELD_ORIGIN.JOIN) {
       const join = this._layer.getValidJoins().find(join => {
         return join.getRightJoinSource().hasMatchingMetricField(fieldDescriptor.name);

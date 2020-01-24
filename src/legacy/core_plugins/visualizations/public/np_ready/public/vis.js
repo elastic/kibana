@@ -97,6 +97,10 @@ class Vis extends EventEmitter {
     }
   }
 
+  setVisType(type) {
+    this.type.type = type;
+  }
+
   updateState() {
     this.setState(this.getCurrentState(true));
     this.emit('update');
@@ -114,18 +118,6 @@ class Vis extends EventEmitter {
       aggs: this.aggs.aggs
         .map(agg => agg.toJSON())
         .filter(agg => includeDisabled || agg.enabled)
-        .filter(Boolean),
-    };
-  }
-
-  getSerializableState(state) {
-    return {
-      title: state.title,
-      type: state.type,
-      params: _.cloneDeep(state.params),
-      aggs: state.aggs.aggs
-        .map(agg => agg.toJSON())
-        .filter(agg => agg.enabled)
         .filter(Boolean),
     };
   }

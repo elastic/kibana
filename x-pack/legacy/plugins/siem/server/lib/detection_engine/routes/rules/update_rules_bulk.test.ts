@@ -6,14 +6,11 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { updateRulesRoute } from './update_rules_route';
 import { ServerInjectOptions } from 'hapi';
-import { ServerFacade } from '../../../../types';
 
 import {
   getFindResult,
@@ -33,7 +30,7 @@ describe('update_rules_bulk', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient } = createMockServer());
-    updateRulesBulkRoute((server as unknown) as ServerFacade);
+    updateRulesBulkRoute(server);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -71,26 +68,10 @@ describe('update_rules_bulk', () => {
       expect(parsed).toEqual(expected);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      updateRulesRoute((serverWithoutActionClient as unknown) as ServerFacade);
-      const { statusCode } = await serverWithoutActionClient.inject(getUpdateBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      updateRulesRoute((serverWithoutAlertClient as unknown) as ServerFacade);
+      updateRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getUpdateBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      updateRulesRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getUpdateBulkRequest());
       expect(statusCode).toBe(404);
     });
   });

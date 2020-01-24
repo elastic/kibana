@@ -12,6 +12,7 @@ import { start } from '../../../../../../../../../src/legacy/core_plugins/embedd
 import * as i18n from './translations';
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
+import { Location } from '../../../../../common/runtime_types';
 
 import { MapEmbeddable } from './types';
 import { getLayerList } from './map_config';
@@ -22,10 +23,7 @@ export interface EmbeddedMapProps {
   downPoints: LocationPoint[];
 }
 
-export interface LocationPoint {
-  lat: string;
-  lon: string;
-}
+export type LocationPoint = Required<Location>;
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -45,7 +43,7 @@ const EmbeddedPanel = styled.div`
   }
 `;
 
-export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
+export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProps) => {
   const { colors } = useContext(UptimeThemeContext);
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -55,10 +53,6 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
     id: uuid.v4(),
     filters: [],
     hidePanelTitles: true,
-    query: {
-      query: '',
-      language: 'kuery',
-    },
     refreshConfig: {
       value: 0,
       pause: false,
@@ -116,6 +110,6 @@ export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
       <div className="embPanel__content" ref={embeddableRoot} />
     </EmbeddedPanel>
   );
-};
+});
 
 EmbeddedMap.displayName = 'EmbeddedMap';

@@ -501,6 +501,8 @@ export interface Source {
 
   NetworkDns: NetworkDnsData;
 
+  NetworkDnsHistogram: NetworkDsOverTimeData;
+
   NetworkHttp: NetworkHttpData;
 
   OverviewNetwork?: Maybe<OverviewNetworkData>;
@@ -1754,6 +1756,14 @@ export interface MatrixOverOrdinalHistogramData {
   g: string;
 }
 
+export interface NetworkDsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
 export interface NetworkHttpData {
   edges: NetworkHttpEdges[];
 
@@ -1839,7 +1849,9 @@ export interface OverviewHostData {
 
   filebeatSystemModule?: Maybe<number>;
 
-  winlogbeat?: Maybe<number>;
+  winlogbeatSecurity?: Maybe<number>;
+
+  winlogbeatMWSysmonOperational?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
 }
@@ -2432,6 +2444,15 @@ export interface NetworkDnsSourceArgs {
 
   defaultIndex: string[];
 }
+export interface NetworkDnsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+
+  stackByField?: Maybe<string>;
+}
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;
 
@@ -2930,6 +2951,8 @@ export namespace SourceResolvers {
 
     NetworkDns?: NetworkDnsResolver<NetworkDnsData, TypeParent, TContext>;
 
+    NetworkDnsHistogram?: NetworkDnsHistogramResolver<NetworkDsOverTimeData, TypeParent, TContext>;
+
     NetworkHttp?: NetworkHttpResolver<NetworkHttpData, TypeParent, TContext>;
 
     OverviewNetwork?: OverviewNetworkResolver<Maybe<OverviewNetworkData>, TypeParent, TContext>;
@@ -3279,6 +3302,21 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     defaultIndex: string[];
+  }
+
+  export type NetworkDnsHistogramResolver<
+    R = NetworkDsOverTimeData,
+    Parent = Source,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext, NetworkDnsHistogramArgs>;
+  export interface NetworkDnsHistogramArgs {
+    filterQuery?: Maybe<string>;
+
+    defaultIndex: string[];
+
+    timerange: TimerangeInput;
+
+    stackByField?: Maybe<string>;
   }
 
   export type NetworkHttpResolver<
@@ -7547,6 +7585,36 @@ export namespace MatrixOverOrdinalHistogramDataResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
+export namespace NetworkDsOverTimeDataResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = NetworkDsOverTimeData> {
+    inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    matrixHistogramData?: MatrixHistogramDataResolver<
+      MatrixOverTimeHistogramData[],
+      TypeParent,
+      TContext
+    >;
+
+    totalCount?: TotalCountResolver<number, TypeParent, TContext>;
+  }
+
+  export type InspectResolver<
+    R = Maybe<Inspect>,
+    Parent = NetworkDsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type MatrixHistogramDataResolver<
+    R = MatrixOverTimeHistogramData[],
+    Parent = NetworkDsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = NetworkDsOverTimeData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
 export namespace NetworkHttpDataResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = NetworkHttpData> {
     edges?: EdgesResolver<NetworkHttpEdges[], TypeParent, TContext>;
@@ -7765,7 +7833,13 @@ export namespace OverviewHostDataResolvers {
 
     filebeatSystemModule?: FilebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
 
-    winlogbeat?: WinlogbeatResolver<Maybe<number>, TypeParent, TContext>;
+    winlogbeatSecurity?: WinlogbeatSecurityResolver<Maybe<number>, TypeParent, TContext>;
+
+    winlogbeatMWSysmonOperational?: WinlogbeatMwSysmonOperationalResolver<
+      Maybe<number>,
+      TypeParent,
+      TContext
+    >;
 
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
@@ -7840,7 +7914,12 @@ export namespace OverviewHostDataResolvers {
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type WinlogbeatResolver<
+  export type WinlogbeatSecurityResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type WinlogbeatMwSysmonOperationalResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
@@ -9227,6 +9306,7 @@ export type IResolvers<TContext = SiemContext> = {
   NetworkDnsEdges?: NetworkDnsEdgesResolvers.Resolvers<TContext>;
   NetworkDnsItem?: NetworkDnsItemResolvers.Resolvers<TContext>;
   MatrixOverOrdinalHistogramData?: MatrixOverOrdinalHistogramDataResolvers.Resolvers<TContext>;
+  NetworkDsOverTimeData?: NetworkDsOverTimeDataResolvers.Resolvers<TContext>;
   NetworkHttpData?: NetworkHttpDataResolvers.Resolvers<TContext>;
   NetworkHttpEdges?: NetworkHttpEdgesResolvers.Resolvers<TContext>;
   NetworkHttpItem?: NetworkHttpItemResolvers.Resolvers<TContext>;

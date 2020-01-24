@@ -6,7 +6,7 @@
 import { Logger } from '../../../../../../src/core/server';
 import { RunContext } from '../../../../../plugins/task_manager/server';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../../../plugins/actions/server';
 import {
   AlertType,
   GetBasePathFunction,
