@@ -21,3 +21,5 @@ for x in jest functional mocha; do
 
   node scripts/ingest_coverage.js --verbose --path $COVERAGE_SUMMARY_FILE || echo "### ${COVERAGE_SUMMARY_FILE} not found?"
 done
+
+echo "###  Ingesting Code Coverage - Complete"
