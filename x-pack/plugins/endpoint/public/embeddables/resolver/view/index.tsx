@@ -24,11 +24,13 @@ export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, Reso
   );
 });
 
-const StyledEvent = styled(Panel)`
+const StyledPanel = styled(Panel)`
   position: absolute;
   left: 1em;
   top: 1em;
-  width: 30em;
+  max-height: calc(100% - 2em);
+  overflow: auto;
+  width: 25em;
   max-width: 50%;
 `;
 
@@ -66,7 +68,7 @@ const Resolver = styled(
             />
           ))}
         </div>
-        <StyledEvent />
+        <StyledPanel />
         <StyledGraphControls />
       </div>
     );

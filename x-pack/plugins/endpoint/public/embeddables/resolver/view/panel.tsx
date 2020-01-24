@@ -114,12 +114,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         <h4>Hey There</h4>
       </EuiTitle>
       <HorizontalRule />
-      <EuiInMemoryTable<ProcessTableView>
-        items={processTableView}
-        columns={columns}
-        pagination
-        sorting
-      />
+      <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
     </EuiPanel>
   );
 });

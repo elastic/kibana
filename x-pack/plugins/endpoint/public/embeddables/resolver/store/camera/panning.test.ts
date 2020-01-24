@@ -77,7 +77,7 @@ describe('panning interaction', () => {
       expect(actual).toMatchInlineSnapshot(`
         Array [
           0,
-          32.49906769231164,
+          7.407407407407405,
         ]
       `);
     });

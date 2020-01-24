@@ -5,6 +5,8 @@
  */
 
 import { createSelector, defaultMemoize } from 'reselect';
+import { easing } from 'ts-easing';
+import { clamp } from '../../lib/math';
 import * as vector2 from '../../lib/vector2';
 import { multiply, add as addMatrix } from '../../lib/matrix3';
 import {
@@ -14,8 +16,6 @@ import {
   translationTransformation,
 } from '../../lib/transformation';
 import { maximum, minimum, zoomCurveRate } from './scaling_constants';
-import { translation as cameraAnimationTranslation } from './animation/methods';
-import { active as animationIsActive } from './animation/methods';
 import {
   Vector2,
   CameraState,
@@ -23,6 +23,7 @@ import {
   Matrix3,
   CameraStateWhenPanning,
   CameraStateWhenNotAnimatingOrPanning,
+  CameraAnimationState,
 } from '../../types';
 
 interface ClippingPlanes {
@@ -34,15 +35,41 @@ interface ClippingPlanes {
   clippingPlaneBottom: number;
 }
 
+function animationIsActive(animation: CameraAnimationState, time: Date): boolean {
+  return animation.startTime.getTime() + animation.duration >= time.getTime();
+}
+
 /**
  * The scale by which world values are scaled when rendered.
  */
-export const scale: (state: CameraState) => Vector2 = createSelector(
+export const scale: (state: CameraState) => (time: Date) => Vector2 = createSelector(
   state => state.scalingFactor,
-  scalingFactor => {
+  state => state.animation,
+  state => {
+    /**
+     * Calculate the viewableBoundingBox without taking animation into account,
+     * otherwise you'd have circular logic since the scale, during animation,
+     * depends on viewableBoundingBox and the viewableBoundingBox always depends on
+     * scale.
+     */
+    if (state.animation) {
+      return viewableBoundingBox({
+        ...state,
+        animation: undefined,
+      });
+    } else {
+      return null;
+    }
+  },
+  (scalingFactor, animation, maybeViewableBoundingBox) => time => {
     const delta = maximum - minimum;
     const value = Math.pow(scalingFactor, zoomCurveRate) * delta + minimum;
-    return [value, value];
+    const scaleNotCountingAnimation: Vector2 = [value, value];
+    if (animation !== undefined && animationIsActive(animation, time)) {
+      return vector2.scale(scaleNotCountingAnimation, 0.5);
+    } else {
+      return scaleNotCountingAnimation;
+    }
   }
 );
 
@@ -51,10 +78,13 @@ export const scale: (state: CameraState) => Vector2 = createSelector(
 /**
  * The 2D clipping planes used for the orthographic projection. See https://en.wikipedia.org/wiki/Orthographic_projection
  */
-export const clippingPlanes: (state: CameraState) => ClippingPlanes = createSelector(
+export const clippingPlanes: (
+  state: CameraState
+) => (time: Date) => ClippingPlanes = createSelector(
   state => state.rasterSize,
   scale,
-  (rasterSize, [scaleX, scaleY]) => {
+  (rasterSize, scaleAtTime) => (time: Date) => {
+    const [scaleX, scaleY] = scaleAtTime(time);
     const renderWidth = rasterSize[0];
     const renderHeight = rasterSize[1];
     const clippingPlaneRight = renderWidth / 2 / scaleX;
@@ -115,12 +145,28 @@ export const translation: (state: CameraState) => (time: Date) => Vector2 = crea
   state => state.translationNotCountingCurrentPanning,
   scale,
   state => state.animation,
-  (panning, translationNotCountingCurrentPanning, [scaleX, scaleY], animation) => {
+  (panning, translationNotCountingCurrentPanning, scaleAtTime, animation) => {
     return (time: Date) => {
+      const [scaleX, scaleY] = scaleAtTime(time);
       // TODO, calculate this inline somehow? or call a version that takes state and is a
       // type predicate?
       if (animation !== undefined && animationIsActive(animation, time)) {
-        return cameraAnimationTranslation(animation, time);
+        const delta = vector2.subtract(animation.targetTranslation, animation.initialTranslation);
+        const progress = clamp(
+          (time.getTime() - animation.startTime.getTime()) / animation.duration,
+          0,
+          1
+        );
+
+        /**
+         * play the animation at double speed, then at double speed in reverse.
+         */
+        // const inOutProgress = -Math.abs(2 * progress - 1) + 1;
+
+        return vector2.add(
+          animation.initialTranslation,
+          vector2.scale(delta, easing.inOutCubic(progress))
+        );
       } else if (panning) {
         const changeInPanningOffset = vector2.subtract(panning.currentOffset, panning.origin);
         /**
@@ -146,18 +192,17 @@ export const inverseProjectionMatrix: (
 ) => (time: Date) => Matrix3 = createSelector(
   clippingPlanes,
   translation,
-  (
-    {
-      renderWidth,
-      renderHeight,
-      clippingPlaneRight,
-      clippingPlaneTop,
-      clippingPlaneLeft,
-      clippingPlaneBottom,
-    },
-    translationAtTime
-  ) => {
+  (clippingPlanesAtTime, translationAtTime) => {
     return (time: Date) => {
+      const {
+        renderWidth,
+        renderHeight,
+        clippingPlaneRight,
+        clippingPlaneTop,
+        clippingPlaneLeft,
+        clippingPlaneBottom,
+      } = clippingPlanesAtTime(time);
+
       // prettier-ignore
       /**
        * Scale by 1/renderSize to put it in range of 0->1
@@ -211,8 +256,9 @@ export const inverseProjectionMatrix: (
 export const viewableBoundingBox: (state: CameraState) => (time: Date) => AABB = createSelector(
   clippingPlanes,
   inverseProjectionMatrix,
-  ({ renderWidth, renderHeight }, matrixAtTime) => {
+  (clippingPlanesAtTime, matrixAtTime) => {
     return (time: Date) => {
+      const { renderWidth, renderHeight } = clippingPlanesAtTime(time);
       const matrix = matrixAtTime(time);
       const bottomLeftCorner: Vector2 = [0, renderHeight];
       const topRightCorner: Vector2 = [renderWidth, 0];
@@ -231,19 +277,17 @@ export const viewableBoundingBox: (state: CameraState) => (time: Date) => AABB =
 export const projectionMatrix: (state: CameraState) => (time: Date) => Matrix3 = createSelector(
   clippingPlanes,
   translation,
-  (
-    {
-      renderWidth,
-      renderHeight,
-      clippingPlaneRight,
-      clippingPlaneTop,
-      clippingPlaneLeft,
-      clippingPlaneBottom,
-    },
-    translationAtTime
-  ) => {
-    return defaultMemoize((time: Date) =>
-      multiply(
+  (clippingPlanesAtTime, translationAtTime) => {
+    return defaultMemoize((time: Date) => {
+      const {
+        renderWidth,
+        renderHeight,
+        clippingPlaneRight,
+        clippingPlaneTop,
+        clippingPlaneLeft,
+        clippingPlaneBottom,
+      } = clippingPlanesAtTime(time);
+      return multiply(
         // 5. convert from 0->2 to 0->rasterWidth (or height)
         scalingTransformation([renderWidth / 2, renderHeight / 2]),
         addMatrix(
@@ -266,8 +310,8 @@ export const projectionMatrix: (state: CameraState) => (time: Date) => Matrix3 =
             )
           )
         )
-      )
-    );
+      );
+    });
   }
 );
 

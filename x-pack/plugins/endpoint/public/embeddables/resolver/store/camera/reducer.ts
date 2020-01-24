@@ -153,7 +153,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
      * Nudge less when zoomed in.
      */
     const nudge = vector2.multiply(
-      vector2.divide([unitsPerNudge, unitsPerNudge], selectors.scale(state)),
+      vector2.divide([unitsPerNudge, unitsPerNudge], selectors.scale(state)(time)),
       direction
     );
 
@@ -164,6 +164,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
       time,
       vector2.add(
         // TODO, this assumes the camera isn't panning. assert that instead, and test it
+        // TODO, does this work when the camera is being animated?
         state.translationNotCountingCurrentPanning,
         nudge
       ),
