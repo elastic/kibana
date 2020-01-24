@@ -11,6 +11,11 @@ import {
   mappingsConfigurationSchemaKeys,
 } from './mappings_validator';
 
+interface MappingsWithType {
+  type?: string;
+  mappings: GenericObject;
+}
+
 const ALLOWED_PARAMETERS = [...mappingsConfigurationSchemaKeys, 'dynamic_templates', 'properties'];
 
 const isMappingDefinition = (obj: GenericObject): boolean => {
@@ -31,6 +36,29 @@ const isMappingDefinition = (obj: GenericObject): boolean => {
   // we can assume that the mapping is declared at root level (no types)
   return isConfigurationValid && isPropertiesValid && isDynamicTemplatesValid;
 };
+
+const getMappingsDefinitionWithType = (mappings: GenericObject): MappingsWithType[] => {
+  if (isMappingDefinition(mappings)) {
+    // No need to go any further
+    return [{ mappings }];
+  }
+
+  // At this point there must be one or more type mappings
+  const typedMappings = Object.entries(mappings).reduce(
+    (acc: Array<{ type: string; mappings: GenericObject }>, [type, value]) => {
+      if (isMappingDefinition(value)) {
+        acc.push({ type, mappings: value as GenericObject });
+      }
+      return acc;
+    },
+    []
+  );
+
+  return typedMappings;
+};
+
+export const doesMappingsHasType = (mappings: GenericObject): boolean =>
+  getMappingsDefinitionWithType(mappings).filter(({ type }) => type !== undefined).length > 0;
 
 /**
  * 5.x index templates can be created with multiple types.
@@ -72,19 +100,10 @@ const isMappingDefinition = (obj: GenericObject): boolean => {
  *
  * @param mappings The mappings object to validate
  */
-export const extractMappingsDefinition = (mappings: GenericObject = {}): GenericObject | null => {
-  if (isMappingDefinition(mappings)) {
-    // No need to go any further
-    return mappings;
-  }
-
-  // At this point there must be one or more type mappings
-  const typedMappings = Object.values(mappings).reduce((acc: GenericObject[], value) => {
-    if (isMappingDefinition(value)) {
-      acc.push(value as GenericObject);
-    }
-    return acc;
-  }, []);
+export const extractMappingsDefinition = (
+  mappings: GenericObject = {}
+): MappingsWithType | null => {
+  const typedMappings = getMappingsDefinitionWithType(mappings);
 
   // If there are no typed mappings found this means that one of the type must did not pass
   // the "isMappingDefinition()" validation.
