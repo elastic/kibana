@@ -1526,6 +1526,32 @@ export interface SavedObjectsClientWrapperOptions {
 }
 
 // @public (undocumented)
+export interface SavedObjectsComplexFieldMapping {
+    // (undocumented)
+    dynamic?: string;
+    // (undocumented)
+    properties: SavedObjectsMappingProperties;
+    // (undocumented)
+    type?: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsCoreFieldMapping {
+    // (undocumented)
+    enabled?: boolean;
+    // (undocumented)
+    fields?: {
+        [subfield: string]: {
+            type: string;
+        };
+    };
+    // (undocumented)
+    index?: boolean;
+    // (undocumented)
+    type: string;
+}
+
+// @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
@@ -1619,6 +1645,9 @@ export interface SavedObjectsExportResultDetails {
         type: string;
     }>;
 }
+
+// @public
+export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjectsComplexFieldMapping;
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
@@ -1784,6 +1813,12 @@ export interface SavedObjectsLegacyService {
     types: string[];
 }
 
+// @public
+export interface SavedObjectsMappingProperties {
+    // (undocumented)
+    [field: string]: SavedObjectsFieldMapping;
+}
+
 // @public (undocumented)
 export interface SavedObjectsMigrationLogger {
     // (undocumented)
@@ -1899,6 +1934,18 @@ export interface SavedObjectsServiceStart {
     createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
     createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+}
+
+// @public
+export interface SavedObjectsTypeMappingDefinition {
+    // (undocumented)
+    properties: SavedObjectsMappingProperties;
+}
+
+// @public
+export interface SavedObjectsTypeMappingDefinitions {
+    // (undocumented)
+    [type: string]: SavedObjectsTypeMappingDefinition;
 }
 
 // @public (undocumented)

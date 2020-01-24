@@ -115,6 +115,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkUpdateResponse](./kibana-plugin-server.savedobjectsbulkupdateresponse.md) |  |
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
+|  [SavedObjectsComplexFieldMapping](./kibana-plugin-server.savedobjectscomplexfieldmapping.md) |  |
+|  [SavedObjectsCoreFieldMapping](./kibana-plugin-server.savedobjectscorefieldmapping.md) |  |
 |  [SavedObjectsCreateOptions](./kibana-plugin-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-server.savedobjectsdeletebynamespaceoptions.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-server.savedobjectsdeleteoptions.md) |  |
@@ -131,6 +133,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsImportUnknownError](./kibana-plugin-server.savedobjectsimportunknownerror.md) | Represents a failure to import due to an unknown reason. |
 |  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-server.savedobjectsimportunsupportedtypeerror.md) | Represents a failure to import due to having an unsupported saved object type. |
 |  [SavedObjectsIncrementCounterOptions](./kibana-plugin-server.savedobjectsincrementcounteroptions.md) |  |
+|  [SavedObjectsMappingProperties](./kibana-plugin-server.savedobjectsmappingproperties.md) | Describe the fields of a [saved object type](./kibana-plugin-server.savedobjectstypemappingdefinition.md)<!-- -->. |
 |  [SavedObjectsMigrationLogger](./kibana-plugin-server.savedobjectsmigrationlogger.md) |  |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-server.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsRawDoc](./kibana-plugin-server.savedobjectsrawdoc.md) | A raw document as represented directly in the saved object index. |
@@ -138,6 +141,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsResolveImportErrorsOptions](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) | Options to control the "resolve import" operation. |
 |  [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for creating and registering Saved Object client wrappers. |
 |  [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceStart API provides a scoped Saved Objects client for interacting with Saved Objects. |
+|  [SavedObjectsTypeMappingDefinition](./kibana-plugin-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
+|  [SavedObjectsTypeMappingDefinitions](./kibana-plugin-server.savedobjectstypemappingdefinitions.md) | A map of [saved object type mappings](./kibana-plugin-server.savedobjectstypemappingdefinition.md) |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |
 |  [SessionCookieValidationResult](./kibana-plugin-server.sessioncookievalidationresult.md) | Return type from a function to validate cookie contents. |
@@ -221,6 +226,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientFactory](./kibana-plugin-server.savedobjectsclientfactory.md) | Describes the factory used to create instances of the Saved Objects Client. |
 |  [SavedObjectsClientFactoryProvider](./kibana-plugin-server.savedobjectsclientfactoryprovider.md) | Provider to invoke to retrieve a [SavedObjectsClientFactory](./kibana-plugin-server.savedobjectsclientfactory.md)<!-- -->. |
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
+|  [SavedObjectsFieldMapping](./kibana-plugin-server.savedobjectsfieldmapping.md) | Describe a [saved object type mapping](./kibana-plugin-server.savedobjectstypemappingdefinition.md) field. |
 |  [ScopeableRequest](./kibana-plugin-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-server.kibanarequest.md)<!-- -->. |
 |  [SharedGlobalConfig](./kibana-plugin-server.sharedglobalconfig.md) |  |
 |  [StringValidation](./kibana-plugin-server.stringvalidation.md) | Allows regex objects or a regex string |
