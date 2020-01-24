@@ -136,7 +136,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(await exists('renderingHeader')).to.be(false);
     });
 
-    it('navigates between standard application and one with custom appRoute', async () => {
+    // Flaky: https://github.com/elastic/kibana/issues/55750
+    it.skip('navigates between standard application and one with custom appRoute', async () => {
       await navigateTo('/');
       await find.waitForElementStale(await findLoadingMessage());
 
@@ -159,7 +160,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       ).to.eql(['/app/app_status', '/render/core', '/app/app_status']);
     });
 
-    it('navigates between applications with custom appRoutes', async () => {
+    // Flaky: https://github.com/elastic/kibana/issues/55736
+    it.skip('navigates between applications with custom appRoutes', async () => {
       await navigateTo('/');
       await find.waitForElementStale(await findLoadingMessage());
 

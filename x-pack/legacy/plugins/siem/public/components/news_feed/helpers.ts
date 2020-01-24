@@ -12,9 +12,19 @@ import { NewsItem, RawNewsApiItem, RawNewsApiResponse } from './types';
 import { throwIfNotOk } from '../../hooks/api/api';
 
 /**
- * Combines the URL specified with the `newsFeedUrlSetting` with the Kibana
- * version returned from `getKibanaVersion` to form a complete path to the
- * news (specific to the current version of Kibana)
+ * Removes the `-SNAPSHOT` that is sometimes appended to the Kibana version,
+ * (e.g. `8.0.0-SNAPSHOT`), which is typically only seen in non-production
+ * environments
+ */
+export const removeSnapshotFromVersion = (kibanaVersion?: string) =>
+  kibanaVersion?.replace(/-SNAPSHOT/gi, '') ?? kibanaVersion;
+
+/**
+ * Combines the URL specified in the `newsFeedUrlSetting`, e.g.
+ * `https://feeds.elastic.co/security-solution` with the Kibana version
+ * returned from `getKibanaVersion` (e.g. `8.0.0`) to form a complete path to
+ * the news specific to the current version of Kibana, (e.g.
+ * `https://feeds.elastic.co/security-solution/v8.0.0.json`)
  */
 export const getNewsFeedUrl = ({
   newsFeedUrlSetting,
@@ -22,16 +32,26 @@ export const getNewsFeedUrl = ({
 }: {
   newsFeedUrlSetting: string;
   getKibanaVersion: () => string;
-}) => [newsFeedUrlSetting, `v${getKibanaVersion()}.json`].join('/');
+}) =>
+  [
+    newsFeedUrlSetting?.trim().replace(/\/$/, ''),
+    `v${removeSnapshotFromVersion(getKibanaVersion())}.json`,
+  ].join('/');
 
+/** Fall back to this language when extracting i18n news items from the feed */
 export const NEWS_FEED_FALLBACK_LANGUAGE = 'en';
 
 /**
  * Returns the current locale of the browser as specified in the `document`,
  * or the value of `fallback` if the locale could not be retrieved
  */
-export const getLocale = (fallback: string): string =>
-  document.documentElement.lang?.toLowerCase() ?? fallback; // use the `lang` attribute of the `html` tag
+export const getLocale = (fallback: string): string => {
+  if (document.documentElement.lang === '') {
+    return fallback;
+  }
+
+  return document.documentElement.lang ?? fallback; // use the `lang` attribute of the `html` tag
+};
 
 const NO_NEWS_ITEMS: NewsItem[] = [];
 
@@ -39,7 +59,7 @@ const NO_NEWS_ITEMS: NewsItem[] = [];
  * Transforms a `RawNewsApiResponse` from the news feed API to a collection of
  * `NewsItem`s
  */
-export const getNewsItemsFromApiResponse = (response?: RawNewsApiResponse): NewsItem[] => {
+export const getNewsItemsFromApiResponse = (response?: RawNewsApiResponse | null): NewsItem[] => {
   const locale = getLocale(NEWS_FEED_FALLBACK_LANGUAGE);
 
   if (response == null || response.items == null) {
@@ -53,7 +73,7 @@ export const getNewsItemsFromApiResponse = (response?: RawNewsApiResponse): News
         get(locale, x.description) ?? get(NEWS_FEED_FALLBACK_LANGUAGE, x.description) ?? '',
       expireOn: new Date(x.expire_on ?? ''),
       hash: x.hash ?? uuid.v4(),
-      imageUrl: x.image_url ?? null,
+      imageUrl: get(locale, x.image_url) ?? get(NEWS_FEED_FALLBACK_LANGUAGE, x.image_url) ?? null,
       linkUrl: get(locale, x.link_url) ?? get(NEWS_FEED_FALLBACK_LANGUAGE, x.link_url) ?? '',
       publishOn: new Date(x.publish_on ?? ''),
       title: get(locale, x.title) ?? get(NEWS_FEED_FALLBACK_LANGUAGE, x.title) ?? '',
@@ -82,8 +102,8 @@ export const fetchNews = async ({
 };
 
 /**
- * Returns false if `now` is before the `NewsItem` `publishOn` date, or
- * after the `expireOn` date
+ * Returns true when "now" is after the publishOn date and before the expireOn
+ * date
  */
 export const showNewsItem = ({ publishOn, expireOn }: NewsItem): boolean =>
-  !moment().isBefore(publishOn) && !moment().isAfter(expireOn);
+  moment(Date.now()).isAfter(publishOn) && moment(Date.now()).isBefore(expireOn);
