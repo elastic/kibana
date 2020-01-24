@@ -50,31 +50,40 @@ async function getSpacesUsage(
 
   const knownFeatureIds = features.getFeatures().map(feature => feature.id);
 
-  const resp = await callCluster<SpacesAggregationResponse>('search', {
-    index: kibanaIndex,
-    body: {
-      track_total_hits: true,
-      query: {
-        term: {
-          type: {
-            value: 'space',
+  let resp: SpacesAggregationResponse | undefined;
+  try {
+    resp = await callCluster<SpacesAggregationResponse>('search', {
+      index: kibanaIndex,
+      body: {
+        track_total_hits: true,
+        query: {
+          term: {
+            type: {
+              value: 'space',
+            },
           },
         },
-      },
-      aggs: {
-        disabledFeatures: {
-          terms: {
-            field: 'space.disabledFeatures',
-            include: knownFeatureIds,
-            size: knownFeatureIds.length,
+        aggs: {
+          disabledFeatures: {
+            terms: {
+              field: 'space.disabledFeatures',
+              include: knownFeatureIds,
+              size: knownFeatureIds.length,
+            },
           },
         },
+        size: 0,
       },
-      size: 0,
-    },
-  });
+    });
+  } catch (err) {
+    if (err.status === 404) {
+      return {} as UsageStats;
+    }
 
-  const { hits, aggregations } = resp;
+    throw err;
+  }
+
+  const { hits, aggregations } = resp!;
 
   const count = get(hits, 'total.value', 0);
   const disabledFeatureBuckets = get(aggregations, 'disabledFeatures.buckets', []);

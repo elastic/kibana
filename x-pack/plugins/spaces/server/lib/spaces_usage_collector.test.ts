@@ -66,6 +66,38 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
+describe('error handling', () => {
+  it('handles a 404 when searching for space usage', async () => {
+    const { features, licensing, usageCollecion } = setup({
+      license: { isAvailable: true, type: 'basic' },
+    });
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
+      kibanaIndex: '.kibana',
+      features,
+      licensing,
+    });
+
+    await getSpacesUsage(jest.fn().mockRejectedValue({ status: 404 }));
+  });
+
+  it('throws error for a non-404', async () => {
+    const { features, licensing, usageCollecion } = setup({
+      license: { isAvailable: true, type: 'basic' },
+    });
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(usageCollecion as any, {
+      kibanaIndex: '.kibana',
+      features,
+      licensing,
+    });
+
+    const statusCodes = [401, 402, 403, 500];
+    for (const statusCode of statusCodes) {
+      const error = { status: statusCode };
+      await expect(getSpacesUsage(jest.fn().mockRejectedValue(error))).rejects.toBe(error);
+    }
+  });
+});
+
 describe('with a basic license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
