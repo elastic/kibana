@@ -5,13 +5,15 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiBasicTable,
   EuiFlexGroup,
-  EuiPanel,
-  EuiTitle,
-  EuiButtonIcon,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
@@ -100,6 +102,16 @@ export const MonitorListComponent = (props: Props) => {
         </MonitorPageLink>
       ),
       sortable: true,
+    },
+    {
+      aligh: 'left' as const,
+      field: 'state.url.full',
+      name: labels.URL,
+      render: (url: string, summary: MonitorSummary) => (
+        <EuiLink href={url} target="_blank" color="text">
+          {url} <EuiIcon size="s" type="popout" color="subbdued" />
+        </EuiLink>
+      ),
     },
     {
       align: 'center' as const,
