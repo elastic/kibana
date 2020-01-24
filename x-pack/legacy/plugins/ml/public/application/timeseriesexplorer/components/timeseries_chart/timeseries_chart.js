@@ -385,6 +385,7 @@ const TimeseriesChartIntl = injectI18n(
       drawContextElements(context, this.vizWidth, contextChartHeight, swimlaneHeight);
     }
 
+    contextChartInitialized = false;
     drawContextChartSelection() {
       const {
         contextChartData,
@@ -446,7 +447,10 @@ const TimeseriesChartIntl = injectI18n(
         };
         if (!_.isEqual(newSelectedBounds, this.selectedBounds)) {
           this.selectedBounds = newSelectedBounds;
-          contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
+          if (this.contextChartInitialized === false) {
+            this.contextChartInitialized = true;
+            contextChartSelected({ from: contextXScaleDomain[0], to: contextXScaleDomain[1] });
+          }
         }
       }
     }

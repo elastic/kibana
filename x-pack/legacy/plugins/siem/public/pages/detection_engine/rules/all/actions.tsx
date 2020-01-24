@@ -38,12 +38,7 @@ export const duplicateRulesAction = async (
     const ruleIds = rules.map(r => r.id);
     dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: true });
     const duplicatedRules = await duplicateRules({ rules });
-    dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: false });
-    dispatch({
-      type: 'updateRules',
-      rules: duplicatedRules,
-      appendRuleId: rules[rules.length - 1].id,
-    });
+    dispatch({ type: 'refresh' });
     displaySuccessToast(
       i18n.SUCCESSFULLY_DUPLICATED_RULES(duplicatedRules.length),
       dispatchToaster
@@ -64,13 +59,12 @@ export const deleteRulesAction = async (
   onRuleDeleted?: () => void
 ) => {
   try {
-    dispatch({ type: 'updateLoading', ids, isLoading: true });
+    dispatch({ type: 'loading', isLoading: true });
 
     const response = await deleteRules({ ids });
-    const { rules, errors } = bucketRulesResponse(response);
+    const { errors } = bucketRulesResponse(response);
 
-    dispatch({ type: 'deleteRules', rules });
-
+    dispatch({ type: 'refresh' });
     if (errors.length > 0) {
       displayErrorToast(
         i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ids.length),

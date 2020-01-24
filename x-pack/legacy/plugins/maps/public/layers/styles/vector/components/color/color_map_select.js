@@ -14,9 +14,7 @@ import { ColorStopsCategorical } from './color_stops_categorical';
 const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 
 export class ColorMapSelect extends Component {
-  state = {
-    selected: '',
-  };
+  state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.customColorMap === prevState.prevPropsCustomColorMap) {
@@ -41,10 +39,7 @@ export class ColorMapSelect extends Component {
   _onCustomColorMapChange = ({ colorStops, isInvalid }) => {
     // Manage invalid custom color map in local state
     if (isInvalid) {
-      const newState = {
-        customColorMap: colorStops,
-      };
-      this.setState(newState);
+      this.setState({ customColorMap: colorStops });
       return;
     }
 
@@ -56,35 +51,34 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
-    let colorStopsInput;
-    if (this.props.useCustomColorMap) {
-      if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-        colorStopsInput = (
-          <Fragment>
-            <EuiSpacer size="s" />
-            <ColorStopsOrdinal
-              colorStops={this.state.customColorMap}
-              onChange={this._onCustomColorMapChange}
-            />
-          </Fragment>
-        );
-      } else if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
-        colorStopsInput = (
-          <Fragment>
-            <EuiSpacer size="s" />
-            <ColorStopsCategorical
-              colorStops={this.state.customColorMap}
-              onChange={this._onCustomColorMapChange}
-            />
-          </Fragment>
-        );
-      }
+    if (!this.props.useCustomColorMap) {
+      return null;
     }
-    return colorStopsInput;
+
+    if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
+      return (
+        <Fragment>
+          <EuiSpacer size="s" />
+          <ColorStopsOrdinal
+            colorStops={this.state.customColorMap}
+            onChange={this._onCustomColorMapChange}
+          />
+        </Fragment>
+      );
+    }
+
+    return (
+      <Fragment>
+        <EuiSpacer size="s" />
+        <ColorStopsCategorical
+          colorStops={this.state.customColorMap}
+          onChange={this._onCustomColorMapChange}
+        />
+      </Fragment>
+    );
   }
 
   render() {
-    const colorStopsInput = this._renderColorStopsInput();
     const colorMapOptionsWithCustom = [
       {
         value: CUSTOM_COLOR_MAP,
@@ -110,7 +104,7 @@ export class ColorMapSelect extends Component {
           valueOfSelected={valueOfSelected}
           hasDividers={true}
         />
-        {colorStopsInput}
+        {this._renderColorStopsInput()}
       </Fragment>
     );
   }

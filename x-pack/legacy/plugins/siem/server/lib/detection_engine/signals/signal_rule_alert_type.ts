@@ -134,6 +134,27 @@ export const signalRulesAlertType = ({
         logger.warn(
           `Signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`
         );
+        // write a failure status whenever we have a time gap
+        // this is a temporary solution until general activity
+        // monitoring is developed as a feature
+        const gapDate = new Date().toISOString();
+        await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
+          alertId,
+          statusDate: gapDate,
+          status: 'failed',
+          lastFailureAt: gapDate,
+          lastSuccessAt: currentStatusSavedObject.attributes.lastSuccessAt,
+          lastFailureMessage: `Signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`,
+          lastSuccessMessage: currentStatusSavedObject.attributes.lastSuccessMessage,
+        });
+
+        if (ruleStatusSavedObjects.saved_objects.length >= 6) {
+          // delete fifth status and prepare to insert a newer one.
+          const toDelete = ruleStatusSavedObjects.saved_objects.slice(5);
+          await toDelete.forEach(async item =>
+            services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
+          );
+        }
       }
       // set searchAfter page size to be the lesser of default page size or maxSignals.
       const searchAfterSize =
@@ -243,10 +264,8 @@ export const signalRulesAlertType = ({
             }
           }
         } catch (err) {
-          // TODO: Error handling and writing of errors into a signal that has error
-          // handling/conditions
           logger.error(
-            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", ${err.message}`
           );
           const sDate = new Date().toISOString();
           currentStatusSavedObject.attributes.status = 'failed';
