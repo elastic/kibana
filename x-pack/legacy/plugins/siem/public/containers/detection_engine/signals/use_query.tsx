@@ -57,8 +57,8 @@ export const useQuerySignals = <Hit, Aggs>(
         if (isSubscribed) {
           setSignals({
             data: signalResponse,
-            response: JSON.stringify(signalResponse),
-            request: JSON.stringify({ index: [indexName] ?? [''], body: query }),
+            response: JSON.stringify(signalResponse, null, 2),
+            request: JSON.stringify({ index: [indexName] ?? [''], body: query }, null, 2),
             setQuery,
             refetch: fetchData,
           });
