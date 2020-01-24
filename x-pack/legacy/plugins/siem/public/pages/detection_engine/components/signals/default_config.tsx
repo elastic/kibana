@@ -90,6 +90,7 @@ export const signalsHeaders: ColumnHeader[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.name',
     label: i18n.SIGNALS_HEADERS_RULE,
+    linkField: 'signal.rule.id',
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {

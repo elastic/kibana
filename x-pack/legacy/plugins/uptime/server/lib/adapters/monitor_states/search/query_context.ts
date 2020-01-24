@@ -55,18 +55,14 @@ export class QueryContext {
     return clauses;
   }
 
-  async dateRangeFilter(forceNoTimespan?: boolean): Promise<any> {
+  async dateRangeFilter(): Promise<any> {
     const timestampClause = {
       range: { '@timestamp': { gte: this.dateRangeStart, lte: this.dateRangeEnd } },
     };
 
-    if (forceNoTimespan === true || !(await this.hasTimespan())) {
+    if (!(await this.hasTimespan())) {
       return timestampClause;
     }
-
-    // @ts-ignore
-    const tsStart = DateMath.parse(this.dateRangeEnd).subtract(10, 'seconds');
-    const tsEnd = DateMath.parse(this.dateRangeEnd)!;
 
     return {
       bool: {
@@ -75,14 +71,7 @@ export class QueryContext {
           {
             bool: {
               should: [
-                {
-                  range: {
-                    'monitor.timespan': {
-                      gte: tsStart.toISOString(),
-                      lte: tsEnd.toISOString(),
-                    },
-                  },
-                },
+                this.timespanClause(),
                 {
                   bool: {
                     must_not: { exists: { field: 'monitor.timespan' } },
@@ -92,6 +81,29 @@ export class QueryContext {
             },
           },
         ],
+      },
+    };
+  }
+
+  // timeRangeClause queries the given date range using the monitor timespan field
+  // which is a bit dicey since we may have data that predates this field existing,
+  // or we may have data that has it, but a slow ingestion process.
+  timespanClause() {
+    // We subtract 5m from the start to account for data that shows up late,
+    // for instance, with a large value for the elasticsearch refresh interval
+    // setting it lower can work very well on someone's laptop, but with real world
+    // latencies and slowdowns that's dangerous. Making this value larger makes things
+    // only slower, but only marginally so, and prevents people from seeing weird
+    // behavior.
+    const tsStart = DateMath.parse(this.dateRangeEnd)!.subtract(5, 'minutes');
+    const tsEnd = DateMath.parse(this.dateRangeEnd)!;
+
+    return {
+      range: {
+        'monitor.timespan': {
+          gte: tsStart.toISOString(),
+          lte: tsEnd.toISOString(),
+        },
       },
     };
   }
@@ -107,10 +119,7 @@ export class QueryContext {
           body: {
             query: {
               bool: {
-                filter: [
-                  await this.dateRangeFilter(true),
-                  { exists: { field: 'monitor.timespan' } },
-                ],
+                filter: [this.timespanClause()],
               },
             },
           },
