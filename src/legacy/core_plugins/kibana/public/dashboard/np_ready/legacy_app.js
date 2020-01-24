@@ -31,7 +31,7 @@ import {
 } from '../../../../../../plugins/kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { syncQuery } from '../../../../../../plugins/data/public/query/state_sync';
+import { syncQuery } from '../../../../../../plugins/data/public';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
