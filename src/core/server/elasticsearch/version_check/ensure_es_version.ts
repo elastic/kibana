@@ -29,7 +29,7 @@ import { isEsCompatibleWithKibana } from './is_es_compatible_with_kibana';
 import { Logger } from '../../logging';
 import { APICaller } from '..';
 
-export interface EnsureVersionOptions {
+export interface PollEsNodesVersionOptions {
   callWithInternalUser: APICaller;
   log: Logger;
   kibanaVersion: string;
@@ -49,6 +49,15 @@ interface NodeInfo {
   http: {
     publish_address: string;
   };
+  name: string;
+}
+
+export interface NodesVersionCompatibility {
+  isCompatible: boolean;
+  message?: string;
+  incompatibleNodes: NodeInfo[];
+  warningNodes: NodeInfo[];
+  kibanaVersion: string;
 }
 
 function getHumanizedNodeName(node: NodeInfo) {
@@ -60,7 +69,7 @@ export function mapNodesVersionCompatibility(
   nodesInfo: NodesInfo,
   kibanaVersion: string,
   ignoreVersionMismatch: boolean
-) {
+): NodesVersionCompatibility {
   const nodes = Object.keys(nodesInfo.nodes)
     .sort() // Sorting ensures a stable node ordering for comparison
     .map(key => nodesInfo.nodes[key])
@@ -81,7 +90,7 @@ export function mapNodesVersionCompatibility(
     return nodeSemVer && kibanaSemver && nodeSemVer.version !== kibanaSemver.version;
   });
 
-  let message = {};
+  let message;
   if (incompatibleNodes.length > 0) {
     const incompatibleNodeNames = incompatibleNodes.map(node => node.name).join(', ');
     if (ignoreVersionMismatch) {
@@ -112,7 +121,7 @@ export const pollEsNodesVersion = ({
   kibanaVersion,
   ignoreVersionMismatch,
   esVersionCheckInterval: healthCheckInterval,
-}: EnsureVersionOptions) => {
+}: PollEsNodesVersionOptions) => {
   log.debug('Checking Elasticsearch version');
 
   return interval(healthCheckInterval).pipe(
@@ -129,7 +138,8 @@ export const pollEsNodesVersion = ({
     map((nodesInfo: NodesInfo) =>
       mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch)
     ),
-    // Only emit if the IP or version numbers of the nodes
+    // Only emit if the IP or version numbers of the nodes changed from the
+    // previous result.
     distinctUntilChanged((prev, curr) => {
       const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
       return (
