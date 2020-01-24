@@ -232,9 +232,12 @@ export function loadIndexTemplate(name: Template['name']) {
 export async function saveTemplate(template: Template, isClone?: boolean) {
   const includeTypeName = doesMappingsHasType(template.mappings);
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/templates?include_type_name=${includeTypeName}`,
+    path: `${API_BASE_PATH}/templates`,
     method: 'put',
     body: JSON.stringify(template),
+    query: {
+      include_type_name: includeTypeName,
+    },
   });
 
   const uimActionType = isClone ? UIM_TEMPLATE_CLONE : UIM_TEMPLATE_CREATE;
@@ -248,11 +251,12 @@ export async function updateTemplate(template: Template) {
   const includeTypeName = doesMappingsHasType(template.mappings);
   const { name } = template;
   const result = await sendRequest({
-    path: `${API_BASE_PATH}/templates/${encodeURIComponent(
-      name
-    )}?include_type_name=${includeTypeName}`,
+    path: `${API_BASE_PATH}/templates/${encodeURIComponent(name)}`,
     method: 'put',
     body: JSON.stringify(template),
+    query: {
+      include_type_name: includeTypeName,
+    },
   });
 
   uiMetricService.trackMetric('count', UIM_TEMPLATE_UPDATE);
