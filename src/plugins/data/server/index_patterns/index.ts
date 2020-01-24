@@ -20,4 +20,5 @@ import * as indexPatterns from './utils';
 
 export { IndexPatternsFetcher, FieldDescriptor, shouldReadFieldFromDocValues } from './fetcher';
 export { IndexPatternsService } from './index_patterns_service';
+export { getFieldsForWildcard } from './lib/fields_for_wildcard';
 export { indexPatterns };

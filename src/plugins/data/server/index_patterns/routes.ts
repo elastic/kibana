@@ -20,18 +20,10 @@
 import { schema } from '@kbn/config-schema';
 import { HttpServiceSetup, RequestHandlerContext } from 'kibana/server';
 import { IndexPatternsFetcher } from './fetcher';
+import { getFieldsForWildcard } from './lib/fields_for_wildcard';
+import { parseMetaFields } from './utils';
 
 export function registerRoutes(http: HttpServiceSetup) {
-  const parseMetaFields = (metaFields: string | string[]) => {
-    let parsedFields: string[] = [];
-    if (typeof metaFields === 'string') {
-      parsedFields = JSON.parse(metaFields);
-    } else {
-      parsedFields = metaFields;
-    }
-    return parsedFields;
-  };
-
   const router = http.createRouter();
   router.get(
     {
@@ -45,34 +37,7 @@ export function registerRoutes(http: HttpServiceSetup) {
         }),
       },
     },
-    async (context, request, response) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
-      const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
-      const { pattern, meta_fields: metaFields } = request.query;
-
-      let parsedFields: string[] = [];
-      try {
-        parsedFields = parseMetaFields(metaFields);
-      } catch (error) {
-        return response.badRequest();
-      }
-
-      try {
-        const fields = await indexPatterns.getFieldsForWildcard({
-          pattern,
-          metaFields: parsedFields,
-        });
-
-        return response.ok({
-          body: { fields },
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-      } catch (error) {
-        return response.notFound();
-      }
-    }
+    async (context, request, response) => getFieldsForWildcard(context, request, response)
   );
 
   router.get(
