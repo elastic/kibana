@@ -23,13 +23,14 @@ export { RangeValues, RangesParamEditor } from 'ui/vis/editors/default/controls/
 export { ColorSchema, ColorSchemas, colorSchemas, getHeatmapColors } from 'ui/color_maps';
 export { AggConfig, Vis, VisParams } from 'ui/vis';
 export { AggType } from 'ui/agg_types';
-export { CUSTOM_LEGEND_VIS_TYPES, VisLegend } from 'ui/vis/vis_types/vislib_vis_legend';
-// @ts-ignore
-export { Tooltip } from 'ui/vis/components/tooltip';
 // @ts-ignore
 export { SimpleEmitter } from 'ui/utils/simple_emitter';
 // @ts-ignore
 export { Binder } from 'ui/binder';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
+export { getFormat, getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
+// @ts-ignore
+export { buildHierarchicalData } from 'ui/agg_response/hierarchical/build_hierarchical_data';
+// @ts-ignore
+export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';
