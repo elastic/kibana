@@ -25,7 +25,7 @@
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import {
-  SavedObjectsMapping,
+  SavedObjectsTypeMapping,
   IndexMapping,
   SavedObjectsTypeMappingDefinitions,
 } from '../../mappings';
@@ -49,7 +49,7 @@ export interface KibanaMigratorOptions {
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
-  savedObjectMappings: SavedObjectsMapping[];
+  savedObjectMappings: SavedObjectsTypeMapping[];
   savedObjectMigrations: MigrationDefinition;
   savedObjectSchemas: SavedObjectsSchema;
   savedObjectValidations: PropertyValidators;
@@ -181,7 +181,9 @@ export class KibanaMigrator {
  * Merges savedObjectMappings properties into a single object, verifying that
  * no mappings are redefined.
  */
-export function mergeTypes(mappings: SavedObjectsMapping[]): SavedObjectsTypeMappingDefinitions {
+export function mergeTypes(
+  mappings: SavedObjectsTypeMapping[]
+): SavedObjectsTypeMappingDefinitions {
   return mappings.reduce((acc, { pluginId, type, definition }) => {
     const duplicate = acc.hasOwnProperty(type);
     if (duplicate) {

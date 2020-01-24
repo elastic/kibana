@@ -41,7 +41,7 @@ import {
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
-import { SavedObjectsMapping } from './mappings';
+import { SavedObjectsTypeMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
@@ -211,7 +211,7 @@ export class SavedObjectsService
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
-  private mappings: SavedObjectsMapping[] = [];
+  private mappings: SavedObjectsTypeMapping[] = [];
   private migrations: MigrationDefinition = {};
   private schemas: SavedObjectsSchemaDefinition = {};
   private validations: PropertyValidators = {};
@@ -364,7 +364,7 @@ export class SavedObjectsService
 
 const convertLegacyMappings = (
   legacyMappings: SavedObjectsLegacyMapping[]
-): SavedObjectsMapping[] => {
+): SavedObjectsTypeMapping[] => {
   return legacyMappings.reduce((mappings, { pluginId, properties }) => {
     return [
       ...mappings,
@@ -374,5 +374,5 @@ const convertLegacyMappings = (
         definition,
       })),
     ];
-  }, [] as SavedObjectsMapping[]);
+  }, [] as SavedObjectsTypeMapping[]);
 };

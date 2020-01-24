@@ -22,7 +22,7 @@
  *
  * @internal
  */
-export interface SavedObjectsMapping {
+export interface SavedObjectsTypeMapping {
   pluginId: string;
   type: string;
   definition: SavedObjectsTypeMappingDefinition;
@@ -52,6 +52,8 @@ export interface SavedObjectsMapping {
  *   }
  * }
  * ```
+ *
+ * @public
  */
 export interface SavedObjectsTypeMappingDefinition {
   properties: SavedObjectsMappingProperties;
@@ -108,7 +110,9 @@ export interface SavedObjectsMappingProperties {
  *
  * @public
  */
-export type SavedObjectsFieldMapping = CoreFieldMapping | ComplexFieldMapping;
+export type SavedObjectsFieldMapping =
+  | SavedObjectsCoreFieldMapping
+  | SavedObjectsComplexFieldMapping;
 
 // INDEX MAPPING
 
@@ -118,11 +122,11 @@ export type SavedObjectsFieldMapping = CoreFieldMapping | ComplexFieldMapping;
 export interface IndexMapping {
   dynamic?: string;
   properties: SavedObjectsMappingProperties;
-  _meta?: MappingMeta;
+  _meta?: IndexMappingMeta;
 }
 
 /** @internal */
-export interface MappingMeta {
+export interface IndexMappingMeta {
   // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
   // with each key being a root-level mapping property, and each value being
   // the md5 hash of that mapping's value when the index was created.
@@ -131,7 +135,8 @@ export interface MappingMeta {
 
 // FieldMapping isn't 1:1 with the options available,
 // modify as needed.
-export interface CoreFieldMapping {
+/** @public */
+export interface SavedObjectsCoreFieldMapping {
   type: string;
   index?: boolean;
   enabled?: boolean;
@@ -144,7 +149,8 @@ export interface CoreFieldMapping {
 
 // FieldMapping isn't 1:1 with the options available,
 // modify as needed.
-export interface ComplexFieldMapping {
+/** @public */
+export interface SavedObjectsComplexFieldMapping {
   dynamic?: string;
   type?: string;
   properties: SavedObjectsMappingProperties;

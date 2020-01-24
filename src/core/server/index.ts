@@ -210,6 +210,12 @@ export {
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsFieldMapping,
+  SavedObjectsTypeMappingDefinitions,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsMappingProperties,
 } from './saved_objects';
 
 export {

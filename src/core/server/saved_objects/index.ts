@@ -50,4 +50,13 @@ export {
   SavedObjectsDeleteByNamespaceOptions,
 } from './service/lib/repository';
 
+export {
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsFieldMapping,
+  SavedObjectsMappingProperties,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsTypeMappingDefinitions,
+} from './mappings';
+
 export { config } from './saved_objects_config';
