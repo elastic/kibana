@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import {
   EuiButton,
   EuiCallOut,
@@ -14,14 +16,16 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 
-import { HeaderPage } from '../../../../components/header_page';
-import { WrapperPage } from '../../../../components/wrapper_page';
-import { SpyRoute } from '../../../../utils/route/spy_routes';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
+import { WrapperPage } from '../../../../components/wrapper_page';
+import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
+import { displaySuccessToast, useStateToaster } from '../../../../components/toasters';
+import { SpyRoute } from '../../../../utils/route/spy_routes';
+import { useUserInfo } from '../../components/user_info';
+import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { FormHook, FormData } from '../components/shared_imports';
 import { StepPanel } from '../components/step_panel';
 import { StepAboutRule } from '../components/step_about_rule';
@@ -46,9 +50,21 @@ interface ScheduleStepRuleForm extends StepRuleForm {
   data: ScheduleStepRule | null;
 }
 
-export const EditRuleComponent = memo(() => {
-  const { ruleId } = useParams();
+const EditRulePageComponent: FC = () => {
+  const [, dispatchToaster] = useStateToaster();
+  const {
+    loading: initLoading,
+    isSignalIndexExists,
+    isAuthenticated,
+    canUserCRUD,
+    hasManageApiKey,
+  } = useUserInfo();
+  const { detailName: ruleId } = useParams();
   const [loading, rule] = useRule(ruleId);
+
+  const userHasNoPermissions =
+    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+
   const [initForm, setInitForm] = useState(false);
   const [myAboutRuleForm, setMyAboutRuleForm] = useState<AboutStepRuleForm>({
     data: null,
@@ -88,7 +104,7 @@ export const EditRuleComponent = memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
+            <StepPanel loading={loading || initLoading} title={ruleI18n.DEFINITION}>
               {myDefineRuleForm.data != null && (
                 <StepDefineRule
                   isReadOnlyView={false}
@@ -109,7 +125,7 @@ export const EditRuleComponent = memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.ABOUT}>
+            <StepPanel loading={loading || initLoading} title={ruleI18n.ABOUT}>
               {myAboutRuleForm.data != null && (
                 <StepAboutRule
                   isReadOnlyView={false}
@@ -130,7 +146,7 @@ export const EditRuleComponent = memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.SCHEDULE}>
+            <StepPanel loading={loading || initLoading} title={ruleI18n.SCHEDULE}>
               {myScheduleRuleForm.data != null && (
                 <StepScheduleRule
                   isReadOnlyView={false}
@@ -148,6 +164,7 @@ export const EditRuleComponent = memo(() => {
     ],
     [
       loading,
+      initLoading,
       isLoading,
       myAboutRuleForm,
       myDefineRuleForm,
@@ -249,15 +266,26 @@ export const EditRuleComponent = memo(() => {
   }, []);
 
   if (isSaved || (rule != null && rule.immutable)) {
-    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`} />;
+    displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
+  }
+
+  if (
+    isSignalIndexExists != null &&
+    isAuthenticated != null &&
+    (!isSignalIndexExists || !isAuthenticated)
+  ) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}`} />;
+  } else if (userHasNoPermissions) {
+    return <Redirect to={`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`} />;
   }
 
   return (
     <>
       <WrapperPage restrictWidth>
-        <HeaderPage
+        <DetectionEngineHeaderPage
           backOptions={{
-            href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`,
+            href: `#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`,
             text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
           }}
           isLoading={isLoading}
@@ -303,21 +331,28 @@ export const EditRuleComponent = memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="cross" href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/${ruleId}`}>
+            <EuiButton iconType="cross" href={`#/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${ruleId}`}>
               {i18n.CANCEL}
             </EuiButton>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onSubmit} iconType="save" isLoading={isLoading}>
+            <EuiButton
+              fill
+              onClick={onSubmit}
+              iconType="save"
+              isLoading={isLoading}
+              isDisabled={initLoading}
+            >
               {i18n.SAVE_CHANGES}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </WrapperPage>
 
-      <SpyRoute />
+      <SpyRoute state={{ ruleName: rule?.name }} />
     </>
   );
-});
-EditRuleComponent.displayName = 'EditRuleComponent';
+};
+
+export const EditRulePage = memo(EditRulePageComponent);

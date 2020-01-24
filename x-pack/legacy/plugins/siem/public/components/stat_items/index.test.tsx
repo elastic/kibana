@@ -8,7 +8,6 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
@@ -59,7 +58,7 @@ describe('Stat Items Component', () => {
           <ReduxStoreProvider store={store}>
             <StatItemsComponent
               description="HOSTS"
-              fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+              fields={[{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }]}
               from={from}
               id="statItems"
               index={0}
@@ -79,7 +78,7 @@ describe('Stat Items Component', () => {
               areaChart={[]}
               barChart={[]}
               description="HOSTS"
-              fields={[{ key: 'hosts', value: null, color: '#3185FC', icon: 'cross' }]}
+              fields={[{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }]}
               from={from}
               id="statItems"
               index={0}
@@ -93,7 +92,7 @@ describe('Stat Items Component', () => {
     ],
   ])('disable charts', wrapper => {
     test('it renders the default widget', () => {
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should render titles', () => {
@@ -127,7 +126,7 @@ describe('Stat Items Component', () => {
             { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
             { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
-          color: '#DB1374',
+          color: '#D36086',
         },
         {
           key: 'uniqueDestinationIpsHistogram',
@@ -136,15 +135,15 @@ describe('Stat Items Component', () => {
             { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1084366 },
             { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12280 },
           ],
-          color: '#490092',
+          color: '#9170B8',
         },
       ],
       barChart: [
-        { key: 'uniqueSourceIps', value: [{ x: 'uniqueSourceIps', y: '1714' }], color: '#DB1374' },
+        { key: 'uniqueSourceIps', value: [{ x: 'uniqueSourceIps', y: '1714' }], color: '#D36086' },
         {
           key: 'uniqueDestinationIps',
           value: [{ x: 'uniqueDestinationIps', y: 2354 }],
-          color: '#490092',
+          color: '#9170B8',
         },
       ],
       description: 'UNIQUE_PRIVATE_IPS',
@@ -155,14 +154,14 @@ describe('Stat Items Component', () => {
           key: 'uniqueSourceIps',
           description: 'Source',
           value: 1714,
-          color: '#DB1374',
+          color: '#D36086',
           icon: 'cross',
         },
         {
           key: 'uniqueDestinationIps',
           description: 'Dest.',
           value: 2359,
-          color: '#490092',
+          color: '#9170B8',
           icon: 'cross',
         },
       ],
@@ -182,7 +181,7 @@ describe('Stat Items Component', () => {
       );
     });
     test('it renders the default widget', () => {
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should handle multiple titles', () => {

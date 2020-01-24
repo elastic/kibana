@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import React from 'react';
 
@@ -33,7 +32,7 @@ describe('Events', () => {
         />
       </TestProviders>
     );
-    expect(toJson(wrapper.find('FormattedFieldValue'))).toMatchSnapshot();
+    expect(wrapper.find('FormattedFieldValue')).toMatchSnapshot();
   });
 
   test('it renders a localized date tooltip for a field type of date that has a valid timestamp', () => {

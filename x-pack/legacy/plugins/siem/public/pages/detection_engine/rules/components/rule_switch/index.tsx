@@ -18,6 +18,7 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { enableRules } from '../../../../../containers/detection_engine/rules';
 import { enableRulesAction } from '../../all/actions';
 import { Action } from '../../all/reducer';
+import { useStateToaster } from '../../../../../components/toasters';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -32,8 +33,10 @@ export interface RuleSwitchProps {
   dispatch?: React.Dispatch<Action>;
   id: string;
   enabled: boolean;
+  isDisabled?: boolean;
   isLoading?: boolean;
   optionLabel?: string;
+  onChange?: (enabled: boolean) => void;
 }
 
 /**
@@ -42,18 +45,21 @@ export interface RuleSwitchProps {
 export const RuleSwitchComponent = ({
   dispatch,
   id,
+  isDisabled,
   isLoading,
   enabled,
   optionLabel,
+  onChange,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
   const [myEnabled, setMyEnabled] = useState(enabled ?? false);
+  const [, dispatchToaster] = useStateToaster();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
       if (dispatch != null) {
-        await enableRulesAction([id], event.target.checked!, dispatch);
+        await enableRulesAction([id], event.target.checked!, dispatch, dispatchToaster);
       } else {
         try {
           const updatedRules = await enableRules({
@@ -61,6 +67,9 @@ export const RuleSwitchComponent = ({
             enabled: event.target.checked!,
           });
           setMyEnabled(updatedRules[0].enabled);
+          if (onChange != null) {
+            onChange(updatedRules[0].enabled);
+          }
         } catch {
           setMyIsLoading(false);
         }
@@ -92,7 +101,7 @@ export const RuleSwitchComponent = ({
             data-test-subj="rule-switch"
             label={optionLabel ?? ''}
             showLabel={!isEmpty(optionLabel)}
-            disabled={false}
+            disabled={isDisabled}
             checked={myEnabled}
             onChange={onRuleStateChange}
           />

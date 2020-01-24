@@ -30,11 +30,6 @@ export function getType(node: any) {
 }
 
 export function serializeProvider(types: any) {
-  return {
-    serialize: provider('serialize'),
-    deserialize: provider('deserialize'),
-  };
-
   function provider(key: any) {
     return (context: any) => {
       const type = getType(context);
@@ -43,6 +38,11 @@ export function serializeProvider(types: any) {
       return fn(context);
     };
   }
+
+  return {
+    serialize: provider('serialize'),
+    deserialize: provider('deserialize'),
+  };
 }
 
 export class Type {

@@ -14,9 +14,10 @@ import { BucketSpanEstimator } from '../bucket_span_estimator';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;
+  hideEstimateButton?: boolean;
 }
 
-export const BucketSpan: FC<Props> = ({ setIsValid }) => {
+export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }) => {
   const {
     jobCreator,
     jobCreatorUpdate,
@@ -56,9 +57,11 @@ export const BucketSpan: FC<Props> = ({ setIsValid }) => {
             disabled={estimating}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <BucketSpanEstimator setEstimating={setEstimating} />
-        </EuiFlexItem>
+        {hideEstimateButton === false && (
+          <EuiFlexItem>
+            <BucketSpanEstimator setEstimating={setEstimating} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </Description>
   );

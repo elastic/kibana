@@ -7,18 +7,18 @@
 import { i18n } from '@kbn/i18n';
 
 export const TACTIC = i18n.translate('xpack.siem.detectionEngine.mitreAttack.tacticsDescription', {
-  defaultMessage: 'Tactic',
+  defaultMessage: 'tactic',
 });
 
-export const TECHNIQUES = i18n.translate(
+export const TECHNIQUE = i18n.translate(
   'xpack.siem.detectionEngine.mitreAttack.techniquesDescription',
   {
-    defaultMessage: 'Techniques',
+    defaultMessage: 'technique',
   }
 );
 
 export const ADD_MITRE_ATTACK = i18n.translate('xpack.siem.detectionEngine.mitreAttack.addTitle', {
-  defaultMessage: 'Add MITRE ATT&CK threat',
+  defaultMessage: 'Add MITRE ATT&CK\\u2122 threat',
 });
 
 export const TECHNIQUES_PLACEHOLDER = i18n.translate(

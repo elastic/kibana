@@ -346,6 +346,9 @@ class SavedObjectFinderUi extends React.Component<
             placeholder={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
+            aria-label={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
+              defaultMessage: 'Search…',
+            })}
             fullWidth
             value={this.state.query}
             onChange={e => {

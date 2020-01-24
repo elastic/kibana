@@ -1,17 +1,37 @@
 {
-  "rule_id": "b27b9f47-0a20-4807-8377-7f899b4fbada",
-  "risk_score": 50,
-  "description": "EQL - Audio Capture via PowerShell",
+  "description": "An adversary can leverage a computer's peripheral devices or applications to capture audio recordings for the purpose of listening into sensitive conversations to gather information.",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
   "immutable": true,
   "interval": "5m",
-  "name": "EQL - Audio Capture via PowerShell",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"SoundRecorder.exe\" and process.args:\"/FILE\"",
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "Audio Capture via PowerShell",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"powershell.exe\" and process.args:\"WindowsAudioDevice-Powershell-Cmdlet\"",
+  "risk_score": 25,
+  "rule_id": "b27b9f47-0a20-4807-8377-7f899b4fbada",
+  "severity": "low",
+  "tags": [
+    "EIA"
+  ],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Collection",
+        "reference": "https://attack.mitre.org/tactics/TA0009/"
+      },
+      "techniques": [
+        {
+          "id": "T1123",
+          "name": "Audio Capture",
+          "reference": "https://attack.mitre.org/techniques/T1123/"
+        }
+      ]
+    }
+  ],
+  "to": "now",
+  "type": "query",
   "version": 1
 }

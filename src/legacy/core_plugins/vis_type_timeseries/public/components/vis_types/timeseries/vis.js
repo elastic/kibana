@@ -79,10 +79,14 @@ export class TimeseriesVisualization extends Component {
   static getYAxisDomain = model => {
     const axisMin = get(model, 'axis_min', '').toString();
     const axisMax = get(model, 'axis_max', '').toString();
+    const fit = model.series
+      ? model.series.filter(({ hidden }) => !hidden).every(({ fill }) => fill === '0')
+      : model.fill === '0';
 
     return {
       min: axisMin.length ? Number(axisMin) : undefined,
       max: axisMax.length ? Number(axisMax) : undefined,
+      fit,
     };
   };
 

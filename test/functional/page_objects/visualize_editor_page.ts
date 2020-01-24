@@ -37,19 +37,19 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
   class VisualizeEditorPage {
     public async clickDataTab() {
-      await testSubjects.click('visualizeEditDataLink');
+      await testSubjects.click('visEditorTab__data');
     }
 
     public async clickOptionsTab() {
-      await testSubjects.click('visEditorTaboptions');
+      await testSubjects.click('visEditorTab__options');
     }
 
     public async clickMetricsAndAxes() {
-      await testSubjects.click('visEditorTabadvanced');
+      await testSubjects.click('visEditorTab__advanced');
     }
 
     public async clickVisEditorTab(tabName: string) {
-      await testSubjects.click('visEditorTab' + tabName);
+      await testSubjects.click(`visEditorTab__${tabName}`);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -97,8 +97,9 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickSplitDirection(direction: string) {
-      const control = await testSubjects.find('visEditorSplitBy');
-      const radioBtn = await control.findByCssSelector(`[title="${direction}"]`);
+      const radioBtn = await find.byCssSelector(
+        `[data-test-subj="visEditorSplitBy"][title="${direction}"]`
+      );
       await radioBtn.click();
     }
 
@@ -133,7 +134,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
     public async getBucketErrorMessage() {
       const error = await find.byCssSelector(
-        '[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText'
+        '[data-test-subj="bucketsAggGroup"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText'
       );
       const errorMessage = await error.getAttribute('innerText');
       log.debug(errorMessage);
@@ -151,7 +152,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     ) {
       log.debug(`selectField ${fieldValue}`);
       const selector = `
-          [group-name="${groupName}"]
+          [data-test-subj="${groupName}AggGroup"]
           [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
           [data-test-subj="visAggEditorParams"]
           ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
@@ -179,7 +180,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       childAggregationType = false
     ) {
       const comboBoxElement = await find.byCssSelector(`
-          [group-name="${groupName}"]
+          [data-test-subj="${groupName}AggGroup"]
           [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
           ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
           [data-test-subj="defaultEditorAggSelect"]
@@ -290,8 +291,9 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async sizeUpEditor() {
-      await testSubjects.click('visualizeEditorResizer');
-      await browser.pressKeys(browser.keys.ARROW_RIGHT);
+      const resizerPanel = await testSubjects.find('splitPanelResizer');
+      // Drag panel 100 px left
+      await browser.dragAndDrop({ location: resizerPanel }, { location: { x: -100, y: 0 } });
     }
 
     public async toggleDisabledAgg(agg: string) {
@@ -319,7 +321,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async toggleAutoMode() {
-      await testSubjects.click('visualizeEditorAutoButton');
+      // this is a temporary solution, should be replaced with initial after fixing the EuiToggleButton
+      // passing the data-test-subj attribute to a checkbox
+      await find.clickByCssSelector('.visEditorSidebar__controls input[type="checkbox"]');
+      // await testSubjects.click('visualizeEditorAutoButton');
     }
 
     public async isApplyEnabled() {
@@ -357,13 +362,22 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
 
-    public async clickYAxisAdvancedOptions(axisId: string) {
-      await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
+    public async changeYAxisShowCheckbox(axisId: string, enabled: boolean) {
+      const selector = `valueAxisShow-${axisId}`;
+      const button = await testSubjects.find(selector);
+      const isEnabled = (await button.getAttribute('aria-checked')) === 'true';
+      if (enabled !== isEnabled) {
+        await button.click();
+      }
     }
 
     public async changeYAxisFilterLabelsCheckbox(axisId: string, enabled: boolean) {
       const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
-      await testSubjects.setCheckbox(selector, enabled ? 'check' : 'uncheck');
+      const button = await testSubjects.find(selector);
+      const isEnabled = (await button.getAttribute('aria-checked')) === 'true';
+      if (enabled !== isEnabled) {
+        await button.click();
+      }
     }
 
     public async setSize(newValue: string, aggId: string) {
@@ -379,9 +393,17 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async selectYAxisScaleType(axisId: string, scaleType: string) {
-      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[value="${scaleType}"]`);
+      const selector = await find.byCssSelector(
+        `#scaleSelectYAxis-${axisId} > option[value="${scaleType}"]`
+      );
       await selector.click();
+    }
+
+    public async selectXAxisPosition(position: string) {
+      const option = await (await testSubjects.find('categoryAxisPosition')).findByCssSelector(
+        `option[value="${position}"]`
+      );
+      await option.click();
     }
 
     public async selectYAxisMode(mode: string) {
@@ -427,7 +449,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickMetricEditor() {
-      await find.clickByCssSelector('[group-name="metrics"] .euiAccordion__button');
+      await find.clickByCssSelector('[data-test-subj="metricsAggGroup"] .euiAccordion__button');
     }
 
     public async clickMetricByIndex(index: number) {

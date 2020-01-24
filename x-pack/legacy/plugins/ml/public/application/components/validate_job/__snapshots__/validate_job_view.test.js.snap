@@ -86,7 +86,7 @@ exports[`ValidateJob renders the button 1`] = `
       iconSide="right"
       iconType="questionInCircle"
       isDisabled={false}
-      isLoading={false}
+      isLoading={true}
       onClick={[Function]}
       size="s"
     >

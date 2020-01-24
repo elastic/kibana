@@ -20,7 +20,6 @@
 import { values } from 'lodash';
 import { format as formatUrl } from 'url';
 import { Agent as HttpsAgent } from 'https';
-import { readFileSync } from 'fs';
 
 import { WildcardMatcher } from './wildcard_matcher';
 
@@ -63,9 +62,9 @@ export class ProxyConfig {
     this.verifySsl = ssl.verify;
 
     const sslAgentOpts = {
-      ca: ssl.ca && ssl.ca.map(ca => readFileSync(ca)),
-      cert: ssl.cert && readFileSync(ssl.cert),
-      key: ssl.key && readFileSync(ssl.key),
+      ca: ssl.ca,
+      cert: ssl.cert,
+      key: ssl.key,
     };
 
     if (values(sslAgentOpts).filter(Boolean).length) {

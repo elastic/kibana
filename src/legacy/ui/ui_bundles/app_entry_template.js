@@ -28,14 +28,6 @@ export const appEntryTemplate = bundle => `
  * context: ${bundle.getContext()}
  */
 
-// import global polyfills
-import Symbol_observable from 'symbol-observable';
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
-import 'childnode-remove-polyfill';
 ${apmImport()}
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'

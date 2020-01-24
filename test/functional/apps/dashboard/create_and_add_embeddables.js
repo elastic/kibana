@@ -34,6 +34,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        pageNavigation: 'individual',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
@@ -83,7 +84,7 @@ export default function({ getService, getPageObjects }) {
 
       describe('is false', () => {
         before(async () => {
-          await PageObjects.header.clickManagement();
+          await PageObjects.header.clickStackManagement();
           await PageObjects.settings.clickKibanaSettings();
           await PageObjects.settings.toggleAdvancedSettingCheckbox('visualize:enableLabs');
         });
@@ -98,7 +99,7 @@ export default function({ getService, getPageObjects }) {
         });
 
         after(async () => {
-          await PageObjects.header.clickManagement();
+          await PageObjects.header.clickStackManagement();
           await PageObjects.settings.clickKibanaSettings();
           await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');
           await PageObjects.header.clickDashboard();

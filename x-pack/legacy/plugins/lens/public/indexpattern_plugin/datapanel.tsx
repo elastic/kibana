@@ -109,6 +109,7 @@ export function IndexPatternDataPanel({
     .sort((a, b) => a.localeCompare(b))
     .filter(id => !!indexPatterns[id])
     .map(id => ({
+      id,
       title: indexPatterns[id].title,
       timeFieldName: indexPatterns[id].timeFieldName,
     }));

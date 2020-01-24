@@ -18,12 +18,23 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SimpleSavedObject](./kibana-plugin-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-public.toastsapi.md) | Methods for adding and removing global toast messages. |
 
+## Enumerations
+
+|  Enumeration | Description |
+|  --- | --- |
+|  [AppLeaveActionType](./kibana-plugin-public.appleaveactiontype.md) | Possible type of actions on application leave. |
+|  [AppNavLinkStatus](./kibana-plugin-public.appnavlinkstatus.md) | Status of the application's navLink. |
+|  [AppStatus](./kibana-plugin-public.appstatus.md) | Accessibility status of an application. |
+
 ## Interfaces
 
 |  Interface | Description |
 |  --- | --- |
 |  [App](./kibana-plugin-public.app.md) | Extension of [common app properties](./kibana-plugin-public.appbase.md) with the mount function. |
 |  [AppBase](./kibana-plugin-public.appbase.md) |  |
+|  [AppCategory](./kibana-plugin-public.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
+|  [AppLeaveConfirmAction](./kibana-plugin-public.appleaveconfirmaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) to show a confirmation message when trying to leave an application.<!-- -->See  |
+|  [AppLeaveDefaultAction](./kibana-plugin-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
 |  [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-public.applicationstart.md) |  |
 |  [AppMountContext](./kibana-plugin-public.appmountcontext.md) | The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-public.coresetup.getstartservices.md)<!-- -->. |
@@ -65,6 +76,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md)<!-- -->. |
 |  [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) |  |
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
+|  [ImageValidation](./kibana-plugin-public.imagevalidation.md) |  |
 |  [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) |
 |  [LegacyCoreSetup](./kibana-plugin-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
@@ -99,15 +111,23 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMigrationVersion](./kibana-plugin-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsStart](./kibana-plugin-public.savedobjectsstart.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-public.savedobjectsupdateoptions.md) |  |
+|  [StringValidationRegex](./kibana-plugin-public.stringvalidationregex.md) | StringValidation with regex object |
+|  [StringValidationRegexString](./kibana-plugin-public.stringvalidationregexstring.md) | StringValidation as regex string |
+|  [UiSettingsParams](./kibana-plugin-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-public.uisettingsstate.md) |  |
+|  [UserProvidedValues](./kibana-plugin-public.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Type Aliases
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AppLeaveAction](./kibana-plugin-public.appleaveaction.md) | Possible actions to return from a [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md)<!-- -->See [AppLeaveConfirmAction](./kibana-plugin-public.appleaveconfirmaction.md) and [AppLeaveDefaultAction](./kibana-plugin-public.appleavedefaultaction.md) |
+|  [AppLeaveHandler](./kibana-plugin-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-public.appmountparameters.md) for detailed usage examples. |
 |  [AppMount](./kibana-plugin-public.appmount.md) | A mount function called when the user navigates to this app's route. |
 |  [AppMountDeprecated](./kibana-plugin-public.appmountdeprecated.md) | A mount function called when the user navigates to this app's route. |
 |  [AppUnmount](./kibana-plugin-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
+|  [AppUpdatableFields](./kibana-plugin-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-public.appupdater.md)<!-- -->. |
+|  [AppUpdater](./kibana-plugin-public.appupdater.md) | Updater for applications. see [ApplicationSetup](./kibana-plugin-public.applicationsetup.md) |
 |  [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-public.chromehelpextensionmenucustomlink.md) |  |
 |  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-public.chromehelpextensionmenudiscusslink.md) |  |
@@ -115,6 +135,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-public.chromehelpextensionmenugithublink.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-public.chromenavlinkupdateablefields.md) |  |
+|  [FatalErrorsStart](./kibana-plugin-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-public.handlercontexttype.md)<!-- -->. |
@@ -128,10 +149,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-public.savedobjectsclient.md) |
+|  [StringValidation](./kibana-plugin-public.stringvalidation.md) | Allows regex objects or a regex string |
 |  [Toast](./kibana-plugin-public.toast.md) |  |
 |  [ToastInput](./kibana-plugin-public.toastinput.md) | Inputs for [IToasts](./kibana-plugin-public.itoasts.md) APIs. |
 |  [ToastInputFields](./kibana-plugin-public.toastinputfields.md) | Allowed fields for [ToastInput](./kibana-plugin-public.toastinput.md)<!-- -->. |
 |  [ToastsSetup](./kibana-plugin-public.toastssetup.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
 |  [ToastsStart](./kibana-plugin-public.toastsstart.md) | [IToasts](./kibana-plugin-public.itoasts.md) |
+|  [UiSettingsType](./kibana-plugin-public.uisettingstype.md) | UI element type to represent the settings. |
 |  [UnmountCallback](./kibana-plugin-public.unmountcallback.md) | A function that will unmount the element previously mounted by the associated [MountPoint](./kibana-plugin-public.mountpoint.md) |
 

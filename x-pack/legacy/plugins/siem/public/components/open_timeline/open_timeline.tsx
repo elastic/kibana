@@ -57,6 +57,11 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       />
 
       <TimelinesTable
+        actionTimelineToShow={
+          onDeleteSelected != null && deleteTimelines != null
+            ? ['delete', 'duplicate', 'selectable']
+            : ['duplicate', 'selectable']
+        }
         data-test-subj="timelines-table"
         deleteTimelines={deleteTimelines}
         defaultPageSize={defaultPageSize}
@@ -69,7 +74,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         pageIndex={pageIndex}
         pageSize={pageSize}
         searchResults={searchResults}
-        showExtendedColumnsAndActions={onDeleteSelected != null && deleteTimelines != null}
+        showExtendedColumns={true}
         sortDirection={sortDirection}
         sortField={sortField}
         totalSearchResultsCount={totalSearchResultsCount}

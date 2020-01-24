@@ -11,7 +11,7 @@ export const FILTERS_LABEL = i18n.translate('xpack.siem.detectionEngine.createRu
 });
 
 export const QUERY_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule.QueryLabel', {
-  defaultMessage: 'Query',
+  defaultMessage: 'Custom query',
 });
 
 export const SAVED_ID_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule.savedIdLabel', {

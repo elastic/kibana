@@ -20,13 +20,12 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { npStart } from 'ui/new_platform';
-import { parseInterval } from '../utils/parse_interval';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
 } from './calc_es_interval';
-import { FIELD_FORMAT_IDS } from '../../../../plugins/data/public';
+import { FIELD_FORMAT_IDS, parseInterval } from '../../../../plugins/data/public';
 
 const getConfig = (...args) => npStart.core.uiSettings.get(...args);
 

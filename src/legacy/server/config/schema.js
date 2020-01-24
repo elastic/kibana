@@ -181,7 +181,7 @@ export default () =>
         .default('localhost'),
       watchPrebuild: Joi.boolean().default(false),
       watchProxyTimeout: Joi.number().default(10 * 60000),
-      useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
+      useBundleCache: Joi.boolean().default(!!process.env.CODE_COVERAGE ? true : Joi.ref('$prod')),
       sourceMaps: Joi.when('$prod', {
         is: true,
         then: Joi.boolean().valid(false),
@@ -254,7 +254,11 @@ export default () =>
           )
           .default([]),
       }).default(),
-      manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v7.2/manifest'),
+      manifestServiceUrl: Joi.string()
+        .default('')
+        .allow(''),
+      emsFileApiUrl: Joi.string().default('https://vector-staging.maps.elastic.co'),
+      emsTileApiUrl: Joi.string().default('https://tiles.maps.elastic.co'),
       emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.4'),
       emsFontLibraryUrl: Joi.string().default(
         'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'

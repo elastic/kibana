@@ -8,6 +8,7 @@ import * as H from 'history';
 import { isEqual } from 'lodash/fp';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
+import deepEqual from 'fast-deep-equal';
 
 import { SpyRouteProps } from './types';
 import { useRouteSpy } from './use_route_spy';
@@ -17,8 +18,9 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
     location: { pathname, search },
     history,
     match: {
-      params: { pageName, detailName, tabName },
+      params: { pageName, detailName, tabName, flowTarget },
     },
+    state,
   }) => {
     const [isInitializing, setIsInitializing] = useState(true);
     const [route, dispatch] = useRouteSpy();
@@ -43,6 +45,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
               tabName,
               pathName: pathname,
               history,
+              flowTarget,
             },
           });
           setIsInitializing(false);
@@ -56,11 +59,28 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
               search,
               pathName: pathname,
               history,
+              flowTarget,
+            },
+          });
+        }
+      } else {
+        if (pageName && !deepEqual(state, route.state)) {
+          dispatch({
+            type: 'updateRoute',
+            route: {
+              pageName,
+              detailName,
+              tabName,
+              search,
+              pathName: pathname,
+              history,
+              flowTarget,
+              state,
             },
           });
         }
       }
-    }, [pathname, search, pageName, detailName, tabName]);
+    }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
     return null;
   }
 );

@@ -34,7 +34,7 @@ declare module '@elastic/eui' {
       items: Array<{
         id: string;
         name: string;
-        onClick: () => void;
+        onClick?: () => void;
       }>;
     }>;
     mobileTitle?: React.ReactNode;

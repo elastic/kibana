@@ -22,7 +22,8 @@ import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 
-import { compareFilters } from './lib/compare_filters';
+import { compareFilters, COMPARE_ALL_OPTIONS } from './lib/compare_filters';
+import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
@@ -44,20 +45,23 @@ export class FilterManager {
     const appFilters = partitionedFilters.appFilters;
 
     // existing globalFilters should be mutated by appFilters
+    // ignore original appFilters which are already inside globalFilters
+    const cleanedAppFilters: esFilters.Filter[] = [];
     _.each(appFilters, function(filter, i) {
       const match = _.find(globalFilters, function(globalFilter) {
         return compareFilters(globalFilter, filter);
       });
 
-      // no match, do nothing
-      if (!match) return;
+      // no match, do continue with app filter
+      if (!match) {
+        return cleanedAppFilters.push(filter);
+      }
 
-      // matching filter in globalState, update global and remove from appState
+      // matching filter in globalState, update global and don't add from appState
       _.assign(match.meta, filter.meta);
-      appFilters.splice(i, 1);
     });
 
-    return FilterManager.mergeFilters(appFilters, globalFilters);
+    return FilterManager.mergeFilters(cleanedAppFilters, globalFilters);
   }
 
   private static mergeFilters(
@@ -76,20 +80,9 @@ export class FilterManager {
   }
 
   private handleStateUpdate(newFilters: esFilters.Filter[]) {
-    // global filters should always be first
+    newFilters.sort(sortFilters);
 
-    newFilters.sort(({ $state: a }: esFilters.Filter, { $state: b }: esFilters.Filter): number => {
-      if (a!.store === b!.store) {
-        return 0;
-      } else {
-        return a!.store === esFilters.FilterStateStore.GLOBAL_STATE &&
-          b!.store !== esFilters.FilterStateStore.GLOBAL_STATE
-          ? -1
-          : 1;
-      }
-    });
-
-    const filtersUpdated = !_.isEqual(this.filters, newFilters);
+    const filtersUpdated = !compareFilters(this.filters, newFilters, COMPARE_ALL_OPTIONS);
     const updatedOnlyDisabledFilters = onlyDisabledFiltersChanged(newFilters, this.filters);
 
     this.filters = newFilters;

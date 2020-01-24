@@ -6,10 +6,12 @@
 
 import { Observable } from 'rxjs';
 import { Annotation } from '../../../../common/types/annotations';
+import { Dictionary } from '../../../../common/types/common';
 import { AggFieldNamePair } from '../../../../common/types/fields';
+import { Category } from '../../../../common/types/categories';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../../common/types/privileges';
-import { MlSummaryJobs } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/jobs';
 import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
@@ -20,6 +22,12 @@ import { PartitionFieldsDefinition } from '../results_service/result_service_rx'
 import { annotations } from './annotations';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import { CombinedJob, JobId } from '../../jobs/new_job/common/job_creator/configs';
+import {
+  CategorizationAnalyzer,
+  CategoryFieldExample,
+  FieldExampleCheck,
+} from '../../../../common/types/categories';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/new_job';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -107,7 +115,7 @@ declare interface Ml {
   checkManageMLPrivileges(): Promise<PrivilegesResponse>;
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
-  esSearch(obj: object): any;
+  esSearch(obj: object): Promise<any>;
   esSearch$(obj: object): Observable<any>;
   getIndices(): Promise<EsIndex[]>;
   dataRecognizerModuleJobsExist(obj: { moduleId: string }): Promise<any>;
@@ -134,6 +142,9 @@ declare interface Ml {
 
   jobs: {
     jobsSummary(jobIds: string[]): Promise<MlSummaryJobs>;
+    jobsWithTimerange(
+      dateFormatTz: string
+    ): Promise<{ jobs: MlJobWithTimeRange[]; jobsMap: Dictionary<MlJobWithTimeRange> }>;
     jobs(jobIds: string[]): Promise<object>;
     groups(): Promise<object>;
     updateGroups(updatedJobs: string[]): Promise<object>;
@@ -171,6 +182,25 @@ declare interface Ml {
       start: number,
       end: number
     ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
+    categorizationFieldExamples(
+      indexPatternTitle: string,
+      query: object,
+      size: number,
+      field: string,
+      timeField: string | undefined,
+      start: number,
+      end: number,
+      analyzer: CategorizationAnalyzer
+    ): Promise<{
+      examples: CategoryFieldExample[];
+      sampleSize: number;
+      overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
+      validationChecks: FieldExampleCheck[];
+    }>;
+    topCategories(
+      jobId: string,
+      count: number
+    ): Promise<{ total: number; categories: Array<{ count?: number; category: Category }> }>;
   };
 
   estimateBucketSpan(data: BucketSpanEstimatorData): Promise<BucketSpanEstimatorResponse>;

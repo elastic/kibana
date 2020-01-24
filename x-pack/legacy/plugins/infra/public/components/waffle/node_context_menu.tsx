@@ -13,19 +13,19 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import React from 'react';
-import { InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
 import { findInventoryModel } from '../../../common/inventory_models';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface Props {
   options: InfraWaffleMapOptions;
   currentTime: number;
   children: any;
   node: InfraWaffleMapNode;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   isPopoverOpen: boolean;
   closePopover: () => void;
   popoverPosition: EuiPopoverProps['anchorPosition'];
@@ -47,7 +47,7 @@ export const NodeContextMenu = ({
   // We need to have some exceptions until 7.0 & ECS is finalized. Reference
   // #26620 for the details for these fields.
   // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-  const apmField = nodeType === InfraNodeType.host ? 'host.hostname' : inventoryModel.fields.id;
+  const apmField = nodeType === 'host' ? 'host.hostname' : inventoryModel.fields.id;
 
   const nodeLogsMenuItem = {
     name: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
@@ -95,8 +95,7 @@ export const NodeContextMenu = ({
   const showAPMTraceLink =
     inventoryModel.crosslinkSupport.apm && uiCapabilities?.apm && uiCapabilities?.apm.show;
   const showUptimeLink =
-    inventoryModel.crosslinkSupport.uptime &&
-    ([InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip);
+    inventoryModel.crosslinkSupport.uptime && (['pod', 'container'].includes(nodeType) || node.ip);
 
   const items = [
     ...(showLogsLink ? [nodeLogsMenuItem] : []),

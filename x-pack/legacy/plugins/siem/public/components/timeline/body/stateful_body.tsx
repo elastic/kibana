@@ -281,6 +281,7 @@ const makeMapStateToProps = () => {
     const {
       columns,
       eventIdToNoteIds,
+      eventType,
       isSelectAllChecked,
       loadingEventIds,
       pinnedEventIds,
@@ -292,6 +293,7 @@ const makeMapStateToProps = () => {
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
       eventIdToNoteIds,
+      eventType,
       isSelectAllChecked,
       loadingEventIds,
       notesById: getNotesByIds(state),

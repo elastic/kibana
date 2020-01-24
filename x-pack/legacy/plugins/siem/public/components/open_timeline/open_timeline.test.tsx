@@ -143,7 +143,7 @@ describe('OpenTimeline', () => {
     ).toBe(true);
   });
 
-  test('it shows extended columns and actions when onDeleteSelected and deleteTimelines are specified', () => {
+  test('it shows the delete action columns when onDeleteSelected and deleteTimelines are specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
@@ -178,10 +178,10 @@ describe('OpenTimeline', () => {
       .first()
       .props() as TimelinesTableProps;
 
-    expect(props.showExtendedColumnsAndActions).toBe(true);
+    expect(props.actionTimelineToShow).toContain('delete');
   });
 
-  test('it does NOT show extended columns and actions when is onDeleteSelected undefined and deleteTimelines is specified', () => {
+  test('it does NOT show the delete action columns when is onDeleteSelected undefined and deleteTimelines is specified', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
@@ -215,10 +215,10 @@ describe('OpenTimeline', () => {
       .first()
       .props() as TimelinesTableProps;
 
-    expect(props.showExtendedColumnsAndActions).toBe(false);
+    expect(props.actionTimelineToShow).not.toContain('delete');
   });
 
-  test('it does NOT show extended columns and actions when is onDeleteSelected provided and deleteTimelines is undefined', () => {
+  test('it does NOT show the delete action columns when is onDeleteSelected provided and deleteTimelines is undefined', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
@@ -252,10 +252,10 @@ describe('OpenTimeline', () => {
       .first()
       .props() as TimelinesTableProps;
 
-    expect(props.showExtendedColumnsAndActions).toBe(false);
+    expect(props.actionTimelineToShow).not.toContain('delete');
   });
 
-  test('it does NOT show extended columns and actions when both onDeleteSelected and deleteTimelines are undefined', () => {
+  test('it does NOT show the delete action when both onDeleteSelected and deleteTimelines are undefined', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <OpenTimeline
@@ -288,6 +288,6 @@ describe('OpenTimeline', () => {
       .first()
       .props() as TimelinesTableProps;
 
-    expect(props.showExtendedColumnsAndActions).toBe(false);
+    expect(props.actionTimelineToShow).not.toContain('delete');
   });
 });

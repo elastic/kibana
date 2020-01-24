@@ -8,7 +8,7 @@ import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { RuleParams } from './types';
 import { addTags } from './add_tags';
 
-export const createRules = async ({
+export const createRules = ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
   description,
@@ -19,6 +19,7 @@ export const createRules = async ({
   language,
   savedId,
   timelineId,
+  timelineTitle,
   meta,
   filters,
   ruleId,
@@ -56,6 +57,7 @@ export const createRules = async ({
         outputIndex,
         savedId,
         timelineId,
+        timelineTitle,
         meta,
         filters,
         maxSignals,

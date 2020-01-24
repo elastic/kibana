@@ -1,0 +1,17 @@
+{
+  "description": "403 Response to a POST",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
+  "immutable": true,
+  "interval": "5m",
+  "language": "kuery",
+  "name": "403 Response to a POST",
+  "query": "http.response.status_code:403 and http.request.method:post",
+  "risk_score": 50,
+  "rule_id": "a87a4e42-1d82-44bd-b0bf-d9b7f91fb89e",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
+  "version": 1
+}

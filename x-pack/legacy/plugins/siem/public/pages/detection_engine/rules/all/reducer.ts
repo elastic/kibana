@@ -20,7 +20,7 @@ export interface State {
   filterOptions: FilterOptions;
   refreshToggle: boolean;
   tableData: TableData[];
-  exportPayload?: object[];
+  exportPayload?: Rule[];
 }
 
 export type Action =
@@ -28,7 +28,7 @@ export type Action =
   | { type: 'loading'; isLoading: boolean }
   | { type: 'deleteRules'; rules: Rule[] }
   | { type: 'duplicate'; rule: Rule }
-  | { type: 'setExportPayload'; exportPayload?: object[] }
+  | { type: 'setExportPayload'; exportPayload?: Rule[] }
   | { type: 'setSelected'; selectedItems: TableData[] }
   | { type: 'updateLoading'; ids: string[]; isLoading: boolean }
   | { type: 'updateRules'; rules: Rule[]; appendRuleId?: string; pagination?: PaginationOptions }
@@ -58,19 +58,21 @@ export const allRulesReducer = (state: State, action: Action): State => {
       const ruleIds = state.rules.map(r => r.rule_id);
       const appendIdx =
         action.appendRuleId != null ? state.rules.findIndex(r => r.id === action.appendRuleId) : -1;
-      const updatedRules = action.rules.reduce(
-        (rules, updatedRule) =>
-          ruleIds.includes(updatedRule.rule_id)
-            ? rules.map(r => (updatedRule.rule_id === r.rule_id ? updatedRule : r))
-            : appendIdx !== -1
-            ? [
-                ...rules.slice(0, appendIdx + 1),
-                updatedRule,
-                ...rules.slice(appendIdx + 1, rules.length - 1),
-              ]
-            : [...rules, updatedRule],
-        [...state.rules]
-      );
+      const updatedRules = action.rules.reverse().reduce((rules, updatedRule) => {
+        let newRules = rules;
+        if (ruleIds.includes(updatedRule.rule_id)) {
+          newRules = newRules.map(r => (updatedRule.rule_id === r.rule_id ? updatedRule : r));
+        } else if (appendIdx !== -1) {
+          newRules = [
+            ...newRules.slice(0, appendIdx + 1),
+            updatedRule,
+            ...newRules.slice(appendIdx + 1, newRules.length),
+          ];
+        } else {
+          newRules = [...newRules, updatedRule];
+        }
+        return newRules;
+      }, state.rules);
 
       // Update enabled on selectedItems so that batch actions show correct available actions
       const updatedRuleIdToState = action.rules.reduce<Record<string, boolean>>(
@@ -88,6 +90,13 @@ export const allRulesReducer = (state: State, action: Action): State => {
         rules: updatedRules,
         tableData: formatRules(updatedRules),
         selectedItems: updatedSelectedItems,
+        pagination: {
+          ...state.pagination,
+          total:
+            action.appendRuleId != null
+              ? state.pagination.total + action.rules.length
+              : state.pagination.total,
+        },
       };
     }
     case 'updatePagination': {
@@ -112,6 +121,7 @@ export const allRulesReducer = (state: State, action: Action): State => {
         ...state,
         rules: updatedRules,
         tableData: formatRules(updatedRules),
+        refreshToggle: !state.refreshToggle,
       };
     }
     case 'setSelected': {
@@ -143,7 +153,7 @@ export const allRulesReducer = (state: State, action: Action): State => {
     case 'setExportPayload': {
       return {
         ...state,
-        exportPayload: action.exportPayload,
+        exportPayload: [...(action.exportPayload ?? [])],
       };
     }
     default:

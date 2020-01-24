@@ -1,43 +1,16 @@
 {
-  "rule_id": "e8ec93a6-49d2-4467-8c12-81c435fcc519",
-  "risk_score": 50,
   "description": "Linux: Web Download",
+  "enabled": false,
+  "from": "now-6m",
   "immutable": true,
   "interval": "5m",
-  "name": "Linux: Web Download",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "process.name: curl or wget",
   "language": "kuery",
-  "filters": [
-    {
-      "meta": {
-        "negate": false,
-        "type": "phrase",
-        "key": "event.action",
-        "value": "socket_opened",
-        "params": {
-          "query": "socket_opened"
-        },
-        "disabled": false,
-        "alias": null,
-        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
-      },
-      "query": {
-        "match": {
-          "event.action": {
-            "query": "socket_opened",
-            "type": "phrase"
-          }
-        }
-      },
-      "$state": {
-        "store": "appState"
-      }
-    }
-  ],
-  "enabled": false,
+  "name": "Linux: Web Download",
+  "query": "process.name: (curl or wget) and event.action:executed",
+  "risk_score": 50,
+  "rule_id": "e8ec93a6-49d2-4467-8c12-81c435fcc519",
+  "severity": "low",
+  "to": "now",
+  "type": "query",
   "version": 1
 }

@@ -9,7 +9,7 @@ import React, { useContext, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import { DonutChartLegend } from './donut_chart_legend';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface DonutChartProps {
   down: number;
@@ -23,7 +23,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
 
   const {
     colors: { danger, gray },
-  } = useContext(UptimeSettingsContext);
+  } = useContext(UptimeThemeContext);
 
   let upCount = up;
   if (up === 0 && down === 0) {
@@ -73,7 +73,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <svg
-          aria-label={i18n.translate('xpack.uptime.donutChart.ariaLabel', {
+          aria-label={i18n.translate('xpack.uptime.snapshot.donutChart.ariaLabel', {
             defaultMessage:
               'Pie chart showing the current status. {down} of {total} monitors are down.',
             values: { down, total: up + down },

@@ -65,6 +65,7 @@ export interface IExpressionLoaderParams {
 export interface IInterpreterHandlers {
   getInitialContext: IGetInitialContext;
   inspectorAdapters?: Adapters;
+  variables?: Record<string, any>;
   abortSignal?: AbortSignal;
 }
 

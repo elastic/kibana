@@ -144,7 +144,7 @@ describe('NewVisModal', () => {
       expect(window.location.assign).toBeCalledWith('#/visualize/create?type=vis&foo=true&bar=42');
     });
 
-    it('closes if visualization with aliasUrl and addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasUrl and addToDashboard in editorParams', () => {
       const onClose = jest.fn();
       window.location.assign = jest.fn();
       const wrapper = mountWithIntl(
@@ -160,7 +160,7 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl');
+      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl?addToDashboard');
       expect(onClose).toHaveBeenCalled();
     });
   });

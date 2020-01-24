@@ -21,8 +21,8 @@ import {
   AlertAction,
   AlertType,
   IntervalSchedule,
+  SanitizedAlert,
 } from './types';
-import { TaskManagerStartContract } from './shim';
 import { validateAlertTypeParams } from './lib';
 import {
   InvalidateAPIKeyParams,
@@ -30,6 +30,7 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../../plugins/security/server';
 import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
+import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
@@ -74,7 +75,7 @@ export interface FindResult {
   page: number;
   perPage: number;
   total: number;
-  data: Alert[];
+  data: SanitizedAlert[];
 }
 
 interface CreateOptions {
@@ -198,7 +199,7 @@ export class AlertsClient {
     );
   }
 
-  public async get({ id }: { id: string }): Promise<Alert> {
+  public async get({ id }: { id: string }): Promise<SanitizedAlert> {
     const result = await this.savedObjectsClient.get('alert', id);
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
   }
@@ -362,7 +363,6 @@ export class AlertsClient {
     });
 
     if (attributes.enabled === false) {
-      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       const username = await this.getUserName();
       await this.savedObjectsClient.update(
         'alert',
@@ -372,11 +372,11 @@ export class AlertsClient {
           enabled: true,
           ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
           updatedBy: username,
-
-          scheduledTaskId: scheduledTask.id,
         },
         { version }
       );
+      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
+      await this.savedObjectsClient.update('alert', id, { scheduledTaskId: scheduledTask.id });
       await this.invalidateApiKey({ apiKey: attributes.apiKey });
     }
   }

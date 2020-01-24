@@ -8,3 +8,4 @@ export const DATE_FIELD_TYPE = 'date';
 export const HOST_NAME_FIELD_NAME = 'host.name';
 export const IP_FIELD_TYPE = 'ip';
 export const MESSAGE_FIELD_NAME = 'message';
+export const SIGNAL_RULE_NAME_FIELD_NAME = 'signal.rule.name';
