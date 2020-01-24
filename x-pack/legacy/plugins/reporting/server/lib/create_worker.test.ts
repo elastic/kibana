@@ -25,10 +25,11 @@ const executeJobFactoryStub = sinon.stub();
 
 const getMockServer = (): ServerFacade => {
   return ({
-    log: sinon.stub(),
     config: () => ({ get: configGetStub }),
   } as unknown) as ServerFacade;
 };
+const getMockLogger = jest.fn();
+
 const getMockExportTypesRegistry = (
   exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
 ) => ({
@@ -47,7 +48,7 @@ describe('Create Worker', () => {
 
   test('Creates a single Esqueue worker for Reporting', async () => {
     const exportTypesRegistry = getMockExportTypesRegistry();
-    const createWorker = createWorkerFactory(getMockServer(), {
+    const createWorker = createWorkerFactory(getMockServer(), getMockLogger(), {
       exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
       browserDriverFactory: {} as HeadlessChromiumDriverFactory,
     });
@@ -81,7 +82,7 @@ Object {
       { executeJobFactory: executeJobFactoryStub },
       { executeJobFactory: executeJobFactoryStub },
     ]);
-    const createWorker = createWorkerFactory(getMockServer(), {
+    const createWorker = createWorkerFactory(getMockServer(), getMockLogger(), {
       exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
       browserDriverFactory: {} as HeadlessChromiumDriverFactory,
     });

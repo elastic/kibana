@@ -68,7 +68,10 @@ export interface InjectedMetadataParams {
     uiPlugins: InjectedPluginMetadata[];
     legacyMode: boolean;
     legacyMetadata: {
-      app: unknown;
+      app: {
+        id: string;
+        title: string;
+      };
       bundleId: string;
       nav: LegacyNavLink[];
       version: string;
@@ -171,7 +174,10 @@ export interface InjectedMetadataSetup {
   /** Indicates whether or not we are rendering a known legacy app. */
   getLegacyMode: () => boolean;
   getLegacyMetadata: () => {
-    app: unknown;
+    app: {
+      id: string;
+      title: string;
+    };
     bundleId: string;
     nav: LegacyNavLink[];
     version: string;

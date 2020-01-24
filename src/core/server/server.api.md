@@ -802,8 +802,6 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
-// Warning: (ae-missing-release-tag) "ImageValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
 // @public (undocumented)
 export interface ImageValidation {
     // (undocumented)
@@ -879,6 +877,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
+    readonly events: KibanaRequestEvents;
     // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -893,6 +892,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     readonly socket: IKibanaSocket;
     readonly url: Url;
     }
+
+// @public
+export interface KibanaRequestEvents {
+    aborted$: Observable<void>;
+}
 
 // @public
 export interface KibanaRequestRoute<Method extends RouteMethod> {
@@ -1491,9 +1495,12 @@ export class SavedObjectsClient {
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 // @public
-export type SavedObjectsClientFactory<Request = unknown> = ({ request, }: {
-    request: Request;
+export type SavedObjectsClientFactory = ({ request, }: {
+    request: KibanaRequest;
 }) => SavedObjectsClientContract;
+
+// @public
+export type SavedObjectsClientFactoryProvider = (repositoryFactory: SavedObjectsRepositoryFactory) => SavedObjectsClientFactory;
 
 // @public
 export interface SavedObjectsClientProviderOptions {
@@ -1502,14 +1509,14 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 // @public
-export type SavedObjectsClientWrapperFactory<Request = unknown> = (options: SavedObjectsClientWrapperOptions<Request>) => SavedObjectsClientContract;
+export type SavedObjectsClientWrapperFactory = (options: SavedObjectsClientWrapperOptions) => SavedObjectsClientContract;
 
 // @public
-export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+export interface SavedObjectsClientWrapperOptions {
     // (undocumented)
     client: SavedObjectsClientContract;
     // (undocumented)
-    request: Request;
+    request: KibanaRequest;
 }
 
 // @public (undocumented)
@@ -1745,15 +1752,15 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
 }
 
 // @internal @deprecated (undocumented)
-export interface SavedObjectsLegacyService<Request = any> {
+export interface SavedObjectsLegacyService {
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientProvider" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<Request>['addClientWrapperFactory'];
+    addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider['addClientWrapperFactory'];
     // (undocumented)
     getSavedObjectsRepository(...rest: any[]): any;
     // (undocumented)
-    getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
+    getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
     // (undocumented)
     importExport: {
         objectLimit: number;
@@ -1766,7 +1773,7 @@ export interface SavedObjectsLegacyService<Request = any> {
     // (undocumented)
     schema: SavedObjectsSchema;
     // (undocumented)
-    setScopedSavedObjectsClientFactory: SavedObjectsClientProvider<Request>['setClientFactory'];
+    setScopedSavedObjectsClientFactory: SavedObjectsClientProvider['setClientFactory'];
     // (undocumented)
     types: string[];
 }
@@ -1830,6 +1837,12 @@ export class SavedObjectsRepository {
     }
 
 // @public
+export interface SavedObjectsRepositoryFactory {
+    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+}
+
+// @public
 export interface SavedObjectsResolveImportErrorsOptions {
     // (undocumented)
     namespace?: string;
@@ -1871,14 +1884,14 @@ export class SavedObjectsSerializer {
 
 // @public
 export interface SavedObjectsServiceSetup {
-    addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory<KibanaRequest>) => void;
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
-    setClientFactory: (customClientFactory: SavedObjectsClientFactory<KibanaRequest>) => void;
+    addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
 // @public
 export interface SavedObjectsServiceStart {
+    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
 }
 
@@ -1941,10 +1954,19 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
 }>;
 
-// Warning: (ae-missing-release-tag) "StringValidation" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface StringValidation {
+// @public
+export type StringValidation = StringValidationRegex | StringValidationRegexString;
+
+// @public
+export interface StringValidationRegex {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    regex: RegExp;
+}
+
+// @public
+export interface StringValidationRegexString {
     // (undocumented)
     message: string;
     // (undocumented)
@@ -1978,7 +2000,7 @@ export interface UiSettingsServiceStart {
 }
 
 // @public
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
+export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
 
 // @public
 export interface UserProvidedValues<T = any> {

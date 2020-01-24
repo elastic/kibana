@@ -29,11 +29,8 @@ export const createGetPrepackagedRulesStatusRoute = (): Hapi.ServerRoute => {
     },
     async handler(request: RequestFacade, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
 
-      if (!alertsClient || !actionsClient) {
+      if (!alertsClient) {
         return headers.response().code(404);
       }
 

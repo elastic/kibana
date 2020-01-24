@@ -77,6 +77,7 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
         paramName="position"
         value={axis.position}
         setValue={setPosition}
+        data-test-subj="categoryAxisPosition"
       />
 
       <SwitchOption
