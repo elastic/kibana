@@ -110,6 +110,7 @@ export const AllRules = React.memo<AllRulesProps>(
       dispatch,
     ] = useReducer(allRulesReducer, initialState);
     const history = useHistory();
+    const [oldRefreshToggle, setOldRefreshToggle] = useState(refreshToggle);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [isGlobalLoading, setIsGlobalLoad] = useState(false);
     const [, dispatchToaster] = useStateToaster();
@@ -133,15 +134,12 @@ export const AllRules = React.memo<AllRulesProps>(
     const tableOnChangeCallback = useCallback(
       ({ page, sort }: EuiBasicTableOnChange) => {
         dispatch({
-          type: 'updatePagination',
-          pagination: { page: page.index + 1, perPage: page.size },
-        });
-        dispatch({
           type: 'updateFilterOptions',
           filterOptions: {
             sortField: 'enabled', // Only enabled is supported for sorting currently
             sortOrder: sort?.direction ?? 'desc',
           },
+          pagination: { page: page.index + 1, perPage: page.size },
         });
       },
       [dispatch]
@@ -176,11 +174,18 @@ export const AllRules = React.memo<AllRulesProps>(
     }, [importCompleteToggle]);
 
     useEffect(() => {
-      if (reFetchRulesData != null) {
+      if (!isInitialLoad && reFetchRulesData != null && oldRefreshToggle !== refreshToggle) {
+        setOldRefreshToggle(refreshToggle);
         reFetchRulesData();
+        refetchPrePackagedRulesStatus();
       }
-      refetchPrePackagedRulesStatus();
-    }, [refreshToggle, reFetchRulesData, refetchPrePackagedRulesStatus]);
+    }, [
+      isInitialLoad,
+      refreshToggle,
+      oldRefreshToggle,
+      reFetchRulesData,
+      refetchPrePackagedRulesStatus,
+    ]);
 
     useEffect(() => {
       if (reFetchRulesData != null) {
@@ -222,9 +227,6 @@ export const AllRules = React.memo<AllRulesProps>(
         filterOptions: {
           ...newFilterOptions,
         },
-      });
-      dispatch({
-        type: 'updatePagination',
         pagination: { page: 1 },
       });
     }, []);

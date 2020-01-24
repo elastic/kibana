@@ -33,7 +33,11 @@ export type Action =
   | { type: 'updateLoading'; ids: string[]; isLoading: boolean }
   | { type: 'updateRules'; rules: Rule[]; pagination?: PaginationOptions }
   | { type: 'updatePagination'; pagination: Partial<PaginationOptions> }
-  | { type: 'updateFilterOptions'; filterOptions: Partial<FilterOptions> }
+  | {
+      type: 'updateFilterOptions';
+      filterOptions: Partial<FilterOptions>;
+      pagination: Partial<PaginationOptions>;
+    }
   | { type: 'failure' };
 
 export const allRulesReducer = (state: State, action: Action): State => {
@@ -99,6 +103,10 @@ export const allRulesReducer = (state: State, action: Action): State => {
         filterOptions: {
           ...state.filterOptions,
           ...action.filterOptions,
+        },
+        pagination: {
+          ...state.pagination,
+          ...action.pagination,
         },
       };
     }
