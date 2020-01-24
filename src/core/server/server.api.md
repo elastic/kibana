@@ -1926,6 +1926,7 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    registerMappings: (mappings: SavedObjectsTypeMappingDefinitions) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
