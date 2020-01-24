@@ -25,6 +25,7 @@ export class WebhookAction extends BaseAction {
     this.username = get(props, 'username');
     this.password = get(props, 'password');
     this.contentType = get(props, 'contentType');
+
     this.fullPath = `${this.host}:${this.port}${this.path ? '/' + this.path : ''}`;
   }
 

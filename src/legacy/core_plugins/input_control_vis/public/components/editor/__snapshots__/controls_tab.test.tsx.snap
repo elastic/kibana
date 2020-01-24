@@ -44,11 +44,10 @@ exports[`renders ControlsTab 1`] = `
       }
     }
     getIndexPattern={[Function]}
-    handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
     handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
-    handleNumberOptionChange={[Function]}
+    handleOptionsChange={[Function]}
     handleParentChange={[Function]}
     handleRemoveControl={[Function]}
     key="1"
@@ -101,11 +100,10 @@ exports[`renders ControlsTab 1`] = `
       }
     }
     getIndexPattern={[Function]}
-    handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
     handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
-    handleNumberOptionChange={[Function]}
+    handleOptionsChange={[Function]}
     handleParentChange={[Function]}
     handleRemoveControl={[Function]}
     key="2"
@@ -135,11 +133,7 @@ exports[`renders ControlsTab 1`] = `
         >
           <EuiSelect
             aria-label="Select control type"
-            compressed={false}
             data-test-subj="selectControlType"
-            fullWidth={false}
-            hasNoInitialSelection={false}
-            isLoading={false}
             onChange={[Function]}
             options={
               Array [

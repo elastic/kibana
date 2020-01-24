@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants';
+import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants_static';
 
 export const CANVAS_TYPE = 'canvas-workpad';
 export const CUSTOM_ELEMENT_TYPE = 'canvas-element';

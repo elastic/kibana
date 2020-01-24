@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
+import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick } from 'lodash/fp';
 import React, { memo, useState } from 'react';
-import styled from 'styled-components';
 
 import {
   IIndexPattern,
@@ -26,6 +25,7 @@ import {
   buildSeverityDescription,
   buildStringArrayDescription,
   buildThreatsDescription,
+  buildUnorderedListArrayDescription,
   buildUrlsDescription,
 } from './helpers';
 
@@ -35,15 +35,6 @@ interface StepRuleDescriptionProps {
   indexPatterns?: IIndexPattern;
   schema: FormSchema;
 }
-
-const EuiFlexItemWidth = styled(EuiFlexItem)<{ direction: string }>`
-  ${props => (props.direction === 'row' ? 'width : 50%;' : 'width: 100%;')};
-`;
-
-const MyEuiTextArea = styled(EuiTextArea)`
-  max-width: 100%;
-  height: 80px;
-`;
 
 const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
   data,
@@ -62,13 +53,24 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
     ],
     []
   );
+
+  if (direction === 'row') {
+    return (
+      <EuiFlexGroup>
+        {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
+          <EuiFlexItem key={`description-step-rule-${index}`}>
+            <EuiDescriptionList listItems={chunkListItems} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+
   return (
-    <EuiFlexGroup gutterSize="none" direction={direction} justifyContent="spaceAround">
-      {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
-        <EuiFlexItemWidth direction={direction} key={`description-step-rule-${index}`} grow={false}>
-          <EuiDescriptionList listItems={chunkListItems} />
-        </EuiFlexItemWidth>
-      ))}
+    <EuiFlexGroup>
+      <EuiFlexItem key={`description-step-rule`}>
+        <EuiDescriptionList listItems={listItems} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -123,18 +125,28 @@ const getDescriptionItem = (
     return [
       {
         title: label,
-        description: <MyEuiTextArea value={get(field, value)} readOnly={true} />,
+        description: get(field, value),
       },
     ];
   } else if (field === 'references') {
     const urls: string[] = get(field, value);
     return buildUrlsDescription(label, urls);
+  } else if (field === 'falsePositives') {
+    const values: string[] = get(field, value);
+    return buildUnorderedListArrayDescription(label, field, values);
   } else if (Array.isArray(get(field, value))) {
     const values: string[] = get(field, value);
     return buildStringArrayDescription(label, field, values);
   } else if (field === 'severity') {
     const val: string = get(field, value);
     return buildSeverityDescription(label, val);
+  } else if (field === 'riskScore') {
+    return [
+      {
+        title: label,
+        description: get(field, value),
+      },
+    ];
   } else if (field === 'timeline') {
     const timeline = get(field, value) as FieldValueTimeline;
     return [

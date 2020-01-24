@@ -41,6 +41,7 @@ import {
   PureTransition,
   syncStates,
   getStateFromKbnUrl,
+  BaseState,
 } from '../../../src/plugins/kibana_utils/public';
 import { useUrlTracker } from '../../../src/plugins/kibana_react/public';
 import {
@@ -79,7 +80,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
   const { setText } = GlobalStateHelpers.useTransitions();
   const { text } = GlobalStateHelpers.useState();
   const { edit: editTodo, delete: deleteTodo, add: addTodo } = useTransitions();
-  const todos = useState();
+  const todos = useState().todos;
   const filteredTodos = todos.filter(todo => {
     if (!filter) return true;
     if (filter === 'completed') return todo.completed;
@@ -306,7 +307,7 @@ export const TodoAppPage: React.FC<{
   );
 };
 
-function withDefaultState<State>(
+function withDefaultState<State extends BaseState>(
   stateContainer: BaseStateContainer<State>,
   // eslint-disable-next-line no-shadow
   defaultState: State
@@ -314,14 +315,10 @@ function withDefaultState<State>(
   return {
     ...stateContainer,
     set: (state: State | null) => {
-      if (Array.isArray(defaultState)) {
-        stateContainer.set(state || defaultState);
-      } else {
-        stateContainer.set({
-          ...defaultState,
-          ...state,
-        });
-      }
+      stateContainer.set({
+        ...defaultState,
+        ...state,
+      });
     },
   };
 }

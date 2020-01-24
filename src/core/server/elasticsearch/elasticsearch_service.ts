@@ -152,8 +152,6 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
 
-      adminClient$,
-      dataClient$,
       adminClient,
       dataClient,
 

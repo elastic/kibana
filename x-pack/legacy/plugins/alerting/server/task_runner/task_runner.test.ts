@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions } from '../types';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager';
+import { ConcreteTaskInstance, TaskStatus } from '../../../../../plugins/task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../../../plugins/encrypted_saved_objects/server/mocks';
@@ -38,9 +38,7 @@ describe('Task Runner', () => {
       scheduledAt: new Date(),
       startedAt: new Date(),
       retryAt: new Date(Date.now() + 5 * 60 * 1000),
-      state: {
-        startedAt: new Date(Date.now() - 5 * 60 * 1000),
-      },
+      state: {},
       taskType: 'alerting:test',
       params: {
         alertId: '1',
@@ -110,7 +108,13 @@ describe('Task Runner', () => {
   test('successfully executes the task', async () => {
     const taskRunner = new TaskRunner(
       alertType,
-      mockedTaskInstance,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
       taskRunnerFactoryInitializerParams
     );
     savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
@@ -141,6 +145,7 @@ describe('Task Runner', () => {
                                       }
                     `);
     expect(call.startedAt).toMatchInlineSnapshot(`1970-01-01T00:00:00.000Z`);
+    expect(call.previousStartedAt).toMatchInlineSnapshot(`1969-12-31T23:55:00.000Z`);
     expect(call.state).toMatchInlineSnapshot(`Object {}`);
     expect(call.name).toBe('alert-name');
     expect(call.tags).toEqual(['alert-', '-tags']);
@@ -261,7 +266,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:00:10.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
@@ -293,7 +297,6 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:00:10.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
         },
       }
     `);
@@ -400,7 +403,96 @@ describe('Task Runner', () => {
         "runAt": 1970-01-01T00:00:10.000Z,
         "state": Object {
           "previousStartedAt": 1970-01-01T00:00:00.000Z,
-          "startedAt": 1969-12-31T23:55:00.000Z,
+        },
+      }
+    `);
+  });
+
+  test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
+    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "runAt": 1970-01-01T00:05:00.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+        },
+      }
+    `);
+  });
+
+  test('recovers gracefully when the Alert Task Runner throws an exception when getting internal Services', async () => {
+    taskRunnerFactoryInitializerParams.getServices.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "runAt": 1970-01-01T00:05:00.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
+        },
+      }
+    `);
+  });
+
+  test('recovers gracefully when the Alert Task Runner throws an exception when fetching attributes', async () => {
+    savedObjectsClient.get.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "runAt": 1970-01-01T00:05:00.000Z,
+        "state": Object {
+          "previousStartedAt": 1970-01-01T00:00:00.000Z,
         },
       }
     `);

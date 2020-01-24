@@ -133,3 +133,7 @@ export const NETWORK_STATS = [
   STAT_FLOW,
   STAT_TLS,
 ];
+
+export const OVERVIEW_HOST_STATS = '[data-test-subj="overview-hosts-stats"]';
+
+export const OVERVIEW_NETWORK_STATS = '[data-test-subj="overview-network-stats"]';

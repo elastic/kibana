@@ -11,7 +11,8 @@ import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../../common/constants/aggregation_types';
-import { MLCATEGORY } from '../../../../../../../common/constants/field_types';
+import { MLCATEGORY, DOC_COUNT } from '../../../../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../../../src/plugins/data/public';
 import {
   EVENT_RATE_FIELD_ID,
   Field,
@@ -27,14 +28,14 @@ import {
 } from '../index';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
-const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
+const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
   let field = newJobCapsService.getFieldById(id);
   // if no field could be found it may be a pretend field, like mlcategory or a script field
   if (field === null) {
     if (id === MLCATEGORY) {
       field = mlCategory;
-    } else if (scriptFields.length) {
-      field = scriptFields.find(f => f.id === id) || null;
+    } else if (additionalFields.length) {
+      field = additionalFields.find(f => f.id === id) || null;
     }
   }
   return field;
@@ -44,12 +45,12 @@ const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
 export function getRichDetectors(
   job: Job,
   datafeed: Datafeed,
-  scriptFields: Field[],
+  additionalFields: Field[],
   advanced: boolean = false
 ) {
   const detectors = advanced ? getDetectorsAdvanced(job, datafeed) : getDetectors(job, datafeed);
 
-  const getFieldById = getFieldByIdFactory(scriptFields);
+  const getFieldById = getFieldByIdFactory(additionalFields);
 
   return detectors.map(d => {
     let field = null;
@@ -82,19 +83,19 @@ export function getRichDetectors(
   });
 }
 
-export function createFieldOptions(fields: Field[]) {
-  return fields
-    .filter(f => f.id !== EVENT_RATE_FIELD_ID)
-    .map(f => ({
-      label: f.name,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label));
-}
-
-export function createScriptFieldOptions(scriptFields: Field[]) {
-  return scriptFields.map(f => ({
-    label: f.id,
-  }));
+export function createFieldOptions(fields: Field[], additionalFields: Field[]) {
+  return [
+    ...fields
+      .filter(f => f.id !== EVENT_RATE_FIELD_ID)
+      .map(f => ({
+        label: f.name,
+      })),
+    ...additionalFields
+      .filter(f => fields.some(f2 => f2.id === f.id) === false)
+      .map(f => ({
+        label: f.id,
+      })),
+  ].sort((a, b) => a.label.localeCompare(b.label));
 }
 
 export function createMlcategoryFieldOption(categorizationFieldName: string | null) {
@@ -106,6 +107,16 @@ export function createMlcategoryFieldOption(categorizationFieldName: string | nu
       label: MLCATEGORY,
     },
   ];
+}
+
+export function createDocCountFieldOption(usingAggregations: boolean) {
+  return usingAggregations
+    ? [
+        {
+          label: DOC_COUNT,
+        },
+      ]
+    : [];
 }
 
 function getDetectorsAdvanced(job: Job, datafeed: Datafeed) {
@@ -303,5 +314,28 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
       });
     default:
       return '';
+  }
+}
+
+// recurse through a datafeed aggregation object,
+// adding top level keys from each nested agg to an array
+// of fields
+export function collectAggs(o: any, aggFields: Field[]) {
+  for (const i in o) {
+    if (o[i] !== null && typeof o[i] === 'object') {
+      if (i === 'aggregations' || i === 'aggs') {
+        Object.keys(o[i]).forEach(k => {
+          if (k !== 'aggregations' && i !== 'aggs') {
+            aggFields.push({
+              id: k,
+              name: k,
+              type: ES_FIELD_TYPES.KEYWORD,
+              aggregatable: true,
+            });
+          }
+        });
+      }
+      collectAggs(o[i], aggFields);
+    }
   }
 }

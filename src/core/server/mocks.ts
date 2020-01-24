@@ -33,10 +33,12 @@ import { capabilitiesServiceMock } from './capabilities/capabilities_service.moc
 export { httpServerMock } from './http/http_server.mocks';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
 export { configServiceMock } from './config/config_service.mock';
+import { createMockEnv } from './config/env.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
+export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { uuidServiceMock } from './uuid/uuid_service.mock';
 
@@ -85,6 +87,8 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
   return mock;
 }
 
+type CoreSetupMockType = MockedKeys<CoreSetup> & jest.Mocked<Pick<CoreSetup, 'getStartServices'>>;
+
 function createCoreSetupMock() {
   const httpService = httpServiceMock.createSetupContract();
   const httpMock: jest.Mocked<CoreSetup['http']> = {
@@ -94,7 +98,7 @@ function createCoreSetupMock() {
     registerOnPostAuth: httpService.registerOnPostAuth,
     registerOnPreResponse: httpService.registerOnPreResponse,
     basePath: httpService.basePath,
-    csp: CspConfig.DEFAULT,
+    csp: new CspConfig(createMockEnv()),
     isTlsEnabled: httpService.isTlsEnabled,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
@@ -104,7 +108,7 @@ function createCoreSetupMock() {
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
   };
-  const mock: MockedKeys<CoreSetup> = {
+  const mock: CoreSetupMockType = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
@@ -112,6 +116,9 @@ function createCoreSetupMock() {
     savedObjects: savedObjectsServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
+    getStartServices: jest
+      .fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>()
+      .mockResolvedValue([createCoreStartMock(), {}]),
   };
 
   return mock;

@@ -41,7 +41,7 @@ describe('NewVisHelp', () => {
               stage: 'production',
             },
           ]}
-          addBasePath={(url: string) => `testbasepath${url}`}
+          onPromotionClicked={() => {}}
         />
       )
     ).toMatchInlineSnapshot(`
@@ -60,9 +60,9 @@ describe('NewVisHelp', () => {
         </p>
         <EuiButton
           fill={true}
-          href="testbasepath/my/fancy/new/thing"
           iconSide="right"
           iconType="popout"
+          onClick={[Function]}
           size="s"
         >
           Do it now!

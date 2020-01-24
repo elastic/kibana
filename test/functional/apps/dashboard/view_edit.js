@@ -68,7 +68,7 @@ export default function({ getService, getPageObjects }) {
         });
 
         it('when time changed is stored with dashboard', async function() {
-          await PageObjects.dashboard.setTimepickerInDataRange();
+          await PageObjects.timePicker.setDefaultDataRange();
 
           const originalTime = await PageObjects.timePicker.getTimeConfig();
 
@@ -196,7 +196,7 @@ export default function({ getService, getPageObjects }) {
     describe('and preserves edits on cancel', function() {
       it('when time changed is stored with dashboard', async function() {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, true);
         await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setAbsoluteRange(

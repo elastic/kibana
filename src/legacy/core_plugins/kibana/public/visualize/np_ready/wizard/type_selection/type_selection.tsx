@@ -154,7 +154,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   <EuiSpacer size="m" />
                   <NewVisHelp
                     promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter(t => t.promotion)}
-                    addBasePath={this.props.addBasePath}
+                    onPromotionClicked={this.props.onVisTypeSelected}
                   />
                 </React.Fragment>
               )}

@@ -1,17 +1,40 @@
 {
-  "rule_id": "a4ec1382-4557-452b-89ba-e413b22ed4b8",
-  "risk_score": 50,
-  "description": "EQL - Mshta Making Network Connections",
+  "description": "Identifies Mshta.exe making outbound network connections. This may indicate adversarial activity as Mshta is often leveraged by adversaries to execute malicious scripts and evade detection.",
+  "enabled": false,
+  "filters": [],
+  "from": "now-6m",
   "immutable": true,
   "interval": "5m",
-  "name": "EQL - Mshta Making Network Connections",
-  "severity": "low",
-  "type": "query",
-  "from": "now-6m",
-  "to": "now",
-  "query": "  event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:\"mshta.exe\" and not process.name:\"mshta.exe\" and not parent.process.name:\"Microsoft.ConfigurationManagement.exe\"",
   "language": "kuery",
-  "filters": [],
-  "enabled": false,
+  "name": "Mshta Making Network Connections",
+  "query": "event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:\"mshta.exe\" and not process.name:\"mshta.exe\"",
+  "references": [
+    "https://www.fireeye.com/blog/threat-research/2017/05/cyber-espionage-apt32.html"
+  ],
+  "risk_score": 50,
+  "rule_id": "a4ec1382-4557-452b-89ba-e413b22ed4b8",
+  "severity": "medium",
+  "tags": [
+    "EIA"
+  ],
+  "threats": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "techniques": [
+        {
+          "id": "T1170",
+          "name": "Mshta",
+          "reference": "https://attack.mitre.org/techniques/T1170/"
+        }
+      ]
+    }
+  ],
+  "to": "now",
+  "type": "query",
   "version": 1
 }
