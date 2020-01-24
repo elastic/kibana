@@ -37,7 +37,7 @@ export class SetupModeRenderer extends React.Component {
 
   UNSAFE_componentWillMount() {
     const { scope, injector } = this.props;
-    initSetupModeState(scope, injector, _oldData => {
+    initSetupModeState(scope, injector, data => {
       const newState = { renderState: true };
       const { productName } = this.props;
       if (!productName) {
@@ -46,17 +46,17 @@ export class SetupModeRenderer extends React.Component {
       }
 
       const setupModeState = getSetupModeState();
-      if (!setupModeState.enabled || !setupModeState.data) {
+      if (!setupModeState.enabled || !data || !setupModeState.oldData) {
         this.setState(newState);
         return;
       }
 
-      const data = setupModeState.data[productName];
-      const oldData = _oldData ? _oldData[productName] : null;
-      if (data && oldData) {
-        const newUuid = findNewUuid(Object.keys(oldData.byUuid), Object.keys(data.byUuid));
+      const newData = data[productName];
+      const oldData = setupModeState.oldData[productName];
+      if (newData && oldData) {
+        const newUuid = findNewUuid(Object.keys(oldData.byUuid), Object.keys(newData.byUuid));
         if (newUuid) {
-          newState.newProduct = data.byUuid[newUuid];
+          newState.newProduct = newData.byUuid[newUuid];
         }
       }
 

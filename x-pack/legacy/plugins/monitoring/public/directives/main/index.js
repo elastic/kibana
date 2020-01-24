@@ -14,7 +14,6 @@ import { timefilter } from 'ui/timefilter';
 import { shortenPipelineHash } from '../../../common/formatting';
 import 'ui/directives/kbn_href';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
-import { checkInternalMonitoring, destroyInternalMonitoringWarning } from './internal_monitoring';
 
 const setOptions = controller => {
   if (
@@ -188,7 +187,6 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
     controllerAs: 'monitoringMain',
     bindToController: true,
     link(scope, _element, attributes, controller) {
-      checkInternalMonitoring($injector);
       initSetupModeState(scope, $injector, () => {
         controller.setup(getSetupObj());
       });
@@ -231,7 +229,6 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
       scope.$on('$destroy', () => {
         controller.pipelineDropdownElement &&
           unmountComponentAtNode(controller.pipelineDropdownElement);
-        destroyInternalMonitoringWarning();
       });
       scope.$watch('pageData.versions', versions => {
         controller.pipelineVersions = versions;

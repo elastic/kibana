@@ -162,28 +162,31 @@ describe('SetupModeRenderer', () => {
   it('should use a new product found in the api response', () => {
     const newProduct = { id: 1 };
 
+    const setupModeState = {
+      enabled: true,
+      data: {
+        elasticsearch: {
+          byUuid: {
+            2: newProduct,
+          },
+        },
+        _meta: {},
+      },
+      oldData: {
+        elasticsearch: {
+          byUuid: {
+            1: {},
+          },
+        },
+      },
+    };
+
     jest.useFakeTimers();
     jest.doMock('../../lib/setup_mode', () => ({
-      getSetupModeState: () => ({
-        enabled: true,
-        data: {
-          elasticsearch: {
-            byUuid: {
-              2: newProduct,
-            },
-          },
-          _meta: {},
-        },
-      }),
+      getSetupModeState: () => setupModeState,
       initSetupModeState: (_scope, _injectir, cb) => {
         setTimeout(() => {
-          cb({
-            elasticsearch: {
-              byUuid: {
-                1: {},
-              },
-            },
-          });
+          cb(setupModeState.data);
         }, 500);
       },
       updateSetupModeData: () => {},

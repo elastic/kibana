@@ -10077,7 +10077,6 @@
     "xpack.monitoring.setupMode.node": "节点",
     "xpack.monitoring.setupMode.nodes": "节点",
     "xpack.monitoring.setupMode.noMonitoringDataFound": "未检测到 {product} {identifier}",
-    "xpack.monitoring.setupMode.notAvailableCloud": "此功能在云上不可用。",
     "xpack.monitoring.setupMode.notAvailablePermissions": "您没有所需的权限来执行此功能。",
     "xpack.monitoring.setupMode.notAvailableTitle": "设置模式不可用",
     "xpack.monitoring.setupMode.server": "服务器",

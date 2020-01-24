@@ -10078,7 +10078,6 @@
     "xpack.monitoring.setupMode.node": "ノード",
     "xpack.monitoring.setupMode.nodes": "ノード",
     "xpack.monitoring.setupMode.noMonitoringDataFound": "{product} {identifier} が検出されませんでした",
-    "xpack.monitoring.setupMode.notAvailableCloud": "この機能はクラウドで使用できません。",
     "xpack.monitoring.setupMode.notAvailablePermissions": "これを実行するために必要な権限がありません。",
     "xpack.monitoring.setupMode.notAvailableTitle": "設定モードは使用できません",
     "xpack.monitoring.setupMode.server": "サーバー",
