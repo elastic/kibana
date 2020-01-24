@@ -2,7 +2,7 @@
 
 set -e
 
-echo "###  Ingesting Code Coverage"
+echo "### Ingesting Code Coverage"
 
 
 BUILD_ID=$1
@@ -20,7 +20,8 @@ for x in jest functional mocha; do
   COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
 
   echo "### node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE}"
-  ls $COVERAGE_SUMMARY_FILE
+  pwd
+  head $COVERAGE_SUMMARY_FILE
 done
 
 echo "###  Ingesting Code Coverage - Complete"
