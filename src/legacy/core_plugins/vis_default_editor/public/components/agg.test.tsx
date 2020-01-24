@@ -24,11 +24,12 @@ import { act } from 'react-dom/test-utils';
 import { IndexPattern } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 
-import { AggGroupNames } from '../agg_groups';
+import { AggType, AggGroupNames } from '../legacy_imports';
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { DefaultEditorAggParams } from './agg_params';
-import { AggType } from 'ui/agg_types';
 import { AGGS_ACTION_KEYS } from './agg_group_state';
+
+jest.mock('ui/new_platform');
 
 jest.mock('./agg_params', () => ({
   DefaultEditorAggParams: () => null,
@@ -175,11 +176,11 @@ describe('DefaultEditorAgg component', () => {
 
   it('should add schema component', () => {
     defaultProps.agg.schema = {
-      editorComponent: () => <div className="schemaComponent" />,
+      name: 'split',
     } as any;
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
 
-    expect(comp.find('.schemaComponent').exists()).toBeTruthy();
+    expect(comp.find('RowsOrColumnsControl').exists()).toBeTruthy();
   });
 
   describe('agg actions', () => {

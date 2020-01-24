@@ -19,23 +19,20 @@
 
 import { IndexPattern, Field } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, AggType, IndexedArray } from '../legacy_imports';
+import { AggConfig, AggType, AggGroupNames, BUCKET_TYPES, IndexedArray } from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import { EditorConfig } from '../config/types';
+import { FieldParamEditor, OrderByParamEditor } from './controls';
 
-jest.mock('ui/agg_types', () => ({
-  aggTypes: {
-    metrics: [],
-    buckets: [],
-  },
-}));
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
 }));
+
+jest.mock('ui/new_platform');
 
 describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
@@ -101,6 +98,8 @@ describe('DefaultEditorAggParams helpers', () => {
       const filterFieldTypes = ['number', 'boolean', 'date'];
       agg = ({
         type: {
+          type: AggGroupNames.Buckets,
+          name: BUCKET_TYPES.TERMS,
           params: [
             {
               name: 'field',
@@ -109,11 +108,9 @@ describe('DefaultEditorAggParams helpers', () => {
               getAvailableFields: jest.fn((fields: IndexedArray<Field>) =>
                 fields.filter(({ type }) => filterFieldTypes.includes(type))
               ),
-              editorComponent: jest.fn(),
             },
             {
               name: 'orderBy',
-              editorComponent: jest.fn(),
             },
           ],
         },
@@ -138,7 +135,7 @@ describe('DefaultEditorAggParams helpers', () => {
             aggParam: agg.type.params[0],
             editorConfig,
             indexedFields: ['indexedFields'],
-            paramEditor: agg.type.params[0].editorComponent,
+            paramEditor: FieldParamEditor,
             metricAggs,
             state,
             value: agg.params.field,
@@ -148,7 +145,7 @@ describe('DefaultEditorAggParams helpers', () => {
             aggParam: agg.type.params[1],
             editorConfig,
             indexedFields: [],
-            paramEditor: agg.type.params[1].editorComponent,
+            paramEditor: OrderByParamEditor,
             metricAggs,
             state,
             value: agg.params.orderBy,

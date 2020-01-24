@@ -87,7 +87,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 
     const type = param.advanced ? 'advanced' : 'basic';
 
-    let paramEditor;
+    let paramEditor: ParamInstance['paramEditor'];
 
     if (agg.type.subtype && aggParamsMap[agg.type.subtype]) {
       paramEditor = get(aggParamsMap, [agg.type.subtype, param.name]);
@@ -95,7 +95,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
       const aggType = agg.type.type;
       const aggName = agg.type.name;
       const aggParams = get(aggParamsMap, [aggType, aggName], {});
-      paramEditor = aggParams[param.name] || aggParamsMap.common[param.type];
+      paramEditor = get(aggParams, param.name) || get(aggParamsMap, ['common', param.type]);
     }
 
     // show params with an editor component

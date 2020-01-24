@@ -21,7 +21,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DateRangesParamEditor } from './date_ranges';
 
-jest.mock('../../../../documentation_links', () => ({
+jest.mock('../../legacy_imports', () => ({
   getDocLink: jest.fn(),
 }));
 

@@ -22,9 +22,9 @@ import { i18n } from '@kbn/i18n';
 
 import { truncatedColorSchemas as colorSchemas } from 'ui/color_maps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
+import { Schemas } from 'ui/agg_types';
 
 import { Status } from '../../visualizations/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { createTileMapVisualization } from './tile_map_visualization';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';

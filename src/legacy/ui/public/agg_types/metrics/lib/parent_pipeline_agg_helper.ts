@@ -24,7 +24,7 @@ import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
-import { Schemas } from '../../../../../core_plugins/vis_default_editor/public';
+import { Schemas } from '../../schemas';
 
 const metricAggFilter = [
   '!top_hits',

@@ -22,8 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { MetricVisComponent } from './components/metric_vis_component';
 import { MetricVisOptions } from './components/metric_vis_options';
 import { ColorModes } from '../../vis_type_vislib/public';
-import { colorSchemas, ColorSchemas } from './legacy_imports';
-import { AggGroupNames, Schemas } from '../../vis_default_editor/public';
+import { colorSchemas, ColorSchemas, Schemas, AggGroupNames } from './legacy_imports';
 
 export const metricVisTypeDefinition = {
   name: 'metric',

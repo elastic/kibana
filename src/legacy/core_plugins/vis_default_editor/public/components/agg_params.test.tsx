@@ -23,8 +23,7 @@ import { mount, shallow } from 'enzyme';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IndexPattern } from 'src/plugins/data/public';
 import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
-import { AggGroupNames } from '../agg_groups';
-import { AggConfig } from '../legacy_imports';
+import { AggConfig, AggGroupNames } from '../legacy_imports';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },
@@ -36,15 +35,9 @@ const mockEditorConfig = {
   },
 };
 
-jest.mock('ui/agg_types', () => ({
-  aggTypes: {
-    byType: {
-      metrics: [],
-      buckets: [],
-    },
-  },
-}));
-jest.mock('../../config/editor_config_providers', () => ({
+jest.mock('ui/new_platform');
+
+jest.mock('../config/editor_config_providers', () => ({
   editorConfigProviders: {
     getConfigForAgg: jest.fn(() => mockEditorConfig),
   },

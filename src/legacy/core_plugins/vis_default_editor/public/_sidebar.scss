@@ -59,15 +59,6 @@
   + .visEditorSidebar__section {
     margin-top: $euiSizeS;
   }
-
-  label:not([class^='eui']) {
-    @include __legacyLabelStyles__bad;
-    display: block;
-  }
-
-  .form-group label {
-    margin-bottom: $euiSizeS;
-  }
 }
 
 // Collapsible section

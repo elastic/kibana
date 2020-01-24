@@ -20,9 +20,8 @@
 import { cloneDeep } from 'lodash';
 
 import { Vis, VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfigs, AggConfig, move } from '../../../legacy_imports';
+import { AggConfigs, AggConfig, AggGroupNames, move } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
-import { AggGroupNames } from '../../../agg_groups';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';
 

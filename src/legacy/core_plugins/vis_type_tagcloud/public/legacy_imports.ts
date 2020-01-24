@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export { vislibColorMaps, colorSchemas, ColorSchemas } from 'ui/color_maps';
-export { getHeatmapColors } from 'ui/color_maps';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { AggGroupNames, Schemas } from 'ui/agg_types';
+export { Schemas } from 'ui/agg_types';

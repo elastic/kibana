@@ -22,8 +22,6 @@ export { DefaultEditorAggParams } from './components/agg_params';
 export { useValidation } from './components/controls/utils';
 export { RangesParamEditor, RangeValues } from './components/controls/ranges';
 export { editorConfigProviders } from './config/editor_config_providers';
-export * from './agg_groups';
 export * from './editor_size';
-export * from './schemas';
 export * from './vis_options_props';
 export * from './utils';

@@ -23,10 +23,15 @@ export {
   AggConfig,
   AggConfigs,
   AggParam,
+  AggGroupNames,
+  aggGroupNamesMap,
   aggTypes,
   FieldParamType,
   BUCKET_TYPES,
   METRIC_TYPES,
+  ISchemas,
+  Schema,
+  termsAggFilter,
 } from 'ui/agg_types';
 export { aggTypeFilters, propFilter } from 'ui/agg_types/filter';
 export { aggTypeFieldFilters } from 'ui/agg_types/param_types/filter';

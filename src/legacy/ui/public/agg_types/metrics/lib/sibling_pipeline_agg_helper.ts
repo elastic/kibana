@@ -22,7 +22,7 @@ import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
-import { Schemas } from '../../../../../core_plugins/vis_default_editor/public';
+import { Schemas } from '../../schemas';
 
 const metricAggFilter: string[] = [
   '!top_hits',

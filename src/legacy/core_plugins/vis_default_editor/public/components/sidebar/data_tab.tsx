@@ -22,9 +22,14 @@ import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, parentPipelineType, MetricAggType } from '../../legacy_imports';
+import {
+  AggConfig,
+  AggGroupNames,
+  ISchemas,
+  parentPipelineType,
+  MetricAggType,
+} from '../../legacy_imports';
 import { DefaultEditorAggGroup } from '../agg_group';
-import { AggGroupNames } from '../../agg_groups';
 import {
   EditorAction,
   addNewAgg,
@@ -34,7 +39,6 @@ import {
   changeAggType,
   toggleEnabledAgg,
 } from './state';
-import { ISchemas } from '../../schemas';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from '../agg_common_props';
 
 export interface DefaultEditorDataTabProps {

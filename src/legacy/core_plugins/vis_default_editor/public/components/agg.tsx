@@ -32,6 +32,8 @@ import { AggConfig } from '../legacy_imports';
 import { DefaultEditorAggParams } from './agg_params';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
+import { RowsOrColumnsControl } from './controls/rows_or_columns';
+import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: AggConfig;
@@ -75,7 +77,15 @@ function DefaultEditorAgg({
   // When a Parent Pipeline agg is selected and this agg is the last bucket.
   const isLastBucketAgg = isLastBucket && lastParentPipelineAggTitle && agg.type;
 
-  const SchemaComponent = agg.schema.editorComponent;
+  let SchemaComponent;
+
+  if (agg.schema.name === 'split') {
+    SchemaComponent = RowsOrColumnsControl;
+  }
+
+  if (agg.schema.name === 'radius') {
+    SchemaComponent = RadiusRatioOptionControl;
+  }
 
   if (isLastBucketAgg) {
     if (['date_histogram', 'histogram'].includes(agg.type.name)) {

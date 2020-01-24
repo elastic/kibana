@@ -20,11 +20,10 @@ import { i18n } from '@kbn/i18n';
 import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW, COUNT_PROP_NAME } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
-import { AggConfigs } from 'ui/agg_types';
+import { AggConfigs, Schemas } from 'ui/agg_types';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
-import { Schemas } from '../../../../../../../../src/legacy/core_plugins/vis_default_editor/public';
 
 const MAX_GEOTILE_LEVEL = 29;
 

@@ -28,6 +28,7 @@ import {
   useValidation,
 } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
+import { termsAggFilter } from '../../legacy_imports';
 
 const DEFAULT_VALUE = '_key';
 const DEFAULT_OPTIONS = [
@@ -38,21 +39,8 @@ const DEFAULT_OPTIONS = [
     value: DEFAULT_VALUE,
   },
 ];
-const aggFilter = [
-  '!top_hits',
-  '!percentiles',
-  '!median',
-  '!std_dev',
-  '!derivative',
-  '!moving_avg',
-  '!serial_diff',
-  '!cumulative_sum',
-  '!avg_bucket',
-  '!max_bucket',
-  '!min_bucket',
-  '!sum_bucket',
-];
-const isCompatibleAgg = isCompatibleAggregation(aggFilter);
+
+const isCompatibleAgg = isCompatibleAggregation(termsAggFilter);
 
 function OrderByParamEditor({
   agg,
@@ -83,9 +71,9 @@ function OrderByParamEditor({
     }
   }, []);
 
-  useFallbackMetric(setValue, aggFilter, metricAggs, value, DEFAULT_VALUE);
+  useFallbackMetric(setValue, termsAggFilter, metricAggs, value, DEFAULT_VALUE);
 
-  const options = useAvailableOptions(aggFilter, metricAggs, DEFAULT_OPTIONS);
+  const options = useAvailableOptions(termsAggFilter, metricAggs, DEFAULT_OPTIONS);
 
   return (
     <EuiFormRow label={label} fullWidth isInvalid={showValidation && !isValid} compressed>
@@ -103,4 +91,4 @@ function OrderByParamEditor({
   );
 }
 
-export { OrderByParamEditor, aggFilter };
+export { OrderByParamEditor };

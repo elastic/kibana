@@ -19,12 +19,12 @@
 
 import * as controls from './controls';
 import {
+  AggGroupNames,
   BUCKET_TYPES,
   METRIC_TYPES,
   siblingPipelineType,
   parentPipelineType,
 } from '../legacy_imports';
-import { AggGroupNames } from '../agg_groups';
 import { wrapWithInlineComp } from './controls/utils';
 
 const buckets = {
@@ -60,6 +60,14 @@ const buckets = {
   },
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: {
     size: controls.SizeParamEditor,
+  },
+  [BUCKET_TYPES.TERMS]: {
+    orderBy: controls.OrderByParamEditor,
+    orderAgg: controls.OrderAggParamEditor,
+    order: wrapWithInlineComp(controls.OrderParamEditor),
+    size: wrapWithInlineComp(controls.SizeParamEditor),
+    otherBucket: controls.OtherBucketParamEditor,
+    missingBucket: controls.MissingBucketParamEditor,
   },
 };
 

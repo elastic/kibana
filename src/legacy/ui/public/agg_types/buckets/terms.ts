@@ -29,8 +29,6 @@ import { AggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../plugins/inspector/public';
 import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
-import { aggFilter } from '../../../../core_plugins/vis_default_editor/public/components/controls/order_by';
-import { Schemas } from '../../../../core_plugins/vis_default_editor/public';
 
 import {
   buildOtherBucketAgg,
@@ -38,15 +36,32 @@ import {
   updateMissingBucket,
   // @ts-ignore
 } from './_terms_other_bucket_helper';
+import { Schemas } from '../schemas';
+import { AggGroupNames } from '../agg_groups';
+
+export const termsAggFilter = [
+  '!top_hits',
+  '!percentiles',
+  '!median',
+  '!std_dev',
+  '!derivative',
+  '!moving_avg',
+  '!serial_diff',
+  '!cumulative_sum',
+  '!avg_bucket',
+  '!max_bucket',
+  '!min_bucket',
+  '!sum_bucket',
+];
 
 const [orderAggSchema] = new Schemas([
   {
-    group: 'none',
+    group: AggGroupNames.None,
     name: 'orderAgg',
     // This string is never visible to the user so it doesn't need to be translated
     title: 'Order Agg',
     hideCustomLabel: true,
-    aggFilter,
+    aggFilter: termsAggFilter,
   },
 ]).all;
 

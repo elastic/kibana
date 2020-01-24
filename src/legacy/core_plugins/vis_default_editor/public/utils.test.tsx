@@ -18,7 +18,9 @@
  */
 
 import { groupAndSortBy } from './utils';
-import { AggGroupNames } from './agg_groups';
+import { AggGroupNames } from './legacy_imports';
+
+jest.mock('ui/new_platform');
 
 const aggs = [
   {

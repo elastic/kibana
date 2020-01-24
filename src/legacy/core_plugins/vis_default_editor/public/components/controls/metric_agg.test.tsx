@@ -23,7 +23,7 @@ import { mount, shallow } from 'enzyme';
 import { AggConfig } from '../../legacy_imports';
 import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
 
-jest.mock('./agg_utils', () => ({
+jest.mock('./utils', () => ({
   useAvailableOptions: jest.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
     ...filteredMetrics.map(({ id, type }: { id: string; type: { name: string } }) => ({
       text: type.name,

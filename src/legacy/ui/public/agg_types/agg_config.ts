@@ -32,7 +32,7 @@ import { AggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
 import { ContentType, KBN_FIELD_TYPES } from '../../../../plugins/data/public';
-import { Schema, AggGroupNames } from '../../../core_plugins/vis_default_editor/public';
+import { Schema } from './schemas';
 
 export interface AggConfigOptions {
   enabled: boolean;
@@ -52,7 +52,7 @@ const unknownSchema: Schema = {
   params: [],
   defaults: {},
   editor: false,
-  group: AggGroupNames.Metrics,
+  group: 'metrics',
 };
 
 const getTypeFromRegistry = (type: string): AggType => {

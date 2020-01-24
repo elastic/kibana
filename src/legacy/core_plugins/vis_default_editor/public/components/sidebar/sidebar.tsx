@@ -23,11 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
-import { PersistedState } from '../../legacy_imports';
+import { PersistedState, AggGroupNames } from '../../legacy_imports';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState } from './state';
-import { AggGroupNames } from '../../agg_groups';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 interface DefaultEditorSideBarProps {

@@ -18,7 +18,7 @@
  */
 
 export { ColorSchema, ColorSchemas, colorSchemas, getHeatmapColors } from 'ui/color_maps';
-export { AggType, AggConfig } from 'ui/agg_types';
+export { AggType, AggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
 // @ts-ignore
 export { SimpleEmitter } from 'ui/utils/simple_emitter';
 // @ts-ignore

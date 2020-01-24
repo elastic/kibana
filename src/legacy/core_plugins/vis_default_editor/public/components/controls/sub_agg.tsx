@@ -20,11 +20,10 @@
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { AggParamType, AggConfig } from '../../legacy_imports';
+import { AggParamType, AggConfig, AggGroupNames } from '../../legacy_imports';
 import { useSubAggParamsHandlers } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { DefaultEditorAggParams } from '../agg_params';
-import { AggGroupNames } from '../../agg_groups';
 
 function SubAggParamEditor({
   agg,

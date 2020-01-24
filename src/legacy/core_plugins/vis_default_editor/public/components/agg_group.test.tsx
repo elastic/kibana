@@ -21,9 +21,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { Schema } from '../schemas';
-import { AggGroupNames } from '../agg_groups';
-import { AggConfigs, AggConfig } from '../legacy_imports';
+import { AggConfigs, AggConfig, Schema } from '../legacy_imports';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
@@ -35,6 +33,17 @@ jest.mock('@elastic/eui', () => ({
   EuiDraggable: (props: any) => props.children({ dragHandleProps: {} }),
   EuiSpacer: 'eui-spacer',
   EuiPanel: 'eui-panel',
+}));
+
+jest.mock('../legacy_imports', () => ({
+  aggGroupNamesMap: () => ({
+    metrics: 'Metrics',
+    buckets: 'Buckets',
+  }),
+  AggGroupNames: {
+    Metrics: 'metrics',
+    Buckets: 'buckets',
+  },
 }));
 
 jest.mock('./agg', () => ({
@@ -92,7 +101,7 @@ describe('DefaultEditorAgg component', () => {
     defaultProps = {
       formIsTouched: false,
       metricAggs: [],
-      groupName: AggGroupNames.Metrics,
+      groupName: 'metrics',
       state: {
         aggs,
       } as VisState,
@@ -129,7 +138,7 @@ describe('DefaultEditorAgg component', () => {
   });
 
   it('should last bucket has truthy isLastBucket prop', () => {
-    defaultProps.groupName = AggGroupNames.Buckets;
+    defaultProps.groupName = 'buckets';
     const comp = mount(<DefaultEditorAggGroup {...defaultProps} />);
     const lastAgg = comp.find(DefaultEditorAgg).last();
 
@@ -150,7 +159,7 @@ describe('DefaultEditorAgg component', () => {
   });
 
   it('should show add button when schemas count is less than max', () => {
-    defaultProps.groupName = AggGroupNames.Buckets;
+    defaultProps.groupName = 'buckets';
     const comp = shallow(<DefaultEditorAggGroup {...defaultProps} />);
 
     expect(comp.find(DefaultEditorAggAdd).exists()).toBeTruthy();

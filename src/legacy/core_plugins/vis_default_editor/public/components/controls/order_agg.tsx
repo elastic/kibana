@@ -20,9 +20,8 @@
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { AggParamType, AggConfig } from '../../legacy_imports';
+import { AggParamType, AggConfig, AggGroupNames } from '../../legacy_imports';
 import { useSubAggParamsHandlers } from './utils';
-import { AggGroupNames } from '../../agg_groups';
 import { AggParamEditorProps } from '../agg_param_props';
 import { DefaultEditorAggParams } from '../agg_params';
 

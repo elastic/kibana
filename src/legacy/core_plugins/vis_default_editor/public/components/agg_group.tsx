@@ -30,8 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggConfig } from '../legacy_imports';
-import { aggGroupNamesMap, AggGroupNames } from '../agg_groups';
+import { AggConfig, aggGroupNamesMap, AggGroupNames, Schema } from '../legacy_imports';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
@@ -42,7 +41,6 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { aggGroupReducer, initAggsState, AGGS_ACTION_KEYS } from './agg_group_state';
-import { Schema } from '../schemas';
 
 export interface DefaultEditorAggGroupProps extends DefaultEditorAggCommonProps {
   schemas: Schema[];

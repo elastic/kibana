@@ -21,11 +21,9 @@ import _ from 'lodash';
 
 import { Optional } from '@kbn/utility-types';
 
-import { AggParam, IndexedArray } from './legacy_imports';
-import { RowsOrColumnsControl } from './components/controls/rows_or_columns';
-import { RadiusRatioOptionControl } from './components/controls/radius_ratio_option';
+import { IndexedArray } from 'ui/indexed_array';
 import { AggGroupNames } from './agg_groups';
-import { AggControlProps } from './components/controls/agg_control_props';
+import { AggParam } from './agg_params';
 
 export interface ISchemas {
   [AggGroupNames.Buckets]: Schema[];
@@ -45,7 +43,6 @@ export interface Schema {
   hideCustomLabel?: boolean;
   mustBeFirst?: boolean;
   aggSettings?: any;
-  editorComponent?: React.ComponentType<AggControlProps>;
 }
 
 class Schemas {
@@ -71,9 +68,6 @@ class Schemas {
               default: true,
             },
           ] as AggParam[];
-          schema.editorComponent = RowsOrColumnsControl;
-        } else if (schema.name === 'radius') {
-          schema.editorComponent = RadiusRatioOptionControl;
         }
 
         _.defaults(schema, {
