@@ -1,15 +1,7 @@
 {
   "description": "Identifies loadable kernel module errors, often indicative of potential persistence attempts.",
-  "enabled": false,
-  "false_positives": [
-    "Security tools and device drivers may load legitimate kernel modules."
-  ],
-  "from": "now-6m",
-  "immutable": true,
-  "index": [
-    "auditbeat-*"
-  ],
-  "interval": "5m",
+    "false_positives": ["Security tools and device drivers may load legitimate kernel modules."],
+  "index": ["auditbeat-*"],
   "language": "kuery",
   "max_signals": 33,
   "name": "Persistence via Kernel Module Modification",
@@ -20,10 +12,7 @@
   "risk_score": 25,
   "rule_id": "81cc58f5-8062-49a2-ba84-5cc4b4d31c40",
   "severity": "low",
-  "tags": [
-    "EIA",
-    "auditbeat"
-  ],
+  "tags": ["EIA", "auditbeat"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -41,7 +30,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

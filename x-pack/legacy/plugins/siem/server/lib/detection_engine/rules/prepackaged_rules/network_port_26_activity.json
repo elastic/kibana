@@ -1,17 +1,11 @@
 {
-  "description": "Network - Port 26 Activity\t",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Network - Port 26 Activity",
   "language": "kuery",
-  "name": "Network - Port 26 Activity\t",
+  "name": "Network - Port 26 Activity",
   "query": "destination.port:26",
   "risk_score": 50,
   "rule_id": "d7e62693-aab9-4f66-a21a-3d79ecdd603d",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

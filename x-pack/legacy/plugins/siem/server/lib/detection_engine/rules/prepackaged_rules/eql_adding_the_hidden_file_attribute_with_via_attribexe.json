@@ -1,19 +1,12 @@
 {
   "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Adding the Hidden File Attribute with via attrib.exe",
-  "query": "    event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"attrib.exe\" and process.args:\"+h\"",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"attrib.exe\" and process.args:\"+h\"",
   "risk_score": 25,
   "rule_id": "4630d948-40d4-4cef-ac69-4002e29bc3db",
   "severity": "low",
-  "tags": [
-    "EIA"
-  ],
+  "tags": ["EIA"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -46,7 +39,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

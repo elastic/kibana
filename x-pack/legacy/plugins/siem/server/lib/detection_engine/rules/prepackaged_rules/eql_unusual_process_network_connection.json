@@ -1,19 +1,12 @@
 {
   "description": "Identifies network activity from unexpected system applications. This may indicate adversarial activity as these applications are often leveraged by adversaries to execute code and evade detection.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Unusual Process Network Connection",
   "query": " event.action:\"Network connection detected (rule: NetworkConnect)\" and process.name:(bginfo.exe or cdb.exe or cmstp.exe or csi.exe or dnx.exe or fsi.exe or ieexec.exe or iexpress.exe or Microsoft.Workflow.Compiler.exe or odbcconf.exe or rcsi.exe or xwizard.exe)",
   "risk_score": 25,
   "rule_id": "610949a1-312f-4e04-bb55-3a79b8c95267",
   "severity": "low",
-  "tags": [
-    "EIA"
-  ],
+  "tags": ["EIA"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -31,7 +24,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

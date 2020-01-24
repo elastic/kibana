@@ -1,17 +1,11 @@
 {
-  "description": "Network - RDP (Remote Desktop Protocol) to the Internet\t",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Network - RDP (Remote Desktop Protocol) to the Internet",
   "language": "kuery",
-  "name": "Network - RDP (Remote Desktop Protocol) to the Internet\t",
+  "name": "Network - RDP (Remote Desktop Protocol) to the Internet",
   "query": "destination.port:3389 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
   "risk_score": 50,
   "rule_id": "e56993d2-759c-4120-984c-9ec9bb940fd5",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

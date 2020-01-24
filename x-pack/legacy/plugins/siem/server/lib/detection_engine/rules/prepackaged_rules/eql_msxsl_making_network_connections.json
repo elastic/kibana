@@ -1,19 +1,12 @@
 {
   "description": "Identifies MsXsl.exe making outbound network connections. This may indicate adversarial activity as MsXsl is often leveraged by adversaries to execute malicious scripts and evade detection.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "MsXsl Making Network Connections",
   "query": "process.name:msxsl.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
   "risk_score": 50,
   "rule_id": "d7351b03-135d-43ba-8b36-cc9b07854525",
   "severity": "medium",
-  "tags": [
-    "EIA"
-  ],
+  "tags": ["EIA"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -31,7 +24,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

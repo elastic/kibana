@@ -1,19 +1,12 @@
 {
   "description": "Identifies a PowerShell process launched by either CScript or WScript. Observing Windows scripting processes executing a PowerShell script, may be indicative of malicious activity.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Windows Script Executing PowerShell",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:(\"wscript.exe\" or \"cscript.exe\") and process.name:\"powershell.exe\"",
   "risk_score": 50,
   "rule_id": "f545ff26-3c94-4fd0-bd33-3c7f95a3a0fc",
   "severity": "low",
-  "tags": [
-    "EIA"
-  ],
+  "tags": ["EIA"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -31,7 +24,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

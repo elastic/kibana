@@ -1,16 +1,11 @@
 {
   "description": "Linux: Hping Activity",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
-  "language": "kuery",
+    "language": "kuery",
   "name": "Linux: Hping Activity",
   "query": "process.name: hping  and event.action:executed",
   "risk_score": 50,
   "rule_id": "90169566-2260-4824-b8e4-8615c3b4ed52",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

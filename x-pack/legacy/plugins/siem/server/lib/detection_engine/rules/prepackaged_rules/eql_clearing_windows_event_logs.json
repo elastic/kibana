@@ -1,19 +1,12 @@
 {
   "description": "Identifies attempts to clear Windows event log stores. This is often done by attackers in an attempt evade detection or destroy forensic evidence on a system.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Clearing Windows Event Logs",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and (process.name:\"wevtutil.exe\" and process.args:\"cl\") or (process.name:\"powershell.exe\" and process.args:\"Clear-EventLog\")",
   "risk_score": 25,
   "rule_id": "d331bbe2-6db4-4941-80a5-8270db72eb61",
   "severity": "low",
-  "tags": [
-    "EIA"
-  ],
+  "tags": ["EIA"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -31,7 +24,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

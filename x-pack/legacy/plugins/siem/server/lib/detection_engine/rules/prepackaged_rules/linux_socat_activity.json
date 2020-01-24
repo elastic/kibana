@@ -1,16 +1,11 @@
 {
   "description": "Linux: socat activity",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
-  "language": "kuery",
+    "language": "kuery",
   "name": "Linux: Whoami Commmand",
   "query": "process.name:socat and not process.args:\"-V\" and event.action:executed",
   "risk_score": 50,
   "rule_id": "cd4d5754-07e1-41d4-b9a5-ef4ea6a0a126",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

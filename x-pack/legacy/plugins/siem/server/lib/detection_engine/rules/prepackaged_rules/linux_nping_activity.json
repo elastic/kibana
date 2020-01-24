@@ -1,16 +1,11 @@
 {
   "description": "Linux: Nping Activity",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
-  "language": "kuery",
+    "language": "kuery",
   "name": "Linux: Nping Activity",
   "query": "process.name: nping and event.action:executed",
   "risk_score": 50,
   "rule_id": "0d69150b-96f8-467c-a86d-a67a3378ce77",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

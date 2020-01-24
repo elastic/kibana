@@ -1,17 +1,11 @@
 {
-  "description": "Network - SSH (Secure Shell) to the Internet\t",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Network - SSH (Secure Shell) to the Internet",
   "language": "kuery",
-  "name": "Network - SSH (Secure Shell) to the Internet\t",
+  "name": "Network - SSH (Secure Shell) to the Internet",
   "query": "destination.port:22 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
   "risk_score": 50,
   "rule_id": "6f1500bc-62d7-4eb9-8601-7485e87da2f4",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

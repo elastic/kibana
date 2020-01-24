@@ -1,17 +1,11 @@
 {
-  "description": "Network - SQL Server Port Activity to the Internet\t",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Network - SQL Server Port Activity to the Internet",
   "language": "kuery",
-  "name": "Network - SQL Server Port Activity to the Internet\t",
+  "name": "Network - SQL Server Port Activity to the Internet",
   "query": "destination.port:1433 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
   "risk_score": 50,
   "rule_id": "139c7458-566a-410c-a5cd-f80238d6a5cd",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

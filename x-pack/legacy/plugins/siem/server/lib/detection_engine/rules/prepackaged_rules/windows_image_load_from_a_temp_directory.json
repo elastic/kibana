@@ -1,7 +1,6 @@
 {
   "description": "Windows image load from a temp directory",
-  "enabled": false,
-  "filters": [
+    "filters": [
     {
       "$state": {
         "store": "appState"
@@ -28,16 +27,12 @@
       }
     }
   ],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Windows image load from a temp directory",
   "query": "file.path:Temp",
   "risk_score": 50,
   "rule_id": "f23e4cc7-6825-4a28-b27a-e67437a9a806",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

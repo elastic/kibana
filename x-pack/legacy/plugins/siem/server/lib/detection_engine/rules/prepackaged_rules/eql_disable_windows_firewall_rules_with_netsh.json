@@ -1,19 +1,12 @@
 {
   "description": "Identifies use of the netsh command to disable or weaken the local firewall. Attackers will use this command line tool to disable the firewall during troubleshooting or to enable network mobility.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Disable Windows Firewall Rules with Netsh",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"netsh.exe\" and process.args:(\"firewall\" and \"set\" and \"disable\") or process.args:(\"advfirewall\" and \"state\" and \"off\")",
   "risk_score": 50,
   "rule_id": "4b438734-3793-4fda-bd42-ceeada0be8f9",
   "severity": "medium",
-  "tags": [
-    "EIA"
-  ],
+  "tags": ["EIA"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -31,7 +24,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

@@ -1,15 +1,9 @@
 {
   "description": "The 'whoami' command was executed on a Linux host. This is often used by tools and persistence mechanisms to test for privlieged access.",
-  "enabled": false,
-  "false_positives": [
+    "false_positives": [
     "Security testing tools and frameworks may run this command. Some normal use of this command may originate from automation tools and frameworks."
   ],
-  "from": "now-6m",
-  "immutable": true,
-  "index": [
-    "auditbeat-*"
-  ],
-  "interval": "5m",
+  "index": ["auditbeat-*"],
   "language": "kuery",
   "max_signals": 33,
   "name": "Linux: User Discovery Via The Whoami Commmand",
@@ -17,10 +11,7 @@
   "risk_score": 50,
   "rule_id": "120559c6-5e24-49f4-9e30-8ffe697df6b9",
   "severity": "low",
-  "tags": [
-    "EIA",
-    "auditbeat"
-  ],
+  "tags": ["EIA", "auditbeat"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -38,7 +29,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

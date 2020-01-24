@@ -1,17 +1,11 @@
 {
   "description": "Windows Process Discovery via Tasklist Command",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Windows Process Discovery via Tasklist Command",
   "query": "event.code:1 and process.name:tasklist.exe",
   "risk_score": 50,
   "rule_id": "cc16f774-59f9-462d-8b98-d27ccd4519ec",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

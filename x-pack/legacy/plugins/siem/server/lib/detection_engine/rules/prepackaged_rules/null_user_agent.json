@@ -1,7 +1,6 @@
 {
   "description": "Null user agent",
-  "enabled": false,
-  "filters": [
+    "filters": [
     {
       "meta": {
         "alias": null,
@@ -20,16 +19,12 @@
       }
     }
   ],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Null user agent",
   "query": "url.path: *",
   "risk_score": 50,
   "rule_id": "43303fd4-4839-4e48-b2b2-803ab060758d",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

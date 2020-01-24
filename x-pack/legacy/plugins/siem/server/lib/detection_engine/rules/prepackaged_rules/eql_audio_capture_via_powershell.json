@@ -1,19 +1,12 @@
 {
   "description": "An adversary can leverage a computer's peripheral devices or applications to capture audio recordings for the purpose of listening into sensitive conversations to gather information.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
   "language": "kuery",
   "name": "Audio Capture via PowerShell",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"powershell.exe\" and process.args:\"WindowsAudioDevice-Powershell-Cmdlet\"",
   "risk_score": 25,
   "rule_id": "b27b9f47-0a20-4807-8377-7f899b4fbada",
   "severity": "low",
-  "tags": [
-    "EIA"
-  ],
+  "tags": ["EIA"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",
@@ -31,7 +24,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

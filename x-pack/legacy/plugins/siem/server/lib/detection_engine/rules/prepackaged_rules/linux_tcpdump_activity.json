@@ -1,16 +1,11 @@
 {
   "description": "Linux: Tcpdump Activity",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
-  "language": "kuery",
+    "language": "kuery",
   "name": "Linux: Tcpdump Activity",
   "query": "process.name: tcpdump and event.action:executed",
   "risk_score": 50,
   "rule_id": "7a137d76-ce3d-48e2-947d-2747796a78c0",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

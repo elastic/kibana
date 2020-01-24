@@ -1,16 +1,11 @@
 {
   "description": "Command shell started by Powershell",
-  "enabled": false,
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
-  "language": "kuery",
+    "language": "kuery",
   "name": "Command shell started by Powershell",
   "query": "process.parent.name:powershell.exe and process.name:cmd.exe",
   "risk_score": 50,
   "rule_id": "0f616aee-8161-4120-857e-742366f5eeb3",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }

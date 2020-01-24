@@ -1,17 +1,11 @@
 {
-  "description": "Network - PPTP (Point to Point Tunneling Protocol) Activity\t",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "description": "Network - PPTP (Point to Point Tunneling Protocol) Activity",
   "language": "kuery",
-  "name": "Network - PPTP (Point to Point Tunneling Protocol) Activity\t",
+  "name": "Network - PPTP (Point to Point Tunneling Protocol) Activity",
   "query": "destination.port:1723",
   "risk_score": 50,
   "rule_id": "d2053495-8fe7-4168-b3df-dad844046be3",
   "severity": "low",
-  "to": "now",
   "type": "query",
   "version": 1
 }
