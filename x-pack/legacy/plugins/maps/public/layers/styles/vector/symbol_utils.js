@@ -57,6 +57,12 @@ export function getMakiSymbolAnchor(symbolId) {
   }
 }
 
+// Style descriptor stores symbolId, for example 'aircraft'
+// Icons are registered in Mapbox with full maki ids, for example 'aircraft-11'
+export function getMakiIconId(symbolId, iconPixelSize) {
+  return `${symbolId}-${iconPixelSize}`;
+}
+
 export function buildSrcUrl(svgString) {
   const domUrl = window.URL || window.webkitURL || window;
   const svg = new Blob([svgString], { type: 'image/svg+xml' });
@@ -129,8 +135,4 @@ export function getIconPaletteOptions(isDarkMode) {
 export function getIconPalette(paletteId) {
   const palette = ICON_PALETTES.find(({ id }) => id === paletteId);
   return palette ? [...palette.icons] : null;
-}
-
-export function getSymbolId(icon, iconPixelSize) {
-  return `${icon}-${iconPixelSize}`;
 }

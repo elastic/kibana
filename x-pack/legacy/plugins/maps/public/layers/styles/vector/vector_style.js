@@ -26,7 +26,6 @@ import {
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
-import { getMakiSymbolAnchor } from './symbol_utils';
 import { getComputedFieldName, isOnlySingleFeatureType } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
@@ -566,7 +565,6 @@ export class VectorStyle extends AbstractStyle {
 
   setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(this._getSymbolId()));
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
 
     this._iconStyleProperty.syncIconWithMb(

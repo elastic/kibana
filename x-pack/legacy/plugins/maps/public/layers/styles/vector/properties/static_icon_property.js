@@ -5,14 +5,12 @@
  */
 
 import { StaticStyleProperty } from './static_style_property';
-import { getSymbolId } from '../symbol_utils';
+import { getMakiSymbolAnchor, getMakiIconId } from '../symbol_utils';
 
 export class StaticIconProperty extends StaticStyleProperty {
   syncIconWithMb(symbolLayerId, mbMap, iconPixelSize) {
-    mbMap.setLayoutProperty(
-      symbolLayerId,
-      'icon-image',
-      getSymbolId(this._options.value, iconPixelSize)
-    );
+    const symbolId = this._options.value;
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-image', getMakiIconId(symbolId, iconPixelSize));
   }
 }

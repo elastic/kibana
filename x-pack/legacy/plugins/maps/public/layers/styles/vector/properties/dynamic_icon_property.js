@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { getIconPalette, getSymbolId } from '../symbol_utils';
+import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
 
 import {
   EuiFlexGroup,
@@ -34,10 +34,12 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbMap.setLayoutProperty(
         symbolLayerId,
         'icon-image',
-        this._getMbIconExpression(iconPixelSize)
+        this._getMbIconImageExpression(iconPixelSize)
       );
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', null);
     }
   }
 
@@ -65,7 +67,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     });
   }
 
-  _getMbIconExpression(iconPixelSize) {
+  _getMbIconImageExpression(iconPixelSize) {
     const { stops, fallback } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallback) {
@@ -76,9 +78,26 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(getSymbolId(style, iconPixelSize));
+      mbStops.push(getMakiIconId(style, iconPixelSize));
     });
-    mbStops.push(getSymbolId(fallback, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
+    mbStops.push(getMakiIconId(fallback, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
+    return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
+  }
+
+  _getMbIconAnchorExpression() {
+    const { stops, fallback } = this._getPaletteStops();
+
+    if (stops.length < 1 || !fallback) {
+      //occurs when no data
+      return null;
+    }
+
+    const mbStops = [];
+    stops.forEach(({ stop, style }) => {
+      mbStops.push(`${stop}`);
+      mbStops.push(getMakiSymbolAnchor(style));
+    });
+    mbStops.push(getMakiSymbolAnchor(fallback)); //last item is fallback style for anything that does not match provided stops
     return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
   }
 
