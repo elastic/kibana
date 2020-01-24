@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
@@ -114,8 +114,10 @@ export class ApplicationService {
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    // Only setup history if we're not in legacy mode
-    if (!injectedMetadata.getLegacyMode()) {
+    if (injectedMetadata.getLegacyMode()) {
+      this.currentAppId$.next(injectedMetadata.getLegacyMetadata().app.id);
+    } else {
+      // Only setup history if we're not in legacy mode
       this.history = history || createBrowserHistory({ basename });
     }
 
@@ -264,7 +266,11 @@ export class ApplicationService {
     return {
       applications$,
       capabilities,
-      currentAppId$: this.currentAppId$.pipe(takeUntil(this.stop$)),
+      currentAppId$: this.currentAppId$.pipe(
+        filter(appId => appId !== undefined),
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),

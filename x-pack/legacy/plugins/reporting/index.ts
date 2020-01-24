@@ -83,10 +83,10 @@ export const reporting = (kibana: any) => {
         uiSettingsServiceFactory: server.uiSettingsServiceFactory,
         // @ts-ignore Property 'fieldFormatServiceFactory' does not exist on type 'Server'.
         fieldFormatServiceFactory: server.fieldFormatServiceFactory,
-        log: server.log.bind(server),
       };
 
-      const plugin: ReportingPlugin = reportingPluginFactory(__LEGACY, this);
+      const initializerContext = server.newPlatform.coreContext;
+      const plugin: ReportingPlugin = reportingPluginFactory(initializerContext, __LEGACY, this);
       await plugin.setup(coreSetup, pluginsSetup);
     },
 

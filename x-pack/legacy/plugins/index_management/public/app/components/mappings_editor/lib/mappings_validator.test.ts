@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { isPlainObject } from 'lodash';
 
-import { validateMappings, validateProperties, isObject } from './mappings_validator';
+import { validateMappings, validateProperties } from './mappings_validator';
 
 describe('Mappings configuration validator', () => {
   it('should convert non object to empty object', () => {
@@ -12,7 +13,7 @@ describe('Mappings configuration validator', () => {
 
     tests.forEach(testValue => {
       const { value, errors } = validateMappings(testValue as any);
-      expect(isObject(value)).toBe(true);
+      expect(isPlainObject(value)).toBe(true);
       expect(errors).toBe(undefined);
     });
   });
@@ -76,7 +77,7 @@ describe('Properties validator', () => {
 
     tests.forEach(testValue => {
       const { value, errors } = validateProperties(testValue as any);
-      expect(isObject(value)).toBe(true);
+      expect(isPlainObject(value)).toBe(true);
       expect(errors).toEqual([]);
     });
   });
@@ -280,7 +281,7 @@ describe('Properties validator', () => {
         orientation: 'ccw',
         boost: 1.5,
         scaling_factor: 2.5,
-        dynamic: true,
+        dynamic: 'strict', // true | false | 'strict' are allowed
         enabled: true,
         format: 'strict_date_optional_time',
         analyzer: 'standard',
@@ -310,14 +311,24 @@ describe('Properties validator', () => {
         dims: 'abc',
         max_shingle_size: 2,
       },
+      goodField2: {
+        type: 'object',
+        dynamic: true,
+      },
+      goodField3: {
+        type: 'object',
+        dynamic: false,
+      },
     };
 
     const { value, errors } = validateProperties(properties as any);
 
-    expect(Object.keys(value)).toEqual(['wrongField', 'goodField']);
+    expect(Object.keys(value)).toEqual(['wrongField', 'goodField', 'goodField2', 'goodField3']);
 
     expect(value.wrongField).toEqual({ type: 'text' }); // All parameters have been stripped out but the "type".
     expect(value.goodField).toEqual(properties.goodField); // All parameters are stil there.
+    expect(value.goodField2).toEqual(properties.goodField2);
+    expect(value.goodField3).toEqual(properties.goodField3);
 
     const allWrongParameters = Object.keys(properties.wrongField).filter(v => v !== 'type');
     expect(errors).toEqual(

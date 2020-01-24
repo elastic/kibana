@@ -127,6 +127,7 @@ export const EventColumnView = React.memo<Props>(
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}
+          ecsData={ecsData}
           onColumnResized={onColumnResized}
           timelineId={timelineId}
         />
