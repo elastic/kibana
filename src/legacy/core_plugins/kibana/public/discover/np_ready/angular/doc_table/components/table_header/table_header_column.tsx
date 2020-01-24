@@ -34,7 +34,7 @@ interface Props {
   sortOrder: SortOrder[];
 }
 
-const sortDirectionToIcon = {
+const sortDirectionToIcon: Record<string, string> = {
   desc: 'fa fa-sort-down',
   asc: 'fa fa-sort-up',
   '': 'fa fa-sort',

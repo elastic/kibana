@@ -9291,7 +9291,15 @@
             "deprecationReason": null
           },
           {
-            "name": "winlogbeat",
+            "name": "winlogbeatSecurity",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "winlogbeatMWSysmonOperational",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },

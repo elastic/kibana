@@ -1849,7 +1849,9 @@ export interface OverviewHostData {
 
   filebeatSystemModule?: Maybe<number>;
 
-  winlogbeat?: Maybe<number>;
+  winlogbeatSecurity?: Maybe<number>;
+
+  winlogbeatMWSysmonOperational?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
 }
@@ -7831,7 +7833,13 @@ export namespace OverviewHostDataResolvers {
 
     filebeatSystemModule?: FilebeatSystemModuleResolver<Maybe<number>, TypeParent, TContext>;
 
-    winlogbeat?: WinlogbeatResolver<Maybe<number>, TypeParent, TContext>;
+    winlogbeatSecurity?: WinlogbeatSecurityResolver<Maybe<number>, TypeParent, TContext>;
+
+    winlogbeatMWSysmonOperational?: WinlogbeatMwSysmonOperationalResolver<
+      Maybe<number>,
+      TypeParent,
+      TContext
+    >;
 
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
   }
@@ -7906,7 +7914,12 @@ export namespace OverviewHostDataResolvers {
     Parent = OverviewHostData,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type WinlogbeatResolver<
+  export type WinlogbeatSecurityResolver<
+    R = Maybe<number>,
+    Parent = OverviewHostData,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type WinlogbeatMwSysmonOperationalResolver<
     R = Maybe<number>,
     Parent = OverviewHostData,
     TContext = SiemContext
