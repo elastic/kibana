@@ -47,11 +47,7 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
   state => state.animation,
   (scalingFactor, animation) => time => {
     const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
-    if (
-      animation !== undefined &&
-      animationIsActive(animation, time) &&
-      animationIsGreaterThanNudge(animation, scaleNotCountingAnimation)
-    ) {
+    if (animation !== undefined && animationIsActive(animation, time)) {
       /**
        * `t` goes from 0 -> 1 -> 0 at a linear rate as `animationProgress` goes from 0 -> 1
        */
@@ -59,15 +55,40 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
 
       const easedValue = easing.inOutCubic(t);
 
-      return vector2.lerp(
+      /**
+       * If nudge is around 1, we don't want any real effect here.
+       * Let's assume 10 nudges is a couple screens worth.
+       */
+
+      /*
+      console.log(
+        'nudgeFactor',
+        nudgeFactor(animation, scaleNotCountingAnimation),
+        'scale',
         scaleNotCountingAnimation,
-        vector2.clamp(
-          scaleFromScalingFactor(clamp(scalingFactor - 0.1, 0, 1)),
-          [scalingConstants.minimum, scalingConstants.minimum],
-          [scalingConstants.maximum, scalingConstants.maximum]
-        ),
-        easedValue
+        'scaling Factor',
+        scalingFactor
       );
+      */
+
+      // Totally made up value???
+      const nudgesToMaxZoomOut = 40;
+
+      const changeToScalingFactorDueToAnimation = clamp(
+        // Totally made up equation
+        Math.max(0, nudgeFactor(animation, scaleNotCountingAnimation) - 1) / nudgesToMaxZoomOut,
+        0,
+        0.2
+      );
+
+      const zoomedOutScale = scaleFromScalingFactor(
+        clamp(scalingFactor - changeToScalingFactorDueToAnimation, 0, 1)
+      );
+
+      /**
+       * Linearly interpolate between these, using the bell-shaped easing value
+       */
+      return vector2.lerp(scaleNotCountingAnimation, zoomedOutScale, easedValue);
     } else {
       return scaleNotCountingAnimation;
     }
@@ -318,6 +339,24 @@ export const scalingFactor = (state: CameraState): CameraState['scalingFactor'] 
  * Whether or not the user is current panning the map.
  */
 export const userIsPanning = (state: CameraState): boolean => state.panning !== undefined;
+
+/**
+ * The magnitude of the animation in terms of nudges.
+ */
+function nudgeFactor(
+  animation: CameraAnimationState,
+  scaleNotConsideringAnimation: Vector2
+): number {
+  // TODO assumes that scale is same in both axis
+  const lengthOfNudge = vector2.length(
+    vector2.divide([0, scalingConstants.unitsPerNudge], scaleNotConsideringAnimation)
+  );
+
+  return (
+    vector2.length(vector2.subtract(animation.targetTranslation, animation.initialTranslation)) /
+    lengthOfNudge
+  );
+}
 
 /**
  * If the distance between the start and end translation is greater than a 'nudge'.
