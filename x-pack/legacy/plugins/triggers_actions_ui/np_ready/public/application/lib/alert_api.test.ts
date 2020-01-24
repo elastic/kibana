@@ -265,8 +265,8 @@ describe('createAlert', () => {
       params: {},
       throttle: null,
       consumer: '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date('1970-01-01T00:00:00.000Z'),
+      updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
     };
@@ -286,7 +286,7 @@ describe('createAlert', () => {
       Array [
         "/api/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"consumer\\":\\"\\",\\"createdAt\\":\\"2020-01-24T10:56:10.077Z\\",\\"updatedAt\\":\\"2020-01-24T10:56:10.077Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
@@ -305,8 +305,8 @@ describe('updateAlert', () => {
       params: {},
       actions: [],
       consumer: '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date('1970-01-01T00:00:00.000Z'),
+      updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
     };
@@ -328,7 +328,7 @@ describe('updateAlert', () => {
       Array [
         "/api/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"consumer\\":\\"\\",\\"createdAt\\":\\"2020-01-24T10:56:10.101Z\\",\\"updatedAt\\":\\"2020-01-24T10:56:10.101Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
