@@ -36,12 +36,12 @@ export function useTrackMetric(
   { app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }: TrackMetricOptions,
   effectDependencies: EffectDeps = []
 ) {
-  const { reportUiStats } = useKibana<any>().services.usageCollection;
+  const reportUiStats = useKibana<any>().services?.usageCollection?.reportUiStats;
 
   useEffect(() => {
     if (!reportUiStats) {
       // eslint-disable-next-line no-console
-      console.warn(
+      console.log(
         'usageCollection.reportUiStats is unavailable. Ensure this is setup via <KibanaContextProvider />.'
       );
     } else {
