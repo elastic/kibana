@@ -38,7 +38,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toMatchInlineSnapshot(`"/app/uptime/#?search=(host.ip:HOST_IP)"`);
+      ).toMatchInlineSnapshot(`"/app/uptime#/?search=(host.ip:HOST_IP)"`);
     });
 
     it('renders with a container id filter when present in log entry', () => {
@@ -66,7 +66,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toMatchInlineSnapshot(`"/app/uptime/#?search=(container.id:CONTAINER_ID)"`);
+      ).toMatchInlineSnapshot(`"/app/uptime#/?search=(container.id:CONTAINER_ID)"`);
     });
 
     it('renders with a pod uid filter when present in log entry', () => {
@@ -94,7 +94,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toMatchInlineSnapshot(`"/app/uptime/#?search=(kubernetes.pod.uid:POD_UID)"`);
+      ).toMatchInlineSnapshot(`"/app/uptime#/?search=(kubernetes.pod.uid:POD_UID)"`);
     });
 
     it('renders with a disjunction of filters when multiple present in log entry', () => {
@@ -127,7 +127,7 @@ describe('LogEntryActionsMenu component', () => {
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
       ).toMatchInlineSnapshot(
-        `"/app/uptime/#?search=(container.id:CONTAINER_ID OR host.ip:HOST_IP OR kubernetes.pod.uid:POD_UID)"`
+        `"/app/uptime#/?search=(container.id:CONTAINER_ID OR host.ip:HOST_IP OR kubernetes.pod.uid:POD_UID)"`
       );
     });
 

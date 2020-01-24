@@ -22,19 +22,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         state: undefined,
       };
       const expectedSearchString =
-        "logFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1565707203194),streamLive:!f)&sourceId=default";
+        "sourceId=default&logFilter=(expression:'trace.id:433b4651687e18be2c6c8e3b11f53d09',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1565707203194),streamLive:!f)";
       const expectedRedirectPath = '/logs/stream?';
 
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraOps',
-        `/${location.pathname}${location.search}`
+        `${location.pathname}${location.search}`
       );
       await retry.tryForTime(5000, async () => {
         const currentUrl = await browser.getCurrentUrl();
-        const [, currentHash] = decodeURIComponent(currentUrl).split('#');
-        // Account for unpredictable location of the g parameter in the search string
-        expect(currentHash.slice(0, expectedRedirectPath.length)).to.be(expectedRedirectPath);
-        expect(currentHash.slice(expectedRedirectPath.length)).to.contain(expectedSearchString);
+        const decodedUrl = decodeURIComponent(currentUrl);
+        expect(decodedUrl).to.contain(expectedRedirectPath);
+        expect(decodedUrl).to.contain(expectedSearchString);
       });
     });
   });
