@@ -18,11 +18,13 @@
  */
 export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
 export {
-  SavedObjectsMapping,
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsTypeMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsTypeMappingDefinitions,
   SavedObjectsMappingProperties,
   SavedObjectsFieldMapping,
-  MappingMeta,
+  IndexMappingMeta,
   IndexMapping,
 } from './types';

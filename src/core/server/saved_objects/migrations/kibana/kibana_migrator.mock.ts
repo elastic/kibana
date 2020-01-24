@@ -19,7 +19,7 @@
 
 import { KibanaMigrator } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
-import { SavedObjectsMapping } from '../../mappings';
+import { SavedObjectsTypeMapping } from '../../mappings';
 const { mergeTypes } = jest.requireActual('./kibana_migrator');
 
 const defaultSavedObjectMappings = [
@@ -38,7 +38,7 @@ const createMigrator = (
   {
     savedObjectMappings,
   }: {
-    savedObjectMappings: SavedObjectsMapping[];
+    savedObjectMappings: SavedObjectsTypeMapping[];
   } = { savedObjectMappings: defaultSavedObjectMappings }
 ) => {
   const mockMigrator: jest.Mocked<PublicMethodsOf<KibanaMigrator>> = {
