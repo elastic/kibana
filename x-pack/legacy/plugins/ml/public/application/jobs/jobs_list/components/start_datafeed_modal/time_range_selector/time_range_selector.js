@@ -5,7 +5,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component, useState } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 
 import { EuiDatePicker, EuiFieldText } from '@elastic/eui';
 
@@ -222,11 +222,13 @@ const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
   const [dateString, setDateString] = useState(date.format(TIME_FORMAT));
   const [currentTab, setCurrentTab] = useState(tab);
 
-  if (currentTab !== tab) {
-    // if the tab has changed, reset the text to be the same as the date prop
-    setDateString(date.format(TIME_FORMAT));
-    setCurrentTab(tab);
-  }
+  useEffect(() => {
+    if (currentTab !== tab) {
+      // if the tab has changed, reset the text to be the same as the date prop
+      setDateString(date.format(TIME_FORMAT));
+      setCurrentTab(tab);
+    }
+  }, [tab]);
 
   function onTextChange(e) {
     const val = e.target.value;
