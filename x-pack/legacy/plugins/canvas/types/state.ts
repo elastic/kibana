@@ -33,7 +33,6 @@ export interface AppState {
 
 interface StoreAppState {
   basePath: string;
-  hasReporting: boolean;
   // TODO: These server functions are actually missing the fn because they are serialized from the server
   serverFunctions: CanvasFunction[];
   ready: boolean;

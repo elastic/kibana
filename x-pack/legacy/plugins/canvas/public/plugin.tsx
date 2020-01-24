@@ -34,11 +34,8 @@ export { CoreStart };
  * @internal
  */
 // This interface will be built out as we require other plugins for setup
-export interface CanvasSetupDeps {
-  reporting?: {};
-}
+export interface CanvasSetupDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
 export interface CanvasStartDeps {
-  reporting?: {};
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;

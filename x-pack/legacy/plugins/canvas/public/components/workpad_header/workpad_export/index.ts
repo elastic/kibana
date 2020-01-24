@@ -10,8 +10,6 @@ import { jobCompletionNotifications } from '../../../../../reporting/public/lib/
 // @ts-ignore Untyped local
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
 // @ts-ignore Untyped local
-import { getHasReporting } from '../../../state/selectors/app';
-// @ts-ignore Untyped local
 import { notify } from '../../../lib/notify';
 import { getWindow } from '../../../lib/get_window';
 // @ts-ignore Untyped local
@@ -34,7 +32,6 @@ const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
   pageCount: getPages(state).length,
-  enabled: getHasReporting(state),
 });
 
 const getAbsoluteUrl = (path: string) => {
@@ -51,15 +48,13 @@ const getAbsoluteUrl = (path: string) => {
 interface Props {
   workpad: CanvasWorkpad;
   pageCount: number;
-  enabled: boolean;
 }
 
 export const WorkpadExport = compose<ComponentProps, {}>(
   connect(mapStateToProps),
   withKibana,
   withProps(
-    ({ workpad, pageCount, enabled, kibana }: Props & WithKibanaProps): ComponentProps => ({
-      enabled,
+    ({ workpad, pageCount, kibana }: Props & WithKibanaProps): ComponentProps => ({
       getExportUrl: type => {
         if (type === 'pdf') {
           const pdfUrl = getPdfUrl(workpad, { pageCount }, kibana.services.http.basePath.prepend);

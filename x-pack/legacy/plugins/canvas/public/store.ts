@@ -16,7 +16,6 @@ export async function createStore(core: CoreSetup, plugins: CanvasSetupDeps) {
   const initialState = getInitialState();
 
   const basePath = core.http.basePath.get();
-  const hasReporting = !!plugins.reporting;
 
   // Retrieve server functions
   const serverFunctionsResponse = await core.http.get(`/api/interpreter/fns`);
@@ -24,7 +23,6 @@ export async function createStore(core: CoreSetup, plugins: CanvasSetupDeps) {
 
   initialState.app = {
     basePath,
-    hasReporting,
     serverFunctions,
     ready: false,
   };

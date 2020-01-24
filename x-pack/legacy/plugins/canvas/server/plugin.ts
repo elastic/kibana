@@ -16,18 +16,8 @@ export class Plugin {
     plugins.interpreter.register({ serverFunctions: functions });
 
     core.injectUiAppVars('canvas', async () => {
-      const config = core.getServerConfig();
-      const reportingBrowserType = (() => {
-        const configKey = 'xpack.reporting.capture.browser.type';
-        if (!config.has(configKey)) {
-          return null;
-        }
-        return config.get(configKey);
-      })();
-
       return {
         ...plugins.kibana.injectedUiAppVars,
-        reportingBrowserType,
       };
     });
 
