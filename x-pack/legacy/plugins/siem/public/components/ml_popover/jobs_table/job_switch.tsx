@@ -21,7 +21,7 @@ StaticSwitch.displayName = 'StaticSwitch';
 export interface JobSwitchProps {
   job: SiemJob;
   isSiemJobsLoading: boolean;
-  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => void;
+  onJobStateChange: (job: SiemJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
 }
 
 // Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
