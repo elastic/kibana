@@ -24,8 +24,11 @@ import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
 import { CodeEditor, useKibana } from '../../../../../plugins/kibana_react/public';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
+import {
+  ITimelionFunction,
+  TimelionFunctionArgs,
+} from '../../../../../plugins/timelion/common/types';
 
 const LANGUAGE_ID = 'timelion_expression';
 monacoEditor.languages.register({ id: LANGUAGE_ID });

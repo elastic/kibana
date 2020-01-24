@@ -1847,7 +1847,9 @@ export interface OverviewHostData {
 
   filebeatSystemModule?: Maybe<number>;
 
-  winlogbeat?: Maybe<number>;
+  winlogbeatSecurity?: Maybe<number>;
+
+  winlogbeatMWSysmonOperational?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
 }
@@ -4029,7 +4031,9 @@ export namespace GetOverviewHostQuery {
 
     filebeatSystemModule: Maybe<number>;
 
-    winlogbeat: Maybe<number>;
+    winlogbeatSecurity: Maybe<number>;
+
+    winlogbeatMWSysmonOperational: Maybe<number>;
 
     inspect: Maybe<Inspect>;
   };
